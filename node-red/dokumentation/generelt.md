@@ -1,3 +1,5 @@
+# Om opsætning i node-red
+
 I node red er det "Main" der har været fokus på.
 "Main" indeholder lige nu kun request-flowet og outputter kun det rå response.
 
