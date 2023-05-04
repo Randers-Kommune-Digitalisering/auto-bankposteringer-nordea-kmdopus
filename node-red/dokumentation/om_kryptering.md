@@ -1,7 +1,11 @@
-Til kryptering skal bruges en private key og en public key.
+# Hjælp til videre arbejde med kryptering
+
+Til kryptering skal bruges en private key og en public key
+
 Begge dele er gemt som Codespace secrets, som er gemt som miljøvariable i compose-filen.
 I workflow har jeg lige nu kun brugt private key, men det betyder at signaturen ikke bliver hashet rigtigt.
 Så for at fixe problemet skal disse nodes ændres:
+
 - "Generate crypto key object"
 - "Kryptér payload"
 Resten burde være ok.
