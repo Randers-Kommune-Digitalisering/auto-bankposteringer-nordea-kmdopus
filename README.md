@@ -1,1 +1,1 @@
-# 🏦 Udlæsning af bankposteringer/bevægelser fra Nordea
+# 🏦 Udlæsning af bankposteringer fra Nordea
