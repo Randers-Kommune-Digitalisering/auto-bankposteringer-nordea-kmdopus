@@ -1,7 +1,7 @@
 const Node = {
   "id": "0bc16db685bd2e6a",
   "type": "tab",
-  "label": "Encrypted HTTP POST",
+  "label": "Sørens kode crypto",
   "disabled": false,
   "info": "",
   "env": [],
