@@ -7,12 +7,15 @@ services:
     ports:
       - "1880:1880"
     environment:
-      #GIT_BRANCH: ${GIT_BRANCH}
       DB_USER: root
       DB_PASS: pass
       DB_HOST: db
       DB_PORT: 3306
       DB_DATABASE: demo
+      API_AUTH: ${API_AUTH}
+      KEYPAIR_PEM: ${KEYPAIR_PEM}
+      PRIVATEKEY_PEM: ${PRIVATEKEY_PEM}
+      PUBLICKEY_PEM: ${PUBLICKEY_PEM}
       
       # Miljøvariablen FLOWS fortæller Node-RED IDEet hvilket flow.json den skal åbne og gemme ændringer i ved deploy.
       FLOWS: "/data/flows.json"
