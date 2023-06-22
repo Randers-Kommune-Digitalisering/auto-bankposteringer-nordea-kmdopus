@@ -1,14 +1,14 @@
 const Node = {
-  "id": "12bc8e8aefd490c9",
+  "id": "024e78fda9e43eee",
   "type": "change",
-  "z": "b2c910a3562c542e",
+  "z": "8983772ca1c7d013",
   "name": "",
   "rules": [
     {
       "t": "set",
-      "p": "privateKey",
-      "pt": "msg",
-      "to": "PRIVATEKEY_PEM",
+      "p": "eidasPrivateKey",
+      "pt": "flow",
+      "to": "EIDASPRIVATEKEY",
       "tot": "env",
       "dc": true
     }
@@ -18,14 +18,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 530,
-  "y": 140,
+  "x": 310,
+  "y": 40,
   "wires": [
     [
-      "ae33256ab3f888ba"
+      "ba1ee39dd5ee47d5"
     ]
   ],
-  "_order": 41
+  "_order": 17
 }
 
 module.exports = Node;

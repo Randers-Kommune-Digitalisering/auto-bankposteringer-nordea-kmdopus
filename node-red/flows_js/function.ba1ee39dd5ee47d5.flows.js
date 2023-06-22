@@ -1,30 +1,44 @@
 const Node = {
-  "id": "23e5a4db82793153",
+  "id": "ba1ee39dd5ee47d5",
   "type": "function",
-  "z": "257592181f6612d1",
-  "name": "Signing 3 - fra Nordeas postman collection",
+  "z": "8983772ca1c7d013",
+  "name": "function 1",
   "func": "",
   "outputs": 1,
-  "noerr": 1696,
+  "noerr": 0,
   "initialize": "",
   "finalize": "",
   "libs": [
     {
       "var": "crypto",
       "module": "crypto"
+    },
+    {
+      "var": "moment",
+      "module": "moment"
+    },
+    {
+      "var": "uuid",
+      "module": "uuid"
+    },
+    {
+      "var": "sdk",
+      "module": "postman-collection"
+    },
+    {
+      "var": "forge",
+      "module": "node-forge"
     }
   ],
-  "x": 630,
-  "y": 1140,
+  "x": 520,
+  "y": 40,
   "wires": [
-    [
-      "aca798e65210098e"
-    ]
+    []
   ],
-  "_order": 127
+  "_order": 16
 }
 
-Node.func = async function (node, msg, RED, context, flow, global, env, util, crypto) {
+Node.func = async function (node, msg, RED, context, flow, global, env, util, crypto, moment, uuid, sdk, forge) {
   // Forge library OBI logic is at the bottom
   var forge =
   /******/ (function (modules) { // webpackBootstrap
@@ -29295,34 +29309,91 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cr
   
   
   // ========================== OBI Logic ==========================
+  //PIS specific
+  
+  const requestId = uuid.v4();
+  const today = moment().format("YYYY-MM-DD");
+  
+  flow.set("randomUUID", requestId);
+  flow.set("today", today);
+  
+  // Common
+  function getHeaderValue(headerName) {
+      const headerValue = request.headers[headerName];
+      if (headerValue === undefined) {
+          throw new Error(`Requried header: ${headerName} is not defined`);
+      }
+      return resolveVariables(headerValue);
+  }
   
   function resolveVariables(textWithPossibleVaraibles) {
       return textWithPossibleVaraibles.replace(/{{(\w*)}}/g, (str, key) => {
-          const value = msg.get(key);
+          const value = flow.get(key);
           return value === undefined ? "{{" + key + "}}" : value;
       });
   }
   
+  // Digest Calculation
+  function resolveRequestBody() {
+      const contentType = getHeaderValue("content-type");
+  
+      if (contentType === "application/x-www-form-urlencoded") {
+          const data = Object.keys(request.data)
+              .sort(function (a, b) {
+                  if (a < b) { return -1; }
+                  if (a > b) { return 1; }
+                  return 0;
+              })
+              .map(key => key + "=" + request.data[key])
+              .join('&');
+          return resolveVariables(data);
+      } else if (Object.entries(request.data).length === 0 && request.data.constructor === Object) {
+          return "";
+      }
+  
+      return resolveVariables(request.data.toString());
+  }
+  
+  function calculateDigest() {
+      const requestData = resolveRequestBody();
+      console.log(`Request data: ${requestData}`);
+  
+      const sha256digest = CryptoJS.SHA256(requestData);
+      const base64sha256 = CryptoJS.enc.Base64.stringify(sha256digest);
+      const calculatedDigest = 'sha-256=' + base64sha256;
+  
+      console.log(`Digest header: ${calculatedDigest}`);
+      flow.set("Digest", calculatedDigest);
+      return calculatedDigest;
+  }
+  
   // Signature Calculation
   
-  function getSignatureBaseOnRequest() {
-      const path = resolveVariables("https://api.nordeaopenbanking.com/corporate/premium/v3/accounts/DK5036579260-USD/transactions");
-      const host = "api.nordeaopenbanking.com".toLowerCase();
-      const method = "get";
-      const date = new Date().toUTCString();
+  const requestWithoutContentHeaders = "(request-target) x-nordea-originating-host x-nordea-originating-date";
+  const requestWithContentHeaders = "(request-target) x-nordea-originating-host x-nordea-originating-date content-type digest";
   
-      let headers = "(request-target) x-nordea-originating-host x-nordea-originating-date";
+  function getSignatureBaseOnRequest() {
+      const url = new sdk.Url(resolveVariables(request.url));
+      const host = url.getHost().toLowerCase();
+      const path = url.getPathWithQuery();
+      const method = request.method.toLowerCase();
+      const date = moment().utc().format("ddd, DD MMM YYYY HH:mm:ss") + " GMT";
+  
+      let headers = requestWithoutContentHeaders;
   
       let normalizedString =
           `(request-target): ${method} ${path}\n` +
           `x-nordea-originating-host: ${host}\n` +
           `x-nordea-originating-date: ${date}`;
   
-      return { host, path, method, date, headers, normalizedString };
-  }
+      if ((method === "post" || method === "put" || method === "patch") && Object.entries(request.data).length > 0) {
+          const contentType = getHeaderValue("content-type");
+          const digest = calculateDigest();
+          normalizedString += `\ncontent-type: ${contentType}\ndigest: ${digest}`
   
-  function getPrivateKey() {
-      return forge.pki.privateKeyFromPem(msg.payload.privateKey);
+          headers = requestWithContentHeaders;
+      }
+      return { host, path, method, date, headers, normalizedString };
   }
   
   function encryptSignature(normalizedSignatureString) {
@@ -29331,13 +29402,29 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cr
       return forge.util.encode64(getPrivateKey().sign(messageDigest));
   }
   
-  const clientId = "bff6e089c937b9d710e68c00d5114654"
+  function getPrivateKey() {
+      let eidasPrivateKey = flow.get("eidasPrivateKey");
+  
+      if (!eidasPrivateKey.includes('PRIVATE KEY')) {
+          eidasPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\n" + eidasPrivateKey + "\n" + "-----END RSA PRIVATE KEY-----";
+      }
+      console.log(eidasPrivateKey);
+      return forge.pki.privateKeyFromPem(eidasPrivateKey);
+  }
+  
+  
+  const clientId = getHeaderValue("x-ibm-client-id")
   const signature = getSignatureBaseOnRequest();
   const encryptedSignature = encryptSignature(signature.normalizedString);
+  const signatureHeader = `keyId="${clientId}",algorithm="rsa-sha256",headers="${signature.headers}",signature="${encryptedSignature}"`;
   
-  msg.payload.sign = encryptedSignature;
+  console.log(`Normalized signature string: ${signature.normalizedString}`);
+  console.log(`Signature header: ${signatureHeader}`);
   
-  return msg;
+  
+  flow.set("Signature", signatureHeader);
+  flow.set("X-Nordea-Originating-Host", signature.host);
+  flow.set("X-Nordea-Originating-Date", signature.date);
 }
 
 module.exports = Node;

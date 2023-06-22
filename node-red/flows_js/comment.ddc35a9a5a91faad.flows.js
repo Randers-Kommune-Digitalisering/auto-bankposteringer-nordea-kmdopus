@@ -7,7 +7,7 @@ const Node = {
   "x": 90,
   "y": 40,
   "wires": [],
-  "_order": 41
+  "_order": 28
 }
 
 Node.info = `
