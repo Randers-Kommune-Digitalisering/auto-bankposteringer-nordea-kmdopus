@@ -1,0 +1,26 @@
+{
+    "moment": {
+        "spec": "moment",
+        "module": "moment",
+        "builtin": false,
+        "known": false
+    },
+    "uuid": {
+        "spec": "uuid",
+        "module": "uuid",
+        "builtin": false,
+        "known": false
+    },
+    "node-forge": {
+        "spec": "node-forge",
+        "module": "node-forge",
+        "builtin": false,
+        "known": false
+    },
+    "postman-collection": {
+        "spec": "postman-collection",
+        "module": "postman-collection",
+        "builtin": false,
+        "known": false
+    }
+}
