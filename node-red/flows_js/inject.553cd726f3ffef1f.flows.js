@@ -19,8 +19,8 @@ const Node = {
   "topic": "",
   "payload": "",
   "payloadType": "date",
-  "x": 100,
-  "y": 40,
+  "x": 120,
+  "y": 100,
   "wires": [
     [
       "024e78fda9e43eee"
