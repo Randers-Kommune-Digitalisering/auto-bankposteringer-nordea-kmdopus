@@ -22,12 +22,12 @@ const Node = {
       "module": "uuid"
     },
     {
-      "var": "sdk",
-      "module": "postman-collection"
-    },
-    {
       "var": "forge",
       "module": "node-forge"
+    },
+    {
+      "var": "sdk",
+      "module": "postman-collection"
     }
   ],
   "x": 520,
@@ -38,7 +38,7 @@ const Node = {
   "_order": 16
 }
 
-Node.func = async function (node, msg, RED, context, flow, global, env, util, crypto, moment, uuid, sdk, forge) {
+Node.func = async function (node, msg, RED, context, flow, global, env, util, crypto, moment, uuid, forge, sdk) {
   // Forge library OBI logic is at the bottom
   var forge =
   /******/ (function (modules) { // webpackBootstrap
