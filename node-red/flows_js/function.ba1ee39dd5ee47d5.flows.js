@@ -2,10 +2,10 @@ const Node = {
   "id": "ba1ee39dd5ee47d5",
   "type": "function",
   "z": "8983772ca1c7d013",
-  "name": "function 1",
+  "name": "Pre-request script",
   "func": "",
   "outputs": 1,
-  "noerr": 0,
+  "noerr": 1698,
   "initialize": "",
   "finalize": "",
   "libs": [
@@ -30,10 +30,12 @@ const Node = {
       "module": "postman-collection"
     }
   ],
-  "x": 520,
-  "y": 40,
+  "x": 830,
+  "y": 100,
   "wires": [
-    []
+    [
+      "a013f183862862d0"
+    ]
   ],
   "_order": 16
 }
@@ -29319,7 +29321,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cr
   
   // Common
   function getHeaderValue(headerName) {
-      const headerValue = request.headers[headerName];
+      const headerValue = flow.get("headers[" + headerName + "]");
       if (headerValue === undefined) {
           throw new Error(`Requried header: ${headerName} is not defined`);
       }
@@ -29328,7 +29330,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cr
   
   function resolveVariables(textWithPossibleVaraibles) {
       return textWithPossibleVaraibles.replace(/{{(\w*)}}/g, (str, key) => {
-          const value = flow.get(key);
+          const value = flow.get("key");
           return value === undefined ? "{{" + key + "}}" : value;
       });
   }
@@ -29338,20 +29340,20 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cr
       const contentType = getHeaderValue("content-type");
   
       if (contentType === "application/x-www-form-urlencoded") {
-          const data = Object.keys(request.data)
+          const data = Object.keys(flow.get("data"))
               .sort(function (a, b) {
                   if (a < b) { return -1; }
                   if (a > b) { return 1; }
                   return 0;
               })
-              .map(key => key + "=" + request.data[key])
+              .map(key => key + "=" + flow.get("data")[key])
               .join('&');
           return resolveVariables(data);
-      } else if (Object.entries(request.data).length === 0 && request.data.constructor === Object) {
+      } else if (Object.entries(flow.get("data")).length === 0 && flow.get("data").constructor === Object) {
           return "";
       }
   
-      return resolveVariables(request.data.toString());
+      return resolveVariables(flow.get("data").toString());
   }
   
   function calculateDigest() {
@@ -29373,10 +29375,10 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cr
   const requestWithContentHeaders = "(request-target) x-nordea-originating-host x-nordea-originating-date content-type digest";
   
   function getSignatureBaseOnRequest() {
-      const url = new sdk.Url(resolveVariables(request.url));
+      const url = new sdk.Url(resolveVariables(flow.get("url")));
       const host = url.getHost().toLowerCase();
       const path = url.getPathWithQuery();
-      const method = request.method.toLowerCase();
+      const method = flow.get("method").toLowerCase();
       const date = moment().utc().format("ddd, DD MMM YYYY HH:mm:ss") + " GMT";
   
       let headers = requestWithoutContentHeaders;
@@ -29386,7 +29388,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cr
           `x-nordea-originating-host: ${host}\n` +
           `x-nordea-originating-date: ${date}`;
   
-      if ((method === "post" || method === "put" || method === "patch") && Object.entries(request.data).length > 0) {
+      if ((method === "post" || method === "put" || method === "patch") && Object.entries(flow.get("data")).length > 0) {
           const contentType = getHeaderValue("content-type");
           const digest = calculateDigest();
           normalizedString += `\ncontent-type: ${contentType}\ndigest: ${digest}`
