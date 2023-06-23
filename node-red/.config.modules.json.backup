@@ -16,5 +16,17 @@
         "module": "node-forge",
         "builtin": false,
         "known": false
+    },
+    "postman-collection": {
+        "spec": "postman-collection",
+        "module": "postman-collection",
+        "builtin": false,
+        "known": false
+    },
+    "crypto.js": {
+        "spec": "crypto.js",
+        "module": "crypto.js",
+        "builtin": false,
+        "known": false
     }
 }

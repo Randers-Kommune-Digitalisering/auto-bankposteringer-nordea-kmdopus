@@ -6,58 +6,59 @@ const Node = {
   "rules": [
     {
       "t": "set",
+      "p": "headers",
+      "pt": "msg",
+      "to": "{}",
+      "tot": "json"
+    },
+    {
+      "t": "set",
       "p": "headers.Content-Type",
-      "pt": "flow",
-      "to": "application/json",
-      "tot": "str"
+      "pt": "msg",
+      "to": "Content-Type",
+      "tot": "flow"
     },
     {
       "t": "set",
       "p": "headers.Signature",
-      "pt": "flow",
+      "pt": "msg",
       "to": "Signature",
-      "tot": "flow",
-      "dc": true
+      "tot": "flow"
     },
     {
       "t": "set",
       "p": "headers.Digest",
-      "pt": "flow",
+      "pt": "msg",
       "to": "Digest",
-      "tot": "flow",
-      "dc": true
+      "tot": "flow"
     },
     {
       "t": "set",
       "p": "headers.X-Nordea-Originating-Date",
-      "pt": "flow",
+      "pt": "msg",
       "to": "X-Nordea-Originating-Date",
-      "tot": "flow",
-      "dc": true
+      "tot": "flow"
     },
     {
       "t": "set",
-      "p": "headers.X-Nordea-Originating-Date",
-      "pt": "flow",
+      "p": "headers.X-Nordea-Originating-Host",
+      "pt": "msg",
       "to": "X-Nordea-Originating-Host",
-      "tot": "flow",
-      "dc": true
+      "tot": "flow"
     },
     {
       "t": "set",
       "p": "headers.X-IBM-Client-Id",
-      "pt": "flow",
+      "pt": "msg",
       "to": "X-IBM-Client-Id",
-      "tot": "flow",
-      "dc": true
+      "tot": "flow"
     },
     {
       "t": "set",
       "p": "headers.X-IBM-Client-Secret",
-      "pt": "flow",
+      "pt": "msg",
       "to": "X-IBM-Client-Secret",
-      "tot": "flow",
-      "dc": true
+      "tot": "flow"
     }
   ],
   "action": "",
@@ -69,7 +70,8 @@ const Node = {
   "y": 100,
   "wires": [
     [
-      "6b1d7553508977f1"
+      "6b1d7553508977f1",
+      "1a435b9326b3eefc"
     ]
   ],
   "_order": 34

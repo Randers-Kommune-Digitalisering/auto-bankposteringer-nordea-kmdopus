@@ -20,6 +20,13 @@ const Node = {
     },
     {
       "t": "set",
+      "p": "content-type",
+      "pt": "flow",
+      "to": "application/json",
+      "tot": "str"
+    },
+    {
+      "t": "set",
       "p": "data",
       "pt": "flow",
       "to": "{\"scope\":[\"PAYMENTS_BROADBAND\",\"ACCOUNTS_BROADBAND\"],\"duration\":129600,\"agreement_number\":\"130474822427\"}",
@@ -35,8 +42,7 @@ const Node = {
   "y": 100,
   "wires": [
     [
-      "ba1ee39dd5ee47d5",
-      "d6fc487958714237"
+      "ba1ee39dd5ee47d5"
     ]
   ],
   "_order": 37

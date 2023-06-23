@@ -3,8 +3,8 @@ const Node = {
   "type": "http request",
   "z": "8983772ca1c7d013",
   "name": "Initiate Auth",
-  "method": "use",
-  "ret": "txt",
+  "method": "POST",
+  "ret": "obj",
   "paytoqs": "ignore",
   "url": "https://api.nordeaopenbanking.com/corporate/v2/authorize",
   "tls": "",
@@ -18,7 +18,8 @@ const Node = {
   "y": 100,
   "wires": [
     [
-      "65a1f4032c3f6a3d"
+      "65a1f4032c3f6a3d",
+      "828f8a3ef9544e61"
     ]
   ],
   "_order": 33

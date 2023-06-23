@@ -22,5 +22,17 @@
         "module": "postman-collection",
         "builtin": false,
         "known": false
+    },
+    "crypto.js": {
+        "spec": "crypto.js",
+        "module": "crypto.js",
+        "builtin": false,
+        "known": false
+    },
+    "crypto-js": {
+        "spec": "crypto-js",
+        "module": "crypto-js",
+        "builtin": false,
+        "known": false
     }
 }
