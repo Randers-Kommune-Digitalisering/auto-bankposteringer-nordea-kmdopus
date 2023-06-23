@@ -23,7 +23,7 @@ const Node = {
     {
       "t": "set",
       "p": "X-IBM-Client-Secret",
-      "pt": "msg",
+      "pt": "flow",
       "to": "CLIENT_SECRET",
       "tot": "env",
       "dc": true

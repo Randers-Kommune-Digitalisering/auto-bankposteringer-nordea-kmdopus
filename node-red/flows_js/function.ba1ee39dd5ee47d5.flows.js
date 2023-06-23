@@ -5,14 +5,10 @@ const Node = {
   "name": "Pre-request script",
   "func": "",
   "outputs": 1,
-  "noerr": 1698,
+  "noerr": 1694,
   "initialize": "",
   "finalize": "",
   "libs": [
-    {
-      "var": "crypto",
-      "module": "crypto"
-    },
     {
       "var": "moment",
       "module": "moment"
@@ -28,6 +24,10 @@ const Node = {
     {
       "var": "sdk",
       "module": "postman-collection"
+    },
+    {
+      "var": "CryptoJS",
+      "module": "crypto-js"
     }
   ],
   "x": 830,
@@ -40,7 +40,7 @@ const Node = {
   "_order": 16
 }
 
-Node.func = async function (node, msg, RED, context, flow, global, env, util, crypto, moment, uuid, forge, sdk) {
+Node.func = async function (node, msg, RED, context, flow, global, env, util, moment, uuid, forge, sdk, CryptoJS) {
   // Forge library OBI logic is at the bottom
   var forge =
   /******/ (function (modules) { // webpackBootstrap
@@ -29321,50 +29321,51 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cr
   
   // Common
   function getHeaderValue(headerName) {
-      const headerValue = flow.get("headers[" + headerName + "]");
+      const headers = flow.get("headers");
+      const headerValue = headers ? headers[headerName] : undefined;
       if (headerValue === undefined) {
-          throw new Error(`Requried header: ${headerName} is not defined`);
+          throw new Error(`Required header: ${headerName} is not defined`);
       }
-      return resolveVariables(headerValue);
-  }
-  
-  function resolveVariables(textWithPossibleVaraibles) {
-      return textWithPossibleVaraibles.replace(/{{(\w*)}}/g, (str, key) => {
-          const value = flow.get("key");
-          return value === undefined ? "{{" + key + "}}" : value;
-      });
+      return headerValue;
   }
   
   // Digest Calculation
   function resolveRequestBody() {
-      const contentType = getHeaderValue("content-type");
+      const contentType = flow.get("content-type");
+      const data = flow.get("data");
   
       if (contentType === "application/x-www-form-urlencoded") {
-          const data = Object.keys(flow.get("data"))
+          const data = Object.keys(data)
               .sort(function (a, b) {
                   if (a < b) { return -1; }
                   if (a > b) { return 1; }
                   return 0;
               })
-              .map(key => key + "=" + flow.get("data")[key])
+              .map(key => key + "=" + data[key])
               .join('&');
-          return resolveVariables(data);
-      } else if (Object.entries(flow.get("data")).length === 0 && flow.get("data").constructor === Object) {
+          return data;
+      } else if (contentType === "application/json") {
+          return JSON.stringify(data);
+      } else if (Object.entries(data).length === 0 && data.constructor === Object) {
           return "";
       }
   
-      return resolveVariables(flow.get("data").toString());
+      return data.toString();
   }
   
   function calculateDigest() {
       const requestData = resolveRequestBody();
+  
       console.log(`Request data: ${requestData}`);
+  
+      // Der må være en fejl her, requestData er OK string
   
       const sha256digest = CryptoJS.SHA256(requestData);
       const base64sha256 = CryptoJS.enc.Base64.stringify(sha256digest);
       const calculatedDigest = 'sha-256=' + base64sha256;
   
       console.log(`Digest header: ${calculatedDigest}`);
+  
       flow.set("Digest", calculatedDigest);
       return calculatedDigest;
   }
@@ -29375,7 +29376,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cr
   const requestWithContentHeaders = "(request-target) x-nordea-originating-host x-nordea-originating-date content-type digest";
   
   function getSignatureBaseOnRequest() {
-      const url = new sdk.Url(resolveVariables(flow.get("url")));
+      const url = new sdk.Url(flow.get("url"));
       const host = url.getHost().toLowerCase();
       const path = url.getPathWithQuery();
       const method = flow.get("method").toLowerCase();
@@ -29389,7 +29390,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cr
           `x-nordea-originating-date: ${date}`;
   
       if ((method === "post" || method === "put" || method === "patch") && Object.entries(flow.get("data")).length > 0) {
-          const contentType = getHeaderValue("content-type");
+          const contentType = flow.get("content-type");
           const digest = calculateDigest();
           normalizedString += `\ncontent-type: ${contentType}\ndigest: ${digest}`
   
@@ -29415,7 +29416,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cr
   }
   
   
-  const clientId = getHeaderValue("x-ibm-client-id")
+  const clientId = flow.get("X-IBM-Client-Id");
   const signature = getSignatureBaseOnRequest();
   const encryptedSignature = encryptSignature(signature.normalizedString);
   const signatureHeader = `keyId="${clientId}",algorithm="rsa-sha256",headers="${signature.headers}",signature="${encryptedSignature}"`;
@@ -29423,10 +29424,11 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cr
   console.log(`Normalized signature string: ${signature.normalizedString}`);
   console.log(`Signature header: ${signatureHeader}`);
   
-  
   flow.set("Signature", signatureHeader);
   flow.set("X-Nordea-Originating-Host", signature.host);
   flow.set("X-Nordea-Originating-Date", signature.date);
+  
+  return msg;
 }
 
 module.exports = Node;
