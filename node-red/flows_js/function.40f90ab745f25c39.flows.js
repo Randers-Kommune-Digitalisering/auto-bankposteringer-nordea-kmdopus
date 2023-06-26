@@ -1,29 +1,27 @@
 const Node = {
-  "id": "f387df52f29ad7db",
+  "id": "40f90ab745f25c39",
   "type": "function",
   "z": "8983772ca1c7d013",
-  "name": "Generér dato",
+  "name": "Save exchange code",
   "func": "",
   "outputs": 1,
   "noerr": 0,
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 380,
-  "y": 580,
+  "x": 1440,
+  "y": 220,
   "wires": [
     [
-      "5293eaa99a9d9c16"
+      "ea7e7a38266e9a0e"
     ]
   ],
-  "_order": 24
+  "_order": 37
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  const date = new Date();
-  const formattedDate = date.toUTCString();
-  
-  msg.headers['x-nordea-originating-date'] = formattedDate;
+  var jsonData = msg.payload;
+  global.set("exchange_code", jsonData.response.code);
   
   return msg;
 }

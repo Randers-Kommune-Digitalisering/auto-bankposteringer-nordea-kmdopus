@@ -7,7 +7,7 @@ const Node = {
     {
       "t": "set",
       "p": "eidasPrivateKey",
-      "pt": "flow",
+      "pt": "global",
       "to": "EIDASPRIVATEKEY",
       "tot": "env",
       "dc": true
@@ -15,7 +15,7 @@ const Node = {
     {
       "t": "set",
       "p": "X-IBM-Client-Id",
-      "pt": "flow",
+      "pt": "global",
       "to": "CLIENT_ID",
       "tot": "env",
       "dc": true
@@ -23,7 +23,7 @@ const Node = {
     {
       "t": "set",
       "p": "X-IBM-Client-Secret",
-      "pt": "flow",
+      "pt": "global",
       "to": "CLIENT_SECRET",
       "tot": "env",
       "dc": true
@@ -34,7 +34,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 330,
+  "x": 290,
   "y": 100,
   "wires": [
     [

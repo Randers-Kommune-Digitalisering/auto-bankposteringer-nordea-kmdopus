@@ -22,16 +22,12 @@ const Node = {
       "module": "node-forge"
     },
     {
-      "var": "sdk",
-      "module": "postman-collection"
-    },
-    {
       "var": "CryptoJS",
       "module": "crypto-js"
     }
   ],
-  "x": 830,
-  "y": 100,
+  "x": 770,
+  "y": 140,
   "wires": [
     [
       "a013f183862862d0"
@@ -40,7 +36,7 @@ const Node = {
   "_order": 16
 }
 
-Node.func = async function (node, msg, RED, context, flow, global, env, util, moment, uuid, forge, sdk, CryptoJS) {
+Node.func = async function (node, msg, RED, context, flow, global, env, util, moment, uuid, forge, CryptoJS) {
   // Forge library OBI logic is at the bottom
   var forge =
   /******/ (function (modules) { // webpackBootstrap
@@ -29376,9 +29372,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   const requestWithContentHeaders = "(request-target) x-nordea-originating-host x-nordea-originating-date content-type digest";
   
   function getSignatureBaseOnRequest() {
-      const url = new sdk.Url(flow.get("url"));
-      const host = url.getHost().toLowerCase();
-      const path = url.getPathWithQuery();
+      const host = "api.nordeaopenbanking.com";
+      const path = flow.get("path");
       const method = flow.get("method").toLowerCase();
       const date = moment().utc().format("ddd, DD MMM YYYY HH:mm:ss") + " GMT";
   
@@ -29406,7 +29401,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   }
   
   function getPrivateKey() {
-      let eidasPrivateKey = flow.get("eidasPrivateKey");
+      let eidasPrivateKey = global.get("eidasPrivateKey");
   
       if (!eidasPrivateKey.includes('PRIVATE KEY')) {
           eidasPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\n" + eidasPrivateKey + "\n" + "-----END RSA PRIVATE KEY-----";
@@ -29416,7 +29411,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   }
   
   
-  const clientId = flow.get("X-IBM-Client-Id");
+  const clientId = global.get("X-IBM-Client-Id");
   const signature = getSignatureBaseOnRequest();
   const encryptedSignature = encryptSignature(signature.normalizedString);
   const signatureHeader = `keyId="${clientId}",algorithm="rsa-sha256",headers="${signature.headers}",signature="${encryptedSignature}"`;

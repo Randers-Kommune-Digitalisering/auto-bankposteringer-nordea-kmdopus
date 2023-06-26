@@ -9,20 +9,22 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 1510,
-  "y": 100,
+  "x": 1450,
+  "y": 140,
   "wires": [
     [
       "45af9632b74daefd"
     ]
   ],
-  "_order": 36
+  "_order": 21
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   var jsonData = msg.payload;
-  flow.set("client_token", jsonData.response.client_token);
-  flow.set("access_id", jsonData.response.access_id);
+  global.set("client_token", jsonData.response.client_token);
+  global.set("access_id", jsonData.response.access_id);
+  
+  return msg;
 }
 
 module.exports = Node;

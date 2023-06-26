@@ -1,7 +1,7 @@
 const Node = {
   "id": "8983772ca1c7d013",
   "type": "tab",
-  "label": "Forsøg 1",
+  "label": "DET VIRKER!!!",
   "disabled": false,
   "info": "",
   "env": [],
