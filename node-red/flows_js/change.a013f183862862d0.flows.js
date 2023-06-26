@@ -2,7 +2,7 @@ const Node = {
   "id": "a013f183862862d0",
   "type": "change",
   "z": "8983772ca1c7d013",
-  "name": "Headers fra flow til msg",
+  "name": "Set headers og data fra flow til msg",
   "rules": [
     {
       "t": "set",
@@ -59,6 +59,13 @@ const Node = {
       "pt": "msg",
       "to": "X-IBM-Client-Secret",
       "tot": "flow"
+    },
+    {
+      "t": "set",
+      "p": "payload",
+      "pt": "msg",
+      "to": "data",
+      "tot": "flow"
     }
   ],
   "action": "",
@@ -66,15 +73,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 1070,
-  "y": 100,
+  "x": 1020,
+  "y": 140,
   "wires": [
     [
-      "6b1d7553508977f1",
-      "1a435b9326b3eefc"
+      "6b1d7553508977f1"
     ]
   ],
-  "_order": 34
+  "_order": 19
 }
 
 module.exports = Node;

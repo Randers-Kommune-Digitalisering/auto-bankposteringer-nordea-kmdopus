@@ -2,7 +2,7 @@ const Node = {
   "id": "473899a206c1da21",
   "type": "change",
   "z": "8983772ca1c7d013",
-  "name": "Initiate Auth request",
+  "name": "Set params for Initiate Auth",
   "rules": [
     {
       "t": "set",
@@ -13,9 +13,9 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "url",
+      "p": "path",
       "pt": "flow",
-      "to": "https://api.nordeaopenbanking.com/corporate/v2/authorize",
+      "to": "/corporate/v2/authorize",
       "tot": "str"
     },
     {
@@ -38,14 +38,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 600,
-  "y": 100,
+  "x": 540,
+  "y": 140,
   "wires": [
     [
       "ba1ee39dd5ee47d5"
     ]
   ],
-  "_order": 37
+  "_order": 22
 }
 
 module.exports = Node;

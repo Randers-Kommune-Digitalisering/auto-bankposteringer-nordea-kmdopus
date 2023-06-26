@@ -1,27 +1,27 @@
 const Node = {
-  "id": "9cf3689d165feb0c",
+  "id": "d59ba36195937df4",
   "type": "http request",
   "z": "8983772ca1c7d013",
-  "name": "hent accounts",
+  "name": "Auth Status",
   "method": "GET",
   "ret": "obj",
   "paytoqs": "ignore",
-  "url": "https://api.nordeaopenbanking.com/corporate/premium/v3/accounts/DK5036579260-USD/transactions",
+  "url": "",
   "tls": "",
   "persist": false,
   "proxy": "",
-  "insecureHTTPParser": true,
+  "insecureHTTPParser": false,
   "authType": "",
   "senderr": false,
   "headers": [],
-  "x": 920,
-  "y": 820,
+  "x": 1250,
+  "y": 220,
   "wires": [
     [
-      "1f6e1c0e843f0eb3"
+      "40f90ab745f25c39"
     ]
   ],
-  "_order": 21
+  "_order": 32
 }
 
 module.exports = Node;

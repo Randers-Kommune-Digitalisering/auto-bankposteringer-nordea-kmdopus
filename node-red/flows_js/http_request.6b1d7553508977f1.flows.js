@@ -14,15 +14,14 @@ const Node = {
   "authType": "",
   "senderr": false,
   "headers": [],
-  "x": 1290,
-  "y": 100,
+  "x": 1250,
+  "y": 140,
   "wires": [
     [
-      "65a1f4032c3f6a3d",
-      "828f8a3ef9544e61"
+      "65a1f4032c3f6a3d"
     ]
   ],
-  "_order": 33
+  "_order": 18
 }
 
 module.exports = Node;
