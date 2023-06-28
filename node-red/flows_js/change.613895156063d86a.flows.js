@@ -2,7 +2,8 @@ const Node = {
   "id": "613895156063d86a",
   "type": "change",
   "z": "31641b084096a0df",
-  "name": "Set params for List Transactions",
+  "g": "19850c032bac1ad9",
+  "name": "Set params for List Trans...",
   "rules": [
     {
       "t": "set",
@@ -59,14 +60,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 570,
-  "y": 700,
+  "x": 960,
+  "y": 280,
   "wires": [
     [
       "caa757059cda7d90"
     ]
   ],
-  "_order": 67
+  "_order": 60
 }
 
 module.exports = Node;

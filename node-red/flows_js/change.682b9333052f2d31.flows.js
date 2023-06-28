@@ -7,7 +7,7 @@ const Node = {
     {
       "t": "set",
       "p": "konteringsregler",
-      "pt": "msg",
+      "pt": "global",
       "to": "payload",
       "tot": "msg"
     }
@@ -21,10 +21,11 @@ const Node = {
   "y": 180,
   "wires": [
     [
-      "82d1b48762c80e74"
+      "82d1b48762c80e74",
+      "30a1d734cd84805b"
     ]
   ],
-  "_order": 109
+  "_order": 82
 }
 
 module.exports = Node;

@@ -2,7 +2,8 @@ const Node = {
   "id": "bc712702feffe499",
   "type": "http request",
   "z": "31641b084096a0df",
-  "name": "List Transactions",
+  "g": "19850c032bac1ad9",
+  "name": "List Trans.",
   "method": "GET",
   "ret": "obj",
   "paytoqs": "ignore",
@@ -14,14 +15,14 @@ const Node = {
   "authType": "",
   "senderr": false,
   "headers": [],
-  "x": 1210,
-  "y": 700,
+  "x": 1470,
+  "y": 280,
   "wires": [
     [
-      "125b88b4802484ea"
+      "6a627e383baee90d"
     ]
   ],
-  "_order": 73
+  "_order": 66
 }
 
 module.exports = Node;

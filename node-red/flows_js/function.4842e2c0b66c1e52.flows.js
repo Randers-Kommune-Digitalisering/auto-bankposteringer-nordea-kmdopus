@@ -20,7 +20,7 @@ const Node = {
   "wires": [
     []
   ],
-  "_order": 122
+  "_order": 97
 }
 
 Node.initialize = async function (node, msg, RED, context, flow, global, env, util, crypto) {

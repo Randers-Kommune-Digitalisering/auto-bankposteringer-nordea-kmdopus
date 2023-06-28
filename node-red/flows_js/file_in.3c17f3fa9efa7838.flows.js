@@ -10,14 +10,17 @@ const Node = {
   "sendError": false,
   "encoding": "none",
   "allProps": false,
-  "x": 300,
-  "y": 100,
+  "x": 380,
+  "y": 40,
   "wires": [
     [
       "10a3b57b1ec29893"
     ]
   ],
-  "_order": 107
+  "outputLabels": [
+    "global.rules"
+  ],
+  "_order": 80
 }
 
 module.exports = Node;

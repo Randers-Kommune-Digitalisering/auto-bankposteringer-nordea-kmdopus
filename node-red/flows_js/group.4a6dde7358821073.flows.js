@@ -12,7 +12,6 @@ const Node = {
     "color": "#a4a4a4"
   },
   "nodes": [
-    "66dafdd402160f0b",
     "842f3b16cbcd4979",
     "c642a3c0d607dcb5",
     "cd65dd2f0095e1f3",
@@ -21,19 +20,17 @@ const Node = {
     "5f0aa7613b79ec87",
     "410e7edee2a07b85",
     "a5dce552806f5805",
-    "7b5faf94ea9224b2",
     "5499bed3749a0538",
     "183e9ab23c862ad2",
     "4b62a84deb37b593",
     "099c88080c962f9e",
-    "6292b31cc3566140",
-    "1da67182bb10c5c8"
+    "6292b31cc3566140"
   ],
-  "x": 604,
+  "x": 24,
   "y": 19,
   "w": 472,
-  "h": 282,
-  "_order": 7
+  "h": 302,
+  "_order": 6
 }
 
 module.exports = Node;

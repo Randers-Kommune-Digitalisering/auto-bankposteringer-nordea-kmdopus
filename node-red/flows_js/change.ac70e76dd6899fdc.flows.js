@@ -2,6 +2,7 @@ const Node = {
   "id": "ac70e76dd6899fdc",
   "type": "change",
   "z": "31641b084096a0df",
+  "g": "19850c032bac1ad9",
   "name": "Clear objects",
   "rules": [
     {
@@ -70,14 +71,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 290,
-  "y": 700,
+  "x": 750,
+  "y": 280,
   "wires": [
     [
       "613895156063d86a"
     ]
   ],
-  "_order": 77
+  "_order": 69
 }
 
 module.exports = Node;

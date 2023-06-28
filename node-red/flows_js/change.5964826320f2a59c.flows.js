@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "31641b084096a0df",
   "g": "19850c032bac1ad9",
-  "name": "Set headers og data fra flow til msg",
+  "name": "Save flow to msg",
   "rules": [
     {
       "t": "set",
@@ -88,14 +88,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 960,
-  "y": 460,
+  "x": 1290,
+  "y": 160,
   "wires": [
     [
       "4626730c59af348f"
     ]
   ],
-  "_order": 27
+  "_order": 24
 }
 
 module.exports = Node;

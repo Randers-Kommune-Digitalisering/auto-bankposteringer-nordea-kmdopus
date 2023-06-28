@@ -3,19 +3,19 @@ const Node = {
   "type": "complete",
   "z": "31641b084096a0df",
   "g": "19850c032bac1ad9",
-  "name": "",
+  "name": "Step 2",
   "scope": [
     "cc8fcb22263bb704"
   ],
   "uncaught": false,
-  "x": 130,
-  "y": 460,
+  "x": 610,
+  "y": 160,
   "wires": [
     [
       "30a777182ef8fd60"
     ]
   ],
-  "_order": 31
+  "_order": 28
 }
 
 module.exports = Node;
