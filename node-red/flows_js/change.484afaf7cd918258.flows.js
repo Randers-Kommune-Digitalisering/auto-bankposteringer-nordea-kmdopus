@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "31641b084096a0df",
   "g": "19850c032bac1ad9",
-  "name": "Set environment variables",
+  "name": "Set env. var.",
   "rules": [
     {
       "t": "set",
@@ -50,14 +50,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 330,
-  "y": 420,
+  "x": 750,
+  "y": 120,
   "wires": [
     [
       "dda6e256ceaacd5d"
     ]
   ],
-  "_order": 18
+  "_order": 16
 }
 
 module.exports = Node;

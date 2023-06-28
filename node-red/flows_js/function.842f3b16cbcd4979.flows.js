@@ -27,14 +27,14 @@ const Node = {
       "module": "crypto-js"
     }
   ],
-  "x": 780,
-  "y": 220,
+  "x": 200,
+  "y": 200,
   "wires": [
     [
       "c642a3c0d607dcb5"
     ]
   ],
-  "_order": 38
+  "_order": 34
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, moment, uuid, forge, CryptoJS) {
@@ -29376,9 +29376,11 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
       let path;
       if (typeof flow.get("query_param1") !== "undefined") {
           path = flow.get("path") + "/" + flow.get("query_param") + flow.get("path_suffix") + "?from_date=" + flow.get("query_param1") + "&to_date=" + flow.get("query_param2");
-      } else {
+      }
+      else if (typeof flow.get("query_param") !== "undefined") {
           path = flow.get("path") + "/" + flow.get("query_param");
       }
+      else path = flow.get("path");
   
       flow.set("url", host + path);
   

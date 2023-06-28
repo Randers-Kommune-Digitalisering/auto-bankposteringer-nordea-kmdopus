@@ -11,10 +11,10 @@ const Node = {
   "targetType": "full",
   "statusVal": "",
   "statusType": "auto",
-  "x": 700,
-  "y": 40,
+  "x": 440,
+  "y": 600,
   "wires": [],
-  "_order": 105
+  "_order": 78
 }
 
 module.exports = Node;
