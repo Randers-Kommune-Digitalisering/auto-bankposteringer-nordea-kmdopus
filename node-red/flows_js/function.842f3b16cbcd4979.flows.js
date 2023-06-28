@@ -34,7 +34,7 @@ const Node = {
       "c642a3c0d607dcb5"
     ]
   ],
-  "_order": 39
+  "_order": 38
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, moment, uuid, forge, CryptoJS) {
@@ -29372,25 +29372,25 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   
   function getSignatureBaseOnRequest() {
       const host = "api.nordeaopenbanking.com";
-      const path = flow.get("path") + "/" + flow.get("query_param");
       
-      // nedenstående skal være IF UNDEFINED, ikke !== ""
-      
-      if (flow.get("query_param1") !== "") {
-          flow.set("url", host + path + "?from_date=" + flow.get("query_param1") + "&to_date=" + flow.get("query_param2"));
+      let path;
+      if (typeof flow.get("query_param1") !== "undefined") {
+          path = flow.get("path") + "/" + flow.get("query_param") + flow.get("path_suffix") + "?from_date=" + flow.get("query_param1") + "&to_date=" + flow.get("query_param2");
+      } else {
+          path = flow.get("path") + "/" + flow.get("query_param");
       }
-      else {
-          flow.set("url", host + path );
-      }
+  
+      flow.set("url", host + path);
+  
       const method = flow.get("method").toLowerCase();
       const date = moment().utc().format("ddd, DD MMM YYYY HH:mm:ss") + " GMT";
-  
-      let headers = requestWithoutContentHeaders;
   
       let normalizedString =
           `(request-target): ${method} ${path}\n` +
           `x-nordea-originating-host: ${host}\n` +
           `x-nordea-originating-date: ${date}`;
+  
+      let headers = requestWithoutContentHeaders;
   
       if ((method === "post" || method === "put" || method === "patch") && Object.entries(flow.get("data")).length > 0) {
           const contentType = flow.get("content-type");

@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "31641b084096a0df",
   "g": "19850c032bac1ad9",
-  "name": "Clear msg object",
+  "name": "Clear objects",
   "rules": [
     {
       "t": "delete",
@@ -44,6 +44,26 @@ const Node = {
       "t": "delete",
       "p": "url",
       "pt": "msg"
+    },
+    {
+      "t": "delete",
+      "p": "query_param",
+      "pt": "flow"
+    },
+    {
+      "t": "delete",
+      "p": "query_param1\t",
+      "pt": "flow"
+    },
+    {
+      "t": "delete",
+      "p": "query_param2",
+      "pt": "flow"
+    },
+    {
+      "t": "delete",
+      "p": "path_suffix",
+      "pt": "flow"
     }
   ],
   "action": "",
@@ -51,7 +71,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 310,
+  "x": 290,
   "y": 460,
   "wires": [
     [
