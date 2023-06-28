@@ -57,8 +57,8 @@ const Node = {
       "t": "set",
       "p": "url",
       "pt": "msg",
-      "to": "$flowContext(\"url\") & \"/transacations?from_date=\" & $flowContext(\"from_date\") & \"&to_date=\" & $flowContext(\"to_date\")",
-      "tot": "jsonata"
+      "to": "url",
+      "tot": "flow"
     }
   ],
   "action": "",
@@ -70,11 +70,10 @@ const Node = {
   "y": 700,
   "wires": [
     [
-      "bc712702feffe499",
-      "f11551b5fb43614c"
+      "bc712702feffe499"
     ]
   ],
-  "_order": 75
+  "_order": 72
 }
 
 module.exports = Node;

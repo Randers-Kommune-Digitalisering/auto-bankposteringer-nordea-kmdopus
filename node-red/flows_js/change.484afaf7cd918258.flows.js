@@ -28,6 +28,21 @@ const Node = {
       "to": "CLIENT_SECRET",
       "tot": "env",
       "dc": true
+    },
+    {
+      "t": "delete",
+      "p": "query_param",
+      "pt": "flow"
+    },
+    {
+      "t": "delete",
+      "p": "query_param1",
+      "pt": "flow"
+    },
+    {
+      "t": "delete",
+      "p": "query_param2",
+      "pt": "flow"
     }
   ],
   "action": "",

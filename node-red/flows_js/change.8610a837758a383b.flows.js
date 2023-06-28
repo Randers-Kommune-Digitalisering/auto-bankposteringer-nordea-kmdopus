@@ -1,9 +1,9 @@
 const Node = {
-  "id": "1a9dec79768f44c7",
+  "id": "8610a837758a383b",
   "type": "change",
   "z": "31641b084096a0df",
   "g": "19850c032bac1ad9",
-  "name": "Clear msg object",
+  "name": "Clear objects",
   "rules": [
     {
       "t": "delete",
@@ -44,6 +44,26 @@ const Node = {
       "t": "delete",
       "p": "url",
       "pt": "msg"
+    },
+    {
+      "t": "delete",
+      "p": "query_param",
+      "pt": "flow"
+    },
+    {
+      "t": "delete",
+      "p": "query_param1\t",
+      "pt": "flow"
+    },
+    {
+      "t": "delete",
+      "p": "query_param2",
+      "pt": "flow"
+    },
+    {
+      "t": "delete",
+      "p": "path_suffix",
+      "pt": "flow"
     }
   ],
   "action": "",
@@ -51,14 +71,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 310,
+  "x": 290,
   "y": 500,
   "wires": [
     [
       "06644378cf4410ca"
     ]
   ],
-  "_order": 36
+  "_order": 76
 }
 
 module.exports = Node;
