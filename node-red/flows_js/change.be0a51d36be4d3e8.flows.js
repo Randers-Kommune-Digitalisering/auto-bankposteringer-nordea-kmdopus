@@ -1,8 +1,9 @@
 const Node = {
   "id": "be0a51d36be4d3e8",
   "type": "change",
-  "z": "c5347a17d8894f3e",
-  "name": "Flow til msg",
+  "z": "a1938e80ddbe5950",
+  "g": "745ee7cac00b8ea6",
+  "name": "Flow to msg",
   "rules": [
     {
       "t": "set",
@@ -26,15 +27,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 350,
-  "y": 200,
+  "x": 170,
+  "y": 620,
   "wires": [
     [
-      "1b056c7bdfe3fc6e",
-      "298793dbd22239c7"
+      "1b056c7bdfe3fc6e"
     ]
   ],
-  "_order": 80
+  "_order": 81
 }
 
 module.exports = Node;

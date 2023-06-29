@@ -5,10 +5,10 @@ const Node = {
   "g": "517b687eb20ef6e5",
   "name": "Auth flow + request",
   "info": "",
-  "x": 1210,
+  "x": 1150,
   "y": 60,
   "wires": [],
-  "_order": 54
+  "_order": 55
 }
 
 module.exports = Node;
