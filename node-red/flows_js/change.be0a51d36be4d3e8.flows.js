@@ -9,7 +9,8 @@ const Node = {
       "p": "payload",
       "pt": "msg",
       "to": "omposteringsarray",
-      "tot": "flow"
+      "tot": "flow",
+      "dc": true
     }
   ],
   "action": "",
