@@ -13,8 +13,8 @@ const Node = {
   "strings": true,
   "include_empty_strings": false,
   "include_null_values": true,
-  "x": 290,
-  "y": 140,
+  "x": 370,
+  "y": 80,
   "wires": [
     [
       "c4dfd056b5ac62f5"

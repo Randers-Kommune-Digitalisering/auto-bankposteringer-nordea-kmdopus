@@ -9,8 +9,8 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 320,
-  "y": 220,
+  "x": 400,
+  "y": 160,
   "wires": [
     [
       "be0a51d36be4d3e8"
@@ -54,6 +54,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       "Mængdeenhed",
       "Referencenøgle"
   ];
+  flow.set("omp_headers", omp_headers.join(', '));
   let omposteringsbilag = [];
   
   for (let postering of global.get("transactions")) {
@@ -165,8 +166,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
                   linjer_dannet += 1;
                   output_posteringsdata_til_drift = {};
                   output_posteringsdata_til_90540000 = {};
-                  flow.set("posteringsdata_til_drift", {});
-                  flow.set("posteringsdata_til_90540000", {});
   
               }
               rows_tjekket += 1;
@@ -197,12 +196,10 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           linjer_dannet += 1;
           output_posteringsdata_til_drift = {};
           output_posteringsdata_til_90540000 = {};
-          flow.set("posteringsdata_til_drift", {});
-          flow.set("posteringsdata_til_90540000", {});
       }
   }
   
-  flow.set("omposteringsarray", omposteringsbilag);
+  global.set("omposteringsarray", omposteringsbilag);
   console.log("ialt " + uplacerbare_poster + "uplacerbare poster");
   
   flow.set("filename", "/data/output/" + global.get("time_of_origin") + ".csv")

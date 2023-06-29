@@ -4,17 +4,17 @@ const Node = {
   "z": "c5347a17d8894f3e",
   "name": "Object to CSV",
   "sep": ";",
-  "hdrin": "",
+  "hdrin": true,
   "hdrout": "all",
   "multi": "one",
   "ret": "\\r\\n",
   "temp": "",
   "skip": "0",
   "strings": true,
-  "include_empty_strings": "",
-  "include_null_values": "",
-  "x": 280,
-  "y": 300,
+  "include_empty_strings": true,
+  "include_null_values": true,
+  "x": 360,
+  "y": 240,
   "wires": [
     [
       "d5ee9d451871bb44"
