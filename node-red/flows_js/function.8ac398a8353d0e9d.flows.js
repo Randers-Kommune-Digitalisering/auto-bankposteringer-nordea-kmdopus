@@ -1,7 +1,8 @@
 const Node = {
   "id": "8ac398a8353d0e9d",
   "type": "function",
-  "z": "c5347a17d8894f3e",
+  "z": "a1938e80ddbe5950",
+  "g": "745ee7cac00b8ea6",
   "name": "Apply rules to transactions",
   "func": "",
   "outputs": 1,
@@ -9,14 +10,14 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 400,
-  "y": 160,
+  "x": 220,
+  "y": 580,
   "wires": [
     [
       "be0a51d36be4d3e8"
     ]
   ],
-  "_order": 76
+  "_order": 77
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {

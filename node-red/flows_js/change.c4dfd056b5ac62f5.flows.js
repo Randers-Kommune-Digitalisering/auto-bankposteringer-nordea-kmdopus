@@ -1,7 +1,8 @@
 const Node = {
   "id": "c4dfd056b5ac62f5",
   "type": "change",
-  "z": "c5347a17d8894f3e",
+  "z": "a1938e80ddbe5950",
+  "g": "745ee7cac00b8ea6",
   "name": "Gem JSON Array i msg.konteringsregler",
   "rules": [
     {
@@ -17,14 +18,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 440,
-  "y": 120,
+  "x": 460,
+  "y": 540,
   "wires": [
     [
       "8ac398a8353d0e9d"
     ]
   ],
-  "_order": 73
+  "_order": 74
 }
 
 module.exports = Node;

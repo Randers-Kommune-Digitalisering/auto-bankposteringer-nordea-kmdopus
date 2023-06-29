@@ -3,7 +3,7 @@ const Node = {
   "type": "function",
   "z": "a1938e80ddbe5950",
   "g": "d343756708beda5a",
-  "name": "Script m. query param",
+  "name": "Script",
   "func": "",
   "outputs": 1,
   "noerr": 1693,
@@ -27,14 +27,14 @@ const Node = {
       "module": "crypto-js"
     }
   ],
-  "x": 200,
+  "x": 170,
   "y": 200,
   "wires": [
     [
       "9e63f9f93a8f8112"
     ]
   ],
-  "_order": 31
+  "_order": 32
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, moment, uuid, forge, CryptoJS) {
