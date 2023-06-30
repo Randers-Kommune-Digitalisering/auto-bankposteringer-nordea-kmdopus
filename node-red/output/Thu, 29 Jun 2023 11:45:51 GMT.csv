@@ -1,0 +1,500 @@
+Reference;Advisliste;Afsender;Posteringstype;match_regel;Beløb1;Beløb2;beløb_regel;Posteringstekst;Artskonto;PSP-element;SIO;Notat
+6687210;null;null;null;Indeholder;-333,00;null;Lig med;Tekst fra bank;40000000;XG-0000000006-00007;null;SKAL STÅ FØR DEN GENERELLE REGEL
+8152290;null;null;null;Indeholder;-333,00;null;Lig med;Tekst fra bank;40000000;XG-0000000006-00007;null;SKAL STÅ FØR DEN GENERELLE REGEL
+1992317;null;null;DK-abonnement;Indeholder;null;null;null;Tekst fra bank;95941202;null;null;SKAL STÅ FØR DEN GENERELLE REGEL
+Dep;null;null;null;Starter med;30000,00;null;Lig med;Tekst fra bank;95950000;null;null;Salg af grunde. Kommer ikke altid med tekst dep, jævnligt kun adressen. Betina Bak.
+9913008388;null;null;Rente af obligationer;Indeholder;null;null;null;Tekst fra bank;94600005;null;null;Randers Kommunes kunstfond
+9913008388;null;null;Udtrukne obligationer;Indeholder;null;null;null;Tekst fra bank;94200011;null;null;Randers Kommunes kunstfond
+null;null;Danica Pension;null;Starter med;1251,70;null;Lig med;Tekst fra bank;95914002;null;null;Posteringstekst inkl. CPR. CPR er ikke med i banken?
+null;null;Danica Pension;null;Starter med;1714,30;null;Lig med;Tekst fra bank;95914002;null;null;Posteringstekst inkl. CPR. CPR er ikke med i banken?
+null;null;PFA Pension;null;Starter med;null;null;null;Advis fra bank;95914002;null;null;Posteringstekst inkl. CPR
+null;null;Sampension;null;Starter med;null;null;null;Tekst fra bank;95914002;null;null;Posteringstekst inkl. CPR
+Regres;null;Forsikring;null;Indeholder;null;null;null;Tekst fra bank;79000000;XG-0000003333-00003;null;Pia Fonnesbæk vedr. spørgsmål.
+0019;null;null;Overførsel;Starter med;null;null;null;Tekst fra bank;90520001;null;null;OBS-konto
+Afdrag indskudslån;null;Udbetaling Danmark;null;Indeholder;null;null;null;UDK - afdrag indskudslån;95990009;null;null;Modposteres af BTK
+NKS-KY;null;null;Cap;Indeholder;null;null;null;Tekst fra bank;95931701;null;null;KY
+KP-;null;Kommune;Overførsel;Indeholder;null;null;null;Afsender fra bank;95931700;null;null;KP
+KP-;null;Kommune;Cap;Indeholder;null;null;null;Afsender fra bank;95931700;null;null;KP
+Mellemkommunal afreg;null;null;Cap;Starter med;null;null;null;Tekst fra bank;90540000;null;null;KMD Udbetaling 339
+Indfasningsstøtte;null;null;Cap;Starter med;null;null;null;Tekst fra bank;90540000;null;null;KMD Udbetaling 210
+Rekvireret udb;null;null;Cap;Starter med;null;null;null;Tekst fra bank;90540000;null;null;KMD Udbetaling 104
+Foreningstilskud;null;null;Cap;Starter med;null;null;null;Tekst fra bank;90540000;null;null;KMD Udbetaling 102
+Leverandørudbetaling;null;null;Cap;Starter med;null;null;null;Tekst fra bank;90540000;null;null;KMD Udbetaling 091
+KMF Begravelse;null;null;Cap;Starter med;null;null;null;Tekst fra bank;90540000;null;null;KMD Udbetaling 057
+Sygedagpenge lønref;null;null;Cap;Starter med;null;null;null;Tekst fra bank;90540000;null;null;KMD Udbetaling 047
+Sygedagpenge;null;null;Cap;Starter med;null;null;null;Tekst fra bank;90540000;null;null;KMD Udbetaling 045
+Boliglån;null;null;Cap;Starter med;null;null;null;Tekst fra bank;90540000;null;null;KMD Udbetaling 042
+Social pension;null;null;Cap;Starter med;null;null;null;Tekst fra bank;90540000;null;null;KMD Udbetaling 039
+Tilskud til børnepas;null;null;Cap;Starter med;null;null;null;Tekst fra bank;90540000;null;null;KMD Udbetaling 030
+E-penge;null;MSS;null;Starter med;null;null;null;E-penge;72000000;XG-0000005228-00003;null;Kantinen
+141360;null;Børne- og undervisning;null;Indeholder;null;null;null;Advis fra bank;86000000;XG-0000002066-00003;null;Kan gælde forskellige P-numre. P-nummer måske kun i advis.
+null;null;null;Overførsel;Starter med;6597,00;null;Lig med;Advis fra bank;79000000;XG-0000003025-00001;null;Huslejenævnet
+null;null;null;Overførsel;Starter med;4398,00;null;Lig med;Advis fra bank;79000000;XG-0000003025-00001;null;Huslejenævnet
+null;null;null;Overførsel;Starter med;345,00;null;Lig med;Tekst fra bank;79000000;XG-0000003025-00001;null;Huslejenævnet
+null;null;null;Bgs;Starter med;345,00;null;Lig med;Tekst fra bank;79000000;XG-0000003025-00001;null;Huslejenævnet
+null;SENR;null;Overførsel;Starter med;161,00;null;Lig med;Advis fra bank;79000000;XG-0000003025-00001;null;Huslejenævnet
+null;null;null;Info-overførsel;Starter med;null;null;null;Tekst fra bank;95912001;null;null;Elsebeth Morgensen vedr. spørgsmål
+Løn;null;Randers Kunstmuseum;null;Indeholder;null;null;null;Tekst fra bank;95911000;null;null;Elsebeth Morgensen vedr. spørgsmål
+null;KSD-;null;null;Indeholder;null;null;null;null;95914005;null;null;Dagpenge - Poster fra Hjørnesten og Randers Kunstmuseum skal tages manuelt
+E-lån;null;null;null;Starter med;null;null;null;Tekst fra bank;92500201;null;null;CPR ell. ejendomsnr. skal med i posteringstekst
+Elån;null;null;null;Starter med;null;null;null;Tekst fra bank;92500201;null;null;CPR ell. ejendomsnr. skal med i posteringstekst
+030000000;null;MobilePay;null;Starter med;null;null;null;Tekst fra bank;90540000;null;null;91407041 efter bankfil mandag
+040000000;null;MobilePay;null;Starter med;null;null;null;Tekst fra bank;90540000;null;null;91407041 efter bankfil mandag
+NKS-KP;null;null;null;Indeholder;null;null;null;Tekst fra bank;95931700;null;null;null
+null;TBK 730;Udbetaling Danmark for bolig;null;Indeholder;null;null;null;null;95990026;null;null;null
+null;null;Svend Aage Sølvsten;null;Indeholder;null;null;null;Aktivitetsudvalget Korshøjscentret kageforplejning;79000000;XG-0000004526-00031;null;null
+006981;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Regnskab 006981;95990009;null;null;null
+6687210;null;null;null;Indeholder;null;null;null;DK6687210 Trådløs Dankortterminal - Udlån fra Regnskab;79000000;XG-0000003397-00016;null;Gældende indtil 01.05.2023 - Derefter 95990009
+8152290;null;null;null;Indeholder;null;null;null;DK8152290 Trådløs Dankortterminal - Udlån fra Regnskab;79000000;XG-0000003397-00016;null;Gældende indtil 01.05.2023 - Derefter 95990009
+7893415;null;null;null;Indeholder;null;null;null;Teller 7893415 - internationalekort Kommunikation;95990009;null;null;null
+null;Løn;Verdo;null;Starter med;null;null;null;null;95990001;null;null;null
+011888;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Museum Østjylland 011888;95941300;null;null;null
+2471043;null;null;null;Indeholder;null;null;null;DK2471043 Museum Østjylland;95941300;null;null;null
+5247969;null;null;null;Indeholder;null;null;null;DK5247969 Museum Østjylland;95941300;null;null;null
+9475369104;null;null;null;Indeholder;null;null;null;Nets nr. 9475369104;95941300;null;null;null
+7864309;null;null;null;Indeholder;null;null;null;Teller 7864309;95941300;null;null;null
+7978497;null;null;null;Indeholder;null;null;null;Teller 7978497;95941300;null;null;null
+MOE;null;null;Indbetaling;Starter med;null;null;null;Kontant transaktion MOE;95941300;null;null;null
+012195;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Randers Bibliotek 012195;95941202;null;null;null
+012193;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Ladegården (Back up) 012193;90540005;null;null;Back up pga. manglende fornyelse af eksisterende kort.
+1992317;null;null;null;Indeholder;null;null;null;DK1992317 Biblioteket;95941202;null;null;null
+Bibliotek;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Randers Bibliotek;95941202;null;null;null
+8674335;null;null;null;Indeholder;null;null;null;Nets 8674335 internationale kortbetalinger;95941202;null;null;null
+4521609;null;null;null;Indeholder;null;null;null;DK4521609;95941200;null;null;null
+null;null;Værket;null;Starter med;500000,00;null;Større end;Tekst fra bank;95941110;null;null;null
+Kommunalt træk;null;Udbetaling Danmark;null;Indeholder;null;null;null;Tekst fra bank;95932008;null;null;null
+null;Kundenr: 33485468;null;null;Indeholder;null;null;null;Tekst fra bank;95931505;null;null;null
+null;Kundenr: 29759456;null;null;Indeholder;null;null;null;Tekst fra bank;95931502;null;null;null
+null;null;#Hjørnestenen;null;Indeholder;null;null;null;null;95931400;null;null;Gælder kun overførsel af driftsresultat, sygeref. skal til 95914005
+6256651;null;null;null;Indeholder;null;null;null;DK6256651;95931206;null;null;null
+7810906;null;null;null;Indeholder;null;null;null;Teller 7810906 - Borgerservice Pas, billeder og fingeraftryk;95931206;null;null;null
+4430778;null;null;Dankort-salg;Indeholder;null;null;null;DK4430778 Borgerservice;95931205;null;null;null
+4430778;null;null;DK-abonnement;Indeholder;null;null;null;DK4430778 Abonnement;40000000;XG-0000003020-00258;null;null
+4430778;null;null;Dankortsalg-gebyr;Indeholder;null;null;null;DK4430778 Gebyrer;40000000;XG-0000003020-00258;null;null
+7620659;null;null;null;Indeholder;null;null;null;Teller 7620659;95931205;null;null;null
+7673000;null;null;null;Indeholder;null;null;null;Teller 7673000;95931202;null;null;null
+null;Kundenr: 29759464;null;null;Indeholder;null;null;null;Tekst fra bank;95931011;null;null;null
+5386888 050607;null;null;null;Indeholder;null;null;null;Tekst fra bank;95930007;null;null;null
+Bidrag;null;Udbetaling Danmark;null;Indeholder;null;null;null;Udbetaling Danmark Bidrag;95920000;null;null;null
+null;BDP-;null;null;Indeholder;null;null;null;null;95914006;null;null;null
+31 kapital;null;null;null;Indeholder;null;null;null;Tekst fra bank;95912000;null;null;null
+30 kapital;null;null;null;Slutter med;null;null;null;Tekst fra bank;95912000;null;null;null
+tj;null;Vandmiljø Randers;null;Starter med;null;null;null;Tekst fra bank;95911002;null;null;null
+null;null;Randers Havn;null;Starter med;null;null;null;Tekst fra bank;95911001;null;null;null
+AI-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+AN-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+BQ-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+BW-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+BX-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+BZ;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+CP-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+CQ-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+CU-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+CV-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+CY-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+CZ-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+OB-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+OG-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+OI-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+OK-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+OQ-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+OR-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+OT-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+OU-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+OV-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+OW-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+OX-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+OY-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+OZ-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+RG-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+RI-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+RJ-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+RM-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+RO-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+RQ-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+RR-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+RS-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+RU-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+RV-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+RW-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+RY-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+RZ-;null;null;Cap;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+null;Kundenr: 34199620;null;null;Indeholder;null;null;null;Retur fra skat vedr. RW;95910006;null;null;null
+Skattekontoen, kredi;null;null;null;Starter med;null;null;null;Skattekontoen, kreditering;95910006;null;null;null
+null;null;null;Fonds;Starter med;null;null;null;Tekst fra bank;95000100;null;null;null
+5386888 050016;null;null;null;Indeholder;null;null;null;Tekst fra bank;94700003;null;null;null
+7131666;null;null;null;Indeholder;null;null;null;DK7131666 - Mit Betalingsoverblik;91407040;null;null;null
+8499089;null;null;null;Indeholder;null;null;null;DK8499089 - Mit Betalingsoverblik;91407040;null;null;null
+8871930;null;null;null;Indeholder;null;null;null;Tekst fra bank;91407032;null;null;null
+BSR08871930;null;null;null;Indeholder;null;null;null;Tekst fra bank;91407032;null;null;null
+K 86446707;null;null;null;Indeholder;null;null;null;K 86446707;91407030;null;null;null
+- SKAT;null;null;null;Slutter med;null;null;null;Tekst fra bank;91407020;null;null;null
+null;Indskudslån;Lejerbo;null;Indeholder;1100,00;null;Mindre end;Indskudslån Lejerbo;91407008;null;null;null
+Indskudslån;null;null;null;Indeholder;1100,00;null;Mindre end;Afsender fra bank;91407008;null;null;null
+209082;null;null;null;Indeholder;null;null;null;Tekst fra bank;91407007;null;null;null
+BSR00209082;null;null;null;Indeholder;null;null;null;Tekst fra bank;91407007;null;null;null
+8871973;null;null;null;Indeholder;null;null;null;Tekst fra bank;91407006;null;null;null
+BSR08871973;null;null;null;Indeholder;null;null;null;Tekst fra bank;91407006;null;null;null
+K 86136228;null;null;null;Indeholder;null;null;null;K 86136228;91407005;null;null;null
+K 89182816;null;null;null;Indeholder;null;null;null;K 89182816;91407004;null;null;null
+K 84788767;null;null;null;Indeholder;null;null;null;K 84788767;91407003;null;null;null
+null;null;null;Udtrukne obligationer;Starter med;null;null;null;Tekst fra bank;90800100;null;null;null
+Betalingsservice;null;null;null;Starter med;null;null;null;Betalingsservice månedsoverførsel;90540015;null;null;null
+56685;null;null;null;Indeholder;null;null;null;Ls, kreditor 56685Udbetaling Loomis;90100036;null;null;null
+006992;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard ACR 006992;90100035;null;null;null
+90100035;null;null;null;Indeholder;null;null;null;Kontant transaktion ACR;90100035;null;null;null
+ACR;null;null;null;Slutter med;null;null;null;Kontant transaktion ACR;90100035;null;null;null
+DAC;null;null;null;Starter med;null;null;null;Kontant transaktion ACR;90100035;null;null;null
+006983;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard CBR 006983;90100011;null;null;null
+CBR;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion CBR;90100011;null;null;null
+90100011;null;null;null;Indeholder;null;null;null;Kontant transaktion CBR;90100011;null;null;null
+null;mønter Bib;null;null;Starter med;null;null;null;Tekst fra bank;90100002;null;null;null
+012180;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Borgerservice 012180;90100001;null;null;null
+udbetaling af mønt;null;null;null;Indeholder;null;null;null;Tekst fra bank;90100001;null;null;null
+mønt borgerservice;null;null;null;Indeholder;null;null;null;Mønt Borgerservice;90100001;null;null;null
+141442;null;Børne- og undervisning;null;Indeholder;null;null;null;Advis fra bank;86000000;XG-0000002067-00003;null;null
+141296;null;Børne- og undervisning;null;Indeholder;null;null;null;Advis fra bank;86000000;XG-0000002068-00003;null;null
+141855;null;Børne- og undervisning;null;Indeholder;null;null;null;Advis fra bank;86000000;XG-0000000034-00003;null;null
+143498;null;Børne- og undervisning;null;Indeholder;null;null;null;Advis fra bank;86000000;XG-0000002069-00003;null;null
+142731;null;Børne- og undervisning;null;Indeholder;null;null;null;Advis fra bank;86000000;XG-0000002806-00014;null;null
+RG20938;null;null;null;Starter med;null;null;null;Tekst fra bank;95910014;null;null;null
+null;3135-0006;Socialstyrelse;null;Indeholder;null;null;null;Tilskud, Socialstyrelsen;86000000;XG-0000004599-00002;null;null
+null;7195-0011;Socialstyrelse;null;Indeholder;null;null;null;Tilskud, Socialstyrelsen;86000000;XG-0000003913-00090;null;null
+null;7225-0013;Socialstyrelse;null;Indeholder;null;null;null;Tilskud, Socialstyrelsen;86000000;XG-0000002810-00001;null;null
+null;6105-0135;Socialstyrelse;null;Indeholder;null;null;null;Tilskud, Socialstyrelsen;86000000;XG-0000003912-00004;null;null
+null;2367-0075;Socialstyrelse;null;Indeholder;null;null;null;Tilskud, Socialstyrelsen;86000000;XG-0000004507-00131;null;null
+null;2955-0014;Socialstyrelse;null;Indeholder;null;null;null;Tilskud, Socialstyrelsen;86000000;XG-0000004178-00007;null;null
+null;KUREG;Slots- og kulturstyrelse;null;Indeholder;null;null;null;Tekst fra bank;86000000;XG-0000004083-00002;null;null
+null;MUSIKSKOLE;Slots- og kulturstyrelse;null;Indeholder;null;null;null;Tilskud, Musikskole;86000000;XG-0000004089-00005;null;null
+null;Østjysk vækstbånd;Slots- og kulturstyrelse;null;Indeholder;null;null;null;Østjysk Vækstbånd;86000000;XG-0000004187-00001;null;null
+null;null;Bolig- og planstyrelse;null;Starter med;200000,00;null;Lig med;Tilskud, Bolig- og Planstyrelsen;86000000;XG-0000000019-00002;null;null
+null;Flere skal med;Styrelsen for arbejdsmarked;null;Indeholder;null;null;null;Tilskud, Flere skal med;86000000;XG-0000003906-00009;null;null
+5386888 051672;null;null;null;Indeholder;null;null;null;DK 5386888 051672 Sprogcentret online-adgang til UV-programm;79000000;XG-0000003397-00044;null;null
+4517148;null;null;null;Indeholder;null;null;null;DK4517148;79000000;XG-0000003057-00001;null;null
+4862821;null;null;null;Indeholder;null;null;null;DK4862821;79000000;XG-0000005094-00001;null;null
+4862899;null;null;null;Indeholder;null;null;null;DK4862899 Udbyhøj Færge;79000000;XG-0000005094-00001;null;null
+4922735;null;null;null;Indeholder;null;null;null;DK4922735;79000000;XG-0000005096-00001;null;null
+5386888 003031;null;null;null;Indeholder;null;null;null;DK5386888 - P-licens;79000000;XG-0000005096-00009;null;null
+5386888 030031;null;null;null;Indeholder;null;null;null;DK5386888 - P-Licens;79000000;XG-0000005096-00009;null;null
+5386888 120031;null;null;null;Indeholder;null;null;null;DK5386888 - P-Licens;79000000;XG-0000005096-00009;null;null
+5386888 005070;null;null;null;Indeholder;null;null;null;DK5386888 005070 Sprogcentret - medborgerskabsprøve;79000000;XG-0000003397-00053;null;null
+5386888 013583;null;null;null;Indeholder;null;null;null;DK5386888 013583 Assentoftskolen 9. klasserne lejrskole;79000000;XG-0000002369-00020;null;null
+5386888 015106;null;null;null;Indeholder;null;null;null;DK5386888 015106 - Assentoft - Djurs sommerland 7-8. årgang;79000000;XG-0000002369-00029;null;null
+5386888 015538;null;null;null;Indeholder;null;null;null;DK5386888 015538 Valgfaget adventure på Assentoftskolen;79000000;XG-0000002369-00020;null;null
+5386888 015681;null;null;null;Indeholder;null;null;null;DK5386888 015681 - Betaling lejrskole 6. årgang;79000000;XG-0000002369-00020;null;null
+5386888 015687;null;null;null;Indeholder;null;null;null;DK5386888 015687 - Hyttetur 7. årgang Assentoftskolen;79000000;XG-0000002369-00021;null;null
+5386888 015689;null;null;null;Indeholder;null;null;null;DK5386888 015689 - Lejrskole 9. årgang Assentoftskolen;79000000;XG-0000002369-00020;null;null
+5386888 017737;null;null;null;Indeholder;null;null;null;DK5386888 017737 Assentoft - egenbetaling;79000000;XG-0000002369-00022;null;null
+5386888 017840;null;null;null;Indeholder;null;null;null;DK5386888 017840 Assentoft - Aktive tøser overnatningstur;79000000;XG-0000002369-00020;null;null
+5386888 030587;null;null;null;Indeholder;null;null;null;DK5386888 030433 - Gudenåløbet 2019;79000000;XG-0000005063-00010;null;null
+5386888 041575;null;null;null;Indeholder;null;null;null;DK5386888 041575 - Vestervangsskolen Skolefest;79000000;XG-0000002555-00023;null;null
+5386888 041575;null;null;null;Indeholder;null;null;null;DK5386888 041575 Vestervangsskolen Skolefest;79000000;XG-0000002555-00023;null;null
+5386888 048106;null;null;null;Indeholder;null;null;null;DK5386888 048106 - Lejrtur 6. årgang, Vestervangsskolen;79000000;XG-0000002555-00020;null;null
+5386888 050070;null;null;null;Indeholder;null;null;null;DK5386888 050070 Sprogcentret - medborgerskabsprøve;79000000;XG-0000003397-00053;null;null
+5386888 083585;null;null;null;Indeholder;null;null;null;DK5386888 083585 Grønhøjskolens Studietur for 9.A og 9.B Prag;79000000;XG-0000002415-00037;null;null
+5386888 084052;null;null;null;Indeholder;null;null;null;DK5386888 084052 Grønhøj, Lejrtur Bornholm;79000000;XG-0000002415-00037;null;null
+5386888 102156;null;null;null;Indeholder;null;null;null;DK5386888 102156 Østervangsskolen 1.e og 2.d lejrskole;79000000;XG-0000002568-00015;null;null
+5386888 102373;null;null;null;Indeholder;null;null;null;DK5386888 102373 Østervangsskolen -Lejrskole i I1, I2 og I3;79000000;XG-0000002568-00015;null;null
+5386888 111939;null;null;null;Indeholder;null;null;null;DK5386888 111939 Nørrevangsk. Studietur til Berlin for 10.kl;79000000;XG-0000002511-00020;null;null
+5386888 112030;null;null;null;Indeholder;null;null;null;DK5386888 112030 Nørrevangsskolen tur till Berlin for 9. årg;79000000;XG-0000002511-00020;null;null
+5386888 111923;null;null;null;Indeholder;null;null;null;DK5386888 119223 Nørrevangsskolen studietur ;79000000;XG-0000002511-00020;null;null
+5386888 131806;null;null;null;Indeholder;null;null;null;DK5386888 131806 Korshøjskolen, Skolerejse til København 9A+9B;79000000;XG-0000002465-00044;null;null
+5386888 131905;null;null;null;Indeholder;null;null;null;DK5386888 131905 - Korshøjskolen - billetter skuespil;79000000;XG-0000002465-00024;null;null
+5386888 131955;null;null;null;Indeholder;null;null;null;DK5386888 131955 Korshøjskolen - Djurs Sommerland 9A+9B;79000000;XG-0000002465-00024;null;null
+5386888 132419;null;null;null;Indeholder;null;null;null;DK5386888 132419 Korshøjskolen skolefest B-skolen;79000000;XG-0000002465-00024;null;null
+5386888 132761;null;null;null;Indeholder;null;null;null;DK5386888 132761 5. årgangs Hyttetur, Korshøjskolen ;79000000;XG-0000002465-00042;null;null
+5386888 132761;null;null;null;Indeholder;null;null;null;DK5386888 132761 Korshøjskolen Lejrtur 4A + 4B;79000000;XG-0000002465-00042;null;null
+5386888 133171;null;null;null;Indeholder;null;null;null;DK5386888 133171 Korshøjskolen, skolefest;79000000;XG-0000002465-00024;null;null
+5386888 133987;null;null;null;Indeholder;null;null;null;DK5386888 133987 8. årgang København - Korshøjskolen;79000000;XG-0000002465-00044;null;null
+5386888 141866;null;null;null;Indeholder;null;null;null;DK5386888 141866 - Tirsdalens Skole tur til Krakow for 9. kl.;79000000;XG-0000002544-00024;null;null
+5386888 142030;null;null;null;Indeholder;null;null;null;DK5386888 142030 Tirsdalens lejrskole 8. årgang;79000000;XG-0000002544-00024;null;null
+5386888 142063;null;null;null;Indeholder;null;null;null;DK5386888 142063 Lejrskole for 7.-klasser på Tirsdalens Skole.;79000000;XG-0000002544-00024;null;null
+5386888 142069;null;null;null;Indeholder;null;null;null;DK5386888 142069 Tirsdalensskole - skolerejse for 9. til Tje;79000000;XG-0000002544-00024;null;null
+5386888 142228;null;null;null;Indeholder;null;null;null;DK5386888 142228 - 8. årgang Tirsdalen Skole til Sønderborg;79000000;XG-0000002544-00024;null;null
+5386888 142514;null;null;null;Indeholder;null;null;null;DK5386888 1425814 Tirsdalens Skole 9. Årgang til Berlin;79000000;XG-0000002544-00024;null;null
+5386888 192046;null;null;null;Indeholder;null;null;null;DK5386888 192046 Hornbæk Skole. Lejrskole 8.x og 8.y til Køb;79000000;XG-0000002452-00020;null;null
+5386888 192104;null;null;null;Indeholder;null;null;null;DK5386888 192104 - Hornbæk skole skolefest;79000000;XG-0000002452-00024;null;null
+5386888 192411;null;null;null;Indeholder;null;null;null;DK5386888 192411 Hornbæk,Lejrskole for 9.x og 9.y til Københ;79000000;XG-0000002452-00020;null;null
+5386888 192715;null;null;null;Indeholder;null;null;null;DK5386888 192715 Hornbæk-Tur til Nordtyskland for 8. årgang;79000000;XG-0000002452-00020;null;null
+5386888 192764;null;null;null;Indeholder;null;null;null;DK5386888 192764 Honbæk skole, Lejrtur for 8. årgang til KBH;79000000;XG-0000002452-00020;null;null
+5386888 192789;null;null;null;Indeholder;null;null;null;DK5386888 192789 Hornbæk Skole, Lejrtur 6. årgang;79000000;XG-0000002452-00020;null;null
+5386888 153001;null;null;null;Indeholder;null;null;null;DK5386888 2113400 Hobrovejens Skole. Lejrskole for 6. årgang;79000000;XG-0000002439-00022;null;null
+5386888 211363;null;null;null;Indeholder;null;null;null;DK5386888 211363 Rismølleskolen 8.årgang studietur KBH;79000000;XG-0000002521-00030;null;null
+5386888 191686;null;null;null;Indeholder;null;null;null;DK5386888 2114410 Hornbæk lejrskole Bornholm;79000000;XG-0000002452-00020;null;null
+5386888 132419;null;null;null;Indeholder;null;null;null;DK5386888 2115023 Korshøjskolen Skolefest B-skolen;79000000;XG-0000002465-00024;null;null
+5386888 2125038;null;null;null;Indeholder;null;null;null;DK5386888 2125038 9. Årgang til Berlin på Tirsdalens Skole;79000000;XG-0000002544-00024;null;null
+5386888 222815;null;null;null;Indeholder;null;null;null;DK5386888 222815 Søndermarkskolen Lejrtur Kattegat;79000000;XG-0000002531-00015;null;null
+5386888 224173;null;null;null;Indeholder;null;null;null;DK5386888 224173 - Søndermarkskolen hyttetur for 3. klasse;79000000;XG-0000002531-00015;null;null
+5386888 225973;null;null;null;Indeholder;null;null;null;DK5386888 225973 Søndermarkskolen. Lejrtur Skagen;79000000;XG-0000002531-00015;null;null
+5386888 226407;null;null;null;Indeholder;null;null;null;DK5386888 226407 Søndermarkskolen, Hyttetur 3. årgang;79000000;XG-0000002531-00015;null;null
+5386888 121400;null;null;null;Indeholder;null;null;null;DK5386888 231400 - Bådpladser Udbyhøj;79000000;XG-0000004025-00001;null;null
+5386888 231400;null;null;null;Indeholder;null;null;null;DK5386888 231400 - Bådpladser Udbyhøj;79000000;XG-0000004025-00001;null;null
+5386888 231526;null;null;null;Indeholder;null;null;null;DK5386888 231400 - Bådpladser Udbyhøj;79000000;XG-0000004025-00001;null;null
+5386888 231529;null;null;null;Indeholder;null;null;null;DK5386888 231400 - Bådpladser Udbyhøj;79000000;XG-0000004025-00001;null;null
+5386888 241777;null;null;null;Indeholder;null;null;null;DK5386888 241777 - Kristrup Skole – Lejrskole for 6. klasserne;79000000;XG-0000002475-00015;null;null
+5386888 241798;null;null;null;Indeholder;null;null;null;DK5386888 241798 - Kristrup Skole – Lejrskole for 6. klasserne;79000000;XG-0000002475-00015;null;null
+5386888 241816;null;null;null;Indeholder;null;null;null;DK5386888 241816 / Hyttetur for 3. årgang;79000000;XG-0000002475-00015;null;null
+5386888 242118;null;null;null;Indeholder;null;null;null;DK5386888 242118 Kristrup Skole - Skolefest;79000000;XG-0000002475-00017;null;null
+5386888 242716;null;null;null;Indeholder;null;null;null;DK5386888 242716 Kristrup Skole 6 årgang Læsø;79000000;XG-0000002475-00015;null;null
+5386888 242740;null;null;null;Indeholder;null;null;null;DK5386888 242740 Kristrup skole Lejrskole 6. årgang;79000000;XG-0000002475-00015;null;null
+5386888 242823;null;null;null;Indeholder;null;null;null;DK5386888 242823 Hyttetur 3 A på Kristrup Skole;79000000;XG-0000002475-00015;null;null
+5386888 280691;null;null;null;Indeholder;null;null;null;DK5386888 280691 - Cykelparkering - abonnementsbetaling;79000000;XG-0000005063-00010;null;null
+5386888 280692;null;null;null;Indeholder;null;null;null;DK5386888 280692 - Cykelparkering - abonnementsbetaling;79000000;XG-0000005063-00010;null;null
+5386888 280693;null;null;null;Indeholder;null;null;null;DK5386888 280693 - Cykelparkering - abonnementsbetaling;79000000;XG-0000005063-00010;null;null
+5386888 281701;null;null;null;Indeholder;null;null;null;DK5386888 281701 - Cykelby;79000000;XG-0000005063-00010;null;null
+5386888 410066;null;null;null;Indeholder;null;null;null;DK5386888 410066 Vestervangsskolen overnatning 3. årgang;79000000;XG-0000002555-00020;null;null
+5386888 412905;null;null;null;Indeholder;null;null;null;DK5386888 412905 Vestervangsskolen - Lejrtur 9. årgang;79000000;XG-0000002555-00020;null;null
+5386888 417651;null;null;null;Indeholder;null;null;null;DK5386888 417651 Vestervangsskolen - Lejrtur 6. årgang;79000000;XG-0000002555-00020;null;null
+5386888 0_UDLY;null;null;null;Indeholder;null;null;null;DK5386888 Bådpladser Udbyhøj;79000000;XG-0000004025-00001;null;null
+5386888 1_UDLY;null;null;null;Indeholder;null;null;null;DK5386888 Bådpladser Udbyhøj;79000000;XG-0000004025-00001;null;null
+5386888 2_UDLY;null;null;null;Indeholder;null;null;null;DK5386888 Bådpladser Udbyhøj;79000000;XG-0000004025-00001;null;null
+5386888 3_UDLY;null;null;null;Indeholder;null;null;null;DK5386888 Bådpladser Udbyhøj;79000000;XG-0000004025-00001;null;null
+5386888 4_UDLY;null;null;null;Indeholder;null;null;null;DK5386888 Bådpladser Udbyhøj;79000000;XG-0000004025-00001;null;null
+5386888 5_UDLY;null;null;null;Indeholder;null;null;null;DK5386888 Bådpladser Udbyhøj;79000000;XG-0000004025-00001;null;null
+5386888 6_UDLY;null;null;null;Indeholder;null;null;null;DK5386888 Bådpladser Udbyhøj;79000000;XG-0000004025-00001;null;null
+5386888 7_UDLY;null;null;null;Indeholder;null;null;null;DK5386888 Bådpladser Udbyhøj;79000000;XG-0000004025-00001;null;null
+5386888 8_UDLY;null;null;null;Indeholder;null;null;null;DK5386888 Bådpladser Udbyhøj;79000000;XG-0000004025-00001;null;null
+5386888 9_UDLY;null;null;null;Indeholder;null;null;null;DK5386888 Bådpladser Udbyhøj;79000000;XG-0000004025-00001;null;null
+5386888 030012;null;null;null;Indeholder;null;null;null;DK5386888 Cykel;79000000;XG-0000005063-00010;null;null
+5386888 120012;null;null;null;Indeholder;null;null;null;DK5386888 Cykel;79000000;XG-0000005063-00010;null;null
+5386888 151445;null;null;null;Indeholder;null;null;null;DK5386888 Hobrovejensskole Lejrskole 2017 for 5. a og 5. b;79000000;XG-0000002439-00022;null;null
+5386888 191623;null;null;null;Indeholder;null;null;null;DK5386888 Hornbæk skole Lejrskole 2017 for 5. a og 5. b;79000000;XG-0000002452-00020;null;null
+5386888 151360;null;null;null;Indeholder;null;null;null;DK5386888 Indbetaling Lejrskole for vores 6. klasser;79000000;XG-0000002439-00022;null;null
+5386888 121786;null;null;null;Indeholder;null;null;null;DK5386888 Korshøjskolen Lejrtur 6. årgang til Skagen;79000000;XG-0000002465-00042;null;null
+5386888 131668;null;null;null;Indeholder;null;null;null;DK5386888 Korshøjskolen Skolefest for udskolingen;79000000;XG-0000002465-00024;null;null
+5386888 131786;null;null;null;Indeholder;null;null;null;DK5386888 Korshøjskolen Tur til Sønderborg for S1 og S2 ;79000000;XG-0000002465-00045;null;null
+5386888 241991;null;null;null;Indeholder;null;null;null;DK5386888 Kristrup Skole lejrskole København;79000000;XG-0000002475-00015;null;null
+5386888 241992;null;null;null;Indeholder;null;null;null;DK5386888 Kristrup Skole Lejrskole Voer 2018;79000000;XG-0000002475-00015;null;null
+5386888 241360;null;null;null;Indeholder;null;null;null;DK5386888 Kristrup Skole Skolefest;79000000;XG-0000002475-00017;null;null
+5386888 121806;null;null;null;Indeholder;null;null;null;DK5386888 Lejrtur 8.C Korshøjskolen;79000000;XG-0000002465-00044;null;null
+5386888 192461;null;null;null;Indeholder;null;null;null;DK5386888 Skolefest Hornbæk Skole;79000000;XG-0000002452-00024;null;null
+5386888 141501;null;null;null;Indeholder;null;null;null;DK5386888 Tirsdalens Skole – lejrskole i København;79000000;XG-0000002544-00024;null;null
+5386888 121614;null;null;null;Indeholder;null;null;null;DK5386888 Tirsdalens Skole - Skolefest;79000000;XG-0000002544-00026;null;null
+5386888 121600;null;null;null;Indeholder;null;null;null;DK5386888 Tirsdalens skole-Lejrskole på Samsø;79000000;XG-0000002544-00024;null;null
+5541069;null;null;null;Indeholder;null;null;null;DK5541069 Udbyhøj Lystbådehavn;79000000;XG-0000004025-00002;null;null
+6175937;null;null;null;Indeholder;null;null;null;DK6175937 køb af mærkater til erhvervs adgang til genbrugspl;79000000;XG-0000005285-00015;null;null
+6177549;null;null;null;Indeholder;null;null;null;DK6177549 Huslejenævnet. Indbetaling på Randers.dk;79000000;XG-0000003025-00001;null;null
+6631479;null;null;null;Indeholder;null;null;null;DK6631479 Beboerlicens parkering RK;79000000;XG-0000005096-00009;null;null
+5078318;null;null;null;Indeholder;null;null;null;Tekst fra bank;79000000;XG-0000002667-00008;null;null
+8189094;null;null;null;Indeholder;null;null;null;Tekst fra bank;79000000;XG-0000002667-00008;null;null
+5386888 191360;null;null;null;Indeholder;null;null;null;Hornbæk Skoles skolefest;79000000;XG-0000002452-00024;null;null
+3070-01;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion AFK;79000000;XG 0000003070-00001;null;null
+5386888 141359;null;null;null;Indeholder;null;null;null;Lejrskole 9. klasse Tirsdalen;79000000;XG-0000002544-00024;null;null
+5386888 120070;null;null;null;Indeholder;null;null;null;Sprogcentret - medborgerskabsprøve;79000000;XG-0000003397-00053;null;null
+5386888 050035;null;null;null;Indeholder;null;null;null;Sprogcentret - Prøver;79000000;XG-0000003397-00044;null;null
+5386888 005027;null;null;null;Indeholder;null;null;null;Sprogcentret - Statsborgerskabsprøve;79000000;XG-0000003397-00053;null;null
+5386888 050027;null;null;null;Indeholder;null;null;null;Sprogcentret - Statsborgerskabsprøve;79000000;XG-0000003397-00053;null;null
+5386888 120027;null;null;null;Indeholder;null;null;null;Sprogcentret - Statsborgerskabsprøve;79000000;XG-0000003397-00053;null;null
+5386888 111313;null;null;null;Indeholder;null;null;null;Studietur til Berlin;79000000;XG-0000002511-00020;null;null
+5386888 111324;null;null;null;Indeholder;null;null;null;Studietur til New York;79000000;XG-0000002511-00020;null;null
+7374697;null;null;null;Indeholder;null;null;null;Teller 7374697;79000000;XG-0000005096-00001;null;null
+7555139;null;null;null;Indeholder;null;null;null;Teller 7555139;79000000;XG-0000005094-00001;null;null
+7570562;null;null;null;Indeholder;null;null;null;Teller 7570562;79000000;XG-0000004025-00002;null;null
+7757974;null;null;null;Indeholder;null;null;null;Teller 7757974 / randers-affald;79000000;XG-0000005285-00015;null;null
+8094609;null;null;null;Indeholder;null;null;null;Teller 8094609 Beboerlicens parkering RK;79000000;XG-0000005096-00009;null;null
+cyke;null;null;null;Slutter med;null;null;null;DK5386888_cykel;79000000;XG-0000005063-00010;null;null
+cykel;null;null;null;Slutter med;null;null;null;DK5386888_cykel;79000000;XG-0000005063-00010;null;null
+AE 9476014980;null;null;null;Starter med;null;null;null;AE 9476014980;79000000;XG-0000005096-00001;null;null
+AE 9476060256;null;null;null;Starter med;null;null;null;AE 9476060256;79000000;XG-0000005094-00001;null;null
+5386888 121623;null;null;null;Starter med;null;null;null;Hornbæk Skole – Lejrskole for 5. årgang til Odense;79000000;XG-0000002452-00020;null;null
+null;null;ParkPark;null;Indeholder;null;null;null;Tekst fra bank;79000000;XG-0000005096-00010;null;null
+null;null;Parkman;null;Indeholder;null;null;null;Tekst fra bank;79000000;XG-0000005096-00010;null;null
+null;null;Park4U;null;Indeholder;null;null;null;Tekst fra bank;79000000;XG-0000005096-00010;null;null
+null;SDTN;Kvindecenter;null;Indeholder;null;null;null;Vedr. projekt SDTN Supervision;79000000;XG-0000002793-00004;null;null
+null;null;EasyPark;null;Indeholder;null;null;null;Tekst fra bank;79000000;XG-0000005096-00010;null;null
+5386888 030325;null;null;null;Indeholder;null;null;null;538688 030325 Depositum ifm. udlån af elcykler;79000000;XG-0000005063-00011;null;null
+5386888 0-0621;null;null;null;Indeholder;null;null;null;5386888 0-2121 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;null;null
+5386888 1-0621;null;null;null;Indeholder;null;null;null;5386888 1-2121 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;null;null
+5386888 212126;null;null;null;Indeholder;null;null;null;5386888 212126 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;null;null
+5386888 2-0621;null;null;null;Indeholder;null;null;null;5386888 2-2121 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;null;null
+5386888 3-0621;null;null;null;Indeholder;null;null;null;5386888 3-2121 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;null;null
+5386888 4-0621;null;null;null;Indeholder;null;null;null;5386888 4-2121 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;null;null
+5386888 5-0621;null;null;null;Indeholder;null;null;null;5386888 5-2121 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;null;null
+5386888 6-0621;null;null;null;Indeholder;null;null;null;5386888 6-2121 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;null;null
+5386888 7-0621;null;null;null;Indeholder;null;null;null;5386888 7-2121 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;null;null
+5386888 8-0621;null;null;null;Indeholder;null;null;null;5386888 8-2121 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;null;null
+5386888 9-0621;null;null;null;Indeholder;null;null;null;5386888 9-2121 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;null;null
+011887;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard AF-koordinator 011887;79000000;XG-0000003070-00001;null;null
+011893;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Blicherskolen Skolebod A 011893;79000000;XG-0000002392-00031;null;null
+011892;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Blicherskolen Skolebod B 011892;79000000;XG-0000002392-00032;null;null
+006990;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Hobrovejens Skole 006990;79000000;XG-0000002439-00014;null;null
+012183;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard RS Blommevej;79000000;XG-0000002648-00024;null;null
+006982;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Mellerup/Ragna 006982;79000000;XG-0000005094-00005;null;null
+012194;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Munkholmskolen 012194;79000000;XG-0000004526-00048;null;null
+006991;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Randers Ungddomsskole 006991;79000000;XG-0000002667-00008;null;null
+006980;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Sprogcentret 006980;79000000;XG-0000003397-00012;null;null
+006976;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Søndermarkskolen 006976;79000000;XG-0000002531-00016;null;null
+006977;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Udbyhøj 006977;79000000;XG-0000005094-00004;null;null
+5386888 102400;null;null;null;Indeholder;null;null;null;DK5386000 102400 Østervangsskolen, Lejrskole 5. årgang – ;79000000;XG-0000002568-00015;null;null
+5386888 084190;null;null;null;Indeholder;null;null;null;DK5386888 083585 Grønhøjskolens Skolerejse for 9.A og 9.B KBH;79000000;XG-0000002415-00037;null;null
+5386888 142729;null;null;null;Indeholder;null;null;null;DK5386888 142729 Tirsdalens skole - egenbetaling lejrtur;79000000;XG-0000002544-00024;null;null
+5386888 192902;null;null;null;Indeholder;null;null;null;DK5386888 192902Hornbæk Skole, Lejrskole 5. årgang – ID 192902;79000000;XG-0000002452-00020;null;null
+5386888 192944;null;null;null;Indeholder;null;null;null;DK5386888 192944 Hornbæk Skole, Lejrskole 8. årgang – ID 192944;79000000;XG-0000002452-00020;null;null
+5386888 243011;null;null;null;Indeholder;null;null;null;DK5386888 243011 ;79000000;XG-0000002475-00015;null;null
+5386888 243153;null;null;null;Indeholder;null;null;null;DK5386888 243153 Hyttetur 3 årgang på Kristrup Skole;79000000;XG-0000002475-00015;null;null
+5386888 243086;null;null;null;Indeholder;null;null;null;DK8686888 243086 Kristrup 6. årg. SKAGEN.;79000000;XG-0000002475-00015;null;null
+null;ParkOne;null;null;Indeholder;null;null;null;Tekst fra bank;79000000;XG-0000005096-00010;null;null
+null;OK parkering;null;null;Indeholder;null;null;null;Tekst fra bank;79000000;XG-0000005096-00010;null;null
+5386888 192832;null;null;null;Indeholder;null;null;null;Hornbæk skole, galla + Djurs Sommerland, 9. klasse;79000000;XG-0000002452-00029;null;null
+Hobrovejens Skole;null;null;null;Indeholder;null;null;null;Kontant transaktion Hobrovejens Skole;79000000;XG-0000002439-00014;null;null
+Munkholmskole;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Munkholmskolen;79000000;XG-0000004526-00048;null;null
+null;Unge i uddannelse;Region Midt;null;Indeholder;null;null;null;Region Midtjylland - Ung i uddannelse;79000000;XG-0000002833-00003;null;null
+MEL;null;null;Indbetaling;Slutter med;null;null;null;Kontant transaktion Mellerup færge;79000000;XG-0000005094-00004;null;null
+UDB;null;null;Indbetaling;Slutter med;null;null;null;Kontant transaktion Udbyhøj færge;79000000;XG-0000005094-00005;null;null
+Automat;null;null;null;Slutter med;null;null;null;Mønt-indbetaling parkering;79000000;XG-0000005096-00001;null;null
+null;63470645;Bambora;null;Starter med;null;null;null;Tekst fra bank;79000000;XG-0000005096-00009;null;null
+2022_962_;null;null;null;Starter med;null;null;null;Pay4it Automat;79000000;XG-0000002415-00038;null;null
+OY-;null;null;Overførsel;Starter med;null;null;null;Tekst fra bank;79000000;XG-0000005086-00001;null;null
+null;OY-;null;Overførsel;Starter med;null;null;null;Tekst fra bank;79000000;XG-0000005086-00001;null;null
+3796663;null;null;null;Indeholder;null;null;null;DK3796663 Vorup Plejehjem;72000000;XG-0000004526-00041;null;null
+3796671;null;null;null;Indeholder;null;null;null;DK3796671 Borupvænget;72000000;XG-0000004526-00046;null;null
+3796795;null;null;null;Indeholder;null;null;null;DK3796795 - Møllevang;72000000;XG-0000004526-00033;null;null
+3796817;null;null;null;Indeholder;null;null;null;DK3796817 - Bakkegården;72000000;XG-0000004526-00028;null;null
+3796868;null;null;null;Indeholder;null;null;null;DK3796868 Dronningborg;72000000;XG-0000004526-00030;null;null
+3796884;null;null;null;Indeholder;null;null;null;DK3796884 Svaleparken;72000000;XG-0000004526-00038;null;null
+3796892;null;null;null;Indeholder;null;null;null;DK3796892 - Rosenvænget;72000000;XG-0000004526-00027;null;null
+3796906;null;null;null;Indeholder;null;null;null;DK3796906;72000000;XG-0000004526-00040;null;null
+3796914;null;null;null;Indeholder;null;null;null;DK3796914 Kollektivhuset;72000000;XG-0000004526-00044;null;null
+3796930;null;null;null;Indeholder;null;null;null;DK3796930 Lindevænget;72000000;XG-0000004526-00036;null;null
+3796949;null;null;null;Indeholder;null;null;null;DK3796949 Huset Nyvang;72000000;XG-0000004526-00035;null;null
+4771842;null;null;null;Indeholder;null;null;null;DK4771842 GAIA PAPAYA;72000000;XG-0000003040-00046;null;null
+5157064;null;null;null;Indeholder;null;null;null;DK5157064 - Condomeriet;72000000;XG-0000004204-00002;null;null
+5386888 120186;null;null;null;Indeholder;null;null;null;DK5386388 Assentoft;72000000;XG-0000002369-00021;null;null
+5386888 010631;null;null;null;Indeholder;null;null;null;DK538688 010631 Assentoftskolen skolefest;72000000;XG-0000002369-00022;null;null
+5386888 281359;null;null;null;Indeholder;null;null;null;DK5386888 - Kompostbeholder;72000000;XG-0000005280-00036;null;null
+5386888 101655;null;null;null;Indeholder;null;null;null;DK5386888 101655 Østervangsskolen Skolefest;72000000;XG-0000002415-00039;null;null
+5386888 102002;null;null;null;Indeholder;null;null;null;DK5386888 102002 Tirsdalens Skole skolebod;72000000;XG-0000002544-00025;null;null
+5386888 102193;null;null;null;Indeholder;null;null;null;DK5386888 102193 Østervangsskolen Skolefest;72000000;XG-0000002415-00039;null;null
+5386888 211569;null;null;null;Indeholder;null;null;null;DK5386888 211369 - Rismølleskolen madbestilling;72000000;XG-0000002521-00031;null;null
+5386888 211390;null;null;null;Indeholder;null;null;null;DK5386888 211390 - Rismølleskolen madbestilling;72000000;XG-0000002521-00031;null;null
+5386888 211567;null;null;null;Indeholder;null;null;null;DK5386888 211567 - Rismølleskolen madbestilling;72000000;XG-0000002521-00031;null;null
+5386888 211568;null;null;null;Indeholder;null;null;null;DK5386888 211568 - Rismølleskolen madbestilling;72000000;XG-0000002521-00031;null;null
+5386888 211570;null;null;null;Indeholder;null;null;null;DK5386888 211570 - Rismølleskolen madbestilling;72000000;XG-0000002521-00031;null;null
+5386888 211571;null;null;null;Indeholder;null;null;null;DK5386888 211571 - Rismølleskolen madbestilling;72000000;XG-0000002521-00031;null;null
+5386888 221365;null;null;null;Indeholder;null;null;null;DK5386888 221365 Madbestilling Søndermarkskolen;72000000;XG-0000002531-00016;null;null
+5386888 222807;null;null;null;Indeholder;null;null;null;DK5386888 222807 Søndermarkskolen skolefest;72000000;XG-0000002531-00017;null;null
+5386888 225082;null;null;null;Indeholder;null;null;null;DK5386888 225082 Søndermarkskolen skolefest 2019;72000000;XG-0000002531-00017;null;null
+5386888 010186;null;null;null;Indeholder;null;null;null;DK5386888 Madsalg Assentoftskolen;72000000;XG-0000002369-00021;null;null
+5386888 001004;null;null;null;Indeholder;null;null;null;DK5386888 Madsalg Assentoftskolen 0-3 klasse;72000000;XG-0000002369-00021;null;null
+5386888 001186;null;null;null;Indeholder;null;null;null;DK5386888 Madsalg Assentoftsskolen;72000000;XG-0000002369-00021;null;null
+5444748;null;null;null;Indeholder;null;null;null;DK5444748 Kantinen via GAIA;72000000;XG-0000003040-00034;null;null
+5541042;null;null;null;Indeholder;null;null;null;DK5541042 Udbyhøj Lystbådehavn;72000000;XG-0000004024-00003;null;null
+5846102;null;null;null;Indeholder;null;null;null;DK5846102 Kantinen Laksetorvet;72000000;XG-0000005228-00003;null;null
+5887356;null;null;null;Indeholder;null;null;null;DK5887356 Kildevang;72000000;XG-0000004526-00045;null;null
+5891507;null;null;null;Indeholder;null;null;null;DK5891507 - Åbakken;72000000;XG-0000004526-00031;null;null
+5908167;null;null;null;Indeholder;null;null;null;DK5908167 Asferg;72000000;XG-0000004526-00048;null;null
+5991390;null;null;null;Indeholder;null;null;null;DK5991390 Kantinen Sundhedshuset;72000000;XG-0000005228-00003;null;null
+6201830;null;null;null;Indeholder;null;null;null;DK6201830 Kantinen Kasernen;72000000;XG-0000005228-00003;null;null
+6899625;null;null;null;Indeholder;null;null;null;DK6899625 Huset Nellemann;72000000;XG-0000004526-00037;null;null
+8357634;null;null;null;Indeholder;null;null;null;DK8357634 Huset Nellemann;72000000;XG-0000004526-00037;null;null
+Gaia via;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Gaia Via;72000000;XG-0000003040-00034;null;null
+5386888 101002;null;null;null;Indeholder;null;null;null;Kortbetaling - Søndermarkskolen;72000000;XG-0000002531-00016;null;null
+5386888 001683;null;null;null;Indeholder;null;null;null;Madbestilling førskolen Assentoft;72000000;XG-0000002369-00021;null;null
+5386888 010683;null;null;null;Indeholder;null;null;null;Madbestilling førskolen Assentoft;72000000;XG-0000002369-00021;null;null
+5386888 001631;null;null;null;Indeholder;null;null;null;Skolefest Assentoftskolen;72000000;XG-0000002369-00022;null;null
+7463073;null;null;null;Indeholder;null;null;null;Teller 7463073;72000000;XG-0000004204-00002;null;null
+7570567;null;null;null;Indeholder;null;null;null;Teller 7570567;72000000;XG-0000004024-00003;null;null
+7667973;null;null;null;Indeholder;null;null;null;Teller 7667973;72000000;XG-0000004526-00031;null;null
+7670788;null;null;null;Indeholder;null;null;null;Teller 7670788;72000000;XG-0000004526-00028;null;null
+7670789;null;null;null;Indeholder;null;null;null;Teller 7670789;72000000;XG-0000004526-00033;null;null
+7670796;null;null;null;Indeholder;null;null;null;Teller 7670796;72000000;XG-0000004526-00027;null;null
+7670797;null;null;null;Indeholder;null;null;null;Teller 7670797;72000000;XG-0000004526-00030;null;null
+Ekstra;null;Open Experience;null;Starter med;null;null;null;Tekst fra bank;72000000;XG-0000005285-00006;null;null
+012197;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Assentoftskolen 012197;72000000;XG-0000002369-00021;null;null
+011781;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Bakkegården 011781;72000000;XG-0000004526-00028;null;null
+011784;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Bjerregrav Skole 011784;72000000;XG-0000002382-00015;null;null
+011785;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Borupvænget 011785;72000000;XG-0000004526-00046;null;null
+011777;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Cafe Lindevænget 011777;72000000;XG-0000004526-00036;null;null
+011792;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Cafe Nellemann 011792;72000000;XG-0000004526-00037;null;null
+011778;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Cafe Svaleparken 011778;72000000;XG-0000004526-00038;null;null
+011789;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Cafe Thors Bakke 011789;72000000;XG-0000004526-00039;null;null
+011897;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Cafe Vorup 011897;72000000;XG-0000004526-00041;null;null
+011783;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Dronnigborg 011783;72000000;XG-0000004526-00030;null;null
+011890;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Fritidscentret 011890;95990009;null;null;null
+011780;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Fårup 011780;72000000;XG-0000004526-00047;null;null
+012200;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Gaia Butik 012200;72000000;XG-0000003040-00018;null;null
+012199;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Gaia Cafe 012199;72000000;XG-0000003040-00046;null;null
+012196;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Hobrovejens Juniorklub 012196;72000000;XG-0000002448-00001;null;null
+011891;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Huset Nyvang 011891;72000000;XG-0000004526-00035;null;null
+006984;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Kildevang Cafe 006984;72000000;XG-0000004526-00045;null;null
+011791;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Kollektivhuset 011791;72000000;XG-0000004526-00044;null;null
+006986;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Korshøjskolen 006986;72000000;XG-0000002465-00021;null;null
+006973;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Kristrupcentret 006973;72000000;XG-0000004526-00042;null;null
+011786;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Madservice 011786;72000000;XG-0000004526-00018;null;null
+011793;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Møllevang 011793;72000000;XG-0000004526-00033;null;null
+006993;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Nørrevangsskolen 006993;72000000;XG-0000002511-00021;null;null
+006979;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Perron 4 006979;72000000;XG-0000003038-00053;null;null
+012198;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Psykiatriens Hus 012198;72000000;XG-0000003038-00126;null;null
+006974;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Randers Specialskole 006974 ;72000000;XG-0000002648-00024;null;null
+011790;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Rosevænget 011790;72000000;XG-0000004526-00027;null;null
+011787;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Terneparken 011787;72000000;XG-0000004526-00048;null;null
+012185;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Tirsdalen Skole 012185;72000000;XG-0000002544-00025;null;null
+006987;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Tirsdalens 006987;72000000;XG-0000004526-00040;null;null
+006988;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Vennelyst Juniorklub 006988;72000000;XG-0000002484-00001;null;null
+011788;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Åbakken 011788;72000000;XG-0000004526-00031;null;null
+8537995;null;null;null;Indeholder;null;null;null;DK 8537995 Gaia Cafe ;72000000;XG-0000003040-00046;null;null
+2271311;null;null;null;Indeholder;null;null;null;DK2271311 Affaldsterminalen;72000000;XG-0000005010-00080;null;null
+4771850;null;null;null;Indeholder;null;null;null;DK4771850 Gaia butik;72000000;XG-0000003040-00018;null;null
+7221304;null;null;null;Indeholder;null;null;null;DK7221304 Gaia Via;72000000;XG-0000003040-00034;null;null
+8538001;null;null;null;Indeholder;null;null;null;DK8538001 Gaia Via;72000000;XG-0000003040-00034;null;null
+Vindstød;null;null;null;Indeholder;null;null;null;Tekst fra bank;72000000;XG-0000005244-00014;null;null
+Assentoft;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Assentoftskolens kantine;72000000;XG-0000002369-00021;null;null
+Fritid;null;null;Indbetaling;Indeholder;null;null;null;Kontakt transaktion Fritidscentret;95990009;null;null;null
+Bakkegården;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Bakkegården;72000000;XG-0000004518-00093;null;null
+Blicherskolen A;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Blicherskolen a-bod;72000000;XG-0000002392-00031;null;null
+Blicherskolen B;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Blicherskolen b-bod;72000000;XG-0000002392-00032;null;null
+KC cafe;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Café Kristrupcentret;72000000;XG-0000004526-00042;null;null
+Kristrupcentret;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Café Kristrupcentret;72000000;XG-0000004526-00042;null;null
+Cafe-LV;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Café Lindevænget;72000000;XG-0000004526-00036;null;null
+Cafe Nellemann;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Café Nellemann;72000000;XG-0000004526-00037;null;null
+Cafe Svaleparken;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Café Svaleparken;72000000;XG-0000004526-00038;null;null
+Cafe-SP;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Café Svaleparken;72000000;XG-0000004526-00038;null;null
+Svaleparken;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Café Svaleparken;72000000;XG-0000004526-00038;null;null
+Thors bakke;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Café Thors Bakke;72000000;XG-0000004526-00039;null;null
+Thorsbakke;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Café Thors Bakke;72000000;XG-0000004526-00039;null;null
+Cafe Vorup;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Café Vorup Plejehjem;72000000;XG-0000004526-00041;null;null
+Cafe-VP;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Café Vorup Plejehjem;72000000;XG-0000004526-00041;null;null
+Cafe VP;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Café Vorup Plejehjem;72000000;XG-0000004526-00041;null;null
+Dronningborg;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Dronningborg;72000000;XG-0000004518-00094;null;null
+Fårup;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Fårup Café;72000000;XG-0000004526-00047;null;null
+Gaia Butik;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Gaia Butik;72000000;XG-0000003040-00018;null;null
+Gaia Cafe;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Gaia Papaya;72000000;XG-0000003040-00046;null;null
+Gaia papaya;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Gaia Papaya;72000000;XG-0000003040-00046;null;null
+Kollektivhus;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Kollektivhuset;72000000;XG-0000004526-00044;null;null
+2465-00021;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Korshøjskolen Café;72000000;XG-0000002465-00021;null;null
+Korshøjskole;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Korshøjskolen Café;72000000;XG-0000002465-00021;null;null
+Madservice;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Madservice Kronjylland;72000000;XG-0000004526-00018;null;null
+Møllevang;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Møllevang;72000000;XG-0000004518-00098;null;null
+301.408.72.05;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Nørrevangsskolen;72000000;XG-0000002511-00021;null;null
+Perron 4;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Perron 4;72000000;XG-0000003038-00053;null;null
+Rosenvæng;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Rosenvænget;72000000;XG-0000004518-00092;null;null
+Terneparken;null;null;Indbetaling;Indeholder;null;null;null;Kontant transaktion Terneparken Café;72000000;XG-0000004526-00048;null;null
+7221290;null;null;null;Indeholder;null;null;null;Nets 7221290 Gaia Cafe ;72000000;XG-0000003040-00046;null;null
+8516775;null;null;null;Indeholder;null;null;null;Nets 8516775 Gaia Butik;72000000;XG-0000003040-00018;null;null
+8104226;null;null;null;Indeholder;null;null;null;Teller 8104226;72000000;XG-0000005010-00080;null;null
+LV;null;null;Indbetaling;Slutter med;null;null;null;Kontant transaktion Café Lindevænget;72000000;XG-0000004526-00036;null;null
+NM;null;null;null;Slutter med;null;null;null;Kontant transaktion Café Nellemann;72000000;XG-0000004526-00037;null;null
+null;null;Too good to go;null;Starter med;null;null;null;Tekst fra bank;72000000;XG-0000005228-00003;null;null
+null;null;Kanpla APS;null;Starter med;null;null;null;Tekst fra bank;72000000;XG-0000002511-00021;null;null
+null;null;Biometric Solutions;null;Starter med;null;null;null;Tekst fra bank;72000000;XG-0000003057-00003;null;null
+Borup;null;null;Indbetaling;Starter med;null;null;null;Kontant transaktion Café Borupvænget;72000000;XG-0000004526-00046;null;null
+Cafe Borup;null;null;Indbetaling;Starter med;null;null;null;Kontant transaktion Café Borupvænget;72000000;XG-0000004526-00046;null;null
+TB;null;null;Indbetaling;Starter med;null;null;null;Kontant transaktion Café Thors Bakke;72000000;XG-0000004526-00039;null;null
+TD cafe;null;null;Indbetaling;Starter med;null;null;null;Kontant transaktion Café Tirsdalen;72000000;XG-0000004526-00040;null;null
+Tirsdalen;null;null;Indbetaling;Starter med;null;null;null;Kontant transaktion Café Tirsdalen;72000000;XG-0000004526-00040;null;null
+XG-3397-50;null;null;Indbetaling;Starter med;null;null;null;Kontant transaktion Sprogcenter;72000000;XG-0000003397-00050;null;null
+null;null;null;OTC-betaling;Indeholder;null;null;null;Tekst fra bank;67041004;null;null;null
+null;null;null;Rente af obligationer;Starter med;null;null;null;Tekst fra bank;60800001;null;null;null
+null;null;null;Afkast overført til;Starter med;null;null;null;Tekst fra bank;60500000;null;null;null
+null;null;null;Debetrente;Starter med;null;null;null;Tekst fra bank;60500000;null;null;null
+null;null;null;Kreditrente;Starter med;null;null;null;Tekst fra bank;60500000;null;null;null
+40010;null;null;Leverandørservice;Indeholder;null;null;null;Ls, kreditor 40010 Udbetaling;40000000;XG-0000000013-00001;null;null
+54879;null;null;Leverandørservice;Indeholder;null;null;null;Ls, kreditor 54879 Udbetaling;40000000;XG-0000000013-00002;null;null
+006970;null;null;Pengeautomat;Indeholder;null;null;null;Depositcard Matrielgården 006970;40000000;XG-0000005004-00023;null;null
+1007867103;null;null;Gebyr;Indeholder;null;null;null;Gebyr af depot 1007867103;40000000;XG-0000000006-00007;null;null
+2121115030;null;null;Gebyr;Indeholder;null;null;null;Gebyr af depot 2121115030;40000000;XG-0000000006-00007;null;null
+FAKTURA D0100;null;null;null;Starter med;null;null;null;Tekst fra bank;40000000;XG-0000000006-00007;null;null
+URA;null;null;Pbs overførsel;Starter med;null;null;null;Tekst fra bank;40000000;XG-0000000006-00007;null;null
+49344 MOBILE;null;null;null;Starter med;null;null;null;Gebyr Mobile Pay leverandørservice;40000000;XG-0000000006-00007;null;null
+Mariendal;null;420 Kristrup Børnehus;null;Indeholder;null;null;null;Tekst fra bank;10000000;XG-0000002281-00002;null;null
+
