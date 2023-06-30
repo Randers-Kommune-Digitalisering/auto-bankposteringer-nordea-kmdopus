@@ -21,7 +21,7 @@ const Node = {
   "outputLabels": [
     "global.rules"
   ],
-  "_order": 73
+  "_order": 62
 }
 
 module.exports = Node;
