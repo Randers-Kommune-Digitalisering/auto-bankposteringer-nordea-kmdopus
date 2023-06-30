@@ -21,7 +21,7 @@ Her er en step-by-step til igangsætning af programmet:
 
 # Resources
 
-[Dokumentation for Nordea API Corporate Access Authentication]([https://link-url-here.org](https://developer.nordeaopenbanking.com/documentation?api=Corporate%20Access%20Authorization%20API)https://developer.nordeaopenbanking.com/documentation?api=Corporate%20Access%20Authorization%20API)
+[Dokumentation for Nordea API Corporate Access Authentication](https://developer.nordeaopenbanking.com/documentation?api=Corporate%20Access%20Authorization%20API)
 
 [Dokumentation for Nordea API Instant Reporting](https://developer.nordeaopenbanking.com/documentation?api=Instant%20Reporting%20API)
 
