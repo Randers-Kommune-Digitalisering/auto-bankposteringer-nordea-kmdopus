@@ -40,7 +40,7 @@ input, select {
 
 input {
   background: linear-gradient(whitesmoke, #fafafa);
-  max-width: 250px;
+  border-right: 20px;
 }
 
 select {
@@ -61,7 +61,8 @@ h1 {
   flex-wrap: wrap;
   gap: 5px;
   padding: 5px;
-  width: 4vw;
+  width: 70px;
+  max-width: 70px;
   text-transform: uppercase;
   font-weight: 400;
   background-color: #4077b9;
@@ -71,8 +72,16 @@ h1 {
   position: fixed;
 }
 
-h3 {
+h2 {
+  font-weight: 400;
+}
+
+pad_big {
   padding-left: 80px;
+}
+
+pad_small {
+  padding-left: 10px;
 }
 
 body {
@@ -122,7 +131,7 @@ body {
 }
 
 .ruleBox .ruleWrapper {
-  display: flex;
+  display: grid;
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: 10px;
