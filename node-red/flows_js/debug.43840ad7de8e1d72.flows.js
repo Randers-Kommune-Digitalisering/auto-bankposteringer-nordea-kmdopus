@@ -1,20 +1,20 @@
 const Node = {
-  "id": "f1226e9c6d14bf30",
+  "id": "43840ad7de8e1d72",
   "type": "debug",
   "z": "97cc6bce53027f96",
-  "name": "Rules updated",
+  "name": "tjek msg obj",
   "active": true,
   "tosidebar": true,
   "console": false,
   "tostatus": false,
-  "complete": "rules",
-  "targetType": "msg",
+  "complete": "true",
+  "targetType": "full",
   "statusVal": "",
   "statusType": "auto",
-  "x": 680,
-  "y": 340,
+  "x": 850,
+  "y": 400,
   "wires": [],
-  "_order": 118
+  "_order": 100
 }
 
 module.exports = Node;

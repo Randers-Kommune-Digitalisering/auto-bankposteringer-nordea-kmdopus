@@ -3,7 +3,7 @@ const Node = {
   "type": "websocket-listener",
   "path": "/ws/rules",
   "wholemsg": "false",
-  "_order": 10
+  "_order": 9
 }
 
 module.exports = Node;

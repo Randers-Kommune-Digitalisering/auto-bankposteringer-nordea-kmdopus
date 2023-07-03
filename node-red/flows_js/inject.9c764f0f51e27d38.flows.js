@@ -9,8 +9,8 @@ const Node = {
       "p": "payload"
     }
   ],
-  "repeat": "",
-  "crontab": "30 07 * * 1,2,3,4,5",
+  "repeat": "300",
+  "crontab": "",
   "once": false,
   "onceDelay": 0.1,
   "topic": "",
@@ -23,7 +23,7 @@ const Node = {
       "e0e5ad062ccfd3fb"
     ]
   ],
-  "_order": 28
+  "_order": 12
 }
 
 module.exports = Node;

@@ -34,7 +34,7 @@ const Node = {
       "9e63f9f93a8f8112"
     ]
   ],
-  "_order": 44
+  "_order": 28
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, moment, uuid, forge, CryptoJS) {

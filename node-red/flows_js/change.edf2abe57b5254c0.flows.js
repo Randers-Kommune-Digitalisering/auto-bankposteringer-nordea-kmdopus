@@ -2,14 +2,14 @@ const Node = {
   "id": "edf2abe57b5254c0",
   "type": "change",
   "z": "97cc6bce53027f96",
-  "name": "",
+  "name": "konteringsregler til msg obj",
   "rules": [
     {
       "t": "set",
       "p": "payload.rules",
       "pt": "msg",
-      "to": "rules",
-      "tot": "msg"
+      "to": "konteringsregler",
+      "tot": "global"
     }
   ],
   "action": "",
@@ -17,14 +17,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 560,
+  "x": 380,
   "y": 540,
   "wires": [
     [
       "ecb62d79eca7028c"
     ]
   ],
-  "_order": 116
+  "_order": 94
 }
 
 module.exports = Node;
