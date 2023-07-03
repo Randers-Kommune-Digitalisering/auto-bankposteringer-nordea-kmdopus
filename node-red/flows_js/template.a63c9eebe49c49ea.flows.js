@@ -68,10 +68,10 @@ function generateRule(index) {
     let returnHTML = \`
         <div>
         <h1>\${index}</h1>
-        <h3></h3>
+        <pad_big></pad_big>
     \`;
 
-	for (let i = 0; i < obj_array.length-1; i++) {
+	for (let i = 0; i < obj_array.length; i++) {
 		const obj = obj_array[i]
 		
         if (obj.value || obj.value1) {
@@ -88,22 +88,26 @@ function generateRule(index) {
         
             returnHTML += \`
                     </select>
+                    
+                    // mangler at vise value 1, fejl
+                    
                     <input id="input_\${obj.name}_value" value="\${obj.value}" />
+                    <pad_small></pad_small>
             \`;
-            
-            // virker ikke
-
-            if (obj.Notat) {
-                returnHTML += \`
-                    <input id="description" value="\${obj.Notat}" />
-                \`;
-            }
+        } else if (obj.name == "Kontering") {
+            returnHTML += \`
+                <input id="posteringstekst" value="\${obj.text}" style="width:300px;"/>
+                <input id="Artskonto" value="\${obj.Artskonto}" style="width:200px;"/>
+                <input id="PSP" value="\${obj.PSP}" style="width:300px;"/>
+                <input id="SIO" value="\${obj.SIO}" style="width:300px;"/>
+                <input id="Notat" value="\${obj.Notat}" style="width:700px;"/>
+            \`;            
         }
-	}
-    returnHTML += \`
-			</div>
-		\`;
-    return returnHTML;
+        returnHTML += \`
+            </div>
+        \`;
+        return returnHTML;
+    }
 }
 
 for (let i = 0; i < rules.length; i++) {
