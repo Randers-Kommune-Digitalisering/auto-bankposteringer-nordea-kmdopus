@@ -1,14 +1,14 @@
 const Node = {
-  "id": "ee5a63248868ad94",
+  "id": "123656358b9bc345",
   "type": "change",
-  "z": "55e8960ea895cf83",
-  "name": "",
+  "z": "97cc6bce53027f96",
+  "name": "Testregler til global konteringsregler",
   "rules": [
     {
       "t": "set",
-      "p": "#:(storeInFile)::rules",
+      "p": "konteringsregler",
       "pt": "global",
-      "to": "rules",
+      "to": "payload",
       "tot": "msg"
     }
   ],
@@ -17,12 +17,12 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 1060,
-  "y": 440,
+  "x": 400,
+  "y": 420,
   "wires": [
     []
   ],
-  "_order": 15
+  "_order": 99
 }
 
 module.exports = Node;

@@ -4,10 +4,10 @@ const Node = {
   "z": "97cc6bce53027f96",
   "name": "URL: localhost:1880/rules",
   "info": "",
-  "x": 160,
-  "y": 100,
+  "x": 150,
+  "y": 40,
   "wires": [],
-  "_order": 121
+  "_order": 95
 }
 
 module.exports = Node;
