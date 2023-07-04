@@ -19,6 +19,9 @@ const Node = {
 }
 
 Node.template = `
+// 040723 14:25 - Ændringer af værdier på siden opdaterer ikke værdien i kildekoden og kommer derfor heller ikke med over i rules objektet
+
+
 const ruleWrapper_user = document.querySelector(".ruleWrapper_user");
 const addRuleButton = document.querySelector(".addRuleButton");
 
@@ -64,6 +67,10 @@ const operators = [
         "value": ".endsWith"
     }
 ]
+
+function PublishWsMessage(m) {
+    if (ws) { ws.send(m); }
+}
 
 function generateRule(index) {
 	const obj_array = rules[index]; // rules[index] returnerer et array
@@ -137,58 +144,94 @@ for (let i = 0; i < rules.length; i++) {
     ruleWrapper_user.innerHTML += generateRule(i);
 }
 
-// for (let i = 0; i < rules.length; i++) {
-    
+// Add event listeners to track user changes
+for (let i = 0; i < Object.keys(inputFields).length; i++) {
+    const valueElement = document.querySelector(\`#input_\${inputFields[i]}_value\`);
 
-//     for (let j = 0; j < )
-    
-//     document.querySelector("#input_" + i + "_operator").addEventListener("focusout", () => {
-//         UpdateValue(document.querySelector("#input_" + i + "_operator"));
-//     });
+    valueElement.addEventListener("focusout", () => {
+        UpdateValue(valueElement);
+    });
 
-//     document.querySelector("#input_" + i + "_value").addEventListener("focusout", () => {
-//         UpdateValue(document.querySelector("#input_" + i + "_value"));
-//     });
+    valueElement.addEventListener("input", () => {
+        OnInputChange(valueElement);
+    });
 
-//     document.querySelector("#input_" + i + "_value").addEventListener("input", () => {
-//         OnInputChange(document.querySelector("#input_" + i + "_value"));
-//     });
-// }
+    if (\`input_\${inputFields[i]}_operator\` in document) {
+        const operatorElement = document.querySelector(\`#input_\${inputFields[i]}_operator\`);
+        operatorElement.addEventListener("focusout", () => {
+            UpdateValue(operatorElement);
+        });
+    }
+}
 
-///
-// Update input value
+/// Update input value
 function UpdateValue(inputField) {
     let id = inputField.id;
     let sid = id.split("_");
 
-    (rules[parseInt(sid[1])])[sid[2]] = inputField.value;
+    // Find the rule object with matching name property
+    let ruleObject = null;
+    for (let i = 0; i < rules.length; i++) {
+        for (let j = 0; j < rules[i].length; j++) {
+            if (rules[i][j].name === sid[1]) {
+                ruleObject = rules[i][j];
+                break;
+            }
+        }
+        if (ruleObject) {
+            break;
+        }
+    }
 
-    const message = rules;
+    if (ruleObject) {
+        ruleObject[sid[2]] = inputField.value;
 
-    PublishWsMessage(JSON.stringify(message));
-    console.log(message);
+        const message = rules;
+
+        PublishWsMessage(JSON.stringify(message));
+        console.log(message);
+    }
 }
+
 
 ///
 //
 function OnInputChange(inputField) {
     let id = inputField.id;
     let sid = id.split("_");
-    let type = (rules[parseInt(sid[1])])["type"];
 
-    switch (type) {
-        case "int": case "float": case "double": case "number":
-            inputField.value = inputField.value.replace(/[^0-9.]/g, '').replace(/(\\..*?)\\..*/g, '\$1');
+    // Find the rule object with matching name property
+    let ruleObject = null;
+    for (let i = 0; i < rules.length; i++) {
+        for (let j = 0; j < rules[i].length; j++) {
+            if (rules[i][j].name === sid[1]) {
+                ruleObject = rules[i][j];
+                break;
+            }
+        }
+        if (ruleObject) {
             break;
+        }
+    }
 
-        case "text": case "letters":
-            inputField.value = inputField.value.replace(/[^A-Za-z ]/g, '');
-            break;
+    if (ruleObject) {
+        let type = ruleObject.type;
 
+        switch (type) {
+            case "int":
+            case "float":
+            case "double":
+            case "number":
+                inputField.value = inputField.value.replace(/[^0-9.]/g, '').replace(/(\\..*?)\\..*/g, '\$1');
+                break;
+
+            case "text":
+            case "letters":
+                inputField.value = inputField.value.replace(/[^A-Za-z ]/g, '');
+                break;
+        }
     }
 }
-
-
 
 
 ///
@@ -229,9 +272,8 @@ function wsConnect() {
         setTimeout(wsConnect, 3000);
     }
 }
-function PublishWsMessage(m) {
-    if (ws) { ws.send(m); }
-}
+
+
 
 
 
