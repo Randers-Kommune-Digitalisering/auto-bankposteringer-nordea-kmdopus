@@ -35,7 +35,7 @@ input, select {
   line-height: 35px;
   min-height: 37px;
   padding: 0px 10px;
-  font-weight: 400;
+  font-weight: 300;
 }
 
 input {
