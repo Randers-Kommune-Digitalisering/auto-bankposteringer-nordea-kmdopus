@@ -6,7 +6,7 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "#:(storeInFile)::rules",
+      "p": "konteringsregler",
       "pt": "global",
       "to": "rules",
       "tot": "msg"
@@ -17,7 +17,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 600,
+  "x": 640,
   "y": 580,
   "wires": [
     [
