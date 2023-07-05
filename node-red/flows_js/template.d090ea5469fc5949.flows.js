@@ -37,10 +37,10 @@ Node.template = `
 
   <div class="ruleBox">
     <div class="header">Konteringsregler</div>
-    <div class="ruleWrapper ruleWrapper_user"></div>
+    <div class="ruleWrapper ruleWrapper"></div>
     <div class="ruleWrapper">
       <div>
-        <button class="addRuleButton" onclick="addNewRule()">+</button>
+        <button class="addRuleButton" onclick="generateNewRow()">+</button>
       </div>
     </div>
   </div>
