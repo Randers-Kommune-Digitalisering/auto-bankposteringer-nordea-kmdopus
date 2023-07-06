@@ -1,13 +1,13 @@
 const Node = {
-  "id": "28413720314195e1",
+  "id": "efc79773ee08e6db",
   "type": "comment",
   "z": "97cc6bce53027f96",
-  "name": "Endpoint",
+  "name": "Push updates to backend",
   "info": "",
-  "x": 1420,
-  "y": 500,
+  "x": 150,
+  "y": 140,
   "wires": [],
-  "_order": 86
+  "_order": 102
 }
 
 module.exports = Node;

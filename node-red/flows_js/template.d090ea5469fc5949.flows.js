@@ -8,14 +8,14 @@ const Node = {
   "format": "html",
   "syntax": "mustache",
   "template": "",
-  "x": 1270,
-  "y": 540,
+  "x": 690,
+  "y": 380,
   "wires": [
     [
       "f4c955396488fa27"
     ]
   ],
-  "_order": 83
+  "_order": 88
 }
 
 Node.template = `
@@ -35,12 +35,14 @@ Node.template = `
 
 <body onload="wsConnect();" onunload="ws.disconnect();">
 
-  <div class="ruleBox">
-    <div class="header">Konteringsregler</div>
-    <div class="ruleWrapper ruleWrapper"></div>
-    <div class="ruleWrapper">
-      <div>
-        <button class="addRuleButton" onclick="generateNewRow()">+</button>
+  <div class="ruleContainer">
+    <div class="ruleBox">
+      <div class="header">Konteringsregler</div>
+      <div class="ruleWrapper ruleWrapper"></div>
+      <div class="ruleWrapper">
+        <div>
+          <button class="addRuleButton" onclick="generateNewRow()">+</button>
+        </div>
       </div>
     </div>
   </div>

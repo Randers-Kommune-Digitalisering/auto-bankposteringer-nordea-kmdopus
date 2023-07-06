@@ -1,8 +1,8 @@
 const Node = {
-  "id": "3d925f06d011b63a",
+  "id": "b6722f2612891357",
   "type": "file in",
   "z": "a1938e80ddbe5950",
-  "g": "745ee7cac00b8ea6",
+  "g": "2be607f061d91628",
   "name": "Hent konteringsregler",
   "filename": "/data/konteringsregler/konteringsregler.csv",
   "filenameType": "str",
@@ -11,11 +11,11 @@ const Node = {
   "sendError": false,
   "encoding": "none",
   "allProps": false,
-  "x": 400,
-  "y": 500,
+  "x": 1460,
+  "y": 420,
   "wires": [
     [
-      "322b5602d72c7332"
+      "b96da9492994439b"
     ]
   ],
   "outputLabels": [

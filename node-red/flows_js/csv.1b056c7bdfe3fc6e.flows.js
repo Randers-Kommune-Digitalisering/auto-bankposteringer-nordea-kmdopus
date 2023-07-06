@@ -14,14 +14,14 @@ const Node = {
   "strings": true,
   "include_empty_strings": true,
   "include_null_values": true,
-  "x": 340,
-  "y": 620,
+  "x": 180,
+  "y": 580,
   "wires": [
     [
       "d5ee9d451871bb44"
     ]
   ],
-  "_order": 74
+  "_order": 78
 }
 
 module.exports = Node;

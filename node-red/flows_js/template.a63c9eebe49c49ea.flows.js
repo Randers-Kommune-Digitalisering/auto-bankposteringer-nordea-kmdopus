@@ -8,20 +8,21 @@ const Node = {
   "format": "javascript",
   "syntax": "plain",
   "template": "",
-  "x": 870,
-  "y": 540,
+  "x": 710,
+  "y": 260,
   "wires": [
     [
       "487b9a4158444856"
     ]
   ],
-  "_order": 81
+  "_order": 86
 }
 
 Node.template = `
 // 040723 14:25 - Ændringer af værdier på siden opdaterer ikke værdien i kildekoden og kommer derfor heller ikke med over i rules objektet
 const ruleWrapper = document.querySelector(".ruleWrapper");
 const addRuleButton = document.querySelector(".addRuleButton");
+const deleteButtons = document.querySelectorAll(".deleteRowButton");
 const inputs = document.getElementsByTagName("input");
 const selects = document.getElementsByTagName("select");
 const rules = _rules != null ? _rules : []; // Rules are defined in change node previous to this
@@ -31,6 +32,7 @@ const operators = [
     { "name": "≠ Må ikke være lig med", "value": "!=" },
     { "name": "< Skal være mindre end", "value": "<" },
     { "name": "> Skal være større end", "value": ">" },
+    { "name": "< Mellem <", "value": ">< " },
     { "name": "{?} Indeholder", "value": "contains" },
     { "name": "{!} Indeholder ikke", "value": "!contains" },
     { "name": "[o] Skal være oplyst", "value": "!null" },
@@ -41,32 +43,6 @@ const operators = [
 function PublishWsMessage(m) {
     if (ws) { ws.send(m); }
 }
-
-// // Track ændringer i elementer med id input*
-// function applyChanges() {
-//     for (let i = 0; i < inputs.length; i++) {   
-//         for (let j = 0; j < Object.keys(inputFields).length; j++) {
-//             const valueElement = document.querySelector(\`#input_\${inputFields[j]}_value\`);
-//             updateValue(valueElement);
-//             onInputChange(valueElement);
-//             if (\`input_\${inputFields[j]}_operator\` in document) {
-//                 const operatorElement = document.querySelector(\`#input_\${inputFields[j]}_operator\`);
-//                 updateValue(operatorElement);
-//             }
-//         }
-//     }
-//     for (let i = 0; i < selects.length; i++) {
-//         for (let j = 0; j < Object.keys(inputFields).length; j++) {
-//             const valueElement = document.querySelector(\`#input_\${inputFields[j]}_value\`);
-//             updateValue(valueElement);
-//             onInputChange(valueElement);
-//             if (\`input_\${inputFields[j]}_operator\` in document) {
-//                 const operatorElement = document.querySelector(\`#input_\${inputFields[j]}_operator\`);
-//                 updateValue(operatorElement);
-//             }
-//         }
-//     }
-// }
 
 /// Ved opdatering af input value
 function updateValue(inputField) {
@@ -81,7 +57,7 @@ function updateValue(inputField) {
             if (rules[i][j].name === sid[1]) {
                 ruleObject = rules[i][j];
                 ruleIndex = i;
-                innerIndex =j;
+                innerIndex = j;
                 break;
             }
         }
@@ -114,7 +90,7 @@ function generateRule(index) {
     let returnHTML = \`
         <div>
         <h1>\${index}</h1>
-        <pad_big></pad_big>
+        <pad_small></pad_small>
     \`;
     for (let i = 0; i < obj_array.length; i++) {
         const obj = obj_array[i];
@@ -168,7 +144,6 @@ function generateRule(index) {
             \`;
             for (let i = 0; i < operators.length; i++) {
                 let isSelected = obj.operator == operators[i].value;
-                //console.log("Checking '" + obj.operator + "' against '" + operators[i].value + "' = " + isSelected);
                 returnHTML += \`<option value="\${operators[i].value}"\${isSelected ? " selected" : ""}>\${operators[i].name}</option>\`;
             }
             if (!obj.value) {
@@ -206,22 +181,63 @@ function generateRule(index) {
         }
     }
     returnHTML += \`
+        <pad_small></pad_small>
+        <button class="deleteRowButton" onclick="deleteRow(\${index})">-</button>
         </div>
     \`;
     return returnHTML;
 }
 
+// Slet en linje
+function deleteRow(rowIndex) {
+    if (rowIndex >= 0 && rowIndex < rules.length) {
+        rules.splice(rowIndex, 1);
+        PublishWsMessage(JSON.stringify(rules));
+        renderRules();
+    }
+}
+
 // Lav ny tom linje
 function generateNewRow() {
-    const sample_row = rules[0]; // rules[index] returnerer et array
+    const sampleRow = rules[0]; // rules[index] returnerer et array
     const newRowNumber = rules.length;
+    let newRow = [];
+    for (let i = 0; i < sampleRow.length; i++) {
+        const obj = sampleRow[i];
+        let newObj;
+        if (i === 5) {
+            newObj = {
+                name: obj.name,
+                text: '',
+                Artskonto: null,
+                PSP: null,
+                SIO: null,
+                Notat: '',
+            };
+        } else if (i === 4) {
+            newObj = {
+                name: obj.name,
+                value1: null,
+                value2: null,
+                operator: '',
+            };
+        } else {
+            newObj = {
+                name: obj.name,
+                value: null,
+                operator: '',
+            };
+        }
+        newRow.push(newObj);
+    }
+    rules.push(newRow); // Append the new row to the rules array
     let returnHTML = \`
         <div>
         <h1>\${newRowNumber}</h1>
-        <pad_big></pad_big>
+        <pad_small></pad_small>
     \`;
-    for (let i = 0; i < sample_row.length; i++) {
-        const obj = sample_row[i];
+    for (let i = 0; i < newRow.length; i++) {
+        const obj = newRow[i];
         if (i === 5) { // her er ingen operators
             returnHTML += \`
             <h2>Posteringstekst</h2>
@@ -270,31 +286,47 @@ function generateNewRow() {
         }
     }
     returnHTML += \`
+        <pad_small></pad_small>
+        <button class="deleteRowButton" onclick="deleteRow(\${newRowNumber})">-</button>
         </div>
     \`;
     ruleWrapper.innerHTML += returnHTML;
+    PublishWsMessage(JSON.stringify(rules)); // Publish the updated rules
 }
 
-// Læg regler i ruleWrapper
-for (let i = 0; i < rules.length; i++) {
-    ruleWrapper.innerHTML += generateRule(i);
+function renderRules() {
+    ruleWrapper.innerHTML = "";
+    // Læg regler i ruleWrapper
+    for (let i = 0; i < rules.length; i++) {
+        ruleWrapper.innerHTML += generateRule(i);
+    }
+    // Add event listener for each delete button
+    for (let i = 0; i < deleteButtons.length; i++) {
+        deleteButtons[i].addEventListener("click", () => {
+            console.log("Delete rule event triggered");
+            deleteRow(i);
+        });
+    }
+    // Add event listener to each input element
+    for (let i = 0; i < inputs.length; i++) {
+        inputs[i].addEventListener("change", () => {
+            console.log("Input change event triggered");
+            updateValue(inputs[i]);
+        });
+    }
+    // Add event listener to each select element
+    for (let i = 0; i < selects.length; i++) {
+        selects[i].addEventListener("change", () => {
+            console.log("Select change event triggered");
+            updateValue(selects[i]);
+        });
+    }
 }
 
-// Add event listener to each input element
-for (let i = 0; i < inputs.length; i++) {
-    inputs[i].addEventListener("change", () => {
-        console.log("Input change event triggered");
-        updateValue(inputs[i]);
-    });
-}
+renderRules();
 
-// Add event listener to each select element
-for (let i = 0; i < selects.length; i++) {
-    selects[i].addEventListener("change", () => {
-        console.log("Select change event triggered");
-        updateValue(selects[i]);
-    });
-}
+
+
 
 
 

@@ -8,12 +8,12 @@ const Node = {
   "format": "css",
   "syntax": "mustache",
   "template": "",
-  "x": 1090,
-  "y": 580,
+  "x": 730,
+  "y": 340,
   "wires": [
     []
   ],
-  "_order": 96
+  "_order": 98
 }
 
 Node.template = `
