@@ -4,10 +4,10 @@ const Node = {
   "z": "97cc6bce53027f96",
   "name": "Hosting web UI",
   "info": "",
-  "x": 160,
-  "y": 500,
+  "x": 580,
+  "y": 140,
   "wires": [],
-  "_order": 84
+  "_order": 89
 }
 
 module.exports = Node;

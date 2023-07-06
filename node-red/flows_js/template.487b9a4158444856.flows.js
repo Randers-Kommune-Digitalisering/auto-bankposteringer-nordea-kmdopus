@@ -8,14 +8,14 @@ const Node = {
   "format": "css",
   "syntax": "mustache",
   "template": "",
-  "x": 1070,
-  "y": 540,
+  "x": 690,
+  "y": 320,
   "wires": [
     [
       "d090ea5469fc5949"
     ]
   ],
-  "_order": 80
+  "_order": 85
 }
 
 Node.template = `
@@ -69,36 +69,59 @@ h1 {
   color: white;
   border-left: 2px;
   border-right: 12px;
-  position: fixed;
+  position: sticky;
+  position: -webkit-sticky;
 }
 
 h2 {
   font-weight: 400;
 }
 
-pad_big {
-  padding-left: 80px;
-}
-
 pad_small {
   padding-left: 10px;
 }
 
+button {
+  background-color: #4077b9;
+  color: #ffffff;
+  border: none;
+  padding: 5px 12px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: transform 0.2s;
+}
+
+button:hover {
+  transform: scale(1.1);
+}
+
 body {
-  padding-top: 0px;
   background-color: #d6d6d6;
-  margin: 5px;
   flex: content;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
+  overflow-y: auto;
+}
+
+.ruleContainer {
+  height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  display: flex;
+  justify-content: start;
+  align-items: flex-start;
+  overflow-x: auto;
 }
 
 .ruleBox {
-  width: 100vw;
   background-color: white;
   border-radius: 5px;
-  overflow-x: auto;
   position: relative;
+  overflow-x: visible;
+  display: grid;
+  justify-content: start;
+  align-items: flex-start;
 }
 
 .ruleBox > div.header {
@@ -138,7 +161,7 @@ body {
   padding: 15px;
   border-left: 2px solid whitesmoke;
   border-right: 2px solid whitesmoke;
-  overflow-x: auto;
+  overflow-x: visible;
 }
 
 .ruleWrapper > div {

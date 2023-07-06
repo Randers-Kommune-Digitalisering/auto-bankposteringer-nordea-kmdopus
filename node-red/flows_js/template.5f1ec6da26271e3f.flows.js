@@ -8,12 +8,12 @@ const Node = {
   "format": "javascript",
   "syntax": "plain",
   "template": "",
-  "x": 890,
-  "y": 580,
+  "x": 750,
+  "y": 280,
   "wires": [
     []
   ],
-  "_order": 100
+  "_order": 101
 }
 
 Node.template = `

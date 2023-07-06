@@ -3,21 +3,21 @@ const Node = {
   "type": "function",
   "z": "a1938e80ddbe5950",
   "g": "745ee7cac00b8ea6",
-  "name": "Apply rules to transactions",
+  "name": "Anvend konteringsregler",
   "func": "",
   "outputs": 1,
   "noerr": 0,
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 220,
-  "y": 580,
+  "x": 210,
+  "y": 540,
   "wires": [
     [
       "be0a51d36be4d3e8"
     ]
   ],
-  "_order": 73
+  "_order": 77
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {

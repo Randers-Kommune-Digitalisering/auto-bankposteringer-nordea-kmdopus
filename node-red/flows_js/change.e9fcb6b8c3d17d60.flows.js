@@ -1,13 +1,13 @@
 const Node = {
-  "id": "c4dfd056b5ac62f5",
+  "id": "e9fcb6b8c3d17d60",
   "type": "change",
   "z": "a1938e80ddbe5950",
-  "g": "745ee7cac00b8ea6",
+  "g": "2be607f061d91628",
   "name": "Gem JSON Array i msg.konteringsregler",
   "rules": [
     {
       "t": "set",
-      "p": "konteringsregler",
+      "p": "nye_konteringsregler",
       "pt": "global",
       "to": "payload",
       "tot": "msg"
@@ -18,11 +18,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 460,
-  "y": 540,
+  "x": 1520,
+  "y": 460,
   "wires": [
     [
-      "8ac398a8353d0e9d"
+      "8fc155cc4bcc90d8"
     ]
   ],
   "_order": 70

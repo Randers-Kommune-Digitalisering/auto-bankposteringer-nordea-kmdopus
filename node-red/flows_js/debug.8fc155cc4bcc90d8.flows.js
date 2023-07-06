@@ -1,8 +1,9 @@
 const Node = {
-  "id": "43840ad7de8e1d72",
+  "id": "8fc155cc4bcc90d8",
   "type": "debug",
-  "z": "97cc6bce53027f96",
-  "name": "tjek msg obj",
+  "z": "a1938e80ddbe5950",
+  "g": "2be607f061d91628",
+  "name": "Slut node",
   "active": true,
   "tosidebar": true,
   "console": false,
@@ -11,10 +12,10 @@ const Node = {
   "targetType": "full",
   "statusVal": "",
   "statusType": "auto",
-  "x": 870,
-  "y": 460,
+  "x": 1420,
+  "y": 500,
   "wires": [],
-  "_order": 99
+  "_order": 72
 }
 
 module.exports = Node;
