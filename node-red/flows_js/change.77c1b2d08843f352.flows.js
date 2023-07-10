@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "a1938e80ddbe5950",
   "g": "745ee7cac00b8ea6",
-  "name": "Clear msg object",
+  "name": "Clear msg",
   "rules": [
     {
       "t": "delete",
@@ -56,7 +56,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 190,
+  "x": 170,
   "y": 500,
   "wires": [
     [

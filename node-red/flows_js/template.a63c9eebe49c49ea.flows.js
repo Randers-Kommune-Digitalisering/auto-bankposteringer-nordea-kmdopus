@@ -15,7 +15,7 @@ const Node = {
       "487b9a4158444856"
     ]
   ],
-  "_order": 86
+  "_order": 87
 }
 
 Node.template = `
@@ -27,17 +27,20 @@ const inputs = document.getElementsByTagName("input");
 const selects = document.getElementsByTagName("select");
 const rules = _rules != null ? _rules : []; // Rules are defined in change node previous to this
 const inputFields = { 0: "Reference", 1: "Advisliste", 2: "Afsender", 3: "Posteringstype", 4: "Beløb1", 5: "Beløb2", 6: "Posteringstekst", 7: "Artskonto", 8: "PSP", 9: "SIO", 10: "Notat" }
-const operators = [
+const textOperators = [
     { "name": "= Skal være lig med", "value": "==" },
-    { "name": "≠ Må ikke være lig med", "value": "!=" },
-    { "name": "< Skal være mindre end", "value": "<" },
-    { "name": "> Skal være større end", "value": ">" },
-    { "name": "< Mellem <", "value": ">< " },
     { "name": "{?} Indeholder", "value": "contains" },
     { "name": "{!} Indeholder ikke", "value": "!contains" },
     { "name": "[o] Skal være oplyst", "value": "!null" },
     { "name": "[...] Starter med", "value": ".startsWith" },
     { "name": "Slutter med [...]", "value": ".endsWith" }
+]
+const valueOperators = [
+    { "name": "= Skal være lig med", "value": "==" },
+    { "name": "≠ Må ikke være lig med", "value": "!=" },
+    { "name": "< Skal være mindre end", "value": "<" },
+    { "name": "> Skal være større end", "value": ">" },
+    { "name": "< Mellem <", "value": ">< " },
 ]
 
 function PublishWsMessage(m) {
@@ -125,16 +128,6 @@ function generateRule(index) {
             } else {
                 returnHTML += \`\`;
             }
-            returnHTML += \`" style="width:170px;"/>
-                    </article>
-                    <article>
-                    <h3>SIO</h3>            
-                    <input id="input_SIO_value" value="\`;
-            if (obj.SIO) {
-                returnHTML += \`\${obj.SIO}\`;
-            } else {
-                returnHTML += \`\`;
-            }
             returnHTML += \`" style="width:50px;"/>
                 </article>    
                 <article>    
@@ -154,9 +147,16 @@ function generateRule(index) {
                     <h3>\${obj.name}</h3>
                     <select id="input_\${obj.name}_operator">
             \`;
-            for (let i = 0; i < operators.length; i++) {
-                let isSelected = obj.operator == operators[i].value;
-                returnHTML += \`<option value="\${operators[i].value}"\${isSelected ? " selected" : ""}>\${operators[i].name}</option>\`;
+            if (i === 4) {
+                for (let i = 0; i < valueOperators.length; i++) {
+                    let isSelected = obj.operator == valueOperators[i].value;
+                    returnHTML += \`<option value="\${valueOperators[i].value}"\${isSelected ? " selected" : ""}>\${valueOperators[i].name}</option>\`;
+                }                
+            } else {
+                for (let i = 0; i < textOperators.length; i++) {
+                    let isSelected = obj.operator == textOperators[i].value;
+                    returnHTML += \`<option value="\${textOperators[i].value}"\${isSelected ? " selected" : ""}>\${textOperators[i].name}</option>\`;
+                }
             }
             if (!obj.value) {
                 if (i === 4) {
@@ -194,7 +194,7 @@ function generateRule(index) {
     }
     returnHTML += \`
         </div>
-        <button class="deleteRowButton" onclick="deleteRow(\${index})">-</button>
+        <button class="deleteRowButton" onclick="deleteRow(\${index})">Slet regel</button>
         </section>
     \`;
     return returnHTML;
@@ -267,10 +267,6 @@ function generateNewRow() {
                 <input id="input_PSP_value" value="" style="width:170px;"/>
             </article>
             <article>
-                <h3>SIO</h3>            
-                <input id="input_SIO_value" value="" style="width:50px;"/>
-            </article>
-            <article>
                 <h3>Notat</h3>
                 <input id="input_Notat_value" value="" style="width:700px;"/>
             </article>
@@ -281,10 +277,16 @@ function generateNewRow() {
                 <h3>\${obj.name}</h3>
                 <select id="input_\${obj.name}_operator">
         \`;
-            for (let i = 0; i < operators.length; i++) {
-                let isSelected = obj.operator == operators[i].value;
-                //console.log("Checking '" + obj.operator + "' against '" + operators[i].value + "' = " + isSelected);
-                returnHTML += \`<option value="\${operators[i].value}"\${isSelected ? " selected" : ""}>\${operators[i].name}</option>\`;
+            if (i === 4) {
+                for (let i = 0; i < valueOperators.length; i++) {
+                    let isSelected = obj.operator == valueOperators[i].value;
+                    returnHTML += \`<option value="\${valueOperators[i].value}"\${isSelected ? " selected" : ""}>\${valueOperators[i].name}</option>\`;
+                }                
+            } else {
+                for (let i = 0; i < textOperators.length; i++) {
+                    let isSelected = obj.operator == textOperators[i].value;
+                    returnHTML += \`<option value="\${textOperators[i].value}"\${isSelected ? " selected" : ""}>\${textOperators[i].name}</option>\`;
+                }
             }
             if (!obj.value) {
                 if (i === 4) {
@@ -312,7 +314,7 @@ function generateNewRow() {
     }
     returnHTML += \`
         </div>
-        <button class="deleteRowButton" onclick="deleteRow(\${newRowNumber})">-</button>
+        <button class="deleteRowButton" onclick="deleteRow(\${newRowNumber})">Slet regel</button>
         </section>
     \`;
     ruleWrapper.innerHTML += returnHTML;
