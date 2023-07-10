@@ -15,14 +15,13 @@ const Node = {
       "d090ea5469fc5949"
     ]
   ],
-  "_order": 85
+  "_order": 86
 }
 
 Node.template = `
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400&family=Roboto:wght@900&display=swap');
 
 * {
-  box-sizing: border-box;
   font-family: 'Roboto Slab';
   font-weight: 300;
   font-size: 13px;
@@ -72,7 +71,7 @@ pad_small {
 }
 
 body {
-  background-color: #d6d6d6;
+  background-color: #EAEDF0;
   flex: content;
   display: flex;
   justify-content: flex-start;
@@ -86,28 +85,23 @@ main {
 }
 
 .ruleBox {
-  background-color: #EAEDF0;
   border-radius: 5px;
-  position: relative;
-  overflow-x: visible;
   display: grid;
-  justify-content: start;
-  align-items: flex-start;
 }
 
 .ruleBox > h1 {
   background-color: #1B365D;
-  line-height: 70px;
+  line-height: 80px;
   color: white;
-  padding-left: 18px;
-  font-size: 20px;
+  font-size: 40px;
   font-family: 'Roboto Slab';
   font-weight: 400;
   text-transform: uppercase;
-  border: 2px solid whitesmoke;
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
-
+  width: -webkit-fill-available;
+  display: flex;
+  justify-content: center;
+  margin: auto;
+  border-radius: 5px;
 }
 
 .ruleBox > .subheader {
@@ -185,6 +179,7 @@ main {
 footer {
   padding: 10px;
   margin: 12px;
+  width: -webkit-fill-available;
 }
 
 button {
@@ -194,14 +189,22 @@ button {
   cursor: pointer;
   border-radius: 5px;
   transition: transform 0.2s;
-  font-size: 22px;
+  font-size: 15px;
   width: -webkit-fill-available;
 }
 
 button:hover {
-  transform: scale(1.1);
+  background-color: #1B365D;
+  text-transform: uppercase;
 }
 
+.addRuleButton:hover {
+  color: white;
+}
+
+.deleteRowButton:hover {
+  color: red;
+}
 `
 
 module.exports = Node;

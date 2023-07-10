@@ -15,7 +15,7 @@ const Node = {
       "f4c955396488fa27"
     ]
   ],
-  "_order": 88
+  "_order": 89
 }
 
 Node.template = `
@@ -38,7 +38,7 @@ Node.template = `
       <h1>Konteringsregler</h1>
       <main class="ruleWrapper ruleWrapper"></main>
       <footer>
-        <button class="addRuleButton" onclick="generateNewRow()">+</button>
+        <button class="addRuleButton" onclick="generateNewRow()">Tilføj regel</button>
       </footer>
     </main>
   

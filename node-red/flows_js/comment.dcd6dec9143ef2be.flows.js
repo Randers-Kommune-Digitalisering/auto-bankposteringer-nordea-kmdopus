@@ -5,8 +5,8 @@ const Node = {
   "g": "2be607f061d91628",
   "name": "Konvertering af csv til json",
   "info": "",
-  "x": 1510,
-  "y": 380,
+  "x": 730,
+  "y": 440,
   "wires": [],
   "_order": 74
 }

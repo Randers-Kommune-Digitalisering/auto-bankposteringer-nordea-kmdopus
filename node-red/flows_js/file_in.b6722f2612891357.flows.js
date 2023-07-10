@@ -11,8 +11,8 @@ const Node = {
   "sendError": false,
   "encoding": "none",
   "allProps": false,
-  "x": 1460,
-  "y": 420,
+  "x": 680,
+  "y": 480,
   "wires": [
     [
       "b96da9492994439b"

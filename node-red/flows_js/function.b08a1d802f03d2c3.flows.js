@@ -1,23 +1,20 @@
 const Node = {
-  "id": "8ac398a8353d0e9d",
+  "id": "b08a1d802f03d2c3",
   "type": "function",
   "z": "a1938e80ddbe5950",
-  "g": "745ee7cac00b8ea6",
-  "name": "Script",
+  "name": "Anvend konteringsregler backup",
   "func": "",
   "outputs": 1,
   "noerr": 0,
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 150,
-  "y": 540,
+  "x": 630,
+  "y": 640,
   "wires": [
-    [
-      "be0a51d36be4d3e8"
-    ]
+    []
   ],
-  "_order": 77
+  "_order": 84
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
@@ -60,36 +57,35 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
   for (let postering of global.get("transactions")) {
       let linjer_dannet = 0;
-      let rules_checked = 0;
+      let rows_tjekket = 0;
   
-      for (let regel_obj of global.get("konteringsregler")) {
-          let subRule_checked = 0;
+      for (let regel_row of global.get("konteringsregler")) {
+          let regler_tjekket = 0;
           let matches = 0;
   
+          let antal_searchword = Object.values(regel_row).slice(0, 4).filter(item => item).length;
+  
           let tjek_beløb;
-          if (!regel_obj[4].operator) {
+          if (!regel_row.beløb_regel) {
               tjek_beløb = true;
-          } else if (regel_obj[4].operator === '>') {
-              tjek_beløb = parseFloat(postering.amount) > parseFloat(regel_obj[4].value1.replace(',', '.'));
-          } else if (regel_obj[4].operator === '<') {
-              tjek_beløb = parseFloat(postering.amount) < parseFloat(regel_obj[4].value1.replace(',', '.'));
-          } else if (regel_obj[4].operator === '==') {
-              tjek_beløb = parseFloat(postering.amount) === parseFloat(regel_obj[4].value1.replace(',', '.'));
-          } else if (regel_obj[4].operator === '><') {
-              tjek_beløb = parseFloat(postering.amount) > parseFloat(regel_obj[4].value1.replace(',', '.')) && parseFloat(postering.amount) < parseFloat(regel_obj[4].value2.replace(',', '.'));
+          } else if (regel_row.beløb_regel.toLowerCase() === 'større end') {
+              tjek_beløb = parseFloat(postering.amount) > parseFloat(regel_row.Beløb1.replace(',', '.'));
+          } else if (regel_row.beløb_regel.toLowerCase() === 'mindre end') {
+              tjek_beløb = parseFloat(postering.amount) < parseFloat(regel_row.Beløb1.replace(',', '.'));
+          } else if (regel_row.beløb_regel.toLowerCase() === 'lig med') {
+              tjek_beløb = parseFloat(postering.amount) === parseFloat(regel_row.Beløb1.replace(',', '.'));
+          } else if (regel_row.beløb_regel.toLowerCase() === 'mellem') {
+              tjek_beløb = parseFloat(postering.amount) > parseFloat(regel_row.Beløb1.replace(',', '.')) && parseFloat(postering.amount) < parseFloat(regel_row.Beløb2.replace(',', '.'));
           }
   
-          let antal_searchword = regel_obj.filter(obj => obj.value !== null).length;
-  
-          if (rules_checked > 1 && linjer_dannet > 0) {
+          if (rows_tjekket > 1 && linjer_dannet > 0) {
               continue
           } else {
-  
-              for (let i = 0; i < 4; i++) {
-                  let searchword = String(regel_obj[i].value).toLowerCase();
+              for (let regel_celle of Object.values(regel_row).slice(0, 4)) {
+                  let searchword = String(regel_celle).toLowerCase();
   
                   if (searchword && !searchword.startsWith("#")) {
-                      let searchfelt = felter_i_nordea[subRule_checked];
+                      let searchfelt = felter_i_nordea[regler_tjekket];
                       if (!Array.isArray(searchfelt)) {
                           searchfelt = [searchfelt];
                       }
@@ -98,18 +94,13 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
                           try {
                               flow.set("tjek_searchword");
-                              if (regel_obj[i].operator === '.startsWith') {
+                              if (regel_row.match_regel.toLowerCase() === 'starter med') {
                                   flow.set("tjek_searchword", searchword === postering[alternativer]?.slice(0, searchword.length).toLowerCase());
-                              } else if (regel_obj[i].operator === '.endsWith') {
+                              } else if (regel_row.match_regel.toLowerCase() === 'slutter med') {
                                   flow.set("tjek_searchword", searchword === postering[alternativer]?.slice(-searchword.length).toLowerCase());
-                              } else if (regel_obj[i].operator === 'contains') {
+                              } else if (regel_row.match_regel.toLowerCase() === 'indeholder') {
                                   flow.set("tjek_searchword", postering.length >= alternativer && searchword in postering[alternativer]?.toLowerCase());
-                              } else if (regel_obj[i].operator === '!contains') {
-                                  flow.set("tjek_searchword", postering.length >= alternativer && !(searchword in postering[alternativer]?.toLowerCase()));
-                              } else if (regel_obj[i].operator === '!null') {
-                                  flow.set("tjek_searchword", postering[alternativer]?.toLowerCase() !== null);
                               }
-  
                           }
   
                           catch (error) {
@@ -123,11 +114,11 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
                               let driftdebkred = bankdebkred === 'Debet' ? 'Kredit' : 'Debet';
                               let beloeb = postering.amount.replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
                               let tekst;
-                              if (regel_obj[5].Posteringstekst.toLowerCase() === 'tekst fra bank') {
+                              if (regel_row.Posteringstekst.toLowerCase() === 'tekst fra bank') {
                                   tekst = postering.narrative;
-                              } else if (regel_obj[5].Posteringstekst.toLowerCase() === 'afsender fra bank') {
+                              } else if (regel_row.Posteringstekst.toLowerCase() === 'afsender fra bank') {
                                   tekst = postering.counterparty_name;
-                              } else if (regel_obj[5].Posteringstekst.toLowerCase() === 'advis fra bank') {
+                              } else if (regel_row.Posteringstekst.toLowerCase() === 'advis fra bank') {
                                   try {
                                       try {
                                           tekst = postering.extra_info;
@@ -138,7 +129,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
                                       tekst = postering.narrative;
                                   }
                               } else {
-                                  tekst = regel_obj[5].Posteringstekst;
+                                  tekst = regel_row.Posteringstekst;
                               }
   
                               if (alternativer in felter_i_nordea[1]) {
@@ -148,13 +139,13 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
                                       tekst = postering.message?.slice(postering.message.indexOf('KSD')) + ', ' + postering.payer_alias;
                                   }
                               }
-                              let artskonto = regel_obj[5].Artskonto;
-                              let psp = regel_obj[5].PSP;
+                              let artskonto = regel_row.Artskonto;
+                              let psp = regel_row.PSP;
   
                               flow.set("posteringsdata_til_drift", [artskonto, '', psp, '', '', driftdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
                               flow.set("posteringsdata_til_90540000", ['90540000', '', '', '', '', bankdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
                           }
-                          subRule_checked += 1;
+                          regler_tjekket += 1;
                       }
                   }
               }
@@ -174,7 +165,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
                   output_posteringsdata_til_90540000 = {};
   
               }
-              rules_checked += 1;
+              rows_tjekket += 1;
           }
       }
       if (linjer_dannet === 0) {

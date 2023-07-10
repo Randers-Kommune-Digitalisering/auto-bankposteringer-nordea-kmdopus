@@ -10,7 +10,7 @@ const Node = {
   "syntax": "mustache",
   "template": "",
   "output": "json",
-  "x": 400,
+  "x": 360,
   "y": 500,
   "wires": [
     [
@@ -54,7 +54,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "40000000",
             "PSP": "XG-0000000006-00007",
-            "SIO": null,
             "Notat": "SKAL STÅ FØR DEN GENERELLE REGEL"
         }
     ],
@@ -90,7 +89,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "40000000",
             "PSP": "XG-0000000006-00007",
-            "SIO": null,
             "Notat": "SKAL STÅ FØR DEN GENERELLE REGEL"
         }
     ],
@@ -126,7 +124,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95941202",
             "PSP": "",
-            "SIO": null,
             "Notat": "SKAL STÅ FØR DEN GENERELLE REGEL"
         }
     ],
@@ -162,7 +159,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95950000",
             "PSP": "",
-            "SIO": null,
             "Notat": "Salg af grunde. Kommer ikke altid med tekst dep, jævnligt kun adressen. Betina Bak."
         }
     ],
@@ -198,7 +194,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "94600005",
             "PSP": "",
-            "SIO": null,
             "Notat": "Randers Kommunes kunstfond"
         }
     ],
@@ -234,7 +229,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "94200011",
             "PSP": "",
-            "SIO": null,
             "Notat": "Randers Kommunes kunstfond"
         }
     ],
@@ -270,7 +264,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95914002",
             "PSP": "",
-            "SIO": null,
             "Notat": "Posteringstekst inkl. CPR. CPR er ikke med i banken?"
         }
     ],
@@ -306,7 +299,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95914002",
             "PSP": "",
-            "SIO": null,
             "Notat": "Posteringstekst inkl. CPR. CPR er ikke med i banken?"
         }
     ],
@@ -342,7 +334,6 @@ Node.template = `
             "text": "Advis fra bank",
             "Artskonto": "95914002",
             "PSP": "",
-            "SIO": null,
             "Notat": "Posteringstekst inkl. CPR"
         }
     ],
@@ -378,7 +369,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95914002",
             "PSP": "",
-            "SIO": null,
             "Notat": "Posteringstekst inkl. CPR"
         }
     ],
@@ -414,7 +404,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "79000000",
             "PSP": "XG-0000003333-00003",
-            "SIO": null,
             "Notat": "Pia Fonnesbæk vedr. spørgsmål."
         }
     ],
@@ -450,7 +439,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "90520001",
             "PSP": "",
-            "SIO": null,
             "Notat": "OBS-konto"
         }
     ],
@@ -486,7 +474,6 @@ Node.template = `
             "text": "UDK - afdrag indskudslån",
             "Artskonto": "95990009",
             "PSP": "",
-            "SIO": null,
             "Notat": "Modposteres af BTK"
         }
     ],
@@ -522,7 +509,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95931701",
             "PSP": "",
-            "SIO": null,
             "Notat": "KY"
         }
     ],
@@ -558,7 +544,6 @@ Node.template = `
             "text": "Afsender fra bank",
             "Artskonto": "95931700",
             "PSP": "",
-            "SIO": null,
             "Notat": "KP"
         }
     ],
@@ -594,7 +579,6 @@ Node.template = `
             "text": "Afsender fra bank",
             "Artskonto": "95931700",
             "PSP": "",
-            "SIO": null,
             "Notat": "KP"
         }
     ],
@@ -630,7 +614,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "90540000",
             "PSP": "",
-            "SIO": null,
             "Notat": "KMD Udbetaling 339"
         }
     ],
@@ -666,7 +649,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "90540000",
             "PSP": "",
-            "SIO": null,
             "Notat": "KMD Udbetaling 210"
         }
     ],
@@ -702,7 +684,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "90540000",
             "PSP": "",
-            "SIO": null,
             "Notat": "KMD Udbetaling 104"
         }
     ],
@@ -738,7 +719,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "90540000",
             "PSP": "",
-            "SIO": null,
             "Notat": "KMD Udbetaling 102"
         }
     ],
@@ -774,7 +754,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "90540000",
             "PSP": "",
-            "SIO": null,
             "Notat": "KMD Udbetaling 091"
         }
     ],
@@ -810,7 +789,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "90540000",
             "PSP": "",
-            "SIO": null,
             "Notat": "KMD Udbetaling 057"
         }
     ],
@@ -846,7 +824,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "90540000",
             "PSP": "",
-            "SIO": null,
             "Notat": "KMD Udbetaling 047"
         }
     ],
@@ -882,7 +859,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "90540000",
             "PSP": "",
-            "SIO": null,
             "Notat": "KMD Udbetaling 045"
         }
     ],
@@ -918,7 +894,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "90540000",
             "PSP": "",
-            "SIO": null,
             "Notat": "KMD Udbetaling 042"
         }
     ],
@@ -954,7 +929,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "90540000",
             "PSP": "",
-            "SIO": null,
             "Notat": "KMD Udbetaling 039"
         }
     ],
@@ -990,7 +964,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "90540000",
             "PSP": "",
-            "SIO": null,
             "Notat": "KMD Udbetaling 030"
         }
     ],
@@ -1026,7 +999,6 @@ Node.template = `
             "text": "E-penge",
             "Artskonto": "72000000",
             "PSP": "XG-0000005228-00003",
-            "SIO": null,
             "Notat": "Kantinen"
         }
     ],
@@ -1062,7 +1034,6 @@ Node.template = `
             "text": "Advis fra bank",
             "Artskonto": "86000000",
             "PSP": "XG-0000002066-00003",
-            "SIO": null,
             "Notat": "Kan gælde forskellige P-numre. P-nummer måske kun i advis."
         }
     ],
@@ -1098,7 +1069,6 @@ Node.template = `
             "text": "Advis fra bank",
             "Artskonto": "79000000",
             "PSP": "XG-0000003025-00001",
-            "SIO": null,
             "Notat": "Huslejenævnet"
         }
     ],
@@ -1134,7 +1104,6 @@ Node.template = `
             "text": "Advis fra bank",
             "Artskonto": "79000000",
             "PSP": "XG-0000003025-00001",
-            "SIO": null,
             "Notat": "Huslejenævnet"
         }
     ],
@@ -1170,7 +1139,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "79000000",
             "PSP": "XG-0000003025-00001",
-            "SIO": null,
             "Notat": "Huslejenævnet"
         }
     ],
@@ -1206,7 +1174,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "79000000",
             "PSP": "XG-0000003025-00001",
-            "SIO": null,
             "Notat": "Huslejenævnet"
         }
     ],
@@ -1242,7 +1209,6 @@ Node.template = `
             "text": "Advis fra bank",
             "Artskonto": "79000000",
             "PSP": "XG-0000003025-00001",
-            "SIO": null,
             "Notat": "Huslejenævnet"
         }
     ],
@@ -1278,7 +1244,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95912001",
             "PSP": "",
-            "SIO": null,
             "Notat": "Elsebeth Morgensen vedr. spørgsmål"
         }
     ],
@@ -1314,7 +1279,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95911000",
             "PSP": "",
-            "SIO": null,
             "Notat": "Elsebeth Morgensen vedr. spørgsmål"
         }
     ],
@@ -1350,7 +1314,6 @@ Node.template = `
             "text": "",
             "Artskonto": "95914005",
             "PSP": "",
-            "SIO": null,
             "Notat": "Dagpenge - Poster fra Hjørnesten og Randers Kunstmuseum skal tages manuelt"
         }
     ],
@@ -1386,7 +1349,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "92500201",
             "PSP": "",
-            "SIO": null,
             "Notat": "CPR ell. ejendomsnr. skal med i posteringstekst"
         }
     ],
@@ -1422,7 +1384,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "92500201",
             "PSP": "",
-            "SIO": null,
             "Notat": "CPR ell. ejendomsnr. skal med i posteringstekst"
         }
     ],
@@ -1458,7 +1419,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "90540000",
             "PSP": "",
-            "SIO": null,
             "Notat": "91407041 efter bankfil mandag"
         }
     ],
@@ -1494,7 +1454,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "90540000",
             "PSP": "",
-            "SIO": null,
             "Notat": "91407041 efter bankfil mandag"
         }
     ],
@@ -1530,7 +1489,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95931700",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -1566,7 +1524,6 @@ Node.template = `
             "text": "",
             "Artskonto": "95990026",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -1602,7 +1559,6 @@ Node.template = `
             "text": "Aktivitetsudvalget Korshøjscentret kageforplejning",
             "Artskonto": "79000000",
             "PSP": "XG-0000004526-00031",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -1638,7 +1594,6 @@ Node.template = `
             "text": "Depositcard Regnskab 006981",
             "Artskonto": "95990009",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -1674,7 +1629,6 @@ Node.template = `
             "text": "DK6687210 Trådløs Dankortterminal - Udlån fra Regnskab",
             "Artskonto": "79000000",
             "PSP": "XG-0000003397-00016",
-            "SIO": null,
             "Notat": "Gældende indtil 01.05.2023 - Derefter 95990009"
         }
     ],
@@ -1710,7 +1664,6 @@ Node.template = `
             "text": "DK8152290 Trådløs Dankortterminal - Udlån fra Regnskab",
             "Artskonto": "79000000",
             "PSP": "XG-0000003397-00016",
-            "SIO": null,
             "Notat": "Gældende indtil 01.05.2023 - Derefter 95990009"
         }
     ],
@@ -1746,7 +1699,6 @@ Node.template = `
             "text": "Teller 7893415 - internationalekort Kommunikation",
             "Artskonto": "95990009",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -1782,7 +1734,6 @@ Node.template = `
             "text": "",
             "Artskonto": "95990001",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -1818,7 +1769,6 @@ Node.template = `
             "text": "Depositcard Museum Østjylland 011888",
             "Artskonto": "95941300",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -1854,7 +1804,6 @@ Node.template = `
             "text": "DK2471043 Museum Østjylland",
             "Artskonto": "95941300",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -1890,7 +1839,6 @@ Node.template = `
             "text": "DK5247969 Museum Østjylland",
             "Artskonto": "95941300",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -1926,7 +1874,6 @@ Node.template = `
             "text": "Nets nr. 9475369104",
             "Artskonto": "95941300",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -1962,7 +1909,6 @@ Node.template = `
             "text": "Teller 7864309",
             "Artskonto": "95941300",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -1998,7 +1944,6 @@ Node.template = `
             "text": "Teller 7978497",
             "Artskonto": "95941300",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2034,7 +1979,6 @@ Node.template = `
             "text": "Kontant transaktion MOE",
             "Artskonto": "95941300",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2070,7 +2014,6 @@ Node.template = `
             "text": "Depositcard Randers Bibliotek 012195",
             "Artskonto": "95941202",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2106,7 +2049,6 @@ Node.template = `
             "text": "Depositcard Ladegården (Back up) 012193",
             "Artskonto": "90540005",
             "PSP": "",
-            "SIO": null,
             "Notat": "Back up pga. manglende fornyelse af eksisterende kort."
         }
     ],
@@ -2142,7 +2084,6 @@ Node.template = `
             "text": "DK1992317 Biblioteket",
             "Artskonto": "95941202",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2178,7 +2119,6 @@ Node.template = `
             "text": "Kontant transaktion Randers Bibliotek",
             "Artskonto": "95941202",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2214,7 +2154,6 @@ Node.template = `
             "text": "Nets 8674335 internationale kortbetalinger",
             "Artskonto": "95941202",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2250,7 +2189,6 @@ Node.template = `
             "text": "DK4521609",
             "Artskonto": "95941200",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2286,7 +2224,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95941110",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2322,7 +2259,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95932008",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2358,7 +2294,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95931505",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2394,7 +2329,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95931502",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2430,7 +2364,6 @@ Node.template = `
             "text": "",
             "Artskonto": "95931400",
             "PSP": "",
-            "SIO": null,
             "Notat": "Gælder kun overførsel af driftsresultat, sygeref. skal til 95914005"
         }
     ],
@@ -2466,7 +2399,6 @@ Node.template = `
             "text": "DK6256651",
             "Artskonto": "95931206",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2502,7 +2434,6 @@ Node.template = `
             "text": "Teller 7810906 - Borgerservice Pas, billeder og fingeraftryk",
             "Artskonto": "95931206",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2538,7 +2469,6 @@ Node.template = `
             "text": "DK4430778 Borgerservice",
             "Artskonto": "95931205",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2574,7 +2504,6 @@ Node.template = `
             "text": "DK4430778 Abonnement",
             "Artskonto": "40000000",
             "PSP": "XG-0000003020-00258",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2610,7 +2539,6 @@ Node.template = `
             "text": "DK4430778 Gebyrer",
             "Artskonto": "40000000",
             "PSP": "XG-0000003020-00258",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2646,7 +2574,6 @@ Node.template = `
             "text": "Teller 7620659",
             "Artskonto": "95931205",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2682,7 +2609,6 @@ Node.template = `
             "text": "Teller 7673000",
             "Artskonto": "95931202",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2718,7 +2644,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95931011",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2754,7 +2679,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95930007",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2790,7 +2714,6 @@ Node.template = `
             "text": "Udbetaling Danmark Bidrag",
             "Artskonto": "95920000",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2826,7 +2749,6 @@ Node.template = `
             "text": "",
             "Artskonto": "95914006",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2862,7 +2784,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95912000",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2898,7 +2819,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95912000",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2934,7 +2854,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95911002",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -2970,7 +2889,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95911001",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3006,7 +2924,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3042,7 +2959,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3078,7 +2994,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3114,7 +3029,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3150,7 +3064,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3186,7 +3099,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3222,7 +3134,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3258,7 +3169,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3294,7 +3204,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3330,7 +3239,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3366,7 +3274,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3402,7 +3309,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3438,7 +3344,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3474,7 +3379,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3510,7 +3414,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3546,7 +3449,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3582,7 +3484,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3618,7 +3519,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3654,7 +3554,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3690,7 +3589,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3726,7 +3624,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3762,7 +3659,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3798,7 +3694,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3834,7 +3729,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3870,7 +3764,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3906,7 +3799,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3942,7 +3834,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -3978,7 +3869,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4014,7 +3904,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4050,7 +3939,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4086,7 +3974,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4122,7 +4009,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4158,7 +4044,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4194,7 +4079,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4230,7 +4114,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4266,7 +4149,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4302,7 +4184,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4338,7 +4219,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4374,7 +4254,6 @@ Node.template = `
             "text": "Retur fra skat vedr. RW",
             "Artskonto": "95910006",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4410,7 +4289,6 @@ Node.template = `
             "text": "Skattekontoen, kreditering",
             "Artskonto": "95910006",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4446,7 +4324,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95000100",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4482,7 +4359,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "94700003",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4518,7 +4394,6 @@ Node.template = `
             "text": "DK7131666 - Mit Betalingsoverblik",
             "Artskonto": "91407040",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4554,7 +4429,6 @@ Node.template = `
             "text": "DK8499089 - Mit Betalingsoverblik",
             "Artskonto": "91407040",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4590,7 +4464,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "91407032",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4626,7 +4499,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "91407032",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4662,7 +4534,6 @@ Node.template = `
             "text": "K 86446707",
             "Artskonto": "91407030",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4698,7 +4569,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "91407020",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4734,7 +4604,6 @@ Node.template = `
             "text": "Indskudslån Lejerbo",
             "Artskonto": "91407008",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4770,7 +4639,6 @@ Node.template = `
             "text": "Afsender fra bank",
             "Artskonto": "91407008",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4806,7 +4674,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "91407007",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4842,7 +4709,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "91407007",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4878,7 +4744,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "91407006",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4914,7 +4779,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "91407006",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4950,7 +4814,6 @@ Node.template = `
             "text": "K 86136228",
             "Artskonto": "91407005",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -4986,7 +4849,6 @@ Node.template = `
             "text": "K 89182816",
             "Artskonto": "91407004",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5022,7 +4884,6 @@ Node.template = `
             "text": "K 84788767",
             "Artskonto": "91407003",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5058,7 +4919,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "90800100",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5094,7 +4954,6 @@ Node.template = `
             "text": "Betalingsservice månedsoverførsel",
             "Artskonto": "90540015",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5130,7 +4989,6 @@ Node.template = `
             "text": "Ls, kreditor 56685Udbetaling Loomis",
             "Artskonto": "90100036",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5166,7 +5024,6 @@ Node.template = `
             "text": "Depositcard ACR 006992",
             "Artskonto": "90100035",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5202,7 +5059,6 @@ Node.template = `
             "text": "Kontant transaktion ACR",
             "Artskonto": "90100035",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5238,7 +5094,6 @@ Node.template = `
             "text": "Kontant transaktion ACR",
             "Artskonto": "90100035",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5274,7 +5129,6 @@ Node.template = `
             "text": "Kontant transaktion ACR",
             "Artskonto": "90100035",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5310,7 +5164,6 @@ Node.template = `
             "text": "Depositcard CBR 006983",
             "Artskonto": "90100011",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5346,7 +5199,6 @@ Node.template = `
             "text": "Kontant transaktion CBR",
             "Artskonto": "90100011",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5382,7 +5234,6 @@ Node.template = `
             "text": "Kontant transaktion CBR",
             "Artskonto": "90100011",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5418,7 +5269,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "90100002",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5454,7 +5304,6 @@ Node.template = `
             "text": "Depositcard Borgerservice 012180",
             "Artskonto": "90100001",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5490,7 +5339,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "90100001",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5526,7 +5374,6 @@ Node.template = `
             "text": "Mønt Borgerservice",
             "Artskonto": "90100001",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5562,7 +5409,6 @@ Node.template = `
             "text": "Advis fra bank",
             "Artskonto": "86000000",
             "PSP": "XG-0000002067-00003",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5598,7 +5444,6 @@ Node.template = `
             "text": "Advis fra bank",
             "Artskonto": "86000000",
             "PSP": "XG-0000002068-00003",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5634,7 +5479,6 @@ Node.template = `
             "text": "Advis fra bank",
             "Artskonto": "86000000",
             "PSP": "XG-0000000034-00003",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5670,7 +5514,6 @@ Node.template = `
             "text": "Advis fra bank",
             "Artskonto": "86000000",
             "PSP": "XG-0000002069-00003",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5706,7 +5549,6 @@ Node.template = `
             "text": "Advis fra bank",
             "Artskonto": "86000000",
             "PSP": "XG-0000002806-00014",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5742,7 +5584,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "95910014",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5778,7 +5619,6 @@ Node.template = `
             "text": "Tilskud, Socialstyrelsen",
             "Artskonto": "86000000",
             "PSP": "XG-0000004599-00002",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5814,7 +5654,6 @@ Node.template = `
             "text": "Tilskud, Socialstyrelsen",
             "Artskonto": "86000000",
             "PSP": "XG-0000003913-00090",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5850,7 +5689,6 @@ Node.template = `
             "text": "Tilskud, Socialstyrelsen",
             "Artskonto": "86000000",
             "PSP": "XG-0000002810-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5886,7 +5724,6 @@ Node.template = `
             "text": "Tilskud, Socialstyrelsen",
             "Artskonto": "86000000",
             "PSP": "XG-0000003912-00004",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5922,7 +5759,6 @@ Node.template = `
             "text": "Tilskud, Socialstyrelsen",
             "Artskonto": "86000000",
             "PSP": "XG-0000004507-00131",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5958,7 +5794,6 @@ Node.template = `
             "text": "Tilskud, Socialstyrelsen",
             "Artskonto": "86000000",
             "PSP": "XG-0000004178-00007",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -5994,7 +5829,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "86000000",
             "PSP": "XG-0000004083-00002",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6030,7 +5864,6 @@ Node.template = `
             "text": "Tilskud, Musikskole",
             "Artskonto": "86000000",
             "PSP": "XG-0000004089-00005",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6066,7 +5899,6 @@ Node.template = `
             "text": "Østjysk Vækstbånd",
             "Artskonto": "86000000",
             "PSP": "XG-0000004187-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6102,7 +5934,6 @@ Node.template = `
             "text": "Tilskud, Bolig- og Planstyrelsen",
             "Artskonto": "86000000",
             "PSP": "XG-0000000019-00002",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6138,7 +5969,6 @@ Node.template = `
             "text": "Tilskud, Flere skal med",
             "Artskonto": "86000000",
             "PSP": "XG-0000003906-00009",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6174,7 +6004,6 @@ Node.template = `
             "text": "DK 5386888 051672 Sprogcentret online-adgang til UV-programm",
             "Artskonto": "79000000",
             "PSP": "XG-0000003397-00044",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6210,7 +6039,6 @@ Node.template = `
             "text": "DK4517148",
             "Artskonto": "79000000",
             "PSP": "XG-0000003057-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6246,7 +6074,6 @@ Node.template = `
             "text": "DK4862821",
             "Artskonto": "79000000",
             "PSP": "XG-0000005094-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6282,7 +6109,6 @@ Node.template = `
             "text": "DK4862899 Udbyhøj Færge",
             "Artskonto": "79000000",
             "PSP": "XG-0000005094-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6318,7 +6144,6 @@ Node.template = `
             "text": "DK4922735",
             "Artskonto": "79000000",
             "PSP": "XG-0000005096-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6354,7 +6179,6 @@ Node.template = `
             "text": "DK5386888 - P-licens",
             "Artskonto": "79000000",
             "PSP": "XG-0000005096-00009",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6390,7 +6214,6 @@ Node.template = `
             "text": "DK5386888 - P-Licens",
             "Artskonto": "79000000",
             "PSP": "XG-0000005096-00009",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6426,7 +6249,6 @@ Node.template = `
             "text": "DK5386888 - P-Licens",
             "Artskonto": "79000000",
             "PSP": "XG-0000005096-00009",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6462,7 +6284,6 @@ Node.template = `
             "text": "DK5386888 005070 Sprogcentret - medborgerskabsprøve",
             "Artskonto": "79000000",
             "PSP": "XG-0000003397-00053",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6498,7 +6319,6 @@ Node.template = `
             "text": "DK5386888 013583 Assentoftskolen 9. klasserne lejrskole",
             "Artskonto": "79000000",
             "PSP": "XG-0000002369-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6534,7 +6354,6 @@ Node.template = `
             "text": "DK5386888 015106 - Assentoft - Djurs sommerland 7-8. årgang",
             "Artskonto": "79000000",
             "PSP": "XG-0000002369-00029",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6570,7 +6389,6 @@ Node.template = `
             "text": "DK5386888 015538 Valgfaget adventure på Assentoftskolen",
             "Artskonto": "79000000",
             "PSP": "XG-0000002369-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6606,7 +6424,6 @@ Node.template = `
             "text": "DK5386888 015681 - Betaling lejrskole 6. årgang",
             "Artskonto": "79000000",
             "PSP": "XG-0000002369-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6642,7 +6459,6 @@ Node.template = `
             "text": "DK5386888 015687 - Hyttetur 7. årgang Assentoftskolen",
             "Artskonto": "79000000",
             "PSP": "XG-0000002369-00021",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6678,7 +6494,6 @@ Node.template = `
             "text": "DK5386888 015689 - Lejrskole 9. årgang Assentoftskolen",
             "Artskonto": "79000000",
             "PSP": "XG-0000002369-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6714,7 +6529,6 @@ Node.template = `
             "text": "DK5386888 017737 Assentoft - egenbetaling",
             "Artskonto": "79000000",
             "PSP": "XG-0000002369-00022",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6750,7 +6564,6 @@ Node.template = `
             "text": "DK5386888 017840 Assentoft - Aktive tøser overnatningstur",
             "Artskonto": "79000000",
             "PSP": "XG-0000002369-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6786,7 +6599,6 @@ Node.template = `
             "text": "DK5386888 030433 - Gudenåløbet 2019",
             "Artskonto": "79000000",
             "PSP": "XG-0000005063-00010",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6822,7 +6634,6 @@ Node.template = `
             "text": "DK5386888 041575 - Vestervangsskolen Skolefest",
             "Artskonto": "79000000",
             "PSP": "XG-0000002555-00023",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6858,7 +6669,6 @@ Node.template = `
             "text": "DK5386888 041575 Vestervangsskolen Skolefest",
             "Artskonto": "79000000",
             "PSP": "XG-0000002555-00023",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6894,7 +6704,6 @@ Node.template = `
             "text": "DK5386888 048106 - Lejrtur 6. årgang, Vestervangsskolen",
             "Artskonto": "79000000",
             "PSP": "XG-0000002555-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6930,7 +6739,6 @@ Node.template = `
             "text": "DK5386888 050070 Sprogcentret - medborgerskabsprøve",
             "Artskonto": "79000000",
             "PSP": "XG-0000003397-00053",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -6966,7 +6774,6 @@ Node.template = `
             "text": "DK5386888 083585 Grønhøjskolens Studietur for 9.A og 9.B Prag",
             "Artskonto": "79000000",
             "PSP": "XG-0000002415-00037",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7002,7 +6809,6 @@ Node.template = `
             "text": "DK5386888 084052 Grønhøj, Lejrtur Bornholm",
             "Artskonto": "79000000",
             "PSP": "XG-0000002415-00037",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7038,7 +6844,6 @@ Node.template = `
             "text": "DK5386888 102156 Østervangsskolen 1.e og 2.d lejrskole",
             "Artskonto": "79000000",
             "PSP": "XG-0000002568-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7074,7 +6879,6 @@ Node.template = `
             "text": "DK5386888 102373 Østervangsskolen -Lejrskole i I1, I2 og I3",
             "Artskonto": "79000000",
             "PSP": "XG-0000002568-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7110,7 +6914,6 @@ Node.template = `
             "text": "DK5386888 111939 Nørrevangsk. Studietur til Berlin for 10.kl",
             "Artskonto": "79000000",
             "PSP": "XG-0000002511-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7146,7 +6949,6 @@ Node.template = `
             "text": "DK5386888 112030 Nørrevangsskolen tur till Berlin for 9. årg",
             "Artskonto": "79000000",
             "PSP": "XG-0000002511-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7182,7 +6984,6 @@ Node.template = `
             "text": "DK5386888 119223 Nørrevangsskolen studietur ",
             "Artskonto": "79000000",
             "PSP": "XG-0000002511-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7218,7 +7019,6 @@ Node.template = `
             "text": "DK5386888 131806 Korshøjskolen, Skolerejse til København 9A+9B",
             "Artskonto": "79000000",
             "PSP": "XG-0000002465-00044",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7254,7 +7054,6 @@ Node.template = `
             "text": "DK5386888 131905 - Korshøjskolen - billetter skuespil",
             "Artskonto": "79000000",
             "PSP": "XG-0000002465-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7290,7 +7089,6 @@ Node.template = `
             "text": "DK5386888 131955 Korshøjskolen - Djurs Sommerland 9A+9B",
             "Artskonto": "79000000",
             "PSP": "XG-0000002465-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7326,7 +7124,6 @@ Node.template = `
             "text": "DK5386888 132419 Korshøjskolen skolefest B-skolen",
             "Artskonto": "79000000",
             "PSP": "XG-0000002465-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7362,7 +7159,6 @@ Node.template = `
             "text": "DK5386888 132761 5. årgangs Hyttetur, Korshøjskolen ",
             "Artskonto": "79000000",
             "PSP": "XG-0000002465-00042",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7398,7 +7194,6 @@ Node.template = `
             "text": "DK5386888 132761 Korshøjskolen Lejrtur 4A + 4B",
             "Artskonto": "79000000",
             "PSP": "XG-0000002465-00042",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7434,7 +7229,6 @@ Node.template = `
             "text": "DK5386888 133171 Korshøjskolen, skolefest",
             "Artskonto": "79000000",
             "PSP": "XG-0000002465-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7470,7 +7264,6 @@ Node.template = `
             "text": "DK5386888 133987 8. årgang København - Korshøjskolen",
             "Artskonto": "79000000",
             "PSP": "XG-0000002465-00044",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7506,7 +7299,6 @@ Node.template = `
             "text": "DK5386888 141866 - Tirsdalens Skole tur til Krakow for 9. kl.",
             "Artskonto": "79000000",
             "PSP": "XG-0000002544-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7542,7 +7334,6 @@ Node.template = `
             "text": "DK5386888 142030 Tirsdalens lejrskole 8. årgang",
             "Artskonto": "79000000",
             "PSP": "XG-0000002544-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7578,7 +7369,6 @@ Node.template = `
             "text": "DK5386888 142063 Lejrskole for 7.-klasser på Tirsdalens Skole.",
             "Artskonto": "79000000",
             "PSP": "XG-0000002544-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7614,7 +7404,6 @@ Node.template = `
             "text": "DK5386888 142069 Tirsdalensskole - skolerejse for 9. til Tje",
             "Artskonto": "79000000",
             "PSP": "XG-0000002544-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7650,7 +7439,6 @@ Node.template = `
             "text": "DK5386888 142228 - 8. årgang Tirsdalen Skole til Sønderborg",
             "Artskonto": "79000000",
             "PSP": "XG-0000002544-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7686,7 +7474,6 @@ Node.template = `
             "text": "DK5386888 1425814 Tirsdalens Skole 9. Årgang til Berlin",
             "Artskonto": "79000000",
             "PSP": "XG-0000002544-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7722,7 +7509,6 @@ Node.template = `
             "text": "DK5386888 192046 Hornbæk Skole. Lejrskole 8.x og 8.y til Køb",
             "Artskonto": "79000000",
             "PSP": "XG-0000002452-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7758,7 +7544,6 @@ Node.template = `
             "text": "DK5386888 192104 - Hornbæk skole skolefest",
             "Artskonto": "79000000",
             "PSP": "XG-0000002452-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7794,7 +7579,6 @@ Node.template = `
             "text": "DK5386888 192411 Hornbæk,Lejrskole for 9.x og 9.y til Københ",
             "Artskonto": "79000000",
             "PSP": "XG-0000002452-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7830,7 +7614,6 @@ Node.template = `
             "text": "DK5386888 192715 Hornbæk-Tur til Nordtyskland for 8. årgang",
             "Artskonto": "79000000",
             "PSP": "XG-0000002452-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7866,7 +7649,6 @@ Node.template = `
             "text": "DK5386888 192764 Honbæk skole, Lejrtur for 8. årgang til KBH",
             "Artskonto": "79000000",
             "PSP": "XG-0000002452-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7902,7 +7684,6 @@ Node.template = `
             "text": "DK5386888 192789 Hornbæk Skole, Lejrtur 6. årgang",
             "Artskonto": "79000000",
             "PSP": "XG-0000002452-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7938,7 +7719,6 @@ Node.template = `
             "text": "DK5386888 2113400 Hobrovejens Skole. Lejrskole for 6. årgang",
             "Artskonto": "79000000",
             "PSP": "XG-0000002439-00022",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -7974,7 +7754,6 @@ Node.template = `
             "text": "DK5386888 211363 Rismølleskolen 8.årgang studietur KBH",
             "Artskonto": "79000000",
             "PSP": "XG-0000002521-00030",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8010,7 +7789,6 @@ Node.template = `
             "text": "DK5386888 2114410 Hornbæk lejrskole Bornholm",
             "Artskonto": "79000000",
             "PSP": "XG-0000002452-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8046,7 +7824,6 @@ Node.template = `
             "text": "DK5386888 2115023 Korshøjskolen Skolefest B-skolen",
             "Artskonto": "79000000",
             "PSP": "XG-0000002465-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8082,7 +7859,6 @@ Node.template = `
             "text": "DK5386888 2125038 9. Årgang til Berlin på Tirsdalens Skole",
             "Artskonto": "79000000",
             "PSP": "XG-0000002544-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8118,7 +7894,6 @@ Node.template = `
             "text": "DK5386888 222815 Søndermarkskolen Lejrtur Kattegat",
             "Artskonto": "79000000",
             "PSP": "XG-0000002531-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8154,7 +7929,6 @@ Node.template = `
             "text": "DK5386888 224173 - Søndermarkskolen hyttetur for 3. klasse",
             "Artskonto": "79000000",
             "PSP": "XG-0000002531-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8190,7 +7964,6 @@ Node.template = `
             "text": "DK5386888 225973 Søndermarkskolen. Lejrtur Skagen",
             "Artskonto": "79000000",
             "PSP": "XG-0000002531-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8226,7 +7999,6 @@ Node.template = `
             "text": "DK5386888 226407 Søndermarkskolen, Hyttetur 3. årgang",
             "Artskonto": "79000000",
             "PSP": "XG-0000002531-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8262,7 +8034,6 @@ Node.template = `
             "text": "DK5386888 231400 - Bådpladser Udbyhøj",
             "Artskonto": "79000000",
             "PSP": "XG-0000004025-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8298,7 +8069,6 @@ Node.template = `
             "text": "DK5386888 231400 - Bådpladser Udbyhøj",
             "Artskonto": "79000000",
             "PSP": "XG-0000004025-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8334,7 +8104,6 @@ Node.template = `
             "text": "DK5386888 231400 - Bådpladser Udbyhøj",
             "Artskonto": "79000000",
             "PSP": "XG-0000004025-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8370,7 +8139,6 @@ Node.template = `
             "text": "DK5386888 231400 - Bådpladser Udbyhøj",
             "Artskonto": "79000000",
             "PSP": "XG-0000004025-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8406,7 +8174,6 @@ Node.template = `
             "text": "DK5386888 241777 - Kristrup Skole – Lejrskole for 6. klasserne",
             "Artskonto": "79000000",
             "PSP": "XG-0000002475-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8442,7 +8209,6 @@ Node.template = `
             "text": "DK5386888 241798 - Kristrup Skole – Lejrskole for 6. klasserne",
             "Artskonto": "79000000",
             "PSP": "XG-0000002475-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8478,7 +8244,6 @@ Node.template = `
             "text": "DK5386888 241816 / Hyttetur for 3. årgang",
             "Artskonto": "79000000",
             "PSP": "XG-0000002475-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8514,7 +8279,6 @@ Node.template = `
             "text": "DK5386888 242118 Kristrup Skole - Skolefest",
             "Artskonto": "79000000",
             "PSP": "XG-0000002475-00017",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8550,7 +8314,6 @@ Node.template = `
             "text": "DK5386888 242716 Kristrup Skole 6 årgang Læsø",
             "Artskonto": "79000000",
             "PSP": "XG-0000002475-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8586,7 +8349,6 @@ Node.template = `
             "text": "DK5386888 242740 Kristrup skole Lejrskole 6. årgang",
             "Artskonto": "79000000",
             "PSP": "XG-0000002475-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8622,7 +8384,6 @@ Node.template = `
             "text": "DK5386888 242823 Hyttetur 3 A på Kristrup Skole",
             "Artskonto": "79000000",
             "PSP": "XG-0000002475-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8658,7 +8419,6 @@ Node.template = `
             "text": "DK5386888 280691 - Cykelparkering - abonnementsbetaling",
             "Artskonto": "79000000",
             "PSP": "XG-0000005063-00010",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8694,7 +8454,6 @@ Node.template = `
             "text": "DK5386888 280692 - Cykelparkering - abonnementsbetaling",
             "Artskonto": "79000000",
             "PSP": "XG-0000005063-00010",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8730,7 +8489,6 @@ Node.template = `
             "text": "DK5386888 280693 - Cykelparkering - abonnementsbetaling",
             "Artskonto": "79000000",
             "PSP": "XG-0000005063-00010",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8766,7 +8524,6 @@ Node.template = `
             "text": "DK5386888 281701 - Cykelby",
             "Artskonto": "79000000",
             "PSP": "XG-0000005063-00010",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8802,7 +8559,6 @@ Node.template = `
             "text": "DK5386888 410066 Vestervangsskolen overnatning 3. årgang",
             "Artskonto": "79000000",
             "PSP": "XG-0000002555-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8838,7 +8594,6 @@ Node.template = `
             "text": "DK5386888 412905 Vestervangsskolen - Lejrtur 9. årgang",
             "Artskonto": "79000000",
             "PSP": "XG-0000002555-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8874,7 +8629,6 @@ Node.template = `
             "text": "DK5386888 417651 Vestervangsskolen - Lejrtur 6. årgang",
             "Artskonto": "79000000",
             "PSP": "XG-0000002555-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8910,7 +8664,6 @@ Node.template = `
             "text": "DK5386888 Bådpladser Udbyhøj",
             "Artskonto": "79000000",
             "PSP": "XG-0000004025-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8946,7 +8699,6 @@ Node.template = `
             "text": "DK5386888 Bådpladser Udbyhøj",
             "Artskonto": "79000000",
             "PSP": "XG-0000004025-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -8982,7 +8734,6 @@ Node.template = `
             "text": "DK5386888 Bådpladser Udbyhøj",
             "Artskonto": "79000000",
             "PSP": "XG-0000004025-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9018,7 +8769,6 @@ Node.template = `
             "text": "DK5386888 Bådpladser Udbyhøj",
             "Artskonto": "79000000",
             "PSP": "XG-0000004025-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9054,7 +8804,6 @@ Node.template = `
             "text": "DK5386888 Bådpladser Udbyhøj",
             "Artskonto": "79000000",
             "PSP": "XG-0000004025-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9090,7 +8839,6 @@ Node.template = `
             "text": "DK5386888 Bådpladser Udbyhøj",
             "Artskonto": "79000000",
             "PSP": "XG-0000004025-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9126,7 +8874,6 @@ Node.template = `
             "text": "DK5386888 Bådpladser Udbyhøj",
             "Artskonto": "79000000",
             "PSP": "XG-0000004025-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9162,7 +8909,6 @@ Node.template = `
             "text": "DK5386888 Bådpladser Udbyhøj",
             "Artskonto": "79000000",
             "PSP": "XG-0000004025-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9198,7 +8944,6 @@ Node.template = `
             "text": "DK5386888 Bådpladser Udbyhøj",
             "Artskonto": "79000000",
             "PSP": "XG-0000004025-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9234,7 +8979,6 @@ Node.template = `
             "text": "DK5386888 Bådpladser Udbyhøj",
             "Artskonto": "79000000",
             "PSP": "XG-0000004025-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9270,7 +9014,6 @@ Node.template = `
             "text": "DK5386888 Cykel",
             "Artskonto": "79000000",
             "PSP": "XG-0000005063-00010",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9306,7 +9049,6 @@ Node.template = `
             "text": "DK5386888 Cykel",
             "Artskonto": "79000000",
             "PSP": "XG-0000005063-00010",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9342,7 +9084,6 @@ Node.template = `
             "text": "DK5386888 Hobrovejensskole Lejrskole 2017 for 5. a og 5. b",
             "Artskonto": "79000000",
             "PSP": "XG-0000002439-00022",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9378,7 +9119,6 @@ Node.template = `
             "text": "DK5386888 Hornbæk skole Lejrskole 2017 for 5. a og 5. b",
             "Artskonto": "79000000",
             "PSP": "XG-0000002452-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9414,7 +9154,6 @@ Node.template = `
             "text": "DK5386888 Indbetaling Lejrskole for vores 6. klasser",
             "Artskonto": "79000000",
             "PSP": "XG-0000002439-00022",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9450,7 +9189,6 @@ Node.template = `
             "text": "DK5386888 Korshøjskolen Lejrtur 6. årgang til Skagen",
             "Artskonto": "79000000",
             "PSP": "XG-0000002465-00042",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9486,7 +9224,6 @@ Node.template = `
             "text": "DK5386888 Korshøjskolen Skolefest for udskolingen",
             "Artskonto": "79000000",
             "PSP": "XG-0000002465-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9522,7 +9259,6 @@ Node.template = `
             "text": "DK5386888 Korshøjskolen Tur til Sønderborg for S1 og S2 ",
             "Artskonto": "79000000",
             "PSP": "XG-0000002465-00045",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9558,7 +9294,6 @@ Node.template = `
             "text": "DK5386888 Kristrup Skole lejrskole København",
             "Artskonto": "79000000",
             "PSP": "XG-0000002475-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9594,7 +9329,6 @@ Node.template = `
             "text": "DK5386888 Kristrup Skole Lejrskole Voer 2018",
             "Artskonto": "79000000",
             "PSP": "XG-0000002475-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9630,7 +9364,6 @@ Node.template = `
             "text": "DK5386888 Kristrup Skole Skolefest",
             "Artskonto": "79000000",
             "PSP": "XG-0000002475-00017",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9666,7 +9399,6 @@ Node.template = `
             "text": "DK5386888 Lejrtur 8.C Korshøjskolen",
             "Artskonto": "79000000",
             "PSP": "XG-0000002465-00044",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9702,7 +9434,6 @@ Node.template = `
             "text": "DK5386888 Skolefest Hornbæk Skole",
             "Artskonto": "79000000",
             "PSP": "XG-0000002452-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9738,7 +9469,6 @@ Node.template = `
             "text": "DK5386888 Tirsdalens Skole – lejrskole i København",
             "Artskonto": "79000000",
             "PSP": "XG-0000002544-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9774,7 +9504,6 @@ Node.template = `
             "text": "DK5386888 Tirsdalens Skole - Skolefest",
             "Artskonto": "79000000",
             "PSP": "XG-0000002544-00026",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9810,7 +9539,6 @@ Node.template = `
             "text": "DK5386888 Tirsdalens skole-Lejrskole på Samsø",
             "Artskonto": "79000000",
             "PSP": "XG-0000002544-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9846,7 +9574,6 @@ Node.template = `
             "text": "DK5541069 Udbyhøj Lystbådehavn",
             "Artskonto": "79000000",
             "PSP": "XG-0000004025-00002",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9882,7 +9609,6 @@ Node.template = `
             "text": "DK6175937 køb af mærkater til erhvervs adgang til genbrugspl",
             "Artskonto": "79000000",
             "PSP": "XG-0000005285-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9918,7 +9644,6 @@ Node.template = `
             "text": "DK6177549 Huslejenævnet. Indbetaling på Randers.dk",
             "Artskonto": "79000000",
             "PSP": "XG-0000003025-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9954,7 +9679,6 @@ Node.template = `
             "text": "DK6631479 Beboerlicens parkering RK",
             "Artskonto": "79000000",
             "PSP": "XG-0000005096-00009",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -9990,7 +9714,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "79000000",
             "PSP": "XG-0000002667-00008",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10026,7 +9749,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "79000000",
             "PSP": "XG-0000002667-00008",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10062,7 +9784,6 @@ Node.template = `
             "text": "Hornbæk Skoles skolefest",
             "Artskonto": "79000000",
             "PSP": "XG-0000002452-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10098,7 +9819,6 @@ Node.template = `
             "text": "Kontant transaktion AFK",
             "Artskonto": "79000000",
             "PSP": "XG 0000003070-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10134,7 +9854,6 @@ Node.template = `
             "text": "Lejrskole 9. klasse Tirsdalen",
             "Artskonto": "79000000",
             "PSP": "XG-0000002544-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10170,7 +9889,6 @@ Node.template = `
             "text": "Sprogcentret - medborgerskabsprøve",
             "Artskonto": "79000000",
             "PSP": "XG-0000003397-00053",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10206,7 +9924,6 @@ Node.template = `
             "text": "Sprogcentret - Prøver",
             "Artskonto": "79000000",
             "PSP": "XG-0000003397-00044",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10242,7 +9959,6 @@ Node.template = `
             "text": "Sprogcentret - Statsborgerskabsprøve",
             "Artskonto": "79000000",
             "PSP": "XG-0000003397-00053",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10278,7 +9994,6 @@ Node.template = `
             "text": "Sprogcentret - Statsborgerskabsprøve",
             "Artskonto": "79000000",
             "PSP": "XG-0000003397-00053",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10314,7 +10029,6 @@ Node.template = `
             "text": "Sprogcentret - Statsborgerskabsprøve",
             "Artskonto": "79000000",
             "PSP": "XG-0000003397-00053",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10350,7 +10064,6 @@ Node.template = `
             "text": "Studietur til Berlin",
             "Artskonto": "79000000",
             "PSP": "XG-0000002511-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10386,7 +10099,6 @@ Node.template = `
             "text": "Studietur til New York",
             "Artskonto": "79000000",
             "PSP": "XG-0000002511-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10422,7 +10134,6 @@ Node.template = `
             "text": "Teller 7374697",
             "Artskonto": "79000000",
             "PSP": "XG-0000005096-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10458,7 +10169,6 @@ Node.template = `
             "text": "Teller 7555139",
             "Artskonto": "79000000",
             "PSP": "XG-0000005094-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10494,7 +10204,6 @@ Node.template = `
             "text": "Teller 7570562",
             "Artskonto": "79000000",
             "PSP": "XG-0000004025-00002",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10530,7 +10239,6 @@ Node.template = `
             "text": "Teller 7757974 / randers-affald",
             "Artskonto": "79000000",
             "PSP": "XG-0000005285-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10566,7 +10274,6 @@ Node.template = `
             "text": "Teller 8094609 Beboerlicens parkering RK",
             "Artskonto": "79000000",
             "PSP": "XG-0000005096-00009",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10602,7 +10309,6 @@ Node.template = `
             "text": "DK5386888_cykel",
             "Artskonto": "79000000",
             "PSP": "XG-0000005063-00010",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10638,7 +10344,6 @@ Node.template = `
             "text": "DK5386888_cykel",
             "Artskonto": "79000000",
             "PSP": "XG-0000005063-00010",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10674,7 +10379,6 @@ Node.template = `
             "text": "AE 9476014980",
             "Artskonto": "79000000",
             "PSP": "XG-0000005096-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10710,7 +10414,6 @@ Node.template = `
             "text": "AE 9476060256",
             "Artskonto": "79000000",
             "PSP": "XG-0000005094-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10746,7 +10449,6 @@ Node.template = `
             "text": "Hornbæk Skole – Lejrskole for 5. årgang til Odense",
             "Artskonto": "79000000",
             "PSP": "XG-0000002452-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10782,7 +10484,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "79000000",
             "PSP": "XG-0000005096-00010",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10818,7 +10519,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "79000000",
             "PSP": "XG-0000005096-00010",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10854,7 +10554,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "79000000",
             "PSP": "XG-0000005096-00010",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10890,7 +10589,6 @@ Node.template = `
             "text": "Vedr. projekt SDTN Supervision",
             "Artskonto": "79000000",
             "PSP": "XG-0000002793-00004",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10926,7 +10624,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "79000000",
             "PSP": "XG-0000005096-00010",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10962,7 +10659,6 @@ Node.template = `
             "text": "538688 030325 Depositum ifm. udlån af elcykler",
             "Artskonto": "79000000",
             "PSP": "XG-0000005063-00011",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -10998,7 +10694,6 @@ Node.template = `
             "text": "5386888 0-2121 UMT til kampagnen GIV RANDERS ET TRÆ",
             "Artskonto": "79000000",
             "PSP": "XA-9258200001-00041",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11034,7 +10729,6 @@ Node.template = `
             "text": "5386888 1-2121 UMT til kampagnen GIV RANDERS ET TRÆ",
             "Artskonto": "79000000",
             "PSP": "XA-9258200001-00041",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11070,7 +10764,6 @@ Node.template = `
             "text": "5386888 212126 UMT til kampagnen GIV RANDERS ET TRÆ",
             "Artskonto": "79000000",
             "PSP": "XA-9258200001-00041",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11106,7 +10799,6 @@ Node.template = `
             "text": "5386888 2-2121 UMT til kampagnen GIV RANDERS ET TRÆ",
             "Artskonto": "79000000",
             "PSP": "XA-9258200001-00041",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11142,7 +10834,6 @@ Node.template = `
             "text": "5386888 3-2121 UMT til kampagnen GIV RANDERS ET TRÆ",
             "Artskonto": "79000000",
             "PSP": "XA-9258200001-00041",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11178,7 +10869,6 @@ Node.template = `
             "text": "5386888 4-2121 UMT til kampagnen GIV RANDERS ET TRÆ",
             "Artskonto": "79000000",
             "PSP": "XA-9258200001-00041",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11214,7 +10904,6 @@ Node.template = `
             "text": "5386888 5-2121 UMT til kampagnen GIV RANDERS ET TRÆ",
             "Artskonto": "79000000",
             "PSP": "XA-9258200001-00041",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11250,7 +10939,6 @@ Node.template = `
             "text": "5386888 6-2121 UMT til kampagnen GIV RANDERS ET TRÆ",
             "Artskonto": "79000000",
             "PSP": "XA-9258200001-00041",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11286,7 +10974,6 @@ Node.template = `
             "text": "5386888 7-2121 UMT til kampagnen GIV RANDERS ET TRÆ",
             "Artskonto": "79000000",
             "PSP": "XA-9258200001-00041",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11322,7 +11009,6 @@ Node.template = `
             "text": "5386888 8-2121 UMT til kampagnen GIV RANDERS ET TRÆ",
             "Artskonto": "79000000",
             "PSP": "XA-9258200001-00041",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11358,7 +11044,6 @@ Node.template = `
             "text": "5386888 9-2121 UMT til kampagnen GIV RANDERS ET TRÆ",
             "Artskonto": "79000000",
             "PSP": "XA-9258200001-00041",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11394,7 +11079,6 @@ Node.template = `
             "text": "Depositcard AF-koordinator 011887",
             "Artskonto": "79000000",
             "PSP": "XG-0000003070-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11430,7 +11114,6 @@ Node.template = `
             "text": "Depositcard Blicherskolen Skolebod A 011893",
             "Artskonto": "79000000",
             "PSP": "XG-0000002392-00031",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11466,7 +11149,6 @@ Node.template = `
             "text": "Depositcard Blicherskolen Skolebod B 011892",
             "Artskonto": "79000000",
             "PSP": "XG-0000002392-00032",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11502,7 +11184,6 @@ Node.template = `
             "text": "Depositcard Hobrovejens Skole 006990",
             "Artskonto": "79000000",
             "PSP": "XG-0000002439-00014",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11538,7 +11219,6 @@ Node.template = `
             "text": "Depositcard RS Blommevej",
             "Artskonto": "79000000",
             "PSP": "XG-0000002648-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11574,7 +11254,6 @@ Node.template = `
             "text": "Depositcard Mellerup/Ragna 006982",
             "Artskonto": "79000000",
             "PSP": "XG-0000005094-00005",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11610,7 +11289,6 @@ Node.template = `
             "text": "Depositcard Munkholmskolen 012194",
             "Artskonto": "79000000",
             "PSP": "XG-0000004526-00048",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11646,7 +11324,6 @@ Node.template = `
             "text": "Depositcard Randers Ungddomsskole 006991",
             "Artskonto": "79000000",
             "PSP": "XG-0000002667-00008",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11682,7 +11359,6 @@ Node.template = `
             "text": "Depositcard Sprogcentret 006980",
             "Artskonto": "79000000",
             "PSP": "XG-0000003397-00012",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11718,7 +11394,6 @@ Node.template = `
             "text": "Depositcard Søndermarkskolen 006976",
             "Artskonto": "79000000",
             "PSP": "XG-0000002531-00016",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11754,7 +11429,6 @@ Node.template = `
             "text": "Depositcard Udbyhøj 006977",
             "Artskonto": "79000000",
             "PSP": "XG-0000005094-00004",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11790,7 +11464,6 @@ Node.template = `
             "text": "DK5386000 102400 Østervangsskolen, Lejrskole 5. årgang – ",
             "Artskonto": "79000000",
             "PSP": "XG-0000002568-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11826,7 +11499,6 @@ Node.template = `
             "text": "DK5386888 083585 Grønhøjskolens Skolerejse for 9.A og 9.B KBH",
             "Artskonto": "79000000",
             "PSP": "XG-0000002415-00037",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11862,7 +11534,6 @@ Node.template = `
             "text": "DK5386888 142729 Tirsdalens skole - egenbetaling lejrtur",
             "Artskonto": "79000000",
             "PSP": "XG-0000002544-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11898,7 +11569,6 @@ Node.template = `
             "text": "DK5386888 192902Hornbæk Skole, Lejrskole 5. årgang – ID 192902",
             "Artskonto": "79000000",
             "PSP": "XG-0000002452-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11934,7 +11604,6 @@ Node.template = `
             "text": "DK5386888 192944 Hornbæk Skole, Lejrskole 8. årgang – ID 192944",
             "Artskonto": "79000000",
             "PSP": "XG-0000002452-00020",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -11970,7 +11639,6 @@ Node.template = `
             "text": "DK5386888 243011 ",
             "Artskonto": "79000000",
             "PSP": "XG-0000002475-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12006,7 +11674,6 @@ Node.template = `
             "text": "DK5386888 243153 Hyttetur 3 årgang på Kristrup Skole",
             "Artskonto": "79000000",
             "PSP": "XG-0000002475-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12042,7 +11709,6 @@ Node.template = `
             "text": "DK8686888 243086 Kristrup 6. årg. SKAGEN.",
             "Artskonto": "79000000",
             "PSP": "XG-0000002475-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12078,7 +11744,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "79000000",
             "PSP": "XG-0000005096-00010",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12114,7 +11779,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "79000000",
             "PSP": "XG-0000005096-00010",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12150,7 +11814,6 @@ Node.template = `
             "text": "Hornbæk skole, galla + Djurs Sommerland, 9. klasse",
             "Artskonto": "79000000",
             "PSP": "XG-0000002452-00029",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12186,7 +11849,6 @@ Node.template = `
             "text": "Kontant transaktion Hobrovejens Skole",
             "Artskonto": "79000000",
             "PSP": "XG-0000002439-00014",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12222,7 +11884,6 @@ Node.template = `
             "text": "Kontant transaktion Munkholmskolen",
             "Artskonto": "79000000",
             "PSP": "XG-0000004526-00048",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12258,7 +11919,6 @@ Node.template = `
             "text": "Region Midtjylland - Ung i uddannelse",
             "Artskonto": "79000000",
             "PSP": "XG-0000002833-00003",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12294,7 +11954,6 @@ Node.template = `
             "text": "Kontant transaktion Mellerup færge",
             "Artskonto": "79000000",
             "PSP": "XG-0000005094-00004",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12330,7 +11989,6 @@ Node.template = `
             "text": "Kontant transaktion Udbyhøj færge",
             "Artskonto": "79000000",
             "PSP": "XG-0000005094-00005",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12366,7 +12024,6 @@ Node.template = `
             "text": "Mønt-indbetaling parkering",
             "Artskonto": "79000000",
             "PSP": "XG-0000005096-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12402,7 +12059,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "79000000",
             "PSP": "XG-0000005096-00009",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12438,7 +12094,6 @@ Node.template = `
             "text": "Pay4it Automat",
             "Artskonto": "79000000",
             "PSP": "XG-0000002415-00038",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12474,7 +12129,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "79000000",
             "PSP": "XG-0000005086-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12510,7 +12164,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "79000000",
             "PSP": "XG-0000005086-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12546,7 +12199,6 @@ Node.template = `
             "text": "DK3796663 Vorup Plejehjem",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00041",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12582,7 +12234,6 @@ Node.template = `
             "text": "DK3796671 Borupvænget",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00046",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12618,7 +12269,6 @@ Node.template = `
             "text": "DK3796795 - Møllevang",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00033",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12654,7 +12304,6 @@ Node.template = `
             "text": "DK3796817 - Bakkegården",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00028",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12690,7 +12339,6 @@ Node.template = `
             "text": "DK3796868 Dronningborg",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00030",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12726,7 +12374,6 @@ Node.template = `
             "text": "DK3796884 Svaleparken",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00038",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12762,7 +12409,6 @@ Node.template = `
             "text": "DK3796892 - Rosenvænget",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00027",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12798,7 +12444,6 @@ Node.template = `
             "text": "DK3796906",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00040",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12834,7 +12479,6 @@ Node.template = `
             "text": "DK3796914 Kollektivhuset",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00044",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12870,7 +12514,6 @@ Node.template = `
             "text": "DK3796930 Lindevænget",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00036",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12906,7 +12549,6 @@ Node.template = `
             "text": "DK3796949 Huset Nyvang",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00035",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12942,7 +12584,6 @@ Node.template = `
             "text": "DK4771842 GAIA PAPAYA",
             "Artskonto": "72000000",
             "PSP": "XG-0000003040-00046",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -12978,7 +12619,6 @@ Node.template = `
             "text": "DK5157064 - Condomeriet",
             "Artskonto": "72000000",
             "PSP": "XG-0000004204-00002",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13014,7 +12654,6 @@ Node.template = `
             "text": "DK5386388 Assentoft",
             "Artskonto": "72000000",
             "PSP": "XG-0000002369-00021",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13050,7 +12689,6 @@ Node.template = `
             "text": "DK538688 010631 Assentoftskolen skolefest",
             "Artskonto": "72000000",
             "PSP": "XG-0000002369-00022",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13086,7 +12724,6 @@ Node.template = `
             "text": "DK5386888 - Kompostbeholder",
             "Artskonto": "72000000",
             "PSP": "XG-0000005280-00036",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13122,7 +12759,6 @@ Node.template = `
             "text": "DK5386888 101655 Østervangsskolen Skolefest",
             "Artskonto": "72000000",
             "PSP": "XG-0000002415-00039",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13158,7 +12794,6 @@ Node.template = `
             "text": "DK5386888 102002 Tirsdalens Skole skolebod",
             "Artskonto": "72000000",
             "PSP": "XG-0000002544-00025",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13194,7 +12829,6 @@ Node.template = `
             "text": "DK5386888 102193 Østervangsskolen Skolefest",
             "Artskonto": "72000000",
             "PSP": "XG-0000002415-00039",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13230,7 +12864,6 @@ Node.template = `
             "text": "DK5386888 211369 - Rismølleskolen madbestilling",
             "Artskonto": "72000000",
             "PSP": "XG-0000002521-00031",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13266,7 +12899,6 @@ Node.template = `
             "text": "DK5386888 211390 - Rismølleskolen madbestilling",
             "Artskonto": "72000000",
             "PSP": "XG-0000002521-00031",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13302,7 +12934,6 @@ Node.template = `
             "text": "DK5386888 211567 - Rismølleskolen madbestilling",
             "Artskonto": "72000000",
             "PSP": "XG-0000002521-00031",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13338,7 +12969,6 @@ Node.template = `
             "text": "DK5386888 211568 - Rismølleskolen madbestilling",
             "Artskonto": "72000000",
             "PSP": "XG-0000002521-00031",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13374,7 +13004,6 @@ Node.template = `
             "text": "DK5386888 211570 - Rismølleskolen madbestilling",
             "Artskonto": "72000000",
             "PSP": "XG-0000002521-00031",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13410,7 +13039,6 @@ Node.template = `
             "text": "DK5386888 211571 - Rismølleskolen madbestilling",
             "Artskonto": "72000000",
             "PSP": "XG-0000002521-00031",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13446,7 +13074,6 @@ Node.template = `
             "text": "DK5386888 221365 Madbestilling Søndermarkskolen",
             "Artskonto": "72000000",
             "PSP": "XG-0000002531-00016",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13482,7 +13109,6 @@ Node.template = `
             "text": "DK5386888 222807 Søndermarkskolen skolefest",
             "Artskonto": "72000000",
             "PSP": "XG-0000002531-00017",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13518,7 +13144,6 @@ Node.template = `
             "text": "DK5386888 225082 Søndermarkskolen skolefest 2019",
             "Artskonto": "72000000",
             "PSP": "XG-0000002531-00017",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13554,7 +13179,6 @@ Node.template = `
             "text": "DK5386888 Madsalg Assentoftskolen",
             "Artskonto": "72000000",
             "PSP": "XG-0000002369-00021",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13590,7 +13214,6 @@ Node.template = `
             "text": "DK5386888 Madsalg Assentoftskolen 0-3 klasse",
             "Artskonto": "72000000",
             "PSP": "XG-0000002369-00021",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13626,7 +13249,6 @@ Node.template = `
             "text": "DK5386888 Madsalg Assentoftsskolen",
             "Artskonto": "72000000",
             "PSP": "XG-0000002369-00021",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13662,7 +13284,6 @@ Node.template = `
             "text": "DK5444748 Kantinen via GAIA",
             "Artskonto": "72000000",
             "PSP": "XG-0000003040-00034",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13698,7 +13319,6 @@ Node.template = `
             "text": "DK5541042 Udbyhøj Lystbådehavn",
             "Artskonto": "72000000",
             "PSP": "XG-0000004024-00003",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13734,7 +13354,6 @@ Node.template = `
             "text": "DK5846102 Kantinen Laksetorvet",
             "Artskonto": "72000000",
             "PSP": "XG-0000005228-00003",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13770,7 +13389,6 @@ Node.template = `
             "text": "DK5887356 Kildevang",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00045",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13806,7 +13424,6 @@ Node.template = `
             "text": "DK5891507 - Åbakken",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00031",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13842,7 +13459,6 @@ Node.template = `
             "text": "DK5908167 Asferg",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00048",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13878,7 +13494,6 @@ Node.template = `
             "text": "DK5991390 Kantinen Sundhedshuset",
             "Artskonto": "72000000",
             "PSP": "XG-0000005228-00003",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13914,7 +13529,6 @@ Node.template = `
             "text": "DK6201830 Kantinen Kasernen",
             "Artskonto": "72000000",
             "PSP": "XG-0000005228-00003",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13950,7 +13564,6 @@ Node.template = `
             "text": "DK6899625 Huset Nellemann",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00037",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -13986,7 +13599,6 @@ Node.template = `
             "text": "DK8357634 Huset Nellemann",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00037",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14022,7 +13634,6 @@ Node.template = `
             "text": "Kontant transaktion Gaia Via",
             "Artskonto": "72000000",
             "PSP": "XG-0000003040-00034",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14058,7 +13669,6 @@ Node.template = `
             "text": "Kortbetaling - Søndermarkskolen",
             "Artskonto": "72000000",
             "PSP": "XG-0000002531-00016",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14094,7 +13704,6 @@ Node.template = `
             "text": "Madbestilling førskolen Assentoft",
             "Artskonto": "72000000",
             "PSP": "XG-0000002369-00021",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14130,7 +13739,6 @@ Node.template = `
             "text": "Madbestilling førskolen Assentoft",
             "Artskonto": "72000000",
             "PSP": "XG-0000002369-00021",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14166,7 +13774,6 @@ Node.template = `
             "text": "Skolefest Assentoftskolen",
             "Artskonto": "72000000",
             "PSP": "XG-0000002369-00022",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14202,7 +13809,6 @@ Node.template = `
             "text": "Teller 7463073",
             "Artskonto": "72000000",
             "PSP": "XG-0000004204-00002",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14238,7 +13844,6 @@ Node.template = `
             "text": "Teller 7570567",
             "Artskonto": "72000000",
             "PSP": "XG-0000004024-00003",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14274,7 +13879,6 @@ Node.template = `
             "text": "Teller 7667973",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00031",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14310,7 +13914,6 @@ Node.template = `
             "text": "Teller 7670788",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00028",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14346,7 +13949,6 @@ Node.template = `
             "text": "Teller 7670789",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00033",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14382,7 +13984,6 @@ Node.template = `
             "text": "Teller 7670796",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00027",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14418,7 +14019,6 @@ Node.template = `
             "text": "Teller 7670797",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00030",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14454,7 +14054,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "72000000",
             "PSP": "XG-0000005285-00006",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14490,7 +14089,6 @@ Node.template = `
             "text": "Depositcard Assentoftskolen 012197",
             "Artskonto": "72000000",
             "PSP": "XG-0000002369-00021",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14526,7 +14124,6 @@ Node.template = `
             "text": "Depositcard Bakkegården 011781",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00028",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14562,7 +14159,6 @@ Node.template = `
             "text": "Depositcard Bjerregrav Skole 011784",
             "Artskonto": "72000000",
             "PSP": "XG-0000002382-00015",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14598,7 +14194,6 @@ Node.template = `
             "text": "Depositcard Borupvænget 011785",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00046",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14634,7 +14229,6 @@ Node.template = `
             "text": "Depositcard Cafe Lindevænget 011777",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00036",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14670,7 +14264,6 @@ Node.template = `
             "text": "Depositcard Cafe Nellemann 011792",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00037",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14706,7 +14299,6 @@ Node.template = `
             "text": "Depositcard Cafe Svaleparken 011778",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00038",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14742,7 +14334,6 @@ Node.template = `
             "text": "Depositcard Cafe Thors Bakke 011789",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00039",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14778,7 +14369,6 @@ Node.template = `
             "text": "Depositcard Cafe Vorup 011897",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00041",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14814,7 +14404,6 @@ Node.template = `
             "text": "Depositcard Dronnigborg 011783",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00030",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14850,7 +14439,6 @@ Node.template = `
             "text": "Depositcard Fritidscentret 011890",
             "Artskonto": "95990009",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14886,7 +14474,6 @@ Node.template = `
             "text": "Depositcard Fårup 011780",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00047",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14922,7 +14509,6 @@ Node.template = `
             "text": "Depositcard Gaia Butik 012200",
             "Artskonto": "72000000",
             "PSP": "XG-0000003040-00018",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14958,7 +14544,6 @@ Node.template = `
             "text": "Depositcard Gaia Cafe 012199",
             "Artskonto": "72000000",
             "PSP": "XG-0000003040-00046",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -14994,7 +14579,6 @@ Node.template = `
             "text": "Depositcard Hobrovejens Juniorklub 012196",
             "Artskonto": "72000000",
             "PSP": "XG-0000002448-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15030,7 +14614,6 @@ Node.template = `
             "text": "Depositcard Huset Nyvang 011891",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00035",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15066,7 +14649,6 @@ Node.template = `
             "text": "Depositcard Kildevang Cafe 006984",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00045",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15102,7 +14684,6 @@ Node.template = `
             "text": "Depositcard Kollektivhuset 011791",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00044",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15138,7 +14719,6 @@ Node.template = `
             "text": "Depositcard Korshøjskolen 006986",
             "Artskonto": "72000000",
             "PSP": "XG-0000002465-00021",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15174,7 +14754,6 @@ Node.template = `
             "text": "Depositcard Kristrupcentret 006973",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00042",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15210,7 +14789,6 @@ Node.template = `
             "text": "Depositcard Madservice 011786",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00018",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15246,7 +14824,6 @@ Node.template = `
             "text": "Depositcard Møllevang 011793",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00033",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15282,7 +14859,6 @@ Node.template = `
             "text": "Depositcard Nørrevangsskolen 006993",
             "Artskonto": "72000000",
             "PSP": "XG-0000002511-00021",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15318,7 +14894,6 @@ Node.template = `
             "text": "Depositcard Perron 4 006979",
             "Artskonto": "72000000",
             "PSP": "XG-0000003038-00053",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15354,7 +14929,6 @@ Node.template = `
             "text": "Depositcard Psykiatriens Hus 012198",
             "Artskonto": "72000000",
             "PSP": "XG-0000003038-00126",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15390,7 +14964,6 @@ Node.template = `
             "text": "Depositcard Randers Specialskole 006974 ",
             "Artskonto": "72000000",
             "PSP": "XG-0000002648-00024",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15426,7 +14999,6 @@ Node.template = `
             "text": "Depositcard Rosevænget 011790",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00027",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15462,7 +15034,6 @@ Node.template = `
             "text": "Depositcard Terneparken 011787",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00048",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15498,7 +15069,6 @@ Node.template = `
             "text": "Depositcard Tirsdalen Skole 012185",
             "Artskonto": "72000000",
             "PSP": "XG-0000002544-00025",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15534,7 +15104,6 @@ Node.template = `
             "text": "Depositcard Tirsdalens 006987",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00040",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15570,7 +15139,6 @@ Node.template = `
             "text": "Depositcard Vennelyst Juniorklub 006988",
             "Artskonto": "72000000",
             "PSP": "XG-0000002484-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15606,7 +15174,6 @@ Node.template = `
             "text": "Depositcard Åbakken 011788",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00031",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15642,7 +15209,6 @@ Node.template = `
             "text": "DK 8537995 Gaia Cafe ",
             "Artskonto": "72000000",
             "PSP": "XG-0000003040-00046",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15678,7 +15244,6 @@ Node.template = `
             "text": "DK2271311 Affaldsterminalen",
             "Artskonto": "72000000",
             "PSP": "XG-0000005010-00080",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15714,7 +15279,6 @@ Node.template = `
             "text": "DK4771850 Gaia butik",
             "Artskonto": "72000000",
             "PSP": "XG-0000003040-00018",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15750,7 +15314,6 @@ Node.template = `
             "text": "DK7221304 Gaia Via",
             "Artskonto": "72000000",
             "PSP": "XG-0000003040-00034",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15786,7 +15349,6 @@ Node.template = `
             "text": "DK8538001 Gaia Via",
             "Artskonto": "72000000",
             "PSP": "XG-0000003040-00034",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15822,7 +15384,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "72000000",
             "PSP": "XG-0000005244-00014",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15858,7 +15419,6 @@ Node.template = `
             "text": "Kontant transaktion Assentoftskolens kantine",
             "Artskonto": "72000000",
             "PSP": "XG-0000002369-00021",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15894,7 +15454,6 @@ Node.template = `
             "text": "Kontakt transaktion Fritidscentret",
             "Artskonto": "95990009",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15930,7 +15489,6 @@ Node.template = `
             "text": "Kontant transaktion Bakkegården",
             "Artskonto": "72000000",
             "PSP": "XG-0000004518-00093",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -15966,7 +15524,6 @@ Node.template = `
             "text": "Kontant transaktion Blicherskolen a-bod",
             "Artskonto": "72000000",
             "PSP": "XG-0000002392-00031",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16002,7 +15559,6 @@ Node.template = `
             "text": "Kontant transaktion Blicherskolen b-bod",
             "Artskonto": "72000000",
             "PSP": "XG-0000002392-00032",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16038,7 +15594,6 @@ Node.template = `
             "text": "Kontant transaktion Café Kristrupcentret",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00042",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16074,7 +15629,6 @@ Node.template = `
             "text": "Kontant transaktion Café Kristrupcentret",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00042",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16110,7 +15664,6 @@ Node.template = `
             "text": "Kontant transaktion Café Lindevænget",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00036",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16146,7 +15699,6 @@ Node.template = `
             "text": "Kontant transaktion Café Nellemann",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00037",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16182,7 +15734,6 @@ Node.template = `
             "text": "Kontant transaktion Café Svaleparken",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00038",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16218,7 +15769,6 @@ Node.template = `
             "text": "Kontant transaktion Café Svaleparken",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00038",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16254,7 +15804,6 @@ Node.template = `
             "text": "Kontant transaktion Café Svaleparken",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00038",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16290,7 +15839,6 @@ Node.template = `
             "text": "Kontant transaktion Café Thors Bakke",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00039",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16326,7 +15874,6 @@ Node.template = `
             "text": "Kontant transaktion Café Thors Bakke",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00039",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16362,7 +15909,6 @@ Node.template = `
             "text": "Kontant transaktion Café Vorup Plejehjem",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00041",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16398,7 +15944,6 @@ Node.template = `
             "text": "Kontant transaktion Café Vorup Plejehjem",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00041",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16434,7 +15979,6 @@ Node.template = `
             "text": "Kontant transaktion Café Vorup Plejehjem",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00041",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16470,7 +16014,6 @@ Node.template = `
             "text": "Kontant transaktion Dronningborg",
             "Artskonto": "72000000",
             "PSP": "XG-0000004518-00094",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16506,7 +16049,6 @@ Node.template = `
             "text": "Kontant transaktion Fårup Café",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00047",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16542,7 +16084,6 @@ Node.template = `
             "text": "Kontant transaktion Gaia Butik",
             "Artskonto": "72000000",
             "PSP": "XG-0000003040-00018",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16578,7 +16119,6 @@ Node.template = `
             "text": "Kontant transaktion Gaia Papaya",
             "Artskonto": "72000000",
             "PSP": "XG-0000003040-00046",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16614,7 +16154,6 @@ Node.template = `
             "text": "Kontant transaktion Gaia Papaya",
             "Artskonto": "72000000",
             "PSP": "XG-0000003040-00046",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16650,7 +16189,6 @@ Node.template = `
             "text": "Kontant transaktion Kollektivhuset",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00044",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16686,7 +16224,6 @@ Node.template = `
             "text": "Kontant transaktion Korshøjskolen Café",
             "Artskonto": "72000000",
             "PSP": "XG-0000002465-00021",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16722,7 +16259,6 @@ Node.template = `
             "text": "Kontant transaktion Korshøjskolen Café",
             "Artskonto": "72000000",
             "PSP": "XG-0000002465-00021",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16758,7 +16294,6 @@ Node.template = `
             "text": "Kontant transaktion Madservice Kronjylland",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00018",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16794,7 +16329,6 @@ Node.template = `
             "text": "Kontant transaktion Møllevang",
             "Artskonto": "72000000",
             "PSP": "XG-0000004518-00098",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16830,7 +16364,6 @@ Node.template = `
             "text": "Kontant transaktion Nørrevangsskolen",
             "Artskonto": "72000000",
             "PSP": "XG-0000002511-00021",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16866,7 +16399,6 @@ Node.template = `
             "text": "Kontant transaktion Perron 4",
             "Artskonto": "72000000",
             "PSP": "XG-0000003038-00053",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16902,7 +16434,6 @@ Node.template = `
             "text": "Kontant transaktion Rosenvænget",
             "Artskonto": "72000000",
             "PSP": "XG-0000004518-00092",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16938,7 +16469,6 @@ Node.template = `
             "text": "Kontant transaktion Terneparken Café",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00048",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -16974,7 +16504,6 @@ Node.template = `
             "text": "Nets 7221290 Gaia Cafe ",
             "Artskonto": "72000000",
             "PSP": "XG-0000003040-00046",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17010,7 +16539,6 @@ Node.template = `
             "text": "Nets 8516775 Gaia Butik",
             "Artskonto": "72000000",
             "PSP": "XG-0000003040-00018",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17046,7 +16574,6 @@ Node.template = `
             "text": "Teller 8104226",
             "Artskonto": "72000000",
             "PSP": "XG-0000005010-00080",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17082,7 +16609,6 @@ Node.template = `
             "text": "Kontant transaktion Café Lindevænget",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00036",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17118,7 +16644,6 @@ Node.template = `
             "text": "Kontant transaktion Café Nellemann",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00037",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17154,7 +16679,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "72000000",
             "PSP": "XG-0000005228-00003",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17190,7 +16714,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "72000000",
             "PSP": "XG-0000002511-00021",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17226,7 +16749,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "72000000",
             "PSP": "XG-0000003057-00003",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17262,7 +16784,6 @@ Node.template = `
             "text": "Kontant transaktion Café Borupvænget",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00046",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17298,7 +16819,6 @@ Node.template = `
             "text": "Kontant transaktion Café Borupvænget",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00046",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17334,7 +16854,6 @@ Node.template = `
             "text": "Kontant transaktion Café Thors Bakke",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00039",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17370,7 +16889,6 @@ Node.template = `
             "text": "Kontant transaktion Café Tirsdalen",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00040",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17406,7 +16924,6 @@ Node.template = `
             "text": "Kontant transaktion Café Tirsdalen",
             "Artskonto": "72000000",
             "PSP": "XG-0000004526-00040",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17442,7 +16959,6 @@ Node.template = `
             "text": "Kontant transaktion Sprogcenter",
             "Artskonto": "72000000",
             "PSP": "XG-0000003397-00050",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17478,7 +16994,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "67041004",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17514,7 +17029,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "60800001",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17550,7 +17064,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "60500000",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17586,7 +17099,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "60500000",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17622,7 +17134,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "60500000",
             "PSP": "",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17658,7 +17169,6 @@ Node.template = `
             "text": "Ls, kreditor 40010 Udbetaling",
             "Artskonto": "40000000",
             "PSP": "XG-0000000013-00001",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17694,7 +17204,6 @@ Node.template = `
             "text": "Ls, kreditor 54879 Udbetaling",
             "Artskonto": "40000000",
             "PSP": "XG-0000000013-00002",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17730,7 +17239,6 @@ Node.template = `
             "text": "Depositcard Matrielgården 006970",
             "Artskonto": "40000000",
             "PSP": "XG-0000005004-00023",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17766,7 +17274,6 @@ Node.template = `
             "text": "Gebyr af depot 1007867103",
             "Artskonto": "40000000",
             "PSP": "XG-0000000006-00007",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17802,7 +17309,6 @@ Node.template = `
             "text": "Gebyr af depot 2121115030",
             "Artskonto": "40000000",
             "PSP": "XG-0000000006-00007",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17838,7 +17344,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "40000000",
             "PSP": "XG-0000000006-00007",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17874,7 +17379,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "40000000",
             "PSP": "XG-0000000006-00007",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17910,7 +17414,6 @@ Node.template = `
             "text": "Gebyr Mobile Pay leverandørservice",
             "Artskonto": "40000000",
             "PSP": "XG-0000000006-00007",
-            "SIO": null,
             "Notat": ""
         }
     ],
@@ -17946,7 +17449,6 @@ Node.template = `
             "text": "Tekst fra bank",
             "Artskonto": "10000000",
             "PSP": "XG-0000002281-00002",
-            "SIO": null,
             "Notat": ""
         }
     ]
