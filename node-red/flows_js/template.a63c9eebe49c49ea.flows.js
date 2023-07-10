@@ -87,60 +87,72 @@ function updateValue(inputField) {
 // Sæt eksisterende regler ind på siden
 function generateRule(index) {
     const obj_array = rules[index]; // rules[index] returnerer et array
+    const numberShown = index+1;
     let returnHTML = \`
+        <section>
+        <h2>\${numberShown}</h2>
         <div>
-        <h1>\${index}</h1>
-        <pad_small></pad_small>
     \`;
     for (let i = 0; i < obj_array.length; i++) {
         const obj = obj_array[i];
         if (i === 5) { // her er ingen operators
             returnHTML += \`
-                <h2>Posteringstekst</h2>
-                <input id="input_Posteringstekst_value" value="\`;
+                <article>
+                    <h3>Posteringstekst</h3>
+                    <input id="input_Posteringstekst_value" value="\`;
             if (obj.text) {
                 returnHTML += \`\${obj.text}\`;
             } else {
                 returnHTML += \`\`;
             }
             returnHTML += \`" style="width:300px;"/>
-                <h2>Artskonto</h2>
-                <input id="input_Artskonto_value" value="\`;
+                </article>
+                <article>
+                    <h3>Artskonto</h3>
+                    <input id="input_Artskonto_value" value="\`;
             if (obj.Artskonto) {
                 returnHTML += \`\${obj.Artskonto}\`;
             } else {
                 returnHTML += \`\`;
             }
             returnHTML += \`" style="width:85px;"/>
-                <h2>PSP</h2>
-                <input id="input_PSP_value" value="\`;
+                </article>
+                <article>
+                    <h3>PSP</h3>
+                    <input id="input_PSP_value" value="\`;
             if (obj.PSP) {
                 returnHTML += \`\${obj.PSP}\`;
             } else {
                 returnHTML += \`\`;
             }
             returnHTML += \`" style="width:170px;"/>
-                <h2>SIO</h2>            
-                <input id="input_SIO_value" value="\`;
+                    </article>
+                    <article>
+                    <h3>SIO</h3>            
+                    <input id="input_SIO_value" value="\`;
             if (obj.SIO) {
                 returnHTML += \`\${obj.SIO}\`;
             } else {
                 returnHTML += \`\`;
             }
             returnHTML += \`" style="width:50px;"/>
-                <h2>Notat</h2>
-                <input id="input_Notat_value" value="\`;
+                </article>    
+                <article>    
+                    <h3>Notat</h3>
+                    <input id="input_Notat_value" value="\`;
             if (obj.Notat) {
                 returnHTML += \`\${obj.Notat}\`;
             } else {
                 returnHTML += \`\`;
             }
             returnHTML += \`" style="width:700px;"/>
+                </article>
             \`;
         } else {
             returnHTML += \`   
-                <h2>\${obj.name}</h2>
-                <select id="input_\${obj.name}_operator">
+                <article>
+                    <h3>\${obj.name}</h3>
+                    <select id="input_\${obj.name}_operator">
             \`;
             for (let i = 0; i < operators.length; i++) {
                 let isSelected = obj.operator == operators[i].value;
@@ -162,28 +174,28 @@ function generateRule(index) {
                         \`;
                     }
                     returnHTML += \`
-                        <pad_small></pad_small>
+                        </article>                        
                     \`;
                 } else {
                     returnHTML += \`
                         </select>            
                         <input id="input_\${obj.name}_value" value="" />
-                        <pad_small></pad_small>
+                        </article>
                     \`;
                 }
             } else {
                 returnHTML += \`
                     </select>            
                     <input id="input_\${obj.name}_value" value="\${obj.value}" />
-                    <pad_small></pad_small>
+                    </article>
                 \`;
             }
         }
     }
     returnHTML += \`
-        <pad_small></pad_small>
-        <button class="deleteRowButton" onclick="deleteRow(\${index})">-</button>
         </div>
+        <button class="deleteRowButton" onclick="deleteRow(\${index})">-</button>
+        </section>
     \`;
     return returnHTML;
 }
@@ -201,6 +213,8 @@ function deleteRow(rowIndex) {
 function generateNewRow() {
     const sampleRow = rules[0]; // rules[index] returnerer et array
     const newRowNumber = rules.length;
+    const newRowNumberShown = newRowNumber+1;
+
     let newRow = [];
     for (let i = 0; i < sampleRow.length; i++) {
         const obj = sampleRow[i];
@@ -232,29 +246,40 @@ function generateNewRow() {
     }
     rules.push(newRow); // Append the new row to the rules array
     let returnHTML = \`
+        <section>
+        <h2>\${newRowNumberShown}</h2>
         <div>
-        <h1>\${newRowNumber}</h1>
-        <pad_small></pad_small>
     \`;
     for (let i = 0; i < newRow.length; i++) {
         const obj = newRow[i];
         if (i === 5) { // her er ingen operators
             returnHTML += \`
-            <h2>Posteringstekst</h2>
-            <input id="input_Posteringstekst_value" value="" style="width:300px;"/>
-            <h2>Artskonto</h2>
-            <input id="input_Artskonto_value" value="" style="width:85px;"/>
-            <h2>PSP</h2>
-            <input id="input_PSP_value" value="" style="width:170px;"/>
-            <h2>SIO</h2>            
-            <input id="input_SIO_value" value="" style="width:50px;"/>
-            <h2>Notat</h2>
-            <input id="input_Notat_value" value="" style="width:700px;"/>
+            <article>
+                <h3>Posteringstekst</h3>
+                <input id="input_Posteringstekst_value" value="" style="width:300px;"/>
+            </article>
+            <article>
+                <h3>Artskonto</h3>
+                <input id="input_Artskonto_value" value="" style="width:85px;"/>
+            </article>
+            <article>
+                <h3>PSP</h3>
+                <input id="input_PSP_value" value="" style="width:170px;"/>
+            </article>
+            <article>
+                <h3>SIO</h3>            
+                <input id="input_SIO_value" value="" style="width:50px;"/>
+            </article>
+            <article>
+                <h3>Notat</h3>
+                <input id="input_Notat_value" value="" style="width:700px;"/>
+            </article>
         \`;
         } else {
             returnHTML += \`   
-            <h2>\${obj.name}</h2>
-            <select id="input_\${obj.name}_operator">
+            <article>
+                <h3>\${obj.name}</h3>
+                <select id="input_\${obj.name}_operator">
         \`;
             for (let i = 0; i < operators.length; i++) {
                 let isSelected = obj.operator == operators[i].value;
@@ -264,31 +289,31 @@ function generateNewRow() {
             if (!obj.value) {
                 if (i === 4) {
                     returnHTML += \`
-                        </select>            
-                        <input id="input_\${obj.name}1_value" value="" />
-                        <input id="input_\${obj.name}2_value" value="" />
-                        <pad_small></pad_small>
+                            </select>            
+                            <input id="input_\${obj.name}1_value" value="" />
+                            <input id="input_\${obj.name}2_value" value="" />
+                        </article>
                     \`;
                 } else {
                     returnHTML += \`
-                        </select>            
-                        <input id="input_\${obj.name}_value" value="" />
-                        <pad_small></pad_small>
+                            </select>            
+                            <input id="input_\${obj.name}_value" value="" />
+                        </article>
                     \`;
                 }
             } else {
                 returnHTML += \`
-                    </select>            
-                    <input id="input_\${obj.name}_value" value="" />
-                    <pad_small></pad_small>
+                        </select>            
+                        <input id="input_\${obj.name}_value" value="" />
+                    </article>
                 \`;
             }
         }
     }
     returnHTML += \`
-        <pad_small></pad_small>
-        <button class="deleteRowButton" onclick="deleteRow(\${newRowNumber})">-</button>
         </div>
+        <button class="deleteRowButton" onclick="deleteRow(\${newRowNumber})">-</button>
+        </section>
     \`;
     ruleWrapper.innerHTML += returnHTML;
     PublishWsMessage(JSON.stringify(rules)); // Publish the updated rules

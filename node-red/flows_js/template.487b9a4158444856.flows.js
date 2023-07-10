@@ -32,8 +32,7 @@ input, select {
   border-radius: 3px;
   background-color: whitesmoke;
   border: 1px solid #ebebeb;
-  line-height: 35px;
-  min-height: 37px;
+  height: 50px;
   padding: 0px 10px;
   font-weight: 300;
 }
@@ -56,66 +55,38 @@ input:disabled, select:disabled {
   opacity: 1!important;
 }
 
-h1 {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  padding: 5px;
-  width: 70px;
-  max-width: 70px;
+h2 {
   text-transform: uppercase;
   font-weight: 400;
-  background-color: #4077b9;
-  color: white;
-  border-left: 2px;
-  border-right: 12px;
-  position: sticky;
-  position: -webkit-sticky;
+  font-size: 40px;
 }
 
-h2 {
+h3 {
   font-weight: 400;
+  align-items: center;
+  display: contents;
 }
 
 pad_small {
   padding-left: 10px;
 }
 
-button {
-  background-color: #4077b9;
-  color: #ffffff;
-  border: none;
-  padding: 5px 12px;
-  cursor: pointer;
-  border-radius: 3px;
-  transition: transform 0.2s;
-}
-
-button:hover {
-  transform: scale(1.1);
-}
-
 body {
   background-color: #d6d6d6;
   flex: content;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
-  overflow-y: auto;
 }
 
-.ruleContainer {
-  height: 100vh;
-  width: 100%;
-  max-width: 100vw;
+main {
   display: flex;
   justify-content: start;
   align-items: flex-start;
-  overflow-x: auto;
 }
 
 .ruleBox {
-  background-color: white;
+  background-color: #EAEDF0;
   border-radius: 5px;
   position: relative;
   overflow-x: visible;
@@ -124,7 +95,7 @@ body {
   align-items: flex-start;
 }
 
-.ruleBox > div.header {
+.ruleBox > h1 {
   background-color: #1B365D;
   line-height: 70px;
   color: white;
@@ -133,10 +104,10 @@ body {
   font-family: 'Roboto Slab';
   font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 1px;
   border: 2px solid whitesmoke;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
+
 }
 
 .ruleBox > .subheader {
@@ -158,35 +129,77 @@ body {
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: 10px;
-  padding: 15px;
-  border-left: 2px solid whitesmoke;
-  border-right: 2px solid whitesmoke;
-  overflow-x: visible;
+  padding: 10px;
 }
 
-.ruleWrapper > div {
-  display: flex;
+.ruleWrapper > section {
+  display: grid;
   position: relative;
   gap: 5px;
+  padding: 10px;
+  border-radius: 5px;
+  flex-wrap: wrap;
+  justify-items: center;
 }
 
-.ruleWrapper > div:hover {
-  background-color: #fafafa;
+.ruleWrapper > section:hover {
+  background-color: #ffffff;
+  box-shadow: 5px 5px 5px #d6d6d6;
+  outline: 0px;
 }
 
-.ruleWrapper:last-of-type > div:last-child {
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-  border-bottom: 2px solid whitesmoke;
-}
-
-.ruleWrapper > div > span:first-of-type {
+.ruleWrapper > section > span:first-of-type {
   width: 50%;
   font-size: 15px;
 }
 
+.ruleWrapper > section > div {
+  display: flex;
+  position: relative;
+  gap: 5px;
+  padding: 10px;
+  align-items: initial;
+  border-radius: 5px;
+  flex-wrap: wrap;
+}
+
+.ruleWrapper > section > div > article {
+  display: grid;
+  position: relative;
+  gap: 5px;
+  padding: 10px;
+  align-items: center;
+  border-radius: 5px;
+  background-color: #EAEDF0;
+  justify-items: center;
+}
+
+.ruleWrapper > section > div > article:focus-within {
+  outline: 1px solid #FAE100;
+}
+
 .ruleWrapper .spacing {
   flex-grow: 0;
+}
+
+footer {
+  padding: 10px;
+  margin: 12px;
+}
+
+button {
+  background-color: #D6DAE2;
+  border: none;
+  padding: 2px 11px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: transform 0.2s;
+  font-size: 22px;
+  width: -webkit-fill-available;
+}
+
+button:hover {
+  transform: scale(1.1);
 }
 
 `
