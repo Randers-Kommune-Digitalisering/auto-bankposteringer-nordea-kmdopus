@@ -34,19 +34,14 @@ Node.template = `
 </head>
 
 <body onload="wsConnect();" onunload="ws.disconnect();">
-
-  <div class="ruleContainer">
-    <div class="ruleBox">
-      <div class="header">Konteringsregler</div>
-      <div class="ruleWrapper ruleWrapper"></div>
-      <div class="ruleWrapper">
-        <div>
-          <button class="addRuleButton" onclick="generateNewRow()">+</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
+    <main class="ruleBox">
+      <h1>Konteringsregler</h1>
+      <main class="ruleWrapper ruleWrapper"></main>
+      <footer>
+        <button class="addRuleButton" onclick="generateNewRow()">+</button>
+      </footer>
+    </main>
+  
   <script>
     const _rules = {{{payload.rules}}}
   </script>
