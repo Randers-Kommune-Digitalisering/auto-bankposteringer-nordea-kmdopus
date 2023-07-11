@@ -8,7 +8,7 @@ const Node = {
   "format": "javascript",
   "syntax": "plain",
   "template": "",
-  "x": 750,
+  "x": 910,
   "y": 280,
   "wires": [
     []
@@ -17,141 +17,342 @@ const Node = {
 }
 
 Node.template = `
-const ruleWrapper_system = document.querySelector(".ruleWrapper_system");
-const ruleWrapper_user = document.querySelector(".ruleWrapper_user");
-
+// 040723 14:25 - Ændringer af værdier på siden opdaterer ikke værdien i kildekoden og kommer derfor heller ikke med over i rules objektet
+const ruleWrapper = document.querySelector(".ruleWrapper");
+const addRuleButton = document.querySelector(".addRuleButton");
+const deleteButtons = document.querySelectorAll(".deleteRowButton");
+const inputs = document.getElementsByTagName("input");
+const selects = document.getElementsByTagName("select");
 const rules = _rules != null ? _rules : []; // Rules are defined in change node previous to this
-
-const operators = [
-    {
-        "name": "= Skal være lig med",
-        "value": "=="
-    },
-    {
-        "name": "≠ Må ikke være lig med",
-        "value": "!="
-    },
-    {
-        "name": "< Skal være mindre end",
-        "value": "<"
-    },
-    {
-        "name": "> Skal være større end",
-        "value": ">"
-    },
-    {
-        "name": "{?} Indeholder",
-        "value": "contains"
-    },
-    {
-        "name": "{!} Indeholder ikke",
-        "value": "!contains"
-    },
-    {
-        "name": "[o] Skal være oplyst",
-        "value": "!null"
-    },
-    {
-        "name": "[...] Starter med",
-        "value": ".startsWith"
-    },
-    {
-        "name": "Slutter med [...]",
-        "value": ".endsWith"
-    }
+const inputFields = { 0: "Reference", 1: "Advisliste", 2: "Afsender", 3: "Posteringstype", 4: "Beløb1", 5: "Beløb2", 6: "Posteringstekst", 7: "Artskonto", 8: "PSP", 9: "SIO", 10: "Notat" }
+const textOperators = [
+    { "name": "= Skal være lig med", "value": "==" },
+    { "name": "{?} Indeholder", "value": "contains" },
+    { "name": "{!} Indeholder ikke", "value": "!contains" },
+    { "name": "[o] Skal være oplyst", "value": "!null" },
+    { "name": "[...] Starter med", "value": ".startsWith" },
+    { "name": "Slutter med [...]", "value": ".endsWith" }
+]
+const valueOperators = [
+    { "name": "= Skal være lig med", "value": "==" },
+    { "name": "≠ Må ikke være lig med", "value": "!=" },
+    { "name": "< Skal være mindre end", "value": "<" },
+    { "name": "> Skal være større end", "value": ">" },
+    { "name": "< Mellem <", "value": ">< " },
 ]
 
-function newSelector(selectedValue) {
-    return \`
-    \`;
+function PublishWsMessage(m) {
+    if (ws) { ws.send(m); }
 }
 
-function newInputField(index) {
-    const obj = rules[index];
-    let returnHTML = \`
-        <div>    
-            <select id="input_\${index}_operator"\${obj.systemrule == true ? " disabled=\\"disabled\\"" : ""}>
-        \`;
-
-    for (let i = 0; i < operators.length; i++) {
-        let isSelected = obj.operator == operators[i].value;
-        //console.log("Checking '" + obj.operator + "' against '" + operators[i].value + "' = " + isSelected);
-        returnHTML += \`<option value="\${operators[i].value}"\${isSelected ? " selected" : ""}>\${operators[i].name}</option>\`;
+/// Ved opdatering af input value
+function updateValue(inputField) {
+    let id = inputField.id;
+    let sid = id.split("_");
+    // Find the rule object with matching name property
+    let ruleObject = null;
+    let ruleIndex = -1;
+    let innerIndex = -1;
+    for (let i = 0; i < rules.length; i++) {
+        for (let j = 0; j < rules[i].length; j++) {
+            if (rules[i][j].name === sid[1]) {
+                ruleObject = rules[i][j];
+                ruleIndex = i;
+                innerIndex = j;
+                break;
+            }
+        }
+        if (ruleObject) { break; }
     }
-        // !!! description skal være et felt man kan skrive i
+    if (ruleObject) {
+        ruleObject[sid[2]] = inputField.value;
+        rules[ruleIndex][innerIndex] = ruleObject;
+        let type = ruleObject.type;
+        switch (type) {
+            case "int":
+            case "float":
+            case "double":
+            case "number":
+                inputField.value = inputField.value.replace(/[^0-9.]/g, '').replace(/(\\..*?)\\..*/g, '\$1');
+                break;
+            default:
+                inputField.setAttribute('value', inputField.value);
+                break;
+        }
+        PublishWsMessage(JSON.stringify(rules));
+    }
+    console.log("Saving user input to rules...");
+}
 
+
+// Sæt eksisterende regler ind på siden
+function generateRule(index) {
+    const obj_array = rules[index];
+    const numberShown = index + 1;
+    let returnHTML = \`
+    <section>
+      <h2>\${numberShown}</h2>
+      <div>
+  \`;
+    for (let i = 0; i < obj_array.length; i++) {
+        const obj = obj_array[i];
+        switch (i) {
+            case 5:
+                returnHTML += \`
+          <article>
+            <h3>Posteringstekst</h3>
+            <input id="input_Posteringstekst_value" value="\${obj.text ? obj.text : ''}" style="width:300px;"/>
+          </article>
+          <article>
+            <h3>Artskonto</h3>
+            <input id="input_Artskonto_value" value="\${obj.Artskonto ? obj.Artskonto : ''}" style="width:85px;"/>
+          </article>
+          <article>
+            <h3>PSP</h3>
+            <input id="input_PSP_value" value="\${obj.PSP ? obj.PSP : ''}" style="width:170px;"/>
+          </article>    
+          <article>    
+            <h3>Notat</h3>
+            <input id="input_Notat_value" value="\${obj.Notat ? obj.Notat : ''}" style="width:700px;"/>
+          </article>
+        \`;
+                break;
+            default:
+                returnHTML += \`   
+          <article>
+            <h3>\${obj.name}</h3>
+            <select id="input_\${obj.name}_operator">
+        \`;
+                if (i === 4) {
+                    for (let j = 0; j < valueOperators.length; j++) {
+                        let isSelected = obj.operator == valueOperators[j].value;
+                        returnHTML += \`<option value="\${valueOperators[j].value}"\${isSelected ? " selected" : ""}>\${valueOperators[j].name}</option>\`;
+                    }
+                } else {
+                    for (let j = 0; j < textOperators.length; j++) {
+                        let isSelected = obj.operator == textOperators[j].value;
+                        returnHTML += \`<option value="\${textOperators[j].value}"\${isSelected ? " selected" : ""}>\${textOperators[j].name}</option>\`;
+                    }
+                }
+                if (!obj.value) {
+                    if (i === 4) {
+                        returnHTML += \`
+              </select>            
+              <input id="input_\${obj.name}1_value" value="\${obj.value1}" />
+            \`;
+                        if (obj.value2) {
+                            returnHTML += \`
+                <input id="input_\${obj.name}2_value" value="\${obj.value2}" />
+              \`;
+                        } else {
+                            returnHTML += \`
+                <input id="input_\${obj.name}2_value" value="" />
+              \`;
+                        }
+                        returnHTML += \`
+              </article>                        
+            \`;
+                    } else {
+                        returnHTML += \`
+              </select>            
+              <input id="input_\${obj.name}_value" value="" />
+              </article>
+            \`;
+                    }
+                } else {
+                    returnHTML += \`
+            </select>            
+            <input id="input_\${obj.name}_value" value="\${obj.value}" />
+            </article>
+          \`;
+                }
+                break;
+        }
+    }
     returnHTML += \`
-            </select>
-            <input id="input_\${index}_value" value="\${obj.value}"\${obj.systemrule == true ? " disabled=\\"disabled\\"" : ""} />
-        <span class="description" title="\${obj.notat}">?</span>
-        </div>
-    \`;
+      </div>
+      <button class="deleteRowButton" onclick="deleteRow(\${index})">Slet regel</button>
+    </section>
+  \`;
     return returnHTML;
 }
 
-///
-// Instantiate input fields
-
-for (let i = 0; i < rules.length; i++)
-    if (rules[i]["systemrule"] != null && rules[i]["systemrule"] == true)
-        ruleWrapper_system.innerHTML += newInputField(i);
-    else
-        ruleWrapper_user.innerHTML += newInputField(i);
-
-///
-// Dynamically add event listeners 
-
-for (let i = 0; i < rules.length; i++) {
-    document.querySelector("#input_" + i + "_operator").addEventListener("focusout", () => {
-        UpdateValue(document.querySelector("#input_" + i + "_operator"));
-    });
-
-    document.querySelector("#input_" + i + "_value").addEventListener("focusout", () => {
-        UpdateValue(document.querySelector("#input_" + i + "_value"));
-    });
-
-    document.querySelector("#input_" + i + "_value").addEventListener("input", () => {
-        OnInputChange(document.querySelector("#input_" + i + "_value"));
-    });
-}
-
-///
-// Update input value
-function UpdateValue(inputField) {
-    let id = inputField.id;
-    let sid = id.split("_");
-
-    (rules[parseInt(sid[1])])[sid[2]] = inputField.value;
-
-    const message = rules;
-
-    PublishWsMessage(JSON.stringify(message));
-    console.log(message);
-}
-
-///
-//
-function OnInputChange(inputField) {
-    let id = inputField.id;
-    let sid = id.split("_");
-    let type = (rules[parseInt(sid[1])])["type"];
-
-    switch (type) {
-        case "int": case "float": case "double": case "number":
-            inputField.value = inputField.value.replace(/[^0-9.]/g, '').replace(/(\\..*?)\\..*/g, '\$1');
-            break;
-
-        case "text": case "letters":
-            inputField.value = inputField.value.replace(/[^A-Za-z ]/g, '');
-            break;
-
+// Slet en linje
+function deleteRow(rowIndex) {
+    if (rowIndex >= 0 && rowIndex < rules.length) {
+        rules.splice(rowIndex, 1);
+        PublishWsMessage(JSON.stringify(rules));
+        renderRules();
     }
 }
 
+// Lav ny tom linje
+function generateNewRow() {
+    const sampleRow = rules[0];
+    const newRowNumber = rules.length;
+    const newRowNumberShown = newRowNumber + 1;
+
+    let newRow = [];
+    for (let i = 0; i < sampleRow.length; i++) {
+        const obj = sampleRow[i];
+        let newObj;
+        switch (i) {
+            case 5:
+                newObj = {
+                    name: obj.name,
+                    text: '',
+                    Artskonto: null,
+                    PSP: null,
+                    SIO: null,
+                    Notat: '',
+                };
+                break;
+            case 4:
+                newObj = {
+                    name: obj.name,
+                    value1: null,
+                    value2: null,
+                    operator: '',
+                };
+                break;
+            default:
+                newObj = {
+                    name: obj.name,
+                    value: null,
+                    operator: '',
+                };
+                break;
+        }
+        newRow.push(newObj);
+    }
+    rules.push(newRow);
+    let returnHTML = \`
+    <section>
+      <h2>\${newRowNumberShown}</h2>
+      <div>
+  \`;
+    for (let i = 0; i < newRow.length; i++) {
+        const obj = newRow[i];
+        switch (i) {
+            case 5:
+                returnHTML += \`
+          <article>
+            <h3>Posteringstekst</h3>
+            <input id="input_Posteringstekst_value" value="" style="width:300px;"/>
+          </article>
+          <article>
+            <h3>Artskonto</h3>
+            <input id="input_Artskonto_value" value="" style="width:85px;"/>
+          </article>
+          <article>
+            <h3>PSP</h3>
+            <input id="input_PSP_value" value="" style="width:170px;"/>
+          </article>
+          <article>
+            <h3>Notat</h3>
+            <input id="input_Notat_value" value="" style="width:700px;"/>
+          </article>
+        \`;
+                break;
+            default:
+                returnHTML += \`   
+          <article>
+            <h3>\${obj.name}</h3>
+            <select id="input_\${obj.name}_operator">
+        \`;
+                if (i === 4) {
+                    for (let j = 0; j < valueOperators.length; j++) {
+                        let isSelected = obj.operator == valueOperators[j].value;
+                        returnHTML += \`<option value="\${valueOperators[j].value}"\${isSelected ? " selected" : ""}>\${valueOperators[j].name}</option>\`;
+                    }
+                } else {
+                    for (let j = 0; j < textOperators.length; j++) {
+                        let isSelected = obj.operator == textOperators[j].value;
+                        returnHTML += \`<option value="\${textOperators[j].value}"\${isSelected ? " selected" : ""}>\${textOperators[j].name}</option>\`;
+                    }
+                }
+                if (!obj.value) {
+                    if (i === 4) {
+                        returnHTML += \`
+              </select>            
+              <input id="input_\${obj.name}1_value" value="" />
+              <input id="input_\${obj.name}2_value" value="" />
+            </article>
+          \`;
+                    } else {
+                        returnHTML += \`
+              </select>            
+              <input id="input_\${obj.name}_value" value="" />
+            </article>
+          \`;
+                    }
+                } else {
+                    returnHTML += \`
+            </select>            
+            <input id="input_\${obj.name}_value" value="" />
+          </article>
+        \`;
+                }
+                break;
+        }
+    }
+    returnHTML += \`
+      </div>
+      <button class="deleteRowButton" onclick="deleteRow(\${newRowNumber})">Slet regel</button>
+    </section>
+  \`;
+    ruleWrapper.innerHTML += returnHTML;
+    PublishWsMessage(JSON.stringify(rules));
+}
+
+
+function renderRules() {
+    ruleWrapper.innerHTML = "";
+    // Læg regler i ruleWrapper
+    for (let i = 0; i < rules.length; i++) {
+        ruleWrapper.innerHTML += generateRule(i);
+    }
+    // Add event listener for each delete button
+    for (let i = 0; i < deleteButtons.length; i++) {
+        deleteButtons[i].addEventListener("click", () => {
+            console.log("Delete rule event triggered");
+            deleteRow(i);
+        });
+    }
+    // Add event listener to each input element
+    for (let i = 0; i < inputs.length; i++) {
+        inputs[i].addEventListener("change", () => {
+            console.log("Input change event triggered");
+            updateValue(inputs[i]);
+        });
+    }
+    // Add event listener to each select element
+    for (let i = 0; i < selects.length; i++) {
+        selects[i].addEventListener("change", () => {
+            console.log("Select change event triggered");
+            updateValue(selects[i]);
+        });
+    }
+}
+
+renderRules();
 
 
 
-///
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // WEB SOCKET (node-red)
 var ws;
 var wsUri = "ws:";
@@ -162,35 +363,25 @@ if (loc.protocol === "https:") { wsUri = "wss:"; }
 wsUri += "//" + loc.host + loc.pathname.replace("rules", "ws/rules");
 
 function wsConnect() {
-
     console.log("Connecting to ", wsUri);
     ws = new WebSocket(wsUri);
-
     ws.onmessage = function (msg) {
-
         // parse the incoming message as a JSON object
         var data = msg.data;
         const obj = JSON.parse(data);
-
         console.log("Received WS message: " + JSON.stringify(obj));
-
         //ws.send(JSON.stringify({data:data}));
     }
-
     ws.onopen = function () {
         // update the status div with the connection status
         console.log("Connected to WS");
     }
-
     ws.onclose = function () {
         // update the status div with the connection status
         console.log("WS connection lost");
         // in case of lost connection tries to reconnect every 3 secs
         setTimeout(wsConnect, 3000);
     }
-}
-function PublishWsMessage(m) {
-    if (ws) { ws.send(m); }
 }
 `
 
