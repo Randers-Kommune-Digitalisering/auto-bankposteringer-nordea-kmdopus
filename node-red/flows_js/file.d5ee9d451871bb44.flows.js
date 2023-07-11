@@ -2,7 +2,7 @@ const Node = {
   "id": "d5ee9d451871bb44",
   "type": "file",
   "z": "a1938e80ddbe5950",
-  "g": "745ee7cac00b8ea6",
+  "g": "67c340b82556b251",
   "name": "Skriv csv fil",
   "filename": "$flowContext(\"filename\")\t",
   "filenameType": "jsonata",
@@ -10,8 +10,8 @@ const Node = {
   "createDir": true,
   "overwriteFile": "false",
   "encoding": "none",
-  "x": 350,
-  "y": 580,
+  "x": 130,
+  "y": 620,
   "wires": [
     [
       "0f01c64aaf96b6ce"

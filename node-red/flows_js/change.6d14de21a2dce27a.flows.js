@@ -1,13 +1,13 @@
 const Node = {
-  "id": "e9fcb6b8c3d17d60",
+  "id": "6d14de21a2dce27a",
   "type": "change",
   "z": "a1938e80ddbe5950",
-  "g": "2be607f061d91628",
-  "name": "Gem JSON Array i msg.konteringsregler",
+  "g": "67c340b82556b251",
+  "name": "Konteringsregler til global obj",
   "rules": [
     {
       "t": "set",
-      "p": "nye_konteringsregler",
+      "p": "konteringsregler",
       "pt": "global",
       "to": "payload",
       "tot": "msg"
@@ -18,14 +18,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 780,
-  "y": 520,
+  "x": 380,
+  "y": 540,
   "wires": [
     [
-      "8fc155cc4bcc90d8"
+      "8ac398a8353d0e9d"
     ]
   ],
-  "_order": 70
+  "_order": 85
 }
 
 module.exports = Node;

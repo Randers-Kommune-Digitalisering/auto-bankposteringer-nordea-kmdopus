@@ -2,7 +2,7 @@ const Node = {
   "id": "1b056c7bdfe3fc6e",
   "type": "csv",
   "z": "a1938e80ddbe5950",
-  "g": "745ee7cac00b8ea6",
+  "g": "67c340b82556b251",
   "name": "Object to CSV",
   "sep": ";",
   "hdrin": true,
@@ -14,7 +14,7 @@ const Node = {
   "strings": true,
   "include_empty_strings": true,
   "include_null_values": true,
-  "x": 180,
+  "x": 420,
   "y": 580,
   "wires": [
     [

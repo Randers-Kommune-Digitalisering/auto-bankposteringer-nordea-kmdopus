@@ -2,7 +2,7 @@ const Node = {
   "id": "8ac398a8353d0e9d",
   "type": "function",
   "z": "a1938e80ddbe5950",
-  "g": "745ee7cac00b8ea6",
+  "g": "67c340b82556b251",
   "name": "Script",
   "func": "",
   "outputs": 1,
@@ -10,8 +10,8 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 150,
-  "y": 540,
+  "x": 110,
+  "y": 580,
   "wires": [
     [
       "be0a51d36be4d3e8"

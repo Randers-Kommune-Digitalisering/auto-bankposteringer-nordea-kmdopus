@@ -1,27 +1,24 @@
 const Node = {
-  "id": "b6722f2612891357",
+  "id": "84f9353769a4a1f6",
   "type": "file in",
   "z": "a1938e80ddbe5950",
-  "g": "2be607f061d91628",
+  "g": "67c340b82556b251",
   "name": "Hent konteringsregler",
-  "filename": "/data/konteringsregler/konteringsregler.csv",
+  "filename": "/data/konteringsregler/konteringsregler.json",
   "filenameType": "str",
   "format": "utf8",
   "chunk": false,
   "sendError": false,
   "encoding": "none",
-  "allProps": false,
-  "x": 720,
-  "y": 480,
+  "allProps": true,
+  "x": 400,
+  "y": 500,
   "wires": [
     [
-      "b96da9492994439b"
+      "c231b32d84af6746"
     ]
   ],
-  "outputLabels": [
-    "global.rules"
-  ],
-  "_order": 69
+  "_order": 84
 }
 
 module.exports = Node;

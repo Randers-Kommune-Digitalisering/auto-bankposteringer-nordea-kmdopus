@@ -2,12 +2,19 @@ const Node = {
   "id": "35ba1ef03eb6f044",
   "type": "change",
   "z": "97cc6bce53027f96",
-  "name": "",
+  "name": "Gem msg.rules til global obj + payload",
   "rules": [
     {
       "t": "set",
       "p": "konteringsregler",
       "pt": "global",
+      "to": "rules",
+      "tot": "msg"
+    },
+    {
+      "t": "set",
+      "p": "payload",
+      "pt": "msg",
       "to": "rules",
       "tot": "msg"
     }
@@ -17,14 +24,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 320,
+  "x": 350,
   "y": 260,
   "wires": [
     [
-      "7a29f71422d29646"
+      "26b41d06f39cca7b"
     ]
   ],
-  "_order": 93
+  "_order": 95
 }
 
 module.exports = Node;
