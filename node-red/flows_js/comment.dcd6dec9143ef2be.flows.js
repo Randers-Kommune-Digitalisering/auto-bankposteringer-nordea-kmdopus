@@ -5,7 +5,7 @@ const Node = {
   "g": "2be607f061d91628",
   "name": "Konvertering af csv til json",
   "info": "",
-  "x": 730,
+  "x": 770,
   "y": 440,
   "wires": [],
   "_order": 74

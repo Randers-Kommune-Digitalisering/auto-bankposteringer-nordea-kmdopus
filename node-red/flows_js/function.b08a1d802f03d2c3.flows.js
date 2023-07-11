@@ -2,19 +2,19 @@ const Node = {
   "id": "b08a1d802f03d2c3",
   "type": "function",
   "z": "a1938e80ddbe5950",
-  "name": "Anvend konteringsregler backup",
+  "name": "Script backup",
   "func": "",
   "outputs": 1,
   "noerr": 0,
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 630,
-  "y": 640,
+  "x": 120,
+  "y": 700,
   "wires": [
     []
   ],
-  "_order": 84
+  "_order": 83
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {

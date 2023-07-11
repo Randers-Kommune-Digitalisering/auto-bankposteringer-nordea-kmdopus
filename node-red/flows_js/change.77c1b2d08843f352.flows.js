@@ -2,7 +2,7 @@ const Node = {
   "id": "77c1b2d08843f352",
   "type": "change",
   "z": "a1938e80ddbe5950",
-  "g": "745ee7cac00b8ea6",
+  "g": "67c340b82556b251",
   "name": "Clear msg",
   "rules": [
     {
@@ -56,11 +56,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 170,
+  "x": 190,
   "y": 500,
   "wires": [
     [
-      "d6b98664b133ba01"
+      "84f9353769a4a1f6"
     ]
   ],
   "_order": 76

@@ -2,7 +2,7 @@ const Node = {
   "id": "be0a51d36be4d3e8",
   "type": "change",
   "z": "a1938e80ddbe5950",
-  "g": "745ee7cac00b8ea6",
+  "g": "67c340b82556b251",
   "name": "Flow to msg",
   "rules": [
     {
@@ -27,8 +27,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 290,
-  "y": 540,
+  "x": 250,
+  "y": 580,
   "wires": [
     [
       "1b056c7bdfe3fc6e"
