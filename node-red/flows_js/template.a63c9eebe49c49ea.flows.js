@@ -2,13 +2,13 @@ const Node = {
   "id": "a63c9eebe49c49ea",
   "type": "template",
   "z": "97cc6bce53027f96",
-  "name": "JavaScript",
+  "name": "JavaScript - genererer ikke input fields og andre elementer",
   "field": "payload.script",
   "fieldType": "msg",
   "format": "javascript",
   "syntax": "plain",
   "template": "",
-  "x": 710,
+  "x": 850,
   "y": 260,
   "wires": [
     [
@@ -89,244 +89,217 @@ function updateValue(inputField) {
 
 // Sæt eksisterende regler ind på siden
 function generateRule(index) {
-    const obj_array = rules[index]; // rules[index] returnerer et array
-    const numberShown = index+1;
-    let returnHTML = \`
-        <section>
-        <h2>\${numberShown}</h2>
-        <div>
-    \`;
+    const obj_array = rules[index];
+    const numberShown = index + 1;
+    const fragment = document.createDocumentFragment(); // Create a document fragment
+
+    let section = document.createElement('section');
+    let h2 = document.createElement('h2');
+    h2.textContent = numberShown;
+    section.appendChild(h2);
+
+    let div = document.createElement('div');
+
     for (let i = 0; i < obj_array.length; i++) {
         const obj = obj_array[i];
-        if (i === 5) { // her er ingen operators
-            returnHTML += \`
-                <article>
-                    <h3>Posteringstekst</h3>
-                    <input id="input_Posteringstekst_value" value="\`;
-            if (obj.text) {
-                returnHTML += \`\${obj.text}\`;
-            } else {
-                returnHTML += \`\`;
-            }
-            returnHTML += \`" style="width:300px;"/>
-                </article>
-                <article>
-                    <h3>Artskonto</h3>
-                    <input id="input_Artskonto_value" value="\`;
-            if (obj.Artskonto) {
-                returnHTML += \`\${obj.Artskonto}\`;
-            } else {
-                returnHTML += \`\`;
-            }
-            returnHTML += \`" style="width:85px;"/>
-                </article>
-                <article>
-                    <h3>PSP</h3>
-                    <input id="input_PSP_value" value="\`;
-            if (obj.PSP) {
-                returnHTML += \`\${obj.PSP}\`;
-            } else {
-                returnHTML += \`\`;
-            }
-            returnHTML += \`" style="width:50px;"/>
-                </article>    
-                <article>    
-                    <h3>Notat</h3>
-                    <input id="input_Notat_value" value="\`;
-            if (obj.Notat) {
-                returnHTML += \`\${obj.Notat}\`;
-            } else {
-                returnHTML += \`\`;
-            }
-            returnHTML += \`" style="width:700px;"/>
-                </article>
-            \`;
+        let article = document.createElement('article');
+        let h3 = document.createElement('h3');
+
+        if (i === 5) {
+            h3.textContent = 'Posteringstekst';
+            let input = document.createElement('input');
+            input.id = 'input_Posteringstekst_value';
+            input.value = obj.text || '';
+            input.style.width = '300px';
+            article.appendChild(h3);
+            article.appendChild(input);
         } else {
-            returnHTML += \`   
-                <article>
-                    <h3>\${obj.name}</h3>
-                    <select id="input_\${obj.name}_operator">
-            \`;
+            h3.textContent = obj.name;
+            let select = document.createElement('select');
+            select.id = \`input_\${obj.name}_operator\`;
+
             if (i === 4) {
-                for (let i = 0; i < valueOperators.length; i++) {
-                    let isSelected = obj.operator == valueOperators[i].value;
-                    returnHTML += \`<option value="\${valueOperators[i].value}"\${isSelected ? " selected" : ""}>\${valueOperators[i].name}</option>\`;
-                }                
-            } else {
-                for (let i = 0; i < textOperators.length; i++) {
-                    let isSelected = obj.operator == textOperators[i].value;
-                    returnHTML += \`<option value="\${textOperators[i].value}"\${isSelected ? " selected" : ""}>\${textOperators[i].name}</option>\`;
-                }
-            }
-            if (!obj.value) {
-                if (i === 4) {
-                    returnHTML += \`
-                        </select>            
-                        <input id="input_\${obj.name}1_value" value="\${obj.value1}" />
-                    \`;
-                    if (obj.value2) {
-                        returnHTML += \`
-                            <input id="input_\${obj.name}2_value" value="\${obj.value2}" />
-                        \`;
-                    } else {
-                        returnHTML += \`
-                            <input id="input_\${obj.name}2_value" value="" />
-                        \`;
+                for (let j = 0; j < valueOperators.length; j++) {
+                    let option = document.createElement('option');
+                    option.value = valueOperators[j].value;
+                    option.text = valueOperators[j].name;
+                    if (obj.operator == valueOperators[j].value) {
+                        option.selected = true;
                     }
-                    returnHTML += \`
-                        </article>                        
-                    \`;
-                } else {
-                    returnHTML += \`
-                        </select>            
-                        <input id="input_\${obj.name}_value" value="" />
-                        </article>
-                    \`;
+                    select.appendChild(option);
                 }
             } else {
-                returnHTML += \`
-                    </select>            
-                    <input id="input_\${obj.name}_value" value="\${obj.value}" />
-                    </article>
-                \`;
+                for (let j = 0; j < textOperators.length; j++) {
+                    let option = document.createElement('option');
+                    option.value = textOperators[j].value;
+                    option.text = textOperators[j].name;
+                    if (obj.operator == textOperators[j].value) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                }
             }
+
+            if (!obj.value) {
+                let input = document.createElement('input');
+                input.id = \`input_\${obj.name}_value\`;
+                input.value = '';
+                select.appendChild(input);
+            } else {
+                let input = document.createElement('input');
+                input.id = \`input_\${obj.name}_value\`;
+                input.value = obj.value;
+                select.appendChild(input);
+            }
+
+            article.appendChild(h3);
+            article.appendChild(select);
         }
+
+        div.appendChild(article);
     }
-    returnHTML += \`
-        </div>
-        <button class="deleteRowButton" onclick="deleteRow(\${index})">Slet regel</button>
-        </section>
-    \`;
-    return returnHTML;
+
+    section.appendChild(div);
+
+    let deleteButton = document.createElement('button');
+    deleteButton.className = 'deleteRowButton';
+    deleteButton.textContent = 'Slet regel';
+    deleteButton.onclick = function () {
+        deleteRow(index);
+    };
+    section.appendChild(deleteButton);
+
+    fragment.appendChild(section); // Append the section to the fragment
+
+    return fragment; // Return the document fragment
 }
+
 
 // Slet en linje
 function deleteRow(rowIndex) {
     if (rowIndex >= 0 && rowIndex < rules.length) {
         rules.splice(rowIndex, 1);
         PublishWsMessage(JSON.stringify(rules));
-        renderRules();
+        ruleWrapper.innerHTML = "";
+        for (let i = 0; i < rules.length; i++) {
+            ruleWrapper.appendChild(generateRule(i).cloneNode(true)); // Append the cloned content
+        }
     }
 }
 
+
 // Lav ny tom linje
 function generateNewRow() {
-    const sampleRow = rules[0]; // rules[index] returnerer et array
+    const sampleRow = rules[0];
     const newRowNumber = rules.length;
-    const newRowNumberShown = newRowNumber+1;
+    const newRowNumberShown = newRowNumber + 1;
 
     let newRow = [];
     for (let i = 0; i < sampleRow.length; i++) {
         const obj = sampleRow[i];
         let newObj;
-        if (i === 5) {
-            newObj = {
-                name: obj.name,
-                text: '',
-                Artskonto: null,
-                PSP: null,
-                SIO: null,
-                Notat: '',
-            };
-        } else if (i === 4) {
-            newObj = {
-                name: obj.name,
-                value1: null,
-                value2: null,
-                operator: '',
-            };
-        } else {
-            newObj = {
-                name: obj.name,
-                value: null,
-                operator: '',
-            };
+        switch (i) {
+            case 5:
+                newObj = {
+                    name: obj.name,
+                    text: '',
+                    Artskonto: null,
+                    PSP: null,
+                    SIO: null,
+                    Notat: '',
+                };
+                break;
+            case 4:
+                newObj = {
+                    name: obj.name,
+                    value1: null,
+                    value2: null,
+                    operator: '',
+                };
+                break;
+            default:
+                newObj = {
+                    name: obj.name,
+                    value: null,
+                    operator: '',
+                };
+                break;
         }
         newRow.push(newObj);
     }
-    rules.push(newRow); // Append the new row to the rules array
-    let returnHTML = \`
-        <section>
-        <h2>\${newRowNumberShown}</h2>
-        <div>
-    \`;
+    rules.push(newRow);
+
+    const section = document.createElement('section');
+    const h2 = document.createElement('h2');
+    h2.textContent = newRowNumberShown;
+    section.appendChild(h2);
+
+    const div = document.createElement('div');
+
     for (let i = 0; i < newRow.length; i++) {
         const obj = newRow[i];
-        if (i === 5) { // her er ingen operators
-            returnHTML += \`
-            <article>
-                <h3>Posteringstekst</h3>
-                <input id="input_Posteringstekst_value" value="" style="width:300px;"/>
-            </article>
-            <article>
-                <h3>Artskonto</h3>
-                <input id="input_Artskonto_value" value="" style="width:85px;"/>
-            </article>
-            <article>
-                <h3>PSP</h3>
-                <input id="input_PSP_value" value="" style="width:170px;"/>
-            </article>
-            <article>
-                <h3>Notat</h3>
-                <input id="input_Notat_value" value="" style="width:700px;"/>
-            </article>
-        \`;
+        const article = document.createElement('article');
+        const h3 = document.createElement('h3');
+
+        if (i === 5) {
+            h3.textContent = 'Posteringstekst';
+            const input = document.createElement('input');
+            input.id = 'input_Posteringstekst_value';
+            input.value = '';
+            input.style.width = '300px';
+            article.appendChild(h3);
+            article.appendChild(input);
         } else {
-            returnHTML += \`   
-            <article>
-                <h3>\${obj.name}</h3>
-                <select id="input_\${obj.name}_operator">
-        \`;
+            h3.textContent = obj.name;
+            const select = document.createElement('select');
+            select.id = \`input_\${obj.name}_operator\`;
+
             if (i === 4) {
-                for (let i = 0; i < valueOperators.length; i++) {
-                    let isSelected = obj.operator == valueOperators[i].value;
-                    returnHTML += \`<option value="\${valueOperators[i].value}"\${isSelected ? " selected" : ""}>\${valueOperators[i].name}</option>\`;
-                }                
-            } else {
-                for (let i = 0; i < textOperators.length; i++) {
-                    let isSelected = obj.operator == textOperators[i].value;
-                    returnHTML += \`<option value="\${textOperators[i].value}"\${isSelected ? " selected" : ""}>\${textOperators[i].name}</option>\`;
-                }
-            }
-            if (!obj.value) {
-                if (i === 4) {
-                    returnHTML += \`
-                            </select>            
-                            <input id="input_\${obj.name}1_value" value="" />
-                            <input id="input_\${obj.name}2_value" value="" />
-                        </article>
-                    \`;
-                } else {
-                    returnHTML += \`
-                            </select>            
-                            <input id="input_\${obj.name}_value" value="" />
-                        </article>
-                    \`;
+                for (let j = 0; j < valueOperators.length; j++) {
+                    const option = document.createElement('option');
+                    option.value = valueOperators[j].value;
+                    option.text = valueOperators[j].name;
+                    select.appendChild(option);
                 }
             } else {
-                returnHTML += \`
-                        </select>            
-                        <input id="input_\${obj.name}_value" value="" />
-                    </article>
-                \`;
+                for (let j = 0; j < textOperators.length; j++) {
+                    const option = document.createElement('option');
+                    option.value = textOperators[j].value;
+                    option.text = textOperators[j].name;
+                    select.appendChild(option);
+                }
             }
+
+            const input = document.createElement('input');
+            input.id = \`input_\${obj.name}_value\`;
+            input.value = '';
+            select.appendChild(input);
+
+            article.appendChild(h3);
+            article.appendChild(select);
         }
+
+        div.appendChild(article);
     }
-    returnHTML += \`
-        </div>
-        <button class="deleteRowButton" onclick="deleteRow(\${newRowNumber})">Slet regel</button>
-        </section>
-    \`;
-    ruleWrapper.innerHTML += returnHTML;
-    PublishWsMessage(JSON.stringify(rules)); // Publish the updated rules
+
+    section.appendChild(div);
+
+    const deleteButton = document.createElement('button');
+    deleteButton.className = 'deleteRowButton';
+    deleteButton.textContent = 'Slet regel';
+    deleteButton.onclick = function () {
+        deleteRow(newRowNumber);
+    };
+    section.appendChild(deleteButton);
+
+    ruleWrapper.appendChild(section);
+
+    PublishWsMessage(JSON.stringify(rules));
 }
 
-function renderRules() {
-    ruleWrapper.innerHTML = "";
-    // Læg regler i ruleWrapper
-    for (let i = 0; i < rules.length; i++) {
-        ruleWrapper.innerHTML += generateRule(i);
-    }
+
+
+function listenToEvents() {
     // Add event listener for each delete button
     for (let i = 0; i < deleteButtons.length; i++) {
         deleteButtons[i].addEventListener("click", () => {
@@ -350,7 +323,13 @@ function renderRules() {
     }
 }
 
-renderRules();
+// Læg regler i ruleWrapper
+ruleWrapper.innerHTML = "";
+for (let i = 0; i < rules.length; i++) {
+    ruleWrapper.appendChild(generateRule(i).cloneNode(true)); // Append the cloned content
+}
+
+listenToEvents();
 
 
 

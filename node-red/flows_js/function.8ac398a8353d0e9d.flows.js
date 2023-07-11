@@ -69,6 +69,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           let tjek_beløb;
           if (!regel_obj[4].operator) {
               tjek_beløb = true;
+          } else if (!regel_obj[4].value1) {
+              tjek_beløb = true;
           } else if (regel_obj[4].operator === '>') {
               tjek_beløb = parseFloat(postering.amount) > parseFloat(regel_obj[4].value1.replace(',', '.'));
           } else if (regel_obj[4].operator === '<') {
