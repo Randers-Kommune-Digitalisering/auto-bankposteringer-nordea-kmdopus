@@ -2,14 +2,14 @@ const Node = {
   "id": "a63c9eebe49c49ea",
   "type": "template",
   "z": "97cc6bce53027f96",
-  "name": "JavaScript - genererer ikke input fields og andre elementer",
+  "name": "JavaScript",
   "field": "payload.script",
   "fieldType": "msg",
   "format": "javascript",
   "syntax": "plain",
   "template": "",
-  "x": 850,
-  "y": 260,
+  "x": 770,
+  "y": 280,
   "wires": [
     [
       "487b9a4158444856"
@@ -19,14 +19,25 @@ const Node = {
 }
 
 Node.template = `
-// 040723 14:25 - Ændringer af værdier på siden opdaterer ikke værdien i kildekoden og kommer derfor heller ikke med over i rules objektet
 const ruleWrapper = document.querySelector(".ruleWrapper");
 const addRuleButton = document.querySelector(".addRuleButton");
 const deleteButtons = document.querySelectorAll(".deleteRowButton");
 const inputs = document.getElementsByTagName("input");
 const selects = document.getElementsByTagName("select");
 const rules = _rules != null ? _rules : []; // Rules are defined in change node previous to this
-const inputFields = { 0: "Reference", 1: "Advisliste", 2: "Afsender", 3: "Posteringstype", 4: "Beløb1", 5: "Beløb2", 6: "Posteringstekst", 7: "Artskonto", 8: "PSP", 9: "SIO", 10: "Notat" }
+const inputFields = {
+    0: "Reference",
+    1: "Advisliste",
+    2: "Afsender",
+    3: "Posteringstype",
+    4: "Beløb1",
+    5: "Beløb2",
+    6: "Posteringstekst",
+    7: "Artskonto",
+    8: "PSP",
+    9: "SIO",
+    10: "Notat"
+};
 const textOperators = [
     { "name": "= Skal være lig med", "value": "==" },
     { "name": "{?} Indeholder", "value": "contains" },
@@ -68,7 +79,7 @@ function updateValue(inputField) {
     }
     if (ruleObject) {
         ruleObject[sid[2]] = inputField.value;
-        rules[ruleIndex][innerIndex] = ruleObject;
+        rules[ruleIndex][innerIndex][sid[2]] = inputField.value; // Update the specific property of the ruleObject in rules
         let type = ruleObject.type;
         switch (type) {
             case "int":
@@ -85,6 +96,10 @@ function updateValue(inputField) {
     }
     console.log("Saving user input to rules...");
 }
+
+
+
+
 
 
 // Sæt eksisterende regler ind på siden
@@ -213,9 +228,8 @@ function generateRule(index) {
     let deleteButton = document.createElement("button");
     deleteButton.className = "deleteRowButton";
     deleteButton.textContent = "Slet regel";
-    deleteButton.onclick = function () {
-        deleteRow(index);
-    };
+    deleteButton.setAttribute("onclick", \`deleteRow(\${index})\`);
+
     section.appendChild(deleteButton);
 
     fragment.appendChild(section); // Append the section to the fragment
@@ -231,19 +245,22 @@ function deleteRow(rowIndex) {
     if (rowIndex >= 0 && rowIndex < rules.length) {
         rules.splice(rowIndex, 1);
         PublishWsMessage(JSON.stringify(rules));
-        ruleWrapper.innerHTML = "";
-        for (let i = 0; i < rules.length; i++) {
-            ruleWrapper.appendChild(generateRule(i).cloneNode(true)); // Append the cloned content
+        const ruleSection = ruleWrapper.children[rowIndex];
+        ruleWrapper.removeChild(ruleSection);
+        for (let i = rowIndex; i < ruleWrapper.children.length; i++) {
+            const ruleElement = ruleWrapper.children[i];
+            const h2 = ruleElement.querySelector("h2");
+            h2.textContent = i + 1;
         }
+        listenToEvents(); // Reattach event listeners
     }
 }
+
 
 
 // Lav ny tom linje
 function generateNewRow() {
     const sampleRow = rules[0];
-    const newRowNumber = rules.length;
-    const newRowNumberShown = newRowNumber + 1;
 
     let newRow = [];
     for (let i = 0; i < sampleRow.length; i++) {
@@ -280,70 +297,10 @@ function generateNewRow() {
     }
     rules.push(newRow);
 
-    const section = document.createElement('section');
-    const h2 = document.createElement('h2');
-    h2.textContent = newRowNumberShown;
-    section.appendChild(h2);
-
-    const div = document.createElement('div');
-
-    for (let i = 0; i < newRow.length; i++) {
-        const obj = newRow[i];
-        const article = document.createElement('article');
-        const h3 = document.createElement('h3');
-
-        if (i === 5) {
-            h3.textContent = 'Posteringstekst';
-            const input = document.createElement('input');
-            input.id = 'input_Posteringstekst_value';
-            input.value = '';
-            input.style.width = '300px';
-            article.appendChild(h3);
-            article.appendChild(input);
-        } else {
-            h3.textContent = obj.name;
-            const select = document.createElement('select');
-            select.id = \`input_\${obj.name}_operator\`;
-
-            if (i === 4) {
-                for (let j = 0; j < valueOperators.length; j++) {
-                    const option = document.createElement('option');
-                    option.value = valueOperators[j].value;
-                    option.text = valueOperators[j].name;
-                    select.appendChild(option);
-                }
-            } else {
-                for (let j = 0; j < textOperators.length; j++) {
-                    const option = document.createElement('option');
-                    option.value = textOperators[j].value;
-                    option.text = textOperators[j].name;
-                    select.appendChild(option);
-                }
-            }
-
-            const input = document.createElement('input');
-            input.id = \`input_\${obj.name}_value\`;
-            input.value = '';
-            select.appendChild(input);
-
-            article.appendChild(h3);
-            article.appendChild(select);
-        }
-
-        div.appendChild(article);
+    ruleWrapper.innerHTML = "";
+    for (let i = 0; i < rules.length; i++) {
+        ruleWrapper.appendChild(generateRule(i).cloneNode(true)); // Append the cloned content
     }
-
-    section.appendChild(div);
-
-    const deleteButton = document.createElement('button');
-    deleteButton.className = 'deleteRowButton';
-    deleteButton.textContent = 'Slet regel';
-    deleteButton.onclick = function () {
-        deleteRow(newRowNumber);
-    };
-    section.appendChild(deleteButton);
-
-    ruleWrapper.appendChild(section);
 
     PublishWsMessage(JSON.stringify(rules));
 }

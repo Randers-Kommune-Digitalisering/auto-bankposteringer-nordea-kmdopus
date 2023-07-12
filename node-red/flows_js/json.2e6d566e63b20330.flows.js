@@ -7,11 +7,10 @@ const Node = {
   "action": "obj",
   "pretty": false,
   "x": 250,
-  "y": 180,
+  "y": 140,
   "wires": [
     [
-      "db3dc6da3e3f8126",
-      "40a66681ee5848c1"
+      "db3dc6da3e3f8126"
     ]
   ],
   "_order": 94

@@ -10,7 +10,7 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 110,
+  "x": 90,
   "y": 580,
   "wires": [
     [

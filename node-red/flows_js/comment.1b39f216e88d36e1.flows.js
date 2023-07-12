@@ -4,8 +4,8 @@ const Node = {
   "z": "97cc6bce53027f96",
   "name": "Hosting web UI",
   "info": "",
-  "x": 580,
-  "y": 140,
+  "x": 120,
+  "y": 240,
   "wires": [],
   "_order": 92
 }

@@ -4,7 +4,7 @@ const Node = {
   "z": "a1938e80ddbe5950",
   "name": "authorizer_id i Set params for Confirm Auth svarer til ens Nordea ID",
   "info": "",
-  "x": 620,
+  "x": 600,
   "y": 360,
   "wires": [],
   "_order": 22
