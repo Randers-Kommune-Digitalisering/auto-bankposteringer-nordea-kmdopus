@@ -90,12 +90,11 @@ function updateValue(inputField) {
 // Sæt eksisterende regler ind på siden
 function generateRule(index) {
     const obj_array = rules[index];
-    const numberShown = index + 1;
     const fragment = document.createDocumentFragment(); // Create a document fragment
 
     let section = document.createElement("section");
     let h2 = document.createElement("h2");
-    h2.textContent = numberShown;
+    h2.textContent = index + 1;
     section.appendChild(h2);
 
     let div = document.createElement("div");
@@ -105,97 +104,109 @@ function generateRule(index) {
         let article = document.createElement("article");
         let h3 = document.createElement("h3");
 
-        if (i === 5) {
-            let inputPosteringstekst = document.createElement("input");
-            inputPosteringstekst.id = "input_Posteringstekst_value";
-            inputPosteringstekst.value = obj.Posteringstekst || "";
-            inputPosteringstekst.style.width = "300px";
+        switch (i) {
+            case 5:
+                let inputPosteringstekst = document.createElement("input");
+                inputPosteringstekst.id = "input_Posteringstekst_value";
+                inputPosteringstekst.value = obj.text || "";
+                inputPosteringstekst.style.width = "300px";
 
-            let inputArtskonto = document.createElement("input");
-            inputArtskonto.id = "input_Artskonto_value";
-            inputArtskonto.value = obj.Artskonto || "";
-            inputArtskonto.style.width = "85px";
+                let inputArtskonto = document.createElement("input");
+                inputArtskonto.id = "input_Artskonto_value";
+                inputArtskonto.value = obj.Artskonto || "";
+                inputArtskonto.style.width = "85px";
 
-            let inputPSP = document.createElement("input");
-            inputPSP.id = "input_PSP_value";
-            inputPSP.value = obj.PSP || "";
-            inputPSP.style.width = "170px";
+                let inputPSP = document.createElement("input");
+                inputPSP.id = "input_PSP_value";
+                inputPSP.value = obj.PSP || "";
+                inputPSP.style.width = "170px";
 
-            let inputNotat = document.createElement("input");
-            inputNotat.id = "input_Notat_value";
-            inputNotat.value = obj.Notat || "";
-            inputNotat.style.width = "700px";
+                let inputNotat = document.createElement("input");
+                inputNotat.id = "input_Notat_value";
+                inputNotat.value = obj.Notat || "";
+                inputNotat.style.width = "700px";
 
-            let articlePosteringstekst = document.createElement("article");
-            let h3Posteringstekst = document.createElement("h3");
-            h3Posteringstekst.textContent = "Posteringstekst";
-            articlePosteringstekst.appendChild(h3Posteringstekst);
-            articlePosteringstekst.appendChild(inputPosteringstekst);
+                let articlePosteringstekst = document.createElement("article");
+                let h3Posteringstekst = document.createElement("h3");
+                h3Posteringstekst.textContent = "Posteringstekst";
+                articlePosteringstekst.appendChild(h3Posteringstekst);
+                articlePosteringstekst.appendChild(inputPosteringstekst);
 
-            let articleArtskonto = document.createElement("article");
-            let h3Artskonto = document.createElement("h3");
-            h3Artskonto.textContent = "Artskonto";
-            articleArtskonto.appendChild(h3Artskonto);
-            articleArtskonto.appendChild(inputArtskonto);
+                let articleArtskonto = document.createElement("article");
+                let h3Artskonto = document.createElement("h3");
+                h3Artskonto.textContent = "Artskonto";
+                articleArtskonto.appendChild(h3Artskonto);
+                articleArtskonto.appendChild(inputArtskonto);
 
-            let articlePSP = document.createElement("article");
-            let h3PSP = document.createElement("h3");
-            h3PSP.textContent = "PSP";
-            articlePSP.appendChild(h3PSP);
-            articlePSP.appendChild(inputPSP);
+                let articlePSP = document.createElement("article");
+                let h3PSP = document.createElement("h3");
+                h3PSP.textContent = "PSP";
+                articlePSP.appendChild(h3PSP);
+                articlePSP.appendChild(inputPSP);
 
-            let articleNotat = document.createElement("article");
-            let h3Notat = document.createElement("h3");
-            h3Notat.textContent = "Notat";
-            articleNotat.appendChild(h3Notat);
-            articleNotat.appendChild(inputNotat);
+                let articleNotat = document.createElement("article");
+                let h3Notat = document.createElement("h3");
+                h3Notat.textContent = "Notat";
+                articleNotat.appendChild(h3Notat);
+                articleNotat.appendChild(inputNotat);
 
-            div.appendChild(articlePosteringstekst);
-            div.appendChild(articleArtskonto);
-            div.appendChild(articlePSP);
-            div.appendChild(articleNotat);
-        } else {
-            h3.textContent = obj.name;
-            let select = document.createElement("select");
-            select.id = \`input_\${obj.name}_operator\`;
+                div.appendChild(articlePosteringstekst);
+                div.appendChild(articleArtskonto);
+                div.appendChild(articlePSP);
+                div.appendChild(articleNotat);
+                break;
 
-            if (i === 4) {
-                for (let j = 0; j < valueOperators.length; j++) {
+            default:
+                h3.textContent = obj.name;
+                let select = document.createElement("select");
+                select.id = \`input_\${obj.name}_operator\`;
+
+                const operators = i === 4 ? valueOperators : textOperators;
+                for (let j = 0; j < operators.length; j++) {
                     let option = document.createElement("option");
-                    option.value = valueOperators[j].value;
-                    option.text = valueOperators[j].name;
-                    if (obj.operator == valueOperators[j].value) {
+                    option.value = operators[j].value;
+                    option.text = operators[j].name;
+                    if (obj.operator == operators[j].value) {
                         option.selected = true;
                     }
                     select.appendChild(option);
                 }
-            } else {
-                for (let j = 0; j < textOperators.length; j++) {
-                    let option = document.createElement("option");
-                    option.value = textOperators[j].value;
-                    option.text = textOperators[j].name;
-                    if (obj.operator == textOperators[j].value) {
-                        option.selected = true;
-                    }
-                    select.appendChild(option);
-                }
-            }
-            article.appendChild(h3);
-            article.appendChild(select);
+
+                article.appendChild(h3);
+                article.appendChild(select);
         }
 
-        if (!obj.value) {
-            let input = document.createElement("input");
-            input.id = \`input_\${obj.name}_value\`;
-            input.value = "";
-            article.appendChild(input);
-        } else {
-            let input = document.createElement("input");
-            input.id = \`input_\${obj.name}_value\`;
-            input.value = obj.value;
-            article.appendChild(input);
+        switch (i) {
+            case 4:
+                let input1 = document.createElement("input");
+                input1.id = \`input_\${obj.name}_value1\`;
+                input1.value = !obj.value1 ? "" : obj.value1;
+                article.appendChild(input1);
+
+                let input2 = document.createElement("input");
+                input2.id = \`input_\${obj.name}_value2\`;
+                input2.value = !obj.value2 ? "" : obj.value2;
+                article.appendChild(input2);
+                break;
+
+            case 5:
+                break;
+
+            default:
+                let input = document.createElement("input");
+                input.id = \`input_\${obj.name}_value\`;
+                input.value = !obj.value ? "" : obj.value;
+                article.appendChild(input);
+                break;
         }
-        div.appendChild(article);        
+
+        switch (i) {
+            case 5:
+                break;
+            default:
+                div.appendChild(article);
+                break;
+        }
     }
     section.appendChild(div);
 
