@@ -60,38 +60,28 @@ function PublishWsMessage(m) {
 
 /// Ved opdatering af input value
 function updateValue(inputField) {
-    let id = inputField.id;
-    let sid = id.split("_");
-    // Find the rule object with matching name property
+    let id = inputField.id;   // f.eks. input_afsender_value
+    let sid = id.split("_");  // f.eks. input, afsender, value
     let ruleObject = null;
     let ruleIndex = -1;
     let innerIndex = -1;
     for (let i = 0; i < rules.length; i++) {
         for (let j = 0; j < rules[i].length; j++) {
-            if (rules[i][j].name === sid[1]) {
-                ruleObject = rules[i][j];
+            if (rules[i][j].name === sid[1]) { // når der peges på et felt der matcher en regel
+                ruleObject = rules[i][j]; // gem eksisterende regel i ruleObject
                 ruleIndex = i;
                 innerIndex = j;
                 break;
             }
         }
-        if (ruleObject) { break; }
+        if (ruleObject) { break; } // stop når der er match
     }
-    if (ruleObject) {
-        ruleObject[sid[2]] = inputField.value;
-        rules[ruleIndex][innerIndex][sid[2]] = inputField.value; // Update the specific property of the ruleObject in rules
-        let type = ruleObject.type;
-        switch (type) {
-            case "int":
-            case "float":
-            case "double":
-            case "number":
-                inputField.value = inputField.value.replace(/[^0-9.]/g, '').replace(/(\\..*?)\\..*/g, '\$1');
-                break;
-            default:
-                inputField.setAttribute('value', inputField.value);
-                break;
-        }
+    if (ruleObject) { // når der er match
+        const updatedRuleObject = {
+            ...ruleObject,
+            [sid[2]]: inputField.value, // Update the specific property of the ruleObject
+        };
+        rules[ruleIndex][innerIndex] = updatedRuleObject; // Assign the updated ruleObject back to the rules array
         PublishWsMessage(JSON.stringify(rules));
     }
     console.log("Saving user input to rules...");
@@ -123,7 +113,7 @@ function generateRule(index) {
             case 5:
                 let inputPosteringstekst = document.createElement("input");
                 inputPosteringstekst.id = "input_Posteringstekst_value";
-                inputPosteringstekst.value = obj.text || "";
+                inputPosteringstekst.value = obj.Posteringstekst || "";
                 inputPosteringstekst.style.width = "300px";
 
                 let inputArtskonto = document.createElement("input");
@@ -252,7 +242,6 @@ function deleteRow(rowIndex) {
             const h2 = ruleElement.querySelector("h2");
             h2.textContent = i + 1;
         }
-        listenToEvents(); // Reattach event listeners
     }
 }
 
@@ -270,7 +259,7 @@ function generateNewRow() {
             case 5:
                 newObj = {
                     name: obj.name,
-                    text: '',
+                    Posteringstekst: '',
                     Artskonto: null,
                     PSP: null,
                     SIO: null,
