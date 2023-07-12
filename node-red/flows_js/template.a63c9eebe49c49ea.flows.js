@@ -93,34 +93,75 @@ function generateRule(index) {
     const numberShown = index + 1;
     const fragment = document.createDocumentFragment(); // Create a document fragment
 
-    let section = document.createElement('section');
-    let h2 = document.createElement('h2');
+    let section = document.createElement("section");
+    let h2 = document.createElement("h2");
     h2.textContent = numberShown;
     section.appendChild(h2);
 
-    let div = document.createElement('div');
+    let div = document.createElement("div");
 
     for (let i = 0; i < obj_array.length; i++) {
         const obj = obj_array[i];
-        let article = document.createElement('article');
-        let h3 = document.createElement('h3');
+        let article = document.createElement("article");
+        let h3 = document.createElement("h3");
 
         if (i === 5) {
-            h3.textContent = 'Posteringstekst';
-            let input = document.createElement('input');
-            input.id = 'input_Posteringstekst_value';
-            input.value = obj.text || '';
-            input.style.width = '300px';
-            article.appendChild(h3);
-            article.appendChild(input);
+            let inputPosteringstekst = document.createElement("input");
+            inputPosteringstekst.id = "input_Posteringstekst_value";
+            inputPosteringstekst.value = obj.Posteringstekst || "";
+            inputPosteringstekst.style.width = "300px";
+
+            let inputArtskonto = document.createElement("input");
+            inputArtskonto.id = "input_Artskonto_value";
+            inputArtskonto.value = obj.Artskonto || "";
+            inputArtskonto.style.width = "85px";
+
+            let inputPSP = document.createElement("input");
+            inputPSP.id = "input_PSP_value";
+            inputPSP.value = obj.PSP || "";
+            inputPSP.style.width = "170px";
+
+            let inputNotat = document.createElement("input");
+            inputNotat.id = "input_Notat_value";
+            inputNotat.value = obj.Notat || "";
+            inputNotat.style.width = "700px";
+
+            let articlePosteringstekst = document.createElement("article");
+            let h3Posteringstekst = document.createElement("h3");
+            h3Posteringstekst.textContent = "Posteringstekst";
+            articlePosteringstekst.appendChild(h3Posteringstekst);
+            articlePosteringstekst.appendChild(inputPosteringstekst);
+
+            let articleArtskonto = document.createElement("article");
+            let h3Artskonto = document.createElement("h3");
+            h3Artskonto.textContent = "Artskonto";
+            articleArtskonto.appendChild(h3Artskonto);
+            articleArtskonto.appendChild(inputArtskonto);
+
+            let articlePSP = document.createElement("article");
+            let h3PSP = document.createElement("h3");
+            h3PSP.textContent = "PSP";
+            articlePSP.appendChild(h3PSP);
+            articlePSP.appendChild(inputPSP);
+
+            let articleNotat = document.createElement("article");
+            let h3Notat = document.createElement("h3");
+            h3Notat.textContent = "Notat";
+            articleNotat.appendChild(h3Notat);
+            articleNotat.appendChild(inputNotat);
+
+            div.appendChild(articlePosteringstekst);
+            div.appendChild(articleArtskonto);
+            div.appendChild(articlePSP);
+            div.appendChild(articleNotat);
         } else {
             h3.textContent = obj.name;
-            let select = document.createElement('select');
+            let select = document.createElement("select");
             select.id = \`input_\${obj.name}_operator\`;
 
             if (i === 4) {
                 for (let j = 0; j < valueOperators.length; j++) {
-                    let option = document.createElement('option');
+                    let option = document.createElement("option");
                     option.value = valueOperators[j].value;
                     option.text = valueOperators[j].name;
                     if (obj.operator == valueOperators[j].value) {
@@ -130,7 +171,7 @@ function generateRule(index) {
                 }
             } else {
                 for (let j = 0; j < textOperators.length; j++) {
-                    let option = document.createElement('option');
+                    let option = document.createElement("option");
                     option.value = textOperators[j].value;
                     option.text = textOperators[j].name;
                     if (obj.operator == textOperators[j].value) {
@@ -139,31 +180,28 @@ function generateRule(index) {
                     select.appendChild(option);
                 }
             }
-
-            if (!obj.value) {
-                let input = document.createElement('input');
-                input.id = \`input_\${obj.name}_value\`;
-                input.value = '';
-                select.appendChild(input);
-            } else {
-                let input = document.createElement('input');
-                input.id = \`input_\${obj.name}_value\`;
-                input.value = obj.value;
-                select.appendChild(input);
-            }
-
             article.appendChild(h3);
             article.appendChild(select);
         }
 
-        div.appendChild(article);
+        if (!obj.value) {
+            let input = document.createElement("input");
+            input.id = \`input_\${obj.name}_value\`;
+            input.value = "";
+            article.appendChild(input);
+        } else {
+            let input = document.createElement("input");
+            input.id = \`input_\${obj.name}_value\`;
+            input.value = obj.value;
+            article.appendChild(input);
+        }
+        div.appendChild(article);        
     }
-
     section.appendChild(div);
 
-    let deleteButton = document.createElement('button');
-    deleteButton.className = 'deleteRowButton';
-    deleteButton.textContent = 'Slet regel';
+    let deleteButton = document.createElement("button");
+    deleteButton.className = "deleteRowButton";
+    deleteButton.textContent = "Slet regel";
     deleteButton.onclick = function () {
         deleteRow(index);
     };
@@ -173,6 +211,8 @@ function generateRule(index) {
 
     return fragment; // Return the document fragment
 }
+
+
 
 
 // Slet en linje
