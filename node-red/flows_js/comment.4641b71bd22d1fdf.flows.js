@@ -4,7 +4,7 @@ const Node = {
   "z": "a1938e80ddbe5950",
   "name": "msg.payload = request/response i postman",
   "info": "",
-  "x": 200,
+  "x": 180,
   "y": 360,
   "wires": [],
   "_order": 18
