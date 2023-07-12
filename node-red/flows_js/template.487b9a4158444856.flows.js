@@ -43,6 +43,7 @@ input {
 
 select {
   background: linear-gradient(whitesmoke, #e8e8e8);
+  width: -webkit-fill-available;
 }
 
 input:focus, select:focus {
