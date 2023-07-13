@@ -5,7 +5,7 @@ const Node = {
   "name": "Hosting web UI",
   "info": "",
   "x": 120,
-  "y": 240,
+  "y": 100,
   "wires": [],
   "_order": 92
 }
