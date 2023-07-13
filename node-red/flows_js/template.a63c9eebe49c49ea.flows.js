@@ -8,8 +8,8 @@ const Node = {
   "format": "javascript",
   "syntax": "plain",
   "template": "",
-  "x": 770,
-  "y": 280,
+  "x": 570,
+  "y": 140,
   "wires": [
     [
       "487b9a4158444856"
@@ -63,24 +63,47 @@ function updateValue(inputField) {
     let id = inputField.id;   // f.eks. input_afsender_value
     let sid = id.split("_");  // f.eks. input, afsender, value
     let ruleObject = null;
+    let konteringPointer = false;
     let ruleIndex = -1;
     let innerIndex = -1;
     for (let i = 0; i < rules.length; i++) {
         for (let j = 0; j < rules[i].length; j++) {
-            if (rules[i][j].name === sid[1]) { // når der peges på et felt der matcher en regel
-                ruleObject = rules[i][j]; // gem eksisterende regel i ruleObject
-                ruleIndex = i;
-                innerIndex = j;
-                break;
+            switch (j) {
+                case 5:
+                    if (sid[1] in rules[i][j]) { // når der peges på et felt der matcher en regel
+                        ruleObject = rules[i][j]; // gem eksisterende regel i ruleObject
+                        ruleIndex = i;
+                        innerIndex = j;
+                        konteringPointer = true;
+                        break;
+                    }
+                    break;
+                default:
+                    if (rules[i][j].name === sid[1]) { // når der peges på et felt der matcher en regel
+                        ruleObject = rules[i][j]; // gem eksisterende regel i ruleObject
+                        ruleIndex = i;
+                        innerIndex = j;
+                        break;
+                    }
+                    break;
             }
         }
         if (ruleObject) { break; } // stop når der er match
     }
     if (ruleObject) { // når der er match
-        const updatedRuleObject = {
-            ...ruleObject,
-            [sid[2]]: inputField.value, // Update the specific property of the ruleObject
-        };
+        let updatedRuleObject = null;
+        if (konteringPointer) {
+            updatedRuleObject = {
+                ...ruleObject,
+                [sid[1]]: inputField.value, // Update the specific property of the ruleObject
+            };
+        } else {
+            updatedRuleObject = {
+                ...ruleObject,
+                [sid[2]]: inputField.value, // Update the specific property of the ruleObject
+            };
+        }
+
         rules[ruleIndex][innerIndex] = updatedRuleObject; // Assign the updated ruleObject back to the rules array
         PublishWsMessage(JSON.stringify(rules));
     }

@@ -8,8 +8,8 @@ const Node = {
   "format": "javascript",
   "syntax": "plain",
   "template": "",
-  "x": 810,
-  "y": 300,
+  "x": 610,
+  "y": 160,
   "wires": [
     []
   ],
