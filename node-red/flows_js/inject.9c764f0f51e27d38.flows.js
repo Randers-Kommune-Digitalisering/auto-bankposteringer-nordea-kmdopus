@@ -9,8 +9,8 @@ const Node = {
       "p": "payload"
     }
   ],
-  "repeat": "300",
-  "crontab": "",
+  "repeat": "",
+  "crontab": "30 05 * * 1,2,3,4,5",
   "once": false,
   "onceDelay": 0.1,
   "topic": "",
