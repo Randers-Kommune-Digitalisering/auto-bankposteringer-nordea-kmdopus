@@ -11,13 +11,13 @@ const Node = {
   "finalize": "",
   "libs": [],
   "x": 90,
-  "y": 580,
+  "y": 520,
   "wires": [
     [
       "be0a51d36be4d3e8"
     ]
   ],
-  "_order": 77
+  "_order": 76
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
@@ -90,7 +90,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               for (let i = 0; i < 4; i++) {
                   let searchword = String(regel_obj[i].value).toLowerCase();
   
-                  if (searchword && !searchword.startsWith("#")) {
+                  if (searchword && regel_obj[6].active) {
                       let searchfelt = felter_i_nordea[subRule_checked];
                       if (!Array.isArray(searchfelt)) {
                           searchfelt = [searchfelt];

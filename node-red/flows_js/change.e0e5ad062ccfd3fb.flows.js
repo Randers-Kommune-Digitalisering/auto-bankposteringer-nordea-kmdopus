@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "a1938e80ddbe5950",
   "g": "517b687eb20ef6e5",
-  "name": "Set env. var.",
+  "name": "Env. var.",
   "rules": [
     {
       "t": "set",
@@ -50,7 +50,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 670,
+  "x": 600,
   "y": 120,
   "wires": [
     [

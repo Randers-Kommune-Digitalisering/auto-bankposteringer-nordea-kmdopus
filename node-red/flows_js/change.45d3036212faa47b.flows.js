@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "a1938e80ddbe5950",
   "g": "517b687eb20ef6e5",
-  "name": "Set params for Confirm Auth",
+  "name": "params",
   "rules": [
     {
       "t": "set",
@@ -53,7 +53,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 880,
+  "x": 740,
   "y": 160,
   "wires": [
     [

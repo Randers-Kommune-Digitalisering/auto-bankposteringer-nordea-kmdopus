@@ -15,7 +15,7 @@ const Node = {
       "487b9a4158444856"
     ]
   ],
-  "_order": 89
+  "_order": 90
 }
 
 Node.template = `
@@ -111,7 +111,10 @@ function updateValue(inputField) {
 }
 
 
-
+// Function to set the background color based on the active value
+function setSectionBackgroundColor(section, isActive) {
+    section.style.backgroundColor = isActive ? "#EAEDF0" : "#F8485E"; // Set the desired colors
+}
 
 
 
@@ -121,6 +124,9 @@ function generateRule(index) {
     const fragment = document.createDocumentFragment(); // Create a document fragment
 
     let section = document.createElement("section");
+    setSectionBackgroundColor(section, rules[index][6].active);
+
+
     let h2 = document.createElement("h2");
     h2.textContent = index + 1;
     section.appendChild(h2);
@@ -245,6 +251,17 @@ function generateRule(index) {
 
     section.appendChild(deleteButton);
 
+    let disableButton = document.createElement("button");
+    disableButton.className = "disableRuleButton";
+    if (rules[index][6].active) {
+        disableButton.textContent = "Deaktivér regel";
+    } else {
+        disableButton.textContent = "Aktivér regel";
+    }
+    disableButton.setAttribute("onclick", \`deactivateRow(\${index})\`);
+
+    section.appendChild(disableButton);
+
     fragment.appendChild(section); // Append the section to the fragment
 
     return fragment; // Return the document fragment
@@ -315,6 +332,24 @@ function generateNewRow() {
     }
 
     PublishWsMessage(JSON.stringify(rules));
+}
+
+
+
+// Deactivate a row
+function deactivateRow(rowIndex) {
+    if (rowIndex >= 0 && rowIndex < rules.length) {
+        rules[rowIndex][6].active = !rules[rowIndex][6].active;
+        PublishWsMessage(JSON.stringify(rules));
+
+        // Find the corresponding section and update its background color
+        const ruleSection = ruleWrapper.children[rowIndex];
+        setSectionBackgroundColor(ruleSection, rules[rowIndex][6].active);
+
+        // Find the corresponding disableButton and update its text content
+        const disableButton = ruleSection.querySelector(".disableRuleButton");
+        disableButton.textContent = rules[rowIndex][6].active ? "Deaktivér regel" : "Aktivér regel";
+    }
 }
 
 
