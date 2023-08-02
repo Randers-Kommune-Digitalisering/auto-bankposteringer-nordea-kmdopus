@@ -2,29 +2,32 @@ const Node = {
   "id": "b96da9492994439b",
   "type": "function",
   "z": "a1938e80ddbe5950",
-  "g": "2be607f061d91628",
-  "name": "function 1",
+  "g": "d8d1d8e39f1b0cb7",
+  "name": "Parse",
   "func": "",
   "outputs": 1,
   "noerr": 0,
   "initialize": "",
   "finalize": "",
-  "libs": [],
-  "x": 860,
-  "y": 480,
+  "libs": [
+    {
+      "var": "csv",
+      "module": "csv-parser"
+    }
+  ],
+  "x": 610,
+  "y": 460,
   "wires": [
     [
       "e9fcb6b8c3d17d60"
     ]
   ],
-  "_order": 73
+  "_order": 72
 }
 
-Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  const csvData = msg.payload;
-  const lines = csvData.split("\n"); // Split the CSV data into lines
+Node.func = async function (node, msg, RED, context, flow, global, env, util, csv) {
+  const csvData = msg.payload; // Assuming msg.payload contains an array of parsed CSV objects
   
-  // Mapping object for operator replacements
   const operatorMapping = {
       "Indeholder": "contains",
       "Starter med": ".startsWith",
@@ -35,43 +38,47 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       "Lig med": "==",
   };
   
-  const jsonData = lines.map((line) => {
-      const columns = line.split(";"); // Split each line into columns
-      // Extract values from columns
-      const name1 = columns[0];
-      const name2 = columns[1];
-      const name3 = columns[2];
-      const name4 = columns[3];
-      const operator = operatorMapping[columns[4]] || null;
-      const value1 = columns[5];
-      const value2 = columns[6];
-      const valueOperator = operatorMapping[columns[7]] || null;
-      const text = columns[8];
-      const Artskonto = columns[9];
-      const PSP = columns[10];
-      const SIO = columns[11];
-      const Notat = columns[12];
+  const jsonData = csvData.map(data => {
+      // Remove "#" character from all values
+      const cleanedData = Object.fromEntries(
+          Object.entries(data).map(([key, value]) => [key, value ? String(value).replace(/#/g, '') : value])
+      );
   
-      // Create objects based on extracted values
-      const obj1 = { name: "Reference", value: name1, operator };
-      const obj2 = { name: "Advisliste", value: name2, operator: null };
-      const obj3 = { name: "Afsender", value: name3, operator: null };
-      const obj4 = { name: "Posteringstype", value: name4, operator: null };
-      const obj5 = { name: "Beløb", value1, value2, operator: valueOperator };
-      const obj6 = {
-          name: "Kontering",
-          text,
+      const {
+          Reference,
+          Advisliste,
+          Afsender,
+          Posteringstype,
+          match_regel,
+          Beløb1,
+          Beløb2,
+          beløb_regel,
+          Posteringstekst,
           Artskonto,
           PSP,
-          SIO: SIO === "" ? null : SIO,
-          Notat,
-      };
-      // Create the array of objects
-      return [obj1, obj2, obj3, obj4, obj5, obj6];
+          Notat
+      } = cleanedData;
+  
+      const hasHash = Object.values(data).some(value => value && String(value).includes("#"));
+      const isActive = !hasHash;
+      const activeObject = { active: isActive };
+  
+      const operatorValue = operatorMapping[match_regel] || null;
+      const valueOperatorValue = operatorMapping[beløb_regel] || null;
+  
+      return [
+          { name: "Reference", value: Reference, operator: Reference ? operatorValue : null },
+          { name: "Advisliste", value: Advisliste, operator: Advisliste ? operatorValue : null },
+          { name: "Afsender", value: Afsender, operator: Afsender ? operatorValue : null },
+          { name: "Posteringstype", value: Posteringstype, operator: Posteringstype ? operatorValue : null },
+          { name: "Beløb", value1: Beløb1, value2: Beløb2, operator: valueOperatorValue },
+          { Posteringstekst, Artskonto, PSP, Notat },
+          activeObject,
+      ];
   });
   
-  msg.payload = jsonData; // Assign the converted JSON data to msg.payload
-  return msg; // Return the modified msg object with the converted JSON data
+  msg.payload = jsonData;
+  return msg;
   
 }
 

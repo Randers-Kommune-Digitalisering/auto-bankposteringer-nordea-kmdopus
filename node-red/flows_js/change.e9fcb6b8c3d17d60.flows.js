@@ -2,7 +2,7 @@ const Node = {
   "id": "e9fcb6b8c3d17d60",
   "type": "change",
   "z": "a1938e80ddbe5950",
-  "g": "2be607f061d91628",
+  "g": "d8d1d8e39f1b0cb7",
   "name": "Gem JSON Array i msg.konteringsregler",
   "rules": [
     {
@@ -18,8 +18,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 740,
-  "y": 520,
+  "x": 840,
+  "y": 460,
   "wires": [
     [
       "8fc155cc4bcc90d8"

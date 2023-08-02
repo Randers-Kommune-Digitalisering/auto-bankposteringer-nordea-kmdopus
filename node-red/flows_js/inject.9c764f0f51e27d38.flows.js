@@ -3,7 +3,7 @@ const Node = {
   "type": "inject",
   "z": "a1938e80ddbe5950",
   "g": "517b687eb20ef6e5",
-  "name": "Start",
+  "name": "▶",
   "props": [
     {
       "p": "payload"
@@ -16,7 +16,7 @@ const Node = {
   "topic": "",
   "payload": "{}",
   "payloadType": "json",
-  "x": 530,
+  "x": 470,
   "y": 120,
   "wires": [
     [

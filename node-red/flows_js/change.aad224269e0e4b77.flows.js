@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "a1938e80ddbe5950",
   "g": "517b687eb20ef6e5",
-  "name": "Save transact...",
+  "name": "💾",
   "rules": [
     {
       "t": "set",
@@ -18,7 +18,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 1560,
+  "x": 1250,
   "y": 280,
   "wires": [
     [

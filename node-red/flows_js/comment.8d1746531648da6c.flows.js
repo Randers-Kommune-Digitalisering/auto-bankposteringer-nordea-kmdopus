@@ -3,9 +3,9 @@ const Node = {
   "type": "comment",
   "z": "a1938e80ddbe5950",
   "g": "d343756708beda5a",
-  "name": "Pre-request code",
+  "name": "Postman prerequest",
   "info": "",
-  "x": 240,
+  "x": 190,
   "y": 60,
   "wires": [],
   "_order": 51
