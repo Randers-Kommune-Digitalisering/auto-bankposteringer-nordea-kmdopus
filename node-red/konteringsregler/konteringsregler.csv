@@ -29,7 +29,7 @@ Reference;Advisliste;Afsender;Posteringstype;match_regel;Beløb1;Beløb2;beløb_
 1992317;;;DK-abonnement;Indeholder;;;;Tekst fra bank;95941202;;;SKAL STÅ FØR DEN GENERELLE REGEL
 6687210;;;;Indeholder;-333,00;;Lig med;Tekst fra bank;40000000;XG-0000000006-00007;;SKAL STÅ FØR DEN GENERELLE REGEL
 8152290;;;;Indeholder;-333,00;;Lig med;Tekst fra bank;40000000;XG-0000000006-00007;;SKAL STÅ FØR DEN GENERELLE REGEL
-Dep;;;;Starter med;30000,00;;Lig med;Tekst fra bank;95950000;;;"Salg af grunde. Kommer ikke altid med ""dep"", jævnligt kun adressen. Betina Bak."
+Dep;;;;Starter med;30000,00;;Lig med;Tekst fra bank;95950000;;;Salg af grunde. Kommer ikke altid med ref: dep. Jævnligt kun adressen. Betina Bak.
 9913008388;;;Rente af obligationer;Indeholder;;;;Tekst fra bank;94600005;;;Randers Kommunes kunstfond
 9913008388;;;Udtrukne obligationer;Indeholder;;;;Tekst fra bank;94200011;;;Randers Kommunes kunstfond
 ;;Danica Pension;;Starter med;1251,70;;Lig med;Tekst fra bank;95914002;;;Posteringstekst inkl. CPR. CPR er ikke med i banken?
