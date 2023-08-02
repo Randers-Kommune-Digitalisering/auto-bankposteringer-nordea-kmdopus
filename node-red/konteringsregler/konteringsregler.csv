@@ -1,31 +1,31 @@
 Reference;Advisliste;Afsender;Posteringstype;match_regel;Beløb1;Beløb2;beløb_regel;Posteringstekst;Artskonto;PSP-element;SIO;Notat
-;;#Hjørnestenen;;Indeholder;;;;;95931400;;;UNDTAGELSE : Sygeref. skal til 95914005 (CPR-bogføring)
-;;#Comm2IG;;Indeholder;;;;;;;;Typisk Skole / IT - Lars Bertelsen
-;;#Dansk retursys;;Starter med;;;;;79000000;XG-0000005229-00022;;Tjek efter kreditnota, hvis ikke, bogfør på kantinens konto. Ved ref = SÆKID, ofte Mellerup/Lone Andersen eller Ungdomsskolen/Berit Schneider Mogensen eller Oust Mølleskolen/Lene Matine Jensen
-;;#RDB plastics GmbH;;Starter med;;;;;;;;Tina Tran - vedr. affaldskontoret
-;#retur;;;Indeholder;;;;;95910009;;;Tilbagekaldelse løn / fejludb til nemkonto i Nordea. Husk CPR
-;;#Danish Agro;;Starter med;;;;;;;;Til betalingskontoret - Kan måske bare føres over på 95990009?
-#Donation;;;;Indeholder;;;;;79100000;;;Spørg Ivar ift. moms
-;;#Skatteankestyrelsen;;Indeholder;;;;;;;;Spørg Bettina Bak, tjek j.nr.
-#teaterref Scenit;;;;Starter med;;;;;;XG-0000004075-00006;;Spørg Annette Skov eller Lene Bonne Rasmussen
-#Løntilskud ref;;#Kommune;;Indeholder;;;;;;;;Skal CPR-bogføres direkte på driften i vedkommende afdeling
-#Fleksjob ref FJ;;#Kommune;;Indeholder;;;;;95914009;;;Skal CPR-bogføres
-#Skånejob;;#Kommune;;Indeholder;;;;;95914009;;;Skal CPR-bogføres
-#Jobafklaring/ressourcerforløb;;#Kommune;;Indeholder;;;;;95914001;;;Skal CPR-bogføres
-#HSK;;;Overførsel;Starter med;;;;;52000000;XG-0000003394-00044;;Skal CPR-bogføres
-;;#Dansk affaldsminimering;;Starter med;;;;;79000000;XG-0000005012-00308;;Med tekst Dansk Affaldsminimering HDPE-plast. 
-;#Kundenr. 30114345;;;Indeholder;;;;;;;;Marianne Skovbo
-;;#Place2Book;;Starter med;;;;;95941300;;;Hvis ikke til MOE, kontakt Trine Mains
-#SygeDP/DP retur;;;;Indeholder;;;;;95931013;;;Hvis ikke i indbetalinger@randers.dk, spørg sagsbehandler
-;;#Boet efter;;Indeholder;;;;;;;;Henvendelse til doedsbo.ran@domstol.dk
-#Plejevederlag/Plejeorlov;;;;Indeholder;;;;Tekst fra bank;10000000;;;Find PSP-element på samme måde som AUB el. Kommunal Kompetence Fond
-;;#diverse;Gebyr;Indeholder;;;;;40000000;XG-0000000006-00007;;F.eks. Nets Easy gebyr-delen af bankposter
-;;#LFM;;Indeholder;;;;Retur ;67300000;9900000800;;Elsebeth Morgensen vedr. spørgsmål
-#??????;;;;Indeholder;;;;Uplacerbar;40000000;XG-0000000006-00020;;Bruges kun hvis posten har ligget på 95990009 længe
-#Moms retur;;;;Indeholder;;;;;95999010;;;Afstem med Ivars oversigt
-#Bådplads;;;;Indeholder;;;;;79000000;XG-0000004025-00001;;
-#Fyrværkeri;;;;Indeholder;;;;;79000000;XG-0000004013-00002;;
-#Bådplads depositum;;;;Indeholder;;;;;40000000;XG-0000004025-00003;;
+;;Hjørnestenen;;Indeholder;;;;;95931400;;;UNDTAGELSE : Sygeref. skal til 95914005 (CPR-bogføring)
+;;Comm2IG;;Indeholder;;;;;;;;Typisk Skole / IT - Lars Bertelsen
+;;Dansk retursys;;Starter med;;;;;79000000;XG-0000005229-00022;;Tjek efter kreditnota, hvis ikke, bogfør på kantinens konto. Ved ref = SÆKID, ofte Mellerup/Lone Andersen eller Ungdomsskolen/Berit Schneider Mogensen eller Oust Mølleskolen/Lene Matine Jensen
+;;RDB plastics GmbH;;Starter med;;;;;;;;Tina Tran - vedr. affaldskontoret
+;retur;;;Indeholder;;;;;95910009;;;Tilbagekaldelse løn / fejludb til nemkonto i Nordea. Husk CPR
+;;Danish Agro;;Starter med;;;;;;;;Til betalingskontoret - Kan måske bare føres over på 95990009?
+Donation;;;;Indeholder;;;;;79100000;;;Spørg Ivar ift. moms
+;;Skatteankestyrelsen;;Indeholder;;;;;;;;Spørg Bettina Bak, tjek j.nr.
+teaterref Scenit;;;;Starter med;;;;;;XG-0000004075-00006;;Spørg Annette Skov eller Lene Bonne Rasmussen
+Løntilskud ref;;Kommune;;Indeholder;;;;;;;;Skal CPR-bogføres direkte på driften i vedkommende afdeling
+Fleksjob ref FJ;;Kommune;;Indeholder;;;;;95914009;;;Skal CPR-bogføres
+Skånejob;;Kommune;;Indeholder;;;;;95914009;;;Skal CPR-bogføres
+Jobafklaring/ressourcerforløb;;Kommune;;Indeholder;;;;;95914001;;;Skal CPR-bogføres
+HSK;;;Overførsel;Starter med;;;;;52000000;XG-0000003394-00044;;Skal CPR-bogføres
+;;Dansk affaldsminimering;;Starter med;;;;;79000000;XG-0000005012-00308;;Med tekst Dansk Affaldsminimering HDPE-plast. 
+;Kundenr. 30114345;;;Indeholder;;;;;;;;Marianne Skovbo
+;;Place2Book;;Starter med;;;;;95941300;;;Hvis ikke til MOE, kontakt Trine Mains
+SygeDP/DP retur;;;;Indeholder;;;;;95931013;;;Hvis ikke i indbetalinger@randers.dk, spørg sagsbehandler
+;;Boet efter;;Indeholder;;;;;;;;Henvendelse til doedsbo.ran@domstol.dk
+Plejevederlag/Plejeorlov;;;;Indeholder;;;;Tekst fra bank;10000000;;;Find PSP-element på samme måde som AUB el. Kommunal Kompetence Fond
+;;diverse;Gebyr;Indeholder;;;;;40000000;XG-0000000006-00007;;F.eks. Nets Easy gebyr-delen af bankposter
+;;LFM;;Indeholder;;;;Retur ;67300000;9900000800;;Elsebeth Morgensen vedr. spørgsmål
+??????;;;;Indeholder;;;;Uplacerbar;40000000;XG-0000000006-00020;;Bruges kun hvis posten har ligget på 95990009 længe
+Moms retur;;;;Indeholder;;;;;95999010;;;Afstem med Ivars oversigt
+Bådplads;;;;Indeholder;;;;;79000000;XG-0000004025-00001;;
+Fyrværkeri;;;;Indeholder;;;;;79000000;XG-0000004013-00002;;
+Bådplads depositum;;;;Indeholder;;;;;40000000;XG-0000004025-00003;;
 1992317;;;DK-abonnement;Indeholder;;;;Tekst fra bank;95941202;;;SKAL STÅ FØR DEN GENERELLE REGEL
 6687210;;;;Indeholder;-333,00;;Lig med;Tekst fra bank;40000000;XG-0000000006-00007;;SKAL STÅ FØR DEN GENERELLE REGEL
 8152290;;;;Indeholder;-333,00;;Lig med;Tekst fra bank;40000000;XG-0000000006-00007;;SKAL STÅ FØR DEN GENERELLE REGEL
