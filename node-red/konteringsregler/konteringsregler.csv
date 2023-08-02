@@ -9,7 +9,7 @@ Reference;Advisliste;Afsender;Posteringstype;match_regel;Beløb1;Beløb2;beløb_
 ;;#Skatteankestyrelsen;;Indeholder;;;;;;;;Spørg Bettina Bak, tjek j.nr.
 #teaterref Scenit;;;;Starter med;;;;;;XG-0000004075-00006;;Spørg Annette Skov eller Lene Bonne Rasmussen
 #Løntilskud ref;;#Kommune;;Indeholder;;;;;;;;Skal CPR-bogføres direkte på driften i vedkommende afdeling
-"#Fleksjob ref ""FJ""";;#Kommune;;Indeholder;;;;;95914009;;;Skal CPR-bogføres
+"#Fleksjob ref: FJ";;#Kommune;;Indeholder;;;;;95914009;;;Skal CPR-bogføres
 #Skånejob;;#Kommune;;Indeholder;;;;;95914009;;;Skal CPR-bogføres
 #Jobafklaring/ressourcerforløb;;#Kommune;;Indeholder;;;;;95914001;;;Skal CPR-bogføres
 #HSK;;;Overførsel;Starter med;;;;;52000000;XG-0000003394-00044;;Skal CPR-bogføres
