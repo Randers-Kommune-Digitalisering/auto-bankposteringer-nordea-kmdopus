@@ -20,6 +20,7 @@ services:
       CLIENT_SECRET: ${CLIENT_SECRET}
       EIDASPRIVATEKEY: ${EIDASPRIVATEKEY}
       PRODUKTIONSKEY: ${PRODUKTIONSKEY}
+      PRODUKTIONSSECRET: ${PRODUKTIONSSECRET}
       
       # Miljøvariablen FLOWS fortæller Node-RED IDEet hvilket flow.json den skal åbne og gemme ændringer i ved deploy.
       FLOWS: "/data/flows.json"
