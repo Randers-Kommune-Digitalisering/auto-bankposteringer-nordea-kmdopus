@@ -15,11 +15,11 @@ services:
       DB_DATABASE: demo
       API_AUTH: ${API_AUTH}
       CLIENT_ID: ${CLIENT_ID}
+      # CLIENT_ID: ${PRODUKTIONSKEY}
       CLIENT_SECRET: ${CLIENT_SECRET}
+      # CLIENT_SECRET: ${PRODUKTIONSSECRET}
       EIDASPRIVATEKEY: ${EIDASPRIVATEKEY}
-      PRODUKTIONSKEY: ${PRODUKTIONSKEY}
-      PRODUKTIONSSECRET: ${PRODUKTIONSSECRET}
-      PROD_EIDASPRIVATEKEY: ${PROD_EIDASPRIVATEKEY}
+      # EIDASPRIVATEKEY: ${PROD_EIDASPRIVATEKEY}
       
       # Miljøvariablen FLOWS fortæller Node-RED IDEet hvilket flow.json den skal åbne og gemme ændringer i ved deploy.
       FLOWS: "/data/flows.json"
