@@ -1,9 +1,9 @@
 const Node = {
-  "id": "3d9af6a4fe22b06b",
+  "id": "b22e9664bf365fa0",
   "type": "change",
   "z": "6cc161e748b99815",
-  "g": "b23b428a2893858e",
-  "name": "Regler i payload",
+  "g": "59422dc384fb55bc",
+  "name": "Regler til global",
   "rules": [
     {
       "t": "set",
@@ -18,14 +18,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 540,
-  "y": 400,
+  "x": 480,
+  "y": 500,
   "wires": [
     [
-      "d0ed2805a58e8d63"
+      "d83b9cc14f6e8387"
     ]
   ],
-  "_order": 103
+  "_order": 81
 }
 
 module.exports = Node;

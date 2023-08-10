@@ -3,13 +3,13 @@ const Node = {
   "type": "http response",
   "z": "3ba6bac1c411ace6",
   "g": "a72cb7bc6d1977da",
-  "name": "",
+  "name": "Frontend response node",
   "statusCode": "",
   "headers": {},
-  "x": 510,
+  "x": 570,
   "y": 140,
   "wires": [],
-  "_order": 107
+  "_order": 105
 }
 
 module.exports = Node;

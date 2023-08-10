@@ -2,7 +2,7 @@ const Node = {
   "id": "9854a7387060b3c2",
   "type": "debug",
   "z": "6cc161e748b99815",
-  "g": "3ac1c5a20d250908",
+  "g": "4ca09bc4172b5e1a",
   "name": "Fejl i hentning af konteringsregler",
   "active": true,
   "tosidebar": true,
@@ -12,10 +12,10 @@ const Node = {
   "targetType": "msg",
   "statusVal": "",
   "statusType": "auto",
-  "x": 960,
-  "y": 400,
+  "x": 300,
+  "y": 680,
   "wires": [],
-  "_order": 87
+  "_order": 90
 }
 
 module.exports = Node;

@@ -30,6 +30,13 @@ const Node = {
       "dc": true
     },
     {
+      "t": "set",
+      "p": "agreement_id",
+      "pt": "global",
+      "to": "AGREEMENT_ID",
+      "tot": "env"
+    },
+    {
       "t": "delete",
       "p": "query_param",
       "pt": "flow"

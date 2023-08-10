@@ -47,6 +47,11 @@ const Node = {
     },
     {
       "t": "delete",
+      "p": "data",
+      "pt": "flow"
+    },
+    {
+      "t": "delete",
       "p": "query_param",
       "pt": "flow"
     },
@@ -78,7 +83,7 @@ const Node = {
       "94437dfe53420afe"
     ]
   ],
-  "_order": 89
+  "_order": 70
 }
 
 module.exports = Node;

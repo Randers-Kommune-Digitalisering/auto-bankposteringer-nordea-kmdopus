@@ -7,7 +7,7 @@ const Node = {
   "method": "POST",
   "ret": "obj",
   "paytoqs": "ignore",
-  "url": "https://api.nordeaopenbanking.com/corporate/v2/authorize",
+  "url": "https://open.nordea.com/corporate/v2/authorize",
   "tls": "",
   "persist": false,
   "proxy": "",
@@ -19,7 +19,7 @@ const Node = {
   "y": 60,
   "wires": [
     [
-      "ebe79f7426284b57"
+      "df97189634c67140"
     ]
   ],
   "_order": 36

@@ -7,7 +7,7 @@ const Node = {
   "method": "POST",
   "ret": "obj",
   "paytoqs": "ignore",
-  "url": "https://api.nordeaopenbanking.com/corporate/v2/authorize/token",
+  "url": "https://open.nordea.com/corporate/v2/authorize/token",
   "tls": "",
   "persist": false,
   "proxy": "",
@@ -19,10 +19,10 @@ const Node = {
   "y": 180,
   "wires": [
     [
-      "74bca3efce84e142"
+      "9e4e9f35ebe0d23c"
     ]
   ],
-  "_order": 57
+  "_order": 54
 }
 
 module.exports = Node;

@@ -12,10 +12,10 @@ const Node = {
   "targetType": "msg",
   "statusVal": "",
   "statusType": "auto",
-  "x": 460,
+  "x": 580,
   "y": 320,
   "wires": [],
-  "_order": 111
+  "_order": 109
 }
 
 module.exports = Node;

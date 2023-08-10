@@ -30,7 +30,7 @@ const Node = {
       "t": "set",
       "p": "data",
       "pt": "flow",
-      "to": "{\t   \"scope\":[\t       \"PAYMENTS_BROADBAND\",\t       \"ACCOUNTS_BROADBAND\"\t   ],\t   \"duration\":129600,\t   \"agreement_number\":\"$env('AGREEMENT_ID')\"\t}",
+      "to": "{\t   \"scope\":[\t       \"ACCOUNTS_BROADBAND\"\t   ],\t   \"duration\":129600,\t   \"agreement_number\":$globalContext('agreement_id')\t}",
       "tot": "jsonata"
     },
     {

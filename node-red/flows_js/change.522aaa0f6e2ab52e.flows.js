@@ -30,7 +30,7 @@ const Node = {
       "t": "set",
       "p": "data",
       "pt": "flow",
-      "to": "{\"authorizer_id\":\"$env('AUTH_ID')\"}",
+      "to": "{\t   \"authorizer_id\":$env('AUTH_ID')\t}",
       "tot": "jsonata"
     },
     {
@@ -60,7 +60,7 @@ const Node = {
       "20fe3580deb4db6b"
     ]
   ],
-  "_order": 40
+  "_order": 39
 }
 
 module.exports = Node;

@@ -12,7 +12,7 @@ const Node = {
   "persist": false,
   "proxy": "",
   "insecureHTTPParser": false,
-  "authType": "",
+  "authType": "bearer",
   "senderr": false,
   "headers": [],
   "x": 830,
@@ -22,7 +22,7 @@ const Node = {
       "9fa085170c3c8cae"
     ]
   ],
-  "_order": 41
+  "_order": 40
 }
 
 module.exports = Node;

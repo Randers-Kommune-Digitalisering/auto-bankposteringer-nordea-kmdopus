@@ -3,7 +3,7 @@ const Node = {
   "type": "csv",
   "z": "6cc161e748b99815",
   "g": "b23b428a2893858e",
-  "name": "Object to CSV",
+  "name": "JS obj to CSV",
   "sep": ";",
   "hdrin": true,
   "hdrout": "all",
@@ -14,14 +14,14 @@ const Node = {
   "strings": true,
   "include_empty_strings": true,
   "include_null_values": true,
-  "x": 140,
-  "y": 520,
+  "x": 1440,
+  "y": 180,
   "wires": [
     [
       "952106deca13f3a5"
     ]
   ],
-  "_order": 98
+  "_order": 30
 }
 
 module.exports = Node;

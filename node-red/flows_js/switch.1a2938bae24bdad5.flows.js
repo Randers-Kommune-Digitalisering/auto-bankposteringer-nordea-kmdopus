@@ -26,34 +26,28 @@ const Node = {
       "t": "eq",
       "v": "4",
       "vt": "str"
-    },
-    {
-      "t": "eq",
-      "v": "5",
-      "vt": "str"
     }
   ],
   "checkall": "true",
   "repair": false,
-  "outputs": 5,
+  "outputs": 4,
   "x": 290,
   "y": 200,
   "wires": [
-    [],
     [
-      "aa23f087221e108e"
+      "341c3d7d097dcfd4"
     ],
     [
-      "4e41b6bb7b5e326b"
+      "ecb6baa197d15081"
     ],
     [
-      "12cf647cc94d8cba"
+      "0bb7426eb32a2349"
     ],
     [
-      "cf1fcc5b400c025c"
+      "03687c19ec4e3b9e"
     ]
   ],
-  "_order": 88
+  "_order": 69
 }
 
 module.exports = Node;
