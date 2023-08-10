@@ -2,20 +2,21 @@ const Node = {
   "id": "29072b253e3c176d",
   "type": "template",
   "z": "3ba6bac1c411ace6",
+  "g": "a72cb7bc6d1977da",
   "name": "CSS",
   "field": "payload.style",
   "fieldType": "msg",
   "format": "css",
   "syntax": "mustache",
   "template": "",
-  "x": 550,
-  "y": 180,
+  "x": 270,
+  "y": 140,
   "wires": [
     [
       "14ecbe68b9c7d5cb"
     ]
   ],
-  "_order": 94
+  "_order": 105
 }
 
 Node.template = `

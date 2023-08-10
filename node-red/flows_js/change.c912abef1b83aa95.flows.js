@@ -2,7 +2,8 @@ const Node = {
   "id": "c912abef1b83aa95",
   "type": "change",
   "z": "6cc161e748b99815",
-  "name": "Test env.",
+  "g": "3bdd50ac31e6a0b9",
+  "name": "Credentials",
   "rules": [
     {
       "t": "set",
@@ -49,15 +50,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 600,
-  "y": 120,
+  "x": 270,
+  "y": 60,
   "wires": [
     [
-      "28e89cae0a98b2c0",
-      "d57cbca3b91dfc4b"
+      "28e89cae0a98b2c0"
     ]
   ],
-  "_order": 13
+  "_order": 35
 }
 
 module.exports = Node;

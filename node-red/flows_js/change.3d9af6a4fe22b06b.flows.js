@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "6cc161e748b99815",
   "g": "b23b428a2893858e",
-  "name": "Konteringsregler til global obj",
+  "name": "Regler i payload",
   "rules": [
     {
       "t": "set",
@@ -18,14 +18,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 1140,
-  "y": 880,
+  "x": 540,
+  "y": 400,
   "wires": [
     [
       "d0ed2805a58e8d63"
     ]
   ],
-  "_order": 63
+  "_order": 103
 }
 
 module.exports = Node;

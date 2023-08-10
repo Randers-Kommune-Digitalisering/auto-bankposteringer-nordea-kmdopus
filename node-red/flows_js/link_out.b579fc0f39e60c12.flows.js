@@ -9,10 +9,10 @@ const Node = {
     "8193285ff001b607",
     "62e16170ecd32702"
   ],
-  "x": 325,
-  "y": 100,
+  "x": 245,
+  "y": 660,
   "wires": [],
-  "_order": 74
+  "_order": 72
 }
 
 module.exports = Node;

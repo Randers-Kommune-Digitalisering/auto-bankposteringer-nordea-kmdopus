@@ -3,19 +3,19 @@ const Node = {
   "type": "debug",
   "z": "6cc161e748b99815",
   "g": "b23b428a2893858e",
-  "name": "Slut node",
+  "name": "Completed ",
   "active": true,
   "tosidebar": true,
-  "console": false,
+  "console": true,
   "tostatus": false,
-  "complete": "true",
-  "targetType": "full",
+  "complete": "\"All done\"",
+  "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1180,
-  "y": 960,
+  "x": 470,
+  "y": 520,
   "wires": [],
-  "_order": 60
+  "_order": 100
 }
 
 module.exports = Node;

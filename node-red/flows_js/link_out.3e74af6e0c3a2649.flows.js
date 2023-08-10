@@ -9,10 +9,10 @@ const Node = {
     "1897c8e63aa9ae1c",
     "55186a9e60a1919f"
   ],
-  "x": 325,
-  "y": 80,
+  "x": 245,
+  "y": 640,
   "wires": [],
-  "_order": 73
+  "_order": 71
 }
 
 module.exports = Node;

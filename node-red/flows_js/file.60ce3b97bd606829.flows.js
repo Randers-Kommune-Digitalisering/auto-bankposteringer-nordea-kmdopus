@@ -2,6 +2,7 @@ const Node = {
   "id": "60ce3b97bd606829",
   "type": "file",
   "z": "3ba6bac1c411ace6",
+  "g": "8d5c48f3ea7b5469",
   "name": "Overskriv konteringsregler",
   "filename": "/data/konteringsregler/konteringsregler.json",
   "filenameType": "str",
@@ -9,14 +10,14 @@ const Node = {
   "createDir": true,
   "overwriteFile": "true",
   "encoding": "none",
-  "x": 310,
-  "y": 360,
+  "x": 170,
+  "y": 320,
   "wires": [
     [
       "178aa671cc1362db"
     ]
   ],
-  "_order": 108
+  "_order": 115
 }
 
 module.exports = Node;

@@ -2,7 +2,8 @@ const Node = {
   "id": "522aaa0f6e2ab52e",
   "type": "change",
   "z": "6cc161e748b99815",
-  "name": "Test par.",
+  "g": "3bdd50ac31e6a0b9",
+  "name": "params",
   "rules": [
     {
       "t": "set",
@@ -29,8 +30,8 @@ const Node = {
       "t": "set",
       "p": "data",
       "pt": "flow",
-      "to": "{\"authorizer_id\":\"70311198\"}",
-      "tot": "json"
+      "to": "{\"authorizer_id\":\"$env('AUTH_ID')\"}",
+      "tot": "jsonata"
     },
     {
       "t": "set",
@@ -52,14 +53,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 740,
-  "y": 200,
+  "x": 460,
+  "y": 100,
   "wires": [
     [
       "20fe3580deb4db6b"
     ]
   ],
-  "_order": 18
+  "_order": 40
 }
 
 module.exports = Node;

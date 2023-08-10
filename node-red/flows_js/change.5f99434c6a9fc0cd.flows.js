@@ -2,7 +2,8 @@ const Node = {
   "id": "5f99434c6a9fc0cd",
   "type": "change",
   "z": "6cc161e748b99815",
-  "name": "Test par.",
+  "g": "3bdd50ac31e6a0b9",
+  "name": "params",
   "rules": [
     {
       "t": "set",
@@ -29,7 +30,7 @@ const Node = {
       "t": "set",
       "p": "query_param",
       "pt": "flow",
-      "to": "DK5036579260-USD",
+      "to": "KONTO",
       "tot": "str"
     },
     {
@@ -59,14 +60,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 740,
-  "y": 440,
+  "x": 460,
+  "y": 220,
   "wires": [
     [
       "76f990b9c0c0cc57"
     ]
   ],
-  "_order": 42
+  "_order": 58
 }
 
 module.exports = Node;
