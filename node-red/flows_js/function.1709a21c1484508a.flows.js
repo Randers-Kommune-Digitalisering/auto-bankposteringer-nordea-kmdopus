@@ -6,7 +6,7 @@ const Node = {
   "name": "Script",
   "func": "",
   "outputs": 1,
-  "noerr": 0,
+  "noerr": 1676,
   "initialize": "",
   "finalize": "",
   "libs": [
@@ -28,13 +28,13 @@ const Node = {
     }
   ],
   "x": 190,
-  "y": 100,
+  "y": 60,
   "wires": [
     [
       "71b234c043971f0c"
     ]
   ],
-  "_order": 80
+  "_order": 71
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, moment, uuid, forge, CryptoJS) {
@@ -21875,13 +21875,13 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   function calculateDigest() {
       const requestData = resolveRequestBody();
   
-      console.log(`Request data: ${requestData}`);
+      // console.log(`Request data: ${requestData}`);
   
       const sha256digest = CryptoJS.SHA256(requestData);
       const base64sha256 = CryptoJS.enc.Base64.stringify(sha256digest);
       const calculatedDigest = 'sha-256=' + base64sha256;
   
-      console.log(`Digest header: ${calculatedDigest}`);
+      // console.log(`Digest header: ${calculatedDigest}`);
   
       flow.set("Digest", calculatedDigest);
       return calculatedDigest;
@@ -21938,7 +21938,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
       if (!eidasPrivateKey.includes('PRIVATE KEY')) {
           eidasPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\n" + eidasPrivateKey + "\n" + "-----END RSA PRIVATE KEY-----";
       }
-      console.log(eidasPrivateKey);
+      // console.log(eidasPrivateKey);
       return forge.pki.privateKeyFromPem(eidasPrivateKey);
   }
   
@@ -21948,8 +21948,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   const encryptedSignature = encryptSignature(signature.normalizedString);
   const signatureHeader = `keyId="${clientId}",algorithm="rsa-sha256",headers="${signature.headers}",signature="${encryptedSignature}"`;
   
-  console.log(`Normalized signature string: ${signature.normalizedString}`);
-  console.log(`Signature header: ${signatureHeader}`);
+  // console.log(`Normalized signature string: ${signature.normalizedString}`);
+  // console.log(`Signature header: ${signatureHeader}`);
   
   flow.set("Signature", signatureHeader);
   flow.set("X-Nordea-Originating-Host", signature.host);

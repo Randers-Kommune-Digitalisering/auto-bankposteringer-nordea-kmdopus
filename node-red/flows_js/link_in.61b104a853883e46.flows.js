@@ -7,14 +7,14 @@ const Node = {
   "links": [
     "76f990b9c0c0cc57"
   ],
-  "x": 65,
-  "y": 180,
+  "x": 55,
+  "y": 140,
   "wires": [
     [
       "1709a21c1484508a"
     ]
   ],
-  "_order": 79
+  "_order": 70
 }
 
 module.exports = Node;

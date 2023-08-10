@@ -4,10 +4,10 @@ const Node = {
   "z": "6cc161e748b99815",
   "name": "msg.payload = request/response i postman",
   "info": "",
-  "x": 180,
-  "y": 260,
+  "x": 620,
+  "y": 720,
   "wires": [],
-  "_order": 16
+  "_order": 17
 }
 
 module.exports = Node;

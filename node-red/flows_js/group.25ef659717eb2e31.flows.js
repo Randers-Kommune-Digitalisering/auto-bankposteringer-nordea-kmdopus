@@ -1,30 +1,28 @@
 const Node = {
   "id": "25ef659717eb2e31",
   "type": "group",
-  "z": "6cc161e748b99815",
+  "z": "b4ac8ea3a77a9132",
+  "name": "Konvertering af csv til json",
   "style": {
-    "stroke": "#999999",
-    "stroke-opacity": "1",
-    "fill": "none",
-    "fill-opacity": "1",
+    "stroke": "none",
+    "fill": "#ffffbf",
     "label": true,
-    "label-position": "nw",
-    "color": "#a4a4a4"
+    "label-position": "n",
+    "color": "#000000"
   },
   "nodes": [
     "7159e807e16562c2",
     "6a32e693078a19ae",
     "f3b8f8dbbccacb91",
     "884b223c101e2573",
-    "49cc2a14e36d8de7",
     "3c958764798b548b",
     "8163b300c375f9d4"
   ],
-  "x": 14,
-  "y": 799,
+  "x": 34,
+  "y": 39,
   "w": 512,
-  "h": 202,
-  "_order": 5
+  "h": 162,
+  "_order": 7
 }
 
 module.exports = Node;
