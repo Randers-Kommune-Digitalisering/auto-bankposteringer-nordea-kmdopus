@@ -1,7 +1,7 @@
 const Node = {
   "id": "6cc161e748b99815",
   "type": "tab",
-  "label": "Auth flow + request",
+  "label": "Main",
   "disabled": false,
   "info": "",
   "env": [],

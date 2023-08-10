@@ -2,20 +2,21 @@ const Node = {
   "id": "4787b43fdde8f910",
   "type": "template",
   "z": "3ba6bac1c411ace6",
+  "g": "a72cb7bc6d1977da",
   "name": "JavaScript",
   "field": "payload.script",
   "fieldType": "msg",
   "format": "javascript",
   "syntax": "plain",
   "template": "",
-  "x": 570,
+  "x": 130,
   "y": 140,
   "wires": [
     [
       "29072b253e3c176d"
     ]
   ],
-  "_order": 95
+  "_order": 106
 }
 
 Node.template = `

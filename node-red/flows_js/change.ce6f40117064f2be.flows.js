@@ -2,7 +2,8 @@ const Node = {
   "id": "ce6f40117064f2be",
   "type": "change",
   "z": "3ba6bac1c411ace6",
-  "name": "",
+  "g": "8d5c48f3ea7b5469",
+  "name": "Update til env",
   "rules": [
     {
       "t": "set",
@@ -10,6 +11,20 @@ const Node = {
       "pt": "msg",
       "to": "$.payload ~> |$|\t{\t    \"value\": \t        type = \"number\" ?\t            value ~> $number() \t        :\t        type = \"bool\" ?\t            value = \"true\" ? true : false\t        :\t            value\t    \t}\t|",
       "tot": "jsonata"
+    },
+    {
+      "t": "set",
+      "p": "payload",
+      "pt": "msg",
+      "to": "rules",
+      "tot": "msg"
+    },
+    {
+      "t": "set",
+      "p": "konteringsregler",
+      "pt": "global",
+      "to": "rules",
+      "tot": "msg"
     }
   ],
   "action": "",
@@ -17,14 +32,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 390,
-  "y": 320,
+  "x": 320,
+  "y": 280,
   "wires": [
     [
-      "044a69d3b6c76b8d"
+      "60ce3b97bd606829"
     ]
   ],
-  "_order": 103
+  "_order": 112
 }
 
 module.exports = Node;

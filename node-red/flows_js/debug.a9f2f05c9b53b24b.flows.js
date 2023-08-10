@@ -2,6 +2,7 @@ const Node = {
   "id": "a9f2f05c9b53b24b",
   "type": "debug",
   "z": "6cc161e748b99815",
+  "g": "3bdd50ac31e6a0b9",
   "name": "stdout Auth Status",
   "active": true,
   "tosidebar": true,
@@ -11,10 +12,10 @@ const Node = {
   "targetType": "msg",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1300,
-  "y": 240,
+  "x": 1160,
+  "y": 140,
   "wires": [],
-  "_order": 84
+  "_order": 79
 }
 
 module.exports = Node;

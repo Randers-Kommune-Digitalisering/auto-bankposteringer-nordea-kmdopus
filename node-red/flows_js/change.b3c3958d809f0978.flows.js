@@ -1,7 +1,8 @@
 const Node = {
-  "id": "2870099ba6fd9929",
+  "id": "b3c3958d809f0978",
   "type": "change",
   "z": "6cc161e748b99815",
+  "g": "3bdd50ac31e6a0b9",
   "name": "Clear objects",
   "rules": [
     {
@@ -70,14 +71,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 590,
-  "y": 360,
+  "x": 270,
+  "y": 100,
   "wires": [
     [
-      "bfebd4455e3d9f31"
+      "94437dfe53420afe"
     ]
   ],
-  "_order": 49
+  "_order": 89
 }
 
 module.exports = Node;

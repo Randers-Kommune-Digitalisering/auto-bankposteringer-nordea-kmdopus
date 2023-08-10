@@ -27,14 +27,14 @@ const Node = {
       "module": "crypto-js"
     }
   ],
-  "x": 190,
-  "y": 60,
+  "x": 130,
+  "y": 620,
   "wires": [
     [
-      "71b234c043971f0c"
+      "905aaba2e2481bfd"
     ]
   ],
-  "_order": 71
+  "_order": 69
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, moment, uuid, forge, CryptoJS) {

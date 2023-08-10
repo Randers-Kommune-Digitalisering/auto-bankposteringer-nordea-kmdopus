@@ -2,7 +2,8 @@ const Node = {
   "id": "28e89cae0a98b2c0",
   "type": "change",
   "z": "6cc161e748b99815",
-  "name": "Test par.",
+  "g": "3bdd50ac31e6a0b9",
+  "name": "params",
   "rules": [
     {
       "t": "set",
@@ -29,8 +30,8 @@ const Node = {
       "t": "set",
       "p": "data",
       "pt": "flow",
-      "to": "{\"scope\":[\"PAYMENTS_BROADBAND\",\"ACCOUNTS_BROADBAND\"],\"duration\":129600,\"agreement_number\":\"130474822427\"}",
-      "tot": "json"
+      "to": "{\t   \"scope\":[\t       \"PAYMENTS_BROADBAND\",\t       \"ACCOUNTS_BROADBAND\"\t   ],\t   \"duration\":129600,\t   \"agreement_number\":\"$env('AGREEMENT_ID')\"\t}",
+      "tot": "jsonata"
     },
     {
       "t": "set",
@@ -45,14 +46,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 740,
-  "y": 120,
+  "x": 460,
+  "y": 60,
   "wires": [
     [
       "6f31944caaf06a53"
     ]
   ],
-  "_order": 16
+  "_order": 38
 }
 
 module.exports = Node;
