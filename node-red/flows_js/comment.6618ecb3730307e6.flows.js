@@ -5,9 +5,9 @@ const Node = {
   "name": "Auth flow + request",
   "info": "",
   "x": 890,
-  "y": 60,
+  "y": 40,
   "wires": [],
-  "_order": 39
+  "_order": 40
 }
 
 module.exports = Node;

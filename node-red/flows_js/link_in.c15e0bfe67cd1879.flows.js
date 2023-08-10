@@ -8,14 +8,14 @@ const Node = {
     "20fe3580deb4db6b",
     "52565969421917dd"
   ],
-  "x": 65,
-  "y": 120,
+  "x": 55,
+  "y": 80,
   "wires": [
     [
       "1709a21c1484508a"
     ]
   ],
-  "_order": 75
+  "_order": 67
 }
 
 module.exports = Node;

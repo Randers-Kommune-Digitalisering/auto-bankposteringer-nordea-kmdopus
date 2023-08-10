@@ -2,18 +2,19 @@ const Node = {
   "id": "d23c3bc6e563d861",
   "type": "debug",
   "z": "6cc161e748b99815",
-  "name": "debug 3",
+  "name": "stdout Exchange Token",
   "active": true,
   "tosidebar": true,
-  "console": false,
+  "console": true,
   "tostatus": false,
-  "complete": "false",
+  "complete": "payload",
+  "targetType": "msg",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1600,
-  "y": 280,
+  "x": 1310,
+  "y": 320,
   "wires": [],
-  "_order": 92
+  "_order": 82
 }
 
 module.exports = Node;

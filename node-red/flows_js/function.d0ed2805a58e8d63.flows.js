@@ -10,14 +10,14 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 90,
-  "y": 640,
+  "x": 870,
+  "y": 920,
   "wires": [
     [
       "1d419efdded54930"
     ]
   ],
-  "_order": 56
+  "_order": 57
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
@@ -208,7 +208,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   }
   
   global.set("omposteringsarray", omposteringsbilag);
-  console.log("ialt " + uplacerbare_poster + "uplacerbare poster");
+  console.log("ialt " + uplacerbare_poster + " uplacerbare poster");
   
   flow.set("filename", "/data/output/" + global.get("time_of_origin") + ".csv")
   

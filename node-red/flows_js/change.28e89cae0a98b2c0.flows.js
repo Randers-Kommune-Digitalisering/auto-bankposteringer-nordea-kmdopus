@@ -2,7 +2,6 @@ const Node = {
   "id": "28e89cae0a98b2c0",
   "type": "change",
   "z": "6cc161e748b99815",
-  "d": true,
   "name": "Test par.",
   "rules": [
     {
@@ -53,7 +52,7 @@ const Node = {
       "6f31944caaf06a53"
     ]
   ],
-  "_order": 15
+  "_order": 16
 }
 
 module.exports = Node;

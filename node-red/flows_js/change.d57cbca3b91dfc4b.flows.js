@@ -2,6 +2,7 @@ const Node = {
   "id": "d57cbca3b91dfc4b",
   "type": "change",
   "z": "6cc161e748b99815",
+  "d": true,
   "name": "Prod par.",
   "rules": [
     {
@@ -38,13 +39,6 @@ const Node = {
       "pt": "global",
       "to": "1",
       "tot": "str"
-    },
-    {
-      "t": "set",
-      "p": "payload",
-      "pt": "msg",
-      "to": "",
-      "tot": "str"
     }
   ],
   "action": "",
@@ -59,7 +53,7 @@ const Node = {
       "6f31944caaf06a53"
     ]
   ],
-  "_order": 87
+  "_order": 77
 }
 
 module.exports = Node;

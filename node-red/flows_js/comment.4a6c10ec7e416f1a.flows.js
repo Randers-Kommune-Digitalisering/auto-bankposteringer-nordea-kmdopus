@@ -4,10 +4,10 @@ const Node = {
   "z": "6cc161e748b99815",
   "name": "authorizer_id, Confirm Auth = Nordea ID",
   "info": "",
-  "x": 170,
-  "y": 300,
+  "x": 610,
+  "y": 760,
   "wires": [],
-  "_order": 20
+  "_order": 21
 }
 
 module.exports = Node;

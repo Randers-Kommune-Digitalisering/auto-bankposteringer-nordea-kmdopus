@@ -15,7 +15,7 @@ const Node = {
       "14ecbe68b9c7d5cb"
     ]
   ],
-  "_order": 96
+  "_order": 94
 }
 
 Node.template = `
