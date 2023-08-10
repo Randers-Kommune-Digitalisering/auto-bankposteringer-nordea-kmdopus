@@ -6,13 +6,12 @@ const Node = {
   "name": "link out 6",
   "mode": "link",
   "links": [
-    "8193285ff001b607",
-    "62e16170ecd32702"
+    "8193285ff001b607"
   ],
-  "x": 245,
-  "y": 660,
+  "x": 295,
+  "y": 440,
   "wires": [],
-  "_order": 72
+  "_order": 96
 }
 
 module.exports = Node;

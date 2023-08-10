@@ -58,8 +58,8 @@ const Node = {
       "t": "set",
       "p": "url",
       "pt": "msg",
-      "to": "url",
-      "tot": "flow"
+      "to": "'https://' &$flowContext('url')",
+      "tot": "jsonata"
     }
   ],
   "action": "",
@@ -74,7 +74,7 @@ const Node = {
       "97ccf1b7fe0ffa65"
     ]
   ],
-  "_order": 61
+  "_order": 58
 }
 
 module.exports = Node;

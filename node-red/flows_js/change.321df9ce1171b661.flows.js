@@ -1,5 +1,5 @@
 const Node = {
-  "id": "b156002744a09ac5",
+  "id": "321df9ce1171b661",
   "type": "change",
   "z": "6cc161e748b99815",
   "g": "3bdd50ac31e6a0b9",
@@ -58,8 +58,8 @@ const Node = {
       "t": "set",
       "p": "url",
       "pt": "msg",
-      "to": "url",
-      "tot": "flow"
+      "to": "'https://' &$flowContext('url')",
+      "tot": "jsonata"
     },
     {
       "t": "set",
@@ -95,7 +95,7 @@ const Node = {
       "fc455d55406266d7"
     ]
   ],
-  "_order": 42
+  "_order": 99
 }
 
 module.exports = Node;

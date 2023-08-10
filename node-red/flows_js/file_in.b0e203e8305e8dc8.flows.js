@@ -1,8 +1,8 @@
 const Node = {
-  "id": "85e90a755f43672e",
+  "id": "b0e203e8305e8dc8",
   "type": "file in",
   "z": "6cc161e748b99815",
-  "g": "b23b428a2893858e",
+  "g": "59422dc384fb55bc",
   "name": "Hent konteringsregler",
   "filename": "/data/konteringsregler/konteringsregler.json",
   "filenameType": "str",
@@ -11,14 +11,14 @@ const Node = {
   "sendError": false,
   "encoding": "none",
   "allProps": true,
-  "x": 160,
-  "y": 400,
+  "x": 500,
+  "y": 460,
   "wires": [
     [
-      "a014bc76c4e76843"
+      "02aaf50e591dd3cd"
     ]
   ],
-  "_order": 102
+  "_order": 82
 }
 
 module.exports = Node;
