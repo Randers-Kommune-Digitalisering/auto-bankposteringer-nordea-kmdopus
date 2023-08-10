@@ -13,19 +13,24 @@ services:
       DB_HOST: db
       DB_PORT: 3306
       DB_DATABASE: demo
+
+      ######### Testmiljø:
       
-      CLIENT_ID: ${CLIENT_ID}
-      # CLIENT_ID: ${PRODUKTIONSKEY}
-      CLIENT_SECRET: ${CLIENT_SECRET}
-      # CLIENT_SECRET: ${PRODUKTIONSSECRET}
-      EIDASPRIVATEKEY: ${EIDASPRIVATEKEY}
-      # EIDASPRIVATEKEY: ${PROD_EIDASPRIVATEKEY}
-      KONTO: ${TEST_KONTO}
-      # KONTO: ${HOVEDKONTO}
-      AUTH_ID: ${TEST_AUTH_ID}
-      # AUTH_ID: ${PROD_AUTH_ID}
-      AGREEMENT_ID: ${TEST_AGREEMENT_ID}
-      # AGREEMENT_ID: ${PROD_AGREEMENT_ID}
+      # CLIENT_ID: ${CLIENT_ID}
+      # CLIENT_SECRET: ${CLIENT_SECRET}
+      # EIDASPRIVATEKEY: ${EIDASPRIVATEKEY}
+      # KONTO: ${TEST_KONTO}
+      # AUTH_ID: ${TEST_AUTH_ID}
+      # AGREEMENT_ID: ${TEST_AGREEMENT_ID}
+
+      ######### Produktionsmiljø:
+
+      CLIENT_ID: ${PRODUKTIONSKEY}
+      CLIENT_SECRET: ${PRODUKTIONSSECRET}
+      EIDASPRIVATEKEY: ${PROD_EIDASPRIVATEKEY}
+      KONTO: ${HOVEDKONTO}
+      AUTH_ID: ${PROD_AUTH_ID}
+      AGREEMENT_ID: ${PROD_AGREEMENT_ID}
       
       # Miljøvariablen FLOWS fortæller Node-RED IDEet hvilket flow.json den skal åbne og gemme ændringer i ved deploy.
       FLOWS: "/data/flows.json"
