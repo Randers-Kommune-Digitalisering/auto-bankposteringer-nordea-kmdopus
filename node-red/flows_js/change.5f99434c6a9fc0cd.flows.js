@@ -31,20 +31,20 @@ const Node = {
       "p": "query_param",
       "pt": "flow",
       "to": "KONTO",
-      "tot": "str"
+      "tot": "env"
     },
     {
       "t": "set",
       "p": "query_param1",
       "pt": "flow",
-      "to": "2022-11-14",
+      "to": "2023-09-07",
       "tot": "str"
     },
     {
       "t": "set",
       "p": "query_param2",
       "pt": "flow",
-      "to": "2022-11-14",
+      "to": "2023-09-07",
       "tot": "str"
     },
     {
@@ -67,7 +67,7 @@ const Node = {
       "76f990b9c0c0cc57"
     ]
   ],
-  "_order": 55
+  "_order": 56
 }
 
 module.exports = Node;

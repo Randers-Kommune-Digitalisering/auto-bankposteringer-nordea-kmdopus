@@ -11,6 +11,13 @@ const Node = {
       "pt": "global",
       "to": "payload.response.code",
       "tot": "msg"
+    },
+    {
+      "t": "set",
+      "p": "request_status",
+      "pt": "global",
+      "to": "payload.response.status",
+      "tot": "msg"
     }
   ],
   "action": "",
@@ -25,7 +32,7 @@ const Node = {
       "a9f2f05c9b53b24b"
     ]
   ],
-  "_order": 61
+  "_order": 62
 }
 
 module.exports = Node;
