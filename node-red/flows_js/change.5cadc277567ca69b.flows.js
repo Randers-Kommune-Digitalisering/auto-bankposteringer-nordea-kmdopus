@@ -1,16 +1,16 @@
 const Node = {
-  "id": "a2c74db9c46c1a8c",
+  "id": "5cadc277567ca69b",
   "type": "change",
   "z": "6cc161e748b99815",
-  "g": "59422dc384fb55bc",
-  "name": "event var",
+  "g": "ba3672736693a848",
+  "name": "",
   "rules": [
     {
       "t": "set",
-      "p": "frontend_built",
-      "pt": "flow",
-      "to": "true",
-      "tot": "bool"
+      "p": "step",
+      "pt": "global",
+      "to": "2",
+      "tot": "num"
     }
   ],
   "action": "",
@@ -18,14 +18,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 480,
-  "y": 380,
+  "x": 960,
+  "y": 900,
   "wires": [
     [
-      "c0734603bbe92fad"
+      "0b66fe27f7a4ccd5"
     ]
   ],
-  "_order": 87
+  "_order": 105
 }
 
 module.exports = Node;
