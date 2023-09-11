@@ -2,7 +2,7 @@ const Node = {
   "id": "a72cb7bc6d1977da",
   "type": "group",
   "z": "3ba6bac1c411ace6",
-  "name": "Build and publish websocket",
+  "name": "Build and publish websocket \"rules\"",
   "style": {
     "label": true,
     "stroke": "none",
@@ -23,7 +23,7 @@ const Node = {
   ],
   "x": 14,
   "y": 19,
-  "_order": 7
+  "_order": 6
 }
 
 module.exports = Node;

@@ -2,7 +2,7 @@ const Node = {
   "id": "8d5c48f3ea7b5469",
   "type": "group",
   "z": "3ba6bac1c411ace6",
-  "name": "Push updates to backend",
+  "name": "Push updates on \"rules\" to backend",
   "style": {
     "stroke": "none",
     "fill": "#e3f3d3",
@@ -19,7 +19,7 @@ const Node = {
   ],
   "x": 14,
   "y": 199,
-  "_order": 8
+  "_order": 7
 }
 
 module.exports = Node;
