@@ -3,19 +3,19 @@ const Node = {
   "type": "debug",
   "z": "3ba6bac1c411ace6",
   "g": "8d5c48f3ea7b5469",
-  "name": "Rules updated",
+  "name": "stdout Rules updated",
   "active": true,
   "tosidebar": true,
-  "console": false,
+  "console": true,
   "tostatus": false,
-  "complete": "rules",
-  "targetType": "msg",
+  "complete": "\"Rules updated\"",
+  "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 580,
+  "x": 550,
   "y": 320,
   "wires": [],
-  "_order": 114
+  "_order": 134
 }
 
 module.exports = Node;

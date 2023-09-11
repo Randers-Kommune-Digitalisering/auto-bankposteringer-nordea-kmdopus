@@ -1,0 +1,20 @@
+const Node = {
+  "id": "d5371aca9854e30c",
+  "type": "http in",
+  "z": "3ba6bac1c411ace6",
+  "d": true,
+  "g": "c076bc29b23b9bd7",
+  "name": "Make endpoint",
+  "url": "/info",
+  "method": "get",
+  "upload": false,
+  "swaggerDoc": "",
+  "x": 120,
+  "y": 520,
+  "wires": [
+    []
+  ],
+  "_order": 143
+}
+
+module.exports = Node;
