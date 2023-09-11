@@ -23,7 +23,7 @@ const Node = {
   "wires": [
     []
   ],
-  "_order": 31
+  "_order": 30
 }
 
 module.exports = Node;
