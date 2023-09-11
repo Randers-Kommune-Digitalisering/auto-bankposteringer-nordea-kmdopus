@@ -88,7 +88,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               tjek_beløb = parseFloat(postering.amount) > parseFloat(regel_obj[4].value1.replace(',', '.')) && (regel_obj[4].value2 !== undefined ? parseFloat(postering.amount) < parseFloat(regel_obj[4].value2.replace(',', '.')) : true);
           }
   
-          let antal_searchword = regel_obj.filter(obj => obj.value !== null).length;
+          let antal_searchword = regel_obj.slice(0, 4).filter(obj => obj.value !== null).length;
   
           // Når mere end 1 regel er tjekket og der allerede er dannet en konteringslinje (både debit og kredit), så tjekkes der ikke yderligere. Dette skal laves om i næste version, så der tages højde for flere mulige matches.
           if (rules_checked > 1 && linjer_dannet > 0) {
