@@ -11,7 +11,7 @@ const Node = {
   "x": 165,
   "y": 320,
   "wires": [],
-  "_order": 104
+  "_order": 99
 }
 
 module.exports = Node;

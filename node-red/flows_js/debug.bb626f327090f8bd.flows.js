@@ -8,14 +8,14 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "\"All done\"",
+  "complete": "\"Omposteringsbilag dannet\"",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
   "x": 130,
   "y": 640,
   "wires": [],
-  "_order": 36
+  "_order": 33
 }
 
 module.exports = Node;
