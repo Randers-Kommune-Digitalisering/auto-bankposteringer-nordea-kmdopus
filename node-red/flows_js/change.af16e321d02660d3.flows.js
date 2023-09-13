@@ -9,14 +9,14 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "\"Hej Jan,\\nNordea bankindlæsning kræver din godkendelse i Nordea ID-appen\\nTak for hjælpen.\"",
+      "to": "\"Indlæsningen af bankposteringer kræver din godkendelse i Nordea ID-appen\"",
       "tot": "jsonata"
     },
     {
       "t": "set",
       "p": "topic",
       "pt": "msg",
-      "to": "Godkendelse i Nordea ID",
+      "to": "Godkendelse i Nordea ID (autogenereret mail)",
       "tot": "str"
     }
   ],
@@ -25,14 +25,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 660,
+  "x": 680,
   "y": 400,
   "wires": [
     [
       "0a88af3e0d70cfe6"
     ]
   ],
-  "_order": 117
+  "_order": 116
 }
 
 module.exports = Node;

@@ -3,7 +3,7 @@ const Node = {
   "type": "debug",
   "z": "0b526691b09a2646",
   "g": "608c296403fab569",
-  "name": "Completed ",
+  "name": "Opret omposteringsbilag",
   "active": true,
   "tosidebar": true,
   "console": true,
@@ -12,7 +12,7 @@ const Node = {
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 130,
+  "x": 180,
   "y": 640,
   "wires": [],
   "_order": 33
