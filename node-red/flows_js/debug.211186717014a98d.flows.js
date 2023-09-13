@@ -1,21 +1,21 @@
 const Node = {
-  "id": "09d94f029830cc08",
+  "id": "211186717014a98d",
   "type": "debug",
   "z": "0b526691b09a2646",
-  "g": "d37689bd68a8104a",
-  "name": "Fejl i hentning af konteringsregler",
+  "g": "674c1f70633cac0b",
+  "name": "Hentning af konteringsregler",
   "active": true,
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "payload",
-  "targetType": "msg",
+  "complete": "\"Konteringregler hentet\"",
+  "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 720,
-  "y": 600,
+  "x": 730,
+  "y": 860,
   "wires": [],
-  "_order": 82
+  "_order": 118
 }
 
 module.exports = Node;

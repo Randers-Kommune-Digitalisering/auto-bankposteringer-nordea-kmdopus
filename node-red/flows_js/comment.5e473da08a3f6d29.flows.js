@@ -4,10 +4,10 @@ const Node = {
   "z": "0b526691b09a2646",
   "name": "Sample data transactions",
   "info": "",
-  "x": 350,
+  "x": 170,
   "y": 1020,
   "wires": [],
-  "_order": 114
+  "_order": 113
 }
 
 Node.info = `
