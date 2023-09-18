@@ -16,7 +16,7 @@ const Node = {
       "14ecbe68b9c7d5cb"
     ]
   ],
-  "_order": 137
+  "_order": 141
 }
 
 Node.template = `
@@ -48,7 +48,7 @@ select {
 }
 
 input:focus, select:focus {
-  outline: 1px solid #FAE100;
+  outline: 1px solid #dfc900;
 }
 
 input:disabled, select:disabled {
@@ -106,6 +106,41 @@ main {
   border-radius: 5px;
 }
 
+.ruleBox > .nav {
+  background-color: #aac3e6;
+  line-height: 40px;
+  text-transform: uppercase;
+  width: -webkit-fill-available;
+  border-radius: 5px;
+  list-style-type: none;
+  padding-left: 10px;
+  margin-top: 10px;
+}
+
+.ruleBox > .nav > li {
+  float: left;
+  padding: 0px 5px 0px 5px;
+}
+
+.ruleBox > .nav > li:hover * {
+  background-color: #1B365D;
+  color: white;
+}
+
+.ruleBox > .nav > li:active * {
+  background-color: #1B365D;
+  color: white;
+}
+
+.ruleBox > .nav > li > a {
+  display: grid;
+  font-size: 15px;
+  font-weight: 400;
+  font-family: 'Roboto Slab';
+  text-decoration: none;
+  color: #1B365D;
+}
+
 .ruleBox > .subheader {
   display: flex;
   flex-wrap: wrap;
@@ -140,7 +175,8 @@ main {
 
 .ruleWrapper > section:hover {
   background-color: #ffffff;
-  box-shadow: 5px 5px 5px #d6d6d6;
+  /* FIX */
+  box-shadow: 5px 5px 5px #c4c4c4;
   outline: 0px;
 }
 
@@ -171,7 +207,7 @@ main {
 }
 
 .ruleWrapper > section > div > article:focus-within {
-  outline: 1px solid #FAE100;
+  outline: 1px solid #dfc900;
 }
 
 .ruleWrapper .spacing {
@@ -207,6 +243,12 @@ button:hover {
 .deleteRowButton:hover {
   color: red;
 }
+
+.disableRuleButton:hover {
+  color: white;
+}
+
+
 `
 
 module.exports = Node;

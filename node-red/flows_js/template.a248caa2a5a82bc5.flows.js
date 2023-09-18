@@ -17,7 +17,7 @@ const Node = {
       "eaa7010fccf43e50"
     ]
   ],
-  "_order": 131
+  "_order": 135
 }
 
 Node.template = `
@@ -28,7 +28,13 @@ Node.template = `
   <meta charset="utf-8">
   <title>Konteringsregler</title>
   <style>
-    {{{payload.style}}}
+    {
+        {
+          {
+          payload.style
+        }
+      }
+    }
   </style>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Iconscout Link For Icons -->
@@ -36,14 +42,18 @@ Node.template = `
 </head>
 
 <body onload="wsConnect();" onunload="ws.disconnect();">
-    <main class="ruleBox">
-      <h1>Konteringsregler</h1>
-      <main class="ruleWrapper ruleWrapper"></main>
-      <footer>
-        <button class="addRuleButton" onclick="generateNewRow()">Tilføj regel</button>
-      </footer>
-    </main>
-  
+  <main class="ruleBox">
+    <h1>Konteringsregler</h1>
+    <ul class="nav">
+      <li><a href="/info">Inaktive regler</a></li>
+      <li><a href="/rules">Aktive regler</a></li>
+    </ul class="nav">
+    <main class="ruleWrapper ruleWrapper"></main>
+    <footer>
+      <button class="addRuleButton" onclick="generateNewRow()">Tilføj regel</button>
+    </footer>
+  </main>
+
   <script>
     const _rules = {{{payload.rules}}}
   </script>
