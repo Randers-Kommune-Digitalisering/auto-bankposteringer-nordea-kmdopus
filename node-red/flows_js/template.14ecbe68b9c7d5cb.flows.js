@@ -16,7 +16,7 @@ const Node = {
       "c6d1705c23bbcb66"
     ]
   ],
-  "_order": 140
+  "_order": 144
 }
 
 Node.template = `
@@ -37,6 +37,10 @@ Node.template = `
 <body onload="wsConnect();" onunload="ws.disconnect();">
     <main class="ruleBox">
       <h1>Konteringsregler</h1>
+      <ul class="nav">
+        <li><a href="/info">Inaktive regler</a></li>
+        <li><a href="/rules">Aktive regler</a></li>
+      </ul class="nav">
       <main class="ruleWrapper ruleWrapper"></main>
       <footer>
         <button class="addRuleButton" onclick="generateNewRow()">Tilføj regel</button>
