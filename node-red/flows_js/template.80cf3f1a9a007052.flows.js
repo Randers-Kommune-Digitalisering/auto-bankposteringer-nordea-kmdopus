@@ -9,8 +9,8 @@ const Node = {
   "format": "javascript",
   "syntax": "plain",
   "template": "",
-  "x": 950,
-  "y": 420,
+  "x": 850,
+  "y": 320,
   "wires": [
     [
       "f00533dec1f75067"

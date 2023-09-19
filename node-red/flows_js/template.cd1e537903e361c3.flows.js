@@ -9,8 +9,8 @@ const Node = {
   "format": "html",
   "syntax": "mustache",
   "template": "",
-  "x": 1210,
-  "y": 420,
+  "x": 1110,
+  "y": 320,
   "wires": [
     [
       "061724d02fe3c294"

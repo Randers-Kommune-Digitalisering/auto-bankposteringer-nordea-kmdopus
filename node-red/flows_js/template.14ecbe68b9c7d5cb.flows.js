@@ -43,7 +43,7 @@ Node.template = `
       </ul class="nav">
       <main class="ruleWrapper ruleWrapper"></main>
       <footer>
-        <button class="addRuleButton" onclick="generateNewRow()">Tilføj regel</button>
+        <button class="addRuleButton">Tilføj regel</button>
       </footer>
     </main>
   

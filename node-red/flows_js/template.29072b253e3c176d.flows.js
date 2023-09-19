@@ -127,11 +127,6 @@ main {
   color: white;
 }
 
-.ruleBox > .nav > li:active * {
-  background-color: #1B365D;
-  color: white;
-}
-
 .ruleBox > .nav > li > a {
   display: grid;
   font-size: 15px;
@@ -139,6 +134,11 @@ main {
   font-family: 'Roboto Slab';
   text-decoration: none;
   color: #1B365D;
+}
+
+.ruleBox > .nav > li > a:active {
+  background-color: #1B365D;
+  color: white;
 }
 
 .ruleBox > .subheader {
@@ -155,7 +155,7 @@ main {
   border-right: 2px solid whitesmoke;
 }
 
-.ruleBox .ruleWrapper {
+.ruleBox > .ruleWrapper {
   display: grid;
   flex-wrap: wrap;
   justify-content: flex-start;
@@ -240,11 +240,11 @@ button:hover {
   color: white;
 }
 
-.deleteRowButton:hover {
+.deleteRuleButton:hover {
   color: red;
 }
 
-.disableRuleButton:hover {
+.toggleButton:hover {
   color: white;
 }
 

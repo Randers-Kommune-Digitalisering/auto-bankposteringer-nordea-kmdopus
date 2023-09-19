@@ -2,6 +2,7 @@ const Node = {
   "id": "722760115195719b",
   "type": "template",
   "z": "3ba6bac1c411ace6",
+  "d": true,
   "name": "JavaScript backup",
   "field": "payload.script",
   "fieldType": "msg",
