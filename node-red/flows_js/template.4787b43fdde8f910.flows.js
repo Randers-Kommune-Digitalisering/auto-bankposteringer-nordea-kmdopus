@@ -22,10 +22,12 @@ const Node = {
 Node.template = `
 const ruleWrapper = document.querySelector(".ruleWrapper");
 const addRule = document.querySelector(".addRuleButton");
-const deleteRuleButtons = document.querySelectorAll(".deleteRuleButton");
-const toggleButtons = document.querySelectorAll(".toggleButton");
-const inputs = document.getElementsByTagName("input");
-const selects = document.getElementsByTagName("select");
+
+let deleteRuleButtons; //= document.querySelectorAll(".deleteRuleButton");
+let toggleButtons; //= document.querySelectorAll(".toggleButton");
+let inputs; //= document.getElementsByTagName("input");
+let selects; //= document.getElementsByTagName("select");
+
 const rules = _rules != null ? _rules.map((rule, index) => ({ ...rule, 7: { ruleId: index } })) : [];
 const activeRules = rules.filter(rule => rule[6].active);
 const inputFields = { 0: "Reference", 1: "Advisliste", 2: "Afsender", 3: "Posteringstype", 4: "Beløb1", 5: "Beløb2", 6: "Posteringstekst", 7: "Artskonto", 8: "PSP", 9: "SIO", 10: "Notat" };
@@ -164,12 +166,12 @@ function generateRule(ruleIdIndex, activeRule) {
     let deleteRuleButton = document.createElement("button");
     deleteRuleButton.className = "deleteRuleButton";
     deleteRuleButton.textContent = "Slet regel";
-    deleteRuleButton.setAttribute("onclick", \`deleteRule(\${ruleIdIndex})\`);
+    //deleteRuleButton.setAttribute("onclick", \`deleteRule(\${ruleIdIndex})\`);
     section.appendChild(deleteRuleButton);
     let toggleButton = document.createElement("button");
     toggleButton.className = "toggleButton";
     toggleButton.textContent = "Deaktivér regel";
-    toggleButton.setAttribute("onclick", \`deactivateRow(\${ruleIdIndex})\`);
+    //toggleButton.setAttribute("onclick", \`toggleRule(\${ruleIdIndex})\`);
     section.appendChild(toggleButton);
     fragment.appendChild(section);
 
@@ -308,26 +310,39 @@ function toggleRule(rowIndex) {
     console.log("Rule active-status toggled")
 }
 
+
+function testFor()
+{
+
+    const length = activeRules.length;
+
+    for (let i = 0; i < length; i++)
+    {
+        console.log("i: " + i);
+    }
+}
+
 // Bro mellem brugeraktivitet og sidens funktioner. Alle knapper er indekseret efter activeRules, da det er hvad der displayes på siden.
 function listenToEvents() {
-    for (let i = 0; i < activeRules.length; i++) {
+    for (let i = 0; i < activeRules.length; i++)
+    {
         const ruleId = activeRules[i][7].ruleId; // Access ruleId at index 7
-        deleteRuleButtons[i].addEventListener("click", () => {
-            deleteRule(ruleId);
-        });
-        inputs[i].addEventListener("change", () => {
-            updateValue(inputs[i], ruleId);
-        });
-        selects[i].addEventListener("change", () => {
-            updateValue(selects[i], ruleId);
-        });
-        toggleButtons[i].addEventListener("click", () => {
-            toggleRule(ruleId);
-        });
+
+
+        
+        //console.log("listenToEvents(): i = " + i + ", ruleID = " + ruleId);
+        //console.log("Length: " + activeRules.length);
+
+        deleteRuleButtons[i].addEventListener("click", function(){ deleteRule(ruleId) });
+        
+        inputs[i].addEventListener("change", function () { updateValue(inputs[i], ruleId) });
+
+        selects[i].addEventListener("change", function () { updateValue(selects[i], ruleId) });
+
+        toggleButtons[i].addEventListener("click", function () { toggleRule(ruleId) });
+
     }
-    addRule.addEventListener("click", () => {
-        generateNewRow();
-    });
+    addRule.addEventListener("click", generateNewRow );
 }
 
 
@@ -369,6 +384,14 @@ ruleWrapper.innerHTML = "";
 for (let i = 0; i < activeRules.length; i++) {
     ruleWrapper.appendChild(generateRule(activeRules[i].ruleId, activeRules[i]));
 }
+
+deleteRuleButtons = document.querySelectorAll(".deleteRuleButton");
+
+console.log("Rule button count: " + deleteRuleButtons.length);
+
+toggleButtons =     document.querySelectorAll(".toggleButton");
+inputs =            document.getElementsByTagName("input");
+selects =           document.getElementsByTagName("select");
 
 listenToEvents();
 // RUNTIME end
