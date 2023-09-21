@@ -1,8 +1,8 @@
 const Node = {
-  "id": "ea85fd717480f10a",
+  "id": "9b26ba95b89a2750",
   "type": "change",
   "z": "3ba6bac1c411ace6",
-  "g": "6ff9877691fd4c6f",
+  "g": "e5fafc3bcb2d4365",
   "name": "Regler til msg",
   "rules": [
     {
@@ -18,14 +18,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 860,
-  "y": 280,
+  "x": 780,
+  "y": 60,
   "wires": [
     [
-      "bdf4a944ed661fbe"
+      "14d9ba41e0d56ad1"
     ]
   ],
-  "_order": 152
+  "_order": 127
 }
 
 module.exports = Node;

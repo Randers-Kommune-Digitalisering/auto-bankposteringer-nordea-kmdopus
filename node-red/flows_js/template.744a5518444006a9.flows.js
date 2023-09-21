@@ -1,22 +1,22 @@
 const Node = {
-  "id": "f00533dec1f75067",
+  "id": "744a5518444006a9",
   "type": "template",
   "z": "3ba6bac1c411ace6",
-  "g": "6ff9877691fd4c6f",
+  "g": "9b6c10170cad638d",
   "name": "CSS",
   "field": "payload.style",
   "fieldType": "msg",
   "format": "css",
   "syntax": "mustache",
   "template": "",
-  "x": 990,
-  "y": 320,
+  "x": 770,
+  "y": 140,
   "wires": [
     [
-      "cd1e537903e361c3"
+      "d2465ea9ceb83c7d"
     ]
   ],
-  "_order": 148
+  "_order": 132
 }
 
 Node.template = `
@@ -32,7 +32,6 @@ input, select {
   border-radius: 3px;
   background-color: whitesmoke;
   border: 1px solid #ebebeb;
-  height: 50px;
   padding: 0px 10px;
   font-weight: 300;
 }
@@ -127,11 +126,6 @@ main {
   color: white;
 }
 
-.ruleBox > .nav > li:active * {
-  background-color: #1B365D;
-  color: white;
-}
-
 .ruleBox > .nav > li > a {
   display: grid;
   font-size: 15px;
@@ -139,6 +133,11 @@ main {
   font-family: 'Roboto Slab';
   text-decoration: none;
   color: #1B365D;
+}
+
+.ruleBox > .nav > .active * {
+  background-color: #1B365D;
+  color: white;
 }
 
 .ruleBox > .subheader {
@@ -155,7 +154,7 @@ main {
   border-right: 2px solid whitesmoke;
 }
 
-.ruleBox .ruleWrapper {
+.ruleBox > .ruleWrapper {
   display: grid;
   flex-wrap: wrap;
   justify-content: flex-start;
@@ -240,11 +239,11 @@ button:hover {
   color: white;
 }
 
-.deleteRowButton:hover {
+.deleteRuleButton:hover {
   color: red;
 }
 
-.disableRuleButton:hover {
+.toggleButton:hover {
   color: white;
 }
 

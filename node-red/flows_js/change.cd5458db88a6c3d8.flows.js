@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "0b526691b09a2646",
   "g": "9c916f97d11d31cb",
-  "name": "Reset step",
+  "name": "Step back",
   "rules": [
     {
       "t": "set",
@@ -18,14 +18,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 390,
-  "y": 360,
+  "x": 380,
+  "y": 340,
   "wires": [
     [
       "66586aac58f123ea"
     ]
   ],
-  "_order": 98
+  "_order": 79
 }
 
 module.exports = Node;

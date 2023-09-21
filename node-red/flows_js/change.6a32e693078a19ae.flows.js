@@ -7,7 +7,7 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "nye_konteringsregler",
+      "p": "konteringsregler",
       "pt": "global",
       "to": "payload",
       "tot": "msg"
@@ -18,14 +18,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 360,
-  "y": 120,
+  "x": 240,
+  "y": 160,
   "wires": [
     [
       "f3b8f8dbbccacb91"
     ]
   ],
-  "_order": 156
+  "_order": 136
 }
 
 module.exports = Node;

@@ -17,13 +17,13 @@ const Node = {
   "repair": false,
   "outputs": 1,
   "x": 270,
-  "y": 200,
+  "y": 180,
   "wires": [
     [
       "0df363702703d9c9"
     ]
   ],
-  "_order": 99
+  "_order": 80
 }
 
 module.exports = Node;
