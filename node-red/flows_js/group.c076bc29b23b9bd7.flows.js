@@ -2,7 +2,7 @@ const Node = {
   "id": "c076bc29b23b9bd7",
   "type": "group",
   "z": "3ba6bac1c411ace6",
-  "name": "Build and publish websocket \"Info\"",
+  "name": "Build and publish websocket \"inactive rules\"",
   "style": {
     "label": true,
     "stroke": "none",
@@ -12,16 +12,15 @@ const Node = {
   },
   "nodes": [
     "d5371aca9854e30c",
-    "a3dbff6afdc4b9bd",
     "554f33cc9a0f201b",
     "eaa7010fccf43e50",
-    "a248caa2a5a82bc5",
-    "20e1376af7049cbb"
+    "bf697fc17e7f5c3b",
+    "7b5552a2187320fb"
   ],
   "x": 14,
-  "y": 479,
-  "w": 692,
-  "h": 162,
+  "y": 279,
+  "w": 852,
+  "h": 82,
   "_order": 15
 }
 

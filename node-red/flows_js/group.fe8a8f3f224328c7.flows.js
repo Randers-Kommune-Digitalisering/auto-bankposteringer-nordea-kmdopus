@@ -13,17 +13,16 @@ const Node = {
   "nodes": [
     "ce1542e4d70386de",
     "7a7a78cc9c9515cd",
-    "a3a405fe753f021e",
-    "ee6c0da7b562e21e",
     "f0f26bd5b3e6292a",
     "2ebac6bd31592331",
     "afe62971aeb32dfb",
     "41b71a21957d00b8",
-    "c01dce8d75f539b1"
+    "c01dce8d75f539b1",
+    "f617b313a0fcae8a"
   ],
   "x": 14,
-  "y": 39,
-  "w": 1432,
+  "y": 19,
+  "w": 1552,
   "h": 82,
   "_order": 14
 }

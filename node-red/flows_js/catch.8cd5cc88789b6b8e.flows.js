@@ -9,14 +9,14 @@ const Node = {
     "d67d447a2a6a1b5a"
   ],
   "uncaught": false,
-  "x": 510,
-  "y": 560,
+  "x": 90,
+  "y": 540,
   "wires": [
     [
       "79f957c03eec12f2"
     ]
   ],
-  "_order": 73
+  "_order": 60
 }
 
 module.exports = Node;

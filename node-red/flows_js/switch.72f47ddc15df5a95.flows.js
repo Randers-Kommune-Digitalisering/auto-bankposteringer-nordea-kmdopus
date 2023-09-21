@@ -9,12 +9,12 @@ const Node = {
   "rules": [
     {
       "t": "eq",
-      "v": "ACTIVE",
+      "v": "PENDING",
       "vt": "str"
     },
     {
       "t": "neq",
-      "v": "ACTIVE",
+      "v": "PENDING",
       "vt": "str"
     }
   ],
@@ -22,16 +22,16 @@ const Node = {
   "repair": false,
   "outputs": 2,
   "x": 390,
-  "y": 320,
+  "y": 300,
   "wires": [
     [
-      "1b98e8e8d5c29bbf"
+      "cd5458db88a6c3d8"
     ],
     [
-      "cd5458db88a6c3d8"
+      "1b98e8e8d5c29bbf"
     ]
   ],
-  "_order": 96
+  "_order": 77
 }
 
 module.exports = Node;

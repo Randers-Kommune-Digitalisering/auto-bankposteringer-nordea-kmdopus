@@ -2,7 +2,6 @@ const Node = {
   "id": "554f33cc9a0f201b",
   "type": "template",
   "z": "3ba6bac1c411ace6",
-  "d": true,
   "g": "c076bc29b23b9bd7",
   "name": "JavaScript",
   "field": "payload.script",
@@ -10,36 +9,26 @@ const Node = {
   "format": "javascript",
   "syntax": "plain",
   "template": "",
-  "x": 130,
-  "y": 600,
+  "x": 410,
+  "y": 320,
   "wires": [
     [
-      "a3dbff6afdc4b9bd"
+      "7b5552a2187320fb"
     ]
   ],
-  "_order": 133
+  "_order": 116
 }
 
 Node.template = `
 const ruleWrapper = document.querySelector(".ruleWrapper");
-const addRuleButton = document.querySelector(".addRuleButton");
-const deleteButtons = document.querySelectorAll(".deleteRowButton");
-const inputs = document.getElementsByTagName("input");
-const selects = document.getElementsByTagName("select");
-const rules = _rules != null ? _rules : []; // Rules are defined in change node previous to this
-const inputFields = {
-    0: "Reference",
-    1: "Advisliste",
-    2: "Afsender",
-    3: "Posteringstype",
-    4: "Beløb1",
-    5: "Beløb2",
-    6: "Posteringstekst",
-    7: "Artskonto",
-    8: "PSP",
-    9: "SIO",
-    10: "Notat"
-};
+const addRule = document.querySelector(".addRuleButton");
+let deleteRuleButtons; // bliver defineret i runtime, så knapperne rent faktisk er genereret
+let toggleButtons;
+let inputs;
+let selects;
+const rules = _rules != null ? _rules : [];
+const inactiveRules = rules.filter(rule => !rule[6].active);
+const inputFields = { 0: "Reference", 1: "Advisliste", 2: "Afsender", 3: "Posteringstype", 4: "Beløb1", 5: "Beløb2", 6: "Posteringstekst", 7: "Artskonto", 8: "PSP", 9: "SIO", 10: "Notat" };
 const textOperators = [
     { "name": "= Skal være lig med", "value": "==" },
     { "name": "{?} Indeholder", "value": "contains" },
@@ -56,158 +45,100 @@ const valueOperators = [
     { "name": "< Mellem <", "value": ">< " },
 ]
 
+
+let currentURL = window.location.href; // Get the current URL as a string
+const navLinks = document.getElementsByTagName("ul")[0].getElementsByTagName("a");
+for (let i = 0; i < navLinks.length; i++) {
+    let linkURL = navLinks[i].href; // Get the href attribute of the link
+
+    if (linkURL === currentURL) {
+        navLinks[i].className = "current";
+    }
+}
+
+
+// Send aktivitet til backend
 function PublishWsMessage(m) {
-    if (ws) { ws.send(m); }
-}
-
-/// Ved opdatering af input value
-function updateValue(inputField) {
-    let id = inputField.id;   // f.eks. input_afsender_value
-    let sid = id.split("_");  // f.eks. input, afsender, value
-    let ruleObject = null;
-    let konteringPointer = false;
-    let ruleIndex = -1;
-    let innerIndex = -1;
-    for (let i = 0; i < rules.length; i++) {
-        for (let j = 0; j < rules[i].length; j++) {
-            switch (j) {
-                case 5:
-                    if (sid[1] in rules[i][j]) { // når der peges på et felt der matcher en regel
-                        ruleObject = rules[i][j]; // gem eksisterende regel i ruleObject
-                        ruleIndex = i;
-                        innerIndex = j;
-                        konteringPointer = true;
-                        break;
-                    }
-                    break;
-                default:
-                    if (rules[i][j].name === sid[1]) { // når der peges på et felt der matcher en regel
-                        ruleObject = rules[i][j]; // gem eksisterende regel i ruleObject
-                        ruleIndex = i;
-                        innerIndex = j;
-                        break;
-                    }
-                    break;
-            }
-        }
-        if (ruleObject) { break; } // stop når der er match
+    if (ws) {
+        console.log("Sending WS message:", m);
+        ws.send(m);
     }
-    if (ruleObject) { // når der er match
-        let updatedRuleObject = null;
-        if (konteringPointer) {
-            updatedRuleObject = {
-                ...ruleObject,
-                [sid[1]]: inputField.value, // Update the specific property of the ruleObject
-            };
-        } else {
-            updatedRuleObject = {
-                ...ruleObject,
-                [sid[2]]: inputField.value, // Update the specific property of the ruleObject
-            };
-        }
-
-        rules[ruleIndex][innerIndex] = updatedRuleObject; // Assign the updated ruleObject back to the rules array
-        PublishWsMessage(JSON.stringify(rules));
-    }
-    console.log("Saving user input to rules...");
 }
-
-
-// Function to set the background color based on the active value
-function setSectionBackgroundColor(section, isActive) {
-    section.style.backgroundColor = isActive ? "#EAEDF0" : "#F8485E"; // Set the desired colors
-}
-
-
 
 // Sæt eksisterende regler ind på siden
-function generateRule(index) {
-    const obj_array = rules[index];
-    const fragment = document.createDocumentFragment(); // Create a document fragment
-
+function generateRule(activeRule) {
+    const fragment = document.createDocumentFragment();
     let section = document.createElement("section");
-    setSectionBackgroundColor(section, rules[index][6].active);
-
-
     let h2 = document.createElement("h2");
-    h2.textContent = index + 1;
-    section.appendChild(h2);
 
+    h2.textContent = parseInt(activeRule[7].ruleId) + 1;
+    section.appendChild(h2);
     let div = document.createElement("div");
 
-    for (let i = 0; i < obj_array.length; i++) {
-        const obj = obj_array[i];
+    for (let i = 0; i < Object.keys(activeRule).length - 2; i++) {       // - 2 fordi de sidste to properties ikke skal displayes
+        const delregel = activeRule[i];
         let article = document.createElement("article");
         let h3 = document.createElement("h3");
 
         switch (i) {
             case 5:
                 let inputPosteringstekst = document.createElement("input");
-                inputPosteringstekst.id = "input_Posteringstekst_value";
-                inputPosteringstekst.value = obj.Posteringstekst || "";
+                inputPosteringstekst.id = "input_Posteringstekst_value_" + activeRule[7].ruleId;
+                inputPosteringstekst.value = delregel.Posteringstekst || "";
                 inputPosteringstekst.style.width = "300px";
-
                 let inputArtskonto = document.createElement("input");
-                inputArtskonto.id = "input_Artskonto_value";
-                inputArtskonto.value = obj.Artskonto || "";
+                inputArtskonto.id = "input_Artskonto_value_" + activeRule[7].ruleId;
+                inputArtskonto.value = delregel.Artskonto || "";
                 inputArtskonto.style.width = "85px";
-
                 let inputPSP = document.createElement("input");
-                inputPSP.id = "input_PSP_value";
-                inputPSP.value = obj.PSP || "";
+                inputPSP.id = "input_PSP_value_" + activeRule[7].ruleId;
+                inputPSP.value = delregel.PSP || "";
                 inputPSP.style.width = "170px";
-
                 let inputNotat = document.createElement("input");
-                inputNotat.id = "input_Notat_value";
-                inputNotat.value = obj.Notat || "";
+                inputNotat.id = "input_Notat_value_" + activeRule[7].ruleId;
+                inputNotat.value = delregel.Notat || "";
                 inputNotat.style.width = "700px";
-
                 let articlePosteringstekst = document.createElement("article");
                 let h3Posteringstekst = document.createElement("h3");
                 h3Posteringstekst.textContent = "Posteringstekst";
                 articlePosteringstekst.appendChild(h3Posteringstekst);
                 articlePosteringstekst.appendChild(inputPosteringstekst);
-
                 let articleArtskonto = document.createElement("article");
                 let h3Artskonto = document.createElement("h3");
                 h3Artskonto.textContent = "Artskonto";
                 articleArtskonto.appendChild(h3Artskonto);
                 articleArtskonto.appendChild(inputArtskonto);
-
                 let articlePSP = document.createElement("article");
                 let h3PSP = document.createElement("h3");
                 h3PSP.textContent = "PSP";
                 articlePSP.appendChild(h3PSP);
                 articlePSP.appendChild(inputPSP);
-
                 let articleNotat = document.createElement("article");
                 let h3Notat = document.createElement("h3");
                 h3Notat.textContent = "Notat";
                 articleNotat.appendChild(h3Notat);
                 articleNotat.appendChild(inputNotat);
-
                 div.appendChild(articlePosteringstekst);
                 div.appendChild(articleArtskonto);
                 div.appendChild(articlePSP);
                 div.appendChild(articleNotat);
                 break;
-
             default:
-                h3.textContent = obj.name;
+                h3.textContent = delregel.name;
                 let select = document.createElement("select");
-                select.id = \`input_\${obj.name}_operator\`;
-
+                select.id = \`input_\${delregel.name}_operator_\${activeRule[7].ruleId}\`;
                 const operators = i === 4 ? valueOperators : textOperators;
+
                 for (let j = 0; j < operators.length; j++) {
                     let option = document.createElement("option");
                     option.value = operators[j].value;
                     option.text = operators[j].name;
-                    if (obj.operator == operators[j].value) {
+
+                    if (delregel.operator == operators[j].value) {
                         option.selected = true;
                     }
                     select.appendChild(option);
                 }
-
                 article.appendChild(h3);
                 article.appendChild(select);
         }
@@ -215,23 +146,20 @@ function generateRule(index) {
         switch (i) {
             case 4:
                 let input1 = document.createElement("input");
-                input1.id = \`input_\${obj.name}_value1\`;
-                input1.value = !obj.value1 ? "" : obj.value1;
+                input1.id = \`input_\${delregel.name}_value1_\${activeRule[7].ruleId}\`;
+                input1.value = !delregel.value1 ? "" : delregel.value1;
                 article.appendChild(input1);
-
                 let input2 = document.createElement("input");
-                input2.id = \`input_\${obj.name}_value2\`;
-                input2.value = !obj.value2 ? "" : obj.value2;
+                input2.id = \`input_\${delregel.name}_value2_\${activeRule[7].ruleId}\`;
+                input2.value = !delregel.value2 ? "" : delregel.value2;
                 article.appendChild(input2);
                 break;
-
             case 5:
                 break;
-
             default:
                 let input = document.createElement("input");
-                input.id = \`input_\${obj.name}_value\`;
-                input.value = !obj.value ? "" : obj.value;
+                input.id = \`input_\${delregel.name}_value_\${activeRule[7].ruleId}\`;
+                input.value = !delregel.value ? "" : delregel.value;
                 article.appendChild(input);
                 break;
         }
@@ -246,172 +174,158 @@ function generateRule(index) {
     }
     section.appendChild(div);
 
-    let deleteButton = document.createElement("button");
-    deleteButton.className = "deleteRowButton";
-    deleteButton.textContent = "Slet regel";
-    deleteButton.setAttribute("onclick", \`deleteRow(\${index})\`);
+    let deleteRuleButton = document.createElement("button");
+    deleteRuleButton.className = "deleteRuleButton";
+    deleteRuleButton.id = \`deleteRuleButton_\${activeRule[7].ruleId}\`;
+    deleteRuleButton.textContent = "Slet regel";
+    section.appendChild(deleteRuleButton);
+    let toggleButton = document.createElement("button");
+    toggleButton.className = "toggleButton";
+    toggleButton.id = \`toggleButton_\${activeRule[7].ruleId}\`;
+    toggleButton.textContent = "Aktivér regel";
+    section.appendChild(toggleButton);
+    fragment.appendChild(section);
 
-    section.appendChild(deleteButton);
-
-    let disableButton = document.createElement("button");
-    disableButton.className = "disableRuleButton";
-    if (rules[index][6].active) {
-        disableButton.textContent = "Deaktivér regel";
-    } else {
-        disableButton.textContent = "Aktivér regel";
-    }
-    disableButton.setAttribute("onclick", \`deactivateRow(\${index})\`);
-
-    section.appendChild(disableButton);
-
-    fragment.appendChild(section); // Append the section to the fragment
-
-    return fragment; // Return the document fragment
+    return fragment;
 }
 
-
-
-
-// Slet en linje
-function deleteRow(rowIndex) {
-    if (rowIndex >= 0 && rowIndex < rules.length) {
-        rules.splice(rowIndex, 1);
-        PublishWsMessage(JSON.stringify(rules));
-        const ruleSection = ruleWrapper.children[rowIndex];
-        ruleWrapper.removeChild(ruleSection);
-        for (let i = rowIndex; i < ruleWrapper.children.length; i++) {
-            const ruleElement = ruleWrapper.children[i];
-            const h2 = ruleElement.querySelector("h2");
-            h2.textContent = i + 1;
-        }
-    }
-}
-
-
-
-// Lav ny tom linje
-function generateNewRow() {
-    const sampleRow = rules[0];
-
-    let newRow = [];
-    for (let i = 0; i < sampleRow.length; i++) {
-        const obj = sampleRow[i];
-        let newObj;
-        switch (i) {
-            case 5:
-                newObj = {
-                    name: obj.name,
-                    Posteringstekst: '',
+function generateNewRule() {
+    let oldRuleId = rules[rules.length - 1][7].ruleId;
+    let newRuleId = parseInt(oldRuleId) + 1;
+    console.log(rules[0])
+    const newRule = Object.keys(rules[0]).map((delregel) => {
+        switch (delregel) {
+            case "7":
+                return { ruleId: newRuleId };
+            case "6":
+                return { active: false };
+            case "5":
+                return {
+                    name: delregel.name,
+                    Posteringstekst: "",
                     Artskonto: null,
                     PSP: null,
                     SIO: null,
-                    Notat: '',
+                    Notat: "",
                 };
-                break;
-            case 4:
-                newObj = {
-                    name: obj.name,
+            case "4":
+                return {
+                    name: delregel.name,
                     value1: null,
                     value2: null,
-                    operator: '',
+                    operator: "",
                 };
-                break;
             default:
-                newObj = {
-                    name: obj.name,
+                return {
+                    name: delregel.name,
                     value: null,
-                    operator: '',
+                    operator: "",
                 };
-                break;
         }
-        newRow.push(newObj);
-    }
-    rules.push(newRow);
-
+    });
+    rules.push(newRule);
     ruleWrapper.innerHTML = "";
-    for (let i = 0; i < rules.length; i++) {
-        ruleWrapper.appendChild(generateRule(i).cloneNode(true)); // Append the cloned content
+    for (let i = 0; i < inactiveRules.length; i++) {
+        ruleWrapper.appendChild(generateRule(inactiveRules[i]));
     }
-
     PublishWsMessage(JSON.stringify(rules));
+    console.log(\`New rule with id \${newRuleId} added\`);
 }
 
+function updateValue(inputField, ruleIdIndex) {
+    if (ruleIdIndex >= 0 && ruleIdIndex < rules.length) {
+        const id = inputField.id; // e.g., input_afsender_value
+        const sid = id.split("_"); // e.g., input, afsender, value
 
+        const ruleObject = rules[ruleIdIndex].find(rule => {
+            if (sid[1] === "Posteringstekst" || sid[1] === "Artskonto" || sid[1] === "PSP" || sid[1] === "Notat") {
+                return sid[1] in rule;
+            }
+            return rule.name === sid[1];
+        });
 
-// Deactivate a row
-function deactivateRow(rowIndex) {
-    if (rowIndex >= 0 && rowIndex < rules.length) {
-        rules[rowIndex][6].active = !rules[rowIndex][6].active;
-        PublishWsMessage(JSON.stringify(rules));
-
-        // Find the corresponding section and update its background color
-        const ruleSection = ruleWrapper.children[rowIndex];
-        setSectionBackgroundColor(ruleSection, rules[rowIndex][6].active);
-
-        // Find the corresponding disableButton and update its text content
-        const disableButton = ruleSection.querySelector(".disableRuleButton");
-        disableButton.textContent = rules[rowIndex][6].active ? "Deaktivér regel" : "Aktivér regel";
+        if (ruleObject) {
+            const updatedRuleObject = { ...ruleObject, };
+            if (sid[1] === "Posteringstekst" || sid[1] === "Artskonto" || sid[1] === "PSP" || sid[1] === "Notat") {
+                updatedRuleObject[sid[1]] = inputField.value;
+            } else {
+                updatedRuleObject[sid[2]] = inputField.value;
+            }
+            rules[ruleIdIndex] = [
+                ...rules[ruleIdIndex].filter(rule => rule !== ruleObject),
+                updatedRuleObject,
+            ];
+            PublishWsMessage(JSON.stringify(rules));
+            console.log(\`Rule \${ruleIdIndex}, \${updatedRuleObject} updated\`);
+        }
     }
 }
 
+function deleteRule(ruleIndex) {
+    if (ruleIndex >= 0 && ruleIndex < rules.length) {
+        rules.splice(ruleIndex, 1);
+        PublishWsMessage(JSON.stringify(rules));
+        ruleWrapper.innerHTML = "";
+        for (let i = 0; i < inactiveRules.length; i++) {
+            ruleWrapper.appendChild(generateRule(inactiveRules[i]));
+        }
+    }
+    console.log(\`Rule \${ruleIndex} deleted\`);
+}
 
+function toggleRule(ruleIndex) {
+    if (ruleIndex >= 0 && ruleIndex < rules.length) {
+        rules[ruleIndex][6].active = !rules[ruleIndex][6].active;
+        PublishWsMessage(JSON.stringify(rules));
+        ruleWrapper.innerHTML = "";
+        for (let i = 0; i < inactiveRules.length; i++) {
+            ruleWrapper.appendChild(generateRule(inactiveRules[i]));
+        }
+    }
+    console.log(\`Rule \${ruleIndex} active-status toggled\`)
+}
 
 function listenToEvents() {
-    // Add event listener for each delete button
-    for (let i = 0; i < deleteButtons.length; i++) {
-        deleteButtons[i].addEventListener("click", () => {
-            console.log("Delete rule event triggered");
-            deleteRow(i);
+    for (let i = 0; i < inactiveRules.length; i++) {
+        const ruleId = inactiveRules[i][7].ruleId;
+        deleteRuleButtons[i].addEventListener("click", () => {
+            deleteRule(ruleId)
         });
-    }
-    // Add event listener to each input element
-    for (let i = 0; i < inputs.length; i++) {
         inputs[i].addEventListener("change", () => {
-            console.log("Input change event triggered");
-            updateValue(inputs[i]);
+            updateValue(inputs[i], ruleId)
         });
-    }
-    // Add event listener to each select element
-    for (let i = 0; i < selects.length; i++) {
         selects[i].addEventListener("change", () => {
-            console.log("Select change event triggered");
-            updateValue(selects[i]);
+            updateValue(selects[i], ruleId)
+        });
+        toggleButtons[i].addEventListener("click", () => {
+            toggleRule(ruleId)
         });
     }
+    addRule.addEventListener("click", () => { generateNewRule() });
+    window.addEventListener("DOMContentLoaded", function () {
+        const currentURL = window.location.href;
+        const navLinks = document.querySelectorAll("ul a");
+
+        navLinks.forEach(function (link) {
+            if (link.href === currentURL) {
+                link.classList.add("active");
+                // Optionally, you can add the "active" class to the parent <li> element as well
+                if (link.parentElement.tagName === "LI") {
+                    link.parentElement.classList.add("active");
+                }
+            }
+        });
+    });
 }
 
-// Læg regler i ruleWrapper
-ruleWrapper.innerHTML = "";
-for (let i = 0; i < rules.length; i++) {
-    ruleWrapper.appendChild(generateRule(i).cloneNode(true)); // Append the cloned content
-}
-
-listenToEvents();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// WEB SOCKET (node-red)
+// WEB SOCKET start
 var ws;
 var wsUri = "ws:";
 var loc = window.location; //console.log(loc);
 
 if (loc.protocol === "https:") { wsUri = "wss:"; }
 // This needs to point to the web socket in the Node-RED flow
-wsUri += "//" + loc.host + loc.pathname.replace("rules", "ws/rules");
+wsUri += "//" + loc.host + loc.pathname.replace("info", "ws/info");
 
 function wsConnect() {
     console.log("Connecting to ", wsUri);
@@ -434,6 +348,21 @@ function wsConnect() {
         setTimeout(wsConnect, 3000);
     }
 }
+// WEB SOCKET end
+
+// RUNTIME start
+ruleWrapper.innerHTML = "";
+for (let i = 0; i < inactiveRules.length; i++) {
+    ruleWrapper.appendChild(generateRule(inactiveRules[i]));
+}
+
+deleteRuleButtons = document.querySelectorAll(".deleteRuleButton");
+toggleButtons = document.querySelectorAll(".toggleButton");
+inputs = document.getElementsByTagName("input");
+selects = document.getElementsByTagName("select");
+
+listenToEvents();
+// RUNTIME end
 `
 
 module.exports = Node;

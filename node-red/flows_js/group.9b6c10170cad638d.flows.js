@@ -1,8 +1,8 @@
 const Node = {
-  "id": "deade491e0e58c6b",
+  "id": "9b6c10170cad638d",
   "type": "group",
   "z": "3ba6bac1c411ace6",
-  "name": "Push updates on \"rules\" to backend",
+  "name": "Style and structure",
   "style": {
     "stroke": "none",
     "fill": "#e3f3d3",
@@ -11,15 +11,16 @@ const Node = {
     "color": "#000000"
   },
   "nodes": [
-    "7d7b8d6f9875f531",
-    "dd26d22b47322263",
-    "fa1618adfd3e7c7e"
+    "e07e88f5f8811b3b",
+    "dda8e81914a372dc",
+    "744a5518444006a9",
+    "d2465ea9ceb83c7d"
   ],
-  "x": 14,
-  "y": 659,
-  "w": 692,
-  "h": 162,
-  "_order": 16
+  "x": 634,
+  "y": 99,
+  "w": 472,
+  "h": 82,
+  "_order": 18
 }
 
 module.exports = Node;
