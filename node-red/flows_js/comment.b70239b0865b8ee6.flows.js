@@ -2,9 +2,9 @@ const Node = {
   "id": "b70239b0865b8ee6",
   "type": "comment",
   "z": "3ba6bac1c411ace6",
-  "name": "Tjek updateValue, ikke testet og ikke taget med i inactive rules",
+  "name": "info page danner ikke reglerne",
   "info": "",
-  "x": 240,
+  "x": 140,
   "y": 400,
   "wires": [],
   "_order": 134

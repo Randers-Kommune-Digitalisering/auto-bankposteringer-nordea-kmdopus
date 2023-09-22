@@ -5,8 +5,8 @@ const Node = {
   "g": "f51cc7b4f0bee577",
   "name": "authorizer_id = Nordea ID, admin",
   "info": "",
-  "x": 1410,
-  "y": 400,
+  "x": 1130,
+  "y": 440,
   "wires": [],
   "_order": 28
 }
