@@ -59,6 +59,8 @@ h2 {
   text-transform: uppercase;
   font-weight: 400;
   font-size: 40px;
+  margin-block-start: auto;
+  margin-block-end: auto;
 }
 
 h3 {
