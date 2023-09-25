@@ -2,19 +2,20 @@ const Node = {
   "id": "b0e39349dace8a93",
   "type": "http in",
   "z": "3ba6bac1c411ace6",
-  "name": "",
+  "g": "a72cb7bc6d1977da",
+  "name": "Make endpoint",
   "url": "/rules",
   "method": "get",
   "upload": false,
   "swaggerDoc": "",
-  "x": 100,
-  "y": 140,
+  "x": 120,
+  "y": 240,
   "wires": [
     [
-      "4c07ef299f53feaf"
+      "794334051db22622"
     ]
   ],
-  "_order": 95
+  "_order": 117
 }
 
 module.exports = Node;

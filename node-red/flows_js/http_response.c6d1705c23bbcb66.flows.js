@@ -2,13 +2,14 @@ const Node = {
   "id": "c6d1705c23bbcb66",
   "type": "http response",
   "z": "3ba6bac1c411ace6",
-  "name": "",
+  "g": "a72cb7bc6d1977da",
+  "name": "Frontend response node",
   "statusCode": "",
   "headers": {},
-  "x": 670,
-  "y": 220,
+  "x": 730,
+  "y": 240,
   "wires": [],
-  "_order": 98
+  "_order": 119
 }
 
 module.exports = Node;

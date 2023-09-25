@@ -2,19 +2,20 @@ const Node = {
   "id": "178aa671cc1362db",
   "type": "debug",
   "z": "3ba6bac1c411ace6",
-  "name": "Rules updated",
+  "g": "8d5c48f3ea7b5469",
+  "name": "stdout Rules updated",
   "active": true,
   "tosidebar": true,
-  "console": false,
+  "console": true,
   "tostatus": false,
-  "complete": "rules",
-  "targetType": "msg",
+  "complete": "\"Rules updated\"",
+  "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 520,
-  "y": 320,
+  "x": 470,
+  "y": 140,
   "wires": [],
-  "_order": 104
+  "_order": 111
 }
 
 module.exports = Node;
