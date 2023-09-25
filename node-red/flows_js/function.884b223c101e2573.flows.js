@@ -1,9 +1,9 @@
 const Node = {
   "id": "884b223c101e2573",
   "type": "function",
-  "z": "6cc161e748b99815",
+  "z": "b4ac8ea3a77a9132",
   "g": "25ef659717eb2e31",
-  "name": "Parse",
+  "name": "Omstrukturering",
   "func": "",
   "outputs": 1,
   "noerr": 0,
@@ -15,14 +15,14 @@ const Node = {
       "module": "csv-parser"
     }
   ],
-  "x": 110,
-  "y": 920,
+  "x": 160,
+  "y": 120,
   "wires": [
     [
-      "6a32e693078a19ae"
+      "329ceb4beeb16d5c"
     ]
   ],
-  "_order": 69
+  "_order": 137
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, csv) {
@@ -38,7 +38,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       "Lig med": "==",
   };
   
-  const jsonData = csvData.map(data => {
+  const jsonData = csvData.map((data, index) => {
       // Remove "#" character from all values
       const cleanedData = Object.fromEntries(
           Object.entries(data).map(([key, value]) => [key, value ? String(value).replace(/#/g, '') : value])
@@ -74,6 +74,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
           { name: "Beløb", value1: Beløb1, value2: Beløb2, operator: valueOperatorValue },
           { Posteringstekst, Artskonto, PSP, Notat },
           activeObject,
+          { ruleId: index }
       ];
   });
   

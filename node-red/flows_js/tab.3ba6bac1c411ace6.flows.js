@@ -1,7 +1,7 @@
 const Node = {
   "id": "3ba6bac1c411ace6",
   "type": "tab",
-  "label": "RuleEngine",
+  "label": "Frontend",
   "disabled": false,
   "info": "",
   "env": [],
