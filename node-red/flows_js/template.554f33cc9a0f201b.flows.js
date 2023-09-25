@@ -29,7 +29,7 @@ let toggleButtons;
 let inputs;
 let selects;
 const rules = _rules != null ? _rules : [];
-const inActiveRules = rules.filter(rule => rule[6].inActive);
+const inactiveRules = rules.filter(rule => !rule[6].active);
 const inputFields = { 0: "Reference", 1: "Advisliste", 2: "Afsender", 3: "Posteringstype", 4: "Beløb1", 5: "Beløb2", 6: "Posteringstekst", 7: "Artskonto", 8: "PSP", 9: "SIO", 10: "Notat" };
 const textOperators = [
     { "name": "= Skal være lig med", "value": "==" },
@@ -180,7 +180,7 @@ function renderRule(pointerRule) {
     let toggleButton = document.createElement("button");
     toggleButton.className = "toggleButton";
     toggleButton.id = pointerRule[7].ruleId;
-    toggleButton.textContent = "Deaktivér regel";
+    toggleButton.textContent = "Aktivér regel";
     section.appendChild(toggleButton);
     fragment.appendChild(section);
 
@@ -330,7 +330,7 @@ var loc = window.location; //console.log(loc);
 
 if (loc.protocol === "https:") { wsUri = "wss:"; }
 // This needs to point to the web socket in the Node-RED flow
-wsUri += "//" + loc.host + loc.pathname.replace("rules", "ws/rules");
+wsUri += "//" + loc.host + loc.pathname.replace("info", "ws/info");
 
 function wsConnect() {
     console.log("Connecting to ", wsUri);
@@ -357,8 +357,8 @@ function wsConnect() {
 
 // RUNTIME start
 ruleWrapper.innerHTML = "";
-for (let i = 0; i < inActiveRules.length; i++) {
-    ruleWrapper.appendChild(renderRule(inActiveRules[i]));
+for (let i = 0; i < inactiveRules.length; i++) {
+    ruleWrapper.appendChild(renderRule(inactiveRules[i]));
 }
 
 deleteRuleButtons = document.querySelectorAll(".deleteRuleButton");
