@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "b4ac8ea3a77a9132",
   "g": "25ef659717eb2e31",
-  "name": "Gem JSON Array i msg.konteringsregler",
+  "name": "Gem JSON Array i global.konteringsregler",
   "rules": [
     {
       "t": "set",
@@ -25,7 +25,7 @@ const Node = {
       "f3b8f8dbbccacb91"
     ]
   ],
-  "_order": 135
+  "_order": 134
 }
 
 module.exports = Node;
