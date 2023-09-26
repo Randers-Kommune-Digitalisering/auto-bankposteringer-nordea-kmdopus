@@ -1,21 +1,20 @@
 const Node = {
-  "id": "f3b8f8dbbccacb91",
+  "id": "e494c87e75bee5c7",
   "type": "debug",
-  "z": "b4ac8ea3a77a9132",
-  "g": "25ef659717eb2e31",
-  "name": "Slut node",
+  "z": "0b526691b09a2646",
+  "name": "debug 1",
   "active": true,
   "tosidebar": true,
   "console": false,
   "tostatus": false,
-  "complete": "true",
-  "targetType": "full",
+  "complete": "\"succes\"",
+  "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 480,
-  "y": 160,
+  "x": 580,
+  "y": 880,
   "wires": [],
-  "_order": 139
+  "_order": 111
 }
 
 module.exports = Node;
