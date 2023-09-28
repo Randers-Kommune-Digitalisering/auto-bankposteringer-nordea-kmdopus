@@ -1,21 +1,21 @@
 const Node = {
-  "id": "211186717014a98d",
+  "id": "cb4e7d26af47ee47",
   "type": "debug",
   "z": "0b526691b09a2646",
-  "g": "674c1f70633cac0b",
-  "name": "Hentning af konteringsregler",
+  "g": "608c296403fab569",
+  "name": "Log oprettet",
   "active": true,
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "\"Konteringregler hentet\"",
+  "complete": "\"Transaktioner uden match logget\"",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1110,
-  "y": 660,
+  "x": 1080,
+  "y": 620,
   "wires": [],
-  "_order": 99
+  "_order": 102
 }
 
 module.exports = Node;

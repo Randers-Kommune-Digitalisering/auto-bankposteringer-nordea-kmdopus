@@ -1,22 +1,23 @@
 const Node = {
-  "id": "32fc9c076fab6080",
+  "id": "230a4ed1fea2f7fb",
   "type": "file",
-  "z": "d64ae6beab0c9367",
-  "name": "Overskriv konteringsregler",
+  "z": "b4ac8ea3a77a9132",
+  "g": "25ef659717eb2e31",
+  "name": "Gem i json",
   "filename": "/data/konteringsregler/konteringsregler.json",
   "filenameType": "str",
-  "appendNewline": false,
+  "appendNewline": true,
   "createDir": true,
   "overwriteFile": "true",
   "encoding": "none",
-  "x": 310,
-  "y": 320,
+  "x": 150,
+  "y": 200,
   "wires": [
     [
-      "847951228026dcb0"
+      "f3b8f8dbbccacb91"
     ]
   ],
-  "_order": 163
+  "_order": 137
 }
 
 module.exports = Node;

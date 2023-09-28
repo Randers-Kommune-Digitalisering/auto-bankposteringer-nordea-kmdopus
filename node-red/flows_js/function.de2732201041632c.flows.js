@@ -10,14 +10,14 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 610,
-  "y": 580,
+  "x": 690,
+  "y": 540,
   "wires": [
     [
       "b73eae993793d2e5"
     ]
   ],
-  "_order": 29
+  "_order": 28
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
@@ -27,6 +27,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   flow.set("omp_headers", omp_headers.join(', '));
   
   let omposteringsbilag = [];
+  let nomatch_list = [];
   
   // For hver transaktion
   for (let postering of global.get("transactions")) {
@@ -52,10 +53,12 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           } else if (!regel_obj[4].operator) { match_beloeb = true; } else if (!regel_obj[4].value1) { match_beloeb = true; }
   
           // Tæller antallet af udfyldte delregler
-          let antal_searchword = regel_obj.slice(0, 4).filter(obj => obj.value !== null).length;
+          let antal_searchword = Object.keys(regel_obj)
+              .slice(0, 4)
+              .filter(key => regel_obj[key].value !== null)
+              .length;
   
           if (regellinjer_tjekket > 1 && linjer_dannet > 0) {
-              // console.log("Der er allerede dannet en linje, kigger på næste transaktion")
               continue
           } else {
               // Scope: Tjek alle delreglerne, delregel for delregel
@@ -87,6 +90,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
                           let bankdebkred = postering.amount.startsWith('-') ? 'Kredit' : 'Debet';
                           let driftdebkred = bankdebkred === 'Debet' ? 'Kredit' : 'Debet';
                           let beloeb = postering.amount.replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
+                          let psp = regel_obj[5].PSP ? regel_obj[5].PSP : '';
                           
                           let tekst;
                           if (regel_obj[5].Posteringstekst.toLowerCase() === 'tekst fra bank') {
@@ -106,7 +110,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
                               }
                           }
                           // Placeholder til genereret posteringsdata ud fra match
-                          flow.set("posteringsdata_til_drift", [regel_obj[5].Artskonto, '', regel_obj[5].PSP, '', '', driftdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+                          flow.set("posteringsdata_til_drift", [regel_obj[5].Artskonto, '', psp, '', '', driftdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
                           flow.set("posteringsdata_til_90540000", ['90540000', '', '', '', '', bankdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
                       }
                   }
@@ -141,7 +145,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           let bankdebkred = postering.amount.startsWith('-') ? 'Kredit' : 'Debet';
           let driftdebkred = bankdebkred === 'Debet' ? 'Kredit' : 'Debet';
           let beloeb = postering.amount.replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
-          let tekst = postering.counterparty_name + ' - ' + postering.narrative;
+          let tekst = postering.transaction_id;
   
           flow.set("posteringsdata_til_drift", ['95990009', '', '', '', '', driftdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
           flow.set("posteringsdata_til_90540000", ['90540000', '', '', '', '', bankdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
@@ -159,13 +163,18 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           linjer_dannet += 1;
           output_posteringsdata_til_drift = {};
           output_posteringsdata_til_90540000 = {};
+  
+          nomatch_list.push(postering);
+  
       }
   }
   
   global.set("omposteringsarray", omposteringsbilag);
+  global.set("nomatch_list", nomatch_list);
   console.log("I alt " + uplacerbare_poster + " uplacerbare poster");
   
   flow.set("filename", "/data/output/" + global.get("time_of_origin") + ".csv")
+  flow.set("filename_nomatch_list", "/data/nomatch_output/" + global.get("time_of_origin") + ".json")
   
   return msg;
 }
