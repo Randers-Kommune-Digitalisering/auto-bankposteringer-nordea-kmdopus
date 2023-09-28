@@ -3,19 +3,19 @@ const Node = {
   "type": "debug",
   "z": "0b526691b09a2646",
   "g": "608c296403fab569",
-  "name": "Opret omposteringsbilag",
+  "name": "Bilag oprettet",
   "active": true,
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "\"Omposteringsbilag dannet\"",
+  "complete": "\"Bilag oprettet\"",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 680,
-  "y": 660,
+  "x": 1080,
+  "y": 580,
   "wires": [],
-  "_order": 32
+  "_order": 31
 }
 
 module.exports = Node;
