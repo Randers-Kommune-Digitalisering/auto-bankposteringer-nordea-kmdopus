@@ -13,9 +13,9 @@ const Node = {
   "name": "jan.molbaek@randers.dk",
   "dname": "Send email til Jan",
   "x": 850,
-  "y": 420,
+  "y": 520,
   "wires": [],
-  "_order": 99
+  "_order": 100
 }
 
 module.exports = Node;

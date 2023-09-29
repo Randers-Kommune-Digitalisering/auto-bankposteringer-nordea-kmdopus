@@ -2,7 +2,7 @@ const Node = {
   "id": "fe8a8f3f224328c7",
   "type": "group",
   "z": "0b526691b09a2646",
-  "name": "Transactions request",
+  "name": "Hovedkonto",
   "style": {
     "stroke": "none",
     "fill": "#ffffbf",

@@ -30,7 +30,7 @@ const Node = {
       "t": "set",
       "p": "query_param",
       "pt": "flow",
-      "to": "KONTO",
+      "to": "HOVEDKONTO",
       "tot": "env",
       "dc": true
     },
@@ -68,7 +68,7 @@ const Node = {
       "f617b313a0fcae8a"
     ]
   ],
-  "_order": 81
+  "_order": 82
 }
 
 module.exports = Node;
