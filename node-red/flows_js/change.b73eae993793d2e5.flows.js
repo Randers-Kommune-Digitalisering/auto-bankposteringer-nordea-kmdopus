@@ -10,15 +10,14 @@ const Node = {
       "p": "payload",
       "pt": "msg",
       "to": "omposteringsarray",
-      "tot": "global",
-      "dc": true
+      "tot": "global"
     },
     {
       "t": "set",
       "p": "columns",
       "pt": "msg",
       "to": "omp_headers",
-      "tot": "flow",
+      "tot": "global",
       "dc": true
     }
   ],
@@ -27,14 +26,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 750,
-  "y": 580,
+  "x": 610,
+  "y": 720,
   "wires": [
     [
       "e19e623080066c4c"
     ]
   ],
-  "_order": 32
+  "_order": 33
 }
 
 module.exports = Node;

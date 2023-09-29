@@ -2,7 +2,7 @@ const Node = {
   "id": "fe8a8f3f224328c7",
   "type": "group",
   "z": "0b526691b09a2646",
-  "name": "Transactions request",
+  "name": "Hovedkonto",
   "style": {
     "stroke": "none",
     "fill": "#ffffbf",
@@ -24,9 +24,9 @@ const Node = {
   ],
   "x": 14,
   "y": 19,
-  "w": 1552,
+  "w": 1632,
   "h": 122,
-  "_order": 13
+  "_order": 12
 }
 
 module.exports = Node;
