@@ -3,7 +3,7 @@ const Node = {
   "type": "debug",
   "z": "0b526691b09a2646",
   "g": "608c296403fab569",
-  "name": "Log oprettet",
+  "name": "stdout Poster uden match",
   "active": true,
   "tosidebar": true,
   "console": true,
@@ -12,8 +12,8 @@ const Node = {
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1080,
-  "y": 720,
+  "x": 1120,
+  "y": 760,
   "wires": [],
   "_order": 103
 }

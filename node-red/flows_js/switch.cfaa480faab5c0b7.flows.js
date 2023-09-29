@@ -3,7 +3,7 @@ const Node = {
   "type": "switch",
   "z": "0b526691b09a2646",
   "g": "f51cc7b4f0bee577",
-  "name": "Credentials udløbet",
+  "name": "Hvis auth udløbet",
   "property": "list_http_code",
   "propertyType": "global",
   "rules": [
@@ -17,7 +17,7 @@ const Node = {
   "repair": false,
   "outputs": 1,
   "x": 270,
-  "y": 320,
+  "y": 360,
   "wires": [
     [
       "0df363702703d9c9"

@@ -6,12 +6,12 @@ const Node = {
   "name": "Script",
   "func": "",
   "outputs": 1,
-  "noerr": 0,
+  "noerr": 6,
   "initialize": "",
   "finalize": "",
   "libs": [],
   "x": 690,
-  "y": 640,
+  "y": 680,
   "wires": [
     [
       "b73eae993793d2e5"
@@ -23,9 +23,6 @@ const Node = {
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let uplacerbare_poster = 0;
   let felter_i_nordea = ["narrative", "message", "counterparty_name", "type_description"];
-  let omp_headers = ["Artskonto", "Omkostningssted", "PSP-element", "Profitcenter", "Ordre", "Debet/kredit", "Beløb", "Næste agent", "Tekst", "Betalingsart", "Påligningsår", "Betalingsmodtagernr.", "Betalingsmodtagernr.kode", "Ydelsesmodtagernr.", "Ydelsesmodtagernr.kode", "Ydelsesperiode fra", "Ydelsesperiode til", "Oplysningspligtnr.", "Oplysningspligtmodtagernr.kode", "Oplysningspligtkode", "Netværk", "Operation", "Mængde", "Mængdeenhed", "Referencenøgle"];
-  flow.set("omp_headers", omp_headers.join(', '));
-  
   let omposteringsbilag = [];
   let nomatch_list = [];
   
@@ -173,7 +170,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   global.set("nomatch_list", nomatch_list);
   console.log("I alt " + uplacerbare_poster + " uplacerbare poster");
   
-  flow.set("filename", "/data/output/" + global.get("time_of_origin") + ".csv")
+  flow.set("filename", "/data/output/hovedkonto/" + global.get("time_of_origin") + ".csv")
   flow.set("filename_nomatch_list", "/data/nomatch_output/" + global.get("time_of_origin") + ".json")
   
   return msg;
