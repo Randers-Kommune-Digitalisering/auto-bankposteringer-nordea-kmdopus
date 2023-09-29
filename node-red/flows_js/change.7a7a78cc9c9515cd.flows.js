@@ -38,15 +38,15 @@ const Node = {
       "t": "set",
       "p": "query_param1",
       "pt": "flow",
-      "to": "sidste_bankdag",
-      "tot": "global"
+      "to": "2023-09-07",
+      "tot": "str"
     },
     {
       "t": "set",
       "p": "query_param2",
       "pt": "flow",
-      "to": "sidste_bankdag",
-      "tot": "global"
+      "to": "2023-09-07",
+      "tot": "str"
     },
     {
       "t": "set",

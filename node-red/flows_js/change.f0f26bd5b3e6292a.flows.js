@@ -74,11 +74,7 @@ const Node = {
       "2ebac6bd31592331"
     ]
   ],
-<<<<<<< HEAD
   "_order": 83
-=======
-  "_order": 88
->>>>>>> aaa4f42b14a73a8615ef19d828457e03a3bff094
 }
 
 module.exports = Node;
