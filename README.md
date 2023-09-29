@@ -8,7 +8,8 @@ Filen bliver derefter manuelt indlæst i Opus.
 
 # Status
 
-Projektet er stadig i test-fasen.
+Udvikling af løsningen er færdig. Bugs er fjernet.
+Deploy er next step, men vi afventer tilbagemelding fra Nordea om tilgængelighed af data.
 
 # Guide
 
@@ -17,7 +18,6 @@ Her er en step-by-step til igangsætning af programmet:
 1. Åbn codespaces på dette repository
 2. Send kommandoen "docker-compose up" til terminalen der åbner af sig selv
 3. I fanen "Ports" eller i den prompt der åbner, kan du følge linket til den lokale port hvor node-red startes
-4. I node-red skal der trykkes på "start"-noden, så sker resten automatisk. 
 
 # Resources
 
