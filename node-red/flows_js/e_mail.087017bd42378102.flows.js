@@ -13,7 +13,7 @@ const Node = {
   "name": "jan.molbaek@randers.dk",
   "dname": "Send email til Jan",
   "x": 850,
-  "y": 520,
+  "y": 560,
   "wires": [],
   "_order": 100
 }

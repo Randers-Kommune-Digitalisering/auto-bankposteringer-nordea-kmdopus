@@ -2,7 +2,7 @@ const Node = {
   "id": "608c296403fab569",
   "type": "group",
   "z": "0b526691b09a2646",
-  "name": "Dan omposteringsbilag",
+  "name": "Dan omposteringsbilag, hovedkonto",
   "style": {
     "stroke": "none",
     "fill": "#ffffbf",
@@ -24,8 +24,8 @@ const Node = {
     "691567767fc7e2b0"
   ],
   "x": 494,
-  "y": 599,
-  "w": 712,
+  "y": 639,
+  "w": 792,
   "h": 202,
   "_order": 7
 }

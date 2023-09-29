@@ -7,7 +7,7 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "transactions",
+      "p": "hovedkonto_transactions",
       "pt": "global",
       "to": "payload.response.transactions",
       "tot": "msg"

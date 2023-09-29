@@ -17,7 +17,7 @@ const Node = {
       "p": "columns",
       "pt": "msg",
       "to": "omp_headers",
-      "tot": "flow",
+      "tot": "global",
       "dc": true
     }
   ],
@@ -27,7 +27,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 610,
-  "y": 680,
+  "y": 720,
   "wires": [
     [
       "e19e623080066c4c"

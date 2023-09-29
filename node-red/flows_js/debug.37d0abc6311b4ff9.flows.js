@@ -1,21 +1,21 @@
 const Node = {
-  "id": "178aa671cc1362db",
+  "id": "37d0abc6311b4ff9",
   "type": "debug",
-  "z": "3ba6bac1c411ace6",
-  "g": "8d5c48f3ea7b5469",
-  "name": "stdout Rules updated",
+  "z": "0b526691b09a2646",
+  "g": "0908d601e13c4ce9",
+  "name": "stdout Debitor Bilag",
   "active": true,
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "\"Rules updated\"",
+  "complete": "\"Bilag til debitorkonto oprettet\"",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 470,
-  "y": 140,
+  "x": 1500,
+  "y": 220,
   "wires": [],
-  "_order": 121
+  "_order": 116
 }
 
 module.exports = Node;

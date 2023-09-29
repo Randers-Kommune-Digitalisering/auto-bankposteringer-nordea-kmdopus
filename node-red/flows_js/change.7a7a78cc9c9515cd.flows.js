@@ -38,15 +38,15 @@ const Node = {
       "t": "set",
       "p": "query_param1",
       "pt": "flow",
-      "to": "2023-09-07",
-      "tot": "str"
+      "to": "sidste_bankdag",
+      "tot": "global"
     },
     {
       "t": "set",
       "p": "query_param2",
       "pt": "flow",
-      "to": "2023-09-07",
-      "tot": "str"
+      "to": "sidste_bankdag",
+      "tot": "global"
     },
     {
       "t": "set",
@@ -65,7 +65,8 @@ const Node = {
   "y": 80,
   "wires": [
     [
-      "f617b313a0fcae8a"
+      "f617b313a0fcae8a",
+      "68079c74979ba90f"
     ]
   ],
   "_order": 82
