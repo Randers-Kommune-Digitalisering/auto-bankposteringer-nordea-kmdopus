@@ -10,11 +10,11 @@ const Node = {
   "syntax": "plain",
   "template": "",
   "x": 110,
-  "y": 440,
+  "y": 400,
   "wires": [
     []
   ],
-  "_order": 120
+  "_order": 130
 }
 
 Node.template = `

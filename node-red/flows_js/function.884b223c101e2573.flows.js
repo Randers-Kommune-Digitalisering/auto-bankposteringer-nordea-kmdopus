@@ -15,17 +15,20 @@ const Node = {
       "module": "csv-parser"
     }
   ],
-  "x": 160,
+  "x": 320,
   "y": 120,
   "wires": [
     [
       "329ceb4beeb16d5c"
     ]
   ],
-  "_order": 137
+  "_order": 147
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, csv) {
+  let omp_headers = ["Artskonto", "Omkostningssted", "PSP-element", "Profitcenter", "Ordre", "Debet/kredit", "Beløb", "Næste agent", "Tekst", "Betalingsart", "Påligningsår", "Betalingsmodtagernr.", "Betalingsmodtagernr.kode", "Ydelsesmodtagernr.", "Ydelsesmodtagernr.kode", "Ydelsesperiode fra", "Ydelsesperiode til", "Oplysningspligtnr.", "Oplysningspligtmodtagernr.kode", "Oplysningspligtkode", "Netværk", "Operation", "Mængde", "Mængdeenhed", "Referencenøgle"];
+  global.set("omp_headers", omp_headers.join(', '));
+  
   const csvData = msg.payload; // Assuming msg.payload contains an array of parsed CSV objects
   
   const operatorMapping = {

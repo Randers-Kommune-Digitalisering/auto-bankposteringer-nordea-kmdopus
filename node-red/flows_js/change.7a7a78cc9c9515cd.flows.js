@@ -30,7 +30,7 @@ const Node = {
       "t": "set",
       "p": "query_param",
       "pt": "flow",
-      "to": "KONTO",
+      "to": "HOVEDKONTO",
       "tot": "env",
       "dc": true
     },
@@ -65,10 +65,11 @@ const Node = {
   "y": 80,
   "wires": [
     [
-      "f617b313a0fcae8a"
+      "f617b313a0fcae8a",
+      "68079c74979ba90f"
     ]
   ],
-  "_order": 87
+  "_order": 82
 }
 
 module.exports = Node;
