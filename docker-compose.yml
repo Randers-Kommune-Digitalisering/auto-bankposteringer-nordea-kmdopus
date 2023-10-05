@@ -47,9 +47,6 @@ services:
     depends_on:
       - redis_microservice  
       - db
-      
-    volumes:
-      - "./node-red/:/data" 
 
   redis_microservice:
     build:
