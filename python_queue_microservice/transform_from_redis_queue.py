@@ -7,11 +7,9 @@ def transform(data):
     data = json.loads(data)
 
     # Perform desired data transformations below
-    
 
+    print("done")
 
-
-    
     # Return the transformed data
     return data
 
