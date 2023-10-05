@@ -13,6 +13,8 @@ services:
       DB_HOST: db
       DB_PORT: 3306
       DB_DATABASE: demo
+      TZ: "Europe/Copenhagen"
+      FLOWS: "/data/flows.json"
 
       ######### Testmiljø:
       
@@ -32,21 +34,13 @@ services:
       DEBITORKONTO: ${DEBITORKONTO}
       AUTH_ID: ${PROD_AUTH_ID}
       AGREEMENT_ID: ${PROD_AGREEMENT_ID}
-      
-      # Miljøvariablen FLOWS fortæller Node-RED IDEet hvilket flow.json den skal åbne og gemme ændringer i ved deploy.
-      FLOWS: "/data/flows.json"
-      
-      # Bind mount fra codespace til den kørende containers /data.
-      # Gør det muligt at deploye flowkode direkte fra IDE og bruge git til at comitte ændringerne til repo.
-    volumes:
-      - "./node-red/:/data" 
-      
-      TZ: "Europe/Copenhagen"
-      FLOWS: "/data/flows.json"
 
     depends_on:
       - redis_microservice  
       - db
+      
+    volumes:
+      - "./node-red/:/data" 
 
   redis_microservice:
     build:
