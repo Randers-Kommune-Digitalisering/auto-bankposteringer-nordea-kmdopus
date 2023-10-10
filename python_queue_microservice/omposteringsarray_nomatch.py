@@ -21,7 +21,7 @@ def preprocess_text(text):
 def transform(data):
     # Parse the JSON data
     bankposteringer = json.loads(data)
-    return_data = []
+    data = []
 
     for postering in bankposteringer:
         formateret_postering = {
@@ -42,10 +42,10 @@ def transform(data):
         formateret_postering["PSP_element"] = predicted_kontering[2]
         formateret_postering["Sikkerhed"] = predicted_kontering.accuracy
     
-        return_data.append(formateret_postering)
+        data.append(formateret_postering)
         print(formateret_postering)
 
-    return return_data
+    return data
 
 # Connect to the Redis server using the correct hostname
 r = redis.Redis(host='redis_microservice')
