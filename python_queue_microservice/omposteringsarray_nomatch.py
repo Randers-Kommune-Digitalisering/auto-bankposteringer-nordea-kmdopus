@@ -45,7 +45,9 @@ def transform(data):
     
         return_data.append(formateret_postering)
 
-    return return_data
+    data = return_data
+
+    return data
 
 # Connect to the Redis server using the correct hostname
 r = redis.Redis(host='redis_microservice')
