@@ -21,7 +21,6 @@ def preprocess_text(text):
 def transform(data):
     # Parse the JSON data
     bankposteringer = json.loads(data)
-
     return_data = []
 
     for postering in bankposteringer:
@@ -44,10 +43,9 @@ def transform(data):
         formateret_postering["Sikkerhed"] = predicted_kontering.accuracy
     
         return_data.append(formateret_postering)
+        print(formateret_postering)
 
-    data = return_data
-
-    return data
+    return return_data
 
 # Connect to the Redis server using the correct hostname
 r = redis.Redis(host='redis_microservice')
@@ -64,8 +62,8 @@ while True:
     if not message:
         time.sleep(0.001)
         continue
-    # # Ignore non-data messages
-    # if message['type'] != 'message':
-    #     continue
+    # Ignore non-data messages
+    if message['type'] != 'message':
+        continue
     # Transform the data and Return the transformed data on the "results" topic
     r.publish('results', json.dumps(transform(message['data'])))
