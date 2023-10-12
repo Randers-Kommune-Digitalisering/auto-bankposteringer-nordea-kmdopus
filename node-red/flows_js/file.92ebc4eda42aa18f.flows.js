@@ -1,23 +1,23 @@
 const Node = {
-  "id": "181659adfd50ca47",
+  "id": "92ebc4eda42aa18f",
   "type": "file",
   "z": "0b526691b09a2646",
   "g": "608c296403fab569",
-  "name": "Trans. u. match",
-  "filename": "$flowContext(\"filename_nomatch_list\")",
+  "name": "Skriv omp.bilag",
+  "filename": "$flowContext(\"filename_nomatch\")\t",
   "filenameType": "jsonata",
   "appendNewline": true,
   "createDir": true,
-  "overwriteFile": "false",
+  "overwriteFile": "true",
   "encoding": "none",
-  "x": 900,
-  "y": 760,
+  "x": 1200,
+  "y": 740,
   "wires": [
     [
       "cb4e7d26af47ee47"
     ]
   ],
-  "_order": 101
+  "_order": 203
 }
 
 module.exports = Node;
