@@ -5,10 +5,10 @@ const Node = {
   "g": "f51cc7b4f0bee577",
   "name": "authorizer_id = Nordea ID, admin",
   "info": "",
-  "x": 1130,
-  "y": 580,
+  "x": 1010,
+  "y": 500,
   "wires": [],
-  "_order": 28
+  "_order": 113
 }
 
 module.exports = Node;

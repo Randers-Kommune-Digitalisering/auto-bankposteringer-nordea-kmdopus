@@ -12,10 +12,10 @@ const Node = {
   "tls": true,
   "name": "jan.molbaek@randers.dk",
   "dname": "Send email til Jan",
-  "x": 850,
-  "y": 560,
+  "x": 1470,
+  "y": 540,
   "wires": [],
-  "_order": 100
+  "_order": 182
 }
 
 module.exports = Node;

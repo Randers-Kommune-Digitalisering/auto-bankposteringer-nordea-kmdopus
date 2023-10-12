@@ -1,10 +1,11 @@
+import os
+import time
 import json
 import redis
-import time
 import spacy
 from joblib import load
-import csv
-import os
+
+print("Hello World")
 
 pipeline = spacy.load('da_core_news_md')
 current_dir = os.getcwd()
@@ -12,16 +13,16 @@ current_dir = os.getcwd()
 model_fil_path = 'trained_model.joblib'
 model_til_konteringsforslag = load(model_fil_path)
 
-print("Hello World")
 
 def preprocess_text(text):
+    """Tokenization"""
     doc = pipeline(text.lower())
     tokens = [token.text for token in doc if not token.is_stop and not token.is_punct]
     preprocessed_text = " ".join(tokens)
     return preprocessed_text
 
 def transform(data_in):
-    # Parse the JSON data
+    """Transformation af data"""
     bankposteringer = json.loads(data_in)
     print(bankposteringer)
     new_data = []
