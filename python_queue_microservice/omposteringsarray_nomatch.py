@@ -1,3 +1,4 @@
+"""Import of relevant modules"""
 import os
 import time
 import json
@@ -10,14 +11,12 @@ print("Hello World")
 pipeline = spacy.load('da_core_news_md')
 current_dir = os.getcwd()
 
-model_fil_path = '/workspaces/auto-bankposteringer-nordea-kmdopus/python_queue_microservice/trained_model.joblib'
+MODEL_FIL_PATH = '/service/trained_model.joblib'
 
-if os.path.exists(model_fil_path):
-    model_til_konteringsforslag = load(model_fil_path)
+if os.path.exists(MODEL_FIL_PATH):
+    model_til_konteringsforslag = load(MODEL_FIL_PATH)
 else:
     print("Model file not found.")
-
-model_til_konteringsforslag = load(model_fil_path)
 
 def preprocess_text(text):
     """Tokenization"""
@@ -27,7 +26,7 @@ def preprocess_text(text):
     return preprocessed_text
 
 def transform(data_in):
-    """Transformation af data"""
+    """Datatransformation"""
     bankposteringer = json.loads(data_in)
     print(bankposteringer)
     new_data = []
