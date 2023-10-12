@@ -18,9 +18,9 @@ def preprocess_text(text):
     preprocessed_text = " ".join(tokens)
     return preprocessed_text
 
-def transform(data):
+def transform(data_in):
     # Parse the JSON data
-    bankposteringer = json.loads(data)
+    bankposteringer = json.loads(data_in)
     new_data = []
 
     for postering in bankposteringer:
@@ -63,9 +63,9 @@ while True:
         time.sleep(0.001)
         continue
     # Parse again
-    data = transform(message['data'])
+    data_out = transform(message['data'])
     # Ignore non-data messages
     if message['type'] != 'message':
         continue
     # Transform the data and Return the transformed data on the "results" topic
-    r.publish('results', json.dumps(data))
+    r.publish('results', json.dumps(data_out))
