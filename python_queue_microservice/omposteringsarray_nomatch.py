@@ -11,7 +11,7 @@ print("Hello World")
 pipeline = spacy.load('da_core_news_md')
 current_dir = os.getcwd()
 
-MODEL_FIL_PATH = '/service/trained_model.joblib'
+MODEL_FIL_PATH = 'python_queue_microservice/trained_model.joblib'
 
 if os.path.exists(MODEL_FIL_PATH):
     model_til_konteringsforslag = load(MODEL_FIL_PATH)
@@ -49,7 +49,7 @@ def transform(data_in):
         formateret_postering["Artskonto"] = predicted_kontering[1]
         formateret_postering["PSP_element"] = predicted_kontering[2]
         formateret_postering["Sikkerhed"] = predicted_kontering.accuracy
-    
+
         new_data.append(formateret_postering)
         print(formateret_postering)
 
