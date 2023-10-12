@@ -62,10 +62,11 @@ while True:
     if not message:
         time.sleep(0.001)
         continue
-    # Parse again
-    data_out = transform(message['data'])
     # Ignore non-data messages
     if message['type'] != 'message':
         continue
+    # Parse again
+    preprocessed_data = message['data'].decode('utf-8')
+    data_out = transform(preprocessed_data)
     # Transform the data and Return the transformed data on the "results" topic
     r.publish('results', json.dumps(data_out))
