@@ -62,8 +62,10 @@ while True:
     if not message:
         time.sleep(0.001)
         continue
+    # Parse again
+    data = json.loads(message['data'])
     # Ignore non-data messages
     if message['type'] != 'message':
         continue
     # Transform the data and Return the transformed data on the "results" topic
-    r.publish('results', json.dumps(transform(message['data'])))
+    r.publish('results', json.dumps(transform(data)))
