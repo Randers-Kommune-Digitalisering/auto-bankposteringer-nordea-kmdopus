@@ -12,6 +12,8 @@ current_dir = os.getcwd()
 model_fil_path = 'trained_model.joblib'
 model_til_konteringsforslag = load(model_fil_path)
 
+print("Hello World")
+
 def preprocess_text(text):
     doc = pipeline(text.lower())
     tokens = [token.text for token in doc if not token.is_stop and not token.is_punct]
@@ -21,6 +23,7 @@ def preprocess_text(text):
 def transform(data_in):
     # Parse the JSON data
     bankposteringer = json.loads(data_in)
+    print(bankposteringer)
     new_data = []
 
     for postering in bankposteringer:
@@ -58,7 +61,7 @@ p.subscribe('data')
 while True:
     # Get a new message if one is available
     message = p.get_message()
-    print(f"Received message: {message}")
+    print(f"Received message: {message['data']}")
 
     # If no message is available, sleep for a short time and try again
     if not message:
