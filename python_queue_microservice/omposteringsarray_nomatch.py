@@ -67,6 +67,10 @@ while True:
         continue
     # Parse again
     preprocessed_data = message['data'].decode('utf-8')
+    print(f"Received data: {preprocessed_data}")
+
     data_out = transform(preprocessed_data)
+    print(f"Received data: {data_out}")
+
     # Transform the data and Return the transformed data on the "results" topic
     r.publish('results', json.dumps(data_out))
