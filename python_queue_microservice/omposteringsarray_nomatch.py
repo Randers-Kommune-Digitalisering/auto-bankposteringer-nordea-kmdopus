@@ -11,6 +11,12 @@ pipeline = spacy.load('da_core_news_md')
 current_dir = os.getcwd()
 
 model_fil_path = 'trained_model.joblib'
+
+if os.path.exists(model_fil_path):
+    model_til_konteringsforslag = load(model_fil_path)
+else:
+    print("Model file not found.")
+
 model_til_konteringsforslag = load(model_fil_path)
 
 
