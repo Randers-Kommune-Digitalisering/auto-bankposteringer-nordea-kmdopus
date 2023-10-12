@@ -58,7 +58,7 @@ p.subscribe('data')
 while True:
     # Get a new message if one is available
     message = p.get_message()
-    print(f"Received message: {message['data']}")
+    print(f"Received message: {message}")
 
     # If no message is available, sleep for a short time and try again
     if not message:
