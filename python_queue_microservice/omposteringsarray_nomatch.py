@@ -44,11 +44,9 @@ def transform(data_in):
         # Foretag forudsigelsen
         predicted_kontering = model_til_konteringsforslag.predict([formateret_postering])
         # Udfyld felter med forudsigelser
-        formateret_postering["Tekst"] = formateret_postering.get('narrative', '')
-        formateret_postering["Beløb"] = formateret_postering.get('amount', '')
-        formateret_postering["Artskonto"] = predicted_kontering[1]
-        formateret_postering["PSP_element"] = predicted_kontering[2]
-        formateret_postering["Sikkerhed"] = predicted_kontering.accuracy
+        formateret_postering["artskonto"] = predicted_kontering[1]
+        formateret_postering["psp"] = predicted_kontering[2]
+        formateret_postering["sikkerhed"] = predicted_kontering.accuracy
 
         new_data.append(formateret_postering)
         print(formateret_postering)

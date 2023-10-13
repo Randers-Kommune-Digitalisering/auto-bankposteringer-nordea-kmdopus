@@ -5,7 +5,7 @@ const Node = {
   "name": "Dan omposteringsbilag, hovedkonto",
   "style": {
     "stroke": "none",
-    "fill": "#ffffbf",
+    "fill": "#e3f3d3",
     "label": true,
     "label-position": "n",
     "color": "#000000"
@@ -17,7 +17,6 @@ const Node = {
     "bb626f327090f8bd",
     "b73eae993793d2e5",
     "a7afbef92dc1c00f",
-    "cb4e7d26af47ee47",
     "718878903099dace",
     "691567767fc7e2b0",
     "ac3ed00ce79b1fe1",
@@ -27,13 +26,16 @@ const Node = {
     "92ebc4eda42aa18f",
     "f2ca5e110c37d98a",
     "16dedc57743ff516",
-    "759b90f6981be8bf"
+    "759b90f6981be8bf",
+    "aa9c1b2dfd4cb399",
+    "41c24fb7566b040f",
+    "53eac8bb00a8385a"
   ],
   "x": 494,
   "y": 619,
-  "w": 832,
-  "h": 242,
-  "_order": 16
+  "w": 1332,
+  "h": 202,
+  "_order": 40
 }
 
 module.exports = Node;

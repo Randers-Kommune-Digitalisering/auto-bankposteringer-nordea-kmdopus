@@ -5,7 +5,7 @@ const Node = {
   "options": "{}",
   "cluster": false,
   "optionsType": "json",
-  "_order": 72
+  "_order": 71
 }
 
 module.exports = Node;
