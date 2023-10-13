@@ -5,7 +5,7 @@ const Node = {
   "name": "Afventer Jans godkendelse",
   "style": {
     "stroke": "none",
-    "fill": "#ffbfbf",
+    "fill": "#e3f3d3",
     "label": true,
     "label-position": "n",
     "color": "#000000"
@@ -18,8 +18,8 @@ const Node = {
     "1b98e8e8d5c29bbf",
     "2d4fb1b1c67c7815"
   ],
-  "x": 254,
-  "y": 419,
+  "x": 14,
+  "y": 339,
   "w": 272,
   "h": 162,
   "_order": 23

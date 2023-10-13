@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "0b526691b09a2646",
   "g": "608c296403fab569",
-  "name": "Flow to msg",
+  "name": "flow to msg",
   "rules": [
     {
       "t": "set",
@@ -17,8 +17,7 @@ const Node = {
       "p": "columns",
       "pt": "msg",
       "to": "omp_headers",
-      "tot": "global",
-      "dc": true
+      "tot": "global"
     }
   ],
   "action": "",
@@ -26,14 +25,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 1110,
-  "y": 660,
+  "x": 910,
+  "y": 300,
   "wires": [
     [
       "e19e623080066c4c"
     ]
   ],
-  "_order": 197
+  "_order": 206
 }
 
 module.exports = Node;

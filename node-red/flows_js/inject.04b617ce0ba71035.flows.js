@@ -3,7 +3,7 @@ const Node = {
   "type": "inject",
   "z": "0b526691b09a2646",
   "g": "f51cc7b4f0bee577",
-  "name": "Manuel start",
+  "name": "▶",
   "props": [
     {
       "p": "payload"
@@ -16,14 +16,14 @@ const Node = {
   "topic": "",
   "payload": "{}",
   "payloadType": "json",
-  "x": 130,
-  "y": 300,
+  "x": 110,
+  "y": 780,
   "wires": [
     [
       "0df363702703d9c9"
     ]
   ],
-  "_order": 113
+  "_order": 115
 }
 
 module.exports = Node;

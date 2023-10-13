@@ -1,8 +1,8 @@
 const Node = {
-  "id": "92ebc4eda42aa18f",
+  "id": "365babc5774588e2",
   "type": "file",
   "z": "0b526691b09a2646",
-  "g": "608c296403fab569",
+  "g": "3d885db7955a47b8",
   "name": "Skriv omp.bilag",
   "filename": "$flowContext(\"filename_nomatch\")\t",
   "filenameType": "jsonata",
@@ -10,14 +10,14 @@ const Node = {
   "createDir": true,
   "overwriteFile": "true",
   "encoding": "none",
-  "x": 1400,
-  "y": 740,
+  "x": 1200,
+  "y": 420,
   "wires": [
     [
-      "16dedc57743ff516"
+      "2942402deb02ec6c"
     ]
   ],
-  "_order": 205
+  "_order": 195
 }
 
 module.exports = Node;
