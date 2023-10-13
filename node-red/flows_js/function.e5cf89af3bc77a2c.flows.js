@@ -1,8 +1,8 @@
 const Node = {
-  "id": "f00a6d76db0f4c56",
+  "id": "e5cf89af3bc77a2c",
   "type": "function",
   "z": "0b526691b09a2646",
-  "g": "608c296403fab569",
+  "g": "3d885db7955a47b8",
   "name": "Script",
   "func": "",
   "outputs": 1,
@@ -10,14 +10,14 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 970,
-  "y": 740,
+  "x": 770,
+  "y": 420,
   "wires": [
     [
-      "41c24fb7566b040f"
+      "c1e321bedd4aba6c"
     ]
   ],
-  "_order": 204
+  "_order": 194
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {

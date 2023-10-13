@@ -3,18 +3,19 @@ const Node = {
   "type": "json",
   "z": "0b526691b09a2646",
   "g": "608c296403fab569",
-  "name": "Parse",
+  "name": "parse",
   "property": "payload",
   "action": "",
   "pretty": false,
-  "x": 1250,
-  "y": 700,
+  "x": 1050,
+  "y": 340,
   "wires": [
     [
-      "ac3ed00ce79b1fe1"
+      "ac3ed00ce79b1fe1",
+      "01ed34446f94776e"
     ]
   ],
-  "_order": 202
+  "_order": 211
 }
 
 module.exports = Node;

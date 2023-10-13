@@ -2,13 +2,12 @@ const Node = {
   "id": "704e63fbeff91e0e",
   "type": "comment",
   "z": "0b526691b09a2646",
-  "g": "f51cc7b4f0bee577",
   "name": "authorizer_id = Nordea ID, admin",
   "info": "",
-  "x": 1010,
-  "y": 500,
+  "x": 1490,
+  "y": 980,
   "wires": [],
-  "_order": 112
+  "_order": 114
 }
 
 module.exports = Node;

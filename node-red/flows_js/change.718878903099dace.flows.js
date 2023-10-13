@@ -3,8 +3,18 @@ const Node = {
   "type": "change",
   "z": "0b526691b09a2646",
   "g": "608c296403fab569",
-  "name": "Clean",
+  "name": "clean data",
   "rules": [
+    {
+      "t": "delete",
+      "p": "filename",
+      "pt": "msg"
+    },
+    {
+      "t": "delete",
+      "p": "columns",
+      "pt": "msg"
+    },
     {
       "t": "set",
       "p": "payload",
@@ -18,16 +28,6 @@ const Node = {
       "pt": "msg",
       "to": "data",
       "tot": "str"
-    },
-    {
-      "t": "delete",
-      "p": "filename",
-      "pt": "msg"
-    },
-    {
-      "t": "delete",
-      "p": "columns",
-      "pt": "msg"
     }
   ],
   "action": "",
@@ -35,14 +35,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 1090,
-  "y": 700,
+  "x": 910,
+  "y": 340,
   "wires": [
     [
       "2783b3bef5ec4879"
     ]
   ],
-  "_order": 199
+  "_order": 208
 }
 
 module.exports = Node;

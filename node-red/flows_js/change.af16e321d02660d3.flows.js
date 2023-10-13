@@ -2,7 +2,7 @@ const Node = {
   "id": "af16e321d02660d3",
   "type": "change",
   "z": "0b526691b09a2646",
-  "g": "2be87d58205e8592",
+  "g": "bb5f697092a1318e",
   "name": "Skriv mail",
   "rules": [
     {
@@ -25,14 +25,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 1300,
-  "y": 540,
+  "x": 1520,
+  "y": 560,
   "wires": [
     [
       "087017bd42378102"
     ]
   ],
-  "_order": 167
+  "_order": 169
 }
 
 module.exports = Node;

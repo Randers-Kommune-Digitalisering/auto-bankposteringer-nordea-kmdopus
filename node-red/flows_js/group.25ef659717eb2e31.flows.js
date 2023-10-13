@@ -2,7 +2,7 @@ const Node = {
   "id": "25ef659717eb2e31",
   "type": "group",
   "z": "b4ac8ea3a77a9132",
-  "name": "Konvertering af csv til json",
+  "name": "Import regler",
   "style": {
     "stroke": "none",
     "fill": "#ffffbf",
