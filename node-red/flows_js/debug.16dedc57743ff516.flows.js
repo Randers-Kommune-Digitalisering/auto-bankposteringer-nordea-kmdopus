@@ -4,19 +4,19 @@ const Node = {
   "z": "0b526691b09a2646",
   "d": true,
   "g": "608c296403fab569",
-  "name": "stdout Poster uden match",
+  "name": "stdout Konteringsforslag oprettet",
   "active": true,
   "tosidebar": true,
-  "console": false,
+  "console": true,
   "tostatus": false,
-  "complete": "true",
-  "targetType": "full",
+  "complete": "\"Omposteringsbilag med konteringsforslag oprettet\" ",
+  "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1150,
-  "y": 820,
+  "x": 1640,
+  "y": 740,
   "wires": [],
-  "_order": 207
+  "_order": 206
 }
 
 module.exports = Node;

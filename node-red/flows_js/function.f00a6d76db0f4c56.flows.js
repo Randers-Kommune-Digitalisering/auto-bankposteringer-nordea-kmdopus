@@ -10,34 +10,29 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 1050,
+  "x": 970,
   "y": 740,
   "wires": [
     [
-      "92ebc4eda42aa18f"
+      "41c24fb7566b040f"
     ]
   ],
-  "_order": 202
+  "_order": 204
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let felter_i_nordea = ["narrative", "message", "counterparty_name", "type_description"];
-  let omposteringsbilag = [];
   let nomatch_list = [];
   let omp_headers = global.get("omp_headers").split(", ");
   
   // For hver transaktion
-  for (let postering of msg.payload) {
+  for (let postering of global.get("nomatch_transactions")) {
       let bankdebkred = postering.amount.startsWith('-') ? 'Kredit' : 'Debet';
       let driftdebkred = bankdebkred === 'Debet' ? 'Kredit' : 'Debet';
       let beloeb = postering.amount.replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
       let tekst = postering.transaction_id;
-      let artskonto = postering.Artskonto;
-      let psp = postering.PSP_element;
   
-      let posteringsdata_til_drift = [artskonto, '', psp, '', '', driftdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
+      let posteringsdata_til_drift = [postering.artskonto, '', postering.psp, '', '', driftdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
       let posteringsdata_til_95990009 = ['95990009', '', '', '', '', bankdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
-  
       let output_posteringsdata_til_drift = {};
       let output_posteringsdata_til_95990009 = {};
   
@@ -48,12 +43,12 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
       nomatch_list.push(output_posteringsdata_til_drift);
       nomatch_list.push(output_posteringsdata_til_95990009);
-      output_posteringsdata_til_drift = {};
-      output_posteringsdata_til_95990009 = {};
-  
+      output_posteringsdata_til_drift = {};       // Måske ikke nødvendig fordi der overskrives?
+      output_posteringsdata_til_95990009 = {};    // Måske ikke nødvendig fordi der overskrives?
   }
   
   flow.set("filename_nomatch", "/data/nomatch_output/nomatch_" + global.get("time_of_origin") + ".csv")
+  global.set("nomatch_omposteringsarray", nomatch_list)
   
   return msg;
 }

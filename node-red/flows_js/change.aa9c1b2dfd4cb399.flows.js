@@ -1,16 +1,24 @@
 const Node = {
-  "id": "f77922ade00c39f4",
+  "id": "aa9c1b2dfd4cb399",
   "type": "change",
   "z": "0b526691b09a2646",
-  "g": "0908d601e13c4ce9",
-  "name": "Flow to msg",
+  "g": "608c296403fab569",
+  "name": "build msg",
   "rules": [
     {
       "t": "set",
-      "p": "payload",
+      "p": "columns",
       "pt": "msg",
-      "to": "debitorposter",
-      "tot": "global"
+      "to": "omp_headers",
+      "tot": "global",
+      "dc": true
+    },
+    {
+      "t": "set",
+      "p": "nomatch_transactions",
+      "pt": "global",
+      "to": "payload",
+      "tot": "msg"
     },
     {
       "t": "set",
@@ -26,14 +34,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 370,
-  "y": 160,
+  "x": 840,
+  "y": 740,
   "wires": [
     [
-      "70775b57865160c6"
+      "f00a6d76db0f4c56"
     ]
   ],
-  "_order": 187
+  "_order": 208
 }
 
 module.exports = Node;
