@@ -3,7 +3,7 @@ const Node = {
   "type": "debug",
   "z": "0b526691b09a2646",
   "g": "608c296403fab569",
-  "name": "stdout Hovedkonto Bilag",
+  "name": "stdout Hovedk. bilag",
   "active": true,
   "tosidebar": true,
   "console": true,
@@ -12,10 +12,10 @@ const Node = {
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1460,
-  "y": 300,
+  "x": 1880,
+  "y": 420,
   "wires": [],
-  "_order": 205
+  "_order": 202
 }
 
 module.exports = Node;

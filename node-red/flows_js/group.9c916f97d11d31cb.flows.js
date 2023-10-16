@@ -2,7 +2,7 @@ const Node = {
   "id": "9c916f97d11d31cb",
   "type": "group",
   "z": "0b526691b09a2646",
-  "name": "Afventer Jans godkendelse",
+  "name": "2c. Afvent Jans godkendelse",
   "style": {
     "stroke": "none",
     "fill": "#e3f3d3",

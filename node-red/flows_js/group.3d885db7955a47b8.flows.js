@@ -2,10 +2,10 @@ const Node = {
   "id": "3d885db7955a47b8",
   "type": "group",
   "z": "0b526691b09a2646",
-  "name": "Dan omposteringsbilag, hovedkonto, uden match",
+  "name": "5. Dan omposteringsbilag, hovedkonto, uden match",
   "style": {
     "stroke": "none",
-    "fill": "#e3f3d3",
+    "fill": "#bfc7d7",
     "label": true,
     "label-position": "n",
     "color": "#000000"
@@ -21,11 +21,11 @@ const Node = {
     "c1e321bedd4aba6c",
     "2942402deb02ec6c"
   ],
-  "x": 314,
-  "y": 379,
-  "w": 1312,
+  "x": 794,
+  "y": 519,
+  "w": 1232,
   "h": 122,
-  "_order": 40
+  "_order": 39
 }
 
 module.exports = Node;

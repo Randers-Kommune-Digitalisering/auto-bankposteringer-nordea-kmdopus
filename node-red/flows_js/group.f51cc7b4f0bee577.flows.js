@@ -2,10 +2,10 @@ const Node = {
   "id": "f51cc7b4f0bee577",
   "type": "group",
   "z": "0b526691b09a2646",
-  "name": "Initiate Auth flow",
+  "name": "2. Autorisation",
   "style": {
     "stroke": "none",
-    "fill": "#ffffbf",
+    "fill": "#e3f3d3",
     "label": true,
     "label-position": "n",
     "color": "#000000"
@@ -48,9 +48,9 @@ const Node = {
     "9da43c99593c5b53",
     "aee96e58617e7c46"
   ],
-  "x": 14,
-  "y": 739,
-  "w": 1612,
+  "x": 474,
+  "y": 19,
+  "w": 1552,
   "h": 202,
   "_order": 17
 }

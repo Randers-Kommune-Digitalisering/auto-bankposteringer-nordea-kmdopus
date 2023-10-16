@@ -4,10 +4,10 @@ const Node = {
   "z": "0b526691b09a2646",
   "name": "authorizer_id = Nordea ID, admin",
   "info": "",
-  "x": 1490,
-  "y": 980,
+  "x": 1890,
+  "y": 700,
   "wires": [],
-  "_order": 114
+  "_order": 112
 }
 
 module.exports = Node;

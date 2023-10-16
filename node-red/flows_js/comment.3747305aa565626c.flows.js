@@ -5,10 +5,10 @@ const Node = {
   "g": "bb5f697092a1318e",
   "name": "!!!! Husk credentials",
   "info": "",
-  "x": 1510,
-  "y": 680,
+  "x": 510,
+  "y": 440,
   "wires": [],
-  "_order": 220
+  "_order": 216
 }
 
 module.exports = Node;

@@ -2,7 +2,7 @@ const Node = {
   "id": "d37689bd68a8104a",
   "type": "group",
   "z": "0b526691b09a2646",
-  "name": "Error handling",
+  "name": "Fejlhåndtering",
   "style": {
     "stroke": "none",
     "label": true,

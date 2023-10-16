@@ -15,14 +15,14 @@ const Node = {
       "module": "csv-parser"
     }
   ],
-  "x": 640,
-  "y": 640,
+  "x": 260,
+  "y": 140,
   "wires": [
     [
-      "58238a15189d48fc"
+      "66b81c6ebf307b20"
     ]
   ],
-  "_order": 214
+  "_order": 211
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, csv) {
