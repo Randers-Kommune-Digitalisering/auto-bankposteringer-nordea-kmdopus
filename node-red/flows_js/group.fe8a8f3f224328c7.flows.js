@@ -2,10 +2,10 @@ const Node = {
   "id": "fe8a8f3f224328c7",
   "type": "group",
   "z": "0b526691b09a2646",
-  "name": "Hovedkonto",
+  "name": "3. Klargør transaktioner",
   "style": {
     "stroke": "none",
-    "fill": "#ffffbf",
+    "fill": "#ffefbf",
     "label": true,
     "label-position": "n",
     "color": "#000000"
@@ -13,18 +13,14 @@ const Node = {
   "nodes": [
     "ce1542e4d70386de",
     "7a7a78cc9c9515cd",
-    "f0f26bd5b3e6292a",
-    "2ebac6bd31592331",
-    "afe62971aeb32dfb",
-    "41b71a21957d00b8",
     "c01dce8d75f539b1",
-    "f617b313a0fcae8a",
     "4d23e13748673590",
-    "1b8cc635649a4519"
+    "1b8cc635649a4519",
+    "aae108b7e4ba1f0f"
   ],
-  "x": 14,
-  "y": 19,
-  "w": 1612,
+  "x": 314,
+  "y": 239,
+  "w": 532,
   "h": 122,
   "_order": 25
 }

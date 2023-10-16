@@ -6,14 +6,14 @@ const Node = {
   "name": "Ved ændring",
   "files": "/data/konteringsregler/konteringsregler.csv",
   "recursive": "",
-  "x": 610,
-  "y": 560,
+  "x": 110,
+  "y": 60,
   "wires": [
     [
       "27bcdd1c5f9fbd70"
     ]
   ],
-  "_order": 219
+  "_order": 215
 }
 
 module.exports = Node;

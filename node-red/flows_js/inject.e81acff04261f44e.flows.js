@@ -16,14 +16,14 @@ const Node = {
   "topic": "",
   "payload": "{}",
   "payloadType": "json",
-  "x": 610,
-  "y": 600,
+  "x": 110,
+  "y": 100,
   "wires": [
     [
       "27bcdd1c5f9fbd70"
     ]
   ],
-  "_order": 216
+  "_order": 213
 }
 
 module.exports = Node;

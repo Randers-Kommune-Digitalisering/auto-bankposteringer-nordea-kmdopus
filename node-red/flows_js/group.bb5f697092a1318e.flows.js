@@ -2,7 +2,7 @@ const Node = {
   "id": "bb5f697092a1318e",
   "type": "group",
   "z": "0b526691b09a2646",
-  "name": "Advis til Jan",
+  "name": "2b. Advis til Jan",
   "style": {
     "stroke": "none",
     "label": true,
@@ -16,11 +16,11 @@ const Node = {
     "af16e321d02660d3",
     "d4a4b6ed38a3372b"
   ],
-  "x": 1314,
-  "y": 519,
+  "x": 314,
+  "y": 379,
   "w": 312,
-  "h": 202,
-  "_order": 42
+  "h": 122,
+  "_order": 41
 }
 
 module.exports = Node;

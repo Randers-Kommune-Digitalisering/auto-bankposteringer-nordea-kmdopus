@@ -2,7 +2,7 @@ const Node = {
   "id": "248b6faf1bd25dc8",
   "type": "group",
   "z": "0b526691b09a2646",
-  "name": "Import regler",
+  "name": "1. Import regler",
   "style": {
     "stroke": "none",
     "fill": "#ffffbf",
@@ -16,15 +16,14 @@ const Node = {
     "ad893c40a4b9d6f9",
     "30ea2e64ee09287c",
     "e81acff04261f44e",
-    "58238a15189d48fc",
     "66b81c6ebf307b20",
     "196ab7e8ba591eb1"
   ],
-  "x": 514,
-  "y": 519,
-  "w": 472,
+  "x": 14,
+  "y": 19,
+  "w": 432,
   "h": 202,
-  "_order": 41
+  "_order": 40
 }
 
 module.exports = Node;
