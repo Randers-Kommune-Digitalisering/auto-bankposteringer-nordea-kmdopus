@@ -3,7 +3,7 @@ const Node = {
   "type": "complete",
   "z": "0b526691b09a2646",
   "g": "fe8a8f3f224328c7",
-  "name": "",
+  "name": "▶",
   "scope": [
     "789153d923d1ea04"
   ],
@@ -15,7 +15,7 @@ const Node = {
       "c01dce8d75f539b1"
     ]
   ],
-  "_order": 106
+  "_order": 99
 }
 
 module.exports = Node;
