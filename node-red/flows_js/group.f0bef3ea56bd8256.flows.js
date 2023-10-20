@@ -2,25 +2,23 @@ const Node = {
   "id": "f0bef3ea56bd8256",
   "type": "group",
   "z": "0b526691b09a2646",
+  "name": "Sample-data transactions",
   "style": {
-    "stroke": "#999999",
-    "stroke-opacity": "1",
-    "fill": "none",
-    "fill-opacity": "1",
+    "stroke": "none",
+    "fill": "#ffbfbf",
     "label": true,
-    "label-position": "nw",
-    "color": "#a4a4a4"
+    "label-position": "n",
+    "color": "#000000"
   },
   "nodes": [
     "ba1623d62745d08e",
-    "5e473da08a3f6d29",
     "9e2f20a7cd91882f"
   ],
-  "x": 14,
-  "y": 859,
-  "w": 392,
-  "h": 122,
-  "_order": 17
+  "x": 514,
+  "y": 519,
+  "w": 252,
+  "h": 202,
+  "_order": 37
 }
 
 module.exports = Node;

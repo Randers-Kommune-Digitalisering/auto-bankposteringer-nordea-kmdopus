@@ -2,10 +2,10 @@ const Node = {
   "id": "9c916f97d11d31cb",
   "type": "group",
   "z": "0b526691b09a2646",
-  "name": "Afventer Jans godkendelse",
+  "name": "2c. Afvent Jans godkendelse",
   "style": {
     "stroke": "none",
-    "fill": "#ffbfbf",
+    "fill": "#e3f3d3",
     "label": true,
     "label-position": "n",
     "color": "#000000"
@@ -18,11 +18,11 @@ const Node = {
     "1b98e8e8d5c29bbf",
     "2d4fb1b1c67c7815"
   ],
-  "x": 254,
-  "y": 439,
+  "x": 14,
+  "y": 339,
   "w": 272,
   "h": 162,
-  "_order": 11
+  "_order": 23
 }
 
 module.exports = Node;

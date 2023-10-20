@@ -3,14 +3,31 @@ const Node = {
   "type": "change",
   "z": "0b526691b09a2646",
   "g": "608c296403fab569",
-  "name": "Flow to msg",
+  "name": "clean data",
   "rules": [
+    {
+      "t": "delete",
+      "p": "filename",
+      "pt": "msg"
+    },
+    {
+      "t": "delete",
+      "p": "columns",
+      "pt": "msg"
+    },
     {
       "t": "set",
       "p": "payload",
       "pt": "msg",
       "to": "nomatch_list",
       "tot": "global"
+    },
+    {
+      "t": "set",
+      "p": "topic",
+      "pt": "msg",
+      "to": "data",
+      "tot": "str"
     }
   ],
   "action": "",
@@ -18,14 +35,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 610,
-  "y": 760,
+  "x": 870,
+  "y": 460,
   "wires": [
     [
       "2783b3bef5ec4879"
     ]
   ],
-  "_order": 104
+  "_order": 207
 }
 
 module.exports = Node;

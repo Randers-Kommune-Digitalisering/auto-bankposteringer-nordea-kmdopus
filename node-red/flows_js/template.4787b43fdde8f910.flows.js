@@ -10,13 +10,13 @@ const Node = {
   "syntax": "plain",
   "template": "",
   "x": 410,
-  "y": 240,
+  "y": 280,
   "wires": [
     [
       "13f11dcbe9876165"
     ]
   ],
-  "_order": 128
+  "_order": 232
 }
 
 Node.template = `
@@ -29,7 +29,7 @@ let toggleButtons;
 let inputs;
 let selects;
 const rules = _rules != null ? _rules : [];
-const activeRules = rules.filter(rule => rule[6].active);
+const activeRules = rules.filter(rule => rule[6].active && rule[5].Artskonto !== "90540000");
 const inputFields = { 0: "Reference", 1: "Advisliste", 2: "Afsender", 3: "Posteringstype", 4: "Beløb1", 5: "Beløb2", 6: "Posteringstekst", 7: "Artskonto", 8: "PSP", 9: "SIO", 10: "Notat" };
 const textOperators = [
     { "name": "= Skal være lig med", "value": "==" },
@@ -184,6 +184,8 @@ function renderRule(pointerRule) {
     section.appendChild(toggleButton);
     fragment.appendChild(section);
 
+    addEventListenersToRule(section)
+
     return fragment;
 }
 
@@ -219,7 +221,9 @@ function generateNewRule() {
     });
     rules.push(newRule);
     PublishWsMessage(JSON.stringify(rules));
-    renderRule(newRule);
+    const newRuleFragment = renderRule(newRule);
+    ruleWrapper.appendChild(newRuleFragment);
+    addEventListenersToRule(newRuleFragment); // Add event listeners to the new rule
     console.log(\`New rule with id \${newRuleId} added\`);
 }
 
@@ -260,7 +264,7 @@ function deleteRule(pointerButton) {
     let pointerIndex = rules.findIndex(rule => rule[7].ruleId === pointerId);
     let pointerElement = document.getElementById(\`rule_\${pointerId}\`);
     if (pointerIndex >= 0 && pointerIndex < rules.length) {
-        rules.splice(pointerId, 1);
+        rules.splice(pointerIndex, 1);
         if (pointerElement) {
             pointerElement.remove();
         }
@@ -283,27 +287,44 @@ function toggleRule(pointerButton) {
     console.log(\`Rule \${pointerId} active-status toggled\`)
 }
 
+function addEventListenersToRule(rule) {
+    if (rule) {
+        const deleteButton = rule.querySelector(".deleteRuleButton");
+        const toggleButton = rule.querySelector(".toggleButton");
+        const inputs = rule.querySelectorAll("input");
+        const selects = rule.querySelectorAll("select");
+
+        if (deleteButton) {
+            deleteButton.addEventListener("click", () => {
+                deleteRule(deleteButton);
+            });
+        }
+
+        inputs.forEach(input => {
+            if (input) {
+                input.addEventListener("change", () => {
+                    updateValue(input);
+                });
+            }
+        });
+
+        selects.forEach(select => {
+            if (select) {
+                select.addEventListener("change", () => {
+                    updateValue(select);
+                });
+            }
+        });
+
+        if (toggleButton) {
+            toggleButton.addEventListener("click", () => {
+                toggleRule(toggleButton);
+            });
+        }
+    }
+}
+
 function listenToEvents() {
-    deleteRuleButtons.forEach(button => {
-        button.addEventListener("click", () => {
-            deleteRule(button);
-        });
-    });
-    inputs.forEach(input => {
-        input.addEventListener("change", () => {
-            updateValue(input);
-        });
-    });
-    selects.forEach(select => {
-        select.addEventListener("change", () => {
-            updateValue(select);
-        });
-    });
-    toggleButtons.forEach(button => {
-        button.addEventListener("click", () => {
-            toggleRule(button);
-        });
-    });
     addRule.addEventListener("click", generateNewRule);
     window.addEventListener("reloadPage", function () {
         setTimeout(function () {
