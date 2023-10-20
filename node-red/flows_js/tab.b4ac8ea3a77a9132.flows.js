@@ -1,7 +1,7 @@
 const Node = {
   "id": "b4ac8ea3a77a9132",
   "type": "tab",
-  "label": "Regler fra csv til json ",
+  "label": "Import af regler",
   "disabled": false,
   "info": "",
   "env": [],

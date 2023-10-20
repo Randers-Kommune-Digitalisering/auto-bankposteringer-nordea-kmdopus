@@ -2,12 +2,13 @@ const Node = {
   "id": "5e473da08a3f6d29",
   "type": "comment",
   "z": "0b526691b09a2646",
+  "g": "f0bef3ea56bd8256",
   "name": "Sample data transactions",
   "info": "",
   "x": 150,
-  "y": 780,
+  "y": 940,
   "wires": [],
-  "_order": 94
+  "_order": 89
 }
 
 Node.info = `
