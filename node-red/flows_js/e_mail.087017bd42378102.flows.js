@@ -2,7 +2,7 @@ const Node = {
   "id": "087017bd42378102",
   "type": "e-mail",
   "z": "0b526691b09a2646",
-  "g": "2be87d58205e8592",
+  "g": "bb5f697092a1318e",
   "server": "smtp.gmail.com",
   "port": "465",
   "authtype": "BASIC",
@@ -12,10 +12,10 @@ const Node = {
   "tls": true,
   "name": "jan.molbaek@randers.dk",
   "dname": "Send email til Jan",
-  "x": 850,
-  "y": 560,
+  "x": 510,
+  "y": 460,
   "wires": [],
-  "_order": 100
+  "_order": 176
 }
 
 module.exports = Node;

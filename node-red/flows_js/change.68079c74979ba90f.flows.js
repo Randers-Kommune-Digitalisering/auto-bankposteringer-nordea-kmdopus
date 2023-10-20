@@ -2,8 +2,8 @@ const Node = {
   "id": "68079c74979ba90f",
   "type": "change",
   "z": "0b526691b09a2646",
-  "g": "0908d601e13c4ce9",
-  "name": "params",
+  "g": "1c77fa2eb47442fd",
+  "name": "params., debitorkonto",
   "rules": [
     {
       "t": "set",
@@ -19,14 +19,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 620,
-  "y": 180,
+  "x": 1040,
+  "y": 320,
   "wires": [
     [
       "083b9364e69ceb5c"
     ]
   ],
-  "_order": 106
+  "_order": 177
 }
 
 module.exports = Node;

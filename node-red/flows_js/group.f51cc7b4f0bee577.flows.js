@@ -2,10 +2,10 @@ const Node = {
   "id": "f51cc7b4f0bee577",
   "type": "group",
   "z": "0b526691b09a2646",
-  "name": "Initiate Auth flow",
+  "name": "2. Autorisation",
   "style": {
     "stroke": "none",
-    "fill": "#ffffbf",
+    "fill": "#e3f3d3",
     "label": true,
     "label-position": "n",
     "color": "#000000"
@@ -43,18 +43,16 @@ const Node = {
     "36ad5375ad17eebb",
     "9fadc82dd5f19432",
     "838b842a58440bd1",
-    "704e63fbeff91e0e",
-    "2be87d58205e8592",
     "609738a99c453501",
     "b20d7a5b20ce3b12",
     "9da43c99593c5b53",
     "aee96e58617e7c46"
   ],
-  "x": 14,
-  "y": 279,
+  "x": 474,
+  "y": 19,
   "w": 1552,
-  "h": 348,
-  "_order": 8
+  "h": 202,
+  "_order": 17
 }
 
 module.exports = Node;

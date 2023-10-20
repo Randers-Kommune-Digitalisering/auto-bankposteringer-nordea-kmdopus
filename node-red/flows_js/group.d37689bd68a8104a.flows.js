@@ -2,7 +2,7 @@ const Node = {
   "id": "d37689bd68a8104a",
   "type": "group",
   "z": "0b526691b09a2646",
-  "name": "Error handling",
+  "name": "Fejlhåndtering",
   "style": {
     "stroke": "none",
     "label": true,
@@ -21,10 +21,10 @@ const Node = {
     "7437771230f2b34b"
   ],
   "x": 14,
-  "y": 639,
+  "y": 519,
   "w": 472,
   "h": 202,
-  "_order": 9
+  "_order": 18
 }
 
 module.exports = Node;

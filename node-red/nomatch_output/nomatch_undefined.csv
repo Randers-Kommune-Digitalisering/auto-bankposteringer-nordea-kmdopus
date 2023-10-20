@@ -1,0 +1,8 @@
+Artskonto;Omkostningssted;PSP-element;Profitcenter;Ordre;Debet/kredit;Beløb;Næste agent;Tekst;Betalingsart;Påligningsår;Betalingsmodtagernr.;Betalingsmodtagernr.kode;Ydelsesmodtagernr.;Ydelsesmodtagernr.kode;Ydelsesperiode fra;Ydelsesperiode til;Oplysningspligtnr.;Oplysningspligtmodtagernr.kode;Oplysningspligtkode;Netværk;Operation;Mængde;Mængdeenhed;Referencenøgle
+79000000;;xg-0000003071-00001;;;Kredit;1494,00;;P5908764988202309070000846208;;;;;;;;;;;;;;;;
+95990009;;;;;Debet;1494,00;;P5908764988202309070000846208;;;;;;;;;;;;;;;;
+95990009;;;;;Kredit;27890,00;;P5908764988202309070000846207;;;;;;;;;;;;;;;;
+95990009;;;;;Debet;27890,00;;P5908764988202309070000846207;;;;;;;;;;;;;;;;
+40000000;;xg-0000000006-00007;;;Debet;23360,00;;P5908764988202309070000846206;;;;;;;;;;;;;;;;
+95990009;;;;;Kredit;23360,00;;P5908764988202309070000846206;;;;;;;;;;;;;;;;
+

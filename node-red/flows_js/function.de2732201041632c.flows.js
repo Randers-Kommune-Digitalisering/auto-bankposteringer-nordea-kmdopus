@@ -6,18 +6,18 @@ const Node = {
   "name": "Script",
   "func": "",
   "outputs": 1,
-  "noerr": 6,
+  "noerr": 0,
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 690,
-  "y": 680,
+  "x": 1250,
+  "y": 420,
   "wires": [
     [
       "b73eae993793d2e5"
     ]
   ],
-  "_order": 29
+  "_order": 201
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
@@ -25,6 +25,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let felter_i_nordea = ["narrative", "message", "counterparty_name", "type_description"];
   let omposteringsbilag = [];
   let nomatch_list = [];
+  let omp_headers = global.get("omp_headers").split(", ");
   
   // For hver transaktion
   for (let postering of global.get("transactions")) {
@@ -171,7 +172,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   console.log("I alt " + uplacerbare_poster + " uplacerbare poster");
   
   flow.set("filename", "/data/output/hovedkonto/" + global.get("time_of_origin") + ".csv")
-  flow.set("filename_nomatch_list", "/data/nomatch_output/" + global.get("time_of_origin") + ".json")
   
   return msg;
 }

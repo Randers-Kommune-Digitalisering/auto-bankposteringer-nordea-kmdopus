@@ -16,7 +16,7 @@ const Node = {
       "dda8e81914a372dc"
     ]
   ],
-  "_order": 142
+  "_order": 246
 }
 
 Node.template = `
@@ -40,6 +40,7 @@ Node.template = `
       <ul class="nav">
         <li><a href="/info">Inaktive regler</a></li>
         <li><a href="/rules">Aktive regler</a></li>
+        <li><a href="/exceptions">Undtagelser</a></li>
       </ul class="nav">
       <main class="ruleWrapper ruleWrapper"></main>
       <footer>

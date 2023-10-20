@@ -2,7 +2,7 @@ const Node = {
   "id": "70775b57865160c6",
   "type": "csv",
   "z": "0b526691b09a2646",
-  "g": "0908d601e13c4ce9",
+  "g": "a6a44c3ca7a42667",
   "name": "Parse",
   "sep": ";",
   "hdrin": true,
@@ -14,14 +14,14 @@ const Node = {
   "strings": true,
   "include_empty_strings": true,
   "include_null_values": true,
-  "x": 110,
-  "y": 220,
+  "x": 230,
+  "y": 1320,
   "wires": [
     [
       "1380584b5c052727"
     ]
   ],
-  "_order": 114
+  "_order": 185
 }
 
 module.exports = Node;

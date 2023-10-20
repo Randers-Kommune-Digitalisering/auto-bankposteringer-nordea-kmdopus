@@ -2,8 +2,8 @@ const Node = {
   "id": "41b71a21957d00b8",
   "type": "debug",
   "z": "0b526691b09a2646",
-  "g": "fe8a8f3f224328c7",
-  "name": "stdout Hovedkonto Transactions",
+  "g": "1c77fa2eb47442fd",
+  "name": "stdout Hovedkonto",
   "active": true,
   "tosidebar": true,
   "console": true,
@@ -12,10 +12,10 @@ const Node = {
   "targetType": "full",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1460,
-  "y": 80,
+  "x": 1880,
+  "y": 280,
   "wires": [],
-  "_order": 86
+  "_order": 166
 }
 
 module.exports = Node;
