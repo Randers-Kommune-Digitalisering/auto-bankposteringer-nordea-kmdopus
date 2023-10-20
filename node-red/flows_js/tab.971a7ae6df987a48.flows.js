@@ -5,7 +5,7 @@ const Node = {
   "disabled": true,
   "info": "",
   "env": [],
-  "_order": 4
+  "_order": 3
 }
 
 module.exports = Node;
