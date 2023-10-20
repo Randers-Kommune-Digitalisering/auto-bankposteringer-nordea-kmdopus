@@ -16,7 +16,7 @@ const Node = {
       "d2465ea9ceb83c7d"
     ]
   ],
-  "_order": 243
+  "_order": 245
 }
 
 Node.template = `
@@ -83,14 +83,14 @@ body {
 
 main {
   display: flex;
-  justify-content: start;
   align-items: flex-start;
 }
 
 .ruleBox {
   border-radius: 5px;
   display: grid;
-}
+  width: -webkit-fill-available;
+;}
 
 .ruleBox > h1 {
   background-color: #1B365D;
@@ -159,7 +159,6 @@ main {
 .ruleBox > .ruleWrapper {
   display: grid;
   flex-wrap: wrap;
-  justify-content: flex-start;
   gap: 10px;
   padding: 10px;
 }
@@ -192,6 +191,7 @@ main {
   gap: 5px;
   padding: 10px;
   align-items: initial;
+  justify-content: center;
   border-radius: 5px;
   flex-wrap: wrap;
 }
