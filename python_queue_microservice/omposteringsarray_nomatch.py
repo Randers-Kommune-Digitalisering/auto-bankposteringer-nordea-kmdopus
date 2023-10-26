@@ -29,6 +29,7 @@ def transform(data_in):
     new_data = []
 
     for postering in bankposteringer:
+        print(postering)
         formateret_postering = {
             'transaction_id': postering.get('transaction_id'),
             'amount': postering.get('amount'),
@@ -72,14 +73,10 @@ while True:
     if message['type'] != 'message':
         continue
 
-    print(f"Received message: {message['data']}")
-
     # Parse again
     preprocessed_data = message['data'].decode('utf-8')
-    print(f"Message processed: {preprocessed_data}")
 
     data_out = transform(preprocessed_data)
-    print(f"Data out: {data_out}")
 
     # Transform the data and Return the transformed data on the "results" topic
     r.publish('results', json.dumps(data_out))
