@@ -1,3 +1,4 @@
+"""Import of relevant modules"""
 import os
 import time
 import json
@@ -18,12 +19,14 @@ else:
     print("Model file not found.")
 
 def preprocess_text(text):
+    """Tokenization"""
     doc = pipeline(text.lower())
     tokens = [token.text for token in doc if not token.is_stop and not token.is_punct]
     preprocessed_text = " ".join(tokens)
     return preprocessed_text
 
 def transform(data_in):
+    """Datatransformation"""
     bankposteringer = json.loads(data_in)
     print(bankposteringer)
     new_data = []
@@ -47,8 +50,6 @@ def transform(data_in):
 
         new_data.append(formateret_postering)
         print(formateret_postering)
-
-        print("All done")
 
     return new_data
 
