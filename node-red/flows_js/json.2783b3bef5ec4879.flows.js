@@ -5,7 +5,7 @@ const Node = {
   "g": "608c296403fab569",
   "name": "parse",
   "property": "payload",
-  "action": "",
+  "action": "str",
   "pretty": false,
   "x": 1530,
   "y": 460,
