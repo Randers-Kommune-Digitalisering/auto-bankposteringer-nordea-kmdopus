@@ -1,21 +1,19 @@
 const Node = {
-  "id": "f3b8f8dbbccacb91",
+  "id": "23211b90cb51cbdc",
   "type": "debug",
-  "z": "b4ac8ea3a77a9132",
-  "g": "25ef659717eb2e31",
-  "name": "Slut node",
+  "z": "0b526691b09a2646",
+  "name": "debug 2",
   "active": true,
   "tosidebar": true,
   "console": false,
   "tostatus": false,
-  "complete": "true",
-  "targetType": "full",
+  "complete": "false",
   "statusVal": "",
   "statusType": "auto",
-  "x": 300,
-  "y": 200,
+  "x": 660,
+  "y": 920,
   "wires": [],
-  "_order": 304
+  "_order": 224
 }
 
 module.exports = Node;
