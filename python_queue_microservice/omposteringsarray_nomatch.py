@@ -71,7 +71,7 @@ while True:
 
     print(message['data'])
 
-    data_out = transform(message['data'])
+    # data_out = transform(message['data'])
 
     # Transform the data and Return the transformed data on the "results" topic
-    r.publish('results', json.dumps(data_out))
+    # r.publish('results', json.dumps(data_out))
