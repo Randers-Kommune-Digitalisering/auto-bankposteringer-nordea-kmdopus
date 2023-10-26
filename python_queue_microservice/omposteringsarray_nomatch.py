@@ -24,6 +24,7 @@ def preprocess_text(text):
 def transform(data_in):
     bankposteringer = json.loads(data_in)
     print(bankposteringer)
+    print(bankposteringer[0])
     new_data = []
 
     # for postering in bankposteringer:
