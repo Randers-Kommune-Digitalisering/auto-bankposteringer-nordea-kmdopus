@@ -23,10 +23,10 @@ def preprocess_text(text):
 
 def transform(data_in):
     bankposteringer = json.loads(data_in)
-    print(bankposteringer)
     new_data = []
 
     for postering in bankposteringer:
+        print(postering)
         formateret_postering = {
             'transaction_id': postering.get('transaction_id'),
             'amount': postering.get('amount'),
