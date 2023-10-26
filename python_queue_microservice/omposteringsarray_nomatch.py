@@ -69,7 +69,7 @@ while True:
     if message['type'] != 'message':
         continue
 
-    print(message['data'])
+    print(message['data'].decode('utf-8'))
 
     # data_out = transform(message['data'])
 
