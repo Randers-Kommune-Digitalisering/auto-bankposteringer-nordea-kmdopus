@@ -51,6 +51,8 @@ def transform(data_in):
         new_data.append(formateret_postering)
         print(formateret_postering)
 
+        print("All done")
+
     return new_data
 
 # Connect to the Redis server using the correct hostname
