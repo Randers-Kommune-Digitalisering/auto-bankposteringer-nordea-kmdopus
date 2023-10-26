@@ -1,4 +1,3 @@
-"""Import of relevant modules"""
 import os
 import time
 import json
@@ -19,14 +18,12 @@ else:
     print("Model file not found.")
 
 def preprocess_text(text):
-    """Tokenization"""
     doc = pipeline(text.lower())
     tokens = [token.text for token in doc if not token.is_stop and not token.is_punct]
     preprocessed_text = " ".join(tokens)
     return preprocessed_text
 
 def transform(data_in):
-    """Datatransformation"""
     bankposteringer = json.loads(data_in)
     print(bankposteringer)
     new_data = []
@@ -51,6 +48,8 @@ def transform(data_in):
         new_data.append(formateret_postering)
         print(formateret_postering)
 
+        print("All done")
+
     return new_data
 
 # Connect to the Redis server using the correct hostname
@@ -64,7 +63,6 @@ p.subscribe('data')
 while True:
     # Get a new message if one is available
     message = p.get_message()
-    print(f"Received message: {message['data']}")
 
     # If no message is available, sleep for a short time and try again
     if not message:
@@ -73,6 +71,8 @@ while True:
     # Ignore non-data messages
     if message['type'] != 'message':
         continue
+
+    print(f"Received message: {message['data']}")
     # Parse again
     preprocessed_data = message['data'].decode('utf-8')
     print(f"Message processed: {preprocessed_data}")
