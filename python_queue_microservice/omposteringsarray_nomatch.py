@@ -5,8 +5,6 @@ import redis
 import spacy
 from joblib import load
 
-print("Hello World")
-
 pipeline = spacy.load('da_core_news_md')
 current_dir = os.getcwd()
 
@@ -29,7 +27,6 @@ def transform(data_in):
     new_data = []
 
     for postering in bankposteringer:
-        print(postering)
         formateret_postering = {
             'transaction_id': postering.get('transaction_id'),
             'amount': postering.get('amount'),
@@ -49,7 +46,7 @@ def transform(data_in):
         new_data.append(formateret_postering)
         print(formateret_postering)
 
-        print("All done")
+    print("All done")
 
     return new_data
 
@@ -73,10 +70,7 @@ while True:
     if message['type'] != 'message':
         continue
 
-    # Parse again
-    preprocessed_data = message['data'].decode('utf-8')
-
-    data_out = transform(preprocessed_data)
+    data_out = transform(message['data'])
 
     # Transform the data and Return the transformed data on the "results" topic
     r.publish('results', json.dumps(data_out))
