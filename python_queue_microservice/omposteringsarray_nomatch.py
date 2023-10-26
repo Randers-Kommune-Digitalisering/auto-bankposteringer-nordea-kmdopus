@@ -30,7 +30,7 @@ def transform(data_in):
 
     for postering in bankposteringer:
         formateret_postering = {
-            'transaction_id': postering['transaction_id'],
+            'transaction_id': postering.get('transaction_id'),
             'amount': postering.get('amount'),
             'narrative': preprocess_text(postering.get('narrative', "")),
             'message': preprocess_text(postering.get('message', "")),
@@ -73,6 +73,7 @@ while True:
         continue
 
     print(f"Received message: {message['data']}")
+
     # Parse again
     preprocessed_data = message['data'].decode('utf-8')
     print(f"Message processed: {preprocessed_data}")
