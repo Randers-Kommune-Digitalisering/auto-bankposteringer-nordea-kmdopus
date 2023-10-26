@@ -2,6 +2,7 @@ const Node = {
   "id": "01ed34446f94776e",
   "type": "change",
   "z": "0b526691b09a2646",
+  "d": true,
   "g": "3d885db7955a47b8",
   "name": "bypass",
   "rules": [
@@ -19,7 +20,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 880,
-  "y": 600,
+  "y": 680,
   "wires": [
     [
       "4f8011a7610b2e97"
