@@ -26,7 +26,6 @@ def transform(data_in):
     new_data = []
 
     for postering in bankposteringer:
-        print(postering)
         formateret_postering = {
             'transaction_id': postering.get('transaction_id'),
             'amount': postering.get('amount'),
@@ -69,6 +68,8 @@ while True:
     # Ignore non-data messages
     if message['type'] != 'message':
         continue
+
+    print(message['data'])
 
     data_out = transform(message['data'])
 
