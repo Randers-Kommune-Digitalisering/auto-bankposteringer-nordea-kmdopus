@@ -71,7 +71,10 @@ while True:
     if message['type'] != 'message':
         continue
 
-    data_out = transform(message['data'].decode('utf-8'))
+    # This needs to be pre-processed
+    data_in = message['data'].decode('utf-8')
+
+    data_out = transform(data_in)
 
     # Transform the data and Return the transformed data on the "results" topic
     r.publish('results', json.dumps(data_out))
