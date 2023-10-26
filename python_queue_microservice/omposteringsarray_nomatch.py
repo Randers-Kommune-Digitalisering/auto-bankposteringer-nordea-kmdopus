@@ -26,25 +26,25 @@ def transform(data_in):
     print(bankposteringer)
     new_data = []
 
-    for postering in bankposteringer:
-        formateret_postering = {
-            'transaction_id': postering.get('transaction_id'),
-            'amount': postering.get('amount'),
-            'narrative': preprocess_text(postering.get('narrative', "")),
-            'message': preprocess_text(postering.get('message', "")),
-            'booking_date': postering.get('booking_date'),
-            'type_description': preprocess_text(postering.get('type_description')),
-            'counterparty_name': preprocess_text(postering.get('counterparty_name', ""))
-        }
-        # Foretag forudsigelsen
-        predicted_kontering = model_til_konteringsforslag.predict([formateret_postering])
-        # Udfyld felter med forudsigelser
-        formateret_postering["artskonto"] = predicted_kontering[1]
-        formateret_postering["psp"] = predicted_kontering[2]
-        formateret_postering["sikkerhed"] = predicted_kontering.accuracy
+    # for postering in bankposteringer:
+    #     formateret_postering = {
+    #         'transaction_id': postering.get('transaction_id'),
+    #         'amount': postering.get('amount'),
+    #         'narrative': preprocess_text(postering.get('narrative', "")),
+    #         'message': preprocess_text(postering.get('message', "")),
+    #         'booking_date': postering.get('booking_date'),
+    #         'type_description': preprocess_text(postering.get('type_description')),
+    #         'counterparty_name': preprocess_text(postering.get('counterparty_name', ""))
+    #     }
+    #     # Foretag forudsigelsen
+    #     predicted_kontering = model_til_konteringsforslag.predict([formateret_postering])
+    #     # Udfyld felter med forudsigelser
+    #     formateret_postering["artskonto"] = predicted_kontering[1]
+    #     formateret_postering["psp"] = predicted_kontering[2]
+    #     formateret_postering["sikkerhed"] = predicted_kontering.accuracy
 
-        new_data.append(formateret_postering)
-        print(formateret_postering)
+    #     new_data.append(formateret_postering)
+    #     print(formateret_postering)
 
     print("All done")
 
