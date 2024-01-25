@@ -1,7 +1,7 @@
 const Node = {
   "id": "66586aac58f123ea",
   "type": "delay",
-  "z": "0b526691b09a2646",
+  "z": "5a8afc5afb89916f",
   "g": "9c916f97d11d31cb",
   "name": "Vent 2 min.",
   "pauseType": "delay",
@@ -16,14 +16,14 @@ const Node = {
   "drop": false,
   "allowrate": false,
   "outputs": 1,
-  "x": 150,
-  "y": 460,
+  "x": 1690,
+  "y": 140,
   "wires": [
     [
       "2d4fb1b1c67c7815"
     ]
   ],
-  "_order": 152
+  "_order": 202
 }
 
 module.exports = Node;

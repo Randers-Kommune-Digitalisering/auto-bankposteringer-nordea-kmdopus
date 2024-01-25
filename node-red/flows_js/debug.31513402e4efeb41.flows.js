@@ -1,7 +1,7 @@
 const Node = {
   "id": "31513402e4efeb41",
   "type": "debug",
-  "z": "0b526691b09a2646",
+  "z": "5a8afc5afb89916f",
   "g": "f51cc7b4f0bee577",
   "name": "stdout Confirm Auth",
   "active": true,
@@ -12,10 +12,10 @@ const Node = {
   "targetType": "full",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1880,
+  "x": 1420,
   "y": 100,
   "wires": [],
-  "_order": 132
+  "_order": 181
 }
 
 module.exports = Node;

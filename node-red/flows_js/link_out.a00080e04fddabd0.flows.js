@@ -1,17 +1,17 @@
 const Node = {
   "id": "a00080e04fddabd0",
   "type": "link out",
-  "z": "0b526691b09a2646",
+  "z": "5a8afc5afb89916f",
   "g": "f51cc7b4f0bee577",
-  "name": "link out 19",
+  "name": "link out nordea auth breakout",
   "mode": "link",
   "links": [
     "c14abe3d375bd909"
   ],
-  "x": 625,
+  "x": 165,
   "y": 180,
   "wires": [],
-  "_order": 157
+  "_order": 192
 }
 
 module.exports = Node;

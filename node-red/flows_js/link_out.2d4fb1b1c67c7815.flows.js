@@ -1,17 +1,17 @@
 const Node = {
   "id": "2d4fb1b1c67c7815",
   "type": "link out",
-  "z": "0b526691b09a2646",
+  "z": "5a8afc5afb89916f",
   "g": "9c916f97d11d31cb",
-  "name": "link out 21",
+  "name": "link out admin auth fail",
   "mode": "link",
   "links": [
     "36ad5375ad17eebb"
   ],
-  "x": 245,
-  "y": 460,
+  "x": 1785,
+  "y": 140,
   "wires": [],
-  "_order": 160
+  "_order": 206
 }
 
 module.exports = Node;

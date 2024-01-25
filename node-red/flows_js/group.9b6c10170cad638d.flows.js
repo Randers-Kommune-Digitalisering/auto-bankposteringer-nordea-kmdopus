@@ -5,7 +5,7 @@ const Node = {
   "name": "Style and structure",
   "style": {
     "stroke": "none",
-    "fill": "#e3f3d3",
+    "fill": "#ffffbf",
     "label": true,
     "label-position": "n",
     "color": "#000000"
@@ -18,7 +18,9 @@ const Node = {
   ],
   "x": 634,
   "y": 99,
-  "_order": 33
+  "w": 472,
+  "h": 82,
+  "_order": 30
 }
 
 module.exports = Node;

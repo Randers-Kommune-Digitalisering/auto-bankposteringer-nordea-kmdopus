@@ -3,16 +3,16 @@ const Node = {
   "type": "link out",
   "z": "0b526691b09a2646",
   "g": "fe8a8f3f224328c7",
-  "name": "link out 26",
+  "name": "link out nordea trans pre-request",
   "mode": "link",
   "links": [
-    "f5378242c5f27d87",
-    "05ffada2aa6f2a67"
+    "05ffada2aa6f2a67",
+    "f5378242c5f27d87"
   ],
-  "x": 805,
-  "y": 320,
+  "x": 375,
+  "y": 100,
   "wires": [],
-  "_order": 220
+  "_order": 239
 }
 
 module.exports = Node;

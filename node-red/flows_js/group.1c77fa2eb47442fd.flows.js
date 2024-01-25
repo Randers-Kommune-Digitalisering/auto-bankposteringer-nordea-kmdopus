@@ -2,7 +2,7 @@ const Node = {
   "id": "1c77fa2eb47442fd",
   "type": "group",
   "z": "0b526691b09a2646",
-  "name": "3a. Transaktioner fordelt på konti",
+  "name": "Nordea - transaction request",
   "style": {
     "label": true,
     "stroke": "none",
@@ -23,13 +23,15 @@ const Node = {
     "3da754a7823b3706",
     "083b9364e69ceb5c",
     "05ffada2aa6f2a67",
-    "f5378242c5f27d87"
+    "f5378242c5f27d87",
+    "0641cc10de0fa6e8",
+    "7f564fcbffa44323"
   ],
-  "x": 874,
-  "y": 239,
+  "x": 434,
+  "y": 19,
   "w": 1152,
-  "h": 122,
-  "_order": 43
+  "h": 162,
+  "_order": 35
 }
 
 module.exports = Node;
