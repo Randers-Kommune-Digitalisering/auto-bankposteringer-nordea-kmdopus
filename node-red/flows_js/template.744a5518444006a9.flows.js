@@ -55,18 +55,51 @@ input:disabled, select:disabled {
   opacity: 1!important;
 }
 
+h1 {
+  background-color: #1B365D;
+  line-height: 80px;
+  color: white;
+  font-size: 40px;
+  font-family: 'Roboto Slab';
+  font-weight: 400;
+  text-transform: uppercase;
+  width: -webkit-fill-available;
+  display: flex;
+  justify-content: center;
+  margin: auto;
+  border-radius: 5px;
+}
+
 h2 {
+  display: list-item;
+  list-style-type: "▶";
   text-transform: uppercase;
   font-weight: 400;
   font-size: 40px;
   margin-block-start: auto;
   margin-block-end: auto;
+  padding-left: 15px;
+}
+
+h2::marker {
+  color: #1B365D;
 }
 
 h3 {
+  display: flex;
   font-weight: 400;
-  align-items: center;
-  display: contents;
+  font-size: 20px;
+  margin-block-start: auto;
+  margin-block-end: auto;
+  width: 100%;
+  justify-content: center;
+  padding-bottom: 5px;
+  border-bottom: solid #aac3e6;
+}
+
+h4 {
+  margin-block: 0;
+  font-weight: 400;
 }
 
 pad_small {
@@ -90,24 +123,9 @@ main {
   border-radius: 5px;
   display: grid;
   width: -webkit-fill-available;
-;}
-
-.ruleBox > h1 {
-  background-color: #1B365D;
-  line-height: 80px;
-  color: white;
-  font-size: 40px;
-  font-family: 'Roboto Slab';
-  font-weight: 400;
-  text-transform: uppercase;
-  width: -webkit-fill-available;
-  display: flex;
-  justify-content: center;
-  margin: auto;
-  border-radius: 5px;
 }
 
-.ruleBox > .nav {
+.nav {
   background-color: #aac3e6;
   line-height: 40px;
   text-transform: uppercase;
@@ -118,17 +136,17 @@ main {
   margin-top: 10px;
 }
 
-.ruleBox > .nav > li {
+.nav > li {
   float: left;
   padding: 0px 5px 0px 5px;
 }
 
-.ruleBox > .nav > li:hover * {
+.nav > li:hover * {
   background-color: #1B365D;
   color: white;
 }
 
-.ruleBox > .nav > li > a {
+.nav > li > a {
   display: grid;
   font-size: 15px;
   font-weight: 400;
@@ -137,66 +155,61 @@ main {
   color: #1B365D;
 }
 
-.ruleBox > .nav > .active * {
+.nav > .active * {
   background-color: #1B365D;
   color: white;
 }
 
-.ruleBox > .subheader {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 15px;
-  text-transform: uppercase;
-  font-weight: 400;
-  background-color: #737373;
-  color: white;
-  border-left: 2px solid whitesmoke;
-  border-right: 2px solid whitesmoke;
-}
-
-.ruleBox > .ruleWrapper {
+.ruleWrapper {
   display: grid;
   flex-wrap: wrap;
   gap: 10px;
   padding: 10px;
 }
 
-.ruleWrapper > section {
-  display: grid;
+section {
+  display: flex;
   position: relative;
   gap: 5px;
   padding: 10px;
   border-radius: 5px;
-  flex-wrap: wrap;
-  justify-items: center;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.ruleWrapper > section:hover {
+section:hover {
   background-color: #ffffff;
-  /* FIX */
   box-shadow: 5px 5px 5px #c4c4c4;
   outline: 0px;
 }
 
-.ruleWrapper > section > span:first-of-type {
+.articleContainer {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.articleContainer:hover {
+  background-color: initial;
+  box-shadow: none;
+  outline: 0;
+}
+
+section > span:first-of-type {
   width: 50%;
   font-size: 15px;
 }
 
-.ruleWrapper > section > div {
+div {
   display: flex;
   position: relative;
   gap: 5px;
   padding: 10px;
-  align-items: initial;
-  justify-content: center;
+  flex-wrap: nowrap;
+  align-items: center;
   border-radius: 5px;
-  flex-wrap: wrap;
 }
 
-.ruleWrapper > section > div > article {
+article {
   display: grid;
   position: relative;
   gap: 5px;
@@ -207,7 +220,7 @@ main {
   justify-items: center;
 }
 
-.ruleWrapper > section > div > article:focus-within {
+article:focus-within {
   outline: 1px solid #dfc900;
 }
 
@@ -222,19 +235,27 @@ footer {
 }
 
 button {
-  background-color: #D6DAE2;
+  background-color: #aac3e6;
   border: none;
+  width: 200px;
   padding: 2px 11px;
   cursor: pointer;
   border-radius: 5px;
   transition: transform 0.2s;
   font-size: 15px;
-  width: -webkit-fill-available;
 }
 
 button:hover {
   background-color: #1B365D;
   text-transform: uppercase;
+}
+
+.buttonContainer {
+  display: grid;
+}
+
+.addRuleButton {
+    width: -webkit-fill-available;
 }
 
 .addRuleButton:hover {
