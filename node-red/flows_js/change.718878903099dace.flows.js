@@ -1,8 +1,8 @@
 const Node = {
   "id": "718878903099dace",
   "type": "change",
-  "z": "0b526691b09a2646",
-  "g": "608c296403fab569",
+  "z": "707b29a288c1c947",
+  "g": "3d885db7955a47b8",
   "name": "clean data",
   "rules": [
     {
@@ -35,14 +35,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 870,
-  "y": 460,
+  "x": 290,
+  "y": 140,
   "wires": [
     [
       "2783b3bef5ec4879"
     ]
   ],
-  "_order": 207
+  "_order": 254
 }
 
 module.exports = Node;

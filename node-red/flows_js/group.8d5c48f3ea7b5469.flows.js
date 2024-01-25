@@ -5,7 +5,7 @@ const Node = {
   "name": "Push updates on \"rules\" to backend",
   "style": {
     "stroke": "none",
-    "fill": "#e3f3d3",
+    "fill": "#ffffbf",
     "label": true,
     "label-position": "n",
     "color": "#000000"
@@ -21,7 +21,9 @@ const Node = {
   ],
   "x": 14,
   "y": 19,
-  "_order": 14
+  "w": 612,
+  "h": 162,
+  "_order": 15
 }
 
 module.exports = Node;

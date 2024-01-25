@@ -1,8 +1,8 @@
 const Node = {
   "id": "f0bef3ea56bd8256",
   "type": "group",
-  "z": "0b526691b09a2646",
-  "name": "Sample-data transactions",
+  "z": "707b29a288c1c947",
+  "name": "Bypass with samples",
   "style": {
     "stroke": "none",
     "fill": "#ffbfbf",
@@ -12,13 +12,14 @@ const Node = {
   },
   "nodes": [
     "ba1623d62745d08e",
-    "9e2f20a7cd91882f"
+    "9e2f20a7cd91882f",
+    "01ed34446f94776e"
   ],
-  "x": 514,
-  "y": 519,
+  "x": 14,
+  "y": 239,
   "w": 252,
-  "h": 202,
-  "_order": 37
+  "h": 162,
+  "_order": 44
 }
 
 module.exports = Node;

@@ -1,20 +1,20 @@
 const Node = {
   "id": "c14abe3d375bd909",
   "type": "link in",
-  "z": "0b526691b09a2646",
+  "z": "5a8afc5afb89916f",
   "g": "9c916f97d11d31cb",
-  "name": "link in 19",
+  "name": "link in admin auth",
   "links": [
     "a00080e04fddabd0"
   ],
-  "x": 55,
-  "y": 380,
+  "x": 1595,
+  "y": 60,
   "wires": [
     [
       "72f47ddc15df5a95"
     ]
   ],
-  "_order": 156
+  "_order": 204
 }
 
 module.exports = Node;

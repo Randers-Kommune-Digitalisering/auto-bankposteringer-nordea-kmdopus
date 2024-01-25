@@ -1,7 +1,7 @@
 const Node = {
   "id": "90ca122283f050f2",
   "type": "switch",
-  "z": "0b526691b09a2646",
+  "z": "5a8afc5afb89916f",
   "g": "f51cc7b4f0bee577",
   "name": "Steps",
   "property": "step",
@@ -26,7 +26,7 @@ const Node = {
   "checkall": "true",
   "repair": false,
   "outputs": 3,
-  "x": 910,
+  "x": 450,
   "y": 140,
   "wires": [
     [
@@ -39,7 +39,7 @@ const Node = {
       "6f5d7cef733eca4d"
     ]
   ],
-  "_order": 135
+  "_order": 184
 }
 
 module.exports = Node;

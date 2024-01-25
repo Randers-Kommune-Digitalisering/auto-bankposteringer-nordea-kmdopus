@@ -1,11 +1,11 @@
 const Node = {
   "id": "3d885db7955a47b8",
   "type": "group",
-  "z": "0b526691b09a2646",
-  "name": "5. Dan omposteringsbilag, hovedkonto, uden match",
+  "z": "707b29a288c1c947",
+  "name": "KMD Opus - file creation, no match",
   "style": {
     "stroke": "none",
-    "fill": "#bfc7d7",
+    "fill": "#bfdbef",
     "label": true,
     "label-position": "n",
     "color": "#000000"
@@ -17,15 +17,18 @@ const Node = {
     "4f8011a7610b2e97",
     "8aa1fcb4e51a62b8",
     "bcdfa51e0609f9ca",
-    "01ed34446f94776e",
     "c1e321bedd4aba6c",
-    "2942402deb02ec6c"
+    "2942402deb02ec6c",
+    "691567767fc7e2b0",
+    "718878903099dace",
+    "2783b3bef5ec4879",
+    "ac3ed00ce79b1fe1"
   ],
-  "x": 794,
-  "y": 519,
+  "x": 14,
+  "y": 99,
   "w": 1232,
-  "h": 202,
-  "_order": 39
+  "h": 122,
+  "_order": 46
 }
 
 module.exports = Node;

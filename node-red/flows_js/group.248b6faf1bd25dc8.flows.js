@@ -1,8 +1,8 @@
 const Node = {
   "id": "248b6faf1bd25dc8",
   "type": "group",
-  "z": "0b526691b09a2646",
-  "name": "1. Import regler",
+  "z": "9b998b2e60b3c784",
+  "name": "Import rules",
   "style": {
     "stroke": "none",
     "fill": "#ffffbf",
@@ -23,7 +23,7 @@ const Node = {
   "y": 19,
   "w": 432,
   "h": 202,
-  "_order": 40
+  "_order": 41
 }
 
 module.exports = Node;

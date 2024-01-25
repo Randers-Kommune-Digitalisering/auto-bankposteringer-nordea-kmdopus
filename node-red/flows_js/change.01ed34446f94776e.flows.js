@@ -1,10 +1,10 @@
 const Node = {
   "id": "01ed34446f94776e",
   "type": "change",
-  "z": "0b526691b09a2646",
+  "z": "707b29a288c1c947",
   "d": true,
-  "g": "3d885db7955a47b8",
-  "name": "bypass",
+  "g": "f0bef3ea56bd8256",
+  "name": "Redis bypass",
   "rules": [
     {
       "t": "set",
@@ -19,14 +19,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 880,
-  "y": 680,
+  "x": 140,
+  "y": 360,
   "wires": [
     [
       "4f8011a7610b2e97"
     ]
   ],
-  "_order": 199
+  "_order": 264
 }
 
 module.exports = Node;

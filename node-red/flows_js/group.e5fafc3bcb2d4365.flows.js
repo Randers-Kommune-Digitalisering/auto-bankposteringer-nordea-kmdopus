@@ -6,7 +6,7 @@ const Node = {
   "style": {
     "label": true,
     "stroke": "none",
-    "fill": "#e3f3d3",
+    "fill": "#ffffbf",
     "label-position": "n",
     "color": "#000000"
   },
@@ -18,7 +18,9 @@ const Node = {
   ],
   "x": 634,
   "y": 19,
-  "_order": 31
+  "w": 472,
+  "h": 82,
+  "_order": 28
 }
 
 module.exports = Node;

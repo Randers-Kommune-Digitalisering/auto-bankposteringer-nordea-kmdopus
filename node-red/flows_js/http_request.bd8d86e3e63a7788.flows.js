@@ -1,7 +1,7 @@
 const Node = {
   "id": "bd8d86e3e63a7788",
   "type": "http request",
-  "z": "0b526691b09a2646",
+  "z": "5a8afc5afb89916f",
   "g": "f51cc7b4f0bee577",
   "name": "Confim Auth",
   "method": "PUT",
@@ -15,14 +15,14 @@ const Node = {
   "authType": "bearer",
   "senderr": false,
   "headers": [],
-  "x": 1570,
+  "x": 1110,
   "y": 100,
   "wires": [
     [
       "31513402e4efeb41"
     ]
   ],
-  "_order": 121
+  "_order": 170
 }
 
 module.exports = Node;
