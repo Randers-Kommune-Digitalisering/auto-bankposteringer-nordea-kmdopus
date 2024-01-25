@@ -65,10 +65,22 @@ function renderRule(pointerRule) {
     section.appendChild(h2);
     let div = document.createElement("div");
 
+    let articleContainerKontering = document.createElement("section");
+    articleContainerKontering.className = "articleContainer";
+    let h3ArticleContainerKontering = document.createElement("h3");
+    h3ArticleContainerKontering.textContent = "Kontering";
+    articleContainerKontering.appendChild(h3ArticleContainerKontering);
+
+    let articleContainerSearch = document.createElement("section");
+    articleContainerSearch.className = "articleContainer";
+    let h3ArticleContainerSearch = document.createElement("h3");
+    h3ArticleContainerSearch.textContent = "Søgeværktøjer";
+    articleContainerSearch.appendChild(h3ArticleContainerSearch);
+
     for (let i = 0; i < Object.keys(pointerRule).length - 2; i++) {       // - 2 fordi de sidste to properties ikke skal displayes
         const delregel = pointerRule[i];
         let article = document.createElement("article");
-        let h3 = document.createElement("h3");
+        let h4 = document.createElement("h4");
 
         switch (i) {
             case 5:
@@ -93,32 +105,32 @@ function renderRule(pointerRule) {
                 inputNotat.value = delregel.Notat || "";
                 inputNotat.style.width = "700px";
                 let articlePosteringstekst = document.createElement("article");
-                let h3Posteringstekst = document.createElement("h3");
-                h3Posteringstekst.textContent = "Posteringstekst";
-                articlePosteringstekst.appendChild(h3Posteringstekst);
+                let h4Posteringstekst = document.createElement("h4");
+                h4Posteringstekst.textContent = "Posteringstekst";
+                articlePosteringstekst.appendChild(h4Posteringstekst);
                 articlePosteringstekst.appendChild(inputPosteringstekst);
                 let articleArtskonto = document.createElement("article");
-                let h3Artskonto = document.createElement("h3");
-                h3Artskonto.textContent = "Artskonto";
-                articleArtskonto.appendChild(h3Artskonto);
+                let h4Artskonto = document.createElement("h4");
+                h4Artskonto.textContent = "Artskonto";
+                articleArtskonto.appendChild(h4Artskonto);
                 articleArtskonto.appendChild(inputArtskonto);
                 let articlePSP = document.createElement("article");
-                let h3PSP = document.createElement("h3");
-                h3PSP.textContent = "PSP";
-                articlePSP.appendChild(h3PSP);
+                let h4PSP = document.createElement("h4");
+                h4PSP.textContent = "PSP";
+                articlePSP.appendChild(h4PSP);
                 articlePSP.appendChild(inputPSP);
                 let articleNotat = document.createElement("article");
-                let h3Notat = document.createElement("h3");
-                h3Notat.textContent = "Notat";
-                articleNotat.appendChild(h3Notat);
+                let h4Notat = document.createElement("h4");
+                h4Notat.textContent = "Notat";
+                articleNotat.appendChild(h4Notat);
                 articleNotat.appendChild(inputNotat);
-                div.appendChild(articlePosteringstekst);
-                div.appendChild(articleArtskonto);
-                div.appendChild(articlePSP);
-                div.appendChild(articleNotat);
+                articleContainerKontering.appendChild(articlePosteringstekst);
+                articleContainerKontering.appendChild(articleArtskonto);
+                articleContainerKontering.appendChild(articlePSP);
+                articleContainerKontering.appendChild(articleNotat);
                 break;
             default:
-                h3.textContent = delregel.name;
+                h4.textContent = delregel.name;
                 let select = document.createElement("select");
                 select.id = pointerRule[7].ruleId;
                 select.name = delregel.name;
@@ -134,7 +146,7 @@ function renderRule(pointerRule) {
                     }
                     select.appendChild(option);
                 }
-                article.appendChild(h3);
+                article.appendChild(h4);
                 article.appendChild(select);
         }
 
@@ -166,22 +178,32 @@ function renderRule(pointerRule) {
             case 5:
                 break;
             default:
-                div.appendChild(article);
+                articleContainerSearch.appendChild(article);
                 break;
         }
+
     }
+
+    div.appendChild(articleContainerKontering);
+    div.appendChild(articleContainerSearch);
     section.appendChild(div);
+
+    let buttonContainer = document.createElement("div");
+    buttonContainer.className = "buttonContainer";
 
     let deleteRuleButton = document.createElement("button");
     deleteRuleButton.className = "deleteRuleButton";
     deleteRuleButton.id = pointerRule[7].ruleId;
     deleteRuleButton.textContent = "Slet regel";
-    section.appendChild(deleteRuleButton);
+    buttonContainer.appendChild(deleteRuleButton);
     let toggleButton = document.createElement("button");
     toggleButton.className = "toggleButton";
     toggleButton.id = pointerRule[7].ruleId;
     toggleButton.textContent = "Deaktivér regel";
-    section.appendChild(toggleButton);
+    buttonContainer.appendChild(toggleButton);
+
+    section.appendChild(buttonContainer);
+
     fragment.appendChild(section);
 
     addEventListenersToRule(section)
