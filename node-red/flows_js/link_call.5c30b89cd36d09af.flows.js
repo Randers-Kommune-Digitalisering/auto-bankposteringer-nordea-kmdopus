@@ -9,14 +9,15 @@ const Node = {
   ],
   "linkType": "static",
   "timeout": "30",
-  "x": 270,
-  "y": 440,
+  "x": 1335,
+  "y": 140,
   "wires": [
     [
       "a8f5efb560cbbdaf"
     ]
   ],
-  "_order": 152
+  "l": false,
+  "_order": 151
 }
 
 module.exports = Node;

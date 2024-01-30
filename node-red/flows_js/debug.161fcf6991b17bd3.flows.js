@@ -8,14 +8,14 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "\"Regler importeret fra csv-fil til context var\"",
+  "complete": "\"Regler importeret fra csv-fil til global\"",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
   "x": 300,
   "y": 180,
   "wires": [],
-  "_order": 156
+  "_order": 155
 }
 
 module.exports = Node;

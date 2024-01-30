@@ -16,11 +16,11 @@ const Node = {
     "744a5518444006a9",
     "d2465ea9ceb83c7d"
   ],
-  "x": 634,
-  "y": 99,
-  "w": 472,
+  "x": 1024,
+  "y": 19,
+  "w": 352,
   "h": 82,
-  "_order": 30
+  "_order": 28
 }
 
 module.exports = Node;
