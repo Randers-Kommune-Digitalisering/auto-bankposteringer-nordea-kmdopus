@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "3ba6bac1c411ace6",
   "g": "e5fafc3bcb2d4365",
-  "name": "Regler til msg",
+  "name": "msg > global",
   "rules": [
     {
       "t": "set",
@@ -18,14 +18,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 780,
+  "x": 730,
   "y": 60,
   "wires": [
     [
       "14d9ba41e0d56ad1"
     ]
   ],
-  "_order": 141
+  "_order": 140
 }
 
 module.exports = Node;
