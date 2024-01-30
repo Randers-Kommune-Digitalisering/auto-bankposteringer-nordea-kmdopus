@@ -3,13 +3,13 @@ const Node = {
   "type": "link out",
   "z": "3ba6bac1c411ace6",
   "g": "e5fafc3bcb2d4365",
-  "name": "link out 24",
+  "name": "link out format rules",
   "mode": "return",
   "links": [],
-  "x": 1065,
+  "x": 1005,
   "y": 60,
   "wires": [],
-  "_order": 140
+  "_order": 139
 }
 
 module.exports = Node;
