@@ -3,7 +3,7 @@ const Node = {
   "type": "function",
   "z": "f91accb007eed9a2",
   "g": "6055094b02013d9b",
-  "name": "Match transactions with konteringsregler",
+  "name": "match transactions with konteringsregler",
   "func": "",
   "outputs": 1,
   "noerr": 0,
@@ -17,7 +17,7 @@ const Node = {
       "4255d18a1fe6c5d1"
     ]
   ],
-  "_order": 245
+  "_order": 205
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
@@ -36,6 +36,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       for (let regel_obj of global.get("konteringsregler")) {
           let delregler_tjekket = 0; // tæller til underreglerne, dvs. referenceregel, advisregel, afsenderregel, transaktionstyperegel og beløbregel
           let matches = 0;
+          let exceptionBool = regel_obj[5].Artskonto === "90540000";
   
           // Tjekker om beløbsregel er overholdt
           let match_beloeb;
@@ -85,31 +86,33 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
                       if (match_searchword && match_beloeb) {
                           matches += 1;
   
-                          let bankdebkred = postering.amount.startsWith('-') ? 'Kredit' : 'Debet';
-                          let driftdebkred = bankdebkred === 'Debet' ? 'Kredit' : 'Debet';
-                          let beloeb = postering.amount.replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
-                          let psp = regel_obj[5].PSP ? regel_obj[5].PSP : '';
-                          
-                          let tekst;
-                          if (regel_obj[5].Posteringstekst.toLowerCase() === 'tekst fra bank') {
-                              tekst = postering.narrative;
-                          } else if (regel_obj[5].Posteringstekst.toLowerCase() === 'afsender fra bank') {
-                              tekst = postering.counterparty_name;
-                          } else if (regel_obj[5].Posteringstekst.toLowerCase() === 'advis fra bank') {
-                              try { tekst = postering.message; } catch (error) { tekst = postering.narrative; }
-                          } else { tekst = regel_obj[5].Posteringstekst; }
+                          if (!exceptionBool) {
+                              let bankdebkred = postering.amount.startsWith('-') ? 'Kredit' : 'Debet';
+                              let driftdebkred = bankdebkred === 'Debet' ? 'Kredit' : 'Debet';
+                              let beloeb = postering.amount.replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
+                              let psp = regel_obj[5].PSP ? regel_obj[5].PSP : '';
+                              
+                              let tekst;
+                              if (regel_obj[5].Posteringstekst.toLowerCase() === 'tekst fra bank') {
+                                  tekst = postering.narrative;
+                              } else if (regel_obj[5].Posteringstekst.toLowerCase() === 'afsender fra bank') {
+                                  tekst = postering.counterparty_name;
+                              } else if (regel_obj[5].Posteringstekst.toLowerCase() === 'advis fra bank') {
+                                  try { tekst = postering.message; } catch (error) { tekst = postering.narrative; }
+                              } else { tekst = regel_obj[5].Posteringstekst; }
   
-                          // Særlige regler for posteringstekst, hvis postering er vedr. BDP eller KSD
-                          if (pointer_posteringsparameter === "message") {
-                              if (postering[pointer_posteringsparameter]?.includes('BDP')) {
-                                  tekst = (postering.extra_info?.slice(postering.extra_info.indexOf('BDP')) || '') + (postering[pointer_posteringsparameter]?.toString() || '');
-                              } else if (postering[pointer_posteringsparameter]?.includes('KSD')) {
-                                  tekst = (postering[pointer_posteringsparameter]?.slice(postering[pointer_posteringsparameter]?.indexOf('KSD')) || '') + ', ' + (postering.counterparty_name || '');
+                              // Særlige regler for posteringstekst, hvis postering er vedr. BDP eller KSD
+                              if (pointer_posteringsparameter === "message") {
+                                  if (postering[pointer_posteringsparameter]?.includes('BDP')) {
+                                      tekst = (postering.extra_info?.slice(postering.extra_info.indexOf('BDP')) || '') + (postering[pointer_posteringsparameter]?.toString() || '');
+                                  } else if (postering[pointer_posteringsparameter]?.includes('KSD')) {
+                                      tekst = (postering[pointer_posteringsparameter]?.slice(postering[pointer_posteringsparameter]?.indexOf('KSD')) || '') + ', ' + (postering.counterparty_name || '');
+                                  }
                               }
+                              // Placeholder til genereret posteringsdata ud fra match
+                              flow.set("posteringsdata_til_drift", [regel_obj[5].Artskonto, '', psp, '', '', driftdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+                              flow.set("posteringsdata_til_90540000", ['90540000', '', '', '', '', bankdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
                           }
-                          // Placeholder til genereret posteringsdata ud fra match
-                          flow.set("posteringsdata_til_drift", [regel_obj[5].Artskonto, '', psp, '', '', driftdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
-                          flow.set("posteringsdata_til_90540000", ['90540000', '', '', '', '', bankdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
                       }
                   }
                   delregler_tjekket += 1;

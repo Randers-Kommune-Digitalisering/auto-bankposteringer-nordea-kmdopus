@@ -1,7 +1,7 @@
 const Node = {
   "id": "3c4f780cc74ab1bf",
   "type": "debug",
-  "z": "f91accb007eed9a2",
+  "z": "7cf1e6fdd27d0bd8",
   "g": "c2ddb5ae767f1292",
   "name": "stdout Forslag, kont.",
   "active": true,
@@ -12,10 +12,10 @@ const Node = {
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1680,
-  "y": 140,
+  "x": 1600,
+  "y": 60,
   "wires": [],
-  "_order": 262
+  "_order": 231
 }
 
 module.exports = Node;

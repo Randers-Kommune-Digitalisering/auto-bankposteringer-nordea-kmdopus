@@ -3,10 +3,10 @@ const Node = {
   "type": "link in",
   "z": "37f6db37c66da295",
   "g": "fa9c0eb18149dc68",
-  "name": "link in nordea auth breakout",
+  "name": "link in nordea admin auth breakout",
   "links": [
-    "d6bd73a14364aa0d",
-    "bd9639d398b2a961"
+    "bd9639d398b2a961",
+    "d6bd73a14364aa0d"
   ],
   "x": 205,
   "y": 180,
@@ -15,7 +15,7 @@ const Node = {
       "2e52c960a3fc09fc"
     ]
   ],
-  "_order": 193
+  "_order": 147
 }
 
 module.exports = Node;

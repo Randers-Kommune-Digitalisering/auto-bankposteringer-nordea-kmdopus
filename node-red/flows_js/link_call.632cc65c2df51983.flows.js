@@ -3,20 +3,21 @@ const Node = {
   "type": "link call",
   "z": "37f6db37c66da295",
   "g": "9f5e7f69a9319c00",
-  "name": "Call PM script",
+  "name": "call pr script",
   "links": [
     "23558f766f7c4b8b"
   ],
   "linkType": "static",
   "timeout": "30",
-  "x": 680,
-  "y": 300,
+  "x": 585,
+  "y": 280,
   "wires": [
     [
       "50627b95e97299f4"
     ]
   ],
-  "_order": 228
+  "l": false,
+  "_order": 179
 }
 
 module.exports = Node;

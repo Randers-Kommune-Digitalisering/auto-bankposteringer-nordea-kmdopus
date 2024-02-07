@@ -16,7 +16,7 @@ const Node = {
       "d2465ea9ceb83c7d"
     ]
   ],
-  "_order": 145
+  "_order": 258
 }
 
 Node.template = `
@@ -25,7 +25,7 @@ Node.template = `
 * {
   font-family: 'Roboto Slab';
   font-weight: 300;
-  font-size: 13px;
+  font-size: 20px;
 }
 
 input, select {
@@ -33,7 +33,6 @@ input, select {
   background-color: whitesmoke;
   border: 1px solid #ebebeb;
   padding: 0px 10px;
-  font-weight: 300;
 }
 
 input {
@@ -59,7 +58,7 @@ h1 {
   background-color: #1B365D;
   line-height: 80px;
   color: white;
-  font-size: 40px;
+  font-size: 60px;
   font-family: 'Roboto Slab';
   font-weight: 400;
   text-transform: uppercase;
@@ -74,8 +73,8 @@ h2 {
   display: list-item;
   list-style-type: "▶";
   text-transform: uppercase;
-  font-weight: 400;
-  font-size: 40px;
+  font-size: 60px;
+  font-weight: bold;
   margin-block-start: auto;
   margin-block-end: auto;
   padding-left: 15px;
@@ -87,8 +86,8 @@ h2::marker {
 
 h3 {
   display: flex;
-  font-weight: 400;
-  font-size: 20px;
+  font-size: 30px;
+  font-weight: bold;
   margin-block-start: auto;
   margin-block-end: auto;
   width: 100%;
@@ -99,12 +98,12 @@ h3 {
 
 h4 {
   margin-block: 0;
-  font-weight: 400;
+  font-weight: bolder;
 }
 
-pad_small {
+/* pad_small {
   padding-left: 10px;
-}
+} */
 
 body {
   background-color: #EAEDF0;
@@ -148,7 +147,6 @@ main {
 
 .nav > li > a {
   display: grid;
-  font-size: 15px;
   font-weight: 400;
   font-family: 'Roboto Slab';
   text-decoration: none;
@@ -194,18 +192,13 @@ section:hover {
   outline: 0;
 }
 
-section > span:first-of-type {
-  width: 50%;
-  font-size: 15px;
-}
-
 div {
   display: flex;
   position: relative;
   gap: 5px;
   padding: 10px;
   flex-wrap: nowrap;
-  align-items: center;
+  align-items: flex-start;
   border-radius: 5px;
 }
 
@@ -237,17 +230,18 @@ footer {
 button {
   background-color: #aac3e6;
   border: none;
-  width: 200px;
+  font-weight: bolder;
+  width: 250px;
   padding: 2px 11px;
   cursor: pointer;
   border-radius: 5px;
   transition: transform 0.2s;
-  font-size: 15px;
 }
 
 button:hover {
   background-color: #1B365D;
   text-transform: uppercase;
+  font-weight: bold;
 }
 
 .buttonContainer {

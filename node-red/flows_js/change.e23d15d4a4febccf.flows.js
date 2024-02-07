@@ -1,7 +1,7 @@
 const Node = {
   "id": "e23d15d4a4febccf",
   "type": "change",
-  "z": "f91accb007eed9a2",
+  "z": "7cf1e6fdd27d0bd8",
   "g": "c2ddb5ae767f1292",
   "name": "build msg",
   "rules": [
@@ -26,14 +26,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 920,
-  "y": 140,
+  "x": 840,
+  "y": 60,
   "wires": [
     [
       "7a3684be602309cb"
     ]
   ],
-  "_order": 258
+  "_order": 228
 }
 
 module.exports = Node;

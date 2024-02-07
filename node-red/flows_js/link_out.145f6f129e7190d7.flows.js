@@ -6,10 +6,10 @@ const Node = {
   "name": "link out nordea pre-request",
   "mode": "return",
   "links": [],
-  "x": 1805,
+  "x": 1565,
   "y": 200,
   "wires": [],
-  "_order": 200
+  "_order": 154
 }
 
 module.exports = Node;
