@@ -3,16 +3,16 @@ const Node = {
   "type": "link in",
   "z": "3ba6bac1c411ace6",
   "g": "9b6c10170cad638d",
-  "name": "link in 22",
+  "name": "link in styling",
   "links": [],
-  "x": 675,
-  "y": 140,
+  "x": 1065,
+  "y": 60,
   "wires": [
     [
       "744a5518444006a9"
     ]
   ],
-  "_order": 139
+  "_order": 256
 }
 
 module.exports = Node;

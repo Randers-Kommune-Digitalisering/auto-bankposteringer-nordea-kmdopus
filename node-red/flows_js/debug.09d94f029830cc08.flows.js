@@ -1,8 +1,8 @@
 const Node = {
   "id": "09d94f029830cc08",
   "type": "debug",
-  "z": "0b526691b09a2646",
-  "g": "d37689bd68a8104a",
+  "z": "9b998b2e60b3c784",
+  "g": "fc78f431b09075e3",
   "name": "Fejl i hentning af konteringsregler",
   "active": true,
   "tosidebar": true,
@@ -13,9 +13,9 @@ const Node = {
   "statusVal": "",
   "statusType": "auto",
   "x": 300,
-  "y": 760,
+  "y": 200,
   "wires": [],
-  "_order": 67
+  "_order": 117
 }
 
 module.exports = Node;
