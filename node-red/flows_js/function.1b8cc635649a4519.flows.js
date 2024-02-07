@@ -1,24 +1,29 @@
 const Node = {
   "id": "1b8cc635649a4519",
   "type": "function",
-  "z": "0b526691b09a2646",
-  "g": "fe8a8f3f224328c7",
-  "name": "Sidste bankdag",
+  "z": "9b998b2e60b3c784",
+  "g": "e55824f191632e7c",
+  "name": "generate global var",
   "func": "",
   "outputs": 1,
   "noerr": 0,
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 460,
-  "y": 80,
+  "x": 770,
+  "y": 60,
   "wires": [
     [
-      "7a7a78cc9c9515cd"
+      "8a3337373532e81f"
     ]
   ],
-  "_order": 112
+  "info": "",
+  "_order": 119
 }
+
+Node.info = `
+Format: ISO 8601
+`
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   const today = new Date();

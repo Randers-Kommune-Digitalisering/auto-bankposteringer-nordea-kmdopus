@@ -9,12 +9,12 @@ const Node = {
   "format": "javascript",
   "syntax": "plain",
   "template": "",
-  "x": 110,
-  "y": 400,
+  "x": 1490,
+  "y": 60,
   "wires": [
     []
   ],
-  "_order": 130
+  "_order": 247
 }
 
 Node.template = `
