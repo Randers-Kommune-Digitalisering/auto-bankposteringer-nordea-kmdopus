@@ -9,14 +9,14 @@ const Node = {
   "format": "javascript",
   "syntax": "plain",
   "template": "",
-  "x": 410,
-  "y": 240,
+  "x": 770,
+  "y": 140,
   "wires": [
     [
       "13f11dcbe9876165"
     ]
   ],
-  "_order": 128
+  "_order": 245
 }
 
 Node.template = `
@@ -29,7 +29,7 @@ let toggleButtons;
 let inputs;
 let selects;
 const rules = _rules != null ? _rules : [];
-const activeRules = rules.filter(rule => rule[6].active);
+const activeRules = rules.filter(rule => rule[6].active && rule[5].Artskonto !== "90540000");
 const inputFields = { 0: "Reference", 1: "Advisliste", 2: "Afsender", 3: "Posteringstype", 4: "Beløb1", 5: "Beløb2", 6: "Posteringstekst", 7: "Artskonto", 8: "PSP", 9: "SIO", 10: "Notat" };
 const textOperators = [
     { "name": "= Skal være lig med", "value": "==" },
@@ -65,10 +65,22 @@ function renderRule(pointerRule) {
     section.appendChild(h2);
     let div = document.createElement("div");
 
+    let articleContainerKontering = document.createElement("section");
+    articleContainerKontering.className = "articleContainer";
+    let h3ArticleContainerKontering = document.createElement("h3");
+    h3ArticleContainerKontering.textContent = "Kontering";
+    articleContainerKontering.appendChild(h3ArticleContainerKontering);
+
+    let articleContainerSearch = document.createElement("section");
+    articleContainerSearch.className = "articleContainer";
+    let h3ArticleContainerSearch = document.createElement("h3");
+    h3ArticleContainerSearch.textContent = "Søgeværktøjer";
+    articleContainerSearch.appendChild(h3ArticleContainerSearch);
+
     for (let i = 0; i < Object.keys(pointerRule).length - 2; i++) {       // - 2 fordi de sidste to properties ikke skal displayes
         const delregel = pointerRule[i];
         let article = document.createElement("article");
-        let h3 = document.createElement("h3");
+        let h4 = document.createElement("h4");
 
         switch (i) {
             case 5:
@@ -76,49 +88,49 @@ function renderRule(pointerRule) {
                 inputPosteringstekst.id = pointerRule[7].ruleId;
                 inputPosteringstekst.name = "Posteringstekst";
                 inputPosteringstekst.value = delregel.Posteringstekst || "";
-                inputPosteringstekst.style.width = "300px";
+                inputPosteringstekst.style.width = "400px";
                 let inputArtskonto = document.createElement("input");
                 inputArtskonto.id = pointerRule[7].ruleId;
                 inputArtskonto.name = "Artskonto";
                 inputArtskonto.value = delregel.Artskonto || "";
-                inputArtskonto.style.width = "85px";
+                inputArtskonto.style.width = "100px";
                 let inputPSP = document.createElement("input");
                 inputPSP.id = pointerRule[7].ruleId;
                 inputPSP.name = "PSP";
                 inputPSP.value = delregel.PSP || "";
-                inputPSP.style.width = "170px";
+                inputPSP.style.width = "250px";
                 let inputNotat = document.createElement("input");
                 inputNotat.id = pointerRule[7].ruleId;
                 inputNotat.name = "Notat";
                 inputNotat.value = delregel.Notat || "";
                 inputNotat.style.width = "700px";
                 let articlePosteringstekst = document.createElement("article");
-                let h3Posteringstekst = document.createElement("h3");
-                h3Posteringstekst.textContent = "Posteringstekst";
-                articlePosteringstekst.appendChild(h3Posteringstekst);
+                let h4Posteringstekst = document.createElement("h4");
+                h4Posteringstekst.textContent = "Posteringstekst";
+                articlePosteringstekst.appendChild(h4Posteringstekst);
                 articlePosteringstekst.appendChild(inputPosteringstekst);
                 let articleArtskonto = document.createElement("article");
-                let h3Artskonto = document.createElement("h3");
-                h3Artskonto.textContent = "Artskonto";
-                articleArtskonto.appendChild(h3Artskonto);
+                let h4Artskonto = document.createElement("h4");
+                h4Artskonto.textContent = "Artskonto";
+                articleArtskonto.appendChild(h4Artskonto);
                 articleArtskonto.appendChild(inputArtskonto);
                 let articlePSP = document.createElement("article");
-                let h3PSP = document.createElement("h3");
-                h3PSP.textContent = "PSP";
-                articlePSP.appendChild(h3PSP);
+                let h4PSP = document.createElement("h4");
+                h4PSP.textContent = "PSP";
+                articlePSP.appendChild(h4PSP);
                 articlePSP.appendChild(inputPSP);
                 let articleNotat = document.createElement("article");
-                let h3Notat = document.createElement("h3");
-                h3Notat.textContent = "Notat";
-                articleNotat.appendChild(h3Notat);
+                let h4Notat = document.createElement("h4");
+                h4Notat.textContent = "Notat";
+                articleNotat.appendChild(h4Notat);
                 articleNotat.appendChild(inputNotat);
-                div.appendChild(articlePosteringstekst);
-                div.appendChild(articleArtskonto);
-                div.appendChild(articlePSP);
-                div.appendChild(articleNotat);
+                articleContainerKontering.appendChild(articlePosteringstekst);
+                articleContainerKontering.appendChild(articleArtskonto);
+                articleContainerKontering.appendChild(articlePSP);
+                articleContainerKontering.appendChild(articleNotat);
                 break;
             default:
-                h3.textContent = delregel.name;
+                h4.textContent = delregel.name;
                 let select = document.createElement("select");
                 select.id = pointerRule[7].ruleId;
                 select.name = delregel.name;
@@ -134,7 +146,7 @@ function renderRule(pointerRule) {
                     }
                     select.appendChild(option);
                 }
-                article.appendChild(h3);
+                article.appendChild(h4);
                 article.appendChild(select);
         }
 
@@ -166,23 +178,35 @@ function renderRule(pointerRule) {
             case 5:
                 break;
             default:
-                div.appendChild(article);
+                articleContainerSearch.appendChild(article);
                 break;
         }
+
     }
+
+    div.appendChild(articleContainerKontering);
+    div.appendChild(articleContainerSearch);
     section.appendChild(div);
+
+    let buttonContainer = document.createElement("div");
+    buttonContainer.className = "buttonContainer";
 
     let deleteRuleButton = document.createElement("button");
     deleteRuleButton.className = "deleteRuleButton";
     deleteRuleButton.id = pointerRule[7].ruleId;
     deleteRuleButton.textContent = "Slet regel";
-    section.appendChild(deleteRuleButton);
+    buttonContainer.appendChild(deleteRuleButton);
     let toggleButton = document.createElement("button");
     toggleButton.className = "toggleButton";
     toggleButton.id = pointerRule[7].ruleId;
     toggleButton.textContent = "Deaktivér regel";
-    section.appendChild(toggleButton);
+    buttonContainer.appendChild(toggleButton);
+
+    section.appendChild(buttonContainer);
+
     fragment.appendChild(section);
+
+    addEventListenersToRule(section);
 
     return fragment;
 }
@@ -219,7 +243,9 @@ function generateNewRule() {
     });
     rules.push(newRule);
     PublishWsMessage(JSON.stringify(rules));
-    renderRule(newRule);
+    const newRuleFragment = renderRule(newRule);
+    ruleWrapper.appendChild(newRuleFragment);
+    addEventListenersToRule(newRuleFragment); // Add event listeners to the new rule
     console.log(\`New rule with id \${newRuleId} added\`);
 }
 
@@ -260,7 +286,7 @@ function deleteRule(pointerButton) {
     let pointerIndex = rules.findIndex(rule => rule[7].ruleId === pointerId);
     let pointerElement = document.getElementById(\`rule_\${pointerId}\`);
     if (pointerIndex >= 0 && pointerIndex < rules.length) {
-        rules.splice(pointerId, 1);
+        rules.splice(pointerIndex, 1);
         if (pointerElement) {
             pointerElement.remove();
         }
@@ -274,6 +300,7 @@ function toggleRule(pointerButton) {
     let pointerIndex = rules.findIndex(rule => rule[7].ruleId === pointerId);
     let pointerElement = document.getElementById(\`rule_\${pointerId}\`);
     if (pointerIndex >= 0 && pointerIndex < rules.length) {
+        // inverse "active" property bool
         rules[pointerIndex][6].active = !rules[pointerIndex][6].active;
         if (pointerElement) {
             pointerElement.remove();
@@ -283,27 +310,44 @@ function toggleRule(pointerButton) {
     console.log(\`Rule \${pointerId} active-status toggled\`)
 }
 
+function addEventListenersToRule(rule) {
+    if (rule) {
+        const deleteButton = rule.querySelector(".deleteRuleButton");
+        const toggleButton = rule.querySelector(".toggleButton");
+        const inputs = rule.querySelectorAll("input");
+        const selects = rule.querySelectorAll("select");
+
+        if (deleteButton) {
+            deleteButton.addEventListener("click", () => {
+                deleteRule(deleteButton);
+            });
+        }
+
+        inputs.forEach(input => {
+            if (input) {
+                input.addEventListener("change", () => {
+                    updateValue(input);
+                });
+            }
+        });
+
+        selects.forEach(select => {
+            if (select) {
+                select.addEventListener("change", () => {
+                    updateValue(select);
+                });
+            }
+        });
+
+        if (toggleButton) {
+            toggleButton.addEventListener("click", () => {
+                toggleRule(toggleButton);
+            });
+        }
+    }
+}
+
 function listenToEvents() {
-    deleteRuleButtons.forEach(button => {
-        button.addEventListener("click", () => {
-            deleteRule(button);
-        });
-    });
-    inputs.forEach(input => {
-        input.addEventListener("change", () => {
-            updateValue(input);
-        });
-    });
-    selects.forEach(select => {
-        select.addEventListener("change", () => {
-            updateValue(select);
-        });
-    });
-    toggleButtons.forEach(button => {
-        button.addEventListener("click", () => {
-            toggleRule(button);
-        });
-    });
     addRule.addEventListener("click", generateNewRule);
     window.addEventListener("reloadPage", function () {
         setTimeout(function () {
