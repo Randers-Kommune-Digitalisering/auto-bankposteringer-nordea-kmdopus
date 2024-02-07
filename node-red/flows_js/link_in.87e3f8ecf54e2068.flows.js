@@ -4,10 +4,7 @@ const Node = {
   "z": "37f6db37c66da295",
   "g": "fa9c0eb18149dc68",
   "name": "Step 1",
-  "links": [
-    "0641cc10de0fa6e8",
-    "7f564fcbffa44323"
-  ],
+  "links": [],
   "x": 90,
   "y": 100,
   "wires": [
@@ -16,7 +13,7 @@ const Node = {
     ]
   ],
   "l": true,
-  "_order": 218
+  "_order": 170
 }
 
 module.exports = Node;

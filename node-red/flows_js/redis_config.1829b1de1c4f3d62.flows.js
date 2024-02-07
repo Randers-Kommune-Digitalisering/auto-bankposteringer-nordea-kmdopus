@@ -5,7 +5,7 @@ const Node = {
   "options": "{\"host\":\"redis_microservice\",\"port\":6379}",
   "cluster": false,
   "optionsType": "json",
-  "_order": 81
+  "_order": 68
 }
 
 module.exports = Node;

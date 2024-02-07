@@ -16,7 +16,7 @@ const Node = {
       "13f11dcbe9876165"
     ]
   ],
-  "_order": 132
+  "_order": 245
 }
 
 Node.template = `
@@ -88,17 +88,17 @@ function renderRule(pointerRule) {
                 inputPosteringstekst.id = pointerRule[7].ruleId;
                 inputPosteringstekst.name = "Posteringstekst";
                 inputPosteringstekst.value = delregel.Posteringstekst || "";
-                inputPosteringstekst.style.width = "300px";
+                inputPosteringstekst.style.width = "400px";
                 let inputArtskonto = document.createElement("input");
                 inputArtskonto.id = pointerRule[7].ruleId;
                 inputArtskonto.name = "Artskonto";
                 inputArtskonto.value = delregel.Artskonto || "";
-                inputArtskonto.style.width = "85px";
+                inputArtskonto.style.width = "100px";
                 let inputPSP = document.createElement("input");
                 inputPSP.id = pointerRule[7].ruleId;
                 inputPSP.name = "PSP";
                 inputPSP.value = delregel.PSP || "";
-                inputPSP.style.width = "170px";
+                inputPSP.style.width = "250px";
                 let inputNotat = document.createElement("input");
                 inputNotat.id = pointerRule[7].ruleId;
                 inputNotat.name = "Notat";
@@ -206,7 +206,7 @@ function renderRule(pointerRule) {
 
     fragment.appendChild(section);
 
-    addEventListenersToRule(section)
+    addEventListenersToRule(section);
 
     return fragment;
 }
@@ -300,6 +300,7 @@ function toggleRule(pointerButton) {
     let pointerIndex = rules.findIndex(rule => rule[7].ruleId === pointerId);
     let pointerElement = document.getElementById(\`rule_\${pointerId}\`);
     if (pointerIndex >= 0 && pointerIndex < rules.length) {
+        // inverse "active" property bool
         rules[pointerIndex][6].active = !rules[pointerIndex][6].active;
         if (pointerElement) {
             pointerElement.remove();

@@ -3,7 +3,7 @@ const Node = {
   "type": "file in",
   "z": "9b998b2e60b3c784",
   "g": "248b6faf1bd25dc8",
-  "name": "Hent konteringsregler",
+  "name": "get kont.regler",
   "filename": "/data/konteringsregler/konteringsregler.csv",
   "filenameType": "str",
   "format": "utf8",
@@ -11,14 +11,14 @@ const Node = {
   "sendError": false,
   "encoding": "none",
   "allProps": true,
-  "x": 300,
-  "y": 100,
+  "x": 280,
+  "y": 60,
   "wires": [
     [
       "30ea2e64ee09287c"
     ]
   ],
-  "_order": 154
+  "_order": 110
 }
 
 module.exports = Node;

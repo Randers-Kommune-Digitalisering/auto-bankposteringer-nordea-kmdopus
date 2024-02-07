@@ -3,7 +3,7 @@ const Node = {
   "type": "debug",
   "z": "37f6db37c66da295",
   "g": "fa9c0eb18149dc68",
-  "name": "stdout Auth Status",
+  "name": "stdout Auth Status succes",
   "active": true,
   "tosidebar": true,
   "console": true,
@@ -12,10 +12,11 @@ const Node = {
   "targetType": "full",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1400,
+  "x": 1245,
   "y": 140,
   "wires": [],
-  "_order": 184
+  "l": false,
+  "_order": 138
 }
 
 module.exports = Node;

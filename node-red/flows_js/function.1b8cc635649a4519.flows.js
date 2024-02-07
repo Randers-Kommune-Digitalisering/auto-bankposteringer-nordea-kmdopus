@@ -3,22 +3,22 @@ const Node = {
   "type": "function",
   "z": "9b998b2e60b3c784",
   "g": "e55824f191632e7c",
-  "name": "Generate var",
+  "name": "generate global var",
   "func": "",
   "outputs": 1,
   "noerr": 0,
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 270,
-  "y": 260,
+  "x": 770,
+  "y": 60,
   "wires": [
     [
       "8a3337373532e81f"
     ]
   ],
   "info": "",
-  "_order": 163
+  "_order": 119
 }
 
 Node.info = `
