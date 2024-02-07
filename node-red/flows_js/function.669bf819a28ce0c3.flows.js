@@ -27,14 +27,14 @@ const Node = {
       "module": "crypto-js"
     }
   ],
-  "x": 1690,
+  "x": 1450,
   "y": 200,
   "wires": [
     [
       "145f6f129e7190d7"
     ]
   ],
-  "_order": 199
+  "_order": 153
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, moment, uuid, forge, CryptoJS) {
@@ -99,8 +99,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   const requestWithContentHeaders = "(request-target) x-nordea-originating-host x-nordea-originating-date content-type digest";
   
   function getSignatureBaseOnRequest() {
-      const host = "open.nordea.com";
-      
+      let host = "api.nordeaopenbanking.com";
+  
       let path;
       if (typeof flow.get("query_param1") !== "undefined") {
           path = flow.get("path") + "/" + flow.get("query_param") + flow.get("path_suffix") + "?from_date=" + flow.get("query_param1") + "&to_date=" + flow.get("query_param2");

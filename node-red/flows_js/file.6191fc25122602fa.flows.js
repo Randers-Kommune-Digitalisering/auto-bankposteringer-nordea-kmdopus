@@ -1,7 +1,7 @@
 const Node = {
   "id": "6191fc25122602fa",
   "type": "file",
-  "z": "f91accb007eed9a2",
+  "z": "7cf1e6fdd27d0bd8",
   "g": "c2ddb5ae767f1292",
   "name": "Skriv omp.bilag",
   "filename": "$flowContext(\"filename_nomatch\")\t",
@@ -10,14 +10,14 @@ const Node = {
   "createDir": true,
   "overwriteFile": "true",
   "encoding": "none",
-  "x": 1480,
-  "y": 140,
+  "x": 1400,
+  "y": 60,
   "wires": [
     [
       "3c4f780cc74ab1bf"
     ]
   ],
-  "_order": 256
+  "_order": 226
 }
 
 module.exports = Node;

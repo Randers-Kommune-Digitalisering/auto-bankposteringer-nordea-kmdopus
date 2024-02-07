@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "37f6db37c66da295",
   "g": "9f5e7f69a9319c00",
-  "name": "params., debitorkonto",
+  "name": "params, debitorkonto",
   "rules": [
     {
       "t": "set",
@@ -19,14 +19,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 480,
-  "y": 360,
+  "x": 460,
+  "y": 340,
   "wires": [
     [
       "9f4d5f3a190849e1"
     ]
   ],
-  "_order": 229
+  "_order": 180
 }
 
 module.exports = Node;

@@ -3,7 +3,7 @@ const Node = {
   "type": "switch",
   "z": "37f6db37c66da295",
   "g": "9d7a704133314cab",
-  "name": "Check req status",
+  "name": "switch req status",
   "property": "request_status",
   "propertyType": "flow",
   "rules": [
@@ -21,7 +21,7 @@ const Node = {
   "checkall": "true",
   "repair": false,
   "outputs": 2,
-  "x": 1690,
+  "x": 1450,
   "y": 60,
   "wires": [
     [
@@ -31,7 +31,7 @@ const Node = {
       "d6bd73a14364aa0d"
     ]
   ],
-  "_order": 201
+  "_order": 155
 }
 
 module.exports = Node;

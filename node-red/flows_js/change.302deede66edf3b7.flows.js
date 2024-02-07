@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "37f6db37c66da295",
   "g": "9d7a704133314cab",
-  "name": "Subtract step",
+  "name": "subtract step",
   "rules": [
     {
       "t": "set",
@@ -18,14 +18,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 1690,
+  "x": 1450,
   "y": 100,
   "wires": [
     [
       "02213fe18223d94a"
     ]
   ],
-  "_order": 203
+  "_order": 157
 }
 
 module.exports = Node;

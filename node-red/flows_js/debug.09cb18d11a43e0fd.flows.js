@@ -3,7 +3,7 @@ const Node = {
   "type": "debug",
   "z": "37f6db37c66da295",
   "g": "fa9c0eb18149dc68",
-  "name": "stdout Exch. Token",
+  "name": "stdout Exchange Token succes",
   "active": true,
   "tosidebar": true,
   "console": true,
@@ -12,10 +12,11 @@ const Node = {
   "targetType": "full",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1400,
+  "x": 1245,
   "y": 180,
   "wires": [],
-  "_order": 183
+  "l": false,
+  "_order": 137
 }
 
 module.exports = Node;

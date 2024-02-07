@@ -3,12 +3,12 @@ const Node = {
   "type": "comment",
   "z": "37f6db37c66da295",
   "g": "9c2ba34a9402778f",
-  "name": "Auth flow",
+  "name": "auth flow",
   "info": "",
   "x": 100,
-  "y": 880,
+  "y": 900,
   "wires": [],
-  "_order": 216
+  "_order": 168
 }
 
 module.exports = Node;

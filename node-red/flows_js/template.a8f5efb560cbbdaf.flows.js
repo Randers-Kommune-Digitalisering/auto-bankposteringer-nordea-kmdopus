@@ -16,7 +16,7 @@ const Node = {
       "0f2920ad035e2f9b"
     ]
   ],
-  "_order": 149
+  "_order": 262
 }
 
 Node.template = `
@@ -64,16 +64,22 @@ function renderRule(pointerRule) {
     section.appendChild(h2);
     let div = document.createElement("div");
 
+    let articleContainerSearch = document.createElement("section");
+    articleContainerSearch.className = "articleContainer";
+    let h3ArticleContainerSearch = document.createElement("h3");
+    h3ArticleContainerSearch.textContent = "Søgeværktøjer";
+    articleContainerSearch.appendChild(h3ArticleContainerSearch);
+
     for (let i = 0; i < Object.keys(pointerRule).length - 2; i++) {       // - 2 fordi de sidste to properties ikke skal displayes
         const delregel = pointerRule[i];
         let article = document.createElement("article");
-        let h3 = document.createElement("h3");
+        let h4 = document.createElement("h4");
 
         switch (i) {
             case 5:
                 break;
             default:
-                h3.textContent = delregel.name;
+                h4.textContent = delregel.name;
                 let select = document.createElement("select");
                 select.id = pointerRule[7].ruleId;
                 select.name = delregel.name;
@@ -89,7 +95,7 @@ function renderRule(pointerRule) {
                     }
                     select.appendChild(option);
                 }
-                article.appendChild(h3);
+                article.appendChild(h4);
                 article.appendChild(select);
         }
 
@@ -121,25 +127,33 @@ function renderRule(pointerRule) {
             case 5:
                 break;
             default:
-                div.appendChild(article);
+                articleContainerSearch.appendChild(article);
                 break;
         }
     }
+
+    div.appendChild(articleContainerSearch);
     section.appendChild(div);
+
+    let buttonContainer = document.createElement("div");
+    buttonContainer.className = "buttonContainer";
 
     let deleteRuleButton = document.createElement("button");
     deleteRuleButton.className = "deleteRuleButton";
     deleteRuleButton.id = pointerRule[7].ruleId;
     deleteRuleButton.textContent = "Slet regel";
-    section.appendChild(deleteRuleButton);
+    buttonContainer.appendChild(deleteRuleButton);
     let toggleButton = document.createElement("button");
     toggleButton.className = "toggleButton";
     toggleButton.id = pointerRule[7].ruleId;
     toggleButton.textContent = "Deaktivér regel";
-    section.appendChild(toggleButton);
-    fragment.appendChild(section);
+    buttonContainer.appendChild(toggleButton);
 
-    addEventListenersToRule(section)
+    section.appendChild(buttonContainer);
+
+    fragment.appendChild(section);
+    
+    addEventListenersToRule(section);
 
     return fragment;
 }

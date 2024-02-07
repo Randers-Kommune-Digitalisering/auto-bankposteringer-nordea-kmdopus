@@ -5,14 +5,14 @@ const Node = {
   "g": "e43111d88ddbb93a",
   "name": "link in nordea pre-request",
   "links": [],
-  "x": 1575,
+  "x": 1335,
   "y": 200,
   "wires": [
     [
       "669bf819a28ce0c3"
     ]
   ],
-  "_order": 198
+  "_order": 152
 }
 
 module.exports = Node;
