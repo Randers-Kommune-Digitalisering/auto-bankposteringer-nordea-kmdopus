@@ -16,7 +16,7 @@ const Node = {
       "7b5552a2187320fb"
     ]
   ],
-  "_order": 242
+  "_order": 247
 }
 
 Node.template = `
@@ -29,8 +29,7 @@ let toggleButtons;
 let inputs;
 let selects;
 const rules = _rules != null ? _rules : [];
-const inactiveRules = rules.filter(rule => !rule[6].active);
-const inputFields = { 0: "Reference", 1: "Advisliste", 2: "Afsender", 3: "Posteringstype", 4: "Beløb1", 5: "Beløb2", 6: "Posteringstekst", 7: "Artskonto", 8: "PSP", 9: "SIO", 10: "Notat" };
+const inactiveRules = rules.filter(rule => !rule[7].active);
 const textOperators = [
     { "name": "= Skal være lig med", "value": "==" },
     { "name": "{?} Indeholder", "value": "contains" },
@@ -58,10 +57,10 @@ function PublishWsMessage(m) {
 function renderRule(pointerRule) {
     const fragment = document.createDocumentFragment();
     let section = document.createElement("section");
-    section.id = \`rule_\${pointerRule[7].ruleId}\`;
+    section.id = \`rule_\${pointerRule[8].ruleId}\`;
     let h2 = document.createElement("h2");
 
-    h2.textContent = parseInt(pointerRule[7].ruleId) + 1;
+    h2.textContent = parseInt(pointerRule[8].ruleId) + 1;
     section.appendChild(h2);
     let div = document.createElement("div");
 
@@ -83,24 +82,24 @@ function renderRule(pointerRule) {
         let h4 = document.createElement("h4");
 
         switch (i) {
-            case 5:
+            case 6:
                 let inputPosteringstekst = document.createElement("input");
-                inputPosteringstekst.id = pointerRule[7].ruleId;
+                inputPosteringstekst.id = pointerRule[8].ruleId;
                 inputPosteringstekst.name = "Posteringstekst";
                 inputPosteringstekst.value = delregel.Posteringstekst || "";
                 inputPosteringstekst.style.width = "400px";
                 let inputArtskonto = document.createElement("input");
-                inputArtskonto.id = pointerRule[7].ruleId;
+                inputArtskonto.id = pointerRule[8].ruleId;
                 inputArtskonto.name = "Artskonto";
                 inputArtskonto.value = delregel.Artskonto || "";
                 inputArtskonto.style.width = "100px";
                 let inputPSP = document.createElement("input");
-                inputPSP.id = pointerRule[7].ruleId;
+                inputPSP.id = pointerRule[8].ruleId;
                 inputPSP.name = "PSP";
                 inputPSP.value = delregel.PSP || "";
                 inputPSP.style.width = "250px";
                 let inputNotat = document.createElement("input");
-                inputNotat.id = pointerRule[7].ruleId;
+                inputNotat.id = pointerRule[8].ruleId;
                 inputNotat.name = "Notat";
                 inputNotat.value = delregel.Notat || "";
                 inputNotat.style.width = "700px";
@@ -132,9 +131,9 @@ function renderRule(pointerRule) {
             default:
                 h4.textContent = delregel.name;
                 let select = document.createElement("select");
-                select.id = pointerRule[7].ruleId;
+                select.id = pointerRule[8].ruleId;
                 select.name = delregel.name;
-                const operators = i === 4 ? valueOperators : textOperators;
+                const operators = i === 5 ? valueOperators : textOperators;
 
                 for (let j = 0; j < operators.length; j++) {
                     let option = document.createElement("option");
@@ -151,23 +150,23 @@ function renderRule(pointerRule) {
         }
 
         switch (i) {
-            case 4:
+            case 5:
                 let input1 = document.createElement("input");
-                input1.id = pointerRule[7].ruleId;
+                input1.id = pointerRule[8].ruleId;
                 input1.name = delregel.name;
                 input1.value = !delregel.value1 ? "" : delregel.value1;
                 article.appendChild(input1);
                 let input2 = document.createElement("input");
-                input2.id = pointerRule[7].ruleId;
+                input2.id = pointerRule[8].ruleId;
                 input2.name = delregel.name;
                 input2.value = !delregel.value2 ? "" : delregel.value2;
                 article.appendChild(input2);
                 break;
-            case 5:
+            case 6:
                 break;
             default:
                 let input = document.createElement("input");
-                input.id = pointerRule[7].ruleId;
+                input.id = pointerRule[8].ruleId;
                 input.name = delregel.name
                 input.value = !delregel.value ? "" : delregel.value;
                 article.appendChild(input);
@@ -175,7 +174,7 @@ function renderRule(pointerRule) {
         }
 
         switch (i) {
-            case 5:
+            case 6:
                 break;
             default:
                 articleContainerSearch.appendChild(article);
@@ -192,12 +191,12 @@ function renderRule(pointerRule) {
 
     let deleteRuleButton = document.createElement("button");
     deleteRuleButton.className = "deleteRuleButton";
-    deleteRuleButton.id = pointerRule[7].ruleId;
+    deleteRuleButton.id = pointerRule[8].ruleId;
     deleteRuleButton.textContent = "Slet regel";
     buttonContainer.appendChild(deleteRuleButton);
     let toggleButton = document.createElement("button");
     toggleButton.className = "toggleButton";
-    toggleButton.id = pointerRule[7].ruleId;
+    toggleButton.id = pointerRule[8].ruleId;
     toggleButton.textContent = "Deaktivér regel";
     buttonContainer.appendChild(toggleButton);
 
@@ -211,21 +210,21 @@ function renderRule(pointerRule) {
 }
 
 function generateNewRule() {
-    let newRuleId = parseInt(rules[rules.length - 1][7].ruleId) + 1;
+    let newRuleId = parseInt(rules[rules.length - 1][8].ruleId) + 1;
     const newRule = Object.keys(rules[0]).map((delregel) => {
         switch (delregel) {
-            case "7":
+            case "8":
                 return { ruleId: newRuleId };
-            case "6":
+            case "7":
                 return { active: false };
-            case "5":
+            case "6":
                 return {
                     Posteringstekst: null,
                     Artskonto: null,
                     PSP: null,
                     Notat: null,
                 };
-            case "4":
+            case "5":
                 return {
                     name: delregel.name,
                     value1: null,
@@ -251,21 +250,21 @@ function generateNewRule() {
 function updateValue(pointerField) {
     const pointerId = Number(pointerField.id); // e.g., input_afsender_value
     const pointerDelregel = pointerField.name; // e.g., input, afsender, value
-    const pointerIndex = rules.findIndex(rule => rule[7].ruleId === pointerId);
-    console.log(rules[0][5].hasOwnProperty(pointerDelregel))
+    const pointerIndex = rules.findIndex(rule => rule[8].ruleId === pointerId);
+    console.log(rules[0][6].hasOwnProperty(pointerDelregel))
 
     if (pointerIndex !== -1) {
         const ruleToUpdate = rules[pointerIndex];
         let propertyIndex;
 
-        if (rules[0][5].hasOwnProperty(pointerDelregel)) {
-            propertyIndex = 5;
+        if (rules[0][6].hasOwnProperty(pointerDelregel)) {
+            propertyIndex = 6;
         } else {
             propertyIndex = ruleToUpdate.findIndex(property => property.name === pointerDelregel);
         }
 
         if (propertyIndex !== undefined) {
-            if (propertyIndex === 5) {
+            if (propertyIndex === 6) {
                 ruleToUpdate[propertyIndex][pointerDelregel] = pointerField.value;
             } else {
                 if (pointerField.tagName === 'SELECT') {
@@ -282,7 +281,7 @@ function updateValue(pointerField) {
 
 function deleteRule(pointerButton) {
     let pointerId = Number(pointerButton.id);
-    let pointerIndex = rules.findIndex(rule => rule[7].ruleId === pointerId);
+    let pointerIndex = rules.findIndex(rule => rule[8].ruleId === pointerId);
     let pointerElement = document.getElementById(\`rule_\${pointerId}\`);
     if (pointerIndex >= 0 && pointerIndex < rules.length) {
         rules.splice(pointerIndex, 1);
@@ -296,11 +295,11 @@ function deleteRule(pointerButton) {
 
 function toggleRule(pointerButton) {
     let pointerId = Number(pointerButton.id);
-    let pointerIndex = rules.findIndex(rule => rule[7].ruleId === pointerId);
+    let pointerIndex = rules.findIndex(rule => rule[8].ruleId === pointerId);
     let pointerElement = document.getElementById(\`rule_\${pointerId}\`);
     if (pointerIndex >= 0 && pointerIndex < rules.length) {
         // inverse "active" property bool
-        rules[pointerIndex][6].active = !rules[pointerIndex][6].active;
+        rules[pointerIndex][7].active = !rules[pointerIndex][7].active;
         if (pointerElement) {
             pointerElement.remove();
         }

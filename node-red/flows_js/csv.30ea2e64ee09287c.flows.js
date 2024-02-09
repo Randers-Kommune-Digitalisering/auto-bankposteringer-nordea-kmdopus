@@ -13,7 +13,7 @@ const Node = {
   "skip": "0",
   "strings": true,
   "include_empty_strings": false,
-  "include_null_values": true,
+  "include_null_values": false,
   "x": 385,
   "y": 60,
   "wires": [
