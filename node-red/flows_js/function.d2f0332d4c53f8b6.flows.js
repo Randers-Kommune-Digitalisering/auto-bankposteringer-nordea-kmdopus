@@ -17,12 +17,12 @@ const Node = {
       "4255d18a1fe6c5d1"
     ]
   ],
-  "_order": 205
+  "_order": 209
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let uplacerbare_poster = 0;
-  let felter_i_nordea = ["narrative", "message", "counterparty_name", "type_description"];
+  let felter_i_nordea = ["narrative", "message", "counterparty_name", "type_description", "end_to_end_reference"];
   let omposteringsbilag = [];
   let nomatch_list = [];
   let omp_headers = global.get("omp_headers").split(", ");
@@ -34,27 +34,27 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
       // Scope: Tjek alle konteringsregler igennem, regel for regel
       for (let regel_obj of global.get("konteringsregler")) {
-          let delregler_tjekket = 0; // tæller til underreglerne, dvs. referenceregel, advisregel, afsenderregel, transaktionstyperegel og beløbregel
+          let delregler_tjekket = 0; // tæller til underreglerne, dvs. reference, advis, afsender, transaktionstype, end-to-end-reference og beløb
           let matches = 0;
-          let exceptionBool = regel_obj[5].Artskonto === "90540000";
+          let exceptionBool = regel_obj[6].Artskonto === "90540000";
   
           // Tjekker om beløbsregel er overholdt
           let match_beloeb;
-          if (regel_obj[4].operator === '><') {
-              match_beloeb = parseFloat(postering.amount) > parseFloat(regel_obj[4].value1.replace(',', '.')) && (regel_obj[4].value2 !== undefined ? parseFloat(postering.amount) < parseFloat(regel_obj[4].value2.replace(',', '.')) : true);
-          } else if (regel_obj[4].operator === '>') {
-              match_beloeb = parseFloat(postering.amount) > parseFloat(regel_obj[4].value1.replace(',', '.'));
-          } else if (regel_obj[4].operator === '<') {
-              match_beloeb = parseFloat(postering.amount) < parseFloat(regel_obj[4].value1.replace(',', '.'));
-          } else if (regel_obj[4].operator === '==') {
-              match_beloeb = parseFloat(postering.amount) === parseFloat(regel_obj[4].value1.replace(',', '.'));
+          if (regel_obj[5].operator === '><') {
+              match_beloeb = parseFloat(postering.amount) > parseFloat(regel_obj[5].value1.replace(',', '.')) && (regel_obj[5].value2 ? parseFloat(postering.amount) < parseFloat(regel_obj[5].value2.replace(',', '.')) : true);
+          } else if (regel_obj[5].operator === '>') {
+              match_beloeb = parseFloat(postering.amount) > parseFloat(regel_obj[5].value1.replace(',', '.'));
+          } else if (regel_obj[5].operator === '<') {
+              match_beloeb = parseFloat(postering.amount) < parseFloat(regel_obj[5].value1.replace(',', '.'));
+          } else if (regel_obj[5].operator === '==') {
+              match_beloeb = parseFloat(postering.amount) === parseFloat(regel_obj[5].value1.replace(',', '.'));
           // Fallback
-          } else if (!regel_obj[4].operator) { match_beloeb = true; } else if (!regel_obj[4].value1) { match_beloeb = true; }
+          } else if (!regel_obj[5].operator) { match_beloeb = true; } else if (!regel_obj[5].value1) { match_beloeb = true; }
   
           // Tæller antallet af udfyldte delregler
           let antal_searchword = Object.keys(regel_obj)
-              .slice(0, 4)
-              .filter(key => regel_obj[key].value !== null)
+              .slice(0, 5)
+              .filter(key => regel_obj[key].value)
               .length;
   
           if (regellinjer_tjekket > 1 && linjer_dannet > 0) {
@@ -62,9 +62,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           } else {
               // Scope: Tjek alle delreglerne, delregel for delregel
               for (let i = 0; i < felter_i_nordea.length; i++) {
-                  let searchword = regel_obj[i].value !== null ? String(regel_obj[i].value).toLowerCase() : null;
+                  let searchword = regel_obj[i].value ? String(regel_obj[i].value).toLowerCase() : null;
   
-                  if (searchword !== null && regel_obj[6].active) {
+                  if (searchword !== null && regel_obj[7].active) {
                       // Pointer til delregels tilsvarende parameter i posteringen
                       let pointer_posteringsparameter = felter_i_nordea[delregler_tjekket];
   
@@ -90,16 +90,16 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
                               let bankdebkred = postering.amount.startsWith('-') ? 'Kredit' : 'Debet';
                               let driftdebkred = bankdebkred === 'Debet' ? 'Kredit' : 'Debet';
                               let beloeb = postering.amount.replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
-                              let psp = regel_obj[5].PSP ? regel_obj[5].PSP : '';
+                              let psp = regel_obj[6].PSP ? regel_obj[6].PSP : '';
                               
                               let tekst;
-                              if (regel_obj[5].Posteringstekst.toLowerCase() === 'tekst fra bank') {
+                              if (regel_obj[6].Posteringstekst.toLowerCase() === 'tekst fra bank') {
                                   tekst = postering.narrative;
-                              } else if (regel_obj[5].Posteringstekst.toLowerCase() === 'afsender fra bank') {
+                              } else if (regel_obj[6].Posteringstekst.toLowerCase() === 'afsender fra bank') {
                                   tekst = postering.counterparty_name;
-                              } else if (regel_obj[5].Posteringstekst.toLowerCase() === 'advis fra bank') {
+                              } else if (regel_obj[6].Posteringstekst.toLowerCase() === 'advis fra bank') {
                                   try { tekst = postering.message; } catch (error) { tekst = postering.narrative; }
-                              } else { tekst = regel_obj[5].Posteringstekst; }
+                              } else { tekst = regel_obj[6].Posteringstekst; }
   
                               // Særlige regler for posteringstekst, hvis postering er vedr. BDP eller KSD
                               if (pointer_posteringsparameter === "message") {
@@ -110,7 +110,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
                                   }
                               }
                               // Placeholder til genereret posteringsdata ud fra match
-                              flow.set("posteringsdata_til_drift", [regel_obj[5].Artskonto, '', psp, '', '', driftdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+                              flow.set("posteringsdata_til_drift", [regel_obj[6].Artskonto, '', psp, '', '', driftdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
                               flow.set("posteringsdata_til_90540000", ['90540000', '', '', '', '', bankdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
                           }
                       }

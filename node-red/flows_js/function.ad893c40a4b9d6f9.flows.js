@@ -50,6 +50,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
           Advisliste,
           Afsender,
           Posteringstype,
+          end_to_end_reference,
           match_regel,
           Beløb1,
           Beløb2,
@@ -72,6 +73,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
           { name: "Advisliste", value: Advisliste, operator: Advisliste ? operatorValue : null },
           { name: "Afsender", value: Afsender, operator: Afsender ? operatorValue : null },
           { name: "Posteringstype", value: Posteringstype, operator: Posteringstype ? operatorValue : null },
+          { name: "End-to-end-reference", value: end_to_end_reference, operator: end_to_end_reference ? operatorValue : null },
           { name: "Beløb", value1: Beløb1, value2: Beløb2, operator: valueOperatorValue },
           { Posteringstekst, Artskonto, PSP, Notat },
           activeObject,
@@ -79,7 +81,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       ];
   });
   
-  const rules = jsonData != null ? jsonData.map((rule, index) => ({ ...rule, 7: { ruleId: index } })) : [];
+  const rules = jsonData != null ? jsonData.map((rule, index) => ({ ...rule, 8: { ruleId: index } })) : [];
   
   msg.payload = rules;
   global.set("konteringsregler", rules);
