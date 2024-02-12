@@ -22,7 +22,7 @@ const Node = {
       "66b81c6ebf307b20"
     ]
   ],
-  "_order": 112
+  "_order": 113
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, csv) {
@@ -60,6 +60,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
           PSP,
           Notat
       } = cleanedData;
+  
+      console.log(cleanedData);
   
       const hasHash = Object.values(data).some(value => value && String(value).includes("#"));
       const isActive = !hasHash;
