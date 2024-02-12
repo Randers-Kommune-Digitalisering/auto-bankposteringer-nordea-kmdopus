@@ -7,7 +7,7 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "debitorkonto_transactions",
+      "p": "transactions",
       "pt": "flow",
       "to": "payload.response.transactions",
       "tot": "msg"
@@ -26,7 +26,7 @@ const Node = {
       "f850f9e3f6eff63d"
     ]
   ],
-  "_order": 184
+  "_order": 185
 }
 
 module.exports = Node;

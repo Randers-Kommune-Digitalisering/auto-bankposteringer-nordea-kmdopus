@@ -7,7 +7,7 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "hovedkonto_transactions",
+      "p": "transactions",
       "pt": "flow",
       "to": "payload.response.transactions",
       "tot": "msg"
@@ -33,7 +33,7 @@ const Node = {
       "4e384ce7a5fd0cec"
     ]
   ],
-  "_order": 178
+  "_order": 179
 }
 
 module.exports = Node;

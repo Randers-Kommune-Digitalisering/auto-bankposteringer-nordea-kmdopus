@@ -57,6 +57,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               .filter(key => regel_obj[key].value)
               .length;
   
+          console.log("antal_searchword: " + antal_searchword);
+  
           if (regellinjer_tjekket > 1 && linjer_dannet > 0) {
               continue
           } else {
