@@ -3,19 +3,19 @@ const Node = {
   "type": "debug",
   "z": "f91accb007eed9a2",
   "g": "cc24afa8fb94a1a5",
-  "name": "Fejl i konvertering til csv",
+  "name": "Fejl i konvertering",
   "active": true,
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "true",
-  "targetType": "full",
+  "complete": "{\t   \"Message\": \"Parsing data failed\",\t   \"Error\": msg.error,\t   \"Timestamp\": $now()\t}",
+  "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 200,
+  "x": 220,
   "y": 520,
   "wires": [],
-  "_order": 216
+  "_order": 214
 }
 
 module.exports = Node;

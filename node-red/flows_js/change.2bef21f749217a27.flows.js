@@ -9,8 +9,8 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "\"Indlæsningen af bankposteringer kræver din godkendelse\"",
-      "tot": "jsonata"
+      "to": "Indlæsningen af bankposteringer kræver din godkendelse",
+      "tot": "str"
     },
     {
       "t": "set",
@@ -18,6 +18,13 @@ const Node = {
       "pt": "msg",
       "to": "Godkendelse af automatisk bankindlæsning (autogenereret mail)",
       "tot": "str"
+    },
+    {
+      "t": "set",
+      "p": "adminAuthAttempt",
+      "pt": "global",
+      "to": "0",
+      "tot": "num"
     }
   ],
   "action": "",
@@ -25,7 +32,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 1800,
+  "x": 1700,
   "y": 60,
   "wires": [
     [

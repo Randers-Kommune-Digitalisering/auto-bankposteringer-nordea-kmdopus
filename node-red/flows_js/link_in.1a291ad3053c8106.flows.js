@@ -3,18 +3,18 @@ const Node = {
   "type": "link in",
   "z": "37f6db37c66da295",
   "g": "9f5e7f69a9319c00",
-  "name": "link in 2",
+  "name": "link in nordea trans debtor",
   "links": [
-    "f4017223fa913e7c"
+    "27e7d1cb2f4962a3"
   ],
   "x": 145,
-  "y": 340,
+  "y": 320,
   "wires": [
     [
-      "b303be03c07d895e"
+      "6e266f0e8a2d1ca2"
     ]
   ],
-  "_order": 208
+  "_order": 207
 }
 
 module.exports = Node;

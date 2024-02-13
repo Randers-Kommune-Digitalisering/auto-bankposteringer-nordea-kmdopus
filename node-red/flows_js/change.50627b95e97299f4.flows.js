@@ -16,7 +16,7 @@ const Node = {
       "t": "set",
       "p": "headers.Authorization",
       "pt": "msg",
-      "to": "'Bearer ' & $flowContext('access_token')",
+      "to": "'Bearer ' & $globalContext('access_token')",
       "tot": "jsonata"
     },
     {

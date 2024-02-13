@@ -3,20 +3,20 @@ const Node = {
   "type": "debug",
   "z": "f91accb007eed9a2",
   "g": "6055094b02013d9b",
-  "name": "stdout Hovedk. bilag",
+  "name": "stdout File Creation",
   "active": true,
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "\"Bilag til hovedkonto oprettet\"",
+  "complete": "{\t   \"Message\": \"Transactions matched and file created\",\t   \"Path to file\": $flowContext('filename'),\t   \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 815,
+  "x": 625,
   "y": 60,
   "wires": [],
   "l": false,
-  "_order": 212
+  "_order": 225
 }
 
 module.exports = Node;

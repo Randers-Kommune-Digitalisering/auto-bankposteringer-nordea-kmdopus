@@ -8,13 +8,14 @@ const Node = {
     "a7296134df69aba6"
   ],
   "uncaught": false,
-  "x": 1670,
-  "y": 80,
+  "x": 1515,
+  "y": 60,
   "wires": [
     [
       "2bef21f749217a27"
     ]
   ],
+  "l": false,
   "_order": 166
 }
 

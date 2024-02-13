@@ -27,7 +27,7 @@ const Node = {
       "module": "crypto-js"
     }
   ],
-  "x": 1450,
+  "x": 1330,
   "y": 200,
   "wires": [
     [

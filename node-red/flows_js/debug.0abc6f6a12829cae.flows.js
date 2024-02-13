@@ -8,15 +8,15 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "true",
-  "targetType": "full",
+  "complete": "{\t   \"Message\": \"Transactions retrieved from 'debitorkonto'\",\t   \"Status Code\": msg.statusCode,\t   \"Timestamp\": $now()\t}",
+  "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 955,
-  "y": 340,
+  "x": 1005,
+  "y": 320,
   "wires": [],
   "l": false,
-  "_order": 186
+  "_order": 185
 }
 
 module.exports = Node;

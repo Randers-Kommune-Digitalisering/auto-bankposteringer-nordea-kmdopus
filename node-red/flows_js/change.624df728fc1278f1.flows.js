@@ -8,14 +8,14 @@ const Node = {
     {
       "t": "set",
       "p": "client_token",
-      "pt": "flow",
+      "pt": "global",
       "to": "payload.response.client_token",
       "tot": "msg"
     },
     {
       "t": "set",
       "p": "access_id",
-      "pt": "flow",
+      "pt": "global",
       "to": "payload.response.access_id",
       "tot": "msg"
     }
@@ -25,7 +25,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 1110,
+  "x": 990,
   "y": 60,
   "wires": [
     [

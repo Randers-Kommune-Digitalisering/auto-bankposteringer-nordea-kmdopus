@@ -6,10 +6,10 @@ const Node = {
   "name": "link out nordea auth status check",
   "mode": "return",
   "links": [],
-  "x": 1865,
+  "x": 1745,
   "y": 180,
   "wires": [],
-  "_order": 204
+  "_order": 203
 }
 
 module.exports = Node;

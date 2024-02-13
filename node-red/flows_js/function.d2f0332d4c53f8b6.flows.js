@@ -3,21 +3,21 @@ const Node = {
   "type": "function",
   "z": "f91accb007eed9a2",
   "g": "6055094b02013d9b",
-  "name": "match transactions with konteringsregler",
+  "name": "matching, hovedkonto",
   "func": "",
   "outputs": 1,
   "noerr": 0,
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 240,
-  "y": 60,
+  "x": 180,
+  "y": 80,
   "wires": [
     [
-      "4255d18a1fe6c5d1"
+      "27e7d1cb2f4962a3"
     ]
   ],
-  "_order": 209
+  "_order": 222
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
@@ -56,8 +56,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               .slice(0, 5)
               .filter(key => regel_obj[key].value)
               .length;
-  
-          console.log("antal_searchword: " + antal_searchword);
   
           if (regellinjer_tjekket > 1 && linjer_dannet > 0) {
               continue
@@ -141,7 +139,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       }
   
       // Hvis der ikke findes noget match, smides posteringen over på 95990009
-  
       if (linjer_dannet === 0) {
           uplacerbare_poster += 1;
   
@@ -173,10 +170,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   }
   
   flow.set("omposteringsarray", omposteringsbilag);
-  flow.set("nomatch_list", nomatch_list);
+  global.set("nomatch_list", nomatch_list);
   console.log("I alt " + uplacerbare_poster + " uplacerbare poster");
-  
-  flow.set("filename", "/data/output/hovedkonto/" + flow.get("time_of_origin") + ".csv")
   
   return msg;
 }

@@ -15,13 +15,14 @@ const Node = {
   "authType": "bearer",
   "senderr": false,
   "headers": [],
-  "x": 970,
+  "x": 905,
   "y": 100,
   "wires": [
     [
       "a6cc761e9e0eb217"
     ]
   ],
+  "l": false,
   "_order": 130
 }
 
