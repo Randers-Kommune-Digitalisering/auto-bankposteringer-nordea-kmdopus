@@ -6,13 +6,12 @@ const Node = {
   "name": "link out nordea trans debtor",
   "mode": "link",
   "links": [
-    "b31ff5201c1d8c84",
-    "d9d05c409012a745"
+    "143776ba64dde749"
   ],
-  "x": 955,
-  "y": 360,
+  "x": 1005,
+  "y": 340,
   "wires": [],
-  "_order": 189
+  "_order": 188
 }
 
 module.exports = Node;

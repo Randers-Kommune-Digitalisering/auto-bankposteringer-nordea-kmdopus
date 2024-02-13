@@ -7,7 +7,7 @@ const Node = {
   "property": "payload",
   "action": "str",
   "pretty": false,
-  "x": 290,
+  "x": 255,
   "y": 60,
   "wires": [
     [
@@ -16,7 +16,8 @@ const Node = {
       "2eed582e462f26c2"
     ]
   ],
-  "_order": 236
+  "l": false,
+  "_order": 243
 }
 
 module.exports = Node;

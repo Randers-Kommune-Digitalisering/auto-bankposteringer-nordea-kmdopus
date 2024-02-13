@@ -8,14 +8,14 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "true",
-  "targetType": "full",
+  "complete": "{\t   \"Message\": \"Matching script failed\",\t   \"Error\": msg.error,\t   \"Timestamp\": $now()\t}",
+  "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
   "x": 220,
   "y": 480,
   "wires": [],
-  "_order": 214
+  "_order": 212
 }
 
 module.exports = Node;

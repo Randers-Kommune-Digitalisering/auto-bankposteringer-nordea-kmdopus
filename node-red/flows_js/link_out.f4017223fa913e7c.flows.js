@@ -6,13 +6,12 @@ const Node = {
   "name": "link out nordea file creation",
   "mode": "link",
   "links": [
-    "26165730a50e4641",
-    "1a291ad3053c8106"
+    "26165730a50e4641"
   ],
-  "x": 815,
+  "x": 625,
   "y": 80,
   "wires": [],
-  "_order": 222
+  "_order": 228
 }
 
 module.exports = Node;

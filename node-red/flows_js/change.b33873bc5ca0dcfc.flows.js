@@ -17,7 +17,7 @@ const Node = {
       "p": "query_param",
       "pt": "flow",
       "to": "access_id",
-      "tot": "flow"
+      "tot": "global"
     },
     {
       "t": "set",
