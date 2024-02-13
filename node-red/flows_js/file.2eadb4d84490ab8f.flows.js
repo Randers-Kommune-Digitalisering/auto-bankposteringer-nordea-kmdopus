@@ -10,15 +10,15 @@ const Node = {
   "createDir": true,
   "overwriteFile": "true",
   "encoding": "none",
-  "x": 700,
+  "x": 525,
   "y": 60,
   "wires": [
     [
-      "92e6bca0b7814dbb",
-      "f4017223fa913e7c"
+      "c36b9fb0e614dab4"
     ]
   ],
-  "_order": 211
+  "l": false,
+  "_order": 224
 }
 
 module.exports = Node;

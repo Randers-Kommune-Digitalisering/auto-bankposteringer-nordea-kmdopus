@@ -34,5 +34,11 @@
         "module": "crypto-js",
         "builtin": false,
         "known": false
+    },
+    "csv-parser": {
+        "spec": "csv-parser",
+        "module": "csv-parser",
+        "builtin": false,
+        "known": false
     }
 }

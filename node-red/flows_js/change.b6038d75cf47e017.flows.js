@@ -8,16 +8,23 @@ const Node = {
     {
       "t": "set",
       "p": "exchange_code",
-      "pt": "flow",
+      "pt": "global",
       "to": "payload.response.code",
       "tot": "msg"
     },
     {
       "t": "set",
       "p": "request_status",
-      "pt": "flow",
+      "pt": "global",
       "to": "payload.response.status",
       "tot": "msg"
+    },
+    {
+      "t": "set",
+      "p": "adminAuthAttempt",
+      "pt": "flow",
+      "to": "$globalContext('adminAuthAttempt') + 1",
+      "tot": "jsonata"
     }
   ],
   "action": "",
@@ -25,7 +32,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 1110,
+  "x": 990,
   "y": 140,
   "wires": [
     [

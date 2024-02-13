@@ -3,20 +3,20 @@ const Node = {
   "type": "debug",
   "z": "37f6db37c66da295",
   "g": "c31ca42d52037078",
-  "name": "stdout Auth step fail",
+  "name": "stdout API fail",
   "active": true,
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "true",
-  "targetType": "full",
+  "complete": "{\t   \"Message\": \"API call failed\",\t   \"Status Code\": msg.statusCode,\t   \"Error\": msg.payload.error.failures,\t   \"Timestamp\": $now()\t}",
+  "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1865,
+  "x": 1745,
   "y": 200,
   "wires": [],
   "l": false,
-  "_order": 203
+  "_order": 202
 }
 
 module.exports = Node;

@@ -38,7 +38,7 @@ const Node = {
       "p": "data.code",
       "pt": "flow",
       "to": "exchange_code",
-      "tot": "flow"
+      "tot": "global"
     },
     {
       "t": "set",

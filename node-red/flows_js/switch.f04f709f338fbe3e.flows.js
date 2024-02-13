@@ -5,7 +5,7 @@ const Node = {
   "g": "9d7a704133314cab",
   "name": "switch req status",
   "property": "request_status",
-  "propertyType": "flow",
+  "propertyType": "global",
   "rules": [
     {
       "t": "eq",
@@ -21,7 +21,7 @@ const Node = {
   "checkall": "true",
   "repair": false,
   "outputs": 2,
-  "x": 1450,
+  "x": 1330,
   "y": 60,
   "wires": [
     [

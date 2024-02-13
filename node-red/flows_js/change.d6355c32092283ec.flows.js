@@ -7,6 +7,11 @@ const Node = {
   "rules": [
     {
       "t": "delete",
+      "p": "topic",
+      "pt": "msg"
+    },
+    {
+      "t": "delete",
       "p": "_msgid",
       "pt": "msg"
     },

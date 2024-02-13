@@ -8,15 +8,15 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "true",
-  "targetType": "full",
+  "complete": "{\t   \"Message\": \"Authorization confirmed\",\t   \"Status Code\": msg.statusCode,\t   \"Timestamp\": $now()\t}",
+  "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1245,
+  "x": 1125,
   "y": 100,
   "wires": [],
   "l": false,
-  "_order": 202
+  "_order": 201
 }
 
 module.exports = Node;
