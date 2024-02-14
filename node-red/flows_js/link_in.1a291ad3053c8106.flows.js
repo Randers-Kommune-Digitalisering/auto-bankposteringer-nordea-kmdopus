@@ -2,6 +2,7 @@ const Node = {
   "id": "1a291ad3053c8106",
   "type": "link in",
   "z": "37f6db37c66da295",
+  "d": true,
   "g": "9f5e7f69a9319c00",
   "name": "link in nordea trans debtor",
   "links": [
@@ -13,8 +14,7 @@ const Node = {
     [
       "6e266f0e8a2d1ca2"
     ]
-  ],
-  "_order": 207
+  ]
 }
 
 module.exports = Node;

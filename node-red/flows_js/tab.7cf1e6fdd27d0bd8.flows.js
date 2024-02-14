@@ -4,8 +4,7 @@ const Node = {
   "label": "No match",
   "disabled": false,
   "info": "",
-  "env": [],
-  "_order": 3
+  "env": []
 }
 
 module.exports = Node;

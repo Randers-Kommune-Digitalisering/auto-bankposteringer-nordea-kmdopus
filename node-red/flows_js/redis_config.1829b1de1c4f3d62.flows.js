@@ -4,8 +4,7 @@ const Node = {
   "name": "redis_microservice",
   "options": "{\"host\":\"redis_microservice\",\"port\":6379}",
   "cluster": false,
-  "optionsType": "json",
-  "_order": 69
+  "optionsType": "json"
 }
 
 module.exports = Node;

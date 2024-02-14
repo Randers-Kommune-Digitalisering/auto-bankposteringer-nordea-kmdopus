@@ -43,13 +43,6 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "query_param2",
-      "pt": "flow",
-      "to": "sidste_bankdag",
-      "tot": "global"
-    },
-    {
-      "t": "set",
       "p": "step",
       "pt": "flow",
       "to": "5",
@@ -67,8 +60,7 @@ const Node = {
     [
       "9f4d5f3a190849e1"
     ]
-  ],
-  "_order": 209
+  ]
 }
 
 module.exports = Node;
