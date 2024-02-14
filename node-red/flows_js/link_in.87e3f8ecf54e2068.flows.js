@@ -12,8 +12,7 @@ const Node = {
       "31c1b0b29c6e3426"
     ]
   ],
-  "l": true,
-  "_order": 172
+  "l": true
 }
 
 module.exports = Node;
