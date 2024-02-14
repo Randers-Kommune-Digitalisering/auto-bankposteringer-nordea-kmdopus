@@ -8,15 +8,14 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "{\t   \"Message\": \"Transactions retrieved from 'hovedkonto'\",\t   \"Status Code\": msg.statusCode,\t   \"Timestamp\": $now()\t}",
+  "complete": "{\t   \"Message\": \"Transactions retrieved from 'hovedkonto'\",\t   \"Status Code\": msg.statusCode,\t   \"Transactions\": msg.payload.response.transactions,\t   \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
   "x": 1005,
   "y": 280,
   "wires": [],
-  "l": false,
-  "_order": 180
+  "l": false
 }
 
 module.exports = Node;

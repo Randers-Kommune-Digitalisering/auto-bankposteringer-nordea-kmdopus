@@ -10,8 +10,7 @@ const Node = {
   "caname": "",
   "servername": "",
   "verifyservercert": true,
-  "alpnprotocol": "",
-  "_order": 68
+  "alpnprotocol": ""
 }
 
 module.exports = Node;

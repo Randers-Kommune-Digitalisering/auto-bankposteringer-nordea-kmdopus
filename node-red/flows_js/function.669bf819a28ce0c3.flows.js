@@ -33,8 +33,7 @@ const Node = {
     [
       "145f6f129e7190d7"
     ]
-  ],
-  "_order": 155
+  ]
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, moment, uuid, forge, CryptoJS) {
@@ -102,8 +101,11 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
       let host = "open.nordea.com";
   
       let path;
-      if (typeof flow.get("query_param1") !== "undefined") {
+      if (typeof flow.get("query_param2") !== "undefined") {
           path = flow.get("path") + "/" + flow.get("query_param") + flow.get("path_suffix") + "?from_date=" + flow.get("query_param1") + "&to_date=" + flow.get("query_param2");
+      }
+      else if (typeof flow.get("query_param1") !== "undefined") {
+          path = flow.get("path") + "/" + flow.get("query_param") + flow.get("path_suffix") + "?from_date=" + flow.get("query_param1");
       }
       else if (typeof flow.get("query_param") !== "undefined") {
           path = flow.get("path") + "/" + flow.get("query_param");

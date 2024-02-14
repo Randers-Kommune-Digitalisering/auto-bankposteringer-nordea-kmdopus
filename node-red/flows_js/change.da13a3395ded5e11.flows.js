@@ -38,15 +38,15 @@ const Node = {
       "t": "set",
       "p": "query_param1",
       "pt": "flow",
-      "to": "sidste_bankdag",
-      "tot": "global"
+      "to": "2024-02-13",
+      "tot": "str"
     },
     {
       "t": "set",
       "p": "query_param2",
       "pt": "flow",
-      "to": "sidste_bankdag",
-      "tot": "global"
+      "to": "2024-02-13",
+      "tot": "str"
     },
     {
       "t": "set",
@@ -67,8 +67,7 @@ const Node = {
     [
       "632cc65c2df51983"
     ]
-  ],
-  "_order": 189
+  ]
 }
 
 module.exports = Node;
