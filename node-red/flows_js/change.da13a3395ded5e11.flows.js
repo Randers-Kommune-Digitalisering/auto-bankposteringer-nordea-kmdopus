@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "37f6db37c66da295",
   "g": "9f5e7f69a9319c00",
-  "name": "params, hovedkonto",
+  "name": "Flow vars",
   "rules": [
     {
       "t": "set",
@@ -30,30 +30,23 @@ const Node = {
       "t": "set",
       "p": "query_param",
       "pt": "flow",
-      "to": "HOVEDKONTO",
-      "tot": "env",
+      "to": "$globalContext('bankkonti')[$flowContext('account_step')]",
+      "tot": "jsonata",
       "dc": true
     },
     {
       "t": "set",
       "p": "query_param1",
       "pt": "flow",
-      "to": "2024-02-13",
-      "tot": "str"
+      "to": "startdate",
+      "tot": "global"
     },
     {
       "t": "set",
       "p": "query_param2",
       "pt": "flow",
-      "to": "2024-02-13",
-      "tot": "str"
-    },
-    {
-      "t": "set",
-      "p": "step",
-      "pt": "flow",
-      "to": "5",
-      "tot": "str"
+      "to": "enddate",
+      "tot": "global"
     }
   ],
   "action": "",
@@ -61,7 +54,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 460,
+  "x": 380,
   "y": 280,
   "wires": [
     [

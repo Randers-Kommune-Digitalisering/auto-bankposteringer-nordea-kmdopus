@@ -20,12 +20,17 @@ const Node = {
       "vt": "num",
       "v2": "510",
       "v2t": "num"
+    },
+    {
+      "t": "eq",
+      "v": "401",
+      "vt": "num"
     }
   ],
   "checkall": "true",
   "repair": false,
-  "outputs": 2,
-  "x": 1630,
+  "outputs": 3,
+  "x": 1490,
   "y": 180,
   "wires": [
     [
@@ -33,6 +38,10 @@ const Node = {
     ],
     [
       "b5e0f0f808716c5f"
+    ],
+    [
+      "b5e0f0f808716c5f",
+      "d194eda7b9db38ed"
     ]
   ]
 }

@@ -27,7 +27,7 @@ const Node = {
       "module": "crypto-js"
     }
   ],
-  "x": 1330,
+  "x": 1190,
   "y": 200,
   "wires": [
     [
@@ -114,7 +114,11 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
           path = flow.get("path");
       }
   
-      flow.set("url", host + path);
+      if (typeof flow.get("link_to_next_page") !== "undefined") {
+          flow.set("url", flow.get("link_to_next_page"))
+      } else {
+          flow.set("url", host + path);
+      }
   
       const method = flow.get("method").toLowerCase();
       const date = moment().utc().format("ddd, DD MMM YYYY HH:mm:ss") + " GMT";

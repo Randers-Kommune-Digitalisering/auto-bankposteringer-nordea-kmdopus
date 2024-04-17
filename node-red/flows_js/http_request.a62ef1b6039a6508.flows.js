@@ -15,7 +15,7 @@ const Node = {
   "authType": "bearer",
   "senderr": false,
   "headers": [],
-  "x": 905,
+  "x": 785,
   "y": 100,
   "wires": [
     [

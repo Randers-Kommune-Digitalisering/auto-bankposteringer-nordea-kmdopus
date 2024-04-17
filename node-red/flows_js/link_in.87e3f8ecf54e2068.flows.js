@@ -3,13 +3,15 @@ const Node = {
   "type": "link in",
   "z": "37f6db37c66da295",
   "g": "fa9c0eb18149dc68",
-  "name": "Step 1",
-  "links": [],
-  "x": 90,
-  "y": 100,
+  "name": "Step 1 - Auth expired",
+  "links": [
+    "d194eda7b9db38ed"
+  ],
+  "x": 140,
+  "y": 80,
   "wires": [
     [
-      "31c1b0b29c6e3426"
+      "e4d850011ccad60f"
     ]
   ],
   "l": true

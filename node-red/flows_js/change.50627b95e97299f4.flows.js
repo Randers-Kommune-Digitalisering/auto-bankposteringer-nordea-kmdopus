@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "37f6db37c66da295",
   "g": "9f5e7f69a9319c00",
-  "name": "env. to msg",
+  "name": "Flow to msg",
   "rules": [
     {
       "t": "set",
@@ -67,7 +67,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 690,
+  "x": 650,
   "y": 280,
   "wires": [
     [

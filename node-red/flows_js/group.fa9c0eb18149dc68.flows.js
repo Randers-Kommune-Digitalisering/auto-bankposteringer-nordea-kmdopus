@@ -11,7 +11,6 @@ const Node = {
     "color": "#000000"
   },
   "nodes": [
-    "216b8ea192e11225",
     "e4d850011ccad60f",
     "26e7a1f9f88df3ee",
     "6f4acd89bb51aa56",
@@ -34,31 +33,25 @@ const Node = {
     "27bd5d179edb2c93",
     "281316d0452926d4",
     "f636588c27541101",
-    "31c1b0b29c6e3426",
     "08dccd1d575e80d4",
     "ed71975d1d214b80",
     "582fcaa0daa95fd5",
     "a994c85cb61ed728",
     "01601ddb7de735ae",
     "7a7b99685c649752",
-    "a238f0cb85fa6c7a",
     "d0b394c7c6567278",
     "87e3f8ecf54e2068",
-    "ad149020eaebda4e",
     "0eb4d70577cb850a",
     "899fa423dc131ca8",
     "a7296134df69aba6",
     "a6cc761e9e0eb217",
     "73f6dfe575a1b5f0",
     "f85f9d2570988531",
-    "dc01ad5aef23542a",
-    "0efe8cdf512f5c71",
-    "e2826190712f0f20",
-    "3d507ebf3f05879f"
+    "ecd1d4485a4e7b45"
   ],
   "x": 14,
   "y": 19,
-  "w": 1172,
+  "w": 1032,
   "h": 222
 }
 

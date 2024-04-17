@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "37f6db37c66da295",
   "g": "fa9c0eb18149dc68",
-  "name": "Env vars & clean flow context",
+  "name": "Set flow vars",
   "rules": [
     {
       "t": "set",
@@ -58,7 +58,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 400,
+  "x": 330,
   "y": 60,
   "wires": [
     [

@@ -12,7 +12,7 @@ const Node = {
   "tls": true,
   "name": "jan.molbaek@randers.dk",
   "dname": "Send email",
-  "x": 1710,
+  "x": 1590,
   "y": 100,
   "wires": []
 }

@@ -3,15 +3,15 @@ const Node = {
   "type": "link in",
   "z": "f91accb007eed9a2",
   "g": "6055094b02013d9b",
-  "name": "link in nordea file creation, debtor",
+  "name": "link in nordea file creation",
   "links": [
-    "f850f9e3f6eff63d"
+    "4e384ce7a5fd0cec"
   ],
   "x": 55,
   "y": 60,
   "wires": [
     [
-      "f6dd7ca74ddcc911"
+      "f2c2fa268a05cd5c"
     ]
   ]
 }

@@ -9,15 +9,15 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "omposteringsarray",
+      "to": "erp_array",
       "tot": "flow"
     },
     {
       "t": "set",
       "p": "columns",
       "pt": "msg",
-      "to": "omp_headers",
-      "tot": "flow"
+      "to": "erp_file_headers",
+      "tot": "global"
     }
   ],
   "action": "",
@@ -25,7 +25,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 370,
+  "x": 350,
   "y": 60,
   "wires": [
     [
