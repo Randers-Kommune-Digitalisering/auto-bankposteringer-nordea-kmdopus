@@ -4,10 +4,8 @@ const Node = {
   "z": "37f6db37c66da295",
   "g": "c31ca42d52037078",
   "name": "link in nordea auth status check",
-  "links": [
-    "7a391b8d656c6bc2"
-  ],
-  "x": 1515,
+  "links": [],
+  "x": 1375,
   "y": 180,
   "wires": [
     [

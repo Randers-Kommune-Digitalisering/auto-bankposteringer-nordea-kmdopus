@@ -3,18 +3,18 @@ const Node = {
   "type": "file",
   "z": "f91accb007eed9a2",
   "g": "6055094b02013d9b",
-  "name": "Skriv omp.bilag",
+  "name": "Write ERP file",
   "filename": "$flowContext(\"filename\")\t",
   "filenameType": "jsonata",
   "appendNewline": true,
   "createDir": true,
   "overwriteFile": "true",
   "encoding": "none",
-  "x": 525,
+  "x": 505,
   "y": 60,
   "wires": [
     [
-      "c36b9fb0e614dab4"
+      "5dccac8a2a767f25"
     ]
   ],
   "l": false

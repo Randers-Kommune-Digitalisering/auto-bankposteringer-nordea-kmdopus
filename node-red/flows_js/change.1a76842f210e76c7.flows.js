@@ -19,7 +19,7 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "nomatch_list",
+      "to": "postings_with_no_match",
       "tot": "flow"
     },
     {

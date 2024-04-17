@@ -3,174 +3,191 @@ const Node = {
   "type": "function",
   "z": "f91accb007eed9a2",
   "g": "6055094b02013d9b",
-  "name": "matching, hovedkonto",
+  "name": "Matching",
   "func": "",
   "outputs": 1,
   "noerr": 0,
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 180,
-  "y": 80,
+  "x": 200,
+  "y": 60,
   "wires": [
     [
-      "27e7d1cb2f4962a3"
+      "4255d18a1fe6c5d1"
     ]
   ]
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let uplacerbare_poster = 0;
-  let felter_i_nordea = ["narrative", "message", "counterparty_name", "type_description", "end_to_end_reference"];
-  let omposteringsbilag = [];
-  let nomatch_list = [];
-  let omp_headers = global.get("omp_headers").split(", ");
+  let sumOfPostingsWithNoMatch = 0;
+  const postingParameters = ["message", "narrative", "counterparty_name", "type_description", "end_to_end_reference"];   // Length has to be equal to length of parameter subrules of rules[i]
+  const erpPostings = [];
+  const postingsWithNoMatch = [];
+  const erpFileHeaders = global.get("erp_file_headers").split(", ");
+  const currentAccount = global.get("bankkonti")[flow.get("account_step")];
+  const currentStatusAccount = global.get("statuskonti")[flow.get("account_step")];
+  const currentLandingAccount = global.get("mellemregningskonti")[flow.get("account_step")];
   
-  // For hver transaktion
-  for (let postering of flow.get("transactions")) {
-      let linjer_dannet = 0;
-      let regellinjer_tjekket = 0;
+  function calculateSpecificity(rule) {
+      // Count the number of filled parameters in the rule
+      return rule.slice(0, 6).filter(entry => entry.value).length;
+  } 
   
-      // Scope: Tjek alle konteringsregler igennem, regel for regel
-      for (let regel_obj of global.get("konteringsregler")) {
-          let delregler_tjekket = 0; // tæller til underreglerne, dvs. reference, advis, afsender, transaktionstype, end-to-end-reference og beløb
-          let matches = 0;
-          let exceptionBool = regel_obj[6].Artskonto === "90540000";
+  function merge(left, right) {
+      let result = [];
+      let leftIndex = 0;
+      let rightIndex = 0;
   
-          // Tjekker om beløbsregel er overholdt
-          let match_beloeb;
-          if (regel_obj[5].operator === '><') {
-              match_beloeb = parseFloat(postering.amount) > parseFloat(regel_obj[5].value1.replace(',', '.')) && (regel_obj[5].value2 ? parseFloat(postering.amount) < parseFloat(regel_obj[5].value2.replace(',', '.')) : true);
-          } else if (regel_obj[5].operator === '>') {
-              match_beloeb = parseFloat(postering.amount) > parseFloat(regel_obj[5].value1.replace(',', '.'));
-          } else if (regel_obj[5].operator === '<') {
-              match_beloeb = parseFloat(postering.amount) < parseFloat(regel_obj[5].value1.replace(',', '.'));
-          } else if (regel_obj[5].operator === '==') {
-              match_beloeb = parseFloat(postering.amount) === parseFloat(regel_obj[5].value1.replace(',', '.'));
-          // Fallback
-          } else if (!regel_obj[5].operator) { match_beloeb = true; } else if (!regel_obj[5].value1) { match_beloeb = true; }
-  
-          // Tæller antallet af udfyldte delregler
-          let antal_searchword = Object.keys(regel_obj)
-              .slice(0, 5)
-              .filter(key => regel_obj[key].value)
-              .length;
-  
-          if (regellinjer_tjekket > 1 && linjer_dannet > 0) {
-              continue
+      while (leftIndex < left.length && rightIndex < right.length) {
+          if (calculateSpecificity(left[leftIndex]) > calculateSpecificity(right[rightIndex])) {
+              result.push(left[leftIndex]);
+              leftIndex++;
           } else {
-              // Scope: Tjek alle delreglerne, delregel for delregel
-              for (let i = 0; i < felter_i_nordea.length; i++) {
-                  let searchword = regel_obj[i].value ? String(regel_obj[i].value).toLowerCase() : null;
-  
-                  if (searchword !== null && regel_obj[7].active) {
-                      // Pointer til delregels tilsvarende parameter i posteringen
-                      let pointer_posteringsparameter = felter_i_nordea[delregler_tjekket];
-  
-                      let match_searchword;                                         
-                      if (regel_obj[i].operator === '.startsWith') {
-                          match_searchword = searchword === (postering[pointer_posteringsparameter]?.slice(0, searchword.length) ?? '').toLowerCase();
-                      } else if (regel_obj[i].operator === '.endsWith') {
-                          match_searchword = searchword === (postering[pointer_posteringsparameter]?.slice(-searchword.length) ?? '').toLowerCase();
-                      } else if (regel_obj[i].operator === 'contains') {
-                          match_searchword = (postering[pointer_posteringsparameter]?.toLowerCase() ?? '').includes(searchword);
-                      } else if (regel_obj[i].operator === '!contains') {
-                          match_searchword = !(postering[pointer_posteringsparameter]?.toLowerCase() ?? '').includes(searchword);
-                      } else if (regel_obj[i].operator === '!null') {
-                          match_searchword = (postering[pointer_posteringsparameter]?.toLowerCase() ?? '') !== null;
-                      } else {
-                          match_searchword = false;
-                      }
-  
-                      if (match_searchword && match_beloeb) {
-                          matches += 1;
-  
-                          if (!exceptionBool) {
-                              let bankdebkred = postering.amount.startsWith('-') ? 'Kredit' : 'Debet';
-                              let driftdebkred = bankdebkred === 'Debet' ? 'Kredit' : 'Debet';
-                              let beloeb = postering.amount.replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
-                              let psp = regel_obj[6].PSP ? regel_obj[6].PSP : '';
-                              
-                              let tekst;
-                              if (regel_obj[6].Posteringstekst.toLowerCase() === 'tekst fra bank') {
-                                  tekst = postering.narrative;
-                              } else if (regel_obj[6].Posteringstekst.toLowerCase() === 'afsender fra bank') {
-                                  tekst = postering.counterparty_name;
-                              } else if (regel_obj[6].Posteringstekst.toLowerCase() === 'advis fra bank') {
-                                  try { tekst = postering.message; } catch (error) { tekst = postering.narrative; }
-                              } else { tekst = regel_obj[6].Posteringstekst; }
-  
-                              // Særlige regler for posteringstekst, hvis postering er vedr. BDP eller KSD
-                              if (pointer_posteringsparameter === "message") {
-                                  if (postering[pointer_posteringsparameter]?.includes('BDP')) {
-                                      tekst = (postering.extra_info?.slice(postering.extra_info.indexOf('BDP')) || '') + (postering[pointer_posteringsparameter]?.toString() || '');
-                                  } else if (postering[pointer_posteringsparameter]?.includes('KSD')) {
-                                      tekst = (postering[pointer_posteringsparameter]?.slice(postering[pointer_posteringsparameter]?.indexOf('KSD')) || '') + ', ' + (postering.counterparty_name || '');
-                                  }
-                              }
-                              // Placeholder til genereret posteringsdata ud fra match
-                              flow.set("posteringsdata_til_drift", [regel_obj[6].Artskonto, '', psp, '', '', driftdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
-                              flow.set("posteringsdata_til_90540000", ['90540000', '', '', '', '', bankdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
-                          }
-                      }
-                  }
-                  delregler_tjekket += 1;
-              }
-              // Hvis der er udfyldt søgeord i reglen og der er lavet match på dem alle, sættes posteringsdata fra placeholderen ind i outputfilen "omposteringsbilag".
-              if (antal_searchword > 0 && antal_searchword === matches) {
-                  let output_posteringsdata_til_drift = {};
-                  let output_posteringsdata_til_90540000 = {};
-  
-                  for (let i = 0; i < omp_headers.length; i++) {
-                      output_posteringsdata_til_drift[omp_headers[i]] = flow.get("posteringsdata_til_drift")[i];
-                      output_posteringsdata_til_90540000[omp_headers[i]] = flow.get("posteringsdata_til_90540000")[i];
-                  }
-  
-                  omposteringsbilag.push(output_posteringsdata_til_drift);
-                  omposteringsbilag.push(output_posteringsdata_til_90540000);
-                  linjer_dannet += 1;
-                  output_posteringsdata_til_drift = {};
-                  output_posteringsdata_til_90540000 = {};
-  
-              }
-              regellinjer_tjekket += 1;
+              result.push(right[rightIndex]);
+              rightIndex++;
           }
       }
+      return result.concat(left.slice(leftIndex)).concat(right.slice(rightIndex));
+  }
   
-      // Hvis der ikke findes noget match, smides posteringen over på 95990009
-      if (linjer_dannet === 0) {
-          uplacerbare_poster += 1;
+  function mergeSort(arr) {
+      if (arr.length <= 1) { return arr; }
+      
+      const middle = Math.floor(arr.length / 2);
+      const left = arr.slice(0, middle);
+      const right = arr.slice(middle);
   
-          let bankdebkred = postering.amount.startsWith('-') ? 'Kredit' : 'Debet';
-          let driftdebkred = bankdebkred === 'Debet' ? 'Kredit' : 'Debet';
-          let beloeb = postering.amount.replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
-          let tekst = postering.transaction_id;
+      return merge(mergeSort(left), mergeSort(right));
+  }
   
-          flow.set("posteringsdata_til_drift", ['95990009', '', '', '', '', driftdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
-          flow.set("posteringsdata_til_90540000", ['90540000', '', '', '', '', bankdebkred, beloeb, '', tekst, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+  function matchParameter(posting, searchValue, parameterIndex) {
+      return posting[parameterIndex].toLowerCase().includes(searchValue);
+  }
   
-          let output_posteringsdata_til_drift = {};
-          let output_posteringsdata_til_90540000 = {};
+  function matchAmount(postingAmount, amountOperator, ruleAmount1, ruleAmount2) {
+      if (amountOperator === '><') {
+          return postingAmount >= ruleAmount1 && postingAmount <= ruleAmount2;
+      } else if (amountOperator === '>') {
+          return postingAmount > ruleAmount1;
+      } else if (amountOperator === '<') {
+          return postingAmount < ruleAmount1;
+      } else if (amountOperator === '==') {
+          return postingAmount === ruleAmount1;
+      } else if (!amountOperator) { return true; } else if (!ruleAmount1) { return true; }
+  }
   
-          for (let i = 0; i < omp_headers.length; i++) {
-              output_posteringsdata_til_drift[omp_headers[i]] = flow.get("posteringsdata_til_drift")[i];
-              output_posteringsdata_til_90540000[omp_headers[i]] = flow.get("posteringsdata_til_90540000")[i];
-          }
+  function textGeneration(textVariation, message, narrative, counterparty_name) {
+      if (narrative && narrative.includes('BDP')) {
+          return narrative.substring(narrative.indexOf('BDP'));
+      } else if (narrative && narrative.includes('KSD')) {
+          return narrative.substring(narrative.indexOf('KSD')) + (counterparty_name ? counterparty_name : '');
+      }
   
-          omposteringsbilag.push(output_posteringsdata_til_drift);
-          omposteringsbilag.push(output_posteringsdata_til_90540000);
-          linjer_dannet += 1;
-          output_posteringsdata_til_drift = {};
-          output_posteringsdata_til_90540000 = {};
-  
-          nomatch_list.push(postering);
-  
+      if (textVariation === "tekst fra bank") {
+          return message;
+      } else if (textVariation === "afsender fra bank") {
+          return counterparty_name ? counterparty_name : message;
+      } else if (textVariation === "advis fra bank") {
+          return narrative ? narrative : message;
+      } else {
+          return message;
       }
   }
   
-  flow.set("omposteringsarray", omposteringsbilag);
-  global.set("nomatch_list", nomatch_list);
-  console.log("I alt " + uplacerbare_poster + " uplacerbare poster");
+  function generateErpPostings(statusAccount, landingAccount, statusDebetOrCredit, bookDebetOrCredit, text, amount, psp) {
+      erpPostings.push([landingAccount, '', psp, '', '', bookDebetOrCredit, amount, '', text, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+      erpPostings.push([statusAccount, '', '', '', '', statusDebetOrCredit, amount, '', text, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+  }
+  
+  const sortedRules = mergeSort(global.get("konteringsregler"));
+  
+  if (currentAccount === "DK3620009035615315-DKK") {   // Debitorkonto
+      let erp_array = flow.get("erp_array") || [];
+  
+      // For hver transaktion
+      for (let posting of flow.get("transactions")) {
+          let statusDebetOrCredit = posting.amount.startsWith('-') ? 'Kredit' : 'Debet';
+          let bookDebetOrCredit = statusDebetOrCredit === 'Debet' ? 'Kredit' : 'Debet';
+          let cleanedAmount = posting.amount.replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
+          let text = posting.counterparty_name + " - " + posting.narrative;
+  
+          generateErpPostings(currentStatusAccount, currentLandingAccount, statusDebetOrCredit, bookDebetOrCredit, text, cleanedAmount, '');
+      }
+  
+      // Concatenate erpPostings to erp_array
+      flow.set("erp_array", erp_array.concat(erpPostings));
+  
+  } else {
+      for (let posting of flow.get("transactions")) {
+          let sumOfErpPostings = 0;
+          let sumOfRulesChecked = 0;
+          let matchedAllParametersBool = false;
+  
+          let postingAmount = parseFloat(posting.amount);
+          let cleanedAmount = posting.amount.replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
+          let statusDebetOrCredit = postingAmount > 0 ? "Debet" : "Kredit";
+          let bookDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet"
+  
+          for (let rule of sortedRules) {
+              let matches = 0;
+  
+              let artskonto = rule[6].Artskonto;
+              let psp = rule[6].PSP ? rule[6].PSP : '';
+              let textVariation = rule[6].Posteringstekst.toLowerCase()
+              let exceptionBool = artskonto === currentStatusAccount;
+              let amountOperator = rule[5].operator;
+              let ruleAmount1 = parseFloat(rule[5].value1.replace(',', '.'));
+              let ruleAmount2 = parseFloat(rule[5].value2.replace(',', '.'));
+  
+              if (sumOfRulesChecked > 1 && sumOfErpPostings > 0) {
+                  continue
+              } else {
+                  for (let i = 0; i < postingParameters.length; i++) {
+                      let searchValue = rule[i].value ? String(rule[i].value).toLowerCase() : null;
+  
+                      if (searchValue !== null && rule[7].active && matchParameter(posting, searchValue, i)) {
+                          matches += 1;
+                          break
+                      }
+                  }
+  
+                  if (matches === calculateSpecificity(rule)) {
+                      matchedAllParametersBool = true;
+                  }
+  
+                  let matchedAmountBool = matchAmount(postingAmount, amountOperator, ruleAmount1, ruleAmount2)
+  
+                  if (matchedAllParametersBool && matchedAmountBool) {
+                      if (!exceptionBool) {   // Don't write ERP postings if rule is an exception
+                          let text = textGeneration(textVariation, posting.message, posting.narrative, posting.counterparty_name);
+  
+                          generateErpPostings(currentStatusAccount, artskonto, statusDebetOrCredit, bookDebetOrCredit, text, cleanedAmount, psp);
+                      }
+  
+                      sumOfErpPostings += 1;
+                  }
+              }
+  
+              sumOfRulesChecked += 1;
+          }
+  
+          if (sumOfErpPostings === 0) {
+              sumOfPostingsWithNoMatch += 1;
+              let text = posting.transaction_id;
+  
+              generateErpPostings(currentStatusAccount, currentLandingAccount, statusDebetOrCredit, bookDebetOrCredit, text, cleanedAmount, '');
+  
+              postingsWithNoMatch.push(posting);
+              sumOfErpPostings += 1;
+          }
+      }
+  }
+  
+  flow.set("erp_array", flow.get("erp_array").concat(erpPostings))
+  global.set("postings_with_no_match", postingsWithNoMatch);
+  console.log("I alt " + sumOfPostingsWithNoMatch + " uplacerbare poster");
+  flow.set("filename", "/data/output/" + flow.get("time_of_origin") + ".csv")
   
   return msg;
 }

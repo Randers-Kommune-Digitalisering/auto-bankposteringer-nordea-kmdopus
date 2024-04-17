@@ -16,7 +16,7 @@ const Node = {
   "drop": false,
   "allowrate": false,
   "outputs": 1,
-  "x": 1330,
+  "x": 1190,
   "y": 140,
   "wires": [
     [
