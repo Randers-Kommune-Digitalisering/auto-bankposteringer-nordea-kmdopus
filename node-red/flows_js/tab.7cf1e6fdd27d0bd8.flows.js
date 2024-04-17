@@ -1,7 +1,7 @@
 const Node = {
   "id": "7cf1e6fdd27d0bd8",
   "type": "tab",
-  "label": "No match",
+  "label": "Generate suggested postings",
   "disabled": false,
   "info": "",
   "env": []

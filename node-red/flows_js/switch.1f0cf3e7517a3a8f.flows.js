@@ -3,7 +3,7 @@ const Node = {
   "type": "switch",
   "z": "37f6db37c66da295",
   "g": "fa9c0eb18149dc68",
-  "name": "Step checker",
+  "name": "Step check",
   "property": "step",
   "propertyType": "flow",
   "rules": [
@@ -26,8 +26,8 @@ const Node = {
   "checkall": "true",
   "repair": false,
   "outputs": 3,
-  "x": 430,
-  "y": 120,
+  "x": 330,
+  "y": 140,
   "wires": [
     [
       "66f7f4915a00da12"

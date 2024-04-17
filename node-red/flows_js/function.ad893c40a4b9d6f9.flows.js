@@ -15,8 +15,8 @@ const Node = {
       "module": "csv-parser"
     }
   ],
-  "x": 280,
-  "y": 100,
+  "x": 300,
+  "y": 60,
   "wires": [
     [
       "66b81c6ebf307b20"
@@ -25,9 +25,6 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, csv) {
-  let omp_headers = ["Artskonto", "Omkostningssted", "PSP-element", "Profitcenter", "Ordre", "Debet/kredit", "Beløb", "Næste agent", "Tekst", "Betalingsart", "Påligningsår", "Betalingsmodtagernr.", "Betalingsmodtagernr.kode", "Ydelsesmodtagernr.", "Ydelsesmodtagernr.kode", "Ydelsesperiode fra", "Ydelsesperiode til", "Oplysningspligtnr.", "Oplysningspligtmodtagernr.kode", "Oplysningspligtkode", "Netværk", "Operation", "Mængde", "Mængdeenhed", "Referencenøgle"];
-  global.set("omp_headers", omp_headers.join(', '));
-  
   const operatorMapping = {
       "Indeholder": "contains",
       "Starter med": ".startsWith",
@@ -66,15 +63,14 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       const isActive = !hasHash;
       const activeObject = { active: isActive };
   
-      const operatorValue = operatorMapping[match_regel] || null;
       const valueOperatorValue = operatorMapping[beløb_regel] || null;
   
       return [
-          { name: "Reference", value: Reference, operator: Reference ? operatorValue : null },
-          { name: "Advisliste", value: Advisliste, operator: Advisliste ? operatorValue : null },
-          { name: "Afsender", value: Afsender, operator: Afsender ? operatorValue : null },
-          { name: "Posteringstype", value: Posteringstype, operator: Posteringstype ? operatorValue : null },
-          { name: "End-to-end-reference", value: end_to_end_reference, operator: end_to_end_reference ? operatorValue : null },
+          { name: "Reference", value: Reference},
+          { name: "Advisliste", value: Advisliste},
+          { name: "Afsender", value: Afsender},
+          { name: "Posteringstype", value: Posteringstype},
+          { name: "End-to-end-reference", value: end_to_end_reference},
           { name: "Beløb", value1: Beløb1, value2: Beløb2, operator: valueOperatorValue },
           { Posteringstekst, Artskonto, PSP, Notat },
           activeObject,

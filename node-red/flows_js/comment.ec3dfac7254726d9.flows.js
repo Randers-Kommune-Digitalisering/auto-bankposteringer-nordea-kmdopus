@@ -6,7 +6,7 @@ const Node = {
   "name": "auth flow",
   "info": "",
   "x": 100,
-  "y": 720,
+  "y": 580,
   "wires": []
 }
 

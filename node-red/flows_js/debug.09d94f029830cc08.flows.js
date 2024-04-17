@@ -3,18 +3,19 @@ const Node = {
   "type": "debug",
   "z": "9b998b2e60b3c784",
   "g": "fc78f431b09075e3",
-  "name": "Fejl i hentning af konteringsregler",
+  "name": "",
   "active": true,
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "payload",
-  "targetType": "msg",
+  "complete": "{\t   \"Message\": \"Failed to import rules csv\",\t   \"Error\": msg.error,\t   \"Timestamp\": $now()\t}",
+  "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 300,
-  "y": 200,
-  "wires": []
+  "x": 645,
+  "y": 60,
+  "wires": [],
+  "l": false
 }
 
 module.exports = Node;

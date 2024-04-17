@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "37f6db37c66da295",
   "g": "fa9c0eb18149dc68",
-  "name": "Clean context",
+  "name": "Delete vars",
   "rules": [
     {
       "t": "delete",
@@ -76,8 +76,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 340,
-  "y": 180,
+  "x": 330,
+  "y": 100,
   "wires": [
     [
       "1f0cf3e7517a3a8f"

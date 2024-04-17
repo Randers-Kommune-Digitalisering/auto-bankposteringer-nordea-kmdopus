@@ -1,7 +1,7 @@
 const Node = {
   "id": "37f6db37c66da295",
   "type": "tab",
-  "label": "Request flows",
+  "label": "Fetch banking data",
   "disabled": false,
   "info": "",
   "env": []
