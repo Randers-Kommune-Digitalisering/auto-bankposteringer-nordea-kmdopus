@@ -1,18 +1,57 @@
-# 🏦 Udlæsning af bankposteringer fra Nordea
+<h1 align="center"> Indlæsning af bankposteringer til kommunens økonomisystem </h1> <br>
 
-Programmet kalder først auth-endpoints for at hente diverse tokens.
-Derefter henter det forrige hverdags transaktioner.
-Transaktionerne matches op mod konteringsregler og påføres kontering.
-Konteringerne bliver lagt sammen i et omposteringsbilag i csv-format.
-Transaktioner uden match påføres konteringsforslag i et seperat omposteringsbilag i csv-format.
-Filen bliver derefter manuelt indlæst i Opus.
+# Indholdsfortegnelse
+
+- [Status](#status)
+- [Introduktion](#introduktion)
+- [Sådan fungerer det](#sådan-fungerer-det)
+- [Faglige ressourcer](#faglige-ressourcer)
+- [Tekniske ressourcer](#tekniske-ressourcer)
+- [Data stack](#data-stack)
 
 # Status
 
-Projektet er klar til at håndtere posteringer fra Nordea.
-Dele af programmet er under udvikling. 
+![Under udvikling](https://img.shields.io/badge/Under%20udvikling-red)
 
-# Resources
+Bankintegrationer:
+
+![Nordea](https://img.shields.io/badge/Nordea-OK-green)
+![Danske Bank](https://img.shields.io/badge/Danske_Bank-Mangler-red)
+![Bankdata](https://img.shields.io/badge/Bankdata-Mangler-red)
+![BEC](https://img.shields.io/badge/BEC-Mangler-red)
+![SDC](https://img.shields.io/badge/SDC-Mangler-red)
+
+Økonomisystemintegrationer:
+
+![KMD Opus](https://img.shields.io/badge/KMD_Opus-OK-green)
+![Fujitsu Prisme](https://img.shields.io/badge/Danske_Bank-Mangler-red)
+![ØS Indsigt](https://img.shields.io/badge/ØS_Indsigt-Mangler-red)
+
+# Introduktion
+
+De fleste kommunale økonomimedarbejdere koncentrerer sig primært om det kommunale økonomisystem, men al afregning med omverdnen foregår reelt på kommunernes bankkonti.
+Der bør derfor være en helt tæt forbindelse mellem kommunens transaktioner og kommunens økonomisystem.
+Det er desværre ikke altid tilfældet, og derfor bliver der rundt omkring i kommmunerne lavet rigtig mange manuelle bogføringer; særligt manuel bogføring af indbetalinger.
+En store del af disse transaktioner følger heldigvis ofte et mønster, så der er basis for automatisering.
+
+Projektet sørger altså for en stærkere integration mellem bankkonti og det interne økonomisystem og automatiserer bogføringen af størstedelen af kommunens transaktioner.
+
+# Sådan fungerer det
+
+Kommunerne udfylder stamdata og konteringsregler, som programmet bruger til at automatisere bogføringen af banktransaktioner.
+En konteringsregel indeholder et sæt søgekriterier og et sæt konteringsoplysninger.
+Stamdata indeholder blandt andet information om kommunens administrator/kontaktperson og bankkontooplysninger.
+
+Programmet har planlagt kørsel dagligt kl. 5:30, hvor transaktionerne for seneste lukkede bankdag hentes.
+Transaktionerne matches op mod konteringsregler og påføres kontering.
+Konteringerne bliver lagt sammen i et finansbilag i csv-format.
+Finansbilaget udstilles på hjemmesiden.
+
+# Faglige ressourcer
+
+[Budget- og regnskabssystem for kommuner](https://budregn.im.dk/budget-og-regnskabssystem-for-kommuner/)
+
+# Tekniske ressourcer
 
 [Dokumentation for Nordea API Corporate Access Authentication](https://developer.nordeaopenbanking.com/documentation?api=Corporate%20Access%20Authorization%20API)
 
@@ -22,7 +61,7 @@ Dele af programmet er under udvikling.
 
 [Postman Collection til Premium API endpoints inkl Authentication](https://raw.githubusercontent.com/NordeaOB/swaggers/master/Premium%20Corporate%20Access%20Authorization%20API%20with%20Accounts%20API%20and%20Payments%20API.postman_collection.json)
 
-# 📦 Microservice based data stack
+# Data stack
 
 ![](https://avatars.githubusercontent.com/u/5375661?s=36&v=4)  Node-RED as a dataflow / orchestrator
 
