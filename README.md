@@ -24,7 +24,7 @@ Bankintegrationer:
 Økonomisystemintegrationer:
 
 ![KMD Opus](https://img.shields.io/badge/KMD_Opus-OK-green)
-![Fujitsu Prisme](https://img.shields.io/badge/Danske_Bank-Mangler-red)
+![Fujitsu Prisme](https://img.shields.io/badge/Fujitsu_Prisme-Mangler-red)
 ![ØS Indsigt](https://img.shields.io/badge/ØS_Indsigt-Mangler-red)
 
 # Introduktion
