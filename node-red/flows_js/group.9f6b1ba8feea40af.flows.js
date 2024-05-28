@@ -2,7 +2,7 @@ const Node = {
   "id": "9f6b1ba8feea40af",
   "type": "group",
   "z": "9b998b2e60b3c784",
-  "name": "Write rules JSON",
+  "name": "Write rules to JSON",
   "style": {
     "stroke": "none",
     "fill": "#e3f3d3",

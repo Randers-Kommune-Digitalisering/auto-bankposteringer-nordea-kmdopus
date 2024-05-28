@@ -2,7 +2,7 @@ const Node = {
   "id": "08894d83b67599fd",
   "type": "group",
   "z": "9b998b2e60b3c784",
-  "name": "Read rules JSON",
+  "name": "Read rules to ENV",
   "style": {
     "stroke": "none",
     "fill": "#e3f3d3",

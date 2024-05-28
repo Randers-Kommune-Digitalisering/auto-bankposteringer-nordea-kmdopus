@@ -23,7 +23,7 @@ const Node = {
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let account_step = flow.get("account_step");
   
-  if (flow.get("account_step").len === flow.get("bankkonti").len) {
+  if (account_step + 1 === flow.get("bankkonti").len) {
       flow.set("account_step", 0);
   } else {
       flow.set("account_step", account_step += 1);
