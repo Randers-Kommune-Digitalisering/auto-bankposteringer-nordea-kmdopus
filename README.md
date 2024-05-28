@@ -1,4 +1,4 @@
-<h1 align="center"> Indlæsning af bankposteringer til kommunens økonomisystem </h1> <br>
+<h1 align="center"> Bankintegration for posteringer til kommunalt økonomisystem </h1> <br>
 
 # Indholdsfortegnelse
 
@@ -63,10 +63,12 @@ Finansbilaget udstilles på hjemmesiden.
 
 # Data stack
 
-![](https://avatars.githubusercontent.com/u/5375661?s=36&v=4)  Node-RED as a dataflow / orchestrator
+![](https://avatars.githubusercontent.com/u/5429470?s=36&v=4)  Programmet kører i en docker-container
 
-![](https://avatars.githubusercontent.com/u/1529926?s=36&v=4)  Redis as the messaging queue
+![](https://avatars.githubusercontent.com/u/5375661?s=36&v=4)  Node-RED som orkestrator
 
-![](https://avatars.githubusercontent.com/u/1525981?s=36&v=4)  Python as the data transform language
+![](https://avatars.githubusercontent.com/u/1529926?s=36&v=4)  Redis som bindeled til microservices
 
-For more information on how to use this stack, please see the [HOW-TO](/docs/HOW-TO.md) file.
+![](https://avatars.githubusercontent.com/u/1525981?s=36&v=4)  Python som microservice (konteringsforslag til umatchede posteringer)
+
+For mere information, læs [HOW-TO](/docs/HOW-TO.md) filen.
