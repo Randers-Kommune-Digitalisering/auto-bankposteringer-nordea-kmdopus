@@ -135,7 +135,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               let artskonto = rule[6].Artskonto;
               let psp = rule[6].PSP ? rule[6].PSP : '';
               let textVariation = rule[6].Posteringstekst.toLowerCase()
-              let exceptionBool = artskonto === currentStatusAccount;
+              let exceptionBool = rule[9].exception;
               let amountOperator = rule[5].operator;
               let ruleAmount1 = parseFloat(rule[5].value1.replace(',', '.'));
               let ruleAmount2 = parseFloat(rule[5].value2.replace(',', '.'));

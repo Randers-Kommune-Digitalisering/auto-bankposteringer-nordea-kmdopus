@@ -1,20 +1,18 @@
 const Node = {
-  "id": "71aad7fb08920426",
+  "id": "8114247316d2adf3",
   "type": "json",
-  "z": "37f6db37c66da295",
-  "g": "91ee0364118b77c6",
+  "z": "6a990ac4b4acd1b6",
   "name": "",
   "property": "payload",
   "action": "str",
   "pretty": false,
-  "x": 1185,
-  "y": 800,
+  "x": 890,
+  "y": 100,
   "wires": [
     [
-      "c90f4b4b5c61a378"
+      "8891fbaffc9a8f8b"
     ]
-  ],
-  "l": false
+  ]
 }
 
 module.exports = Node;

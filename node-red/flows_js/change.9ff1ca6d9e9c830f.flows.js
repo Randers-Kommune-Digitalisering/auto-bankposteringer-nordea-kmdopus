@@ -7,7 +7,14 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "statuskonti",
+      "p": "stamdata",
+      "pt": "global",
+      "to": "{}",
+      "tot": "json"
+    },
+    {
+      "t": "set",
+      "p": "stamdata.statuskonti",
       "pt": "global",
       "to": "[\"90540000\",\"90541000\"]",
       "tot": "json",
@@ -15,14 +22,14 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "bankkonti",
+      "p": "stamdata.bankkonti",
       "pt": "global",
-      "to": "[\t   \"DK6520005908764988\"&\"-DKK\",\t   \"DK3620009035615315\"&\"-DKK\"\t]",
+      "to": "[\t   \"DK20005908764988\"&\"-DKK\",\t   \"DK20009035615315\"&\"-DKK\"\t]",
       "tot": "jsonata"
     },
     {
       "t": "set",
-      "p": "mellemregningskonti",
+      "p": "stamdata.mellemregningskonti",
       "pt": "global",
       "to": "[\"95990009\",\"95991009\"]",
       "tot": "json"
@@ -34,7 +41,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 205,
-  "y": 340,
+  "y": 360,
   "wires": [
     [
       "7f454f55bfaa9637"
