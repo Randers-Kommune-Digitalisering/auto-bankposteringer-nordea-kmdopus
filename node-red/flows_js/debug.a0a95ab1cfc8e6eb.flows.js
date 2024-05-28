@@ -8,7 +8,7 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "{\t   \"Message\": \"Rules updated\",\t   \"Timestamp\": $now()\t}",
+  "complete": "{\t   \"Message\": \"Rules read from json to environment\",\t   \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",

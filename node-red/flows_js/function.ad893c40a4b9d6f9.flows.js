@@ -65,6 +65,11 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   
       const valueOperatorValue = operatorMapping[beløb_regel] || null;
   
+      // Create "exception" attribute and remove Artskonto if true
+      const shouldBeException = Artskonto === "90540000";
+      cleanedData.Artskonto = shouldBeException ? undefined : Artskonto;
+      const exceptionObject = { exception: shouldBeException };
+  
       return [
           { name: "Reference", value: Reference},
           { name: "Advisliste", value: Advisliste},
@@ -74,7 +79,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
           { name: "Beløb", value1: Beløb1, value2: Beløb2, operator: valueOperatorValue },
           { Posteringstekst, Artskonto, PSP, Notat },
           activeObject,
-          { ruleId: index }
+          { ruleId: index },
+          exceptionObject
       ];
   });
   

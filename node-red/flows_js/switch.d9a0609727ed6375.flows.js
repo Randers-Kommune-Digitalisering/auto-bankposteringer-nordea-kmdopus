@@ -15,16 +15,16 @@ const Node = {
       "v2t": "num"
     },
     {
+      "t": "eq",
+      "v": "401",
+      "vt": "num"
+    },
+    {
       "t": "btwn",
       "v": "400",
       "vt": "num",
       "v2": "510",
       "v2t": "num"
-    },
-    {
-      "t": "eq",
-      "v": "401",
-      "vt": "num"
     }
   ],
   "checkall": "true",
@@ -37,11 +37,11 @@ const Node = {
       "87538fe934f3a5c9"
     ],
     [
-      "b5e0f0f808716c5f"
-    ],
-    [
       "b5e0f0f808716c5f",
       "d194eda7b9db38ed"
+    ],
+    [
+      "b5e0f0f808716c5f"
     ]
   ]
 }

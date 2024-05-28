@@ -16,7 +16,7 @@ const Node = {
       "t": "set",
       "p": "path",
       "pt": "flow",
-      "to": "/corporate/v2/authorize/token",
+      "to": "/corporate/v3/authorize/token",
       "tot": "str"
     },
     {

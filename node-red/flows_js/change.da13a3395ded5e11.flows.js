@@ -30,9 +30,8 @@ const Node = {
       "t": "set",
       "p": "query_param",
       "pt": "flow",
-      "to": "$globalContext('bankkonti')[$flowContext('account_step')]",
-      "tot": "jsonata",
-      "dc": true
+      "to": "selected_bank_account",
+      "tot": "flow"
     },
     {
       "t": "set",
@@ -43,10 +42,24 @@ const Node = {
     },
     {
       "t": "set",
+      "p": "query_param1",
+      "pt": "flow",
+      "to": "2024-05-13",
+      "tot": "str"
+    },
+    {
+      "t": "set",
       "p": "query_param2",
       "pt": "flow",
       "to": "enddate",
       "tot": "global"
+    },
+    {
+      "t": "set",
+      "p": "query_param2",
+      "pt": "flow",
+      "to": "2024-05-13",
+      "tot": "str"
     }
   ],
   "action": "",
@@ -54,7 +67,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 380,
+  "x": 420,
   "y": 280,
   "wires": [
     [
