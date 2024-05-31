@@ -5,6 +5,7 @@
 - [Status](#status)
 - [Introduktion](#introduktion)
 - [Sådan fungerer det](#sådan-fungerer-det)
+- [Diagrammer](#Diagrammer)
 - [Faglige ressourcer](#faglige-ressourcer)
 - [Tekniske ressourcer](#tekniske-ressourcer)
 - [Data stack](#data-stack)
@@ -46,6 +47,12 @@ Programmet har planlagt kørsel dagligt kl. 5:30, hvor transaktionerne for senes
 Transaktionerne matches op mod konteringsregler og påføres kontering.
 Konteringerne bliver lagt sammen i et finansbilag i csv-format.
 Finansbilaget udstilles på hjemmesiden.
+
+# Diagrammer
+
+![System design](images/System%20design.svg)
+
+![Server design](images/Server%20design.svg)
 
 # Faglige ressourcer
 
