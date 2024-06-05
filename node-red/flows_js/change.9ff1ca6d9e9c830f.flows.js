@@ -14,7 +14,7 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "stamdata.statuskonti",
+      "p": "statuskonti",
       "pt": "global",
       "to": "[\"90540000\",\"90541000\"]",
       "tot": "json",
@@ -22,14 +22,14 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "stamdata.bankkonti",
+      "p": "bankkonti",
       "pt": "global",
       "to": "[\t   \"DK20005908764988\"&\"-DKK\",\t   \"DK20009035615315\"&\"-DKK\"\t]",
       "tot": "jsonata"
     },
     {
       "t": "set",
-      "p": "stamdata.mellemregningskonti",
+      "p": "mellemregningskonti",
       "pt": "global",
       "to": "[\"95990009\",\"95991009\"]",
       "tot": "json"

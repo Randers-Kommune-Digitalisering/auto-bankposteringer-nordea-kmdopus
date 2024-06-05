@@ -1,8 +1,8 @@
 const Node = {
-  "id": "04e231029cd7d50d",
+  "id": "85fc62df12de2fdd",
   "type": "function",
-  "z": "debc38a0513e22c1",
-  "g": "b4ef161cb64fdf9d",
+  "z": "f91accb007eed9a2",
+  "g": "7208899b1498cc2d",
   "name": "set global vars",
   "func": "",
   "outputs": 1,
@@ -15,12 +15,11 @@ const Node = {
       "module": "dayjs"
     }
   ],
-  "x": 260,
-  "y": 60,
+  "x": 380,
+  "y": 320,
   "wires": [
     [
-      "639fe74c5b6d7b2b",
-      "0e0827ef35888613"
+      "5e4c16d66475c6db"
     ]
   ],
   "info": ""

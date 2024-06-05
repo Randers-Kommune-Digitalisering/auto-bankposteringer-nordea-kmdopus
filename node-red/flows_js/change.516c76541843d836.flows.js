@@ -8,7 +8,7 @@ const Node = {
     {
       "t": "set",
       "p": "account_step",
-      "pt": "flow",
+      "pt": "global",
       "to": "0",
       "tot": "num"
     }

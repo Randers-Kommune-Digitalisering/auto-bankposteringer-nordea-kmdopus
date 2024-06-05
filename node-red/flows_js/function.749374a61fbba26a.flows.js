@@ -22,7 +22,7 @@ const Node = {
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let erpFileHeaders = ["Artskonto", "Omkostningssted", "PSP-element", "Profitcenter", "Ordre", "Debet/kredit", "Beløb", "Næste agent", "Tekst", "Betalingsart", "Påligningsår", "Betalingsmodtagernr.", "Betalingsmodtagernr.kode", "Ydelsesmodtagernr.", "Ydelsesmodtagernr.kode", "Ydelsesperiode fra", "Ydelsesperiode til", "Oplysningspligtnr.", "Oplysningspligtmodtagernr.kode", "Oplysningspligtkode", "Netværk", "Operation", "Mængde", "Mængdeenhed", "Referencenøgle"];
-  global.set("erp_file_headers", erpFileHeaders.join(', '));
+  flow.set("erp_file_headers", erpFileHeaders.join(', '));
   
   return msg;
 }

@@ -21,12 +21,12 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let account_step = flow.get("account_step");
+  let account_step = global.get("account_step");
   
-  if (account_step + 1 === flow.get("bankkonti").len) {
-      flow.set("account_step", 0);
+  if (account_step + 1 === global.get("bankkonti").len) {
+      global.set("account_step", 0);
   } else {
-      flow.set("account_step", account_step += 1);
+      global.set("account_step", account_step += 1);
   }
   
   return msg;
