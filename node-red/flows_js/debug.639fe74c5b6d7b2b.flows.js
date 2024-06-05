@@ -8,7 +8,7 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "{\t   \"Message\": \"Dates generated\",\t   \"Timestamp\": $globalContext(\"dateOfOrigin\"),\t   \"Transactions start date\": $globalContext(\"startdate\"),\t   \"Transactions end date\": $globalContext(\"enddate\")\t}",
+  "complete": "{\t   \"Message\": \"Dates generated\",\t   \"Timestamp\": $now(),\t   \"Transactions start date\": $globalContext(\"startdate\"),\t   \"Transactions end date\": $globalContext(\"enddate\")\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",

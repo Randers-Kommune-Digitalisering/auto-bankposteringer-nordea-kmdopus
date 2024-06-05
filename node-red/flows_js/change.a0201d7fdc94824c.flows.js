@@ -8,14 +8,14 @@ const Node = {
     {
       "t": "set",
       "p": "add_transactions",
-      "pt": "flow",
+      "pt": "global",
       "to": "payload.response.transactions",
       "tot": "msg"
     },
     {
       "t": "set",
-      "p": "list_http_code",
-      "pt": "flow",
+      "p": "statusCode",
+      "pt": "msg",
       "to": "payload.group_header.http_code",
       "tot": "msg"
     },

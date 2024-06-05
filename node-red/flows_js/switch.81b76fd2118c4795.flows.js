@@ -5,7 +5,7 @@ const Node = {
   "g": "6055094b02013d9b",
   "name": "All accounts requested?",
   "property": "account_step",
-  "propertyType": "flow",
+  "propertyType": "global",
   "rules": [
     {
       "t": "eq",

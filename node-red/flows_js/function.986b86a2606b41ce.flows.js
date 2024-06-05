@@ -21,8 +21,8 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let transactions = flow.get("transactions");
-  let add_transactions = flow.get("add_transactions");
+  let transactions = global.get("transactions") ? global.get("transactions") : [];
+  let add_transactions = global.get("add_transactions");
   
   // Ensure transactions is an array
   transactions = Array.isArray(transactions) ? transactions : [];
@@ -31,8 +31,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   transactions = transactions.concat(add_transactions);
   
   // Update the flow variable with the modified array
-  flow.set("transactions", transactions);
-  flow.set("add_transactions", {});
+  global.set("transactions", transactions);
+  global.set("add_transactions", {});
   
   return msg;
 }
