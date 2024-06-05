@@ -14,7 +14,8 @@ const Node = {
   "y": 60,
   "wires": [
     [
-      "4255d18a1fe6c5d1"
+      "4255d18a1fe6c5d1",
+      "8c8ffe06f7c8cbf0"
     ]
   ]
 }
@@ -24,14 +25,18 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   const postingParameters = ["message", "narrative", "counterparty_name", "type_description", "end_to_end_reference"];   // Length has to be equal to length of parameter subrules of rules[i]
   const erpPostings = [];
   const postingsWithNoMatch = [];
-  const erpFileHeaders = global.get("erp_file_headers").split(", ");
-  const currentAccount = global.get("bankkonti")[flow.get("account_step")];
-  const currentStatusAccount = global.get("statuskonti")[flow.get("account_step")];
-  const currentLandingAccount = global.get("mellemregningskonti")[flow.get("account_step")];
+  const erpFileHeaders = flow.get("erp_file_headers").split(", ");
+  const currentAccount = global.get("bankkonti")[global.get("account_step")];
+  const currentStatusAccount = global.get("statuskonti")[global.get("account_step")];
+  const currentLandingAccount = global.get("mellemregningskonti")[global.get("account_step")];
   
   function calculateSpecificity(rule) {
       // Count the number of filled parameters in the rule
-      return rule.slice(0, 6).filter(entry => entry.value).length;
+      const ruleArray = Object.keys(rule)                         // Convert rule object to string
+                              .map(key => parseInt(key, 10))      // Convert keys to integers
+                              .sort((a, b) => a - b)              // Sort numerically
+                              .map(key => rule[key]);             // Map back to values
+      return ruleArray.slice(0, 6).filter(entry => entry.value).length;
   } 
   
   function merge(left, right) {
@@ -61,8 +66,12 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       return merge(mergeSort(left), mergeSort(right));
   }
   
-  function matchParameter(posting, searchValue, parameterIndex) {
-      return posting[parameterIndex].toLowerCase().includes(searchValue);
+  function matchParameter(posting, searchValue, parameterKey) {
+      if (posting[parameterKey]) {
+          return posting[parameterKey].toLowerCase().includes(searchValue);
+      } else {
+          return false;
+      }
   }
   
   function matchAmount(postingAmount, amountOperator, ruleAmount1, ruleAmount2) {
@@ -106,7 +115,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       let erp_array = flow.get("erp_array") || [];
   
       // For hver transaktion
-      for (let posting of flow.get("transactions")) {
+      for (let posting of global.get("transactions")) {
           let statusDebetOrCredit = posting.amount.startsWith('-') ? 'Kredit' : 'Debet';
           let bookDebetOrCredit = statusDebetOrCredit === 'Debet' ? 'Kredit' : 'Debet';
           let cleanedAmount = posting.amount.replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
@@ -119,7 +128,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       flow.set("erp_array", erp_array.concat(erpPostings));
   
   } else {
-      for (let posting of flow.get("transactions")) {
+      for (let posting of global.get("transactions")) {
           let sumOfErpPostings = 0;
           let sumOfRulesChecked = 0;
           let matchedAllParametersBool = false;
@@ -134,19 +143,19 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
               let artskonto = rule[6].Artskonto;
               let psp = rule[6].PSP ? rule[6].PSP : '';
-              let textVariation = rule[6].Posteringstekst.toLowerCase()
+              let textVariation = rule[6].Posteringstekst?.toLowerCase() ? rule[6].Posteringstekst.toLowerCase() : undefined;
               let exceptionBool = rule[9].exception;
               let amountOperator = rule[5].operator;
-              let ruleAmount1 = parseFloat(rule[5].value1.replace(',', '.'));
-              let ruleAmount2 = parseFloat(rule[5].value2.replace(',', '.'));
+              let ruleAmount1 = rule[5]?.value1 ? parseFloat(rule[5].value1.replace(',', '.')) : undefined;
+              let ruleAmount2 = rule[5]?.value2 ? parseFloat(rule[5].value2.replace(',', '.')) : undefined;
   
               if (sumOfRulesChecked > 1 && sumOfErpPostings > 0) {
                   continue
               } else {
                   for (let i = 0; i < postingParameters.length; i++) {
-                      let searchValue = rule[i].value ? String(rule[i].value).toLowerCase() : null;
+                      let searchValue = rule[i]?.value ? String(rule[i].value).toLowerCase() : null;
   
-                      if (searchValue !== null && rule[7].active && matchParameter(posting, searchValue, i)) {
+                      if (searchValue !== null && rule[7].active && matchParameter(posting, searchValue, postingParameters[i])) {
                           matches += 1;
                           break
                       }
@@ -187,7 +196,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   flow.set("erp_array", flow.get("erp_array").concat(erpPostings))
   global.set("postings_with_no_match", postingsWithNoMatch);
   console.log("I alt " + sumOfPostingsWithNoMatch + " uplacerbare poster");
-  flow.set("filename", "/data/output/" + flow.get("time_of_origin") + ".csv")
+  flow.set("filename", "/data/output/" + global.get("time_of_origin") + ".csv")
   
   return msg;
 }

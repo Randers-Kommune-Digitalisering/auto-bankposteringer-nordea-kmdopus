@@ -6,7 +6,8 @@ const Node = {
   "name": "link out nordea transaction request",
   "mode": "link",
   "links": [
-    "143776ba64dde749"
+    "143776ba64dde749",
+    "d4ae13f67adc2704"
   ],
   "x": 1095,
   "y": 300,

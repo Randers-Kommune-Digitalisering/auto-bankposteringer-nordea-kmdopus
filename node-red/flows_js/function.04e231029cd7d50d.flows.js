@@ -51,7 +51,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   // Set global variables
   global.set("startdate", findDate("start"));
   global.set("enddate", findDate("end"));
-  global.set("dateOfOrigin", dayjs().format('YYYY-MM-DD'));
+  global.set("dateOfOrigin", dayjs().format('YYYYMMDD'));
+  global.set("timeOfOrigin", dayjs().format('HHmmss'));
   
   return msg;
   
