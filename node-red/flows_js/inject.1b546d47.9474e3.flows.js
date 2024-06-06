@@ -3,6 +3,15 @@ const Node = {
   "type": "inject",
   "z": "f91accb007eed9a2",
   "name": "XML String",
+  "props": [
+    {
+      "p": "payload"
+    },
+    {
+      "p": "topic",
+      "vt": "str"
+    }
+  ],
   "repeat": "",
   "crontab": "",
   "once": false,
