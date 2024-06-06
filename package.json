@@ -1,6 +1,6 @@
 {
   "dependencies": {
     "crypto-js": "^4.1.1",
-    "node-red-node-email": "^2.0.1"
+    "node-red-node-email": "^2.2.1"
   }
 }
