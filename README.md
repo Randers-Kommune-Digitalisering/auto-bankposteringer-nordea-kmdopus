@@ -1,4 +1,4 @@
-<h1 align="center"> Bankintegration for posteringer til kommunalt økonomisystem </h1> <br>
+<h1 align="center"> Bankintegration for posteringer til kommunalt økonomisystem (ØS) </h1> <br>
 
 # Indholdsfortegnelse
 
@@ -28,6 +28,12 @@ Bankintegrationer:
 ![Fujitsu Prisme](https://img.shields.io/badge/Fujitsu_Prisme-Mangler-red)
 ![ØS Indsigt](https://img.shields.io/badge/ØS_Indsigt-Mangler-red)
 
+Bilagsintegration til ØS:
+
+![KMD Opus](https://img.shields.io/badge/KMD_Opus-OK-green)
+![Fujitsu Prisme](https://img.shields.io/badge/Fujitsu_Prisme-Mangler-red)
+![ØS Indsigt](https://img.shields.io/badge/ØS_Indsigt-Mangler-red)
+
 # Introduktion
 
 De fleste kommunale økonomimedarbejdere koncentrerer sig primært om det kommunale økonomisystem, men al afregning med omverdnen foregår reelt på kommunernes bankkonti.
@@ -47,6 +53,7 @@ Programmet har planlagt kørsel dagligt kl. 5:30, hvor transaktionerne for senes
 Transaktionerne matches op mod konteringsregler og påføres kontering.
 Konteringerne bliver lagt sammen i et finansbilag i csv-format.
 Finansbilaget udstilles på hjemmesiden.
+Der er også mulighed for at koble sig på en bilagsintegration hos leverandøren af ØS'et, så finansbilag automatisk indlæses i ØS. 
 
 # Diagrammer
 
