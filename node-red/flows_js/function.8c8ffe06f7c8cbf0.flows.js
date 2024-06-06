@@ -2,10 +2,11 @@ const Node = {
   "id": "8c8ffe06f7c8cbf0",
   "type": "function",
   "z": "f91accb007eed9a2",
+  "g": "1fb8657a805b873c",
   "name": "restructure data",
   "func": "",
   "outputs": 1,
-  "noerr": 22,
+  "noerr": 0,
   "initialize": "",
   "finalize": "",
   "libs": [
@@ -14,19 +15,26 @@ const Node = {
       "module": "csv-parser"
     }
   ],
-  "x": 280,
+  "x": 180,
   "y": 160,
   "wires": [
-    []
+    [
+      "6ffee308afcf6013"
+    ]
   ]
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, csv) {
-  const xmlObject = [];
-  const date = String(global.get("dateOfOrigin"));
-  const time = String(global.get("timeOfOrigin"));
+  const date = global.get("dateOfOrigin");
+  const time = global.get("timeOfOrigin");
   const dateTime = date + "_" + time;
-  const transactionsDate = String(global.get("enddate"));
+  const bankingDate = String(global.get("enddate"));
+  const dataProviderId = "RAND";
+  const filename = "ZFIR_KMD_Opus_Posteringer_IND_730_RAND_" + dateTime + ".xml";
+  let lineCounter = 0;
+  let debetSum = 0;
+  let kreditSum = 0;
+  
   
   // ERP-data is currently an array, but needs to be an object for conversion to XML
   const dataArray = flow.get("erp_array");
@@ -39,10 +47,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       }, {});
   });
   
-  let debetSum = 0;
-  let kreditSum = 0;
-  
-  function makeid(length) {
+  function makeId(length) {
       let result = '';
       const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
       const charactersLength = characters.length;
@@ -54,89 +59,86 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       return result;
   }
   
-  const documentId = makeid(16);
+  const docId = makeId(16);
   
-  let docType = 
-  xmlObject.push()
-  
-  let CONTROL_FIELDS = [];
-  CONTROL_FIELDS.push({ SENDERID: "P04CLNT730" });
-  CONTROL_FIELDS.push({ RECEIVER: "P04CLNT730" });
-  CONTROL_FIELDS.push({ FILE_NAME: "ZFIR_KMD_Opus_Posteringer_IND_730_RAND_" + dateTime + ".xml" });
-  CONTROL_FIELDS.push({ SEND_DATE: date });
-  CONTROL_FIELDS.push({ SEND_TIME: time });
-  xmlObject.push(CONTROL_FIELDS);
-  
+  const LINES = {};
   for (let posting of erpObject) {
-      
+      lineCounter++;
+  
+      let cleanedAmount = posting['Beløb'].replace(',', '.');
+      let amount = posting['Debet/kredit'] === "Debet" ? cleanedAmount : cleanedAmount * -1;
+      let psp = posting['PSP-element'] !== "" ? posting['PSP-element'] : undefined;
+  
+      let line = {
+          DEB_CRED_IND: posting['Debet/kredit'],
+          AMT_DOCCUR: String(amount),
+          ITEM_TEXT: posting['Tekst'],
+          GL_ACCOUNT: posting['Artskonto'],
+          WBS_ELEMENT: psp,
+          REF_KEY_3: String(lineCounter),
+          ZZCSYSIDN: dataProviderId
+      }
+  
+      // Remove keys with undefined values
+      Object.keys(line).forEach(key => line[key] === undefined && delete line[key]);
+  
+      switch (posting['Debet/kredit']) {
+          case 'Debet':
+              debetSum += parseFloat(cleanedAmount);
+              console.log("new debet sum = " + debetSum)
+              break;
+          case 'Kredit':
+              kreditSum += parseFloat(cleanedAmount);
+              console.log("new kredit sum = " + kreditSum)
+              break;
+          default:
+              break;
+      };
+  
+      LINES['LINE_' + lineCounter + '_'] = line;
   }
   
-  flow.set("erpObject", erpObject);
+  const CONTROL_FIELDS = {
+      SENDERID: "P04CLNT730",
+      RECEIVER: "P04CLNT730",
+      FILE_NAME: filename,
+      SEND_DATE: date,
+      SEND_TIME: time
+  };
+  
+  const HEADER = {
+      'NO_DOC-POSITION': String(lineCounter),
+      'BALANCE_DEBET': String(debetSum.toFixed(2)),
+      'BALANCE_CREDIT': String(kreditSum.toFixed(2)),
+      'MUNICIPALITY': '730',
+      'COMP_CODE': '0020',
+      'DOC_DATE': bankingDate,
+      'PSTNG_DATE': bankingDate,
+      'RECEIV_DOC': docId,
+      'HEADER_TXT': dataProviderId,
+      'XREF1_HD': dataProviderId
+  };
+  
+  const secondIndentationObject = {
+      'HEADER': HEADER,
+      'LINES': LINES
+  };
+  
+  const firstIndentationObject = {
+      'CONTROL_FIELDS': CONTROL_FIELDS,
+      'POSTING_DOCUMENT': secondIndentationObject
+  };
+  
+  const xmlObject = {
+      'n1:FinancePostingRequest': firstIndentationObject
+  };
+  
+  flow.set("erpObject", xmlObject);
+  
+  flow.set("filenameFTPlocal", "/data/output/" + filename)
+  flow.set("filenameFTPremote", "/some/folder/" + filename)
   
   return msg;
-  
-  for (let posting of global.get("transactions")) {
-      let sumOfErpPostings = 0;
-      let sumOfRulesChecked = 0;
-      let matchedAllParametersBool = false;
-  
-      let postingAmount = parseFloat(posting.amount);
-      let cleanedAmount = posting.amount.replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
-      let statusDebetOrCredit = postingAmount > 0 ? "Debet" : "Kredit";
-      let bookDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet"
-  
-      for (let rule of sortedRules) {
-          let matches = 0;
-  
-          let artskonto = rule[6].Artskonto;
-          let psp = rule[6].PSP ? rule[6].PSP : '';
-          let textVariation = rule[6].Posteringstekst?.toLowerCase() ? rule[6].Posteringstekst.toLowerCase() : undefined;
-          let exceptionBool = rule[9].exception;
-          let amountOperator = rule[5].operator;
-          let ruleAmount1 = rule[5]?.value1 ? parseFloat(rule[5].value1.replace(',', '.')) : undefined;
-          let ruleAmount2 = rule[5]?.value2 ? parseFloat(rule[5].value2.replace(',', '.')) : undefined;
-  
-          if (sumOfRulesChecked > 1 && sumOfErpPostings > 0) {
-              continue
-          } else {
-              for (let i = 0; i < postingParameters.length; i++) {
-                  let searchValue = rule[i]?.value ? String(rule[i].value).toLowerCase() : null;
-  
-                  if (searchValue !== null && rule[7].active && matchParameter(posting, searchValue, postingParameters[i])) {
-                      matches += 1;
-                      break
-                  }
-              }
-  
-              if (matches === calculateSpecificity(rule)) {
-                  matchedAllParametersBool = true;
-              }
-  
-              let matchedAmountBool = matchAmount(postingAmount, amountOperator, ruleAmount1, ruleAmount2)
-  
-              if (matchedAllParametersBool && matchedAmountBool) {
-                  if (!exceptionBool) {   // Don't write ERP postings if rule is an exception
-                      let text = textGeneration(textVariation, posting.message, posting.narrative, posting.counterparty_name);
-  
-                      generateErpPostings(currentStatusAccount, artskonto, statusDebetOrCredit, bookDebetOrCredit, text, cleanedAmount, psp);
-                  }
-  
-                  sumOfErpPostings += 1;
-              }
-          }
-  
-          sumOfRulesChecked += 1;
-      }
-  
-      if (sumOfErpPostings === 0) {
-          sumOfPostingsWithNoMatch += 1;
-          let text = posting.transaction_id;
-  
-          generateErpPostings(currentStatusAccount, currentLandingAccount, statusDebetOrCredit, bookDebetOrCredit, text, cleanedAmount, '');
-  
-          postingsWithNoMatch.push(posting);
-          sumOfErpPostings += 1;
-      }
 }
 
 module.exports = Node;
