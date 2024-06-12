@@ -30,7 +30,7 @@
 
 ### Bilagsintegration til ØS:
 
-![KMD Opus](https://img.shields.io/badge/KMD_Opus-OK-green)
+![KMD Opus](https://img.shields.io/badge/KMD_Opus-Mangler-red)
 ![Fujitsu Prisme](https://img.shields.io/badge/Fujitsu_Prisme-Mangler-red)
 ![ØS Indsigt](https://img.shields.io/badge/ØS_Indsigt-Mangler-red)
 
