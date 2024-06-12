@@ -5,16 +5,16 @@
 - [Status](#status)
 - [Introduktion](#introduktion)
 - [Sådan fungerer det](#sådan-fungerer-det)
-- [Diagrammer](#Diagrammer)
+- [Diagrammer](#diagrammer)
 - [Faglige ressourcer](#faglige-ressourcer)
 - [Tekniske ressourcer](#tekniske-ressourcer)
-- [Data stack](#data-stack)
+- [Tech stack](#tech-stack)
 
 # Status
 
 ![Under udvikling](https://img.shields.io/badge/Under%20udvikling-red)
 
-Bankintegrationer:
+### Bankintegrationer:
 
 ![Nordea](https://img.shields.io/badge/Nordea-OK-green)
 ![Danske Bank](https://img.shields.io/badge/Danske_Bank-Mangler-red)
@@ -22,13 +22,13 @@ Bankintegrationer:
 ![BEC](https://img.shields.io/badge/BEC-Mangler-red)
 ![SDC](https://img.shields.io/badge/SDC-Mangler-red)
 
-Økonomisystemintegrationer:
+### Økonomisystemintegrationer:
 
 ![KMD Opus](https://img.shields.io/badge/KMD_Opus-OK-green)
 ![Fujitsu Prisme](https://img.shields.io/badge/Fujitsu_Prisme-Mangler-red)
 ![ØS Indsigt](https://img.shields.io/badge/ØS_Indsigt-Mangler-red)
 
-Bilagsintegration til ØS:
+### Bilagsintegration til ØS:
 
 ![KMD Opus](https://img.shields.io/badge/KMD_Opus-OK-green)
 ![Fujitsu Prisme](https://img.shields.io/badge/Fujitsu_Prisme-Mangler-red)
@@ -57,8 +57,10 @@ Der er også mulighed for at koble sig på en bilagsintegration hos leverandøre
 
 # Diagrammer
 
+### Systemdesign
 ![System design](images/System%20design.svg)
 
+### Server design
 ![Server design](images/Server%20design.svg)
 
 # Faglige ressourcer
@@ -75,7 +77,7 @@ Der er også mulighed for at koble sig på en bilagsintegration hos leverandøre
 
 [Postman Collection til Premium API endpoints inkl Authentication](https://raw.githubusercontent.com/NordeaOB/swaggers/master/Premium%20Corporate%20Access%20Authorization%20API%20with%20Accounts%20API%20and%20Payments%20API.postman_collection.json)
 
-# Data stack
+# Tech stack
 
 ![](https://avatars.githubusercontent.com/u/5429470?s=36&v=4)  Programmet kører i en docker-container
 
