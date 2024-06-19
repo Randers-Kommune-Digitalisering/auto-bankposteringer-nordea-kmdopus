@@ -8,7 +8,7 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "{\t   \"Message\": \"API call failed\",\t   \"Status Code\": msg.statusCode,\t   \"Error\": msg.payload.error.failures,\t   \"Timestamp\": $now()\t}",
+  "complete": "{\t   \"Message\": \"API call failed\",\t   \"Status Code\": msg.statusCode,\t   \"Error\": msg.payload.error.failures,\t   \"Payload\": msg.payload,\t   \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",

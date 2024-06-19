@@ -8,11 +8,11 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "{\t   \"Message\": \"Transactions retrieved from 'hovedkonto'\",\t   \"Status Code\": msg.statusCode,\t   \"Transactions\": msg.payload.response.transactions,\t   \"Timestamp\": $now()\t}",
+  "complete": "{\t   \"Message\": \"Transactions retrieved from 'hovedkonto'\",\t   \"Status Code\": msg.statusCode,\t   \"Amount of transactions\":$globalContext('transactions').length,\t   \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1095,
+  "x": 1165,
   "y": 280,
   "wires": [],
   "l": false

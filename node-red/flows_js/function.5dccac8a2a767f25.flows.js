@@ -24,6 +24,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let account_step = global.get("account_step");
   
   if (account_step + 1 === global.get("bankkonti").len) {
+      // When there are no more accounts to check
       global.set("account_step", 0);
   } else {
       global.set("account_step", account_step += 1);

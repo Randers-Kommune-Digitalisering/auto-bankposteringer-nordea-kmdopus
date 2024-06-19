@@ -114,8 +114,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
           path = flow.get("path");
       }
   
-      if (typeof flow.get("link_to_next_page") !== "undefined") {
-          flow.set("url", flow.get("link_to_next_page"))
+      if (flow.get("continuation_key")) {
+          path = path + "&continuation_key=" + flow.get("continuation_key")
+          flow.set("url", host + path);
       } else {
           flow.set("url", host + path);
       }
