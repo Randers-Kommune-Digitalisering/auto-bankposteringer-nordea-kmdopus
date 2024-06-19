@@ -52,6 +52,16 @@ const Node = {
     },
     {
       "t": "delete",
+      "p": "filename",
+      "pt": "msg"
+    },
+    {
+      "t": "delete",
+      "p": "columns",
+      "pt": "msg"
+    },
+    {
+      "t": "delete",
       "p": "data",
       "pt": "flow"
     },

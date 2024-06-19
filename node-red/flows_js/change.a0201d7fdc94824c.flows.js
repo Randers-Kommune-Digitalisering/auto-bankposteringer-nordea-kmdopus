@@ -20,16 +20,11 @@ const Node = {
       "tot": "msg"
     },
     {
-      "t": "delete",
-      "p": "link_to_next_page",
-      "pt": "flow"
-    },
-    {
       "t": "set",
-      "p": "link_to_next_page",
+      "p": "continuation_key",
       "pt": "flow",
-      "to": "$map(\t    $filter(msg.payload.response._links, function($l) {\t        $l.rel = \"next\"\t    }),\t    function($l) {\t        $l.href\t    }\t)\t",
-      "tot": "jsonata"
+      "to": "payload.response.continuation_key",
+      "tot": "msg"
     }
   ],
   "action": "",
