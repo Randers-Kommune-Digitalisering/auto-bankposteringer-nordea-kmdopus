@@ -2,6 +2,7 @@ const Node = {
   "id": "988c223f64313643",
   "type": "http request",
   "z": "37f6db37c66da295",
+  "d": true,
   "g": "9f5e7f69a9319c00",
   "name": "List Trans.",
   "method": "GET",
@@ -20,7 +21,7 @@ const Node = {
   "wires": [
     [
       "a0201d7fdc94824c",
-      "709c777b7caa3770"
+      "345c1cc17edd6a6b"
     ]
   ],
   "l": false

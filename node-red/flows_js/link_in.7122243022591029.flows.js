@@ -5,8 +5,7 @@ const Node = {
   "g": "9f5e7f69a9319c00",
   "name": "link in next account transaction request",
   "links": [
-    "9e9927427a22300d",
-    "0802258366c31ceb"
+    "9e9927427a22300d"
   ],
   "x": 55,
   "y": 320,

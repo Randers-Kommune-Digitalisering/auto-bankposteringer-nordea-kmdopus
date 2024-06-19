@@ -1,5 +1,5 @@
 const Node = {
-  "id": "19bbe3378afad1ef",
+  "id": "6acfd3b6f0f8716b",
   "type": "debug",
   "z": "37f6db37c66da295",
   "name": "debug 4",
@@ -11,7 +11,7 @@ const Node = {
   "targetType": "full",
   "statusVal": "",
   "statusType": "auto",
-  "x": 640,
+  "x": 760,
   "y": 460,
   "wires": []
 }

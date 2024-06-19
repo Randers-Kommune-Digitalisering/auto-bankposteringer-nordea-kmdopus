@@ -21,8 +21,8 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  var bankAccountIndex = flow.get('account_step');
-  var bankAccounts = global.get('stamdata').bankkonti;
+  var bankAccountIndex = global.get('account_step');
+  var bankAccounts = global.get('bankkonti');
   
   // Check if the bank account index is within bounds
   if (bankAccountIndex >= 0 && bankAccountIndex < bankAccounts.length) {

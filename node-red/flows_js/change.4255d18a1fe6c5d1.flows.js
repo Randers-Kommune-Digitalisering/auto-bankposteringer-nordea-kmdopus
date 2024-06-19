@@ -6,6 +6,11 @@ const Node = {
   "name": "flow to msg",
   "rules": [
     {
+      "t": "delete",
+      "p": "transactions",
+      "pt": "global"
+    },
+    {
       "t": "set",
       "p": "payload",
       "pt": "msg",

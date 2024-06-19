@@ -2,6 +2,7 @@ const Node = {
   "id": "d194eda7b9db38ed",
   "type": "link out",
   "z": "37f6db37c66da295",
+  "d": true,
   "g": "c31ca42d52037078",
   "name": "link out nordea auth status 401",
   "mode": "link",

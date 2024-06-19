@@ -21,6 +21,7 @@ const Node = {
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let sumOfPostingsWithNoMatch = 0;
+  let erpArray = flow.get("erp_array") || [];
   const postingParameters = ["message", "narrative", "counterparty_name", "type_description", "end_to_end_reference"];   // Length has to be equal to length of parameter subrules of rules[i]
   const erpPostings = [];
   const postingsWithNoMatch = [];
@@ -111,8 +112,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   const sortedRules = mergeSort(global.get("konteringsregler"));
   
   if (currentAccount === "DK3620009035615315-DKK") {   // Debitorkonto
-      let erp_array = flow.get("erp_array") || [];
-  
       // For hver transaktion
       for (let posting of global.get("transactions")) {
           let statusDebetOrCredit = posting.amount.startsWith('-') ? 'Kredit' : 'Debet';
@@ -124,7 +123,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       }
   
       // Concatenate erpPostings to erp_array
-      flow.set("erp_array", erp_array.concat(erpPostings));
+      flow.set("erp_array", erpArray.concat(erpPostings));
   
   } else {
       for (let posting of global.get("transactions")) {
@@ -133,7 +132,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           let matchedAllParametersBool = false;
   
           let postingAmount = parseFloat(posting.amount);
-          let cleanedAmount = posting.amount.replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
+          let cleanedAmount = String(postingAmount).replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
           let statusDebetOrCredit = postingAmount > 0 ? "Debet" : "Kredit";
           let bookDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet"
   
@@ -192,10 +191,10 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       }
   }
   
-  flow.set("erp_array", flow.get("erp_array").concat(erpPostings))
+  flow.set("erp_array", erpArray.concat(erpPostings));
   global.set("postings_with_no_match", postingsWithNoMatch);
   console.log("I alt " + sumOfPostingsWithNoMatch + " uplacerbare poster");
-  flow.set("filename", "/data/output/" + global.get("time_of_origin") + ".csv")
+  flow.set("filename", "/data/output/" + global.get("time_of_origin") + ".csv");
   
   return msg;
 }
