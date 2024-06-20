@@ -79,7 +79,7 @@ Der er også mulighed for at koble sig på en bilagsintegration hos leverandøre
 
 # Tech stack
 
-![](https://avatars.githubusercontent.com/u/5429470?s=36&v=4)  Programmet kører i en docker-container
+![](https://avatars.githubusercontent.com/u/5429470?s=36&v=4)  Serveren kører i en docker-container
 
 ![](https://avatars.githubusercontent.com/u/5375661?s=36&v=4)  Node-RED som orkestrator
 
