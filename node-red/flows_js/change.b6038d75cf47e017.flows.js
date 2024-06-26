@@ -22,7 +22,7 @@ const Node = {
     {
       "t": "set",
       "p": "adminAuthAttempt",
-      "pt": "flow",
+      "pt": "global",
       "to": "$globalContext('adminAuthAttempt') + 1",
       "tot": "jsonata"
     }
@@ -32,13 +32,15 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 870,
+  "x": 715,
   "y": 140,
   "wires": [
     [
       "f85f9d2570988531"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-save",
+  "l": false
 }
 
 module.exports = Node;

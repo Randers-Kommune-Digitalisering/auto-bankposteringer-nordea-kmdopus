@@ -1,13 +1,13 @@
 const Node = {
-  "id": "1b9bc541986db9e5",
+  "id": "61ee9a5e7c4f4063",
   "type": "delay",
-  "z": "848072497d00f862",
-  "g": "d55b505a1b703e47",
+  "z": "37f6db37c66da295",
+  "g": "c31ca42d52037078",
   "name": "",
-  "pauseType": "rate",
-  "timeout": "5",
-  "timeoutUnits": "seconds",
-  "rate": "5",
+  "pauseType": "delay",
+  "timeout": "1",
+  "timeoutUnits": "hours",
+  "rate": "1",
   "nbRateUnits": "1",
   "rateUnits": "second",
   "randomFirst": "1",
@@ -16,11 +16,11 @@ const Node = {
   "drop": false,
   "allowrate": false,
   "outputs": 1,
-  "x": 265,
-  "y": 940,
+  "x": 185,
+  "y": 200,
   "wires": [
     [
-      "c81f75a4e18dbb52"
+      "d194eda7b9db38ed"
     ]
   ],
   "l": false

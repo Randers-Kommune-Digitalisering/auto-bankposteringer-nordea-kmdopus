@@ -2,7 +2,7 @@ const Node = {
   "id": "7208899b1498cc2d",
   "type": "group",
   "z": "f91accb007eed9a2",
-  "name": "Bypass with samples",
+  "name": "Bypass with sample",
   "style": {
     "stroke": "none",
     "fill": "#ffbfbf",
@@ -13,12 +13,13 @@ const Node = {
   "nodes": [
     "ac6257915f1c9213",
     "5e4c16d66475c6db",
-    "85fc62df12de2fdd"
+    "85fc62df12de2fdd",
+    "461e4c01953b2e60"
   ],
-  "x": 254,
-  "y": 259,
-  "w": 252,
-  "h": 122
+  "x": 204,
+  "y": 19,
+  "w": 222,
+  "h": 82
 }
 
 module.exports = Node;

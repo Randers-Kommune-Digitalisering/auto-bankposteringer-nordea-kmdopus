@@ -15,13 +15,15 @@ const Node = {
       "module": "csv-parser"
     }
   ],
-  "x": 180,
-  "y": 160,
+  "x": 325,
+  "y": 240,
   "wires": [
     [
-      "6ffee308afcf6013"
+      "dae1d291.de0d2"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-arrows",
+  "l": false
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, csv) {
@@ -133,8 +135,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       'n1:FinancePostingRequest': firstIndentationObject
   };
   
-  flow.set("erpObject", xmlObject);
-  
+  msg.payload = xmlObject;
   flow.set("filenameFTPlocal", "/data/output/" + filename)
   flow.set("filenameFTPremote", "/some/folder/" + filename)
   

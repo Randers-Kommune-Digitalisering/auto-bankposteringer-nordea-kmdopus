@@ -3,7 +3,7 @@ const Node = {
   "type": "debug",
   "z": "37f6db37c66da295",
   "g": "9f5e7f69a9319c00",
-  "name": "stdout Hovedkonto",
+  "name": "List Transactions succes",
   "active": true,
   "tosidebar": true,
   "console": true,
@@ -12,8 +12,8 @@ const Node = {
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1165,
-  "y": 280,
+  "x": 795,
+  "y": 300,
   "wires": [],
   "l": false
 }

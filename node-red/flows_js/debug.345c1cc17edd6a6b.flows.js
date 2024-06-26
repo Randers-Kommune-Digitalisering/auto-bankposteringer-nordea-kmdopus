@@ -7,11 +7,12 @@ const Node = {
   "tosidebar": true,
   "console": false,
   "tostatus": false,
-  "complete": "false",
+  "complete": "payload",
+  "targetType": "msg",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1000,
-  "y": 440,
+  "x": 940,
+  "y": 260,
   "wires": []
 }
 

@@ -3,8 +3,15 @@ const Node = {
   "type": "change",
   "z": "37f6db37c66da295",
   "g": "fa9c0eb18149dc68",
-  "name": "Flow vars",
+  "name": "set request data",
   "rules": [
+    {
+      "t": "set",
+      "p": "step",
+      "pt": "flow",
+      "to": "2",
+      "tot": "num"
+    },
     {
       "t": "set",
       "p": "method",
@@ -35,17 +42,10 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "query_param",
+      "p": "urlParam",
       "pt": "flow",
       "to": "access_id",
       "tot": "global"
-    },
-    {
-      "t": "set",
-      "p": "step",
-      "pt": "flow",
-      "to": "2",
-      "tot": "str"
     }
   ],
   "action": "",
@@ -53,13 +53,15 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 500,
+  "x": 595,
   "y": 100,
   "wires": [
     [
       "a994c85cb61ed728"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-cogs",
+  "l": false
 }
 
 module.exports = Node;

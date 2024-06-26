@@ -4,8 +4,8 @@ const Node = {
   "z": "9b998b2e60b3c784",
   "name": "MariaDB/Persistant Volume",
   "info": "",
-  "x": 120,
-  "y": 440,
+  "x": 320,
+  "y": 520,
   "wires": []
 }
 

@@ -4,7 +4,7 @@ const Node = {
   "z": "37f6db37c66da295",
   "d": true,
   "g": "9f5e7f69a9319c00",
-  "name": "List Trans.",
+  "name": "List Transactions",
   "method": "GET",
   "ret": "obj",
   "paytoqs": "ignore",
@@ -16,8 +16,8 @@ const Node = {
   "authType": "",
   "senderr": false,
   "headers": [],
-  "x": 745,
-  "y": 280,
+  "x": 675,
+  "y": 260,
   "wires": [
     [
       "a0201d7fdc94824c",

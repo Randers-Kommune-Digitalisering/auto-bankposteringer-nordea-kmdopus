@@ -3,7 +3,7 @@ const Node = {
   "type": "debug",
   "z": "9b998b2e60b3c784",
   "g": "248b6faf1bd25dc8",
-  "name": "",
+  "name": "Rules imported",
   "active": true,
   "tosidebar": true,
   "console": true,
@@ -12,7 +12,7 @@ const Node = {
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 495,
+  "x": 465,
   "y": 60,
   "wires": [],
   "l": false

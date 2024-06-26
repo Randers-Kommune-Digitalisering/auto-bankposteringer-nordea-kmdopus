@@ -9,9 +9,8 @@ const Node = {
       "t": "set",
       "p": "columns",
       "pt": "msg",
-      "to": "omp_headers",
-      "tot": "flow",
-      "dc": true
+      "to": "erpFileHeaders",
+      "tot": "flow"
     },
     {
       "t": "set",

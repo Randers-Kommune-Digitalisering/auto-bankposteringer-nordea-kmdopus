@@ -3,14 +3,14 @@ const Node = {
   "type": "change",
   "z": "37f6db37c66da295",
   "g": "9d7a704133314cab",
-  "name": "subtract step",
+  "name": "Subtract step",
   "rules": [
     {
       "t": "set",
       "p": "step",
       "pt": "flow",
-      "to": "2",
-      "tot": "num"
+      "to": "$flowContext(\"step\")-1",
+      "tot": "jsonata"
     }
   ],
   "action": "",
@@ -18,13 +18,15 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 1190,
-  "y": 100,
+  "x": 145,
+  "y": 440,
   "wires": [
     [
       "02213fe18223d94a"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-save",
+  "l": false
 }
 
 module.exports = Node;

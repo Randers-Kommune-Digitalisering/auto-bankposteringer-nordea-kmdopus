@@ -1,15 +1,15 @@
 const Node = {
-  "id": "d0b394c7c6567278",
+  "id": "b7c867111a4fe904",
   "type": "link out",
   "z": "37f6db37c66da295",
-  "g": "fa9c0eb18149dc68",
-  "name": "link out nordea auth",
+  "g": "9f5e7f69a9319c00",
+  "name": "link out next page",
   "mode": "link",
   "links": [
-    "0681a95e64c492a2"
+    "7122243022591029"
   ],
-  "x": 985,
-  "y": 200,
+  "x": 795,
+  "y": 260,
   "wires": []
 }
 

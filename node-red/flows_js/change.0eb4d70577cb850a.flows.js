@@ -3,8 +3,15 @@ const Node = {
   "type": "change",
   "z": "37f6db37c66da295",
   "g": "fa9c0eb18149dc68",
-  "name": "Flow vars",
+  "name": "set request data",
   "rules": [
+    {
+      "t": "set",
+      "p": "step",
+      "pt": "flow",
+      "to": "4",
+      "tot": "num"
+    },
     {
       "t": "set",
       "p": "method",
@@ -28,23 +35,9 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "data.grant_type",
-      "pt": "flow",
-      "to": "authorization_code",
-      "tot": "str"
-    },
-    {
-      "t": "set",
-      "p": "data.code",
-      "pt": "flow",
-      "to": "exchange_code",
-      "tot": "global"
-    },
-    {
-      "t": "set",
-      "p": "step",
-      "pt": "flow",
-      "to": "4",
+      "p": "url",
+      "pt": "msg",
+      "to": "$flowContext(\"domain\") & $flowContext(\"path\")",
       "tot": "str"
     }
   ],
@@ -53,13 +46,15 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 500,
+  "x": 595,
   "y": 180,
   "wires": [
     [
       "7a7b99685c649752"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-cogs",
+  "l": false
 }
 
 module.exports = Node;

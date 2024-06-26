@@ -5,12 +5,13 @@ const Node = {
   "g": "c2ddb5ae767f1292",
   "server": "1829b1de1c4f3d62",
   "command": "publish",
-  "name": "Trans. u. match",
+  "name": "redis out",
   "topic": "data",
   "obj": true,
-  "x": 440,
+  "x": 375,
   "y": 60,
-  "wires": []
+  "wires": [],
+  "l": false
 }
 
 module.exports = Node;

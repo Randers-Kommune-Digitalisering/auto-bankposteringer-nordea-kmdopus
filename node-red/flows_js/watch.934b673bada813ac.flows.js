@@ -6,8 +6,8 @@ const Node = {
   "name": "",
   "files": "/data/konteringsregler/konteringsregler.json",
   "recursive": "",
-  "x": 55,
-  "y": 160,
+  "x": 245,
+  "y": 240,
   "wires": [
     [
       "166084d00d8028f7"

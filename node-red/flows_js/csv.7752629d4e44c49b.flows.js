@@ -3,7 +3,7 @@ const Node = {
   "type": "csv",
   "z": "f91accb007eed9a2",
   "g": "6055094b02013d9b",
-  "name": "parse",
+  "name": "",
   "sep": ";",
   "hdrin": true,
   "hdrout": "all",
@@ -14,13 +14,14 @@ const Node = {
   "strings": true,
   "include_empty_strings": true,
   "include_null_values": true,
-  "x": 345,
-  "y": 60,
+  "x": 405,
+  "y": 160,
   "wires": [
     [
       "2eadb4d84490ab8f"
     ]
   ],
+  "icon": "font-awesome/fa-language",
   "l": false
 }
 

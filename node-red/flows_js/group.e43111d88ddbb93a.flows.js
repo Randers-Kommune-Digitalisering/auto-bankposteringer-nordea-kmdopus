@@ -2,7 +2,7 @@ const Node = {
   "id": "e43111d88ddbb93a",
   "type": "group",
   "z": "37f6db37c66da295",
-  "name": "Pre-request",
+  "name": "Pre-request script",
   "style": {
     "stroke": "none",
     "fill": "#e3f3d3",
@@ -15,9 +15,9 @@ const Node = {
     "669bf819a28ce0c3",
     "145f6f129e7190d7"
   ],
-  "x": 1034,
-  "y": 159,
-  "w": 312,
+  "x": 24,
+  "y": 19,
+  "w": 242,
   "h": 82
 }
 

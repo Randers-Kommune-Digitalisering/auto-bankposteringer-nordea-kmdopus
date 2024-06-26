@@ -5,8 +5,8 @@ const Node = {
   "g": "8ebc73d37bf6ccbd",
   "name": "File creation flow",
   "info": "",
-  "x": 120,
-  "y": 280,
+  "x": 320,
+  "y": 340,
   "wires": []
 }
 

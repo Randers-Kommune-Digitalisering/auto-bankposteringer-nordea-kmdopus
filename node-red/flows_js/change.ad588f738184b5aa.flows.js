@@ -19,13 +19,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 205,
-  "y": 160,
+  "x": 425,
+  "y": 240,
   "wires": [
     [
       "a0a95ab1cfc8e6eb"
     ]
   ],
+  "icon": "font-awesome/fa-save",
   "l": false
 }
 

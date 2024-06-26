@@ -3,11 +3,11 @@ const Node = {
   "type": "http request",
   "z": "37f6db37c66da295",
   "g": "fa9c0eb18149dc68",
-  "name": "Exch. Token",
+  "name": "Exchange Token",
   "method": "POST",
   "ret": "obj",
   "paytoqs": "ignore",
-  "url": "https://open.nordea.com/corporate/v2/authorize/token",
+  "url": "",
   "tls": "",
   "persist": false,
   "proxy": "",
@@ -15,7 +15,7 @@ const Node = {
   "authType": "",
   "senderr": false,
   "headers": [],
-  "x": 785,
+  "x": 675,
   "y": 180,
   "wires": [
     [

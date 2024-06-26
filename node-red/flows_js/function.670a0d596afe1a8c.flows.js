@@ -3,25 +3,26 @@ const Node = {
   "type": "function",
   "z": "37f6db37c66da295",
   "g": "9f5e7f69a9319c00",
-  "name": "Build account pointer",
+  "name": "Build account selector",
   "func": "",
   "outputs": 1,
   "noerr": 0,
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 325,
-  "y": 280,
+  "x": 555,
+  "y": 260,
   "wires": [
     [
       "da13a3395ded5e11"
     ]
   ],
+  "icon": "font-awesome/fa-save",
   "l": false
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  var bankAccountIndex = global.get('account_step');
+  var bankAccountIndex = global.get('accountStep');
   var bankAccounts = global.get('bankkonti');
   
   // Check if the bank account index is within bounds

@@ -67,22 +67,22 @@ const Node = {
     },
     {
       "t": "delete",
-      "p": "query_param",
+      "p": "urlParam",
       "pt": "flow"
     },
     {
       "t": "delete",
-      "p": "query_param1",
+      "p": "queryParam1",
       "pt": "flow"
     },
     {
       "t": "delete",
-      "p": "query_param2",
+      "p": "queryParam2",
       "pt": "flow"
     },
     {
       "t": "delete",
-      "p": "path_suffix",
+      "p": "pathSuffix",
       "pt": "flow"
     }
   ],
@@ -91,13 +91,15 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 230,
-  "y": 280,
+  "x": 505,
+  "y": 260,
   "wires": [
     [
       "670a0d596afe1a8c"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-trash",
+  "l": false
 }
 
 module.exports = Node;

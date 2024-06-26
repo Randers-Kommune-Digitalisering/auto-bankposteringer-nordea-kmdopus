@@ -5,10 +5,11 @@ const Node = {
   "g": "6055094b02013d9b",
   "name": "link in nordea file creation",
   "links": [
-    "4e384ce7a5fd0cec"
+    "4e384ce7a5fd0cec",
+    "461e4c01953b2e60"
   ],
-  "x": 55,
-  "y": 60,
+  "x": 245,
+  "y": 160,
   "wires": [
     [
       "f2c2fa268a05cd5c"

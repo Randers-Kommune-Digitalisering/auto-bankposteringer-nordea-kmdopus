@@ -7,7 +7,7 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "add_transactions",
+      "p": "addTransactions",
       "pt": "global",
       "to": "payload.response.transactions",
       "tot": "msg"
@@ -32,13 +32,15 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 870,
-  "y": 280,
+  "x": 715,
+  "y": 260,
   "wires": [
     [
       "986b86a2606b41ce"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-save",
+  "l": false
 }
 
 module.exports = Node;
