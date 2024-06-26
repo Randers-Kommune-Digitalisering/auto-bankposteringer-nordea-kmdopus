@@ -4,7 +4,7 @@ const Node = {
   "z": "f91accb007eed9a2",
   "g": "6055094b02013d9b",
   "name": "All accounts requested?",
-  "property": "account_step",
+  "property": "accountStep",
   "propertyType": "global",
   "rules": [
     {
@@ -19,8 +19,8 @@ const Node = {
   "checkall": "true",
   "repair": false,
   "outputs": 2,
-  "x": 495,
-  "y": 60,
+  "x": 565,
+  "y": 160,
   "wires": [
     [
       "f4017223fa913e7c",
@@ -30,6 +30,7 @@ const Node = {
       "9e9927427a22300d"
     ]
   ],
+  "icon": "font-awesome/fa-question",
   "l": false
 }
 

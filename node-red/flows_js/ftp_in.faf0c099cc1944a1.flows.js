@@ -9,13 +9,15 @@ const Node = {
   "filename": "",
   "localFilename": "",
   "name": "",
-  "x": 530,
-  "y": 160,
+  "x": 655,
+  "y": 240,
   "wires": [
     [
       "6fefca67.3669e4"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-send",
+  "l": false
 }
 
 module.exports = Node;

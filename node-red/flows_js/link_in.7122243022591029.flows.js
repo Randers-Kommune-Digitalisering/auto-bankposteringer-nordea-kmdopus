@@ -3,12 +3,13 @@ const Node = {
   "type": "link in",
   "z": "37f6db37c66da295",
   "g": "9f5e7f69a9319c00",
-  "name": "link in next account transaction request",
+  "name": "link in next transaction request",
   "links": [
-    "9e9927427a22300d"
+    "9e9927427a22300d",
+    "b7c867111a4fe904"
   ],
-  "x": 55,
-  "y": 320,
+  "x": 335,
+  "y": 280,
   "wires": [
     [
       "7c0de16e13c5e6e5"

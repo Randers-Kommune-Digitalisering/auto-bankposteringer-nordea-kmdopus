@@ -2,7 +2,7 @@ const Node = {
   "id": "46eab8862a269fad",
   "type": "group",
   "z": "f91accb007eed9a2",
-  "name": "KMD Opus - headers",
+  "name": "Generate headers",
   "style": {
     "stroke": "none",
     "fill": "#bfdbef",
@@ -15,10 +15,10 @@ const Node = {
     "3b919b9c620ad2ac",
     "dcf695f4a88105de"
   ],
-  "x": 684,
+  "x": 24,
   "y": 19,
-  "w": 142,
-  "h": 102
+  "w": 162,
+  "h": 82
 }
 
 module.exports = Node;

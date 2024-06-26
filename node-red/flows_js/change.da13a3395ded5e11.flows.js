@@ -21,45 +21,31 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "path_suffix",
+      "p": "pathSuffix",
       "pt": "flow",
       "to": "/transactions",
       "tot": "str"
     },
     {
       "t": "set",
-      "p": "query_param",
+      "p": "urlParam",
       "pt": "flow",
       "to": "selected_bank_account",
       "tot": "flow"
     },
     {
       "t": "set",
-      "p": "query_param1",
+      "p": "queryParam1",
       "pt": "flow",
       "to": "startdate",
       "tot": "global"
     },
     {
       "t": "set",
-      "p": "query_param1",
-      "pt": "flow",
-      "to": "2024-06-17",
-      "tot": "str"
-    },
-    {
-      "t": "set",
-      "p": "query_param2",
+      "p": "queryParam2",
       "pt": "flow",
       "to": "enddate",
       "tot": "global"
-    },
-    {
-      "t": "set",
-      "p": "query_param2",
-      "pt": "flow",
-      "to": "2024-06-17",
-      "tot": "str"
     }
   ],
   "action": "",
@@ -67,13 +53,15 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 420,
-  "y": 280,
+  "x": 595,
+  "y": 260,
   "wires": [
     [
       "632cc65c2df51983"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-cogs",
+  "l": false
 }
 
 module.exports = Node;

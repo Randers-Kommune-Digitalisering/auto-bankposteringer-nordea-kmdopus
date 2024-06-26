@@ -27,13 +27,15 @@ const Node = {
       "module": "crypto-js"
     }
   ],
-  "x": 1190,
-  "y": 200,
+  "x": 145,
+  "y": 60,
   "wires": [
     [
       "145f6f129e7190d7"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-gears",
+  "l": false
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, moment, uuid, forge, CryptoJS) {
@@ -42,13 +44,13 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   
   flow.set("randomUUID", requestId);
   flow.set("today", today);
+  msg.headers = {};
   
-  // Common
   function getHeaderValue(headerName) {
       const headers = flow.get("headers");
       const headerValue = headers ? headers[headerName] : undefined;
       if (headerValue === undefined) {
-          throw new Error(`Required header: ${headerName} is not defined`);
+          node.error(`Required header: ${headerName} is not defined`);
       }
       return headerValue;
   }
@@ -59,15 +61,10 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
       const data = flow.get("data");
   
       if (contentType === "application/x-www-form-urlencoded") {
-          const data_sub = Object.keys(data)
-              .sort(function (a, b) {
-                  if (a < b) { return -1; }
-                  if (a > b) { return 1; }
-                  return 0;
-              })
-              .map(key => key + "=" + data[key])
+          return Object.keys(data)
+              .sort()
+              .map(key => `${key}=${data[key]}`)
               .join('&');
-          return data_sub;
       } else if (contentType === "application/json") {
           return JSON.stringify(data);
       } else if (Object.entries(data).length === 0 && data.constructor === Object) {
@@ -79,16 +76,13 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   
   function calculateDigest() {
       const requestData = resolveRequestBody();
-  
-      // console.log(`Request data: ${requestData}`);
-  
       const sha256digest = CryptoJS.SHA256(requestData);
       const base64sha256 = CryptoJS.enc.Base64.stringify(sha256digest);
       const calculatedDigest = 'sha-256=' + base64sha256;
   
-      // console.log(`Digest header: ${calculatedDigest}`);
-  
       flow.set("Digest", calculatedDigest);
+      msg.headers['Digest'] = calculatedDigest;
+      
       return calculatedDigest;
   }
   
@@ -98,47 +92,54 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   const requestWithContentHeaders = "(request-target) x-nordea-originating-host x-nordea-originating-date content-type digest";
   
   function getSignatureBaseOnRequest() {
-      let host = "open.nordea.com";
-  
-      let path;
-      if (typeof flow.get("query_param2") !== "undefined") {
-          path = flow.get("path") + "/" + flow.get("query_param") + flow.get("path_suffix") + "?from_date=" + flow.get("query_param1") + "&to_date=" + flow.get("query_param2");
-      }
-      else if (typeof flow.get("query_param1") !== "undefined") {
-          path = flow.get("path") + "/" + flow.get("query_param") + flow.get("path_suffix") + "?from_date=" + flow.get("query_param1");
-      }
-      else if (typeof flow.get("query_param") !== "undefined") {
-          path = flow.get("path") + "/" + flow.get("query_param");
-      }
-      else {
-          path = flow.get("path");
-      }
-  
-      if (flow.get("continuation_key")) {
-          path = path + "&continuation_key=" + flow.get("continuation_key")
-          flow.set("url", host + path);
-      } else {
-          flow.set("url", host + path);
-      }
-  
+      const host = "open.nordea.com";
+      const path = constructPath();
       const method = flow.get("method").toLowerCase();
       const date = moment().utc().format("ddd, DD MMM YYYY HH:mm:ss") + " GMT";
+      const headers = method === "post" || method === "put" || method === "patch" ? requestWithContentHeaders : requestWithoutContentHeaders;
   
-      let normalizedString =
-          `(request-target): ${method} ${path}\n` +
+      flow.set("url", `https://${host}${path}`);
+  
+      let normalizedString = `(request-target): ${method} ${path}\n` +
           `x-nordea-originating-host: ${host}\n` +
           `x-nordea-originating-date: ${date}`;
   
-      let headers = requestWithoutContentHeaders;
-  
-      if ((method === "post" || method === "put" || method === "patch") && Object.entries(flow.get("data")).length > 0) {
+      if (headers === requestWithContentHeaders) {
           const contentType = flow.get("content-type");
           const digest = calculateDigest();
-          normalizedString += `\ncontent-type: ${contentType}\ndigest: ${digest}`
-  
-          headers = requestWithContentHeaders;
+          normalizedString += `\ncontent-type: ${contentType}\ndigest: ${digest}`;
       }
+  
       return { host, path, method, date, headers, normalizedString };
+  }
+  
+  function constructPath() {
+      const path = flow.get("path");
+      const urlParam = flow.get("urlParam") || '';
+      const pathSuffix = flow.get("pathSuffix") || '';
+      const queryParams = [];
+      const queryParam1 = flow.get("queryParam1");
+      const queryParam2 = flow.get("queryParam2");
+      const continuationKey = flow.get("continuation_key");
+  
+      if (queryParam1) {
+          queryParams.push(`from_date=${queryParam1}`);
+      }
+      if (queryParam2) {
+          queryParams.push(`to_date=${queryParam2}`);
+      }
+      if (continuationKey) {
+          queryParams.push(`continuation_key=${continuationKey}`);
+      }
+  
+      const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
+      
+      if (!urlParam) {
+          return path;
+      } else {
+          return `${path}/${urlParam}${pathSuffix}${queryString}`;
+      }
+      
   }
   
   function encryptSignature(normalizedSignatureString) {
@@ -148,28 +149,36 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   }
   
   function getPrivateKey() {
-      let eidasPrivateKey = flow.get("eidasPrivateKey");
+      let eidasPrivateKey = env.get("EIDASPRIVATEKEY");
   
       if (!eidasPrivateKey.includes('PRIVATE KEY')) {
           eidasPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\n" + eidasPrivateKey + "\n" + "-----END RSA PRIVATE KEY-----";
       }
-      // console.log(eidasPrivateKey);
+  
       return forge.pki.privateKeyFromPem(eidasPrivateKey);
   }
   
   
-  const clientId = flow.get("X-IBM-Client-Id");
+  const clientId = env.get("CLIENT_ID");
   const signature = getSignatureBaseOnRequest();
   const encryptedSignature = encryptSignature(signature.normalizedString);
   const signatureHeader = `keyId="${clientId}",algorithm="rsa-sha256",headers="${signature.headers}",signature="${encryptedSignature}"`;
-  
-  // console.log(`Normalized signature string: ${signature.normalizedString}`);
-  // console.log(`Signature header: ${signatureHeader}`);
   
   flow.set("Signature", signatureHeader);
   flow.set("X-Nordea-Originating-Host", signature.host);
   flow.set("X-Nordea-Originating-Date", signature.date);
   flow.set("time_of_origin", signature.date)
+  
+  msg.headers['X-Nordea-Originating-Host'] = signature.host;
+  msg.headers['X-Nordea-Originating-Date'] = signature.date;
+  msg.headers['X-IBM-Client-Id'] = clientId;
+  msg.headers['X-IBM-Client-Secret'] = env.get("CLIENT_SECRET");
+  msg.headers['Signature'] = signatureHeader;
+  if (flow.get("data")) msg.payload = flow.get("data");
+  if (flow.get("url")) msg.url = flow.get("url");
+  if (flow.get("method") == "PUT" || flow.get("method") == "GET") {
+      msg.headers['Authorization'] = "Bearer " + global.get("client_token");
+  }
   
   return msg;
 }

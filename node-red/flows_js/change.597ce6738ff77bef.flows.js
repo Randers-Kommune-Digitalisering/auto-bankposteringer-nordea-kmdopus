@@ -12,7 +12,7 @@ const Node = {
     },
     {
       "t": "delete",
-      "p": "add_transactions",
+      "p": "addTransactions",
       "pt": "global"
     }
   ],
@@ -21,13 +21,15 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 1125,
-  "y": 280,
+  "x": 715,
+  "y": 300,
   "wires": [
     [
-      "3bf0fcec8ac96b0c"
+      "3bf0fcec8ac96b0c",
+      "4e384ce7a5fd0cec"
     ]
   ],
+  "icon": "font-awesome/fa-trash",
   "l": false
 }
 

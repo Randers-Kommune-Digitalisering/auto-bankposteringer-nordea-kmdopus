@@ -7,13 +7,14 @@ const Node = {
   "property": "payload",
   "action": "str",
   "pretty": false,
-  "x": 155,
-  "y": 240,
+  "x": 345,
+  "y": 300,
   "wires": [
     [
       "393650452fc62a62"
     ]
   ],
+  "icon": "font-awesome/fa-language",
   "l": false
 }
 

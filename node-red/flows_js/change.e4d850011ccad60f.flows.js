@@ -7,50 +7,17 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "eidasPrivateKey",
+      "p": "domain",
       "pt": "flow",
-      "to": "EIDASPRIVATEKEY",
-      "tot": "env",
-      "dc": true
+      "to": "https://open.nordea.com",
+      "tot": "str"
     },
     {
       "t": "set",
-      "p": "X-IBM-Client-Id",
+      "p": "step",
       "pt": "flow",
-      "to": "CLIENT_ID",
-      "tot": "env",
-      "dc": true
-    },
-    {
-      "t": "set",
-      "p": "X-IBM-Client-Secret",
-      "pt": "flow",
-      "to": "CLIENT_SECRET",
-      "tot": "env",
-      "dc": true
-    },
-    {
-      "t": "set",
-      "p": "agreement_id",
-      "pt": "flow",
-      "to": "AGREEMENT_ID",
-      "tot": "env",
-      "dc": true
-    },
-    {
-      "t": "delete",
-      "p": "query_param",
-      "pt": "flow"
-    },
-    {
-      "t": "delete",
-      "p": "query_param1",
-      "pt": "flow"
-    },
-    {
-      "t": "delete",
-      "p": "query_param2",
-      "pt": "flow"
+      "to": "0",
+      "tot": "num"
     }
   ],
   "action": "",
@@ -58,13 +25,15 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 330,
-  "y": 60,
+  "x": 475,
+  "y": 80,
   "wires": [
     [
-      "7a9c780ed742f3c1"
+      "2e52c960a3fc09fc"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-save",
+  "l": false
 }
 
 module.exports = Node;

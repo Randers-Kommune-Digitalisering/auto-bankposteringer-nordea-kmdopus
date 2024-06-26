@@ -3,32 +3,40 @@ const Node = {
   "type": "switch",
   "z": "37f6db37c66da295",
   "g": "fa9c0eb18149dc68",
-  "name": "Step check",
+  "name": "Step checker",
   "property": "step",
   "propertyType": "flow",
   "rules": [
     {
       "t": "eq",
+      "v": "0",
+      "vt": "num"
+    },
+    {
+      "t": "eq",
       "v": "1",
-      "vt": "str"
+      "vt": "num"
     },
     {
       "t": "eq",
       "v": "2",
-      "vt": "str"
+      "vt": "num"
     },
     {
       "t": "eq",
       "v": "3",
-      "vt": "str"
+      "vt": "num"
     }
   ],
   "checkall": "true",
   "repair": false,
-  "outputs": 3,
-  "x": 330,
-  "y": 140,
+  "outputs": 4,
+  "x": 545,
+  "y": 120,
   "wires": [
+    [
+      "7a9c780ed742f3c1"
+    ],
     [
       "66f7f4915a00da12"
     ],
@@ -38,7 +46,9 @@ const Node = {
     [
       "0eb4d70577cb850a"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-question",
+  "l": false
 }
 
 module.exports = Node;

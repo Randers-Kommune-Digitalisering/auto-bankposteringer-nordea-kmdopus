@@ -3,47 +3,50 @@ const Node = {
   "type": "switch",
   "z": "37f6db37c66da295",
   "g": "c31ca42d52037078",
-  "name": "switch req status",
+  "name": "Check status code from API response",
   "property": "statusCode",
   "propertyType": "msg",
   "rules": [
     {
       "t": "btwn",
-      "v": "200",
+      "v": "400",
       "vt": "num",
-      "v2": "201",
+      "v2": "499",
       "v2t": "num"
     },
     {
-      "t": "eq",
-      "v": "401",
-      "vt": "num"
+      "t": "btwn",
+      "v": "200",
+      "vt": "num",
+      "v2": "299",
+      "v2t": "num"
     },
     {
       "t": "btwn",
-      "v": "400",
+      "v": "500",
       "vt": "num",
-      "v2": "510",
+      "v2": "599",
       "v2t": "num"
     }
   ],
   "checkall": "true",
   "repair": false,
   "outputs": 3,
-  "x": 1490,
-  "y": 180,
+  "x": 105,
+  "y": 200,
   "wires": [
+    [
+      "98fb9a12ea6f964c"
+    ],
     [
       "87538fe934f3a5c9"
     ],
     [
-      "b5e0f0f808716c5f",
-      "d194eda7b9db38ed"
-    ],
-    [
-      "b5e0f0f808716c5f"
+      "252967e851662761"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-question",
+  "l": false
 }
 
 module.exports = Node;

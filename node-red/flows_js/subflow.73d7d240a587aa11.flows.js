@@ -29,12 +29,7 @@ const Node = {
     {
       "x": 990,
       "y": 260,
-      "wires": [
-        {
-          "id": "9ff9b55590eb551b",
-          "port": 1
-        }
-      ]
+      "wires": []
     }
   ],
   "env": [],

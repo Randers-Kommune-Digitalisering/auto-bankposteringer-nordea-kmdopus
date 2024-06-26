@@ -2,7 +2,7 @@ const Node = {
   "id": "84ef36904860dd2d",
   "type": "debug",
   "z": "9b998b2e60b3c784",
-  "g": "9be18639da161bb5",
+  "g": "8965e71ff614b1ea",
   "name": "",
   "active": true,
   "tosidebar": true,
@@ -12,8 +12,8 @@ const Node = {
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 405,
-  "y": 240,
+  "x": 115,
+  "y": 300,
   "wires": [],
   "l": false
 }

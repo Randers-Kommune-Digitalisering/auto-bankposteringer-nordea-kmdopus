@@ -11,13 +11,14 @@ const Node = {
   "sendError": false,
   "encoding": "none",
   "allProps": false,
-  "x": 105,
-  "y": 160,
+  "x": 305,
+  "y": 240,
   "wires": [
     [
       "e8045c16c7af0760"
     ]
   ],
+  "icon": "font-awesome/fa-download",
   "l": false
 }
 

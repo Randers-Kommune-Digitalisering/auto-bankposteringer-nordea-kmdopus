@@ -3,7 +3,7 @@ const Node = {
   "type": "switch",
   "z": "37f6db37c66da295",
   "g": "9d7a704133314cab",
-  "name": "switch req status",
+  "name": "What is request status?",
   "property": "request_status",
   "propertyType": "global",
   "rules": [
@@ -21,8 +21,8 @@ const Node = {
   "checkall": "true",
   "repair": false,
   "outputs": 2,
-  "x": 1190,
-  "y": 60,
+  "x": 105,
+  "y": 460,
   "wires": [
     [
       "302deede66edf3b7"
@@ -30,7 +30,9 @@ const Node = {
     [
       "d6bd73a14364aa0d"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-question",
+  "l": false
 }
 
 module.exports = Node;

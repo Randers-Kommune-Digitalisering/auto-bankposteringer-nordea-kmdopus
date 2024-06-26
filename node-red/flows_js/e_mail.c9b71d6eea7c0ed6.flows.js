@@ -10,11 +10,12 @@ const Node = {
   "token": "oauth2Response.access_token",
   "secure": true,
   "tls": true,
-  "name": "jan.molbaek@randers.dk",
+  "name": "",
   "dname": "Send email",
-  "x": 1590,
-  "y": 100,
-  "wires": []
+  "x": 225,
+  "y": 340,
+  "wires": [],
+  "l": false
 }
 
 module.exports = Node;

@@ -5,8 +5,8 @@ const Node = {
   "g": "5f9f555817a1a9c7",
   "name": "transaction flow",
   "info": "",
-  "x": 120,
-  "y": 1040,
+  "x": 400,
+  "y": 1020,
   "wires": []
 }
 
