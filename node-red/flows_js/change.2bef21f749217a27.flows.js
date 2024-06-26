@@ -21,6 +21,13 @@ const Node = {
     },
     {
       "t": "set",
+      "p": "to",
+      "pt": "msg",
+      "to": "admEmail",
+      "tot": "global"
+    },
+    {
+      "t": "set",
       "p": "adminAuthAttempt",
       "pt": "global",
       "to": "0",
@@ -32,13 +39,15 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 1580,
-  "y": 60,
+  "x": 145,
+  "y": 340,
   "wires": [
     [
       "c9b71d6eea7c0ed6"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-cogs",
+  "l": false
 }
 
 module.exports = Node;

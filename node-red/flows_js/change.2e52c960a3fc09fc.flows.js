@@ -7,17 +7,7 @@ const Node = {
   "rules": [
     {
       "t": "delete",
-      "p": "_msgid",
-      "pt": "msg"
-    },
-    {
-      "t": "delete",
       "p": "payload",
-      "pt": "msg"
-    },
-    {
-      "t": "delete",
-      "p": "headers",
       "pt": "msg"
     },
     {
@@ -47,27 +37,32 @@ const Node = {
     },
     {
       "t": "delete",
+      "p": "headers",
+      "pt": "msg"
+    },
+    {
+      "t": "delete",
       "p": "data",
       "pt": "flow"
     },
     {
       "t": "delete",
-      "p": "query_param",
+      "p": "urlParam",
       "pt": "flow"
     },
     {
       "t": "delete",
-      "p": "query_param1",
+      "p": "queryParam1",
       "pt": "flow"
     },
     {
       "t": "delete",
-      "p": "query_param2",
+      "p": "queryParam2",
       "pt": "flow"
     },
     {
       "t": "delete",
-      "p": "path_suffix",
+      "p": "pathSuffix",
       "pt": "flow"
     }
   ],
@@ -76,13 +71,15 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 330,
-  "y": 100,
+  "x": 505,
+  "y": 120,
   "wires": [
     [
       "1f0cf3e7517a3a8f"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-trash",
+  "l": false
 }
 
 module.exports = Node;

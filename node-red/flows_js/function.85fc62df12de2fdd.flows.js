@@ -15,13 +15,15 @@ const Node = {
       "module": "dayjs"
     }
   ],
-  "x": 380,
-  "y": 320,
+  "x": 305,
+  "y": 60,
   "wires": [
     [
       "5e4c16d66475c6db"
     ]
   ],
+  "icon": "font-awesome/fa-save",
+  "l": false,
   "info": ""
 }
 

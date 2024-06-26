@@ -14,13 +14,14 @@ const Node = {
   "strings": true,
   "include_empty_strings": false,
   "include_null_values": false,
-  "x": 175,
+  "x": 345,
   "y": 60,
   "wires": [
     [
       "ad893c40a4b9d6f9"
     ]
   ],
+  "icon": "font-awesome/fa-language",
   "l": false
 }
 

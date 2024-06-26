@@ -3,7 +3,7 @@ const Node = {
   "type": "http request",
   "z": "37f6db37c66da295",
   "g": "fa9c0eb18149dc68",
-  "name": "Auth Status",
+  "name": "Authorization Status",
   "method": "GET",
   "ret": "obj",
   "paytoqs": "ignore",
@@ -15,7 +15,7 @@ const Node = {
   "authType": "",
   "senderr": false,
   "headers": [],
-  "x": 785,
+  "x": 675,
   "y": 140,
   "wires": [
     [

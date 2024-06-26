@@ -16,6 +16,7 @@ const Node = {
       "2eed582e462f26c2"
     ]
   ],
+  "icon": "font-awesome/fa-language",
   "l": false
 }
 

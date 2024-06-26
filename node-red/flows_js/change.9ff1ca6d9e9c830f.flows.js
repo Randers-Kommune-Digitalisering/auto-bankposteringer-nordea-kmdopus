@@ -7,10 +7,10 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "stamdata",
+      "p": "admEmail",
       "pt": "global",
-      "to": "{}",
-      "tot": "json"
+      "to": "jan.molbaek@randers.dk",
+      "tot": "str"
     },
     {
       "t": "set",
@@ -33,6 +33,13 @@ const Node = {
       "pt": "global",
       "to": "[\"95990009\",\"95991009\"]",
       "tot": "json"
+    },
+    {
+      "t": "set",
+      "p": "erpSystem",
+      "pt": "global",
+      "to": "KMD",
+      "tot": "str"
     }
   ],
   "action": "",
@@ -40,13 +47,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 205,
-  "y": 360,
+  "x": 425,
+  "y": 440,
   "wires": [
     [
       "7f454f55bfaa9637"
     ]
   ],
+  "icon": "font-awesome/fa-save",
   "l": false
 }
 

@@ -1,7 +1,7 @@
 const Node = {
   "id": "04e231029cd7d50d",
   "type": "function",
-  "z": "debc38a0513e22c1",
+  "z": "9b998b2e60b3c784",
   "g": "b4ef161cb64fdf9d",
   "name": "set global vars",
   "func": "",
@@ -15,14 +15,16 @@ const Node = {
       "module": "dayjs"
     }
   ],
-  "x": 260,
-  "y": 60,
+  "x": 305,
+  "y": 120,
   "wires": [
     [
       "639fe74c5b6d7b2b",
       "0e0827ef35888613"
     ]
   ],
+  "icon": "font-awesome/fa-save",
+  "l": false,
   "info": ""
 }
 

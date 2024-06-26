@@ -19,8 +19,8 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "postings_with_no_match",
-      "tot": "flow"
+      "to": "postingsWithNoMatch",
+      "tot": "global"
     },
     {
       "t": "set",
@@ -35,13 +35,15 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 150,
+  "x": 95,
   "y": 60,
   "wires": [
     [
       "f9e539bdc6717683"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-trash",
+  "l": false
 }
 
 module.exports = Node;

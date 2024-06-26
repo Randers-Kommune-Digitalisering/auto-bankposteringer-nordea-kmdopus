@@ -3,31 +3,33 @@ const Node = {
   "type": "function",
   "z": "f91accb007eed9a2",
   "g": "6055094b02013d9b",
-  "name": "account_step += 1",
+  "name": "accountStep += 1 (= 0 if no more accounts)",
   "func": "",
   "outputs": 1,
   "noerr": 0,
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 445,
-  "y": 60,
+  "x": 525,
+  "y": 160,
   "wires": [
     [
       "81b76fd2118c4795"
     ]
   ],
+  "icon": "font-awesome/fa-question",
   "l": false
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let account_step = global.get("account_step");
+  let accountStep = global.get("accountStep");
+  let accountLength = global.get("bankkonti").len;
   
-  if (account_step + 1 === global.get("bankkonti").len) {
-      // When there are no more accounts to check
-      global.set("account_step", 0);
+  if (accountStep + 1 !== accountLength) {
+      global.set("accountStep", accountStep += 1);
   } else {
-      global.set("account_step", account_step += 1);
+      // When there are no more accounts to check
+      global.set("accountStep", 0);
   }
   
   return msg;

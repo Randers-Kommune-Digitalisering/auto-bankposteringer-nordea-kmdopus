@@ -3,7 +3,7 @@ const Node = {
   "type": "debug",
   "z": "37f6db37c66da295",
   "g": "fa9c0eb18149dc68",
-  "name": "stdout Auth Status succes",
+  "name": "Authorization Status succes",
   "active": true,
   "tosidebar": true,
   "console": true,
@@ -12,7 +12,7 @@ const Node = {
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 985,
+  "x": 795,
   "y": 140,
   "wires": [],
   "l": false

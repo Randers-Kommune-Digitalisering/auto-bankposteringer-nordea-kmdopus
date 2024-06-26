@@ -3,8 +3,15 @@ const Node = {
   "type": "change",
   "z": "37f6db37c66da295",
   "g": "fa9c0eb18149dc68",
-  "name": "Flow vars",
+  "name": "set request data",
   "rules": [
+    {
+      "t": "set",
+      "p": "step",
+      "pt": "flow",
+      "to": "1",
+      "tot": "num"
+    },
     {
       "t": "set",
       "p": "method",
@@ -30,15 +37,15 @@ const Node = {
       "t": "set",
       "p": "data",
       "pt": "flow",
-      "to": "{\t   \"scope\":[\t       \"ACCOUNTS_BROADBAND\"\t   ],\t   \"duration\":129600,\t   \"agreement_number\":$flowContext('agreement_id')\t}",
+      "to": "{\t   \"scope\":[\t       \"ACCOUNTS_BROADBAND\"\t   ],\t   \"duration\":129600,\t   \"agreement_number\":$env('AGREEMENT_ID')\t}",
       "tot": "jsonata"
     },
     {
       "t": "set",
-      "p": "step",
-      "pt": "flow",
-      "to": "1",
-      "tot": "str"
+      "p": "url",
+      "pt": "msg",
+      "to": "$flowContext(\"domain\") & $flowContext(\"path\")",
+      "tot": "jsonata"
     }
   ],
   "action": "",
@@ -46,13 +53,15 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 500,
+  "x": 595,
   "y": 60,
   "wires": [
     [
       "582fcaa0daa95fd5"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-cogs",
+  "l": false
 }
 
 module.exports = Node;

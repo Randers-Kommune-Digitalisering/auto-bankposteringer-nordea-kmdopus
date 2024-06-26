@@ -3,9 +3,9 @@ const Node = {
   "type": "link in",
   "z": "f91accb007eed9a2",
   "g": "46eab8862a269fad",
-  "name": "link in generate KMD Opus headers",
+  "name": "link in generate headers",
   "links": [],
-  "x": 725,
+  "x": 65,
   "y": 60,
   "wires": [
     [

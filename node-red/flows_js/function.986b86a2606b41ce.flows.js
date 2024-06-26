@@ -10,29 +10,30 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 945,
-  "y": 280,
+  "x": 595,
+  "y": 300,
   "wires": [
     [
       "f2e76e0f25073c0c"
     ]
   ],
+  "icon": "font-awesome/fa-save",
   "l": false
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let transactions = global.get("transactions") ? global.get("transactions") : [];
-  let add_transactions = global.get("add_transactions");
+  let addTransactions = global.get("addTransactions");
   
   // Ensure transactions is an array
   transactions = Array.isArray(transactions) ? transactions : [];
   
   // Concatenate add_transactions to transactions
-  transactions = transactions.concat(add_transactions);
+  transactions = transactions.concat(addTransactions);
   
   // Update the flow variable with the modified array
   global.set("transactions", transactions);
-  global.set("add_transactions", {});
+  global.set("addTransactions", {});
   
   return msg;
 }

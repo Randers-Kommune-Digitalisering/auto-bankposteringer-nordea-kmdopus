@@ -2,7 +2,7 @@ const Node = {
   "id": "9d7a704133314cab",
   "type": "group",
   "z": "37f6db37c66da295",
-  "name": "Check admin auth",
+  "name": "Check admin authorization",
   "style": {
     "stroke": "none",
     "fill": "#e3f3d3",
@@ -18,10 +18,10 @@ const Node = {
     "d6bd73a14364aa0d",
     "bd9639d398b2a961"
   ],
-  "x": 1034,
-  "y": 19,
-  "w": 312,
-  "h": 162
+  "x": 24,
+  "y": 399,
+  "w": 242,
+  "h": 122
 }
 
 module.exports = Node;

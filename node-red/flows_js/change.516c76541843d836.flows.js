@@ -7,7 +7,7 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "account_step",
+      "p": "accountStep",
       "pt": "global",
       "to": "0",
       "tot": "num"
@@ -23,13 +23,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 105,
-  "y": 280,
+  "x": 375,
+  "y": 260,
   "wires": [
     [
       "d6355c32092283ec"
     ]
   ],
+  "icon": "font-awesome/fa-save",
   "l": false
 }
 
