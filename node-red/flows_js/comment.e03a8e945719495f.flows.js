@@ -5,7 +5,7 @@ const Node = {
   "name": "link in from frontend events",
   "info": "",
   "x": 310,
-  "y": 500,
+  "y": 480,
   "wires": []
 }
 

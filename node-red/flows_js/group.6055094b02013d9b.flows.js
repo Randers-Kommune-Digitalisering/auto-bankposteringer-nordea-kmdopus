@@ -5,7 +5,7 @@ const Node = {
   "name": "KMD Opus - file creation",
   "style": {
     "stroke": "none",
-    "fill": "#bfdbef",
+    "fill": "#e3f3d3",
     "label": true,
     "label-position": "n",
     "color": "#000000"

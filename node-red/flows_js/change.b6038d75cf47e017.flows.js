@@ -14,17 +14,17 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "request_status",
-      "pt": "global",
-      "to": "payload.response.status",
-      "tot": "msg"
-    },
-    {
-      "t": "set",
       "p": "adminAuthAttempt",
       "pt": "global",
       "to": "$globalContext('adminAuthAttempt') + 1",
       "tot": "jsonata"
+    },
+    {
+      "t": "set",
+      "p": "adminAuthStatus",
+      "pt": "global",
+      "to": "payload.response.status",
+      "tot": "msg"
     }
   ],
   "action": "",

@@ -5,7 +5,7 @@ const Node = {
   "name": "Bypass with sample",
   "style": {
     "stroke": "none",
-    "fill": "#ffbfbf",
+    "fill": "#ffffbf",
     "label": true,
     "label-position": "n",
     "color": "#000000"
