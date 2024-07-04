@@ -5,7 +5,7 @@ const Node = {
   "name": "Nordea - auth",
   "style": {
     "stroke": "none",
-    "fill": "#e3f3d3",
+    "fill": "#ffffbf",
     "label": true,
     "label-position": "n",
     "color": "#000000"
@@ -27,7 +27,6 @@ const Node = {
     "1f0cf3e7517a3a8f",
     "2e52c960a3fc09fc",
     "7492cb1e8efb02f4",
-    "27bd5d179edb2c93",
     "281316d0452926d4",
     "08dccd1d575e80d4",
     "ed71975d1d214b80",
@@ -42,7 +41,8 @@ const Node = {
     "a6cc761e9e0eb217",
     "73f6dfe575a1b5f0",
     "f85f9d2570988531",
-    "ecd1d4485a4e7b45"
+    "ecd1d4485a4e7b45",
+    "dbf9bf32ce3c4f70"
   ],
   "x": 294,
   "y": 19,

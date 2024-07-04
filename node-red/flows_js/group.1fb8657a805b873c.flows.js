@@ -6,7 +6,7 @@ const Node = {
   "style": {
     "label": true,
     "stroke": "none",
-    "fill": "#bfdbef",
+    "fill": "#e3f3d3",
     "label-position": "n",
     "color": "#000000"
   },

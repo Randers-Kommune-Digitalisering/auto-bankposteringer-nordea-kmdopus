@@ -6,7 +6,7 @@ const Node = {
   "name": "link in Write JSON",
   "links": [],
   "x": 245,
-  "y": 300,
+  "y": 280,
   "wires": [
     [
       "18fb2566dd1b4a92"

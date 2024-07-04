@@ -11,11 +11,6 @@ const Node = {
       "pt": "global",
       "to": "0",
       "tot": "num"
-    },
-    {
-      "t": "delete",
-      "p": "link_to_next_page",
-      "pt": "flow"
     }
   ],
   "action": "",

@@ -6,7 +6,7 @@ const Node = {
   "name": "link in Write stamdata",
   "links": [],
   "x": 245,
-  "y": 440,
+  "y": 420,
   "wires": [
     [
       "9ff1ca6d9e9c830f"

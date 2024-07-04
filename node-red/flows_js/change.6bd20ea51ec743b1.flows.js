@@ -1,15 +1,15 @@
 const Node = {
-  "id": "302deede66edf3b7",
+  "id": "6bd20ea51ec743b1",
   "type": "change",
   "z": "37f6db37c66da295",
   "g": "9d7a704133314cab",
-  "name": "Step = 2",
+  "name": "Step = 0",
   "rules": [
     {
       "t": "set",
       "p": "step",
       "pt": "flow",
-      "to": "2",
+      "to": "0",
       "tot": "num"
     }
   ],
@@ -19,10 +19,10 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 155,
-  "y": 500,
+  "y": 440,
   "wires": [
     [
-      "02213fe18223d94a"
+      "bd9639d398b2a961"
     ]
   ],
   "icon": "font-awesome/fa-save",

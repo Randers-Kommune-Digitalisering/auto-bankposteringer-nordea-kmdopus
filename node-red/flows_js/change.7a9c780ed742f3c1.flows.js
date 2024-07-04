@@ -44,7 +44,7 @@ const Node = {
       "t": "set",
       "p": "url",
       "pt": "msg",
-      "to": "$flowContext(\"domain\") & $flowContext(\"path\")",
+      "to": "$flowContext(\"banking_domain\") & $flowContext(\"path\")",
       "tot": "jsonata"
     }
   ],
