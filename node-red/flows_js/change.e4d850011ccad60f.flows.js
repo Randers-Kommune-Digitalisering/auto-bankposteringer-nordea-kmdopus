@@ -7,7 +7,14 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "domain",
+      "p": "adminAuthAttempt",
+      "pt": "global",
+      "to": "0",
+      "tot": "num"
+    },
+    {
+      "t": "set",
+      "p": "banking_domain",
       "pt": "flow",
       "to": "https://open.nordea.com",
       "tot": "str"
@@ -25,11 +32,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 475,
-  "y": 80,
+  "x": 465,
+  "y": 60,
   "wires": [
     [
-      "2e52c960a3fc09fc"
+      "dbf9bf32ce3c4f70"
     ]
   ],
   "icon": "font-awesome/fa-save",

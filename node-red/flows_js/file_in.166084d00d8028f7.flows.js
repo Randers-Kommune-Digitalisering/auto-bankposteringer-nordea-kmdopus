@@ -12,7 +12,7 @@ const Node = {
   "encoding": "none",
   "allProps": false,
   "x": 305,
-  "y": 240,
+  "y": 220,
   "wires": [
     [
       "e8045c16c7af0760"

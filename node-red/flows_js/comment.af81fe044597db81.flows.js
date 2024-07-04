@@ -4,8 +4,8 @@ const Node = {
   "z": "37f6db37c66da295",
   "name": "authorizer_id = Nordea ID, admin",
   "info": "",
-  "x": 150,
-  "y": 560,
+  "x": 1010,
+  "y": 40,
   "wires": []
 }
 

@@ -5,7 +5,7 @@ const Node = {
   "name": "Anden ØS - file creation",
   "style": {
     "stroke": "none",
-    "fill": "#bfdbef",
+    "fill": "#e3f3d3",
     "label": true,
     "label-position": "n",
     "color": "#000000"

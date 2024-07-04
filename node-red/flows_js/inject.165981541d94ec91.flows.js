@@ -23,6 +23,7 @@ const Node = {
       "27bcdd1c5f9fbd70"
     ]
   ],
+  "icon": "node-red/mouse.png",
   "l": false
 }
 

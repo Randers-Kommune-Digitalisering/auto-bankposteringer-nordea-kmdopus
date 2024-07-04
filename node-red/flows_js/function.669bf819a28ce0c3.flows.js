@@ -56,15 +56,21 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   }
   
   // Digest Calculation
+  
   function resolveRequestBody() {
       const contentType = flow.get("content-type");
       const data = flow.get("data");
   
       if (contentType === "application/x-www-form-urlencoded") {
-          return Object.keys(data)
-              .sort()
-              .map(key => `${key}=${data[key]}`)
+          const data_sub = Object.keys(data)
+              .sort(function (a, b) {
+                  if (a < b) { return -1; }
+                  if (a > b) { return 1; }
+                  return 0;
+              })
+              .map(key => key + "=" + data[key])
               .join('&');
+          return data_sub;
       } else if (contentType === "application/json") {
           return JSON.stringify(data);
       } else if (Object.entries(data).length === 0 && data.constructor === Object) {
@@ -114,7 +120,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   }
   
   function constructPath() {
-      const path = flow.get("path");
+      const path = flow.get("path") || '';
       const urlParam = flow.get("urlParam") || '';
       const pathSuffix = flow.get("pathSuffix") || '';
       const queryParams = [];
@@ -158,7 +164,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
       return forge.pki.privateKeyFromPem(eidasPrivateKey);
   }
   
-  
   const clientId = env.get("CLIENT_ID");
   const signature = getSignatureBaseOnRequest();
   const encryptedSignature = encryptSignature(signature.normalizedString);
@@ -174,8 +179,11 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   msg.headers['X-IBM-Client-Id'] = clientId;
   msg.headers['X-IBM-Client-Secret'] = env.get("CLIENT_SECRET");
   msg.headers['Signature'] = signatureHeader;
-  if (flow.get("data")) msg.payload = flow.get("data");
+  if (flow.get("data")) msg.payload = resolveRequestBody();
   if (flow.get("url")) msg.url = flow.get("url");
+  if (flow.get("method") == "POST" || flow.get("method") == "PUT") {
+      msg.headers['Content-Type'] = flow.get("content-type");
+  }
   if (flow.get("method") == "PUT" || flow.get("method") == "GET") {
       msg.headers['Authorization'] = "Bearer " + global.get("client_token");
   }

@@ -11,7 +11,7 @@ const Node = {
   "overwriteFile": "true",
   "encoding": "none",
   "x": 425,
-  "y": 300,
+  "y": 280,
   "wires": [
     [
       "ffea85280ac1ebb4"

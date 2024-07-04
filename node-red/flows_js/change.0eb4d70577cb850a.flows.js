@@ -35,9 +35,23 @@ const Node = {
     },
     {
       "t": "set",
+      "p": "data.code",
+      "pt": "flow",
+      "to": "exchange_code",
+      "tot": "global"
+    },
+    {
+      "t": "set",
+      "p": "data.grant_type",
+      "pt": "flow",
+      "to": "authorization_code",
+      "tot": "str"
+    },
+    {
+      "t": "set",
       "p": "url",
       "pt": "msg",
-      "to": "$flowContext(\"domain\") & $flowContext(\"path\")",
+      "to": "$flowContext(\"banking_domain\") & $flowContext(\"path\")",
       "tot": "str"
     }
   ],

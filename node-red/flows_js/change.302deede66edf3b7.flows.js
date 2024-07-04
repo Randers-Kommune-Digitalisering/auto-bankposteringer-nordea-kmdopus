@@ -3,14 +3,14 @@ const Node = {
   "type": "change",
   "z": "37f6db37c66da295",
   "g": "9d7a704133314cab",
-  "name": "Subtract step",
+  "name": "Step = 2",
   "rules": [
     {
       "t": "set",
       "p": "step",
       "pt": "flow",
-      "to": "$flowContext(\"step\")-1",
-      "tot": "jsonata"
+      "to": "2",
+      "tot": "num"
     }
   ],
   "action": "",
@@ -18,8 +18,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 145,
-  "y": 440,
+  "x": 155,
+  "y": 500,
   "wires": [
     [
       "02213fe18223d94a"

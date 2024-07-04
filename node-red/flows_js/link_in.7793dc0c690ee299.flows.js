@@ -6,7 +6,7 @@ const Node = {
   "name": "link in nordea auth status check",
   "links": [],
   "x": 65,
-  "y": 200,
+  "y": 160,
   "wires": [
     [
       "d9a0609727ed6375"
