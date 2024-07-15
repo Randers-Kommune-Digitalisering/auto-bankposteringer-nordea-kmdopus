@@ -1,12 +1,16 @@
-version: "3.9"
+version: "1.0"
 services:
-  node-red:
-    build: 
-      context: ./node-red
+
+  node_red_vue:
+    build: .
+
     networks:
-      - node_red
+      - node_red_vue
+
     ports:
       - "1880:1880"
+      - "3000:3000"
+
     environment:
       DB_USER: root
       DB_PASS: pass
@@ -48,13 +52,13 @@ services:
     build:
       context: ./redis_microservice
     networks:
-      - node_red
+      - node_red_vue
 
   python_microservice:
     build:
       context: ./python_queue_microservice
     networks:
-      - node_red
+      - node_red_vue
     depends_on:
       - redis_microservice
 
@@ -74,9 +78,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 55
-    networks:
-      - node_red
 
+    networks:
+      - node_red_vue
+      
 networks: 
-  node_red:
-    name: node_red
+  node_red_vue:
+    name: node_red_vue
