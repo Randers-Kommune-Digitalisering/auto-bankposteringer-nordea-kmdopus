@@ -293,5 +293,10 @@
   "http_response.b5bef6902ce9b02d.flows.js",
   "link_call.5c30b89cd36d09af.flows.js",
   "link_call.0f2920ad035e2f9b.flows.js",
-  "websocket_in.37a744d3152d3df3.flows.js"
+  "websocket_in.37a744d3152d3df3.flows.js",
+  "tab.VueExample.flows.js",
+  "http_in.eee875a55c0439c0.flows.js",
+  "http_response.2e6b0606eab4568c.flows.js",
+  "change.8e82ccceb36f3539.flows.js",
+  "comment.db07758955177a13.flows.js"
 ]
