@@ -11,6 +11,11 @@
             "url": "/"
         },
         {
+            "title": "Konteringsregler",
+            "url": "/konteringsregler",
+            "alert": "OBS"
+        },
+        {
             "title": "UI Templates",
             "url": "/templates",
             "alert": "OBS"
