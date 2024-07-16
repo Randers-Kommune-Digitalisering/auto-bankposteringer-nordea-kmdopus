@@ -10,6 +10,7 @@ import App from './App.vue'
 import Start from '@/views/Start.vue'
 import Vue from '@/views/Vue.vue'
 import Templates from '@/views/Templates.vue'
+import Konteringsregler from './views/Konteringsregler.vue'
 
 // Opsætning af URL routing
 
@@ -20,6 +21,11 @@ const router = createRouter({
             path: '/', 
             name: "Start",
             component: Start
+        },
+        {
+            path: '/konteringsregler', 
+            name: "Konteringsregler",
+            component: Konteringsregler
         },        
         {
             path: '/vue', 
