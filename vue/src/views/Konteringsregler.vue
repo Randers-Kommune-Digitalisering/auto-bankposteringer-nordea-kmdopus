@@ -39,27 +39,7 @@
     }
 
     /* Example data format
-    [
-        {
-            "name": "name",
-            "value": "Klub Øster Tørslev"
-        },
-        {
-            "name": "myShopNumber",
-            "value": "280120"
-        },
-        {
-            "name": "brandId"
-        },
-        {
-            "Posteringstekst": "MP Klub Øster Tørslev",
-            "Artskonto": "72000000",
-            "PSP": "XG-0000002668-00019"
-        },
-        {
-            "ruleId": 8
-        }
-    ]
+        {"0":{"name":"Reference","value":"Rekvireret udb"},"1":{"name":"Advisliste"},"2":{"name":"Afsender"},"3":{"name":"Posteringstype","value":"Cap"},"4":{"name":"End-to-end-reference"},"5":{"name":"Beløb","operator":null},"6":{"Posteringstekst":"Tekst fra bank","Artskonto":"12340000","Notat":"Udbetaling"},"7":{"active":true},"8":{"ruleId":54},"9":{"exception":true}}
     */
 </script>
 
