@@ -1,7 +1,7 @@
 const Node = {
   "id": "VueExample",
   "type": "tab",
-  "label": "Vue Example",
+  "label": "Frontend (new)",
   "disabled": false,
   "info": "",
   "env": []
