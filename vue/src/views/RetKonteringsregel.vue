@@ -115,9 +115,9 @@
         <form @submit.prevent="">
             <fieldset>
                 <div class="flexbox">
-                    <div v-if="konteringsregel != null" v-for="key in Object.keys(keyMap)">
+                    <div v-for="key in Object.keys(keyMap)">
                         <label :for="key" class="capitalize">{{key}}</label>
-                        <input type="text" placeholder="..." :id="key" v-model="(konteringsregel[keyMap[key].id])[keyMap[key].key]" :disabled="keyMap[key].disabled">
+                        <input type="text" placeholder="..." :id="key" v-if="konteringsregel != null" v-model="(konteringsregel[keyMap[key].id])[keyMap[key].key]" :disabled="keyMap[key].disabled">
                     </div>
                 </div>
 
