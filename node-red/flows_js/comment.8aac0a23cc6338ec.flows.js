@@ -5,7 +5,7 @@ const Node = {
   "name": "Indsæt data i DB",
   "info": "",
   "x": 720,
-  "y": 140,
+  "y": 180,
   "wires": []
 }
 

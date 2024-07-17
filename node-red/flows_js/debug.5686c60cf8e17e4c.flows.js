@@ -7,12 +7,12 @@ const Node = {
   "tosidebar": true,
   "console": false,
   "tostatus": false,
-  "complete": "payload",
-  "targetType": "msg",
+  "complete": "payload.affectedRows > 0 ?\t{\t    \"db\": \"rules inserted\",\t    \"table\": \"konteringsregler\",\t    \"ruleCount\": payload.affectedRows\t}\t:\t{\t    \"db\": \"table already exists\",\t    \"table\": \"konteringsregler\"\t}\t",
+  "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1330,
-  "y": 180,
+  "x": 1610,
+  "y": 220,
   "wires": []
 }
 

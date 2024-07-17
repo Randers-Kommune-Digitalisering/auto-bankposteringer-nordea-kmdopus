@@ -1,8 +1,7 @@
 const Node = {
-  "id": "ad588f738184b5aa",
+  "id": "91b06b6df33983e7",
   "type": "change",
   "z": "9b998b2e60b3c784",
-  "g": "08894d83b67599fd",
   "name": "",
   "rules": [
     {
@@ -10,8 +9,7 @@ const Node = {
       "p": "konteringsregler",
       "pt": "global",
       "to": "payload",
-      "tot": "msg",
-      "dc": true
+      "tot": "msg"
     }
   ],
   "action": "",
@@ -19,16 +17,13 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 425,
-  "y": 220,
+  "x": 1360,
+  "y": 320,
   "wires": [
     [
-      "a0a95ab1cfc8e6eb",
-      "02c9cee1d44337a8"
+      "169f2a631aaa1be7"
     ]
-  ],
-  "icon": "font-awesome/fa-save",
-  "l": false
+  ]
 }
 
 module.exports = Node;
