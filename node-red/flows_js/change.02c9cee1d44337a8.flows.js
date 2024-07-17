@@ -2,7 +2,7 @@ const Node = {
   "id": "02c9cee1d44337a8",
   "type": "change",
   "z": "9b998b2e60b3c784",
-  "name": "",
+  "name": "Sæt værdier",
   "rules": [
     {
       "t": "set",
@@ -20,6 +20,14 @@ const Node = {
     },
     {
       "t": "set",
+      "p": "konteringsregler",
+      "pt": "global",
+      "to": "payload",
+      "tot": "msg",
+      "dc": true
+    },
+    {
+      "t": "set",
       "p": "values",
       "pt": "msg",
       "to": "payload ~> $map( function($value, $key) {\t    \"('\" & ( $value ~> $string() ) & \"')\"\t}) ~> $join(\",\")",
@@ -31,11 +39,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 860,
-  "y": 180,
+  "x": 830,
+  "y": 220,
   "wires": [
     [
-      "cd6ac6d45fb46353"
+      "c5aad48489925aca"
     ]
   ]
 }
