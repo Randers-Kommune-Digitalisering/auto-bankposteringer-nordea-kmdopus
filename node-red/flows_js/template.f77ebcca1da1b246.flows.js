@@ -1,5 +1,5 @@
 const Node = {
-  "id": "44cb97f973780425",
+  "id": "f77ebcca1da1b246",
   "type": "template",
   "z": "VueExample",
   "name": "SQL",
@@ -9,21 +9,19 @@ const Node = {
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 510,
-  "y": 360,
+  "x": 530,
+  "y": 400,
   "wires": [
     [
-      "917ce267e21a448a"
+      "c864e987fb194e2e"
     ]
   ]
 }
 
 Node.template = `
-UPDATE
+DELETE FROM
     konteringsregler
-SET
-    data = "{{{payload}}}"
-WHERE 
+WHERE
     id = {{uid}}
 `
 
