@@ -9,8 +9,8 @@ const Node = {
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 510,
-  "y": 360,
+  "x": 950,
+  "y": 380,
   "wires": [
     [
       "917ce267e21a448a"
@@ -22,7 +22,7 @@ Node.template = `
 UPDATE
     konteringsregler
 SET
-    data = "{{{payload}}}"
+    data = '{{{payload}}}'
 WHERE 
     id = {{uid}}
 `
