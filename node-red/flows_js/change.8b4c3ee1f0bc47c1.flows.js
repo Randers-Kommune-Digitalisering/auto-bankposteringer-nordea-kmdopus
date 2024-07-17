@@ -1,5 +1,5 @@
 const Node = {
-  "id": "5db35242981c706e",
+  "id": "8b4c3ee1f0bc47c1",
   "type": "change",
   "z": "VueExample",
   "name": "",
@@ -17,11 +17,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 370,
-  "y": 280,
+  "x": 390,
+  "y": 400,
   "wires": [
     [
-      "f9ea4bc100522960"
+      "f77ebcca1da1b246"
     ]
   ]
 }

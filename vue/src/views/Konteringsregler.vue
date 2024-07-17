@@ -9,9 +9,18 @@
     fetch('/api/konteringsregler')
         .then(response => response = response.json())
         .then(value => konteringsregler.value = value)
-        //.then(value => console.log(value))
+        .then(value => console.log(value))
 
     const keyMap = {
+        "id": {
+            "key": "id",
+            "hidden": true
+        },
+        "ruleId": {
+            "id": 8,
+            "key": "ruleId",
+            "hidden": true
+        },
         "reference": {
             "id": 0,
             "key": "value"
@@ -60,13 +69,13 @@
         <table>
             <thead>
                 <tr>
-                    <th v-for="key in Object.keys(keyMap)" class="capitalize">{{key}}</th>
+                    <th v-for="(value, key) in keyMap" :class="value.hidden ? 'hidden' : ''" class="capitalize">{{key}}</th>
                     <th></th>
                 </tr>
             </thead>
             <tr v-for="(obj, index) in konteringsregler">
-                <td v-for="key in keyMap">{{ obj[key.id][key.key] ?? "" }}</td>
-                <td><router-link :to="'/retkonteringsregel/' + index">
+                <td v-for="(value, key) in keyMap" :class="value.hidden ? 'hidden' : ''">{{ obj[value.id] != undefined ? (obj[value.id][value.key] ?? "") : obj[value.key] }}</td>
+                <td><router-link :to="'/retkonteringsregel/' + obj[keyMap['id'].key]">
                         <button @click="">Redigér</button>
                     </router-link></td>
             </tr>
@@ -74,3 +83,9 @@
     </Content>
 
 </template> 
+
+<style scoped>
+    .hidden {
+        display:none;
+    }
+</style>

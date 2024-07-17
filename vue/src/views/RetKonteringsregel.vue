@@ -11,16 +11,25 @@
 
     const router = useRouter()
     const route = useRoute()
-    const id = route.params.id
-    console.log("Rule ID: " + id)
+
+    const index = route.params.id
     
     // Fetch regel
-    fetch('/api/konteringsregler/' + id)
+    fetch('/api/konteringsregler/' + index)
         .then(response => response = response.json())
         .then(value => konteringsregel.value = value)
         .then(value => console.log(value))
 
         const keyMap = {
+        "id": {
+            "key": "id",
+            "hidden": true
+        },
+        "ruleId": {
+            "id": 8,
+            "key": "ruleId",
+            "hidden": true
+        },
         "reference": {
             "id": 0,
             "key": "value"
@@ -55,7 +64,7 @@
     {
         isUpdating.value = true
         
-        fetch('/api/konteringsregler/' + id,
+        fetch('/api/konteringsregler/' + index,
         {
             method: 'PUT',
             headers: {
@@ -79,7 +88,7 @@
 
         else
         {
-            fetch('/api/konteringsregler/' + id,
+            fetch('/api/konteringsregler/' + index,
             {
                 method: 'DELETE',
                 headers: {
@@ -104,7 +113,7 @@
 
 <template>
 
-    <h2>Konteringsregel #{{id}}</h2>
+    <h2>Konteringsregel #{{konteringsregel[keyMap.ruleId.id][keyMap.ruleId.value]}}</h2>
     
     <Content>
         <template #icon>
@@ -115,9 +124,9 @@
         <form @submit.prevent="">
             <fieldset>
                 <div class="flexbox">
-                    <div v-for="key in Object.keys(keyMap)">
+                    <div v-for="(value, key) in keyMap">
                         <label :for="key" class="capitalize">{{key}}</label>
-                        <input type="text" placeholder="..." :id="key" v-if="konteringsregel != null" v-model="(konteringsregel[keyMap[key].id])[keyMap[key].key]" :disabled="keyMap[key].disabled">
+                        <input type="text" placeholder="..." :id="key" v-if="konteringsregel != null && !value.hidden" v-model="konteringsregel[value.id][value.key]" :disabled="value.disabled">
                     </div>
                 </div>
 
@@ -129,9 +138,9 @@
     </Content>
 
 </template>
+
 <style scoped>
-#submit
-{
-    margin-left: 1rem;
-}
+    .hidden {
+        display:none;
+    }
 </style>
