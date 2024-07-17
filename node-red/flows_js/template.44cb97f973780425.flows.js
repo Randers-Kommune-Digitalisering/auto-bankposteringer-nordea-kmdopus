@@ -3,7 +3,7 @@ const Node = {
   "type": "template",
   "z": "VueExample",
   "name": "SQL",
-  "field": "payload",
+  "field": "sql",
   "fieldType": "msg",
   "format": "handlebars",
   "syntax": "mustache",

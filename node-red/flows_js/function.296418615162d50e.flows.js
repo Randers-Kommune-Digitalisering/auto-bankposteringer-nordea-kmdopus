@@ -22,8 +22,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   for (let index = 0; index < msg.payload.length; index++) {
       
       const element = msg.payload[index];
-      console.log("Parsing: " + element.data);
+      const elementId = element.id;
       msg.payload[index] = JSON.parse(element.data);
+      msg.payload[index].id = elementId;
   
   }
   return msg;
