@@ -9,7 +9,7 @@ const Node = {
       "p": "uid",
       "pt": "msg",
       "to": "req.params.uid",
-      "tot": "msg"
+      "tot": "jsonata"
     }
   ],
   "action": "",

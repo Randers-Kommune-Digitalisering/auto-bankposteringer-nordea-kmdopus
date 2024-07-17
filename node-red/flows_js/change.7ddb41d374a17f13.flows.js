@@ -8,8 +8,8 @@ const Node = {
       "t": "set",
       "p": "uid",
       "pt": "msg",
-      "to": "req.params.uid",
-      "tot": "msg"
+      "to": "req.params.uid ~> $number()",
+      "tot": "jsonata"
     }
   ],
   "action": "",
@@ -17,11 +17,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 370,
-  "y": 360,
+  "x": 390,
+  "y": 380,
   "wires": [
     [
-      "44cb97f973780425"
+      "61676c6c7947def6"
     ]
   ]
 }
