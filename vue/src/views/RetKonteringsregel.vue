@@ -64,7 +64,7 @@
     {
         isUpdating.value = true
         
-        fetch('/api/konteringsregler/' + index,
+        fetch('/api/konteringsregler/' + konteringsregel.value.id,
         {
             method: 'PUT',
             headers: {
@@ -88,16 +88,17 @@
 
         else
         {
-            fetch('/api/konteringsregler/' + index,
+            console.log("Rule: ")
+            console.log(konteringsregel)
+            fetch('/api/konteringsregler/' + konteringsregel.value.id,
             {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(konteringsregel.value)
+                }
             })
-            .then( 
+            .finally(response =>
                 router.push('/konteringsregler')
             )
         }
@@ -113,7 +114,8 @@
 
 <template>
 
-    <h2>Konteringsregel #{{konteringsregel[keyMap.ruleId.id][keyMap.ruleId.value]}}</h2>
+    <h2 v-if="konteringsregel != null">Konteringsregel #{{konteringsregel[keyMap.ruleId.id][keyMap.ruleId.key]}}</h2>
+    <h2 v-else>Indlæser...</h2>
     
     <Content>
         <template #icon>
@@ -125,7 +127,7 @@
             <fieldset>
                 <div class="flexbox">
                     <div v-for="(value, key) in keyMap">
-                        <label :for="key" class="capitalize">{{key}}</label>
+                        <label :for="key" class="capitalize" v-if="!value.hidden">{{key}}</label>
                         <input type="text" placeholder="..." :id="key" v-if="konteringsregel != null && !value.hidden" v-model="konteringsregel[value.id][value.key]" :disabled="value.disabled">
                     </div>
                 </div>

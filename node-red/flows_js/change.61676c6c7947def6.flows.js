@@ -1,14 +1,14 @@
 const Node = {
-  "id": "7ddb41d374a17f13",
+  "id": "61676c6c7947def6",
   "type": "change",
   "z": "VueExample",
   "name": "",
   "rules": [
     {
       "t": "set",
-      "p": "uid",
-      "pt": "msg",
-      "to": "req.params.uid ~> $number()",
+      "p": "konteringsregler",
+      "pt": "global",
+      "to": "$globalContext(\"konteringsregler\") ~> | $ |\t(\t    $.id = $$.uid ? $$.payload\t) |",
       "tot": "jsonata"
     }
   ],
@@ -17,11 +17,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 390,
+  "x": 600,
   "y": 380,
   "wires": [
     [
-      "61676c6c7947def6"
+      "8bef4fda34efd8ed"
     ]
   ]
 }
