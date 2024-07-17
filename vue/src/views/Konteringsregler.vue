@@ -19,7 +19,7 @@
         "afsender": {
             "id": 2,
             "key": "value"
-        },        
+        },/*  
         "artskonto": {
             "id": 6,
             "key": "Artskonto"
@@ -31,7 +31,7 @@
         "posteringstekst": {
             "id": 6,
             "key": "Posteringstekst"
-        },
+        },*/
         "notat": {
             "id": 6,
             "key": "Notat"
@@ -64,9 +64,11 @@
                     <th></th>
                 </tr>
             </thead>
-            <tr v-for="obj in konteringsregler">
+            <tr v-for="(obj, index) in konteringsregler">
                 <td v-for="key in keyMap">{{ obj[key.id][key.key] ?? "" }}</td>
-                <td><!-- obj[ keyMap.id.id ][ keyMap.id.key ] --><button @click="">Rediger</button></td>
+                <td><router-link :to="'/retkonteringsregel/' + index">
+                        <button @click="">Redigér</button>
+                    </router-link></td>
             </tr>
         </table>
     </Content>
