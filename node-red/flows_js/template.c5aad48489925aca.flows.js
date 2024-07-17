@@ -1,25 +1,25 @@
 const Node = {
-  "id": "805d74dc78f16d4e",
+  "id": "c5aad48489925aca",
   "type": "template",
   "z": "9b998b2e60b3c784",
   "name": "SQL",
   "field": "sql",
   "fieldType": "msg",
-  "format": "sql",
+  "format": "handlebars",
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 810,
-  "y": 460,
+  "x": 970,
+  "y": 220,
   "wires": [
     [
-      "a98d7a03dbedfecd"
+      "69e0cf3b52615cfc"
     ]
   ]
 }
 
 Node.template = `
-DROP TABLE konteringsregler
+DELETE FROM konteringsregler
 `
 
 module.exports = Node;
