@@ -1,13 +1,21 @@
 <script setup>
     import { ref } from 'vue'
+    import { useRouter, useRoute } from 'vue-router'
+    
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
 
     const allKonteringsregler = ref(null)
     const konteringsregler = ref(null)
+    
+    const router = useRouter()
+    const route = useRoute()
 
-    const isSearching = ref(false)
-    const searchKeyword = ref("")
+    const searchParam = route.query.search
+    console.log("Current search: " + searchParam)
+    
+    const isSearching = ref(searchParam ? true : false)
+    const searchKeyword = ref(searchParam ?? "")
     
     // Fetch regler
     fetch('/api/konteringsregler')
@@ -62,13 +70,27 @@
     function toggleSearch()
     {
         isSearching.value = !isSearching.value
+
         if(!isSearching.value)
             search(null)
     }
     function search(keyword)
     {
         console.log("Searching for " + keyword)
-        konteringsregler.value = searchList(allKonteringsregler.value, keyword)
+
+        if(keyword == null)
+        {
+            searchKeyword.value = ""
+            konteringsregler.value = allKonteringsregler.value
+        }
+        
+        else
+        {
+            konteringsregler.value = searchList(allKonteringsregler.value, keyword)
+
+            // Use vue-router to update the URL with search keyword
+            router.replace({ path: '/konteringsregler', query: { search: keyword } })
+        }
     }
 
     function searchList(list, keyword)
