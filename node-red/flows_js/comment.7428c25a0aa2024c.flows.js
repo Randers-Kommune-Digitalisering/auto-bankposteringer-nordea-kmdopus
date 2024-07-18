@@ -4,7 +4,7 @@ const Node = {
   "z": "VueExample",
   "name": "Prepare query",
   "info": "",
-  "x": 810,
+  "x": 550,
   "y": 340,
   "wires": []
 }

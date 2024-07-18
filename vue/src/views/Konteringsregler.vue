@@ -74,6 +74,7 @@
     function searchList(list, keyword)
     {
         keyword = keyword.toLowerCase()
+        keyword = keyword.trim()
 
         console.log("Searching in list")
         console.log(list)
@@ -125,11 +126,14 @@
                     <th></th>
                 </tr>
             </thead>
-            <tr v-for="(obj, index) in konteringsregler">
+            <tr v-if="konteringsregler != null" v-for="(obj, index) in konteringsregler">
                 <td v-for="(value, key) in keyMap" :class="(value.hidden ? 'hidden ' : '') + (key)">{{ obj[value.id] != undefined ? (obj[value.id][value.key] ?? "") : obj[value.key] }}</td>
                 <td><router-link :to="'/retkonteringsregel/' + obj[keyMap['id'].key]">
                         <button class="editButton orange" @click="">Redigér</button>
                     </router-link></td>
+            </tr>
+            <tr v-else>
+                <td :colspan="(Object.values(keyMap).filter(value => !value.hidden).length)+1">Indlæser ....</td>
             </tr>
         </table>
     </Content>
@@ -149,9 +153,10 @@
     }
     .editButton
     {
-        font-size: 0.7em;
+        font-size: 0.6em;
         padding-left: 0.5rem;
         padding-right: 0.5rem;
+        font-weight: 500;
     }
     .notat
     {
