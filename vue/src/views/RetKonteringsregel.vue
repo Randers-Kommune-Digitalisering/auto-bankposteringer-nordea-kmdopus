@@ -62,7 +62,11 @@
     
     function updateRule()
     {
+        hasUpdated.value = false
         isUpdating.value = true
+
+        console.log("Has updated: " + hasUpdated.value)
+        console.log("Is updating: " + isUpdating.value)
         
         fetch('/api/konteringsregler/' + konteringsregel.value.id,
         {
@@ -74,8 +78,8 @@
             body: JSON.stringify(konteringsregel.value)
         })
 
-        .then(hasUpdated.value = true)
-        .then(isUpdating.value = false)
+        .then(response => isUpdating.value = false)
+        .then(response => hasUpdated.value = true)
     }
 
 
@@ -129,12 +133,12 @@
                 <div class="flexbox">
                     <div v-for="(value, key) in keyMap">
                         <label :for="key" class="capitalize" v-if="!value.hidden">{{key}}</label>
-                        <input type="text" placeholder="..." :id="key" v-if="konteringsregel != null && !value.hidden" v-model="konteringsregel[value.id][value.key]" :disabled="value.disabled">
+                        <input type="text" placeholder="..." :id="key" v-if="konteringsregel != null && !value.hidden" v-model="konteringsregel[value.id][value.key]" @change="hasUpdated = false" :disabled="value.disabled">
                         <input type="text" placeholder="Indlæser ..." :id="key" v-if="konteringsregel == null && !value.hidden" disabled="true">
                     </div>
                 </div>
 
-                <button id="submit" @click="updateRule" :disabled="isUpdating">{{ isUpdating ? 'Gemmer' : hasUpdated ? 'Rettelser gemt' : 'Gem rettelser' }}</button>
+                <button id="submit" @click="updateRule" :disabled="isUpdating">{{ isUpdating ? 'Gemmer ...' : hasUpdated ? 'Rettelser gemt' : 'Gem rettelser' }}</button>
                 <button @click="deleteRule" class="red float-right" :disabled="isDeleting">{{ awaitingDeleteConfirmation ? 'Bekræft sletning' : 'Slet regel' }}</button>
                 
             </fieldset>
