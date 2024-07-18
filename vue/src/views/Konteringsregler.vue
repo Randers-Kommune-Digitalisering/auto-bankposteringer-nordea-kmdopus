@@ -120,7 +120,7 @@
                 </tr>
             </thead>
             <tr v-for="(obj, index) in konteringsregler">
-                <td v-for="(value, key) in keyMap" :class="value.hidden ? 'hidden' : ''">{{ obj[value.id] != undefined ? (obj[value.id][value.key] ?? "") : obj[value.key] }}</td>
+                <td v-for="(value, key) in keyMap" :class="(value.hidden ? 'hidden ' : '') + (key)">{{ obj[value.id] != undefined ? (obj[value.id][value.key] ?? "") : obj[value.key] }}</td>
                 <td><router-link :to="'/retkonteringsregel/' + obj[keyMap['id'].key]">
                         <button class="editButton orange" @click="">Redigér</button>
                     </router-link></td>
@@ -135,7 +135,7 @@
         display:none;
     }
     td {
-        font-size: 0.8em;
+        font-size: 0.9em;
     }
     .searchButtonDiv 
     {
@@ -143,7 +143,12 @@
     }
     .editButton
     {
-        font-size: 0.9em;
-        max-width: 2rem;
+        font-size: 0.7em;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    .notat
+    {
+        font-size: 0.8em;
     }
 </style>
