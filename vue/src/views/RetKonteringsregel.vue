@@ -80,6 +80,7 @@
 
 
     const awaitingDeleteConfirmation = ref(false)
+    const isDeleting = ref(false)
     
     function deleteRule()
     {
@@ -88,8 +89,8 @@
 
         else
         {
-            console.log("Rule: ")
-            console.log(konteringsregel)
+            isDeleting.value = true
+            
             fetch('/api/konteringsregler/' + konteringsregel.value.id,
             {
                 method: 'DELETE',
@@ -133,7 +134,7 @@
                 </div>
 
                 <button id="submit" @click="updateRule" :disabled="isUpdating">{{ isUpdating ? 'Gemmer' : hasUpdated ? 'Rettelser gemt' : 'Gem rettelser' }}</button>
-                <button @click="deleteRule" class="red float-right">{{ awaitingDeleteConfirmation ? 'Bekræft sletning' : 'Slet regel' }}</button>
+                <button @click="deleteRule" class="red float-right" :disabled="isDeleting">{{ awaitingDeleteConfirmation ? 'Bekræft sletning' : 'Slet regel' }}</button>
                 
             </fieldset>
         </form>
