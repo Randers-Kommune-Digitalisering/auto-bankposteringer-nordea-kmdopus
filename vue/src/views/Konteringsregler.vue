@@ -143,7 +143,7 @@
                 left: 0, top: calc, 
                 behavior: "smooth" })
         
-        }, 300) // Wait ms before scrolling
+        }, 50) // Wait ms before scrolling
     }
 
 
