@@ -8,7 +8,7 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "$globalContext(\"konteringsregler\")[$.id = $$.uid ~> $number()]",
+      "to": "$globalContext(\"konteringsregler\")[id = $$.uid]",
       "tot": "jsonata",
       "dc": true
     }
@@ -22,7 +22,8 @@ const Node = {
   "y": 280,
   "wires": [
     [
-      "16bbec781e708ac6"
+      "16bbec781e708ac6",
+      "61054438f2de6852"
     ]
   ]
 }

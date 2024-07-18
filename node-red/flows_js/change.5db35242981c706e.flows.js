@@ -8,7 +8,7 @@ const Node = {
       "t": "set",
       "p": "uid",
       "pt": "msg",
-      "to": "req.params.uid",
+      "to": "req.params.uid ~> $number()",
       "tot": "jsonata"
     }
   ],
