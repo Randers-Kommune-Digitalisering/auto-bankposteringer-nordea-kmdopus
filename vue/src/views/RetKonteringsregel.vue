@@ -18,7 +18,6 @@
     fetch('/api/konteringsregler/' + index)
         .then(response => response = response.json())
         .then(value => konteringsregel.value = value)
-        .then(value => console.log(value))
 
         const keyMap = {
         "id": {
@@ -64,9 +63,6 @@
     {
         hasUpdated.value = false
         isUpdating.value = true
-
-        console.log("Has updated: " + hasUpdated.value)
-        console.log("Is updating: " + isUpdating.value)
         
         fetch('/api/konteringsregler/' + konteringsregel.value.id,
         {
