@@ -1,3 +1,4 @@
+
 <script setup>
     import { ref } from 'vue'
     import { useRouter, useRoute } from 'vue-router'
@@ -12,17 +13,20 @@
     const route = useRoute()
 
     const searchParam = route.query.search
-    console.log("Current search: " + searchParam)
+    const returnFromParam = route.query.returnfrom
     
     const isSearching = ref(searchParam ? true : false)
     const searchKeyword = ref(searchParam ?? "")
+
+    const isReturning = ref(returnFromParam ? true : false)
+    const returningFrom = ref(returnFromParam ?? null)
     
     // Fetch regler
     fetch('/api/konteringsregler')
         .then(response => response = response.json())
         .then(value => allKonteringsregler.value = value)
         .then(value => konteringsregler.value = value)
-        //.then(value => console.log(value))
+        .then(value => handleQueryParams())
 
     const keyMap = {
         "id": {
@@ -66,6 +70,21 @@
     /* Example data format
         {"0":{"name":"Reference","value":"Rekvireret udb"},"1":{"name":"Advisliste"},"2":{"name":"Afsender"},"3":{"name":"Posteringstype","value":"Cap"},"4":{"name":"End-to-end-reference"},"5":{"name":"Beløb","operator":null},"6":{"Posteringstekst":"Tekst fra bank","Artskonto":"12340000","Notat":"Udbetaling"},"7":{"active":true},"8":{"ruleId":54},"9":{"exception":true}}
     */
+    
+    function handleQueryParams()
+    {        
+        if(isSearching.value)
+        {
+            search(searchKeyword.value)
+        }
+
+        if(isReturning.value)
+        {
+            scrollTo(returningFrom.value)
+            isReturning.value = false
+        }
+    }
+
 
     function toggleSearch()
     {
@@ -74,9 +93,11 @@
         if(!isSearching.value)
             search(null)
     }
+
     function search(keyword)
     {
-        console.log("Searching for " + keyword)
+        if(allKonteringsregler.value == null)
+            return
 
         if(keyword == null)
         {
@@ -89,7 +110,7 @@
             konteringsregler.value = searchList(allKonteringsregler.value, keyword)
 
             // Use vue-router to update the URL with search keyword
-            router.replace({ path: '/konteringsregler', query: { search: keyword } })
+            router.replace({ path: '/konteringsregler', query: isReturning ? { returnfrom: returningFrom.value, search: keyword } : { search: keyword } })
         }
     }
 
@@ -97,9 +118,6 @@
     {
         keyword = keyword.toLowerCase()
         keyword = keyword.trim()
-
-        console.log("Searching in list")
-        console.log(list)
         
         if(keyword == null)
             return list
@@ -112,6 +130,22 @@
                                     (x[keyMap.notat.id][keyMap.notat.key] != null && x[keyMap.notat.id][keyMap.notat.key].toLowerCase().includes(keyword)) || /* Notat */
                                     (x[keyMap.ruleId.id][keyMap.ruleId.key].value != null && x[keyMap.ruleId.id][keyMap.ruleId.key].toLowerCase().includes(keyword)) || x.id == keyword )/* RuleID / ID */
     }
+
+    function scrollTo(id)
+    {
+        setTimeout(function()
+        {
+            const item = document.getElementById(id)
+            let rect = item.getBoundingClientRect()
+            let calc = rect.top - (window.innerHeight - 200)
+
+            window.scrollBy({
+                left: 0, top: calc, 
+                behavior: "smooth" })
+        
+        }, 300) // Wait ms before scrolling
+    }
+
 
 </script>
 
@@ -148,10 +182,14 @@
                     <th></th>
                 </tr>
             </thead>
-            <tr v-if="konteringsregler != null" v-for="(obj, index) in konteringsregler">
-                <td v-for="(value, key) in keyMap" :class="(value.hidden ? 'hidden ' : '') + (key)">{{ obj[value.id] != undefined ? (obj[value.id][value.key] ?? "") : obj[value.key] }}</td>
+            <tr v-if="konteringsregler != null" v-for="(obj, index) in konteringsregler" :id="obj[keyMap['id'].key]" :class="returningFrom == obj[keyMap['id'].key] ? 'highlight' : ''">
+                <td v-for="(value, key) in keyMap" :class="(value.hidden ? 'hidden ' : '') + (key)">
+                    {{ obj[value.id] != undefined ? (obj[value.id][value.key] ?? "") : obj[value.key] }}
+                </td>
                 <td><router-link :to="'/retkonteringsregel/' + obj[keyMap['id'].key]">
-                        <button class="editButton orange" @click="">Redigér</button>
+                        <button class="editButton orange" @click="router.replace({  path: '/konteringsregler',
+                                                                                    query: isSearching ? { returnfrom: obj[keyMap['id'].key], search: searchKeyword }
+                                                                                                       : { returnfrom: obj[keyMap['id'].key] }})">Redigér</button>
                     </router-link></td>
             </tr>
             <tr v-else>
@@ -183,5 +221,9 @@
     .notat
     {
         font-size: 0.8em;
+    }
+    .highlight
+    {
+        background-color: #f0f0f0;
     }
 </style>
