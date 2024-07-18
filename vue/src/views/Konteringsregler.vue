@@ -33,19 +33,22 @@
         "afsender": {
             "id": 2,
             "key": "value"
-        },/*  
+        }, 
         "artskonto": {
             "id": 6,
-            "key": "Artskonto"
+            "key": "Artskonto",
+            "hidden": true
         },
         "posteringstype": {
             "id": 3,
-            "key": "value"
+            "key": "value",
+            "hidden": true
         },
         "posteringstekst": {
             "id": 6,
-            "key": "Posteringstekst"
-        },*/
+            "key": "Posteringstekst",
+            "hidden": true
+        },
         "notat": {
             "id": 6,
             "key": "Notat"
@@ -78,10 +81,13 @@
         if(keyword == null)
             return list
         else 
-            return list.filter(x => ((x[keyMap.reference.id])[keyMap.reference.key] != null && x[keyMap.reference.id][keyMap.reference.key].toLowerCase().includes(keyword)) || /* Reference */
-                                    ((x[keyMap.afsender.id])[keyMap.afsender.key] != null && x[keyMap.afsender.id][keyMap.afsender.key].toLowerCase().includes(keyword)) || /* Afsender */
-                                    ((x[keyMap.notat.id])[keyMap.notat.key] != null && x[keyMap.notat.id][keyMap.notat.key].toLowerCase().includes(keyword)) || /* Notat */
-                                    (x[keyMap.ruleId.id])[keyMap.ruleId.key].value != null && x[keyMap.ruleId.id][keyMap.ruleId.key].toLowerCase().includes(keyword) || x.id == keyword ) /* RuleID / ID */
+            return list.filter(x => (x[keyMap.reference.id][keyMap.reference.key] != null && x[keyMap.reference.id][keyMap.reference.key].toLowerCase().includes(keyword)) || /* Reference */
+                                    (x[keyMap.afsender.id][keyMap.afsender.key] != null && x[keyMap.afsender.id][keyMap.afsender.key].toLowerCase().includes(keyword)) || /* Afsender */
+                                    (x[keyMap.artskonto.id][keyMap.artskonto.key] != null && x[keyMap.artskonto.id][keyMap.artskonto.key].toLowerCase().includes(keyword)) || /* Artskonto */
+                                    (x[keyMap.posteringstype.id][keyMap.posteringstype.key] != null && x[keyMap.posteringstype.id][keyMap.posteringstype.key].toLowerCase().includes(keyword)) || /* Posteringstype */
+                                    (x[keyMap.posteringstekst.id][keyMap.posteringstekst.key] != null && x[keyMap.posteringstekst.id][keyMap.posteringstekst.key].toLowerCase().includes(keyword)) || /* posteringstekst */
+                                    (x[keyMap.notat.id][keyMap.notat.key] != null && x[keyMap.notat.id][keyMap.notat.key].toLowerCase().includes(keyword)) || /* Notat */
+                                    (x[keyMap.ruleId.id][keyMap.ruleId.key].value != null && x[keyMap.ruleId.id][keyMap.ruleId.key].toLowerCase().includes(keyword)) || x.id == keyword )/* RuleID / ID */
     }
 
 </script>
