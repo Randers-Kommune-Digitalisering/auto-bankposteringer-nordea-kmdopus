@@ -1,21 +1,9 @@
 const Node = {
-  "id": "ab856a3522d6efc1",
+  "id": "8d4a93aadc39c034",
   "type": "change",
   "z": "VueExample",
   "name": "Sæt værdier",
   "rules": [
-    {
-      "t": "set",
-      "p": "uidFromObj",
-      "pt": "msg",
-      "to": "payload.id",
-      "tot": "msg"
-    },
-    {
-      "t": "delete",
-      "p": "payload.id",
-      "pt": "msg"
-    },
     {
       "t": "set",
       "p": "payload",
@@ -30,11 +18,9 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 570,
-  "y": 380,
+  "y": 500,
   "wires": [
-    [
-      "61676c6c7947def6"
-    ]
+    []
   ]
 }
 
