@@ -110,7 +110,7 @@
             konteringsregler.value = searchList(allKonteringsregler.value, keyword)
 
             // Use vue-router to update the URL with search keyword
-            router.replace({ path: '/konteringsregler', query: isReturning ? { returnfrom: returningFrom.value, search: keyword } : { search: keyword } })
+            router.replace({ path: '/konteringsregler', query: isReturning ? { returnfrom: route.query.returnfrom ?? returningFrom.value, search: keyword } : { search: keyword } })
         }
     }
 
@@ -137,7 +137,7 @@
         {
             const item = document.getElementById(id)
             let rect = item.getBoundingClientRect()
-            let calc = rect.top - (window.innerHeight - 200)
+            let calc = rect.top - (window.innerHeight - 240)
 
             window.scrollBy({
                 left: 0, top: calc, 
@@ -179,7 +179,9 @@
                 </tr>
                 <tr>
                     <th v-for="(value, key) in keyMap" :class="value.hidden ? 'hidden' : ''" class="capitalize">{{key}}</th>
-                    <th></th>
+                    <th><router-link :to="'/retkonteringsregel/new'">
+                        <button class="addButton blue" @click="router.replace({  path: '/konteringsregler' })">Tilføj</button>
+                    </router-link></th>
                 </tr>
             </thead>
             <tr v-if="konteringsregler != null" v-for="(obj, index) in konteringsregler" :id="obj[keyMap['id'].key]" :class="returningFrom == obj[keyMap['id'].key] ? 'highlight' : ''">
@@ -211,12 +213,22 @@
     {
         transform: translateY(-0.8rem);
     }
-    .editButton
+    .editButton, 
+    .addButton
     {
         font-size: 0.6em;
+        font-weight: 500;
+    }
+    .addButton
+    {
+        padding-left: 0.55rem;
+        padding-right: 0.55rem;
+    }
+    .editButton
+    {
+        
         padding-left: 0.5rem;
         padding-right: 0.5rem;
-        font-weight: 500;
     }
     .notat
     {
