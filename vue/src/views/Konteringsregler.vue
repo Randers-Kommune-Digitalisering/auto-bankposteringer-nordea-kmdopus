@@ -92,6 +92,8 @@
 
         if(!isSearching.value)
             search(null)
+        else
+            setTimeout(() => document.getElementById("searchInput").focus(), 50)
     }
 
     function search(keyword)
@@ -128,7 +130,7 @@
                                     (x[keyMap.posteringstype.id][keyMap.posteringstype.key] != null && x[keyMap.posteringstype.id][keyMap.posteringstype.key].toLowerCase().includes(keyword)) || /* Posteringstype */
                                     (x[keyMap.posteringstekst.id][keyMap.posteringstekst.key] != null && x[keyMap.posteringstekst.id][keyMap.posteringstekst.key].toLowerCase().includes(keyword)) || /* posteringstekst */
                                     (x[keyMap.notat.id][keyMap.notat.key] != null && x[keyMap.notat.id][keyMap.notat.key].toLowerCase().includes(keyword)) || /* Notat */
-                                    (x[keyMap.ruleId.id][keyMap.ruleId.key].value != null && x[keyMap.ruleId.id][keyMap.ruleId.key].toLowerCase().includes(keyword)) || x.id == keyword )/* RuleID / ID */
+                                    (x[keyMap.ruleId.id][keyMap.ruleId.key] != null && x[keyMap.ruleId.id][keyMap.ruleId.key] == keyword) ) /* RuleID */
     }
 
     function scrollTo(id)
@@ -174,7 +176,7 @@
             <thead>
                 <tr v-if="isSearching">
                         <th :colspan="(Object.values(keyMap).filter(value => !value.hidden).length)+1">
-                            <input type="text" placeholder="Søg efter regel" v-model="searchKeyword" :onchange="search(searchKeyword)" />
+                            <input id="searchInput" type="text" placeholder="Søg efter regel" v-model="searchKeyword" :onchange="search(searchKeyword)" />
                         </th>
                 </tr>
                 <tr>
