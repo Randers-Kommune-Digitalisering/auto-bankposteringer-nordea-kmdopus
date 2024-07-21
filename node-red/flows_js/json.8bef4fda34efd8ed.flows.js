@@ -4,7 +4,7 @@ const Node = {
   "z": "VueExample",
   "name": "",
   "property": "payload",
-  "action": "",
+  "action": "str",
   "pretty": false,
   "x": 970,
   "y": 380,

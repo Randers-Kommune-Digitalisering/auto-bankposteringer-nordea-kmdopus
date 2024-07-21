@@ -1,0 +1,38 @@
+{
+    "0": {
+        "name": "Reference",
+        "value": ""
+    },
+    "1": {
+        "name": "Advisliste"
+    },
+    "2": {
+        "name": "Afsender",
+        "value": ""
+    },
+    "3": {
+        "name": "Posteringstype",
+        "value": ""
+    },
+    "4": {
+        "name": "End-to-end-reference"
+    },
+    "5": {
+        "name": "Beløb",
+        "operator": null
+    },
+    "6": {
+        "Posteringstekst": "",
+        "Artskonto": "",
+        "Notat": ""
+    },
+    "7": {
+        "active": true
+    },
+    "8": {
+        "ruleId": 0
+    },
+    "9": {
+        "exception": false
+    }
+}
