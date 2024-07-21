@@ -1,16 +1,16 @@
 const Node = {
-  "id": "8bef4fda34efd8ed",
+  "id": "5fff066a10b59124",
   "type": "json",
   "z": "VueExample",
   "name": "",
   "property": "payload",
   "action": "str",
   "pretty": false,
-  "x": 970,
-  "y": 380,
+  "x": 530,
+  "y": 520,
   "wires": [
     [
-      "44cb97f973780425"
+      "75248437a5f1f371"
     ]
   ]
 }

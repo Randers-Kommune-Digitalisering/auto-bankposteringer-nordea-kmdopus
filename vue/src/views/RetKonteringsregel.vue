@@ -4,8 +4,8 @@
 
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
+    import newItem from '@/assets/newItem.json'
 
-    const konteringsregel = ref(null)
     const isUpdating = ref(false)
     const hasUpdated = ref(false)
 
@@ -13,13 +13,17 @@
     const route = useRoute()
 
     const index = route.params.id
+    const isNewRule = index == "new"
+    
+    const konteringsregel = ref(isNewRule ? JSON.parse(JSON.stringify(newItem)) : null)
     
     // Fetch regel
-    fetch('/api/konteringsregler/' + index)
-        .then(response => response = response.json())
-        .then(value => konteringsregel.value = value)
+    if(!isNewRule)
+        fetch('/api/konteringsregler/' + index)
+            .then(response => response = response.json())
+            .then(value => konteringsregel.value = value)
 
-        const keyMap = {
+    const keyMap = {
         "id": {
             "key": "id",
             "hidden": true
@@ -63,10 +67,13 @@
     {
         hasUpdated.value = false
         isUpdating.value = true
+
+        const url = isNewRule ? '/api/konteringsregler' : '/api/konteringsregler/' + konteringsregel.value.id
+        console.log(url)
         
-        fetch('/api/konteringsregler/' + konteringsregel.value.id,
+        fetch(url,
         {
-            method: 'PUT',
+            method: isNewRule ? 'POST' : 'PUT',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
@@ -115,7 +122,10 @@
 
 <template>
 
-    <h2 v-if="konteringsregel != null">Konteringsregel #{{konteringsregel[keyMap.ruleId.id][keyMap.ruleId.key]}}</h2>
+    <h2 v-if="konteringsregel != null">
+        <span v-if="index == 'new'">Ny konteringsregel</span>
+        <span v-else>Konteringsregel #{{konteringsregel[keyMap.ruleId.id][keyMap.ruleId.key]}}</span>
+    </h2>
     <h2 v-else>Indlæser...</h2>
     
     <Content>
