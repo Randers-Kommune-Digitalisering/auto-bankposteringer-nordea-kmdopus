@@ -7,7 +7,7 @@ const Node = {
   "tosidebar": true,
   "console": false,
   "tostatus": false,
-  "complete": "payload.affectedRows > 0 ?\t{\t    \"db\": \"table created\",\t    \"table\": \"konteringsregler\"\t}\t:\t{\t    \"db\": \"table already exists\",\t    \"table\": \"konteringsregler\"\t}",
+  "complete": "payload.warningCount > 0 ?\t{\t    \"db\": \"table created\",\t    \"table\": \"konteringsregler\"\t}\t:\t{\t    \"db\": \"table already exists\",\t    \"table\": \"konteringsregler\"\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
