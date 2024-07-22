@@ -12,14 +12,14 @@
     const router = useRouter()
     const route = useRoute()
 
-    const index = route.params.id
-    const isNewRule = index == "new"
+    const index = ref(route.params.id)
+    const isNewRule = ref(index.value == "new")
     
-    const konteringsregel = ref(isNewRule ? JSON.parse(JSON.stringify(newItem)) : null)
+    const konteringsregel = ref(isNewRule.value ? JSON.parse(JSON.stringify(newItem)) : null)
     
     // Fetch regel
-    if(!isNewRule)
-        fetch('/api/konteringsregler/' + index)
+    if(!isNewRule.value)
+        fetch('/api/konteringsregler/' + index.value)
             .then(response => response = response.json())
             .then(value => konteringsregel.value = value)
 
@@ -68,12 +68,12 @@
         hasUpdated.value = false
         isUpdating.value = true
 
-        const url = isNewRule ? '/api/konteringsregler' : '/api/konteringsregler/' + konteringsregel.value.id
+        const url = isNewRule.value ? '/api/konteringsregler' : '/api/konteringsregler/' + konteringsregel.value.id
         console.log(url)
         
         fetch(url,
         {
-            method: isNewRule ? 'POST' : 'PUT',
+            method: isNewRule.value ? 'POST' : 'PUT',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
@@ -81,8 +81,32 @@
             body: JSON.stringify(konteringsregel.value)
         })
 
-        .then(response => isUpdating.value = false)
-        .then(response => hasUpdated.value = true)
+        .then(response => {
+            if(response.ok)
+            {
+                var value = response.json()
+                return value
+            }
+            else
+                throw new Error('Error connecting to back-end')
+        })
+        .then(value => {
+            if(isNewRule.value)
+            {
+                isNewRule.value = false
+                
+                // Set ID's from response
+                index.value = value.insertId
+                konteringsregel.value.id = value.insertId
+                konteringsregel.value[keyMap.ruleId.id][keyMap.ruleId.key] = value.ruleId
+
+                router.push('/retkonteringsregel/' + value.insertId)
+            }
+        })
+        .finally(() => {
+            isUpdating.value = false
+            hasUpdated.value = true
+        })
     }
 
 
@@ -123,7 +147,7 @@
 <template>
 
     <h2 v-if="konteringsregel != null">
-        <span v-if="index == 'new'">Ny konteringsregel</span>
+        <span v-if="isNewRule">Ny konteringsregel</span>
         <span v-else>Konteringsregel #{{konteringsregel[keyMap.ruleId.id][keyMap.ruleId.key]}}</span>
     </h2>
     <h2 v-else>Indlæser...</h2>
@@ -132,7 +156,7 @@
         <template #icon>
             <IconTable />
         </template>
-        <template #heading>Redigér konteringsregel</template>
+        <template #heading>{{isNewRule ? 'Opret' : 'Redigér'}} konteringsregel</template>
         
         <form @submit.prevent="">
             <fieldset>
@@ -144,7 +168,7 @@
                     </div>
                 </div>
 
-                <button id="submit" @click="updateRule" :disabled="isUpdating">{{ isUpdating ? 'Gemmer ...' : hasUpdated ? 'Rettelser gemt' : 'Gem rettelser' }}</button>
+                <button id="submit" @click="updateRule" :disabled="isUpdating">{{ isUpdating ? 'Gemmer ...' : hasUpdated ? 'Rettelser gemt' : isNewRule ? 'Opret regel' : 'Gem rettelser' }}</button>
                 <button @click="deleteRule" class="red float-right" :disabled="isDeleting">{{ awaitingDeleteConfirmation ? 'Bekræft sletning' : 'Slet regel' }}</button>
                 
             </fieldset>
