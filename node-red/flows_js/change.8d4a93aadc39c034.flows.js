@@ -25,6 +25,14 @@ const Node = {
       "to": "payload",
       "tot": "msg",
       "dc": true
+    },
+    {
+      "t": "set",
+      "p": "ruleId",
+      "pt": "msg",
+      "to": "payload[8].ruleId",
+      "tot": "msg",
+      "dc": true
     }
   ],
   "action": "",
