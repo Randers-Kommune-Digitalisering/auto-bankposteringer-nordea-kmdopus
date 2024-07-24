@@ -14,14 +14,7 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "account_step",
-      "pt": "flow",
-      "to": "0",
-      "tot": "num"
-    },
-    {
-      "t": "set",
-      "p": "erp_array",
+      "p": "erpArray",
       "pt": "flow",
       "to": "[]",
       "tot": "json"

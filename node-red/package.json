@@ -29,6 +29,7 @@
         }
     ],
     "dependencies": {
+        "@flowfuse/node-red-dashboard": "~1.12.4",
         "crypto-js": "^4.1.1",
         "crypto.js": "^3.1.1",
         "csv-parser": "^3.0.0",

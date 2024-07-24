@@ -1,4 +1,4 @@
-Reference;Advisliste;Afsender;Posteringstype;end_to_end_reference;match_regel;Beløb1;Beløb2;beløb_regel;Posteringstekst;Artskonto;PSP-element;SIO;Notat;;;;
+Reference;Advisliste;Afsender;Posteringstype;end_to_end_reference;match_regel;Beløb1;Beløb2;beløb_regel;Posteringstekst;Artskonto;PSP;SIO;Notat;;;;
 ;;#Hjørnestenen;;;Indeholder;;;;;95931400;;;UNDTAGELSE : Sygeref. skal til 95914005 (CPR-bogføring);;;;
 ;;#Comm2IG;;;Indeholder;;;;;;;;Typisk Skole / IT - Lars Bertelsen;;;;
 ;;#Dansk retursys;;;Starter med;;;;;79000000;XG-0000005229-00022;;Tjek efter kreditnota, hvis ikke, bogfør på kantinens konto. Ved ref = SÆKID, ofte Mellerup/Lone Andersen eller Ungdomsskolen/Berit Schneider Mogensen eller Oust Mølleskolen/Lene Matine Jensen;;;;

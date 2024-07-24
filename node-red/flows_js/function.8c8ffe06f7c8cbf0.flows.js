@@ -39,8 +39,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   
   
   // ERP-data is currently an array, but needs to be an object for conversion to XML
-  const dataArray = flow.get("erp_array");
-  const headersString = flow.get("erp_file_headers");
+  const dataArray = flow.get("erpArray");
+  const headersString = flow.get("erpFileHeaders");
   const headersArray = headersString.split(", ");
   const erpObject = dataArray.map((item) => {
       return headersArray.reduce((obj, header, index) => {
