@@ -60,7 +60,7 @@ const Node = {
       "632cc65c2df51983"
     ]
   ],
-  "icon": "font-awesome/fa-cogs",
+  "icon": "font-awesome/fa-cog",
   "l": false
 }
 

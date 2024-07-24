@@ -6,11 +6,13 @@ const Node = {
   "property": "payload",
   "action": "obj",
   "pretty": false,
-  "x": 1030,
+  "x": 425,
   "y": 100,
   "wires": [
     []
-  ]
+  ],
+  "icon": "font-awesome/fa-language",
+  "l": false
 }
 
 module.exports = Node;
