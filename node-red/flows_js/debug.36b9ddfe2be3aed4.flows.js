@@ -1,8 +1,8 @@
 const Node = {
-  "id": "bd38205594283c27",
+  "id": "36b9ddfe2be3aed4",
   "type": "debug",
   "z": "9b998b2e60b3c784",
-  "g": "9e8459915626dabc",
+  "g": "9a13326620241f51",
   "name": "MySQL query error",
   "active": true,
   "tosidebar": true,
@@ -13,7 +13,7 @@ const Node = {
   "statusVal": "",
   "statusType": "auto",
   "x": 875,
-  "y": 160,
+  "y": 460,
   "wires": [],
   "l": false
 }

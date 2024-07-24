@@ -17,23 +17,19 @@ const Node = {
   ],
   "out": [
     {
-      "x": 1250,
+      "x": 500,
       "y": 100,
       "wires": [
         {
-          "id": "651379f63fd851d5",
-          "port": 0
-        },
-        {
-          "id": "386522f404a71aca",
-          "port": 0
-        },
-        {
-          "id": "a0b0bae84337c4ad",
-          "port": 0
-        },
-        {
           "id": "8891fbaffc9a8f8b",
+          "port": 0
+        },
+        {
+          "id": "3abcd3d83454406b",
+          "port": 0
+        },
+        {
+          "id": "1381e9448cc717c8",
           "port": 0
         }
       ]
@@ -42,23 +38,17 @@ const Node = {
   "env": [],
   "meta": {},
   "color": "#3FADB5",
-  "inputLabels": [
-    "Query input"
-  ],
-  "outputLabels": [
-    "Result output"
-  ],
-  "icon": "node-red/db.svg",
+  "icon": "font-awesome/fa-database",
   "status": {
-    "x": 1260,
-    "y": 260,
+    "x": 280,
+    "y": 240,
     "wires": [
       {
-        "id": "a0b0bae84337c4ad",
+        "id": "e5ecf125f5e51a6a",
         "port": 0
       },
       {
-        "id": "e5ecf125f5e51a6a",
+        "id": "b8e0c0b11374e782",
         "port": 0
       }
     ]
