@@ -2,18 +2,20 @@ const Node = {
   "id": "5686c60cf8e17e4c",
   "type": "debug",
   "z": "9b998b2e60b3c784",
-  "name": "Debug",
+  "g": "db9c10bd096dcbc3",
+  "name": "Update status",
   "active": true,
   "tosidebar": true,
-  "console": false,
+  "console": true,
   "tostatus": false,
-  "complete": "payload.affectedRows > 0 ?\t{\t    \"db\": \"rules inserted\",\t    \"table\": \"konteringsregler\",\t    \"ruleCount\": payload.affectedRows\t}\t:\t{\t    \"db\": \"table already exists\",\t    \"table\": \"konteringsregler\"\t}\t",
+  "complete": "payload.affectedRows > 0 ?\t{\t    \"Message\": \"Rules updated\",\t    \"ruleCount\": payload.affectedRows\t}\t:\t{\t    \"Message\": \"No rules to update\"\t}\t",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1670,
-  "y": 220,
-  "wires": []
+  "x": 1015,
+  "y": 260,
+  "wires": [],
+  "l": false
 }
 
 module.exports = Node;

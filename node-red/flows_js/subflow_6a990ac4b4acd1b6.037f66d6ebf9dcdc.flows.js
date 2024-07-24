@@ -3,14 +3,14 @@ const Node = {
   "type": "subflow:6a990ac4b4acd1b6",
   "z": "73d7d240a587aa11",
   "name": "",
-  "x": 430,
-  "y": 140,
+  "x": 155,
+  "y": 100,
   "wires": [
     [
-      "044512e41861a3b5",
-      "0566ce2c351cb10b"
+      "044512e41861a3b5"
     ]
-  ]
+  ],
+  "l": false
 }
 
 module.exports = Node;

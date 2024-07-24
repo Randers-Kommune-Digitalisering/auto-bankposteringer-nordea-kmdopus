@@ -2,18 +2,20 @@ const Node = {
   "id": "bd38205594283c27",
   "type": "debug",
   "z": "9b998b2e60b3c784",
-  "name": "debug 4",
+  "g": "9e8459915626dabc",
+  "name": "MySQL query error",
   "active": true,
   "tosidebar": true,
-  "console": false,
+  "console": true,
   "tostatus": false,
-  "complete": "true",
-  "targetType": "full",
+  "complete": "{\t   \"Message\": \"Failed to query MySQL\",\t   \"Error\": msg.error,\t   \"Timestamp\": $now()\t}",
+  "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1110,
-  "y": 80,
-  "wires": []
+  "x": 875,
+  "y": 160,
+  "wires": [],
+  "l": false
 }
 
 module.exports = Node;

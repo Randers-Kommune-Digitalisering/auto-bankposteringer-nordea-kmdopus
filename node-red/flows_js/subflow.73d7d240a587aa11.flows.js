@@ -6,30 +6,35 @@ const Node = {
   "category": "",
   "in": [
     {
-      "x": 80,
-      "y": 140,
+      "x": 40,
+      "y": 80,
       "wires": [
         {
-          "id": "17ac97a92e2a2cd9"
+          "id": "a9cf731359b19bac"
         }
       ]
     }
   ],
   "out": [
     {
-      "x": 1140,
-      "y": 140,
+      "x": 470,
+      "y": 60,
       "wires": [
         {
-          "id": "eabaa0f75e59e9e9",
+          "id": "b576def25a775a9f",
           "port": 0
         }
       ]
     },
     {
-      "x": 990,
-      "y": 260,
-      "wires": []
+      "x": 480,
+      "y": 100,
+      "wires": [
+        {
+          "id": "6ebd13e4597c9b26",
+          "port": 0
+        }
+      ]
     }
   ],
   "env": [],
@@ -39,9 +44,10 @@ const Node = {
     "Success",
     "Error"
   ],
+  "icon": "font-awesome/fa-database",
   "status": {
-    "x": 460,
-    "y": 420,
+    "x": 630,
+    "y": 60,
     "wires": [
       {
         "id": "adb714bcd6c341b5",

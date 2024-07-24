@@ -166,6 +166,13 @@
                 <button :class="isSearching ? 'gray' : ''" @click="toggleSearch()">
                     {{ isSearching ? 'Luk søgning' : 'Søg i regler'}}</button>
             </div>
+
+            <div class="float-right searchButtonDiv">
+                <router-link :to="'/retkonteringsregel/new'">
+                    <button @click="router.replace({  path: '/konteringsregler' })">Tilføj regel</button>
+                </router-link>
+            </div>
+
         </template>
         
         <span class="paragraph">
@@ -178,12 +185,6 @@
                         <th :colspan="(Object.values(keyMap).filter(value => !value.hidden).length)+1">
                             <input id="searchInput" type="text" placeholder="Søg efter regel" v-model="searchKeyword" :onchange="search(searchKeyword)" />
                         </th>
-                </tr>
-                <tr>
-                    <th v-for="(value, key) in keyMap" :class="value.hidden ? 'hidden' : ''" class="capitalize">{{key}}</th>
-                    <th><router-link :to="'/retkonteringsregel/new'">
-                        <button class="addButton blue" @click="router.replace({  path: '/konteringsregler' })">Tilføj</button>
-                    </router-link></th>
                 </tr>
             </thead>
             <tr v-if="konteringsregler != null" v-for="(obj, index) in konteringsregler" :id="obj[keyMap['id'].key]" :class="returningFrom == obj[keyMap['id'].key] ? 'highlight' : ''">
@@ -213,6 +214,8 @@
     }
     .searchButtonDiv 
     {
+        padding-left: 0.55rem;
+        padding-right: 0.55rem;
         transform: translateY(-0.8rem);
     }
     .editButton, 
