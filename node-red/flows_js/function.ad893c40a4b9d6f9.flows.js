@@ -96,7 +96,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   global.set("accountingRules", jsonData);
   
   return msg;
-  
 }
 
 module.exports = Node;

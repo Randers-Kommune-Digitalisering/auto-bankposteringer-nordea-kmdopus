@@ -15,8 +15,8 @@ const Node = {
       "t": "set",
       "p": "config.retryAttempts",
       "pt": "msg",
-      "to": "2",
-      "tot": "num"
+      "to": "config.retryAttempts? config.retryAttempts + 1 : 0",
+      "tot": "str"
     }
   ],
   "action": "",
@@ -24,11 +24,15 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 720,
-  "y": 200,
+  "x": 255,
+  "y": 120,
   "wires": [
-    []
-  ]
+    [
+      "c075f5e58acdf5e1"
+    ]
+  ],
+  "icon": "font-awesome/fa-cog",
+  "l": false
 }
 
 module.exports = Node;
