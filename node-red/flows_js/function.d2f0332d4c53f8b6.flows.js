@@ -14,7 +14,8 @@ const Node = {
   "y": 160,
   "wires": [
     [
-      "4255d18a1fe6c5d1"
+      "4255d18a1fe6c5d1",
+      "7752629d4e44c49b"
     ]
   ],
   "icon": "font-awesome/fa-handshake-o",
@@ -23,24 +24,22 @@ const Node = {
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let erpArray = flow.get("erpArray") || [];
-  const postingParameters = ["message", "narrative", "counterparty_name", "type_description", "end_to_end_reference"];   // Length has to be equal to length of parameter subrules of rules[i]
+  const postingParameters = ["narrative", "message", "counterparty_name", "type_description"];   // Has to match ruleParameters
+  const ruleParameters = ["Reference", "Advisliste", "Afsender", "Posteringstype"];
   const postings = global.get("transactions");
-  const konteringsregler = global.get("konteringsregler");
+  const accountingRules = global.get("accountingRules");
   const erpPostings = [];
   const postingsWithNoMatch = [];
   const erpFileHeaders = flow.get("erpFileHeaders").split(", ");
-  const currentAccount = global.get("bankkonti")[global.get("accountStep")];
-  const currentStatusAccount = global.get("statuskonti")[global.get("accountStep")];
-  const currentLandingAccount = global.get("mellemregningskonti")[global.get("accountStep")];
+  const currentBankAccount = global.get("bankAccounts")[global.get("accountStep")];
+  const currentStatusAccount = global.get("statusAccounts")[global.get("accountStep")];
+  const currentIntermediateAccount = global.get("intermediateAccounts")[global.get("accountStep")];
   
   function calculateSpecificity(rule) {
-      // For sorting rules, prioritizing rules by amount of parameters/keys given
+      // Count the number of rule parameters where the value property is defined (truthy)
       return Object.keys(rule)
-          .map(key => parseInt(key, 10))
-          .sort((a, b) => a - b)
-          .map(key => rule[key])
-          .slice(0, 6)
-          .filter(entry => entry.value).length;
+          .slice(0, 2)
+          .filter(key => rule[key] || rule[key] || rule[key]).length;
   }
   
   function merge(left, right) {
@@ -70,8 +69,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       return merge(mergeSort(left), mergeSort(right));
   }
   
-  function matchParameter(posting, searchValue, parameterKey) {
-      return posting[parameterKey] ? posting[parameterKey].toLowerCase().includes(searchValue) : false;
+  function matchParameter(posting, searchValue, key) {
+      return posting[key] ? posting[key].toLowerCase().includes(searchValue) : false;
   }
   
   function matchAmount(postingAmount, amountOperator, ruleAmount1, ruleAmount2) {
@@ -96,94 +95,81 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           return narrative.substring(narrative.indexOf('KSD')) + (counterparty_name ? counterparty_name : '');
       }
   
-      switch (textVariation) {
+      switch (textVariation.toLowerCase()) {
           case "tekst fra bank":
-              return message;
+              return narrative;
           case "afsender fra bank":
               return counterparty_name || message;
           case "advis fra bank":
-              return narrative || message;
+              return message || narrative;
           default:
-              return message;
+              return textVariation;
       }
   }
   
-  function generateErpPostings(statusAccount, landingAccount, statusDebetOrCredit, bookDebetOrCredit, text, amount, psp) {
-      erpPostings.push([landingAccount, '', psp, '', '', bookDebetOrCredit, amount, '', text, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+  function generateErpPostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, psp) {
+      erpPostings.push([landingAccount, '', psp, '', '', landingDebetOrCredit, amount, '', text, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
       erpPostings.push([statusAccount, '', '', '', '', statusDebetOrCredit, amount, '', text, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
   }
   
-  function processPosting(posting, sortedRules, currentStatusAccount, currentLandingAccount) {
-      let sumOfErpPostings = 0;
-      let sumOfRulesChecked = 0;
-      let matchedAllParametersBool = false;
+  function processPosting(posting, sortedRules, currentStatusAccount, currentIntermediateAccount) {
+      let completeMatchBool = false;
   
       let postingAmount = parseFloat(posting.amount);
       let cleanedAmount = String(postingAmount).replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
       let statusDebetOrCredit = postingAmount > 0 ? "Debet" : "Kredit";
-      let bookDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet"
+      let landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet"
   
-      for (let rule of sortedRules) {
-          let matches = 0;
-          let artskonto = rule[6].Artskonto;
-          let psp = rule[6].PSP ? rule[6].PSP : '';
-          let textVariation = rule[6].Posteringstekst?.toLowerCase() ? rule[6].Posteringstekst.toLowerCase() : undefined;
-          let exceptionBool = rule[9].exception;
-          let amountOperator = rule[5].operator;
-          let ruleAmount1 = rule[5]?.value1 ? parseFloat(rule[5].value1.replace(',', '.')) : undefined;
-          let ruleAmount2 = rule[5]?.value2 ? parseFloat(rule[5].value2.replace(',', '.')) : undefined;
+      for (let rule of sortedRules) {      
+          let sumOfParametersMatched = 0;
+          let psp = rule.PSP ? rule.PSP : '';
+          let ruleAmount1 = rule.Beløb1 ? parseFloat(rule.Beløb1.replace(',', '.')) : null;
+          let ruleAmount2 = rule.Beløb2 ? parseFloat(rule.Beløb2.replace(',', '.')) : null;
   
-          if (sumOfRulesChecked > 1 && sumOfErpPostings > 0) {
+          if (completeMatchBool) {
               continue
           } else {
-              for (let i = 0; i < postingParameters.length; i++) {
-                  let searchValue = rule[i]?.value ? String(rule[i].value).toLowerCase() : null;
+              for (let parameterIndex = 0; parameterIndex < postingParameters.length; parameterIndex++) {
+                  let searchValue = rule[ruleParameters[parameterIndex]];
   
-                  if (searchValue !== null && rule[7].active && matchParameter(posting, searchValue, postingParameters[i])) {
-                      matches += 1;
-                      break
+                  if (searchValue && rule.Active && matchParameter(posting, searchValue, postingParameters[parameterIndex])) {
+                      sumOfParametersMatched += 1;
                   }
               }
   
-              if (matches === calculateSpecificity(rule)) {
-                  matchedAllParametersBool = true;
-              }
-  
-              let matchedAmountBool = matchAmount(postingAmount, amountOperator, ruleAmount1, ruleAmount2)
+              let matchedAllParametersBool = sumOfParametersMatched === calculateSpecificity(rule);
+              let matchedAmountBool = matchAmount(postingAmount, rule.Operator, ruleAmount1, ruleAmount2)
   
               if (matchedAllParametersBool && matchedAmountBool) {
-                  if (!exceptionBool) {   // Don't write ERP postings if rule is an exception
-                      let text = textGeneration(textVariation, posting.message, posting.narrative, posting.counterparty_name);
-                      generateErpPostings(currentStatusAccount, artskonto, statusDebetOrCredit, bookDebetOrCredit, text, cleanedAmount, psp);
+                  if (!rule.Exception) {   // Don't write ERP postings if rule is an exception, but still count as match
+                      let text = textGeneration(rule.Posteringstekst, posting.message, posting.narrative, posting.counterparty_name);
+                      generateErpPostings(currentStatusAccount, rule.Artskonto, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, psp);
                   }
-                  sumOfErpPostings += 1;
+                  completeMatchBool = true;
               }
           }
-          sumOfRulesChecked += 1;
       }
-      if (sumOfErpPostings === 0) {
+      if (!completeMatchBool) {
           let text = posting.transaction_id;
   
-          generateErpPostings(currentStatusAccount, currentLandingAccount, statusDebetOrCredit, bookDebetOrCredit, text, cleanedAmount, '');
+          generateErpPostings(currentStatusAccount, currentIntermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, '');
           postingsWithNoMatch.push(posting);
-          sumOfErpPostings += 1;
       }
   }
   
-  if (currentAccount === "DK3620009035615315-DKK") {
+  if (currentBankAccount === "DK3620009035615315-DKK") {
       postings.forEach(posting => {
           let statusDebetOrCredit = posting.amount.startsWith('-') ? 'Kredit' : 'Debet';
-          let bookDebetOrCredit = statusDebetOrCredit === 'Debet' ? 'Kredit' : 'Debet';
+          let landingDebetOrCredit = statusDebetOrCredit === 'Debet' ? 'Kredit' : 'Debet';
           let cleanedAmount = posting.amount.replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
           let text = posting.counterparty_name + " - " + posting.narrative;
   
-          generateErpPostings(currentStatusAccount, currentLandingAccount, statusDebetOrCredit, bookDebetOrCredit, text, cleanedAmount, '');
+          generateErpPostings(currentStatusAccount, currentIntermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, '');
       });
   
-      flow.set("erp_array", erpArray.concat(erpPostings));
   } else {
       postings.forEach(posting => {
-          processPosting(posting, mergeSort(konteringsregler), currentStatusAccount, currentLandingAccount);
+          processPosting(posting, mergeSort(accountingRules), currentStatusAccount, currentIntermediateAccount);
       });
   }
   
@@ -191,8 +177,10 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   flow.set("erpArray", erpArray.concat(erpPostings));
   
   msg.payload = erpArray.concat(erpPostings);
-  msg.columns = global.get("erpFileHeaders");
-  msg.filename = "/data/output/" + global.get("time_of_origin") + ".csv";
+  msg.columns = flow.get("erpFileHeaders");
+  msg.filename = "/data/output/" + global.get("dateOfOrigin") + ".csv";
+  
+  global.set("mergeSortedRules", mergeSort(accountingRules));
   
   return msg;
 }

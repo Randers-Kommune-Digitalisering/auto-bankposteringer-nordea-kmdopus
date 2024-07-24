@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "konteringsregler",
+      "to": "accountingRules",
       "tot": "global",
       "dc": true
     }
@@ -20,7 +20,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 305,
-  "y": 280,
+  "y": 300,
   "wires": [
     [
       "5ab85126ec7b5717"

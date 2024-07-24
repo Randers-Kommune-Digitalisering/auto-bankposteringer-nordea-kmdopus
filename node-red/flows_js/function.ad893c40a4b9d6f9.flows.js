@@ -27,6 +27,7 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, csv) {
+  const statusAccounts = global.get("statusAccounts");
   const operatorMapping = {
       "Indeholder": "contains",
       "Starter med": ".startsWith",
@@ -37,10 +38,10 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       "Lig med": "==",
   };
   
-  const jsonData = msg.payload.map((data, index) => {
+  const jsonData = msg.payload.map((data, index) => {  
       // Remove "#" character from all values
       const cleanedData = Object.fromEntries(
-          Object.entries(data).map(([key, value]) => [key, value ? String(value).replace(/#/g, '') : value])
+          Object.entries(data).map(([key, value]) => [key, value ? String(value).replace(/#/g, '') : undefined])
       );
   
       const {
@@ -48,8 +49,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
           Advisliste,
           Afsender,
           Posteringstype,
-          end_to_end_reference,
-          match_regel,
           Beløb1,
           Beløb2,
           beløb_regel,
@@ -59,37 +58,42 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
           Notat
       } = cleanedData;
   
-      console.log(cleanedData);
-  
       const hasHash = Object.values(data).some(value => value && String(value).includes("#"));
       const isActive = !hasHash;
-      const activeObject = { active: isActive };
+      const Active = isActive;
   
       const valueOperatorValue = operatorMapping[beløb_regel] || null;
+      const Operator = valueOperatorValue;
+  
+      const RuleID = index;
   
       // Create "exception" attribute and remove Artskonto if true
-      const shouldBeException = Artskonto === "90540000";
-      cleanedData.Artskonto = shouldBeException ? undefined : Artskonto;
-      const exceptionObject = { exception: shouldBeException };
+      const shouldBeException = statusAccounts.includes(Artskonto);
+      cleanedData.Artskonto = shouldBeException ? null : Artskonto;
+      const Exception = shouldBeException;
   
-      return [
-          { name: "Reference", value: Reference},
-          { name: "Advisliste", value: Advisliste},
-          { name: "Afsender", value: Afsender},
-          { name: "Posteringstype", value: Posteringstype},
-          { name: "End-to-end-reference", value: end_to_end_reference},
-          { name: "Beløb", value1: Beløb1, value2: Beløb2, operator: valueOperatorValue },
-          { Posteringstekst, Artskonto, PSP, Notat },
-          activeObject,
-          { ruleId: index },
-          exceptionObject
-      ];
+      return {
+          Reference: Reference || null,
+          Advisliste: Advisliste || null,
+          Afsender: Afsender || null,
+          Posteringstype: Posteringstype || null,
+          Beløb1: Beløb1 || null,
+          Beløb2: Beløb2 || null,
+          Operator,
+          Posteringstekst: Posteringstekst || null,
+          Artskonto: Artskonto || null,
+          PSP: PSP || null,
+          Notat: Notat || null,
+          Active,
+          Exception,
+          RuleID
+      };
   });
   
-  const rules = jsonData != null ? jsonData.map((rule, index) => ({ ...rule, 8: { ruleId: index } })) : [];
+  // const rules = jsonData != null ? jsonData.map((rule, index) => ({ ...rule, 5: { ruleId: index } })) : [];
   
-  msg.payload = rules;
-  global.set("konteringsregler", rules);
+  msg.payload = jsonData;
+  global.set("accountingRules", jsonData);
   
   return msg;
   

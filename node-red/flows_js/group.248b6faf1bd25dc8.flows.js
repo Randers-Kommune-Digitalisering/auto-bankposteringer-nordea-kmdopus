@@ -2,7 +2,7 @@ const Node = {
   "id": "248b6faf1bd25dc8",
   "type": "group",
   "z": "9b998b2e60b3c784",
-  "name": "Import csv rules",
+  "name": "CSV overwrite rules",
   "style": {
     "stroke": "none",
     "fill": "#ffffbf",
