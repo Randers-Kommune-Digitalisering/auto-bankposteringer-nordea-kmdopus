@@ -36,13 +36,15 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 530,
+  "x": 235,
   "y": 100,
   "wires": [
     [
       "4ffc22bb5fb41254"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-trash",
+  "l": false
 }
 
 module.exports = Node;

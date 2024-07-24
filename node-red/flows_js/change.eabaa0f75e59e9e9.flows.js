@@ -2,7 +2,7 @@ const Node = {
   "id": "eabaa0f75e59e9e9",
   "type": "change",
   "z": "73d7d240a587aa11",
-  "name": "Rens svar",
+  "name": "Clean",
   "rules": [
     {
       "t": "delete",
@@ -25,11 +25,15 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 960,
-  "y": 140,
+  "x": 255,
+  "y": 80,
   "wires": [
-    []
-  ]
+    [
+      "b576def25a775a9f"
+    ]
+  ],
+  "icon": "font-awesome/fa-trash",
+  "l": false
 }
 
 module.exports = Node;

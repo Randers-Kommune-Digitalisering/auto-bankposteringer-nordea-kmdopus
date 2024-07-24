@@ -23,7 +23,7 @@ const Node = {
   "checkall": "true",
   "repair": false,
   "outputs": 3,
-  "x": 720,
+  "x": 315,
   "y": 100,
   "wires": [
     [
@@ -35,7 +35,9 @@ const Node = {
     [
       "386522f404a71aca"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-question",
+  "l": false
 }
 
 module.exports = Node;

@@ -2,18 +2,20 @@ const Node = {
   "id": "169f2a631aaa1be7",
   "type": "debug",
   "z": "9b998b2e60b3c784",
-  "name": "Debug",
+  "g": "9a13326620241f51",
+  "name": "MySQL query status",
   "active": true,
   "tosidebar": true,
-  "console": false,
+  "console": true,
   "tostatus": false,
-  "complete": "$globalContext(\"konteringsregler\") ~> $exists() ?\t{\t    \"db\": \"rules loaded from db\",\t    \"table\": \"konteringsregler\",\t    \"ruleCount\": $globalContext(\"konteringsregler\") ~> $count()\t}",
+  "complete": "$globalContext(\"konteringsregler\") ~> $exists() ?\t{\t    \"Message\": \"Rules imported from database\",\t    \"Sum of rules\": $globalContext(\"konteringsregler\") ~> $count(),\t    \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1550,
-  "y": 320,
-  "wires": []
+  "x": 975,
+  "y": 420,
+  "wires": [],
+  "l": false
 }
 
 module.exports = Node;

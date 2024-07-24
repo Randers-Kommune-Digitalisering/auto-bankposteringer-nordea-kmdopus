@@ -1,29 +1,31 @@
 const Node = {
-  "id": "044512e41861a3b5",
+  "id": "c075f5e58acdf5e1",
   "type": "switch",
   "z": "73d7d240a587aa11",
-  "name": "Fejl?",
-  "property": "error",
+  "name": "",
+  "property": "config.retryAttempts",
   "propertyType": "msg",
   "rules": [
     {
-      "t": "null"
+      "t": "gte",
+      "v": "5",
+      "vt": "num"
     },
     {
       "t": "else"
     }
   ],
-  "checkall": "true",
+  "checkall": "false",
   "repair": false,
   "outputs": 2,
-  "x": 205,
-  "y": 100,
+  "x": 305,
+  "y": 120,
   "wires": [
     [
-      "eabaa0f75e59e9e9"
+      "6ebd13e4597c9b26"
     ],
     [
-      "914dceb2143a19ae"
+      "1ad3572aafd0355c"
     ]
   ],
   "icon": "font-awesome/fa-question",

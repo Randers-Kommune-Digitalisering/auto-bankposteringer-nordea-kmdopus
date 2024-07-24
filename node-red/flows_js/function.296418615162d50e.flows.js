@@ -2,6 +2,7 @@ const Node = {
   "id": "296418615162d50e",
   "type": "function",
   "z": "9b998b2e60b3c784",
+  "g": "9a13326620241f51",
   "name": "Parse JSON",
   "func": "",
   "outputs": 1,
@@ -9,13 +10,15 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 1150,
-  "y": 320,
+  "x": 875,
+  "y": 420,
   "wires": [
     [
       "91b06b6df33983e7"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-language",
+  "l": false
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
