@@ -7,6 +7,13 @@ const Node = {
   "rules": [
     {
       "t": "set",
+      "p": "admName",
+      "pt": "global",
+      "to": "Jan Mølbæk",
+      "tot": "str"
+    },
+    {
+      "t": "set",
       "p": "admEmail",
       "pt": "global",
       "to": "jan.molbaek@randers.dk",
@@ -14,7 +21,14 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "statuskonti",
+      "p": "admID",
+      "pt": "global",
+      "to": "1000000001",
+      "tot": "str"
+    },
+    {
+      "t": "set",
+      "p": "statusAccounts",
       "pt": "global",
       "to": "[\"90540000\",\"90541000\"]",
       "tot": "json",
@@ -22,14 +36,21 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "bankkonti",
+      "p": "bankAccountNames",
+      "pt": "global",
+      "to": "[\"Hovedkonto\",\"Debitorkonto\"]",
+      "tot": "json"
+    },
+    {
+      "t": "set",
+      "p": "bankAccounts",
       "pt": "global",
       "to": "[\t   \"DK20005908764988\"&\"-DKK\",\t   \"DK20009035615315\"&\"-DKK\"\t]",
       "tot": "jsonata"
     },
     {
       "t": "set",
-      "p": "mellemregningskonti",
+      "p": "intermediateAccounts",
       "pt": "global",
       "to": "[\"95990009\",\"95991009\"]",
       "tot": "json"
@@ -48,7 +69,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 425,
-  "y": 420,
+  "y": 440,
   "wires": [
     [
       "7f454f55bfaa9637"

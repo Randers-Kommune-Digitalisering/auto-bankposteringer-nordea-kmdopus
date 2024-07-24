@@ -16,7 +16,7 @@ const Node = {
       "t": "else"
     }
   ],
-  "checkall": "true",
+  "checkall": "false",
   "repair": false,
   "outputs": 2,
   "x": 565,

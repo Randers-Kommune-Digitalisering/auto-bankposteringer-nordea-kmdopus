@@ -54,6 +54,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   global.set("enddate", findDate("end"));
   global.set("dateOfOrigin", dayjs().format('YYYYMMDD'));
   global.set("timeOfOrigin", dayjs().format('HHmmss'));
+  global.set("accountStep", 0);
+  global.set("bankAccounts", ["DK20005908764988-DKK"]);
   
   return msg;
   

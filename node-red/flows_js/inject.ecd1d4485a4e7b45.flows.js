@@ -20,7 +20,7 @@ const Node = {
   "topic": "",
   "payload": "",
   "payloadType": "date",
-  "x": 390,
+  "x": 380,
   "y": 60,
   "wires": [
     [

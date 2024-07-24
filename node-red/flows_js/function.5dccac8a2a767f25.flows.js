@@ -23,7 +23,7 @@ const Node = {
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let accountStep = global.get("accountStep");
-  let accountLength = global.get("bankkonti").len;
+  let accountLength = global.get("bankAccounts").length;
   
   if (accountStep + 1 !== accountLength) {
       global.set("accountStep", accountStep += 1);

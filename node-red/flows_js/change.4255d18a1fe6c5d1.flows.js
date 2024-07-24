@@ -2,6 +2,7 @@ const Node = {
   "id": "4255d18a1fe6c5d1",
   "type": "change",
   "z": "f91accb007eed9a2",
+  "d": true,
   "g": "6055094b02013d9b",
   "name": "Clean up",
   "rules": [

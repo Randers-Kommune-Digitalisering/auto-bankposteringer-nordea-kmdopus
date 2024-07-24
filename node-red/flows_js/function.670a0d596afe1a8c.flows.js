@@ -10,7 +10,7 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 555,
+  "x": 545,
   "y": 260,
   "wires": [
     [
@@ -23,11 +23,11 @@ const Node = {
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   var bankAccountIndex = global.get('accountStep');
-  var bankAccounts = global.get('bankkonti');
+  var bankAccounts = global.get('bankAccounts');
   
   // Check if the bank account index is within bounds
   if (bankAccountIndex >= 0 && bankAccountIndex < bankAccounts.length) {
-      flow.set('selected_bank_account', bankAccounts[bankAccountIndex]);
+      flow.set('selectedBankAccount', bankAccounts[bankAccountIndex]);
   } else {
       node.error('Invalid bank account index. Account step is larger than the size of array for bank accounts');
   }

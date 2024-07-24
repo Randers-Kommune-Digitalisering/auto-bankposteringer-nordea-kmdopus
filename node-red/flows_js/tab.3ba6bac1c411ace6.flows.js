@@ -2,7 +2,7 @@ const Node = {
   "id": "3ba6bac1c411ace6",
   "type": "tab",
   "label": "Frontend (deprecated)",
-  "disabled": false,
+  "disabled": true,
   "info": "",
   "env": []
 }

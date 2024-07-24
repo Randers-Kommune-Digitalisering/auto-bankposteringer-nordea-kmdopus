@@ -7,11 +7,11 @@ const Node = {
   "props": [],
   "repeat": "",
   "crontab": "",
-  "once": false,
+  "once": true,
   "onceDelay": 0.1,
   "topic": "",
   "x": 265,
-  "y": 440,
+  "y": 460,
   "wires": [
     [
       "9ff1ca6d9e9c830f"

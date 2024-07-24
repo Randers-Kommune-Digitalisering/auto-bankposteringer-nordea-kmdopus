@@ -7,7 +7,7 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "konteringsregler",
+      "p": "accountingRules",
       "pt": "global",
       "to": "payload",
       "tot": "msg",

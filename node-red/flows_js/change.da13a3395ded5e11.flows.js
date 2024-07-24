@@ -30,7 +30,7 @@ const Node = {
       "t": "set",
       "p": "urlParam",
       "pt": "flow",
-      "to": "selected_bank_account",
+      "to": "selectedBankAccount",
       "tot": "flow"
     },
     {
@@ -53,7 +53,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 595,
+  "x": 585,
   "y": 260,
   "wires": [
     [
