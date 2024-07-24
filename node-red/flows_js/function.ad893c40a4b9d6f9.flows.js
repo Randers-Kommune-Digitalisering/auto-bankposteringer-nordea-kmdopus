@@ -67,7 +67,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   
       const valueOperatorValue = operatorMapping[beløb_regel] || null;
   
-      // Create "exception" attribute and remove Artskonto if true
       const shouldBeException = Artskonto === "90540000";
       cleanedData.Artskonto = shouldBeException ? undefined : Artskonto;
       const exceptionObject = { exception: shouldBeException };
@@ -88,11 +87,10 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   
   const rules = jsonData != null ? jsonData.map((rule, index) => ({ ...rule, 8: { ruleId: index } })) : [];
   
-  msg.payload = rules;
-  global.set("konteringsregler", rules);
+  global.set("accountingRules", rules);
+  msg.payload = global.get("accountingRules");
   
   return msg;
-  
 }
 
 module.exports = Node;

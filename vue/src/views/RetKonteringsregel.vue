@@ -164,7 +164,7 @@
                     <div v-for="(value, key) in keyMap">
                         <label :for="key" class="capitalize" v-if="!value.hidden">{{key}}</label>
                         <input type="text" placeholder="..." :id="key" v-if="konteringsregel != null && !value.hidden" v-model="konteringsregel[value.id][value.key]" @change="hasUpdated = false" :disabled="value.disabled">
-                        <input type="text" placeholder="Indlæser ..." :id="key" v-if="konteringsregel == null && !value.hidden" disabled="true">
+                        <input type="text" placeholder="Indlæser..." :id="key" v-if="konteringsregel == null && !value.hidden" disabled="true">
                     </div>
                 </div>
 
