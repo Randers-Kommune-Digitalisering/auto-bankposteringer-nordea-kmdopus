@@ -51,12 +51,12 @@ main
 }
 
 /* Tablet or desktop */
-@media screen and (min-width: 53.125rem) /* 850px or 85rem using 16 px conversion */
+@media screen and (min-width: 75rem) /* 1200px or 120rem using 16 px conversion */
 {
     .content
     {
         /* Set width of main content */
-        width: 85rem;
+        width: 120rem;
 
         border-left: 0.1rem solid var(--color-border);
         border-right: 0.1rem solid var(--color-border);

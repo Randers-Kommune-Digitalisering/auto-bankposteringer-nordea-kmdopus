@@ -5,8 +5,8 @@ const Node = {
   "g": "db9c10bd096dcbc3",
   "name": "<== Data structure change",
   "info": "",
-  "x": 850,
-  "y": 260,
+  "x": 950,
+  "y": 500,
   "wires": []
 }
 

@@ -4,8 +4,8 @@ const Node = {
   "z": "9b998b2e60b3c784",
   "g": "db9c10bd096dcbc3",
   "name": "",
-  "x": 925,
-  "y": 280,
+  "x": 1025,
+  "y": 520,
   "wires": [
     [
       "5686c60cf8e17e4c"

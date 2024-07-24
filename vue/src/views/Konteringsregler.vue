@@ -38,6 +38,10 @@
             "key": "ruleId",
             "hidden": true
         },
+        "advis": {
+            "id": 1,
+            "key": "value"
+        },
         "reference": {
             "id": 0,
             "key": "value"
@@ -185,6 +189,11 @@
                         <th :colspan="(Object.values(keyMap).filter(value => !value.hidden).length)+1">
                             <input id="searchInput" type="text" placeholder="Søg efter regel" v-model="searchKeyword" :onchange="search(searchKeyword)" />
                         </th>
+                </tr>
+                <tr>
+                    <th v-for="([key, value]) in Object.entries(keyMap)" :key="key" :class="(value.hidden ? 'hidden ' : '')">
+                        {{ key }}
+                    </th>
                 </tr>
             </thead>
             <tr v-if="konteringsregler != null" v-for="(obj, index) in konteringsregler" :id="obj[keyMap['id'].key]" :class="returningFrom == obj[keyMap['id'].key] ? 'highlight' : ''">
