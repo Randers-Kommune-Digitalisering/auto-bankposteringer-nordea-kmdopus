@@ -25,43 +25,32 @@
 
     const keyMap = {
         "id": {
-            "key": "id",
+            "key": "RuleID",
             "hidden": true
         },
-        "ruleId": {
-            "id": 8,
-            "key": "ruleId",
-            "hidden": true
+        "Advis": {
+            "key": "Advisliste"
         },
-        "reference": {
-            "id": 0,
-            "key": "value"
+        "Reference": {
+            "key": "Reference"
         },
-        "afsender": {
-            "id": 2,
-            "key": "value"
+        "Afsender": {
+            "key": "Afsender"
         }, 
-        "artskonto": {
-            "id": 6,
-            "key": "Artskonto"
+        "Artskonto": {
+            "key": "Artskonto",
         },
-        "posteringstype": {
-            "id": 3,
-            "key": "value"
+        "Posteringstype": {
+            "key": "Posteringstype",
         },
-        "posteringstekst": {
-            "id": 6,
-            "key": "Posteringstekst"
+        "Posteringstekst": {
+            "key": "Posteringstekst",
+            "hidden": true
         },
-        "notat": {
-            "id": 6,
+        "Notat": {
             "key": "Notat"
         }
     }
-
-    /* Example data format
-        {"0":{"name":"Reference","value":"Rekvireret udb"},"1":{"name":"Advisliste"},"2":{"name":"Afsender"},"3":{"name":"Posteringstype","value":"Cap"},"4":{"name":"End-to-end-reference"},"5":{"name":"Beløb","operator":null},"6":{"Posteringstekst":"Tekst fra bank","Artskonto":"12340000","Notat":"Udbetaling"},"7":{"active":true},"8":{"ruleId":54},"9":{"exception":true}}
-    */
     
     function updateRule()
     {
@@ -98,7 +87,7 @@
                 // Set ID's from response
                 index.value = value.insertId
                 konteringsregel.value.id = value.insertId
-                konteringsregel.value[keyMap.ruleId.id][keyMap.ruleId.key] = value.ruleId
+                konteringsregel.value[keyMap.id.key] = value.ruleId
 
                 router.push('/retkonteringsregel/' + value.insertId)
             }
@@ -148,7 +137,7 @@
 
     <h2 v-if="konteringsregel != null">
         <span v-if="isNewRule">Ny konteringsregel</span>
-        <span v-else>Konteringsregel #{{konteringsregel[keyMap.ruleId.id][keyMap.ruleId.key]}}</span>
+        <span v-else>Konteringsregel #{{konteringsregel[keyMap.id.key]}}</span>
     </h2>
     <h2 v-else>Indlæser...</h2>
     
@@ -161,9 +150,9 @@
         <form @submit.prevent="">
             <fieldset>
                 <div class="flexbox">
-                    <div v-for="(value, key) in keyMap">
-                        <label :for="key" class="capitalize" v-if="!value.hidden">{{key}}</label>
-                        <input type="text" placeholder="..." :id="key" v-if="konteringsregel != null && !value.hidden" v-model="konteringsregel[value.id][value.key]" @change="hasUpdated = false" :disabled="value.disabled">
+                    <div v-for="(value, key) in keyMap" :class="value.hidden ? 'hidden' : ''">
+                        <label :for="key" class="capitalize">{{key}}</label>
+                        <input type="text" placeholder="..." :id="key" v-if="konteringsregel != null && !value.hidden" v-model="konteringsregel[value.key]" @change="hasUpdated = false" :disabled="value.disabled">
                         <input type="text" placeholder="Indlæser..." :id="key" v-if="konteringsregel == null && !value.hidden" disabled="true">
                     </div>
                 </div>
