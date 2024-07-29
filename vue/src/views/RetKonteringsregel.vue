@@ -14,8 +14,6 @@
 
     const index = ref(route.params.id)
     const isNewRule = ref(index.value == "nyaktiv" || index.value == "nyinaktiv" || index.value == "nyundtagelse")
-
-    console.log("IS NEW RULE: " + isNewRule.value)
     
     const konteringsregel = ref(isNewRule.value ? JSON.parse(JSON.stringify(newItem)) : null)
 

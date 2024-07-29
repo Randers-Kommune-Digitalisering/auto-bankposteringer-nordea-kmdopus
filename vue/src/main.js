@@ -13,6 +13,7 @@ import Templates from '@/views/Templates.vue'
 import Konteringsregler from './views/Konteringsregler.vue'
 import RetKonteringsregel from './views/RetKonteringsregel.vue'
 import Filer from './views/Filer.vue'
+import Stamdata from './views/Stamdata.vue'
 
 // Opsætning af URL routing
 
@@ -43,6 +44,11 @@ const router = createRouter({
             path: '/filer', 
             name: "Filer",
             component: Filer
+        },  
+        {
+            path: '/stamdata', 
+            name: "Stamdata",
+            component: Stamdata
         },
         {
             path: '/vue', 
