@@ -177,7 +177,7 @@
 
             <div class="float-right searchButtonDiv">
                 <router-link v-if="type != null" :to="'/retkonteringsregel/ny' + type">
-                    <button @click="router.replace({  path: '/konteringsregler' })">Tilføj regel</button>
+                    <button @click="router.replace({  path: '/konteringsregler' })">{{ type == 'undtagelse' ? 'Tilføj undtagelse' : 'Tilføj regel'}}</button>
                 </router-link>
             </div>
 

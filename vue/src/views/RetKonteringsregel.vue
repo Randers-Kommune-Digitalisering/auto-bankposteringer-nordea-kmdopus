@@ -31,7 +31,36 @@
             .then(response => response = response.json())
             .then(value => konteringsregel.value = value)
 
-    const keyMap = {
+    const keyMap_rule = {
+        "id": {
+            "key": "RuleID",
+            "hidden": true
+        },
+        "Advis": {
+            "key": "Advisliste"
+        },
+        "Reference": {
+            "key": "Reference"
+        },
+        "Afsender": {
+            "key": "Afsender"
+        }, 
+        "Artskonto": {
+            "key": "Artskonto"
+        },
+        "Posteringstype": {
+            "key": "Posteringstype"
+        },
+        "Posteringstekst": {
+            "key": "Posteringstekst",
+            "hidden": true
+        },
+        "Notat": {
+            "key": "Notat"
+        }
+    }
+
+    const keyMap_exception = {
         "id": {
             "key": "RuleID",
             "hidden": true
@@ -47,9 +76,10 @@
         }, 
         "Artskonto": {
             "key": "Artskonto",
+            "hidden": true
         },
         "Posteringstype": {
-            "key": "Posteringstype",
+            "key": "Posteringstype"
         },
         "Posteringstekst": {
             "key": "Posteringstekst",
@@ -59,6 +89,8 @@
             "key": "Notat"
         }
     }
+
+    const keyMap = index.value == 'nyundtagelse' ? keyMap_exception : keyMap_rule
     
     function updateRule()
     {
