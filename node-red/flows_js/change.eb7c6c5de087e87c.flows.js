@@ -1,15 +1,15 @@
 const Node = {
-  "id": "1016f4ed19ada96b",
+  "id": "eb7c6c5de087e87c",
   "type": "change",
   "z": "VueExample",
-  "g": "654ea7d5e05117db",
-  "name": "Create status object",
+  "g": "5f30159012b7773a",
+  "name": "",
   "rules": [
     {
       "t": "set",
-      "p": "payload",
+      "p": "type",
       "pt": "msg",
-      "to": "{ \"success\": true }",
+      "to": "req.params.type",
       "tot": "jsonata"
     }
   ],
@@ -18,11 +18,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 165,
-  "y": 60,
+  "x": 155,
+  "y": 200,
   "wires": [
     [
-      "5a90ebbf9bf703ec"
+      "5bd4322fa1125f35"
     ]
   ],
   "l": false

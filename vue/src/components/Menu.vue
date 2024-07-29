@@ -11,8 +11,20 @@
             "url": "/"
         },
         {
-            "title": "Konteringsregler",
+            "title": "Alle regler",
             "url": "/konteringsregler",
+        },
+        {
+            "title": "Aktive regler",
+            "url": "/konteringsregler/aktiv",
+        },
+        {
+            "title": "Inaktive regler",
+            "url": "/konteringsregler/inaktiv",
+        },
+        {
+            "title": "Undtagelser",
+            "url": "/konteringsregler/undtagelse",
         }
     ])
 

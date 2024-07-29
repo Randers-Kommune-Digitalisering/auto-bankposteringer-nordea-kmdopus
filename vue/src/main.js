@@ -29,6 +29,11 @@ const router = createRouter({
             component: Konteringsregler
         }, 
         {
+            path: '/konteringsregler/:type', 
+            name: "Konteringsregler (type)",
+            component: Konteringsregler
+        }, 
+        {
             path: '/retkonteringsregel/:id', 
             name: "RetKonteringsregel",
             component: RetKonteringsregel
