@@ -11,10 +11,6 @@
             "url": "/"
         },
         {
-            "title": "Alle regler",
-            "url": "/konteringsregler",
-        },
-        {
             "title": "Aktive regler",
             "url": "/konteringsregler/aktiv",
         },
