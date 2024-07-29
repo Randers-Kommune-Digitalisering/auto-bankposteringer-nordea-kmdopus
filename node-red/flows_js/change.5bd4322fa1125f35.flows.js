@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "$globalContext(\"accountingRules\")[$.Active = true]",
+      "to": "(\t    type = \"aktiv\" ?\t        $globalContext(\"accountingRules\")[Active = true and Exception = false]\t    :\t    type = \"inaktiv\" ?\t        $globalContext(\"accountingRules\")[Active = false and Exception = false]\t    :\t    type = \"undtagelse\" ?\t        $globalContext(\"accountingRules\")[Exception = true]\t    :\t        $globalContext(\"accountingRules\")[Exception = false]\t\t)\t",
       "tot": "jsonata",
       "dc": true
     }
@@ -19,7 +19,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 335,
+  "x": 205,
   "y": 200,
   "wires": [
     [

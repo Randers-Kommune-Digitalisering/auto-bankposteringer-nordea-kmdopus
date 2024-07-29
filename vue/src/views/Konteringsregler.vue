@@ -1,6 +1,6 @@
 
 <script setup>
-    import { ref } from 'vue'
+    import { ref, watch } from 'vue'
     import { useRouter, useRoute } from 'vue-router'
     
     import Content from '@/components/Content.vue'
@@ -11,6 +11,8 @@
     
     const router = useRouter()
     const route = useRoute()
+
+    const type = ref(route.params.type ?? null)
 
     const searchParam = route.query.search
     const returnFromParam = route.query.returnfrom
@@ -24,11 +26,24 @@
     console.log("returnFromParam: " + returnFromParam)
     
     // Fetch regler
-    fetch('/api/konteringsregler')
-        .then(response => response = response.json())
-        .then(value => allKonteringsregler.value = value)
-        .then(value => konteringsregler.value = value)
-        .then(value => handleQueryParams())
+    function fetchRules()
+    {
+        fetch('/api/listkonteringsregler/' + (type.value == null ? "" : type.value))
+            .then(response => response = response.json())
+            .then(value => allKonteringsregler.value = value)
+            .then(value => konteringsregler.value = value)
+            .then(value => handleQueryParams())
+    }
+
+    fetchRules()
+
+    // Watch and update rules if parameter changes
+    watch(() => route.params.type, (value) =>
+    {
+        type.value = value
+        fetchRules()
+    })
+
 
     const keyMap = {
         "id": {
