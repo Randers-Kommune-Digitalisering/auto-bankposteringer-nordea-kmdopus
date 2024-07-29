@@ -13,9 +13,17 @@
     const route = useRoute()
 
     const index = ref(route.params.id)
-    const isNewRule = ref(index.value == "new")
+    const isNewRule = ref(index.value == "nyaktiv" || "nyinaktiv" || "nyundtagelse")
     
     const konteringsregel = ref(isNewRule.value ? JSON.parse(JSON.stringify(newItem)) : null)
+
+    if(isNewRule)
+    {   
+        if(index.value == "nyinaktiv")
+            konteringsregel.value.Active = false
+        else if(index.value == "nyundtagelse")
+            konteringsregel.value.Exception = true
+    }
     
     // Fetch regel
     if(!isNewRule.value)
