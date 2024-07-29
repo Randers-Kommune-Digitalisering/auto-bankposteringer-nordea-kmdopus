@@ -13,7 +13,9 @@
     const route = useRoute()
 
     const index = ref(route.params.id)
-    const isNewRule = ref(index.value == "nyaktiv" || "nyinaktiv" || "nyundtagelse")
+    const isNewRule = ref(index.value == "nyaktiv" || index.value == "nyinaktiv" || index.value == "nyundtagelse")
+
+    console.log("IS NEW RULE: " + isNewRule.value)
     
     const konteringsregel = ref(isNewRule.value ? JSON.parse(JSON.stringify(newItem)) : null)
 
@@ -30,6 +32,7 @@
         fetch('/api/konteringsregler/' + index.value)
             .then(response => response = response.json())
             .then(value => konteringsregel.value = value)
+            .then(value => console.log(value))
 
     const keyMap_rule = {
         "id": {
