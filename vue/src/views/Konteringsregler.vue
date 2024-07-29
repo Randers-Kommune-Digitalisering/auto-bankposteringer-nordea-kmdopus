@@ -20,6 +20,8 @@
 
     const isReturning = ref(returnFromParam ? true : false)
     const returningFrom = ref(returnFromParam ?? null)
+
+    console.log("returnFromParam: " + returnFromParam)
     
     // Fetch regler
     fetch('/api/konteringsregler')
@@ -30,43 +32,31 @@
 
     const keyMap = {
         "id": {
-            "key": "id",
+            "key": "RuleID",
             "hidden": true
         },
-        "ruleId": {
-            "id": 8,
-            "key": "ruleId",
-            "hidden": true
+        "Advis": {
+            "key": "Advisliste"
         },
-        "advis": {
-            "id": 1,
-            "key": "value"
+        "Reference": {
+            "key": "Reference"
         },
-        "reference": {
-            "id": 0,
-            "key": "value"
-        },
-        "afsender": {
-            "id": 2,
-            "key": "value"
+        "Afsender": {
+            "key": "Afsender"
         }, 
-        "artskonto": {
-            "id": 6,
+        "Artskonto": {
             "key": "Artskonto",
             "hidden": true
         },
-        "posteringstype": {
-            "id": 3,
-            "key": "value",
+        "Posteringstype": {
+            "key": "Posteringstype",
             "hidden": true
         },
-        "posteringstekst": {
-            "id": 6,
+        "Posteringstekst": {
             "key": "Posteringstekst",
             "hidden": true
         },
-        "notat": {
-            "id": 6,
+        "Notat": {
             "key": "Notat"
         }
     }
@@ -127,14 +117,13 @@
         
         if(keyword == null)
             return list
-        else 
-            return list.filter(x => (x[keyMap.reference.id][keyMap.reference.key] != null && x[keyMap.reference.id][keyMap.reference.key].toLowerCase().includes(keyword)) || /* Reference */
-                                    (x[keyMap.afsender.id][keyMap.afsender.key] != null && x[keyMap.afsender.id][keyMap.afsender.key].toLowerCase().includes(keyword)) || /* Afsender */
-                                    (x[keyMap.artskonto.id][keyMap.artskonto.key] != null && x[keyMap.artskonto.id][keyMap.artskonto.key].toLowerCase().includes(keyword)) || /* Artskonto */
-                                    (x[keyMap.posteringstype.id][keyMap.posteringstype.key] != null && x[keyMap.posteringstype.id][keyMap.posteringstype.key].toLowerCase().includes(keyword)) || /* Posteringstype */
-                                    (x[keyMap.posteringstekst.id][keyMap.posteringstekst.key] != null && x[keyMap.posteringstekst.id][keyMap.posteringstekst.key].toLowerCase().includes(keyword)) || /* posteringstekst */
-                                    (x[keyMap.notat.id][keyMap.notat.key] != null && x[keyMap.notat.id][keyMap.notat.key].toLowerCase().includes(keyword)) || /* Notat */
-                                    (x[keyMap.ruleId.id][keyMap.ruleId.key] != null && x[keyMap.ruleId.id][keyMap.ruleId.key] == keyword) ) /* RuleID */
+        return list.filter(x => (x[keyMap.Reference.key] != null && x[keyMap.Reference.key].toLowerCase().includes(keyword)) || /* Reference */
+                                (x[keyMap.Afsender.key] != null && x[keyMap.Afsender.key].toLowerCase().includes(keyword)) || /* Afsender */
+                                (x[keyMap.Artskonto.key] != null && x[keyMap.Artskonto.key].toLowerCase().includes(keyword)) || /* Artskonto */
+                                (x[keyMap.Posteringstype.key] != null && x[keyMap.Posteringstype.key].toLowerCase().includes(keyword)) || /* Posteringstype */
+                                (x[keyMap.Posteringstekst.key] != null && x[keyMap.Posteringstekst.key].toLowerCase().includes(keyword)) || /* Posteringstekst */
+                                (x[keyMap.Notat.key] != null && x[keyMap.Notat.key].toLowerCase().includes(keyword)) || /* Notat */
+                                (x[keyMap.id.key] != null && x[keyMap.id.key] == keyword) ) /* RuleID */
     }
 
     function scrollTo(id)
@@ -164,7 +153,7 @@
             <IconTable />
         </template>
         <template #heading>
-            Aktuelle konteringsregler
+            Aktuelle konteringsregler test: {{returningFrom}}
             
             <div class="float-right searchButtonDiv">
                 <button :class="isSearching ? 'gray' : ''" @click="toggleSearch()">
@@ -194,17 +183,20 @@
                     <th v-for="([key, value]) in Object.entries(keyMap)" :key="key" :class="(value.hidden ? 'hidden ' : '')">
                         {{ key }}
                     </th>
+                    <th></th>
                 </tr>
             </thead>
             <tr v-if="konteringsregler != null" v-for="(obj, index) in konteringsregler" :id="obj[keyMap['id'].key]" :class="returningFrom == obj[keyMap['id'].key] ? 'highlight' : ''">
                 <td v-for="(value, key) in keyMap" :class="(value.hidden ? 'hidden ' : '') + (key)">
-                    {{ obj[value.id] != undefined ? (obj[value.id][value.key] ?? "") : obj[value.key] }}
+                    {{ obj[value.key] }}
                 </td>
+                
                 <td><router-link :to="'/retkonteringsregel/' + obj[keyMap['id'].key]">
                         <button class="editButton orange" @click="router.replace({  path: '/konteringsregler',
                                                                                     query: isSearching ? { returnfrom: obj[keyMap['id'].key], search: searchKeyword }
                                                                                                        : { returnfrom: obj[keyMap['id'].key] }})">Redigér</button>
-                    </router-link></td>
+                </router-link></td>
+                    
             </tr>
             <tr v-else>
                 <td :colspan="(Object.values(keyMap).filter(value => !value.hidden).length)+1">Indlæser ....</td>
