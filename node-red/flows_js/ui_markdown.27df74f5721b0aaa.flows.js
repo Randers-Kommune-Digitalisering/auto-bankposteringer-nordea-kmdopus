@@ -10,8 +10,8 @@ const Node = {
   "height": 0,
   "content": "<h3 align=\"center\"> INDEN DU GÅR IGANG </h3>",
   "className": "",
-  "x": 100,
-  "y": 180,
+  "x": 360,
+  "y": 120,
   "wires": [
     []
   ]

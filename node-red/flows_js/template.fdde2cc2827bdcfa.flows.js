@@ -10,8 +10,8 @@ const Node = {
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 835,
-  "y": 380,
+  "x": 905,
+  "y": 240,
   "wires": [
     [
       "cec013e5592b6995"
@@ -23,9 +23,21 @@ const Node = {
 
 Node.template = `
 CREATE TABLE IF NOT EXISTS accountingRules (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    data NVARCHAR(4000)
-)
+    Reference NVARCHAR(255) NULL,
+    Advisliste NVARCHAR(255) NULL,
+    Afsender NVARCHAR(255) NULL,
+    Posteringstype NVARCHAR(255) NULL,
+    Beløb1 DECIMAL(18,2) NULL,
+    Beløb2 DECIMAL(18,2) NULL,
+    Operator NVARCHAR(2) NULL,
+    Posteringstekst NVARCHAR(255) NULL,
+    Artskonto NVARCHAR(50) NULL,
+    PSP NVARCHAR(50) NULL,
+    Notat NVARCHAR(255) NULL,
+    Active BOOLEAN,
+    \`Exception\` BOOLEAN,
+    RuleID INT PRIMARY KEY
+);
 `
 
 module.exports = Node;

@@ -5,10 +5,11 @@ const Node = {
   "g": "9d7a704133314cab",
   "name": "link in admin auth",
   "links": [
-    "08dccd1d575e80d4"
+    "08dccd1d575e80d4",
+    "84cbc0ee0279d05a"
   ],
   "x": 65,
-  "y": 460,
+  "y": 480,
   "wires": [
     [
       "f04f709f338fbe3e"

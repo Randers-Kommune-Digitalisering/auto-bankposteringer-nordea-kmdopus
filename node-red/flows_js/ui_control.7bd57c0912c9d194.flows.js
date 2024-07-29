@@ -6,8 +6,8 @@ const Node = {
   "name": "",
   "ui": "97a7e3946b6216fb",
   "events": "all",
-  "x": 915,
-  "y": 520,
+  "x": 1035,
+  "y": 300,
   "wires": [
     []
   ],

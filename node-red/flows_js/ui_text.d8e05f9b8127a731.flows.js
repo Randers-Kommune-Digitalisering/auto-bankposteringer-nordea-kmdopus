@@ -16,8 +16,8 @@ const Node = {
   "fontSize": 16,
   "color": "#717171",
   "className": "",
-  "x": 1520,
-  "y": 100,
+  "x": 980,
+  "y": 80,
   "wires": []
 }
 

@@ -6,9 +6,10 @@ const Node = {
   "name": "link in edit rule",
   "links": [
     "fd2050514e5ad385",
-    "2ae6c32d85c7631e"
+    "2ae6c32d85c7631e",
+    "21f0a906a7b7eade"
   ],
-  "x": 905,
+  "x": 1265,
   "y": 100,
   "wires": [
     [

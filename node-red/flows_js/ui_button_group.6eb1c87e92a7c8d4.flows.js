@@ -3,7 +3,7 @@ const Node = {
   "type": "ui-button-group",
   "z": "74de194f4f0868a4",
   "g": "eda37766d19f5c20",
-  "name": "Posteringstekst variationer",
+  "name": "Posteringstekst",
   "group": "9d7fdc7d23493aa8",
   "order": 1,
   "width": "5",
@@ -44,8 +44,8 @@ const Node = {
   ],
   "topic": "Posteringstekst",
   "topicType": "str",
-  "x": 1280,
-  "y": 320,
+  "x": 1540,
+  "y": 280,
   "wires": [
     [
       "a8cd18f597da995b"

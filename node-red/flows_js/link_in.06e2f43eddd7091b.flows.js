@@ -5,11 +5,11 @@ const Node = {
   "g": "a1731ff3f2478f16",
   "name": "link in active rules",
   "links": [
-    "9c073d0c8ad76f22",
-    "3ac056b2ab0e35f7"
+    "6cf4c6963b323251",
+    "9c073d0c8ad76f22"
   ],
-  "x": 75,
-  "y": 1040,
+  "x": 315,
+  "y": 680,
   "wires": [
     [
       "971937c5376a6250"

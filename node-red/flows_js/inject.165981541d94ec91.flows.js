@@ -3,7 +3,7 @@ const Node = {
   "type": "inject",
   "z": "9b998b2e60b3c784",
   "g": "248b6faf1bd25dc8",
-  "name": "▶",
+  "name": "",
   "props": [
     {
       "p": "payload"
@@ -23,7 +23,7 @@ const Node = {
       "27bcdd1c5f9fbd70"
     ]
   ],
-  "icon": "node-red/mouse.png",
+  "icon": "font-awesome/fa-mouse-pointer",
   "l": false
 }
 

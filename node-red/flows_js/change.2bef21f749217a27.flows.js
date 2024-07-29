@@ -2,6 +2,7 @@ const Node = {
   "id": "2bef21f749217a27",
   "type": "change",
   "z": "37f6db37c66da295",
+  "d": true,
   "g": "d6d5f4ec783b7505",
   "name": "Skriv mail",
   "rules": [
@@ -40,7 +41,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 145,
-  "y": 340,
+  "y": 360,
   "wires": [
     [
       "c9b71d6eea7c0ed6"

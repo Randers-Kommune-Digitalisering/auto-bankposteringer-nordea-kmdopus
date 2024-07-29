@@ -53,8 +53,8 @@ const Node = {
   "topicType": "msg",
   "splitLayout": true,
   "className": "",
-  "x": 430,
-  "y": 80,
+  "x": 370,
+  "y": 300,
   "wires": [
     [
       "7f607bfbdd2aae54"

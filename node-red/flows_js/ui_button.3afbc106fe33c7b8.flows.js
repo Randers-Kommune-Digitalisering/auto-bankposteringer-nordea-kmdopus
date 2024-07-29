@@ -20,8 +20,8 @@ const Node = {
   "payloadType": "str",
   "topic": "ruleAction",
   "topicType": "str",
-  "x": 970,
-  "y": 580,
+  "x": 1090,
+  "y": 340,
   "wires": [
     [
       "0bafc74fb3b28a0e"

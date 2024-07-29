@@ -7,8 +7,8 @@ const Node = {
     "label": true,
     "label-position": "n",
     "color": "#000000",
-    "stroke": "#000000",
-    "fill": "#bfdbef"
+    "stroke": "none",
+    "fill": "#e3f3d3"
   },
   "nodes": [
     "e746918eb6f5b279",
@@ -18,9 +18,9 @@ const Node = {
     "9c073d0c8ad76f22",
     "3ab506568b6fbb8f"
   ],
-  "x": 404,
-  "y": 979,
-  "w": 232,
+  "x": 14,
+  "y": 79,
+  "w": 242,
   "h": 122
 }
 
