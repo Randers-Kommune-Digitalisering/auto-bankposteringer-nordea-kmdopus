@@ -207,7 +207,7 @@
                 </td>
                 
                 <td><router-link :to="'/retkonteringsregel/' + obj[keyMap['id'].key]">
-                        <button class="editButton orange" @click="router.replace({  path: '/konteringsregler',
+                        <button class="editButton orange" @click="router.replace({  path: route.path,
                                                                                     query: isSearching ? { returnfrom: obj[keyMap['id'].key], search: searchKeyword }
                                                                                                        : { returnfrom: obj[keyMap['id'].key] }})">Redigér</button>
                 </router-link></td>
