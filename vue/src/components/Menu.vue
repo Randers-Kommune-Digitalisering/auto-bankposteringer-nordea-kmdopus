@@ -21,6 +21,10 @@
         {
             "title": "Undtagelser",
             "url": "/konteringsregler/undtagelse",
+        },
+        {
+            "title": "Filer",
+            "url": "/filer",
         }
     ])
 
