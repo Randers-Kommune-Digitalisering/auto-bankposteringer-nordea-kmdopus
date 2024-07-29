@@ -59,7 +59,7 @@ const Node = {
       "t": "set",
       "p": "erpSystem",
       "pt": "global",
-      "to": "KMD",
+      "to": "KMD Opus",
       "tot": "str"
     }
   ],
