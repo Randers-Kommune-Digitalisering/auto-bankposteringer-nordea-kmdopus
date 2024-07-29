@@ -1,15 +1,15 @@
 const Node = {
-  "id": "094955872374a0cf",
+  "id": "8c836a1e78c80a94",
   "type": "change",
   "z": "VueExample",
   "name": "",
   "rules": [
     {
       "t": "set",
-      "p": "accountingRules",
-      "pt": "global",
-      "to": "$globalContext(\"accountingRules\")[$.RuleID != $$.uid]",
-      "tot": "jsonata"
+      "p": "payload",
+      "pt": "msg",
+      "to": "bankkonti",
+      "tot": "global"
     }
   ],
   "action": "",
@@ -17,11 +17,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 780,
-  "y": 420,
+  "x": 520,
+  "y": 1180,
   "wires": [
     [
-      "f77ebcca1da1b246"
+      "9d67ae4cb34d4325"
     ]
   ]
 }

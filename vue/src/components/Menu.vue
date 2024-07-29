@@ -25,6 +25,10 @@
         {
             "title": "Filer",
             "url": "/filer",
+        },
+        {
+            "title": "Stamdata",
+            "url": "/stamdata",
         }
     ])
 
