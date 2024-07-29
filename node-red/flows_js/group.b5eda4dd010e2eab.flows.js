@@ -1,8 +1,8 @@
 const Node = {
-  "id": "5656103d47c15804",
+  "id": "b5eda4dd010e2eab",
   "type": "group",
-  "z": "f91accb007eed9a2",
-  "name": "Anden ØS - file creation",
+  "z": "VueExample",
+  "name": "Filer interactions",
   "style": {
     "stroke": "none",
     "fill": "#e3f3d3",
@@ -11,12 +11,12 @@ const Node = {
     "color": "#000000"
   },
   "nodes": [
-    "614c83fac70b5ffa"
+    "b196cd19cebbc2c0"
   ],
-  "x": 214,
-  "y": 399,
-  "w": 212,
-  "h": 82
+  "x": 68,
+  "y": 613,
+  "w": 504,
+  "h": 174
 }
 
 module.exports = Node;

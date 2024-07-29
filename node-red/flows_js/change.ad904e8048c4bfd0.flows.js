@@ -1,20 +1,16 @@
 const Node = {
-  "id": "ab856a3522d6efc1",
+  "id": "ad904e8048c4bfd0",
   "type": "change",
   "z": "VueExample",
-  "name": "Sæt værdier",
+  "g": "b196cd19cebbc2c0",
+  "name": "",
   "rules": [
     {
       "t": "set",
-      "p": "uidFromObj",
+      "p": "encoding",
       "pt": "msg",
-      "to": "payload.id",
-      "tot": "msg"
-    },
-    {
-      "t": "delete",
-      "p": "payload.id",
-      "pt": "msg"
+      "to": "utf-8",
+      "tot": "str"
     }
   ],
   "action": "",
@@ -22,11 +18,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 384,
-  "y": 705,
+  "x": 425,
+  "y": 680,
   "wires": [
-    []
-  ]
+    [
+      "8b299b32044d3469"
+    ]
+  ],
+  "l": false
 }
 
 module.exports = Node;
