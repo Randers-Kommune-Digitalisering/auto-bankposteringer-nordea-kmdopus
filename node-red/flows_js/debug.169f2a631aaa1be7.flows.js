@@ -8,7 +8,7 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "$globalContext(\"konteringsregler\") ~> $exists() ?\t{\t    \"Message\": \"Rules imported from database\",\t    \"Sum of rules\": $globalContext(\"konteringsregler\") ~> $count(),\t    \"Timestamp\": $now()\t}",
+  "complete": "$globalContext(\"accountingRules\") ~> $exists() ?\t{\t    \"Message\": \"Rules imported from database\",\t    \"Sum of rules\": $globalContext(\"accountingRules\") ~> $count(),\t    \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
