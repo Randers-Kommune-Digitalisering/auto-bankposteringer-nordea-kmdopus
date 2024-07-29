@@ -10,8 +10,8 @@ const Node = {
   "height": 0,
   "content": "<h3 align=\"center\"> SØGEKRITERIER </h3>",
   "className": "",
-  "x": 1080,
-  "y": 720,
+  "x": 520,
+  "y": 1620,
   "wires": [
     []
   ]

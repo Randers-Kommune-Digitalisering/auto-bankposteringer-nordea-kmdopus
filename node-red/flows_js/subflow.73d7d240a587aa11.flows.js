@@ -46,7 +46,7 @@ const Node = {
   ],
   "icon": "font-awesome/fa-database",
   "status": {
-    "x": 630,
+    "x": 620,
     "y": 60,
     "wires": [
       {

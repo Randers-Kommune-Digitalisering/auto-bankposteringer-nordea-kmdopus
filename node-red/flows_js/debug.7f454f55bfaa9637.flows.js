@@ -3,7 +3,7 @@ const Node = {
   "type": "debug",
   "z": "9b998b2e60b3c784",
   "g": "de4b4d666626903f",
-  "name": "",
+  "name": "Stamdata manual write",
   "active": true,
   "tosidebar": true,
   "console": true,
@@ -12,8 +12,8 @@ const Node = {
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 465,
-  "y": 440,
+  "x": 385,
+  "y": 580,
   "wires": [],
   "l": false
 }

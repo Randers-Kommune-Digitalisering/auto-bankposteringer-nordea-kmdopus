@@ -6,8 +6,8 @@ const Node = {
   "name": "link out nordea auth status check",
   "mode": "return",
   "links": [],
-  "x": 155,
-  "y": 240,
+  "x": 165,
+  "y": 260,
   "wires": []
 }
 

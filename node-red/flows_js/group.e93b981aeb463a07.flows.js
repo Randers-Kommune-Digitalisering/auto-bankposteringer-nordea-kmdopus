@@ -2,7 +2,7 @@ const Node = {
   "id": "e93b981aeb463a07",
   "type": "group",
   "z": "9b998b2e60b3c784",
-  "name": "Delete accountingRules",
+  "name": "Delete accountingRules manually",
   "style": {
     "stroke": "none",
     "fill": "#bfdbef",
@@ -18,8 +18,8 @@ const Node = {
     "5a9e9c9fc615a477",
     "7c22dccd0bca9297"
   ],
-  "x": 724,
-  "y": 779,
+  "x": 474,
+  "y": 399,
   "w": 312,
   "h": 122
 }

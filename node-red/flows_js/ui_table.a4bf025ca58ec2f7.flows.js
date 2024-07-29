@@ -65,8 +65,8 @@ const Node = {
       "align": "start"
     }
   ],
-  "x": 210,
-  "y": 340,
+  "x": 450,
+  "y": 560,
   "wires": [
     [
       "13a6020dd6283bcf"

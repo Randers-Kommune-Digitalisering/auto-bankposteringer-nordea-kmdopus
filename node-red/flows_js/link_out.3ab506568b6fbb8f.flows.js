@@ -6,8 +6,8 @@ const Node = {
   "name": "link out update rule",
   "mode": "return",
   "links": [],
-  "x": 595,
-  "y": 1040,
+  "x": 215,
+  "y": 140,
   "wires": []
 }
 

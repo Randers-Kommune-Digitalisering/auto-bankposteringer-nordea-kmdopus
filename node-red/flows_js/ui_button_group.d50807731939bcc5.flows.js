@@ -44,8 +44,8 @@ const Node = {
   ],
   "topic": "Posteringstekst",
   "topicType": "str",
-  "x": 380,
-  "y": 740,
+  "x": 560,
+  "y": 1400,
   "wires": [
     [
       "29bd3b8c789ea527"

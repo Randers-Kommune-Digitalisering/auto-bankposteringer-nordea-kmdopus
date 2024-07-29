@@ -18,28 +18,20 @@ const Node = {
       "vt": "str"
     },
     {
-      "t": "eq",
-      "v": "PENDING",
-      "vt": "str"
-    },
-    {
       "t": "else"
     }
   ],
   "checkall": "false",
   "repair": false,
-  "outputs": 4,
-  "x": 105,
+  "outputs": 3,
+  "x": 115,
   "y": 480,
   "wires": [
     [
       "6bd20ea51ec743b1"
     ],
     [
-      "bd9639d398b2a961"
-    ],
-    [
-      "302deede66edf3b7"
+      "1f3af8f024b5a8bb"
     ],
     [
       "302deede66edf3b7"

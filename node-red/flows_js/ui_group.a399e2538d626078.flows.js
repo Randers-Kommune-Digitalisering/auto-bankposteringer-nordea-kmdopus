@@ -8,7 +8,7 @@ const Node = {
   "order": 3,
   "showTitle": false,
   "className": "",
-  "visible": "true",
+  "visible": "false",
   "disabled": "false"
 }
 

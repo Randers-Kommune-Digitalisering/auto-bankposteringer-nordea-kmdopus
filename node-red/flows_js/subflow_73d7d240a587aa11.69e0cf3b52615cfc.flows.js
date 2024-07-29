@@ -4,11 +4,11 @@ const Node = {
   "z": "9b998b2e60b3c784",
   "g": "db9c10bd096dcbc3",
   "name": "",
-  "x": 885,
-  "y": 540,
+  "x": 955,
+  "y": 100,
   "wires": [
     [
-      "cd6ac6d45fb46353"
+      "function-node"
     ],
     [
       "6494fe1e9136b873"

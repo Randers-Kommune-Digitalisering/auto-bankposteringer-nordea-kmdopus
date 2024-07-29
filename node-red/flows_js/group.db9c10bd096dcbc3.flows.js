@@ -12,20 +12,17 @@ const Node = {
     "color": "#000000"
   },
   "nodes": [
-    "02c9cee1d44337a8",
-    "c5aad48489925aca",
     "69e0cf3b52615cfc",
-    "cd6ac6d45fb46353",
     "6494fe1e9136b873",
     "53eed35d5539b46b",
-    "a0396dbbdc478984",
     "5686c60cf8e17e4c",
     "8e8af9cf9ab33940",
-    "change-node",
-    "function-node"
+    "function-node",
+    "c5aad48489925aca",
+    "06fad3ec25cba2f6"
   ],
-  "x": 744,
-  "y": 459,
+  "x": 814,
+  "y": 19,
   "w": 432,
   "h": 142
 }

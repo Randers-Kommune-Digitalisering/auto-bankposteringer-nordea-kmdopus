@@ -4,22 +4,12 @@ const Node = {
   "z": "37f6db37c66da295",
   "g": "fa9c0eb18149dc68",
   "name": "Step 1a",
-  "props": [
-    {
-      "p": "payload"
-    },
-    {
-      "p": "topic",
-      "vt": "str"
-    }
-  ],
+  "props": [],
   "repeat": "",
   "crontab": "",
   "once": false,
   "onceDelay": 0.1,
   "topic": "",
-  "payload": "",
-  "payloadType": "date",
   "x": 380,
   "y": 60,
   "wires": [

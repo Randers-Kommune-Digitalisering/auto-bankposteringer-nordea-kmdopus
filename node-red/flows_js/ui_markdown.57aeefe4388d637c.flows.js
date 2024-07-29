@@ -10,8 +10,8 @@ const Node = {
   "height": 0,
   "content": "Fællesoffentlig bankintegration (forkortet FOBI) er en løsning udviklet til danske kommuner, som har til formål at integrere bankposteringer i kommunernes økonomisystemer (forkortet ØS), så manuel bogføring reduceres mest muligt.\n\nHver bankdag henter FOBI den seneste bankdags bankposteringer, matcher dem op mod kommunens konteringsregler, påfører kontering og indlæser posteringerne i kommunens ØS.",
   "className": "",
-  "x": 120,
-  "y": 160,
+  "x": 380,
+  "y": 100,
   "wires": [
     []
   ]
