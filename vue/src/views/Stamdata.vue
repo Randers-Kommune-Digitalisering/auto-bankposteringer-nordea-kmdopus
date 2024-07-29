@@ -14,15 +14,15 @@
     const adminNavn = ref("")
     const adminAuthID = ref("")
     const adminEmail = ref("")
+    const erpSystem = ref("")
 
     fetch('/api/stamdata')
         .then(response => response = response.json())
         .then(value => {
-            console.log(value)
             adminNavn.value = value.admName
             adminAuthID.value = value.admID
             adminEmail.value = value.admEmail
-            console.log(adminNavn.value)
+            erpSystem.value = value.erpSystem
         })
 
     function updateStamdata()
@@ -42,7 +42,8 @@
             body: JSON.stringify({
                 "admName": adminNavn.value,
                 "admID": adminAuthID.value,
-                "admEmail": adminEmail.value
+                "admEmail": adminEmail.value,
+                "erpSystem": erpSystem.value
             })
         })
 
@@ -133,13 +134,19 @@
                 <tr>
                     <th class="capitalize">Navn</th>
                     <th class="capitalize">Authenticator ID</th>
-                    <th class="capitalize">E-mail</th>                   
+                    <th class="capitalize">E-mail</th>
+                    <th class="capitalize">Økonomisystem</th>
                 </tr>
             </thead>
             <tr>
                 <td><input v-model="adminNavn"></input></td>
                 <td><input v-model="adminAuthID"></input></td>
                 <td><input v-model="adminEmail"></input></td>
+                <td><select v-model="erpSystem">
+                    <option>KMD Opus</option>
+                    <option>Fujitsu Prisme</option>
+                    <option>ØS Indsigt</option>
+                </select></td>
             </tr>
         </table>
         <br />
@@ -174,8 +181,6 @@
         <button @click="addBankkonto()" class="blue">Tilføj</button>
         <button @click="updateBankkonti()" :disabled="isUpdating2">{{ isUpdating2 ? 'Gemmer...' : hasUpdated2 ? 'Ændringer gemt' : 'Gem ændringer' }}</button>
 
-
-        {{ bankkonti }}
     </Content>
 
 </template>

@@ -27,9 +27,16 @@ const Node = {
     },
     {
       "t": "set",
+      "p": "erpSystem",
+      "pt": "msg",
+      "to": "erpSystem",
+      "tot": "global"
+    },
+    {
+      "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "{ \"admName\": admName, \"admEmail\": admEmail, \"admID\": admID }",
+      "to": "{\t   \"admName\": admName,\t   \"admEmail\": admEmail,\t   \"admID\": admID,\t   \"erpSystem\": erpSystem\t}",
       "tot": "jsonata"
     }
   ],
