@@ -18,8 +18,8 @@ const Node = {
   "sendOnBlur": true,
   "sendOnEnter": true,
   "className": "",
-  "x": 1080,
-  "y": 880,
+  "x": 520,
+  "y": 1780,
   "wires": [
     [
       "686f59a287d0544a"

@@ -10,8 +10,8 @@ const Node = {
   "height": 0,
   "content": "<h3 align=\"center\"> ADMINISTRATOR </h3>",
   "className": "",
-  "x": 340,
-  "y": 240,
+  "x": 360,
+  "y": 460,
   "wires": [
     []
   ]

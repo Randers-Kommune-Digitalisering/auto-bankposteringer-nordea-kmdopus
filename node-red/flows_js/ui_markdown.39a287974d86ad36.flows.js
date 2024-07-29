@@ -10,8 +10,8 @@ const Node = {
   "height": 0,
   "content": "<h1 align=\"center\"> <b> STAMDATA </b> </h1>",
   "className": "",
-  "x": 330,
-  "y": 220,
+  "x": 350,
+  "y": 440,
   "wires": [
     []
   ]

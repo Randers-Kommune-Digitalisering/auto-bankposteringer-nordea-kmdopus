@@ -15,8 +15,8 @@ const Node = {
   "raw": false,
   "className": "",
   "name": "Invalid input",
-  "x": 675,
-  "y": 820,
+  "x": 805,
+  "y": 1500,
   "wires": [
     []
   ],

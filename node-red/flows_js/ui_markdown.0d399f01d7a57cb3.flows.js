@@ -10,8 +10,8 @@ const Node = {
   "height": 0,
   "content": "<h1 align=\"center\"> <b> FÆLLESOFFENTLIG BANKINTEGRATION </b> </h1>",
   "className": "",
-  "x": 90,
-  "y": 120,
+  "x": 350,
+  "y": 60,
   "wires": [
     []
   ]

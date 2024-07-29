@@ -5,8 +5,8 @@ const Node = {
   "g": "6214c4bc07e80d53",
   "name": "link in update rule",
   "links": [],
-  "x": 445,
-  "y": 1040,
+  "x": 55,
+  "y": 140,
   "wires": [
     [
       "e746918eb6f5b279"

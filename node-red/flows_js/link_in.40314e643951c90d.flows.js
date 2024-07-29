@@ -5,10 +5,11 @@ const Node = {
   "g": "eda37766d19f5c20",
   "name": "link in deactivate label",
   "links": [
-    "fd2050514e5ad385"
+    "fd2050514e5ad385",
+    "21f0a906a7b7eade"
   ],
-  "x": 805,
-  "y": 500,
+  "x": 915,
+  "y": 300,
   "wires": [
     [
       "7984e9c043157ab6"

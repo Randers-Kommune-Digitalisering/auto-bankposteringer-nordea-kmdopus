@@ -40,7 +40,7 @@ const Node = {
   "topic": "Operator",
   "topicType": "str",
   "className": "",
-  "x": 1230,
+  "x": 1530,
   "y": 140,
   "wires": [
     [

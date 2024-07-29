@@ -10,8 +10,8 @@ const Node = {
   "height": 0,
   "content": "<h3 align=\"center\"> SÅDAN BRUGER DU FOBI </h3>",
   "className": "",
-  "x": 100,
-  "y": 220,
+  "x": 360,
+  "y": 160,
   "wires": [
     []
   ]

@@ -8,7 +8,7 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "$globalContext(\"accountingRules\")[id = $$.uid]",
+      "to": "$globalContext(\"accountingRules\")[RuleID = $$.uid]",
       "tot": "jsonata",
       "dc": true
     }

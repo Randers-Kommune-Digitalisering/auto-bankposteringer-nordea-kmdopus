@@ -62,6 +62,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       const isActive = !hasHash;
       const Active = isActive;
   
+      const amount1 = Beløb1 != null ? parseFloat(Beløb1.replace(',', '.')) : null;
+      const amount2 = Beløb2 != null ? parseFloat(Beløb2.replace(',', '.')) : null;
+  
       const valueOperatorValue = operatorMapping[beløb_regel] || null;
       const Operator = valueOperatorValue;
   
@@ -77,8 +80,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
           Advisliste: Advisliste || null,
           Afsender: Afsender || null,
           Posteringstype: Posteringstype || null,
-          Beløb1: Beløb1 || null,
-          Beløb2: Beløb2 || null,
+          Beløb1: amount1,
+          Beløb2: amount2,
           Operator,
           Posteringstekst: Posteringstekst || null,
           Artskonto: Artskonto || null,

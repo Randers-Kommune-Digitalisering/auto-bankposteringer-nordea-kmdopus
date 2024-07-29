@@ -2,6 +2,7 @@ const Node = {
   "id": "527a8d231af47b40",
   "type": "function",
   "z": "74de194f4f0868a4",
+  "g": "eda37766d19f5c20",
   "name": "Amount operator ui update",
   "func": "",
   "outputs": 1,
@@ -9,8 +10,8 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 1455,
-  "y": 160,
+  "x": 1725,
+  "y": 140,
   "wires": [
     [
       "db75df9f1002c0e6"
