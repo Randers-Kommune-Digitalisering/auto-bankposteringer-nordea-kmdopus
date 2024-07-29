@@ -6,9 +6,9 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "konteringsregler",
+      "p": "accountingRules",
       "pt": "global",
-      "to": "$globalContext(\"konteringsregler\") ~> | $ |\t(\t    $.id = $$.uid ? $$.payload\t) |",
+      "to": "$globalContext(\"accountingRules\") ~> | $ |\t(\t    $.RuleID = $$.uid ? $$.payload\t) |",
       "tot": "jsonata"
     }
   ],
@@ -21,7 +21,7 @@ const Node = {
   "y": 380,
   "wires": [
     [
-      "8bef4fda34efd8ed"
+      "917ce267e21a448a"
     ]
   ]
 }

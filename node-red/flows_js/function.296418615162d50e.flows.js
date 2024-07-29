@@ -31,9 +31,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   };
   
   msg.payload.forEach(item => {
-      item.data = JSON.parse(item.data);
-      convertToBoolean(item.data, ["Active", "Exception"]);
-      item.data.id = item.id;  // Restore the original ID
+      //item.data = JSON.parse(item.data);
+      convertToBoolean(item, ["Active", "Exception"]);
+      //item.data.id = item.id;  // Restore the original ID
   });
   
   return msg;

@@ -6,9 +6,9 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "konteringsregler",
+      "p": "accountingRules",
       "pt": "global",
-      "to": "$globalContext(\"konteringsregler\")[$.id != $$.uid]",
+      "to": "$globalContext(\"accountingRules\")[$.id != $$.uid]",
       "tot": "jsonata"
     }
   ],
