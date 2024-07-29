@@ -57,8 +57,7 @@
         hasUpdated.value = false
         isUpdating.value = true
 
-        const url = isNewRule.value ? '/api/konteringsregler' : '/api/konteringsregler/' + konteringsregel.value.id
-        console.log(url)
+        const url = isNewRule.value ? '/api/konteringsregler' : '/api/konteringsregler/' + konteringsregel.value.RuleID
         
         fetch(url,
         {
@@ -85,11 +84,11 @@
                 isNewRule.value = false
                 
                 // Set ID's from response
-                index.value = value.insertId
-                konteringsregel.value.id = value.insertId
-                konteringsregel.value[keyMap.id.key] = value.ruleId
+                index.value = value.RuleID
+                konteringsregel.value.RuleID = value.RuleID
+                konteringsregel.value[keyMap.id.key] = value.RuleID
 
-                router.push('/retkonteringsregel/' + value.insertId)
+                router.push('/retkonteringsregel/' + value.RuleID)
             }
         })
         .finally(() => {
@@ -111,7 +110,7 @@
         {
             isDeleting.value = true
 
-            fetch('/api/konteringsregler/' + konteringsregel.value.id,
+            fetch('/api/konteringsregler/' + konteringsregel.value.RuleID,
             {
                 method: 'DELETE',
                 headers: {

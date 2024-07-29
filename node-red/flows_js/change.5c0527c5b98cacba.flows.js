@@ -6,7 +6,7 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "payload.ruleId",
+      "p": "payload.RuleID",
       "pt": "msg",
       "to": "ruleId",
       "tot": "msg"
@@ -21,7 +21,8 @@ const Node = {
   "y": 520,
   "wires": [
     [
-      "5bf6e3cac11944d7"
+      "5bf6e3cac11944d7",
+      "db805d9bd7bef612"
     ]
   ],
   "l": false

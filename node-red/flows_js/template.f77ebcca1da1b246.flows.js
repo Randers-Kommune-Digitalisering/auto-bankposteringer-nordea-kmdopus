@@ -20,9 +20,9 @@ const Node = {
 
 Node.template = `
 DELETE FROM
-    konteringsregler
+    accountingRules
 WHERE
-    id = {{uid}}
+    RuleID = {{uid}}
 `
 
 module.exports = Node;

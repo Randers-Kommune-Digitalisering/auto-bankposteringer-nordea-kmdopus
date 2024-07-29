@@ -27,7 +27,7 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, csv) {
-  const statusAccounts = global.get("statusAccounts");
+  const statusAccounts = global.get("statusAccounts") ?? [];
   const operatorMapping = {
       "Indeholder": "contains",
       "Starter med": ".startsWith",
