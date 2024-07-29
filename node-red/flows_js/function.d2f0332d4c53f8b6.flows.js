@@ -123,8 +123,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       for (let rule of sortedRules) {      
           let sumOfParametersMatched = 0;
           let psp = rule.PSP ? rule.PSP : '';
-          let ruleAmount1 = rule.Beløb1 ? parseFloat(rule.Beløb1.replace(',', '.')) : null;
-          let ruleAmount2 = rule.Beløb2 ? parseFloat(rule.Beløb2.replace(',', '.')) : null;
+          let ruleAmount1 = rule.Beløb1; // ? parseFloat(rule.Beløb1.replace(',', '.')) : null;
+          let ruleAmount2 = rule.Beløb2; // ? parseFloat(rule.Beløb2.replace(',', '.')) : null;
   
           if (completeMatchBool) {
               continue
