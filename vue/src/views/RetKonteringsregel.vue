@@ -13,17 +13,55 @@
     const route = useRoute()
 
     const index = ref(route.params.id)
-    const isNewRule = ref(index.value == "new")
+    const isNewRule = ref(index.value == "nyaktiv" || index.value == "nyinaktiv" || index.value == "nyundtagelse")
     
     const konteringsregel = ref(isNewRule.value ? JSON.parse(JSON.stringify(newItem)) : null)
+
+    if(isNewRule)
+    {   
+        if(index.value == "nyinaktiv")
+            konteringsregel.value.Active = false
+        else if(index.value == "nyundtagelse")
+            konteringsregel.value.Exception = true
+    }
     
     // Fetch regel
     if(!isNewRule.value)
         fetch('/api/konteringsregler/' + index.value)
             .then(response => response = response.json())
             .then(value => konteringsregel.value = value)
+            .then(value => console.log(value))
 
-    const keyMap = {
+    const keyMap_rule = {
+        "id": {
+            "key": "RuleID",
+            "hidden": true
+        },
+        "Advis": {
+            "key": "Advisliste"
+        },
+        "Reference": {
+            "key": "Reference"
+        },
+        "Afsender": {
+            "key": "Afsender"
+        }, 
+        "Artskonto": {
+            "key": "Artskonto"
+        },
+        "Posteringstype": {
+            "key": "Posteringstype"
+        },
+        "Posteringstekst": {
+            "key": "Posteringstekst",
+            "hidden": true
+        },
+        "Notat": {
+            "key": "Notat"
+        }
+    }
+
+    const keyMap_exception = {
         "id": {
             "key": "RuleID",
             "hidden": true
@@ -39,9 +77,10 @@
         }, 
         "Artskonto": {
             "key": "Artskonto",
+            "hidden": true
         },
         "Posteringstype": {
-            "key": "Posteringstype",
+            "key": "Posteringstype"
         },
         "Posteringstekst": {
             "key": "Posteringstekst",
@@ -51,14 +90,15 @@
             "key": "Notat"
         }
     }
+
+    const keyMap = index.value == 'nyundtagelse' ? keyMap_exception : keyMap_rule
     
     function updateRule()
     {
         hasUpdated.value = false
         isUpdating.value = true
 
-        const url = isNewRule.value ? '/api/konteringsregler' : '/api/konteringsregler/' + konteringsregel.value.id
-        console.log(url)
+        const url = isNewRule.value ? '/api/konteringsregler' : '/api/konteringsregler/' + konteringsregel.value.RuleID
         
         fetch(url,
         {
@@ -85,11 +125,11 @@
                 isNewRule.value = false
                 
                 // Set ID's from response
-                index.value = value.insertId
-                konteringsregel.value.id = value.insertId
-                konteringsregel.value[keyMap.id.key] = value.ruleId
+                index.value = value.RuleID
+                konteringsregel.value.RuleID = value.RuleID
+                konteringsregel.value[keyMap.id.key] = value.RuleID
 
-                router.push('/retkonteringsregel/' + value.insertId)
+                router.push('/retkonteringsregel/' + value.RuleID)
             }
         })
         .finally(() => {
@@ -111,7 +151,7 @@
         {
             isDeleting.value = true
 
-            fetch('/api/konteringsregler/' + konteringsregel.value.id,
+            fetch('/api/konteringsregler/' + konteringsregel.value.RuleID,
             {
                 method: 'DELETE',
                 headers: {

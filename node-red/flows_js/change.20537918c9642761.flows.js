@@ -6,17 +6,9 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "newrule.id",
-      "pt": "msg",
-      "to": "payload.insertId",
-      "tot": "msg",
-      "dc": true
-    },
-    {
-      "t": "set",
-      "p": "konteringsregler",
+      "p": "accountingRules",
       "pt": "global",
-      "to": "$globalContext(\"konteringsregler\") ~> $append(newrule)",
+      "to": "$globalContext(\"accountingRules\") ~> $append(newrule)",
       "tot": "jsonata"
     }
   ],
@@ -25,7 +17,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 1120,
+  "x": 1060,
   "y": 520,
   "wires": [
     [
