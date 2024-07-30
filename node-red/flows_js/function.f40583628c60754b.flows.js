@@ -22,10 +22,10 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  const bankAccountNames = global.get("bankAccountNames");
-  const bankAccounts = global.get("bankAccounts");
-  const intermediateAccounts = global.get("intermediateAccounts");
-  const statusAccounts = global.get("statusAccounts");
+  const bankAccountNames = global.get("bankAccountNames") ?? [];
+  const bankAccounts = global.get("bankAccounts") ?? [];
+  const intermediateAccounts = global.get("intermediateAccounts") ?? [];
+  const statusAccounts = global.get("statusAccounts") ?? [];
   
   const length = Math.min(bankAccountNames.length, bankAccounts.length, intermediateAccounts.length, statusAccounts.length);
   

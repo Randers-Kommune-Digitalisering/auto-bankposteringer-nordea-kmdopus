@@ -4,15 +4,15 @@ const Node = {
   "z": "VueExample",
   "g": "5f30159012b7773a",
   "name": "",
-  "url": "/konteringsregler",
+  "url": "/listkonteringsregler/:type",
   "method": "get",
   "upload": false,
   "swaggerDoc": "",
-  "x": 345,
-  "y": 80,
+  "x": 105,
+  "y": 200,
   "wires": [
     [
-      "5bd4322fa1125f35"
+      "eb7c6c5de087e87c"
     ]
   ],
   "l": false

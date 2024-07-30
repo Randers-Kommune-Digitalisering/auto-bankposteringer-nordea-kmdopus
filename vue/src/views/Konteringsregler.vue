@@ -1,6 +1,6 @@
 
 <script setup>
-    import { ref } from 'vue'
+    import { ref, watch } from 'vue'
     import { useRouter, useRoute } from 'vue-router'
     
     import Content from '@/components/Content.vue'
@@ -11,6 +11,8 @@
     
     const router = useRouter()
     const route = useRoute()
+
+    const type = ref(route.params.type ?? null)
 
     const searchParam = route.query.search
     const returnFromParam = route.query.returnfrom
@@ -24,11 +26,26 @@
     console.log("returnFromParam: " + returnFromParam)
     
     // Fetch regler
-    fetch('/api/konteringsregler')
-        .then(response => response = response.json())
-        .then(value => allKonteringsregler.value = value)
-        .then(value => konteringsregler.value = value)
-        .then(value => handleQueryParams())
+    function fetchRules()
+    {
+        console.log("Fetching rules with type " + type.value)
+
+        fetch('/api/listkonteringsregler/' + (type.value == null ? "" : type.value))
+            .then(response => response = response.json())
+            .then(value => allKonteringsregler.value = value)
+            .then(value => konteringsregler.value = value)
+            .then(value => handleQueryParams())
+    }
+
+    fetchRules()
+
+    // Watch and update rules if parameter changes
+    watch(() => route.params.type, (value) =>
+    {
+        type.value = value
+        fetchRules()
+    })
+
 
     const keyMap = {
         "id": {
@@ -106,7 +123,7 @@
             konteringsregler.value = searchList(allKonteringsregler.value, keyword)
 
             // Use vue-router to update the URL with search keyword
-            router.replace({ path: '/konteringsregler', query: isReturning ? { returnfrom: route.query.returnfrom ?? returningFrom.value, search: keyword } : { search: keyword } })
+            router.replace({ path: route.path, query: isReturning ? { returnfrom: route.query.returnfrom ?? returningFrom.value, search: keyword } : { search: keyword } })
         }
     }
 
@@ -119,9 +136,7 @@
             return list
         return list.filter(x => (x[keyMap.Reference.key] != null && x[keyMap.Reference.key].toLowerCase().includes(keyword)) || /* Reference */
                                 (x[keyMap.Afsender.key] != null && x[keyMap.Afsender.key].toLowerCase().includes(keyword)) || /* Afsender */
-                                (x[keyMap.Artskonto.key] != null && x[keyMap.Artskonto.key].toLowerCase().includes(keyword)) || /* Artskonto */
-                                (x[keyMap.Posteringstype.key] != null && x[keyMap.Posteringstype.key].toLowerCase().includes(keyword)) || /* Posteringstype */
-                                (x[keyMap.Posteringstekst.key] != null && x[keyMap.Posteringstekst.key].toLowerCase().includes(keyword)) || /* Posteringstekst */
+                                (x[keyMap.Advis.key] != null && x[keyMap.Advis.key].toLowerCase().includes(keyword)) || /* Advis */
                                 (x[keyMap.Notat.key] != null && x[keyMap.Notat.key].toLowerCase().includes(keyword)) || /* Notat */
                                 (x[keyMap.id.key] != null && x[keyMap.id.key] == keyword) ) /* RuleID */
     }
@@ -161,8 +176,8 @@
             </div>
 
             <div class="float-right searchButtonDiv">
-                <router-link :to="'/retkonteringsregel/new'">
-                    <button @click="router.replace({  path: '/konteringsregler' })">Tilføj regel</button>
+                <router-link v-if="type != null" :to="'/retkonteringsregel/ny' + type">
+                    <button @click="router.replace({  path: '/konteringsregler' })">{{ type == 'undtagelse' ? 'Tilføj undtagelse' : 'Tilføj regel'}}</button>
                 </router-link>
             </div>
 
@@ -192,7 +207,7 @@
                 </td>
                 
                 <td><router-link :to="'/retkonteringsregel/' + obj[keyMap['id'].key]">
-                        <button class="editButton orange" @click="router.replace({  path: '/konteringsregler',
+                        <button class="editButton orange" @click="router.replace({  path: route.path,
                                                                                     query: isSearching ? { returnfrom: obj[keyMap['id'].key], search: searchKeyword }
                                                                                                        : { returnfrom: obj[keyMap['id'].key] }})">Redigér</button>
                 </router-link></td>
