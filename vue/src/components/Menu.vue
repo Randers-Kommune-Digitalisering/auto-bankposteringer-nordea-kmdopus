@@ -4,11 +4,19 @@
     defineExpose( { setAlert } )
 
     // Set menu items
-
     const menuItems = ref([
         {
             "title": "Start",
             "url": "/"
+        },
+        {
+            "title": "Stamdata",
+            "url": "/stamdata",
+        },
+        {
+            "title": "Filer",
+            "url": "/filer",
+            "hidden": false,
         },
         {
             "title": "Aktive regler",
@@ -21,24 +29,26 @@
         {
             "title": "Undtagelser",
             "url": "/konteringsregler/undtagelse",
-        },
-        {
-            "title": "Filer",
-            "url": "/filer",
-        },
-        {
-            "title": "Stamdata",
-            "url": "/stamdata",
         }
     ])
 
     // Set selected = true for landing page (URL)
-
     const landingPageIndex = menuItems.value.findIndex(x => x.url == new URL(location.href).pathname)
+
+    const integrationBool = ref(false)
+
+    fetch('/api/stamdata')
+        .then(response => response.json())
+        .then(value => {
+            integrationBool.value = value.integrationBool
+
+            if (integrationBool.value) {
+                menuItems.value[2].hidden = true
+            }
+        })
 
     if(landingPageIndex !== -1)
         menuItems.value[ landingPageIndex ].selected = true
-
 
     // Function to visually update selected item
 
@@ -77,7 +87,7 @@
 
         <div class="randers-logo"></div>
         
-        <router-link v-for="item in menuItems" :to="item.url" :class="item.selected ? 'selected' : ''" @click="select(item)">
+        <router-link v-for="item in menuItems.filter(value => !value.hidden)" :to="item.url" :class="item.selected ? 'selected' : ''" @click="select(item)">
             <span v-if="item.alert" class="alert">{{item.alert}}</span>
             <span>{{item.title}}</span>
         </router-link>

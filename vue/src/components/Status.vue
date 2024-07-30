@@ -17,9 +17,7 @@ fetch('/api/status')
 
 </script>
 
-<template>
-    Herunder kan du se om din Node-RED backend kører, og hvorvidt du bruger Express server. Vær opmærksom på at Express serveren ikke kører hvis du bruger Vite i udviklingsmiljø.
-    
+<template>    
     <div>
         <span>Node-RED</span>:
         <span v-if="statusNodered" class="green heavy">{{statusNodered}}</span>

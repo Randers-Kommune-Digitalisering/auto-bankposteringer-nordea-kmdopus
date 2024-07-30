@@ -34,9 +34,16 @@ const Node = {
     },
     {
       "t": "set",
+      "p": "integrationBool",
+      "pt": "global",
+      "to": "payload.integrationBool",
+      "tot": "msg"
+    },
+    {
+      "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "{\t   \"admName\": admName,\t   \"admEmail\": admEmail,\t   \"admID\": admID,\t   \"erpSystem\": erpSystem\t}",
+      "to": "{\t   \"admName\": admName,\t   \"admEmail\": admEmail,\t   \"admID\": admID,\t   \"erpSystem\": erpSystem,\t   \"integrationBool\": integrationBool\t}",
       "tot": "jsonata"
     }
   ],
