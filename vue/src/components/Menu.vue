@@ -11,8 +11,24 @@
             "url": "/"
         },
         {
-            "title": "Konteringsregler",
-            "url": "/konteringsregler",
+            "title": "Aktive regler",
+            "url": "/konteringsregler/aktiv",
+        },
+        {
+            "title": "Inaktive regler",
+            "url": "/konteringsregler/inaktiv",
+        },
+        {
+            "title": "Undtagelser",
+            "url": "/konteringsregler/undtagelse",
+        },
+        {
+            "title": "Filer",
+            "url": "/filer",
+        },
+        {
+            "title": "Stamdata",
+            "url": "/stamdata",
         }
     ])
 
