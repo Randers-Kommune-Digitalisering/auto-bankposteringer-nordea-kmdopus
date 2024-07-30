@@ -3,6 +3,10 @@
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
 
+    const refreshPage = () => {
+        location.reload(); // Reloads the current page
+    };
+
     const isUpdating = ref(false)
     const hasUpdated = ref(false)
 
@@ -15,6 +19,7 @@
     const adminAuthID = ref("")
     const adminEmail = ref("")
     const erpSystem = ref("")
+    const integrationBool = ref(false)
 
     fetch('/api/stamdata')
         .then(response => response = response.json())
@@ -23,6 +28,7 @@
             adminAuthID.value = value.admID
             adminEmail.value = value.admEmail
             erpSystem.value = value.erpSystem
+            integrationBool.value = value.integrationBool
         })
 
     function updateStamdata()
@@ -43,7 +49,8 @@
                 "admName": adminNavn.value,
                 "admID": adminAuthID.value,
                 "admEmail": adminEmail.value,
-                "erpSystem": erpSystem.value
+                "erpSystem": erpSystem.value,
+                "integrationBool": integrationBool.value 
             })
         })
 
@@ -136,6 +143,7 @@
                     <th class="capitalize">Authenticator ID</th>
                     <th class="capitalize">E-mail</th>
                     <th class="capitalize">Økonomisystem</th>
+                    <th class="capitalize">Integration</th>
                 </tr>
             </thead>
             <tr>
@@ -147,10 +155,11 @@
                     <option>Fujitsu Prisme</option>
                     <option>ØS Indsigt</option>
                 </select></td>
+                <td><input type="checkbox" v-model="integrationBool"></td>
             </tr>
         </table>
         <br />
-        <button @click="updateStamdata()" :disabled="isUpdating">{{ isUpdating ? 'Gemmer...' : hasUpdated ? 'Ændringer gemt' : 'Gem ændringer' }}</button>
+        <button @click="updateStamdata(); refreshPage()" :disabled="isUpdating">{{ isUpdating ? 'Gemmer...' : hasUpdated ? 'Ændringer gemt' : 'Gem ændringer' }}</button>
     </Content>
 
     <Content>
