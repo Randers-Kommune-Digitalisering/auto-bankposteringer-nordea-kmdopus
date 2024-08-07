@@ -5,6 +5,7 @@
     
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
+    import IconEdit from '@/components/icons/IconEdit.vue'
 
     const allKonteringsregler = ref(null)
     const konteringsregler = ref(null)
@@ -48,9 +49,8 @@
 
 
     const keyMap = {
-        "id": {
-            "key": "RuleID",
-            "hidden": true
+        "ID": {
+            "key": "RuleID"
         },
         "Advis": {
             "key": "Advisliste"
@@ -61,12 +61,17 @@
         "Afsender": {
             "key": "Afsender"
         }, 
+        "Posteringstype": {
+            "key": "Posteringstype"
+        },
+        "Beløb 1": {
+            "key": "Beløb1"
+        },
+        "Beløb 2": {
+            "key": "Beløb2"
+        },
         "Artskonto": {
             "key": "Artskonto",
-            "hidden": true
-        },
-        "Posteringstype": {
-            "key": "Posteringstype",
             "hidden": true
         },
         "Posteringstekst": {
@@ -77,10 +82,6 @@
             "key": "Notat"
         }
     }
-
-    /* Example data format
-        {"0":{"name":"Reference","value":"Rekvireret udb"},"1":{"name":"Advisliste"},"2":{"name":"Afsender"},"3":{"name":"Posteringstype","value":"Cap"},"4":{"name":"End-to-end-reference"},"5":{"name":"Beløb","operator":null},"6":{"Posteringstekst":"Tekst fra bank","Artskonto":"12340000","Notat":"Udbetaling"},"7":{"active":true},"8":{"ruleId":54},"9":{"exception":true}}
-    */
     
     function handleQueryParams()
     {        
@@ -137,8 +138,9 @@
         return list.filter(x => (x[keyMap.Reference.key] != null && x[keyMap.Reference.key].toLowerCase().includes(keyword)) || /* Reference */
                                 (x[keyMap.Afsender.key] != null && x[keyMap.Afsender.key].toLowerCase().includes(keyword)) || /* Afsender */
                                 (x[keyMap.Advis.key] != null && x[keyMap.Advis.key].toLowerCase().includes(keyword)) || /* Advis */
+                                (x[keyMap.Posteringstype.key] != null && x[keyMap.Posteringstype.key].toLowerCase().includes(keyword)) || /* Posteringstype */
                                 (x[keyMap.Notat.key] != null && x[keyMap.Notat.key].toLowerCase().includes(keyword)) || /* Notat */
-                                (x[keyMap.id.key] != null && x[keyMap.id.key] == keyword) ) /* RuleID */
+                                (x[keyMap.ID.key] != null && x[keyMap.ID.key] == keyword) ) /* RuleID */
     }
 
     function scrollTo(id)
@@ -169,19 +171,22 @@
         </template>
         <template #heading>
             Aktuelle konteringsregler test: {{returningFrom}}
-            
+        
+        </template>
+
+        <fieldset>           
             <div class="float-right searchButtonDiv">
                 <button :class="isSearching ? 'gray' : ''" @click="toggleSearch()">
                     {{ isSearching ? 'Luk søgning' : 'Søg i regler'}}</button>
             </div>
 
-            <div class="float-right searchButtonDiv">
+            <div class="float-left addButton">
                 <router-link v-if="type != null" :to="'/retkonteringsregel/ny' + type">
                     <button @click="router.replace({  path: '/konteringsregler' })">{{ type == 'undtagelse' ? 'Tilføj undtagelse' : 'Tilføj regel'}}</button>
                 </router-link>
             </div>
 
-        </template>
+        </fieldset>
         
         <span class="paragraph">
             Herunder kan de aktuelle konteringsregler ses, rettes og slettes. Vær opmærksom på at rettelser overskrives hvis der laves ændringer i <code>konteringsregler.json</code>.
@@ -201,20 +206,23 @@
                     <th></th>
                 </tr>
             </thead>
-            <tr v-if="konteringsregler != null" v-for="(obj, index) in konteringsregler" :id="obj[keyMap['id'].key]" :class="returningFrom == obj[keyMap['id'].key] ? 'highlight' : ''">
+            <tr v-if="konteringsregler != null" v-for="(obj, index) in konteringsregler" :id="obj[keyMap['ID'].key]" :class="returningFrom == obj[keyMap['ID'].key] ? 'highlight' : ''">
                 <td v-for="(value, key) in keyMap" :class="(value.hidden ? 'hidden ' : '') + (key)">
                     {{ obj[value.key] }}
                 </td>
                 
-                <td><router-link :to="'/retkonteringsregel/' + obj[keyMap['id'].key]">
-                        <button class="editButton orange" @click="router.replace({  path: route.path,
-                                                                                    query: isSearching ? { returnfrom: obj[keyMap['id'].key], search: searchKeyword }
-                                                                                                       : { returnfrom: obj[keyMap['id'].key] }})">Redigér</button>
+                <td><router-link :to="'/retkonteringsregel/' + obj[keyMap['ID'].key]">
+                    <button class="editButton orange" @click="router.replace({ 
+                        path: route.path,
+                        query: isSearching ? { returnfrom: obj[keyMap['ID'].key], search: searchKeyword }
+                                            : { returnfrom: obj[keyMap['ID'].key] }})">
+                        <IconEdit />
+                    </button>
                 </router-link></td>
                     
             </tr>
             <tr v-else>
-                <td :colspan="(Object.values(keyMap).filter(value => !value.hidden).length)+1">Indlæser ....</td>
+                <td :colspan="(Object.values(keyMap).filter(value => !value.hidden).length)+1">Indlæser...</td>
             </tr>
         </table>
     </Content>
@@ -231,25 +239,18 @@
     .searchButtonDiv 
     {
         padding-left: 0.55rem;
-        padding-right: 0.55rem;
-        transform: translateY(-0.8rem);
-    }
-    .editButton, 
-    .addButton
-    {
-        font-size: 0.6em;
-        font-weight: 500;
     }
     .addButton
     {
-        padding-left: 0.55rem;
         padding-right: 0.55rem;
     }
     .editButton
     {
-        
-        padding-left: 0.5rem;
-        padding-right: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-left: 0.9rem;
+        padding-right: 0.9rem;
     }
     .notat
     {

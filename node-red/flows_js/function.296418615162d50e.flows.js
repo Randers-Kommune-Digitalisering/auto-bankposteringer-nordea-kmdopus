@@ -10,7 +10,7 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 285,
+  "x": 1005,
   "y": 440,
   "wires": [
     [
@@ -31,9 +31,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   };
   
   msg.payload.forEach(item => {
-      //item.data = JSON.parse(item.data);
       convertToBoolean(item, ["Active", "Exception"]);
-      //item.data.id = item.id;  // Restore the original ID
   });
   
   return msg;

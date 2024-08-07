@@ -6,12 +6,12 @@ const Node = {
   "name": "link out manual initiation",
   "mode": "link",
   "links": [
-    "9eb4bb9b2e6d9f01",
-    "cec3771a20e48fe4",
+    "62b223a33e173ee8",
+    "860b591a69355eef",
     "e27b8bf4ee870ff8"
   ],
-  "x": 185,
-  "y": 580,
+  "x": 135,
+  "y": 240,
   "wires": []
 }
 
