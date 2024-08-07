@@ -198,6 +198,14 @@
                 <button @click="deleteRule" class="red float-right" :disabled="isDeleting">{{ awaitingDeleteConfirmation ? 'Bekræft sletning' : 'Slet regel' }}</button>
 
                 <div class="flexbox">
+                    <div>
+                        <input type="checkbox" v-model="konteringsregel.Active" id="isActive" />
+                        <label for="isActive" class="capitalize">Aktiv</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" v-model="konteringsregel.Exception" id="isException" />
+                        <label for="isException" class="capitalize">Undtagelse</label>
+                    </div>
                     <div v-for="group in sortedGroups" :key="group.name">
                         <h3>{{ group.name }}</h3>
                         <div v-for="(value, key) in group.fields" :key="key" :class="value.hidden ? 'hidden' : ''">
