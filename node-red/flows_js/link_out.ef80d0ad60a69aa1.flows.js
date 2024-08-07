@@ -6,7 +6,7 @@ const Node = {
   "name": "link out reset ruleid",
   "mode": "return",
   "links": [],
-  "x": 745,
+  "x": 705,
   "y": 80,
   "wires": []
 }

@@ -5,10 +5,10 @@ const Node = {
   "g": "08894d83b67599fd",
   "name": "link in manual read rules to env",
   "links": [
-    "98196e48085d00a4"
+    "3e94bd471dd85910"
   ],
-  "x": 245,
-  "y": 200,
+  "x": 235,
+  "y": 80,
   "wires": [
     [
       "166084d00d8028f7"

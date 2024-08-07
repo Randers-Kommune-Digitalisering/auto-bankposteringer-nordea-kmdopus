@@ -3,34 +3,40 @@
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
 
+    const refreshPage = () => {
+        location.reload(); // Reloads the current page
+    };
+
     const isUpdating = ref(false)
     const hasUpdated = ref(false)
 
     const isUpdating2 = ref(false)
     const hasUpdated2 = ref(false)
 
-    const bankkonti = ref(null)
+    const bankaccounts = ref(null)
 
     const adminNavn = ref("")
     const adminAuthID = ref("")
     const adminEmail = ref("")
     const erpSystem = ref("")
+    const integrationBool = ref(false)
 
-    fetch('/api/stamdata')
+    fetch('/api/masterdata')
         .then(response => response = response.json())
         .then(value => {
             adminNavn.value = value.admName
             adminAuthID.value = value.admID
             adminEmail.value = value.admEmail
             erpSystem.value = value.erpSystem
+            integrationBool.value = value.integrationBool
         })
 
-    function updateStamdata()
+    function updateMasterdata()
     {
         hasUpdated.value = false
         isUpdating.value = true
 
-        const url =  '/api/stamdata'
+        const url =  '/api/masterdata'
         
         fetch(url,
         {
@@ -43,7 +49,8 @@
                 "admName": adminNavn.value,
                 "admID": adminAuthID.value,
                 "admEmail": adminEmail.value,
-                "erpSystem": erpSystem.value
+                "erpSystem": erpSystem.value,
+                "integrationBool": integrationBool.value 
             })
         })
 
@@ -62,30 +69,30 @@
         })
     }
 
-    fetch('/api/bankkonti')
+    fetch('/api/bankaccounts')
         .then(response => response = response.json())
-        .then(value => bankkonti.value = value)
+        .then(value => bankaccounts.value = value)
 
 
-    function addBankkonto()
+    function addBankaccount()
     {
-        bankkonti.value.push({
-            "Navn": "",
-            "IBAN": "",
-            "Statuskonto": "",
-            "Mellemregningskonto": ""
+        bankaccounts.value.push({
+            "bankAccountName": "",
+            "bankAccount": "",
+            "statusAccount": "",
+            "intermediateAccount": ""
         })
     }
 
-    function updateBankkonti()
+    function updateBankaccounts()
     {
-        console.log("Updating bankkonti")
-        console.log(bankkonti.value)
+        console.log("Updating bank accounts")
+        console.log(bankaccounts.value)
 
         hasUpdated2.value = false
         isUpdating2.value = true
 
-        const url =  '/api/bankkonti'
+        const url =  '/api/bankaccounts'
         
         fetch(url,
         {
@@ -94,7 +101,7 @@
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(bankkonti.value)
+            body: JSON.stringify(bankaccounts.value)
         })
 
         .then(response => {
@@ -114,7 +121,7 @@
 
     function removeBankkonto(index)
     {
-        bankkonti.value.splice(index, 1)
+        bankaccounts.value.splice(index, 1)
     }
 
 </script>
@@ -136,6 +143,7 @@
                     <th class="capitalize">Authenticator ID</th>
                     <th class="capitalize">E-mail</th>
                     <th class="capitalize">Økonomisystem</th>
+                    <th class="capitalize">Integration</th>
                 </tr>
             </thead>
             <tr>
@@ -147,10 +155,11 @@
                     <option>Fujitsu Prisme</option>
                     <option>ØS Indsigt</option>
                 </select></td>
+                <td><input type="checkbox" v-model="integrationBool"></td>
             </tr>
         </table>
         <br />
-        <button @click="updateStamdata()" :disabled="isUpdating">{{ isUpdating ? 'Gemmer...' : hasUpdated ? 'Ændringer gemt' : 'Gem ændringer' }}</button>
+        <button @click="updateMasterdata(); refreshPage()" :disabled="isUpdating">{{ isUpdating ? 'Gemmer...' : hasUpdated ? 'Ændringer gemt' : 'Gem ændringer' }}</button>
     </Content>
 
     <Content>
@@ -164,22 +173,22 @@
                 <tr>
                     <th class="capitalize">Navn</th>
                     <th class="capitalize">IBAN</th>
-                    <th class="capitalize">Spejlkonto i ØS</th>     
+                    <th class="capitalize">Statuskonto</th>     
                     <th class="capitalize">Mellemregning</th>     
                     <th></th>
                 </tr>
             </thead>
-            <tr v-for="(value, index) in bankkonti">
-                <td><input v-model="value.Navn"></input></td>
-                <td><input v-model="value.IBAN"></input></td>
-                <td><input v-model="value.Statuskonto"></input></td>
-                <td><input v-model="value.Mellemregningskonto"></input></td>
+            <tr v-for="(value, index) in bankaccounts">
+                <td><input v-model="value.bankAccountName"></input></td>
+                <td><input v-model="value.bankAccount"></input></td>
+                <td><input v-model="value.statusAccount"></input></td>
+                <td><input v-model="value.intermediateAccount"></input></td>
                 <td><button @click="removeBankkonto(index)">Slet</button></td>
             </tr>
         </table>
         <br />
-        <button @click="addBankkonto()" class="blue">Tilføj</button>
-        <button @click="updateBankkonti()" :disabled="isUpdating2">{{ isUpdating2 ? 'Gemmer...' : hasUpdated2 ? 'Ændringer gemt' : 'Gem ændringer' }}</button>
+        <button @click="addBankaccount()" class="blue">Tilføj</button>
+        <button @click="updateBankaccounts()" :disabled="isUpdating2">{{ isUpdating2 ? 'Gemmer...' : hasUpdated2 ? 'Ændringer gemt' : 'Gem ændringer' }}</button>
 
     </Content>
 
