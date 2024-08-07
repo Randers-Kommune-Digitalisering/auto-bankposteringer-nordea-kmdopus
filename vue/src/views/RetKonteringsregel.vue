@@ -190,6 +190,15 @@
         <form @submit.prevent="">
             <fieldset>
                 <div class="flexbox">
+                    <div>
+                        <input type="checkbox" v-model="konteringsregel.Active" id="isActive" />
+                        <label for="isActive" class="capitalize">Aktiv</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" v-model="konteringsregel.Exception" id="isException" />
+                        <label for="isException" class="capitalize">Undtagelse</label>
+                    </div>
+
                     <div v-for="(value, key) in keyMap" :class="value.hidden ? 'hidden' : ''">
                         <label :for="key" class="capitalize">{{key}}</label>
                         <input type="text" placeholder="..." :id="key" v-if="konteringsregel != null && !value.hidden" v-model="konteringsregel[value.key]" @change="hasUpdated = false" :disabled="value.disabled">
