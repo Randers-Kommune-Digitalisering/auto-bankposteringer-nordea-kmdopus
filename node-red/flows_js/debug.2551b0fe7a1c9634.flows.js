@@ -8,12 +8,12 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "payload.affectedRows > 0 ?\t{\t    \"Message\": \"Database created\",\t    \"Timestamp\": $now()\t\t}\t:\t{\t    \"Message\": \"Database already exists\",\t    \"Timestamp\": $now()\t}",
+  "complete": "payload.affectedRows > 0 ?\t{\t    \"Message\": \"accountingRules created\",\t    \"Timestamp\": $now()\t\t}\t:\t{\t    \"Message\": \"accountingRules already exists\",\t    \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1045,
-  "y": 220,
+  "x": 255,
+  "y": 440,
   "wires": [],
   "l": false
 }

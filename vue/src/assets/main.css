@@ -427,8 +427,11 @@ button.randers:hover, input[type='submit'].randers:hover
 }
 .darkmode input, .darkmode code, .darkmode table, .darkmode table * {
     border-color: var(--color-border-dark);
-    color: var(--color-text);
+    color: var(--color-white);
 }
 .darkmode code, .darkmode .tag {
     background-color: var(--color-border);
+}
+.darkmode a {
+    color: var(--color-blue)
 }
