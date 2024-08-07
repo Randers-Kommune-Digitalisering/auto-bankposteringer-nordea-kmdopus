@@ -193,19 +193,15 @@
         
         <form @submit.prevent="">
             <fieldset>
-                <button id="submit" @click="updateRule" :disabled="isUpdating">{{ isUpdating ? 'Gemmer ...' : hasUpdated ? 'Rettelser gemt' : isNewRule ? 'Opret regel' : 'Gem rettelser' }}</button>
-                <button @click="toggleActivation" :disabled="exceptionBool.value">{{ activeBool.value ? 'Deaktivér' : 'Aktivér' }}</button>
-                <button @click="deleteRule" class="red float-right" :disabled="isDeleting">{{ awaitingDeleteConfirmation ? 'Bekræft sletning' : 'Slet regel' }}</button>
+                <button id="submit" @click="updateRule" class="green" :disabled="isUpdating">{{ isUpdating ? 'Gemmer ...' : hasUpdated ? 'Rettelser gemt' : isNewRule ? 'Opret' : 'Gem' }}</button>
+                <button @click="deleteRule" class="red float-right" :disabled="isDeleting">{{ awaitingDeleteConfirmation ? 'Bekræft sletning' : 'Slet' }}</button>
+                <div class="activeToggle">
+                    <label>
+                        <input type="checkbox" v-model="konteringsregel.Active" id="isActive" /><span>Status</span>
+                    </label>
+                </div>
 
                 <div class="flexbox">
-                    <div>
-                        <input type="checkbox" v-model="konteringsregel.Active" id="isActive" />
-                        <label for="isActive" class="capitalize">Aktiv</label>
-                    </div>
-                    <div>
-                        <input type="checkbox" v-model="konteringsregel.Exception" id="isException" />
-                        <label for="isException" class="capitalize">Undtagelse</label>
-                    </div>
                     <div v-for="group in sortedGroups" :key="group.name">
                         <h3>{{ group.name }}</h3>
                         <div v-for="(value, key) in group.fields" :key="key" :class="value.hidden ? 'hidden' : ''">
