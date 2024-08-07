@@ -15,8 +15,8 @@ const Node = {
       "module": "csv-parser"
     }
   ],
-  "x": 385,
-  "y": 60,
+  "x": 375,
+  "y": 200,
   "wires": [
     [
       "66b81c6ebf307b20"

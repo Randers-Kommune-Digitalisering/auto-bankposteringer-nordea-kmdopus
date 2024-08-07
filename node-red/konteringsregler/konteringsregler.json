@@ -8910,5 +8910,21 @@
         "Active": true,
         "Exception": false,
         "RuleID": 556
+    },
+    {
+        "Reference": null,
+        "Advisliste": null,
+        "Afsender": null,
+        "Posteringstype": "Overførsel",
+        "Beløb1": null,
+        "Beløb2": null,
+        "Operator": null,
+        "Posteringstekst": null,
+        "Artskonto": "95990009",
+        "PSP": null,
+        "Notat": null,
+        "Active": true,
+        "Exception": false,
+        "RuleID": 557
     }
 ]
