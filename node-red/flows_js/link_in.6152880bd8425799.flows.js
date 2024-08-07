@@ -5,7 +5,6 @@ const Node = {
   "g": "626b62f44f191d09",
   "name": "link in active rules",
   "links": [
-    "6cf4c6963b323251",
     "9c073d0c8ad76f22"
   ],
   "x": 315,

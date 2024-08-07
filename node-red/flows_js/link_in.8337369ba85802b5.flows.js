@@ -4,12 +4,14 @@ const Node = {
   "z": "9b998b2e60b3c784",
   "g": "9f6b1ba8feea40af",
   "name": "link in Write JSON",
-  "links": [],
-  "x": 245,
-  "y": 300,
+  "links": [
+    "524a722a6b29e29a"
+  ],
+  "x": 805,
+  "y": 60,
   "wires": [
     [
-      "18fb2566dd1b4a92"
+      "5ab85126ec7b5717"
     ]
   ]
 }
