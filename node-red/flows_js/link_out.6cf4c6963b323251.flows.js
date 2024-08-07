@@ -6,13 +6,10 @@ const Node = {
   "name": "link out load json rules",
   "mode": "link",
   "links": [
-    "06fad3ec25cba2f6",
-    "8139517bcf4c52c2",
-    "06e2f43eddd7091b",
-    "6152880bd8425799"
+    "1e8adaca14f59bb4"
   ],
-  "x": 465,
-  "y": 160,
+  "x": 435,
+  "y": 60,
   "wires": []
 }
 

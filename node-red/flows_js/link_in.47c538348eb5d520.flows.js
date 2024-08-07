@@ -5,7 +5,7 @@ const Node = {
   "g": "aa5769a7dca8b6f4",
   "name": "link in reset ruleid",
   "links": [],
-  "x": 595,
+  "x": 555,
   "y": 80,
   "wires": [
     [
