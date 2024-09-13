@@ -10,7 +10,7 @@
     "Artskonto": null,
     "PSP": null,
     "Notat": null,
-    "Active": true,
-    "Exception": false,
+    "ActiveBool": true,
+    "ExceptionBool": false,
     "RuleID": 0
 }
