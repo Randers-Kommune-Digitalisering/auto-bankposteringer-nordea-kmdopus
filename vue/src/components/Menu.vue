@@ -1,91 +1,100 @@
 <script setup>
-    import { ref } from 'vue'
+    import { ref, watch, onMounted, onUnmounted } from 'vue'
+    import eventBus from '@/eventBus.js'
 
-    defineExpose( { setAlert } )
+    defineExpose({ setAlert })
 
     // Set menu items
     const menuItems = ref([
         {
-            "title": "Start",
-            "url": "/"
+            title: "Start",
+            url: "/"
         },
         {
-            "title": "Stamdata",
-            "url": "/stamdata",
+            title: "Stamdata",
+            url: "/stamdata",
         },
         {
-            "title": "Filer",
-            "url": "/filer",
-            "hidden": false,
+            title: "Filer",
+            url: "/filer",
+            hidden: false,
         },
         {
-            "title": "Aktive regler",
-            "url": "/konteringsregler/aktiv",
+            title: "Aktive regler",
+            url: "/konteringsregler/aktiv",
         },
         {
-            "title": "Inaktive regler",
-            "url": "/konteringsregler/inaktiv",
+            title: "Inaktive regler",
+            url: "/konteringsregler/inaktiv",
         },
         {
-            "title": "Undtagelser",
-            "url": "/konteringsregler/undtagelse",
+            title: "Undtagelser",
+            url: "/konteringsregler/undtagelse",
         }
     ])
 
+    const normalizeUrl = (url) => url.replace(/\/+$/, '')  // Removes trailing slashes
+
     // Set selected = true for landing page (URL)
-    const landingPageIndex = menuItems.value.findIndex(x => x.url == new URL(location.href).pathname)
+    const landingPageIndex = menuItems.value.findIndex(x =>
+        normalizeUrl(x.url) === normalizeUrl(new URL(location.href).pathname)
+    )
 
     const integrationBool = ref(false)
 
-    fetch('/api/stamdata')
-        .then(response => response.json())
-        .then(value => {
-            integrationBool.value = value.integrationBool
+    // Watch for changes in integrationBool to hide/show the "Filer" menu item
+    watch(integrationBool, (newVal) => {
+        const filerItem = menuItems.value.find(item => item.title === "Filer")
+        if (filerItem) {
+            filerItem.hidden = newVal
+        }
+    })
 
-            if (integrationBool.value) {
-                menuItems.value[2].hidden = true
-            }
-        })
-
-    if(landingPageIndex !== -1)
-        menuItems.value[ landingPageIndex ].selected = true
+    // Mark the landing page as selected
+    if (landingPageIndex !== -1)
+        menuItems.value[landingPageIndex].selected = true
 
     // Function to visually update selected item
-
-    function select(item)
-    {
+    function select(item) {
         menuItems.value.forEach(x => x.selected = false)
         item.selected = true
     }
 
     // Function to set alert on an item
+    function setAlert(itemTitle, alert) {
+        const item = menuItems.value.find(x => x.title == itemTitle)
 
-    function setAlert(itemTitle, alert)
-    {
-        // Delete alert
-        if(alert === "" || alert === null || alert === undefined)
-            delete menuItems.value[ menuItems.value.findIndex(x => x.title == itemTitle) ].alert
-
-        // Set alert
-        else
-            menuItems.value[ menuItems.value.findIndex(x => x.title == itemTitle) ].alert = alert
+        if (!alert) { delete item.alert } else { item.alert = alert }
     }
 
-    // Dark mode
-
-    function toggleDarkMode()
-    {
-        const element = document.getElementById("body");
-        element.classList.toggle("darkmode");
+    // Dark mode toggle
+    function toggleDarkMode() {
+        const element = document.getElementById("body")
+        element.classList.toggle("darkmode")
     }
 
+    // Listen for the integrationToggled event
+    onMounted(() => {
+        const handler = (newVal) => {
+            const filerItem = menuItems.value.find(item => item.title === 'Filer');
+            if (filerItem) {
+                filerItem.hidden = newVal;  // Show/hide based on the event data
+            }
+        };
+
+        eventBus.on('integrationToggled', handler);
+
+        // Clean up the event listener
+        onUnmounted(() => {
+            eventBus.off('integrationToggled', handler);
+        });
+    });
+    
 </script>
 
 <template>
 
     <div class="header">
-
-        <div class="randers-logo"></div>
         
         <router-link v-for="item in menuItems.filter(value => !value.hidden)" :to="item.url" :class="item.selected ? 'selected' : ''" @click="select(item)">
             <span v-if="item.alert" class="alert">{{item.alert}}</span>
@@ -106,10 +115,6 @@
 <style scoped>
 /* Mobile first */
 /* 1 rem = 10 px, except when defining @media rules, then 1 rem = 16 px */
-.randers-logo
-{
-    background-position: 2rem 0rem;
-}
 
 /* Is top header */
 .header

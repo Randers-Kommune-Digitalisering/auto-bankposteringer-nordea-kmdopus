@@ -189,7 +189,7 @@
         </fieldset>
         
         <span class="paragraph">
-            Herunder kan de aktuelle konteringsregler ses, rettes og slettes. Vær opmærksom på at rettelser overskrives hvis der laves ændringer i <code>konteringsregler.json</code>.
+            Herunder kan de aktuelle konteringsregler ses, rettes og slettes. Slettede regler kan ikke genoprettes.
         </span>
         
         <table>

@@ -21,30 +21,29 @@
 
     if (isNewRule.value)
     {   
-        if (index.value === 'nyinaktiv') konteringsregel.value.Active = false
-        else if (index.value === 'nyundtagelse') konteringsregel.value.Exception = true
+        if (index.value === 'nyinaktiv') konteringsregel.value.ActiveBool = false
+        else if (index.value === 'nyundtagelse') konteringsregel.value.ExceptionBool = true
     } else {
         // Fetch regel
         fetch(`/api/konteringsregler/${index.value}`)
             .then(response => response.json())
             .then(value => {
                 konteringsregel.value = value
-                exceptionBool.value = konteringsregel.value.Exception
-                activeBool.value = konteringsregel.value.Active
+                exceptionBool.value = konteringsregel.value.ExceptionBool
+                activeBool.value = konteringsregel.value.ActiveBool
             })
     }
 
     // Watch for changes in konteringsregel to keep booleans updated
     watch(() => konteringsregel.value, newValue => {
         if (newValue) {
-            exceptionBool.value = newValue.Exception
-            activeBool.value = newValue.Active
+            exceptionBool.value = newValue.ExceptionBool
+            activeBool.value = newValue.ActiveBool
         }
     })
 
     // Virker ikke
-    console.log(exceptionBool.value)
-    console.log(activeBool.value)
+    console.log(konteringsregel.value)
 
     const keyMap_rule = {
         "id": { "key": "RuleID", "hidden": true },
@@ -58,7 +57,8 @@
         "Artskonto": { "key": "Artskonto", "group": "Kontering" },
         "PSP-element": { "key": "PSP", "group": "Kontering" },
         "Posteringstekst": { "key": "Posteringstekst", "group": "Kontering" },
-        "Notat": { "key": "Notat" }
+        "Notat": { "key": "Notat" },
+        "ActiveBool": { "key": "ActiveBool", "hidden": true }
     }
 
     const keyMap_exception = {
@@ -171,8 +171,9 @@
     }
 
     function toggleActivation() {
-        konteringsregel.value.Active = !konteringsregel.value.Active
-        activeBool.value = konteringsregel.value.Active
+        konteringsregel.value.ActiveBool = !konteringsregel.value.ActiveBool
+        activeBool.value = konteringsregel.value.ActiveBool
+        console.log("aktivstatus er nu " + activeBool.value)
     }
 
 </script>
@@ -193,12 +194,18 @@
         
         <form @submit.prevent="">
             <fieldset>
-                <button id="submit" @click="updateRule" class="green" :disabled="isUpdating">{{ isUpdating ? 'Gemmer ...' : hasUpdated ? 'Rettelser gemt' : isNewRule ? 'Opret' : 'Gem' }}</button>
-                <button @click="deleteRule" class="red float-right" :disabled="isDeleting">{{ awaitingDeleteConfirmation ? 'Bekræft sletning' : 'Slet' }}</button>
                 <div class="activeToggle">
-                    <label>
-                        <input type="checkbox" v-model="konteringsregel.Active" id="isActive" /><span>Status</span>
+                    <button id="submit" @click="updateRule" class="green" :disabled="isUpdating">{{ isUpdating ? 'Gemmer ...' : hasUpdated ? 'Rettelser gemt' : isNewRule ? 'Opret' : 'Gem' }}</button>
+                    <label :id="activeBool ? 'activeLabel' : 'inactiveLabel'">
+                        <input type="checkbox"
+                            v-model="activeBool"
+                            id="isActive"
+                            @change="toggleActivation()"
+                        />
+                        <span v-if="activeBool">Aktiv</span>
+                        <span v-else>Inaktiv</span>
                     </label>
+                    <button @click="deleteRule" class="red float-right" :disabled="isDeleting">{{ awaitingDeleteConfirmation ? 'Bekræft sletning' : 'Slet' }}</button>
                 </div>
 
                 <div class="flexbox">
@@ -244,5 +251,9 @@
 <style scoped>
     .hidden {
         display:none;
+    }
+    .activeToggle {
+        display: flex;
+        justify-content: space-between;
     }
 </style>

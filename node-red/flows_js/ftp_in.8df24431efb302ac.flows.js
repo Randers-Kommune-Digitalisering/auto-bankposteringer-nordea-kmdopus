@@ -1,0 +1,23 @@
+const Node = {
+  "id": "8df24431efb302ac",
+  "type": "ftp in",
+  "z": "ee0cf4ce372e2d36",
+  "d": true,
+  "g": "09ae44d941f2b3ed",
+  "ftp": "",
+  "operation": "append",
+  "filename": "",
+  "localFilename": "",
+  "name": "",
+  "x": 655,
+  "y": 240,
+  "wires": [
+    [
+      "664e50a3d32113ac"
+    ]
+  ],
+  "icon": "font-awesome/fa-send",
+  "l": false
+}
+
+module.exports = Node;
