@@ -54,14 +54,6 @@ services:
     networks:
       - node_red_vue
 
-  python_microservice:
-    build:
-      context: ./python_queue_microservice
-    networks:
-      - node_red_vue
-    depends_on:
-      - redis_microservice
-
   db:
     image: mariadb:10.6.11
     restart: always
