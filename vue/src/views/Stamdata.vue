@@ -1,11 +1,8 @@
 <script setup>
     import { ref } from 'vue'
+    import eventBus from '@/eventBus.js'
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
-
-    const refreshPage = () => {
-        location.reload(); // Reloads the current page
-    };
 
     const isUpdating = ref(false)
     const hasUpdated = ref(false)
@@ -67,6 +64,9 @@
             isUpdating.value = false
             hasUpdated.value = true
         })
+
+        // Emit an event to notify other components
+        eventBus.emit('integrationToggled', integrationBool.value);
     }
 
     fetch('/api/bankaccounts')
@@ -119,7 +119,11 @@
         })
     }
 
-    function removeBankkonto(index)
+    function toggleIntegration() {
+        console.log("ingrationsboolean er nu " + integrationBool.value)
+    }
+
+    function removeBankaccount(index)
     {
         bankaccounts.value.splice(index, 1)
     }
@@ -134,16 +138,16 @@
         <template #icon>
             <IconTable />
         </template>
-        <template #heading>Administrator</template>
+        <template #heading>Administrator- og integrationsoplysninger</template>
         
         <table>
             <thead>
                 <tr>
-                    <th class="capitalize">Navn</th>
-                    <th class="capitalize">Authenticator ID</th>
-                    <th class="capitalize">E-mail</th>
-                    <th class="capitalize">Økonomisystem</th>
-                    <th class="capitalize">Integration</th>
+                    <th>Navn</th>
+                    <th>Authenticator ID</th>
+                    <th>E-mail</th>
+                    <th>Økonomisystem</th>
+                    <th>FTP til ØS</th>
                 </tr>
             </thead>
             <tr>
@@ -155,11 +159,11 @@
                     <option>Fujitsu Prisme</option>
                     <option>ØS Indsigt</option>
                 </select></td>
-                <td><input type="checkbox" v-model="integrationBool"></td>
+                <td><input type="checkbox" v-model="integrationBool" @change="toggleIntegration()"></td>
             </tr>
         </table>
         <br />
-        <button @click="updateMasterdata(); refreshPage()" :disabled="isUpdating">{{ isUpdating ? 'Gemmer...' : hasUpdated ? 'Ændringer gemt' : 'Gem ændringer' }}</button>
+        <button @click="updateMasterdata()" :disabled="isUpdating">{{ isUpdating ? 'Gemmer...' : hasUpdated ? 'Ændringer gemt' : 'Gem ændringer' }}</button>
     </Content>
 
     <Content>
@@ -183,7 +187,7 @@
                 <td><input v-model="value.bankAccount"></input></td>
                 <td><input v-model="value.statusAccount"></input></td>
                 <td><input v-model="value.intermediateAccount"></input></td>
-                <td><button @click="removeBankkonto(index)">Slet</button></td>
+                <td><button @click="removeBankaccount(index)">Slet</button></td>
             </tr>
         </table>
         <br />

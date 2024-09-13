@@ -1,0 +1,20 @@
+const Node = {
+  "id": "8496fbaaebab0c7b",
+  "type": "link in",
+  "z": "92c28da6a66fdcb3",
+  "g": "ccdbed98c6151465",
+  "name": "link in load masterdata to env",
+  "links": [
+    "e2aefec3f86743b4",
+    "9eefcaa37540b844"
+  ],
+  "x": 805,
+  "y": 320,
+  "wires": [
+    [
+      "87979ca976751599"
+    ]
+  ]
+}
+
+module.exports = Node;
