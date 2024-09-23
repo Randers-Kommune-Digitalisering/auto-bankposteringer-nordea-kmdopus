@@ -2,7 +2,7 @@ const Node = {
   "id": "ea1ee8514565d6b7",
   "type": "debug",
   "z": "32cf2bec698ca424",
-  "g": "a6213de5d0ba3b76",
+  "g": "fd2d20f8e7169b95",
   "name": "MySQL query error",
   "active": true,
   "tosidebar": true,
@@ -12,8 +12,8 @@ const Node = {
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1075,
-  "y": 480,
+  "x": 235,
+  "y": 700,
   "wires": [],
   "l": false
 }

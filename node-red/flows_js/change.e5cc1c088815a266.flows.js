@@ -1,7 +1,8 @@
 const Node = {
   "id": "e5cc1c088815a266",
   "type": "change",
-  "z": "431f85f122b4636d",
+  "z": "92c28da6a66fdcb3",
+  "g": "42e21606623e991f",
   "name": "Initiate db tables",
   "rules": [
     {
@@ -31,15 +32,15 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 95,
-  "y": 200,
+  "x": 585,
+  "y": 80,
   "wires": [
     [
-      "0e448630b02f5e41",
-      "670f9430c590cdc5"
+      "19f998658c30306b",
+      "dbc52ef3ec740e48"
     ]
   ],
-  "icon": "font-awesome/fa-save",
+  "icon": "font-awesome/fa-cog",
   "l": false
 }
 

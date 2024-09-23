@@ -2,7 +2,8 @@
     import { ref } from 'vue'
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
-
+    import IconDowload from '../components/icons/IconDowload.vue';
+    
     const outputFiles = ref(null)
     const logFiles = ref(null)
 
@@ -10,7 +11,7 @@
         "filnavn": {
             "key": "name"
         },
-        "tidsstempel":
+        "oprettelsestidspunkt":
         {
             "obj": "stat",
             "key": "created"
@@ -47,12 +48,12 @@
             <thead>
                 <tr>
                     <th v-for="key in Object.keys(keyMap)" class="capitalize">{{key}}</th>
-                    <th></th>
+                    <th>Download</th>
                 </tr>
             </thead>
             <tr v-for="obj in outputFiles">
                 <td v-for="key in keyMap">{{ key.obj != null ? obj[key.obj][key.key] : obj[key.key] }}</td>
-                <td><a :href="'/api/filer/' + obj[keyMap.filnavn.key] + '/download'"><button @click="">Download</button></a></td>
+                <td><a :href="'/api/filer/' + obj[keyMap.filnavn.key] + '/download'"><button @click=""><IconDowload /></button></a></td>
             </tr>
         </table>
     </Content>

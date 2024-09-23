@@ -6,10 +6,11 @@ const Node = {
   "name": "link in load bankaccounts to env",
   "links": [
     "64ae7c8a398dad39",
-    "9eefcaa37540b844"
+    "9eefcaa37540b844",
+    "fa1c196b09dbd0bf"
   ],
-  "x": 805,
-  "y": 460,
+  "x": 785,
+  "y": 540,
   "wires": [
     [
       "cb674a8c31e42c0b"

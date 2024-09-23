@@ -1,7 +1,7 @@
 const Node = {
   "id": "18b22abc816761e0",
   "type": "file",
-  "z": "92c28da6a66fdcb3",
+  "z": "cc3305da0e5c71f6",
   "g": "46c70bcd77ca965a",
   "name": "parse",
   "filename": "$globalContext(\"configs\").jsonPath",
@@ -10,8 +10,8 @@ const Node = {
   "createDir": true,
   "overwriteFile": "true",
   "encoding": "none",
-  "x": 505,
-  "y": 580,
+  "x": 285,
+  "y": 60,
   "wires": [
     [
       "08f8ef9c6813638f"

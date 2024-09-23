@@ -7,16 +7,17 @@ const Node = {
   "props": [],
   "repeat": "",
   "crontab": "",
-  "once": true,
+  "once": false,
   "onceDelay": "2",
   "topic": "",
-  "x": 195,
-  "y": 60,
+  "x": 485,
+  "y": 80,
   "wires": [
     [
-      "d2feb4a804087ef3"
+      "f610448198b2a5de"
     ]
   ],
+  "icon": "font-awesome/fa-mouse-pointer",
   "l": false
 }
 

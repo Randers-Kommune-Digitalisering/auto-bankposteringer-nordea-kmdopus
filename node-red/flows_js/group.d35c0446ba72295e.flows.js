@@ -2,16 +2,16 @@ const Node = {
   "id": "d35c0446ba72295e",
   "type": "group",
   "z": "62eaf4407ee85a3a",
-  "name": "Nordea - auth",
+  "g": "41f07c818d4b858a",
+  "name": "Authentication",
   "style": {
     "stroke": "none",
-    "fill": "#ffffbf",
+    "fill": "#ffefbf",
     "label": true,
     "label-position": "n",
     "color": "#000000"
   },
   "nodes": [
-    "6dd778b614d0f3dd",
     "e70417411f6e82ff",
     "0db12710e10faee7",
     "882cf7b227b32e19",
@@ -44,8 +44,8 @@ const Node = {
     "12de00af2362a4ac",
     "4b416d74e555ec27"
   ],
-  "x": 284,
-  "y": 19,
+  "x": 384,
+  "y": 39,
   "w": 672,
   "h": 202
 }

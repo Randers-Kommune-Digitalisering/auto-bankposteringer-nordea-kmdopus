@@ -31,42 +31,15 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   const erpPostings = [];
   const postingsWithNoMatch = [];
   const erpFileHeaders = flow.get("erpFileHeaders").split(", ");
-  const currentBankAccount = global.get("bankAccounts")[global.get("accountStep")];
-  const currentStatusAccount = global.get("statusAccounts")[global.get("accountStep")];
-  const currentIntermediateAccount = global.get("intermediateAccounts")[global.get("accountStep")];
+  const currentBankAccount = global.get("bankAccounts")[global.get("accountStep")].bankAccount;
+  const currentStatusAccount = global.get("statusAccounts")[global.get("accountStep")].statusAccount;
+  const currentIntermediateAccount = global.get("intermediateAccounts")[global.get("accountStep")].intermediateAccount;
   
   function calculateSpecificity(rule) {
       // Count the number of rule parameters where the value property is defined (truthy)
       return Object.keys(rule)
           .slice(0, 2)
           .filter(key => rule[key] || rule[key] || rule[key]).length;
-  }
-  
-  function merge(left, right) {
-      let result = [];
-      let leftIndex = 0;
-      let rightIndex = 0;
-  
-      while (leftIndex < left.length && rightIndex < right.length) {
-          if (calculateSpecificity(left[leftIndex]) > calculateSpecificity(right[rightIndex])) {
-              result.push(left[leftIndex]);
-              leftIndex++;
-          } else {
-              result.push(right[rightIndex]);
-              rightIndex++;
-          }
-      }
-      return result.concat(left.slice(leftIndex)).concat(right.slice(rightIndex));
-  }
-  
-  function mergeSort(arr) {
-      if (arr.length <= 1) { return arr; }
-      
-      const middle = Math.floor(arr.length / 2);
-      const left = arr.slice(0, middle);
-      const right = arr.slice(middle);
-  
-      return merge(mergeSort(left), mergeSort(right));
   }
   
   function matchParameter(posting, searchValue, key) {
@@ -157,6 +130,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       }
   }
   
+  // Special rule. If/else statement should be removed in public repo.
   if (currentBankAccount === "DK3620009035615315-DKK") {
       postings.forEach(posting => {
           let statusDebetOrCredit = posting.amount.startsWith('-') ? 'Kredit' : 'Debet';
@@ -169,7 +143,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
   } else {
       postings.forEach(posting => {
-          processPosting(posting, mergeSort(accountingRules), currentStatusAccount, currentIntermediateAccount);
+          processPosting(posting, accountingRules, currentStatusAccount, currentIntermediateAccount);
       });
   }
   
@@ -179,8 +153,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   msg.payload = erpArray.concat(erpPostings);
   msg.columns = flow.get("erpFileHeaders");
   msg.filename = "/data/output/" + global.get("dateOfOrigin") + ".csv";
-  
-  global.set("mergeSortedRules", mergeSort(accountingRules));
   
   return msg;
 }

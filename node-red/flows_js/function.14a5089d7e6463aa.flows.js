@@ -10,12 +10,11 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 155,
-  "y": 860,
+  "x": 555,
+  "y": 400,
   "wires": [
     [
-      "df098b3e580b3ec0",
-      "0234ab6f381bf917"
+      "df098b3e580b3ec0"
     ]
   ],
   "icon": "font-awesome/fa-search-plus",

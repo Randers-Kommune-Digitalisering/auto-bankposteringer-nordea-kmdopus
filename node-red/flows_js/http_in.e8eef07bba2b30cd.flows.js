@@ -2,14 +2,14 @@ const Node = {
   "id": "e8eef07bba2b30cd",
   "type": "http in",
   "z": "32cf2bec698ca424",
-  "g": "a6213de5d0ba3b76",
+  "g": "fd2d20f8e7169b95",
   "name": "",
   "url": "/bankaccounts",
   "method": "put",
   "upload": false,
   "swaggerDoc": "",
-  "x": 925,
-  "y": 460,
+  "x": 85,
+  "y": 680,
   "wires": [
     [
       "1c74f8043e850294",
