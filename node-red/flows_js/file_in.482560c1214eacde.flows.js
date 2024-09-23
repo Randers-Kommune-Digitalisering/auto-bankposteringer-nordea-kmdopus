@@ -1,8 +1,7 @@
 const Node = {
   "id": "482560c1214eacde",
   "type": "file in",
-  "z": "431f85f122b4636d",
-  "g": "6dfe26228ab4f389",
+  "z": "a5944093087bb38c",
   "name": "get kont.regler json",
   "filename": "$globalContext(\"configs\").jsonPath",
   "filenameType": "jsonata",
@@ -11,8 +10,8 @@ const Node = {
   "sendError": false,
   "encoding": "none",
   "allProps": false,
-  "x": 295,
-  "y": 380,
+  "x": 155,
+  "y": 100,
   "wires": [
     [
       "18039db57ffe92b6"

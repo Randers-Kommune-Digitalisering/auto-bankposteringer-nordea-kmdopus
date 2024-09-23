@@ -5,7 +5,7 @@ const Node = {
   "name": "Generate dates",
   "style": {
     "stroke": "none",
-    "fill": "#ffffbf",
+    "fill": "#e3f3d3",
     "label": true,
     "label-position": "n",
     "color": "#000000"
@@ -17,9 +17,9 @@ const Node = {
     "19a9e954c5d433ab"
   ],
   "x": 24,
-  "y": 559,
-  "w": 242,
-  "h": 102
+  "y": 539,
+  "w": 312,
+  "h": 122
 }
 
 module.exports = Node;

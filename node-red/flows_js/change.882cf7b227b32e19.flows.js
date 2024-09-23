@@ -37,7 +37,7 @@ const Node = {
       "t": "set",
       "p": "data",
       "pt": "flow",
-      "to": "{\t   \"authorizer_id\":$env('AUTH_ID')\t}",
+      "to": "{\t   \"authorizer_id\":$globalContext(\"masterData\").admID\t}",
       "tot": "jsonata"
     },
     {
@@ -53,8 +53,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 645,
-  "y": 100,
+  "x": 745,
+  "y": 120,
   "wires": [
     [
       "9e7c657749833710"

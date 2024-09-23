@@ -1,7 +1,7 @@
 const Node = {
   "id": "4d849b4e859d6cc5",
   "type": "switch",
-  "z": "431f85f122b4636d",
+  "z": "a5944093087bb38c",
   "name": "Should rules be imported from a file?",
   "property": "configs.initialData.rulesToImportFromFile",
   "propertyType": "global",
@@ -17,10 +17,10 @@ const Node = {
   "repair": false,
   "outputs": 2,
   "x": 95,
-  "y": 320,
+  "y": 60,
   "wires": [
     [
-      "10babf314f8bbe34"
+      "3822931a2b22181a"
     ],
     [
       "482560c1214eacde"

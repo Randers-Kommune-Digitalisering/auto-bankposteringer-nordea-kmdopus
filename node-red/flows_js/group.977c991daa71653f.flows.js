@@ -2,7 +2,8 @@ const Node = {
   "id": "977c991daa71653f",
   "type": "group",
   "z": "32cf2bec698ca424",
-  "name": "POST newRule",
+  "g": "4169783d237ba908",
+  "name": "POST",
   "style": {
     "stroke": "none",
     "fill": "#ffefbf",
@@ -18,10 +19,13 @@ const Node = {
     "74a37c1a79b5ea37",
     "14a5089d7e6463aa",
     "7a18e63301989955",
-    "df098b3e580b3ec0"
+    "df098b3e580b3ec0",
+    "7af179a828255255"
   ],
-  "x": 14,
-  "y": 799
+  "x": 414,
+  "y": 299,
+  "w": 372,
+  "h": 162
 }
 
 module.exports = Node;

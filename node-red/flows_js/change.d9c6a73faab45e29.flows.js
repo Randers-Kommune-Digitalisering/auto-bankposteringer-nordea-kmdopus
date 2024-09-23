@@ -1,8 +1,7 @@
 const Node = {
   "id": "d9c6a73faab45e29",
   "type": "change",
-  "z": "431f85f122b4636d",
-  "g": "6dfe26228ab4f389",
+  "z": "a5944093087bb38c",
   "name": "Check import",
   "rules": [
     {
@@ -18,8 +17,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 345,
-  "y": 340,
+  "x": 205,
+  "y": 60,
   "wires": [
     [
       "7d4d923907a94317"

@@ -9,8 +9,8 @@ const Node = {
   ],
   "linkType": "static",
   "timeout": "30",
-  "x": 795,
-  "y": 60,
+  "x": 895,
+  "y": 80,
   "wires": [
     [
       "152b9c2d37694a5e"

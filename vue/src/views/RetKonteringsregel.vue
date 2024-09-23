@@ -3,6 +3,8 @@
     import { useRouter, useRoute } from 'vue-router'
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
+    import IconDelete from '../components/icons/IconDelete.vue'
+    import IconSave from '../components/icons/IconSave.vue'
     import newItem from '@/assets/newItem.json'
 
     const isUpdating = ref(false)
@@ -195,7 +197,11 @@
         <form @submit.prevent="">
             <fieldset>
                 <div class="activeToggle">
-                    <button id="submit" @click="updateRule" class="green" :disabled="isUpdating">{{ isUpdating ? 'Gemmer ...' : hasUpdated ? 'Rettelser gemt' : isNewRule ? 'Opret' : 'Gem' }}</button>
+                    <button @click="deleteRule" class="red float-right" :disabled="isDeleting">
+                        <template v-if="awaitingDeleteConfirmation">Bekræft sletning</template>
+                        <template v-else><IconDelete /></template>
+                    </button>
+
                     <label :id="activeBool ? 'activeLabel' : 'inactiveLabel'">
                         <input type="checkbox"
                             v-model="activeBool"
@@ -205,7 +211,13 @@
                         <span v-if="activeBool">Aktiv</span>
                         <span v-else>Inaktiv</span>
                     </label>
-                    <button @click="deleteRule" class="red float-right" :disabled="isDeleting">{{ awaitingDeleteConfirmation ? 'Bekræft sletning' : 'Slet' }}</button>
+                    <button id="submit" @click="updateRule" class="green" :disabled="isUpdating">
+                        <template v-if="isUpdating">Gemmer ...</template>
+                        <template v-else-if="hasUpdated">Rettelser gemt</template>
+                        <template v-else-if="isNewRule"><IconSave /></template>
+                        <template v-else><IconSave /></template>
+                    </button>
+
                 </div>
 
                 <div class="flexbox">

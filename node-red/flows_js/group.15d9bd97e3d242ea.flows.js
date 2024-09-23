@@ -1,8 +1,8 @@
 const Node = {
   "id": "15d9bd97e3d242ea",
   "type": "group",
-  "z": "92c28da6a66fdcb3",
-  "name": "Delete accountingRules manually",
+  "z": "cc3305da0e5c71f6",
+  "name": "Delete accountingRules db manually",
   "style": {
     "stroke": "none",
     "fill": "#bfdbef",
@@ -15,11 +15,13 @@ const Node = {
     "e11e54fed105bce0",
     "862489a949fd3930",
     "97d4fce337228c22",
-    "115e90eb3e9c6d95",
-    "e4be96eea466ba98"
+    "e4be96eea466ba98",
+    "0974040d37fa9eec"
   ],
-  "x": 1164,
-  "y": 119
+  "x": 24,
+  "y": 119,
+  "w": 312,
+  "h": 122
 }
 
 module.exports = Node;

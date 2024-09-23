@@ -15,10 +15,6 @@ const Node = {
       "module": "moment"
     },
     {
-      "var": "uuid",
-      "module": "uuid"
-    },
-    {
       "var": "forge",
       "module": "node-forge"
     },
@@ -27,7 +23,7 @@ const Node = {
       "module": "crypto-js"
     }
   ],
-  "x": 145,
+  "x": 185,
   "y": 60,
   "wires": [
     [
@@ -38,29 +34,17 @@ const Node = {
   "l": false
 }
 
-Node.func = async function (node, msg, RED, context, flow, global, env, util, moment, uuid, forge, CryptoJS) {
-  const requestId = uuid.v4();
-  const today = moment().format("YYYY-MM-DD");
-  
-  flow.set("randomUUID", requestId);
-  flow.set("today", today);
+Node.func = async function (node, msg, RED, context, flow, global, env, util, moment, forge, CryptoJS) {
+  const contentType = flow.get("content-type");
+  const data = flow.get("data");
+  const method = flow.get("method").toLowerCase();
+  const url = flow.get("url");
+  const clientId = global.get("configs").banking.id;
   msg.headers = {};
-  
-  function getHeaderValue(headerName) {
-      const headers = flow.get("headers");
-      const headerValue = headers ? headers[headerName] : undefined;
-      if (headerValue === undefined) {
-          node.error(`Required header: ${headerName} is not defined`);
-      }
-      return headerValue;
-  }
   
   // Digest Calculation
   
   function resolveRequestBody() {
-      const contentType = flow.get("content-type");
-      const data = flow.get("data");
-  
       if (contentType === "application/x-www-form-urlencoded") {
           const data_sub = Object.keys(data)
               .sort(function (a, b) {
@@ -98,9 +82,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   const requestWithContentHeaders = "(request-target) x-nordea-originating-host x-nordea-originating-date content-type digest";
   
   function getSignatureBaseOnRequest() {
-      const host = "open.nordea.com";
+      const host = global.get("configs").banking.domainShort;
       const path = constructPath();
-      const method = flow.get("method").toLowerCase();
       const date = moment().utc().format("ddd, DD MMM YYYY HH:mm:ss") + " GMT";
       const headers = method === "post" || method === "put" || method === "patch" ? requestWithContentHeaders : requestWithoutContentHeaders;
   
@@ -148,14 +131,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
       
   }
   
-  function encryptSignature(normalizedSignatureString) {
-      const messageDigest = forge.md.sha256.create();
-      messageDigest.update(normalizedSignatureString, "utf8");
-      return forge.util.encode64(getPrivateKey().sign(messageDigest));
-  }
-  
   function getPrivateKey() {
-      let eidasPrivateKey = env.get("EIDASPRIVATEKEY");
+      let eidasPrivateKey = global.get("configs").banking.eidas.privateKey;
   
       if (!eidasPrivateKey.includes('PRIVATE KEY')) {
           eidasPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\n" + eidasPrivateKey + "\n" + "-----END RSA PRIVATE KEY-----";
@@ -164,7 +141,12 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
       return forge.pki.privateKeyFromPem(eidasPrivateKey);
   }
   
-  const clientId = env.get("CLIENT_ID");
+  function encryptSignature(normalizedSignatureString) {
+      const messageDigest = forge.md.sha256.create();
+      messageDigest.update(normalizedSignatureString, "utf8");
+      return forge.util.encode64(getPrivateKey().sign(messageDigest));
+  }
+  
   const signature = getSignatureBaseOnRequest();
   const encryptedSignature = encryptSignature(signature.normalizedString);
   const signatureHeader = `keyId="${clientId}",algorithm="rsa-sha256",headers="${signature.headers}",signature="${encryptedSignature}"`;
@@ -177,17 +159,25 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   msg.headers['X-Nordea-Originating-Host'] = signature.host;
   msg.headers['X-Nordea-Originating-Date'] = signature.date;
   msg.headers['X-IBM-Client-Id'] = clientId;
-  msg.headers['X-IBM-Client-Secret'] = env.get("CLIENT_SECRET");
+  msg.headers['X-IBM-Client-Secret'] = global.get("configs").banking.secret;
   msg.headers['Signature'] = signatureHeader;
-  if (flow.get("data")) msg.payload = resolveRequestBody();
-  if (flow.get("url")) msg.url = flow.get("url");
-  if (flow.get("method") == "POST" || flow.get("method") == "PUT") {
-      msg.headers['Content-Type'] = flow.get("content-type");
-  }
-  if (flow.get("method") == "PUT" || flow.get("method") == "GET") {
-      msg.headers['Authorization'] = "Bearer " + global.get("client_token");
-  }
   
+  if (url) msg.url = url;
+  if (data) msg.payload = resolveRequestBody();
+  
+  switch (method) {
+      case "get":
+          msg.headers['Authorization'] = "Bearer " + global.get("client_token");
+          break;
+      case "put":
+          msg.headers['Authorization'] = "Bearer " + global.get("client_token");
+          msg.headers['Content-Type'] = contentType;
+          break;
+      case "post":
+          msg.headers['Content-Type'] = contentType;
+          break;
+      }
+      
   return msg;
 }
 

@@ -2,10 +2,11 @@ const Node = {
   "id": "85686cecd7b81714",
   "type": "group",
   "z": "32cf2bec698ca424",
-  "name": "GET bankAccounts",
+  "g": "f103ec614e0aecd9",
+  "name": "GET",
   "style": {
     "stroke": "none",
-    "fill": "#e3f3d3",
+    "fill": "#ffefbf",
     "label": true,
     "label-position": "n",
     "color": "#000000"
@@ -16,8 +17,10 @@ const Node = {
     "49f9a3750606bd34",
     "72b3dd71af420e64"
   ],
-  "x": 884,
-  "y": 299
+  "x": 44,
+  "y": 519,
+  "w": 432,
+  "h": 82
 }
 
 module.exports = Node;

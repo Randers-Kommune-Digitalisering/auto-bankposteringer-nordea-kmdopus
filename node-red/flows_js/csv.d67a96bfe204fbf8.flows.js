@@ -1,7 +1,7 @@
 const Node = {
   "id": "d67a96bfe204fbf8",
   "type": "csv",
-  "z": "92c28da6a66fdcb3",
+  "z": "cc3305da0e5c71f6",
   "g": "46c70bcd77ca965a",
   "name": "parse",
   "sep": ";",
@@ -14,8 +14,8 @@ const Node = {
   "strings": true,
   "include_empty_strings": false,
   "include_null_values": false,
-  "x": 425,
-  "y": 580,
+  "x": 185,
+  "y": 60,
   "wires": [
     [
       "3dbd9a44a2e8e2ea"

@@ -51,7 +51,7 @@ const Node = {
       "t": "set",
       "p": "url",
       "pt": "msg",
-      "to": "$flowContext(\"banking_domain\") & $flowContext(\"path\")",
+      "to": "$globalContext(\"configs\").banking.domain & $flowContext(\"path\")",
       "tot": "jsonata"
     }
   ],
@@ -60,8 +60,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 645,
-  "y": 180,
+  "x": 745,
+  "y": 200,
   "wires": [
     [
       "945bf6baa853fd76"

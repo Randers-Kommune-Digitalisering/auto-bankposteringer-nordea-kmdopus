@@ -2,11 +2,12 @@ const Node = {
   "id": "be3c4fb5b3ea916b",
   "type": "group",
   "z": "62eaf4407ee85a3a",
-  "name": "Nordea - transaction request",
+  "g": "41f07c818d4b858a",
+  "name": "Transactions request",
   "style": {
     "label": true,
     "stroke": "none",
-    "fill": "#e3f3d3",
+    "fill": "#ffefbf",
     "label-position": "n",
     "color": "#000000"
   },
@@ -30,8 +31,8 @@ const Node = {
     "d9d009e3d9d427cc",
     "8f2eaebbbfb89bac"
   ],
-  "x": 284,
-  "y": 219,
+  "x": 384,
+  "y": 239,
   "w": 672,
   "h": 142
 }

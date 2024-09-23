@@ -19,12 +19,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 155,
-  "y": 440,
+  "x": 185,
+  "y": 260,
   "wires": [
     [
-      "cd069fd6c0669353",
-      "9c5313f69d9cae08"
+      "cd069fd6c0669353"
     ]
   ],
   "icon": "font-awesome/fa-filter",

@@ -2,6 +2,7 @@ const Node = {
   "id": "8ca141c872ee3048",
   "type": "group",
   "z": "32cf2bec698ca424",
+  "g": "4169783d237ba908",
   "name": "GET rule",
   "style": {
     "stroke": "none",
@@ -16,8 +17,10 @@ const Node = {
     "cd069fd6c0669353",
     "fdb5f980fe740298"
   ],
-  "x": 14,
-  "y": 399
+  "x": 44,
+  "y": 219,
+  "w": 372,
+  "h": 82
 }
 
 module.exports = Node;

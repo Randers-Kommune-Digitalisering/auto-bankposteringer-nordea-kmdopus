@@ -69,11 +69,6 @@ input, a, button
     transition: 120ms ease-in-out;
 }
 
-button + button
-{
-    margin-left: 0.5rem;
-}
-
 h2 {
     border-bottom: 0.1rem solid var(--color-border); /* Old: rgb(235, 235, 235); */
     color:var(--color-text-dark);
@@ -101,6 +96,8 @@ table, form
 
 button, input[type='submit']
 {
+    display: flex;
+    align-items: center;
     border: 0rem;
 }
     button:disabled, input[type='submit']:disabled
@@ -194,10 +191,8 @@ code {
 .flexbox
 {
     display: flex;
-    justify-content: space-between;
     align-items: start;
-    flex-wrap: wrap;
-    gap: 1rem;
+    gap: 2rem;
 }
 .flexbox.grow > *
 {
@@ -352,8 +347,8 @@ code {
 .center
 { text-align: center; }
 
-.activeToggle div {
-    margin-bottom: 1rem;
+div .activeToggle {
+    margin-bottom: 2rem;
 }
 
 .activeToggle label {
@@ -385,12 +380,20 @@ code {
 
 .activeToggle label input:checked + span { background-color: var(--color-green); }
 
+#activeLabel {
+    transition: 120ms ease-in-out;
+}
+
 #activeLabel :hover {
-    background-color: var(--color-green-red);
+    background-color: var(--color-red-light);
     cursor: pointer;
 }
 
 .activeToggle label input:not(:checked) + span { background-color: var(--color-red); }
+
+#inactiveLabel {
+    transition: 120ms ease-in-out;
+}
 
 #inactiveLabel :hover {
     background-color: var(--color-green-light);

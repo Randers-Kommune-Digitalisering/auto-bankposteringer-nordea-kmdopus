@@ -1,7 +1,7 @@
 const Node = {
   "id": "92c28da6a66fdcb3",
   "type": "tab",
-  "label": "Data synchronization",
+  "label": "Synkronisér data",
   "disabled": false,
   "info": "",
   "env": []

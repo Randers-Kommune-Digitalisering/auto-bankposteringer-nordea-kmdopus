@@ -1,7 +1,7 @@
 const Node = {
   "id": "3dbd9a44a2e8e2ea",
   "type": "function",
-  "z": "92c28da6a66fdcb3",
+  "z": "cc3305da0e5c71f6",
   "g": "46c70bcd77ca965a",
   "name": "restructure data",
   "func": "",
@@ -15,8 +15,8 @@ const Node = {
       "module": "csv-parser"
     }
   ],
-  "x": 465,
-  "y": 580,
+  "x": 235,
+  "y": 60,
   "wires": [
     [
       "18b22abc816761e0"

@@ -38,7 +38,7 @@ const Node = {
   "repair": false,
   "outputs": 4,
   "x": 115,
-  "y": 240,
+  "y": 200,
   "wires": [
     [
       "2e449f988c67a99d"
@@ -50,7 +50,7 @@ const Node = {
       "5b0e22c04ca85106"
     ],
     [
-      "5e98d83c4a1fa3c6"
+      "d4b848bdae2bb91b"
     ]
   ],
   "icon": "font-awesome/fa-question",
