@@ -2,11 +2,12 @@ const Node = {
   "id": "8b39791da44fdf1f",
   "type": "group",
   "z": "32cf2bec698ca424",
+  "g": "1b0a88a05194f18e",
   "name": "GET file",
   "style": {
     "stroke": "none",
     "label": true,
-    "fill": "#e3f3d3",
+    "fill": "#ffefbf",
     "label-position": "n",
     "color": "#000000"
   },
@@ -20,8 +21,10 @@ const Node = {
     "28d4dace2e23279e",
     "c4ba80c8b39fa86c"
   ],
-  "x": 554,
-  "y": 559
+  "x": 44,
+  "y": 819,
+  "w": 432,
+  "h": 122
 }
 
 module.exports = Node;

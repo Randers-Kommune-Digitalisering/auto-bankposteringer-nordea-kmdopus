@@ -15,7 +15,7 @@ const Node = {
       "module": "csv-parser"
     }
   ],
-  "x": 325,
+  "x": 345,
   "y": 240,
   "wires": [
     [
@@ -29,10 +29,12 @@ const Node = {
 Node.func = async function (node, msg, RED, context, flow, global, env, util, csv) {
   const date = global.get("dateOfOrigin");
   const time = global.get("timeOfOrigin");
-  const dateTime = date + "_" + time;
-  const bankingDate = String(global.get("enddate"));
-  const dataProviderId = "RAND";
-  const filename = "ZFIR_KMD_Opus_Posteringer_IND_730_RAND_" + dateTime + ".xml";
+  const compCode = global.get("configs").ftp.compCode;
+  const prodEnv = global.get("configs").ftp.prodEnv;
+  const dataProviderId = global.get("configs").ftp.dataProviderId;
+  const dataProviderIdCode = global.get("configs").ftp.dataProviderIdCode;
+  const filename = flow.get("configs").ftp.filename;
+  const bankingDate = String(global.get("date"));
   let lineCounter = 0;
   let debetSum = 0;
   let kreditSum = 0;
@@ -101,8 +103,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   }
   
   const CONTROL_FIELDS = {
-      SENDERID: "P04CLNT730",
-      RECEIVER: "P04CLNT730",
+      SENDERID: prodEnv + "CLNT" + dataProviderIdCode,
+      RECEIVER: prodEnv + "CLNT" + dataProviderIdCode,
       FILE_NAME: filename,
       SEND_DATE: date,
       SEND_TIME: time
@@ -112,8 +114,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       'NO_DOC-POSITION': String(lineCounter),
       'BALANCE_DEBET': String(debetSum.toFixed(2)),
       'BALANCE_CREDIT': String(kreditSum.toFixed(2)),
-      'MUNICIPALITY': '730',
-      'COMP_CODE': '0020',
+      'MUNICIPALITY': dataProviderIdCode,
+      'COMP_CODE': compCode,
       'DOC_DATE': bankingDate,
       'PSTNG_DATE': bankingDate,
       'RECEIV_DOC': docId,
@@ -136,8 +138,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   };
   
   msg.payload = xmlObject;
-  flow.set("filenameFTPlocal", "/data/output/" + filename)
-  flow.set("filenameFTPremote", "/some/folder/" + filename)
   
   return msg;
 }

@@ -2,7 +2,7 @@ const Node = {
   "id": "21a9bc54fbfa683b",
   "type": "function",
   "z": "32cf2bec698ca424",
-  "g": "a6213de5d0ba3b76",
+  "g": "fd2d20f8e7169b95",
   "name": "Construct SQL Query",
   "func": "",
   "outputs": 1,
@@ -10,11 +10,10 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 1075,
-  "y": 440,
+  "x": 235,
+  "y": 660,
   "wires": [
     [
-      "f2ad8463279f9f76",
       "3d65585d175ec2cd"
     ]
   ],

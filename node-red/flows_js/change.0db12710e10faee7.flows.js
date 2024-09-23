@@ -37,14 +37,14 @@ const Node = {
       "t": "set",
       "p": "data",
       "pt": "flow",
-      "to": "{\t   \"scope\":[\t       \"ACCOUNTS_BROADBAND\"\t   ],\t   \"duration\":129600,\t   \"agreement_number\":$env('AGREEMENT_ID')\t}",
+      "to": "{\t   \"scope\":[\t       \"ACCOUNTS_BROADBAND\"\t   ],\t   \"duration\":129600,\t   \"agreement_number\":$globalContext(\"configs\").banking.agreement\t}",
       "tot": "jsonata"
     },
     {
       "t": "set",
       "p": "url",
       "pt": "msg",
-      "to": "$flowContext(\"banking_domain\") & $flowContext(\"path\")",
+      "to": "$globalContext(\"configs\").banking.domain & $flowContext(\"path\")",
       "tot": "jsonata"
     }
   ],
@@ -53,8 +53,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 645,
-  "y": 60,
+  "x": 745,
+  "y": 80,
   "wires": [
     [
       "bb2aebcebb495b0f"

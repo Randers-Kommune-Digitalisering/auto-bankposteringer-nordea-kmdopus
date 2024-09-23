@@ -2,7 +2,8 @@ const Node = {
   "id": "e3a1fa8058d9a961",
   "type": "group",
   "z": "32cf2bec698ca424",
-  "name": "PUT rule",
+  "g": "4169783d237ba908",
+  "name": "PUT",
   "style": {
     "stroke": "none",
     "fill": "#ffefbf",
@@ -17,10 +18,13 @@ const Node = {
     "6907248a9472ae39",
     "57d8770c4c9dbcad",
     "47ea5bac8e6905ef",
-    "a815b5b63f39be37"
+    "a815b5b63f39be37",
+    "d1810bb0441f3ea3"
   ],
-  "x": 14,
-  "y": 479
+  "x": 44,
+  "y": 299,
+  "w": 372,
+  "h": 162
 }
 
 module.exports = Node;

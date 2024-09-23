@@ -8,8 +8,8 @@ const Node = {
   "method": "delete",
   "upload": false,
   "swaggerDoc": "",
-  "x": 55,
-  "y": 720,
+  "x": 455,
+  "y": 220,
   "wires": [
     [
       "6956e76b0828c414"

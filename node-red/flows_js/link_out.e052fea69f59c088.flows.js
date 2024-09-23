@@ -1,7 +1,8 @@
 const Node = {
   "id": "e052fea69f59c088",
   "type": "link out",
-  "z": "431f85f122b4636d",
+  "z": "92c28da6a66fdcb3",
+  "g": "8fa450aac02c767a",
   "name": "link out build db",
   "mode": "link",
   "links": [
@@ -9,8 +10,8 @@ const Node = {
     "9c66863701eb8d64",
     "aec7c1e8d69a60bb"
   ],
-  "x": 665,
-  "y": 40,
+  "x": 375,
+  "y": 100,
   "wires": []
 }
 

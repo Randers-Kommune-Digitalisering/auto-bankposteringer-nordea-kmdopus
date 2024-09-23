@@ -3,6 +3,9 @@
     import eventBus from '@/eventBus.js'
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
+    import IconAdd from '../components/icons/IconAdd.vue'
+    import IconDelete from '../components/icons/IconDelete.vue'
+    import IconSave from '../components/icons/IconSave.vue'
 
     const isUpdating = ref(false)
     const hasUpdated = ref(false)
@@ -163,7 +166,11 @@
             </tr>
         </table>
         <br />
-        <button @click="updateMasterdata()" :disabled="isUpdating">{{ isUpdating ? 'Gemmer...' : hasUpdated ? 'Ændringer gemt' : 'Gem ændringer' }}</button>
+        <button @click="updateMasterdata()" :disabled="isUpdating">
+            <template v-if="isUpdating">Gemmer...</template>
+            <template v-if="hasUpdated">Ændringer gemt</template>
+            <template v-else><IconSave /></template>
+        </button>
     </Content>
 
     <Content>
@@ -187,13 +194,15 @@
                 <td><input v-model="value.bankAccount"></input></td>
                 <td><input v-model="value.statusAccount"></input></td>
                 <td><input v-model="value.intermediateAccount"></input></td>
-                <td><button @click="removeBankaccount(index)">Slet</button></td>
+                <td><button @click="removeBankaccount(index)"><IconDelete /></button></td>
             </tr>
         </table>
         <br />
-        <button @click="addBankaccount()" class="blue">Tilføj</button>
-        <button @click="updateBankaccounts()" :disabled="isUpdating2">{{ isUpdating2 ? 'Gemmer...' : hasUpdated2 ? 'Ændringer gemt' : 'Gem ændringer' }}</button>
-
+        <button @click="addBankaccount()" class="blue"><IconAdd /></button>
+        <button @click="updateBankaccounts()" :disabled="isUpdating2">
+            <template v-if="isUpdating2">Gemmer...</template>
+            <template v-if="hasUpdated2">Ændringer gemt</template>
+            <template v-else><IconSave /></template>
+        </button>
     </Content>
-
 </template>

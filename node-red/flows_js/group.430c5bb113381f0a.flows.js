@@ -2,10 +2,11 @@ const Node = {
   "id": "430c5bb113381f0a",
   "type": "group",
   "z": "32cf2bec698ca424",
-  "name": "GET masterData",
+  "g": "6e73a9b65330f47b",
+  "name": "GET",
   "style": {
     "stroke": "none",
-    "fill": "#e3f3d3",
+    "fill": "#ffefbf",
     "label": true,
     "label-position": "n",
     "color": "#000000"
@@ -16,8 +17,10 @@ const Node = {
     "2931f546ccea9df6",
     "d4b976cf408bbba7"
   ],
-  "x": 554,
-  "y": 299
+  "x": 534,
+  "y": 519,
+  "w": 372,
+  "h": 82
 }
 
 module.exports = Node;

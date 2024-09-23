@@ -1,11 +1,11 @@
 const Node = {
   "id": "46c70bcd77ca965a",
   "type": "group",
-  "z": "92c28da6a66fdcb3",
+  "z": "cc3305da0e5c71f6",
   "name": "CSV overwrite rules",
   "style": {
     "stroke": "none",
-    "fill": "#ffffbf",
+    "fill": "#e3f3d3",
     "label": true,
     "label-position": "n",
     "color": "#000000"
@@ -18,8 +18,10 @@ const Node = {
     "18b22abc816761e0",
     "1e64e4897ffb3d36"
   ],
-  "x": 284,
-  "y": 539
+  "x": 24,
+  "y": 19,
+  "w": 372,
+  "h": 82
 }
 
 module.exports = Node;

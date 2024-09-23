@@ -1,7 +1,8 @@
 const Node = {
   "id": "62e1fb528b2e9d7f",
   "type": "switch",
-  "z": "431f85f122b4636d",
+  "z": "92c28da6a66fdcb3",
+  "g": "8fa450aac02c767a",
   "name": "",
   "property": "configs.initialData.rulesToImportFromFile",
   "propertyType": "global",
@@ -16,14 +17,14 @@ const Node = {
   "checkall": "false",
   "repair": false,
   "outputs": 2,
-  "x": 245,
-  "y": 40,
+  "x": 225,
+  "y": 80,
   "wires": [
     [
       "eb01e84f2db8e259"
     ],
     [
-      "7babf197605acf75"
+      "30ec221fb9fd9fa3"
     ]
   ],
   "icon": "font-awesome/fa-question",

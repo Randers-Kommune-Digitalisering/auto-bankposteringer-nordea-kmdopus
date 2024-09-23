@@ -22,14 +22,12 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let erpSystem = global.get("erpSystem");
+  let erpSystem = global.get("masterData").erpSystem;
   let erpFileHeaders = [];
   
   switch (erpSystem) {
-      case "KMD":
+      case "KMD Opus":
           erpFileHeaders = ["Artskonto", "Omkostningssted", "PSP-element", "Profitcenter", "Ordre", "Debet/kredit", "Beløb", "Næste agent", "Tekst", "Betalingsart", "Påligningsår", "Betalingsmodtagernr.", "Betalingsmodtagernr.kode", "Ydelsesmodtagernr.", "Ydelsesmodtagernr.kode", "Ydelsesperiode fra", "Ydelsesperiode til", "Oplysningspligtnr.", "Oplysningspligtmodtagernr.kode", "Oplysningspligtkode", "Netværk", "Operation", "Mængde", "Mængdeenhed", "Referencenøgle"];
-          break;
-      case "Prisme":
           break;
       default:
           node.error("Unknown ERP-system");

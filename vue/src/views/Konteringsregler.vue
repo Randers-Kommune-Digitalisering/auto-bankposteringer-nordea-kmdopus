@@ -6,6 +6,8 @@
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
     import IconEdit from '@/components/icons/IconEdit.vue'
+    import IconSearch from '../components/icons/IconSearch.vue'
+    import IconAdd from '../components/icons/IconAdd.vue'
 
     const allKonteringsregler = ref(null)
     const konteringsregler = ref(null)
@@ -170,19 +172,20 @@
             <IconTable />
         </template>
         <template #heading>
-            Aktuelle konteringsregler test: {{returningFrom}}
-        
+            Aktuelle konteringsregler af typen {{ type }}
         </template>
 
         <fieldset>           
             <div class="float-right searchButtonDiv">
                 <button :class="isSearching ? 'gray' : ''" @click="toggleSearch()">
-                    {{ isSearching ? 'Luk søgning' : 'Søg i regler'}}</button>
+                    <template v-if="isSearching">Luk søgning</template>
+                    <template v-else><IconSearch /></template>
+                </button>
             </div>
 
             <div class="float-left addButton">
                 <router-link v-if="type != null" :to="'/retkonteringsregel/ny' + type">
-                    <button @click="router.replace({  path: '/konteringsregler' })">{{ type == 'undtagelse' ? 'Tilføj undtagelse' : 'Tilføj regel'}}</button>
+                    <button @click="router.replace({  path: '/konteringsregler' })"><IconAdd /></button>
                 </router-link>
             </div>
 
@@ -203,7 +206,7 @@
                     <th v-for="([key, value]) in Object.entries(keyMap)" :key="key" :class="(value.hidden ? 'hidden ' : '')">
                         {{ key }}
                     </th>
-                    <th></th>
+                    <th>Ændr</th>
                 </tr>
             </thead>
             <tr v-if="konteringsregler != null" v-for="(obj, index) in konteringsregler" :id="obj[keyMap['ID'].key]" :class="returningFrom == obj[keyMap['ID'].key] ? 'highlight' : ''">
@@ -219,7 +222,6 @@
                         <IconEdit />
                     </button>
                 </router-link></td>
-                    
             </tr>
             <tr v-else>
                 <td :colspan="(Object.values(keyMap).filter(value => !value.hidden).length)+1">Indlæser...</td>
@@ -259,5 +261,9 @@
     .highlight
     {
         background-color: #f0f0f0;
+    }
+    .ID
+    {
+        font-weight: 600;
     }
 </style>

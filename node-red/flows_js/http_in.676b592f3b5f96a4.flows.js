@@ -3,13 +3,13 @@ const Node = {
   "type": "http in",
   "z": "32cf2bec698ca424",
   "g": "7dd9b7ddf80481c4",
-  "name": "List files",
+  "name": "List",
   "url": "/files",
   "method": "get",
   "upload": false,
   "swaggerDoc": "",
-  "x": 640,
-  "y": 720,
+  "x": 120,
+  "y": 980,
   "wires": [
     [
       "8eac67becc9ec7af"

@@ -15,12 +15,11 @@ const Node = {
   "authType": "",
   "senderr": false,
   "headers": [],
-  "x": 745,
-  "y": 180,
+  "x": 845,
+  "y": 200,
   "wires": [
     [
-      "7be3097ce9fc8ed0",
-      "b1c3d81db663e99a"
+      "7be3097ce9fc8ed0"
     ]
   ],
   "l": false

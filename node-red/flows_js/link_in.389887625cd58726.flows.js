@@ -5,10 +5,11 @@ const Node = {
   "g": "883c8c287020e842",
   "name": "link in manual create db table",
   "links": [
-    "e052fea69f59c088"
+    "e052fea69f59c088",
+    "2ed6323229b981a3"
   ],
   "x": 55,
-  "y": 320,
+  "y": 400,
   "wires": [
     [
       "59b7c5db6e53357e"

@@ -1,8 +1,7 @@
 const Node = {
   "id": "de3ee70ea79d0cec",
   "type": "change",
-  "z": "431f85f122b4636d",
-  "g": "6dfe26228ab4f389",
+  "z": "a5944093087bb38c",
   "name": "Set db initial accountingRules",
   "rules": [
     {
@@ -18,12 +17,10 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 495,
-  "y": 340,
+  "x": 355,
+  "y": 60,
   "wires": [
-    [
-      "a31ad194ed05bfc3"
-    ]
+    []
   ],
   "icon": "font-awesome/fa-save",
   "l": false

@@ -6,11 +6,10 @@ const Node = {
   "name": "link out nordea transaction request",
   "mode": "link",
   "links": [
-    "67210a275cdf01da",
-    "d4ae13f67adc2704"
+    "67210a275cdf01da"
   ],
   "x": 895,
-  "y": 320,
+  "y": 340,
   "wires": []
 }
 

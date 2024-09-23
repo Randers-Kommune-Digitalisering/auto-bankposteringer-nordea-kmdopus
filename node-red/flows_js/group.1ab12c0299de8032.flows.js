@@ -2,7 +2,8 @@ const Node = {
   "id": "1ab12c0299de8032",
   "type": "group",
   "z": "32cf2bec698ca424",
-  "name": "DELETE rule",
+  "g": "4169783d237ba908",
+  "name": "DELETE",
   "style": {
     "stroke": "none",
     "fill": "#ffefbf",
@@ -17,10 +18,13 @@ const Node = {
     "f9ef4cd10f18fee8",
     "b2d3147ba03836b3",
     "889685921f91eba6",
-    "1bbde22550adb612"
+    "1bbde22550adb612",
+    "f99a8f1b4ca82a0c"
   ],
-  "x": 14,
-  "y": 639
+  "x": 414,
+  "y": 139,
+  "w": 372,
+  "h": 162
 }
 
 module.exports = Node;

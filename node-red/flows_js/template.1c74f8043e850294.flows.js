@@ -2,7 +2,7 @@ const Node = {
   "id": "1c74f8043e850294",
   "type": "template",
   "z": "32cf2bec698ca424",
-  "g": "a6213de5d0ba3b76",
+  "g": "fd2d20f8e7169b95",
   "name": "SQL query \"DELETE\"",
   "field": "sql",
   "fieldType": "msg",
@@ -10,11 +10,10 @@ const Node = {
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 975,
-  "y": 480,
+  "x": 135,
+  "y": 700,
   "wires": [
     [
-      "5bcc7e609fd01baf",
       "5edfef391387157b"
     ]
   ],

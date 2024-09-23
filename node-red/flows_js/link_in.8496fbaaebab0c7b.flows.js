@@ -6,10 +6,11 @@ const Node = {
   "name": "link in load masterdata to env",
   "links": [
     "e2aefec3f86743b4",
-    "9eefcaa37540b844"
+    "9eefcaa37540b844",
+    "a83eed98932c10c7"
   ],
-  "x": 805,
-  "y": 320,
+  "x": 785,
+  "y": 400,
   "wires": [
     [
       "87979ca976751599"

@@ -6,28 +6,28 @@ const statusNodered = ref(null);
 // Express status
 fetch('/status')
     .then(response => response = response.json())
-    .then(value => statusExpress.value = value.status == "running" ? "Running" : null)
+    .then(value => statusExpress.value = value.status == "running" ? "Forbundet" : null)
     .then(value => console.log("Express status: \n" + value))
 
 // Node-RED status (uses /api/ proxy defined in Vite config)
 fetch('/api/status')
     .then(response => response = response.json())
-    .then(value => statusNodered.value = value.success ? "Connected" : null)
+    .then(value => statusNodered.value = value.success ? "Forbundet" : null)
     .then(value => console.log("Node-RED status: \n" + value))
 
 </script>
 
 <template>    
     <div>
-        <span>Node-RED</span>:
-        <span v-if="statusNodered" class="green heavy">{{statusNodered}}</span>
-        <span v-else="statusNodered" class="red heavy">Not connected</span>
+        <span>Express (front-end)</span>:
+        <span v-if="statusExpress" class="green heavy">{{statusExpress}}</span>
+        <span v-else="statusExpress" class="red heavy">Ingen forbindelse</span>
     </div>
 
     <div>
-        <span>Express</span>:
-        <span v-if="statusExpress" class="green heavy">{{statusExpress}}</span>
-        <span v-else="statusExpress" class="red heavy">Not running</span>
+        <span>Node-RED (back-end)</span>:
+        <span v-if="statusNodered" class="green heavy">{{statusNodered}}</span>
+        <span v-else="statusNodered" class="red heavy">Ingen forbindelse</span>
     </div>
 </template>
 

@@ -4,7 +4,7 @@ const Node = {
   "z": "ee0cf4ce372e2d36",
   "d": true,
   "g": "09ae44d941f2b3ed",
-  "ftp": "",
+  "ftp": "202fb078e8a1cdcb",
   "operation": "append",
   "filename": "",
   "localFilename": "",
