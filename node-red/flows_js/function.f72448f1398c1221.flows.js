@@ -3,36 +3,26 @@ const Node = {
   "type": "function",
   "z": "ee0cf4ce372e2d36",
   "g": "1c9d2e5a1088096c",
-  "name": "ERP headers",
+  "name": "Format",
   "func": "",
   "outputs": 1,
   "noerr": 0,
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 105,
-  "y": 60,
+  "x": 215,
+  "y": 200,
   "wires": [
     [
       "e647e7e80e1b8c83"
     ]
   ],
-  "icon": "font-awesome/fa-save",
+  "icon": "font-awesome/fa-cog",
   "l": false
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let erpSystem = global.get("masterData").erpSystem;
-  let erpFileHeaders = [];
-  
-  switch (erpSystem) {
-      case "KMD Opus":
-          erpFileHeaders = ["Artskonto", "Omkostningssted", "PSP-element", "Profitcenter", "Ordre", "Debet/kredit", "Beløb", "Næste agent", "Tekst", "Betalingsart", "Påligningsår", "Betalingsmodtagernr.", "Betalingsmodtagernr.kode", "Ydelsesmodtagernr.", "Ydelsesmodtagernr.kode", "Ydelsesperiode fra", "Ydelsesperiode til", "Oplysningspligtnr.", "Oplysningspligtmodtagernr.kode", "Oplysningspligtkode", "Netværk", "Operation", "Mængde", "Mængdeenhed", "Referencenøgle"];
-          break;
-      default:
-          node.error("Unknown ERP-system");
-          break;
-  }
+  let erpFileHeaders = flow.get("erpFileHeaders");
   
   flow.set("erpFileHeaders", erpFileHeaders.join(', '));    
   

@@ -10,11 +10,12 @@ const Node = {
   "createDir": true,
   "overwriteFile": "true",
   "encoding": "setbymsg",
-  "x": 485,
-  "y": 160,
+  "x": 655,
+  "y": 100,
   "wires": [
     [
-      "ec6eb0551b979f4b"
+      "588edafd604283f6",
+      "e4b5680702fbfb57"
     ]
   ],
   "icon": "font-awesome/fa-upload",

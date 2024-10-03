@@ -18,6 +18,7 @@ const Node = {
       "56f5fcd2967faf8f"
     ]
   ],
+  "icon": "font-awesome/fa-refresh",
   "l": false
 }
 

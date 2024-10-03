@@ -14,16 +14,9 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "localFilename",
-      "pt": "msg",
-      "to": "configs.ftp.filepaths.local.fullPath",
-      "tot": "global"
-    },
-    {
-      "t": "set",
       "p": "filename",
       "pt": "msg",
-      "to": "configs.ftp.filepaths.remote.fullPath",
+      "to": "configs.ftp.filepaths.local.fullPath",
       "tot": "flow"
     }
   ],
@@ -32,14 +25,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 455,
-  "y": 240,
+  "x": 605,
+  "y": 200,
   "wires": [
     [
       "320460172b7a9a11"
     ]
   ],
-  "icon": "font-awesome/fa-arrows",
+  "icon": "font-awesome/fa-cog",
   "l": false
 }
 

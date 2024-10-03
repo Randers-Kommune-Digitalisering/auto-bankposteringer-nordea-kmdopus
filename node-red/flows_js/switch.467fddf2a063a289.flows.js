@@ -2,8 +2,8 @@ const Node = {
   "id": "467fddf2a063a289",
   "type": "switch",
   "z": "62eaf4407ee85a3a",
-  "g": "be3c4fb5b3ea916b",
-  "name": "All pages requested?",
+  "g": "9f0acbcfa0581c4a",
+  "name": "More pages?",
   "property": "continuation_key",
   "propertyType": "flow",
   "rules": [
@@ -19,15 +19,19 @@ const Node = {
   "checkall": "true",
   "repair": false,
   "outputs": 2,
-  "x": 795,
-  "y": 320,
+  "x": 165,
+  "y": 880,
   "wires": [
     [
-      "8f2eaebbbfb89bac"
+      "4ee43544775ac9aa"
     ],
     [
       "f8442862197f5a62"
     ]
+  ],
+  "outputLabels": [
+    "Yes",
+    "No"
   ],
   "icon": "font-awesome/fa-question",
   "l": false
