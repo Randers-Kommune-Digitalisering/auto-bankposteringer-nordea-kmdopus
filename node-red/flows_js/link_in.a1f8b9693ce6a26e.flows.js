@@ -6,13 +6,15 @@ const Node = {
   "name": "link in next transaction request",
   "links": [
     "d833516eacb80991",
-    "d9d009e3d9d427cc"
+    "d9d009e3d9d427cc",
+    "4ee43544775ac9aa",
+    "2efe55213bd0cbc7"
   ],
-  "x": 425,
+  "x": 595,
   "y": 320,
   "wires": [
     [
-      "0cdcfad8d6f62454"
+      "c83d3435c2fc7e8e"
     ]
   ]
 }

@@ -3,7 +3,7 @@ const Node = {
   "type": "function",
   "z": "ee0cf4ce372e2d36",
   "g": "09ae44d941f2b3ed",
-  "name": "restructure data",
+  "name": "Convert to XML compliance ",
   "func": "",
   "outputs": 1,
   "noerr": 0,
@@ -15,8 +15,8 @@ const Node = {
       "module": "csv-parser"
     }
   ],
-  "x": 345,
-  "y": 240,
+  "x": 455,
+  "y": 200,
   "wires": [
     [
       "ecaebc4d0cb38676"

@@ -4,12 +4,10 @@ const Node = {
   "z": "62eaf4407ee85a3a",
   "g": "a537ba3361b4d03c",
   "name": "link out admin auth fail",
-  "mode": "link",
-  "links": [
-    "ef2578c1c0e2fbf3"
-  ],
-  "x": 295,
-  "y": 460,
+  "mode": "return",
+  "links": [],
+  "x": 265,
+  "y": 600,
   "wires": []
 }
 

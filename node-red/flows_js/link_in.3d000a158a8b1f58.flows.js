@@ -4,15 +4,15 @@ const Node = {
   "z": "ee0cf4ce372e2d36",
   "d": true,
   "g": "09ae44d941f2b3ed",
-  "name": "link in 1",
+  "name": "link in ftp file creation",
   "links": [
-    "588edafd604283f6"
+    "1d6ee10f975dab9d"
   ],
-  "x": 245,
-  "y": 240,
+  "x": 405,
+  "y": 200,
   "wires": [
     [
-      "6173ae0f705c30c1"
+      "9f0da9b309d12828"
     ]
   ]
 }

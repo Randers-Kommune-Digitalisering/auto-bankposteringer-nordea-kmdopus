@@ -48,6 +48,7 @@ const Node = {
     "import succes",
     "import error"
   ],
+  "icon": "font-awesome/fa-cog",
   "status": {
     "x": 460,
     "y": 140,

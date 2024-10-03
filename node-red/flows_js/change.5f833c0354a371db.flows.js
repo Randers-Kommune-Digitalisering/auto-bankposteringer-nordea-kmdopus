@@ -7,20 +7,6 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "payload",
-      "pt": "msg",
-      "to": "Indlæsningen af bankposteringer kræver din godkendelse",
-      "tot": "str"
-    },
-    {
-      "t": "set",
-      "p": "topic",
-      "pt": "msg",
-      "to": "Godkendelse af automatisk bankindlæsning (autogenereret mail)",
-      "tot": "str"
-    },
-    {
-      "t": "set",
       "p": "to",
       "pt": "msg",
       "to": "masterData.admEmail",
@@ -32,8 +18,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 185,
-  "y": 340,
+  "x": 165,
+  "y": 1140,
   "wires": [
     [
       "7bc90509ca21d4f1"

@@ -5,8 +5,8 @@ const Node = {
   "name": "link out config",
   "mode": "return",
   "links": [],
-  "x": 375,
-  "y": 880,
+  "x": 335,
+  "y": 920,
   "wires": []
 }
 

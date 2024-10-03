@@ -7,15 +7,15 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "configs.email.topic",
-      "pt": "global",
+      "p": "topic",
+      "pt": "msg",
       "to": "Godkendelse af automatisk bankindlæsning (autogenereret mail)",
       "tot": "str"
     },
     {
       "t": "set",
-      "p": "configs.email.payload",
-      "pt": "global",
+      "p": "payload",
+      "pt": "msg",
       "to": "Indlæsningen af bankposteringer kræver din godkendelse",
       "tot": "str"
     }
@@ -26,7 +26,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 180,
-  "y": 880,
+  "y": 920,
   "wires": [
     [
       "f64d1a568e9a7397"
