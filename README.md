@@ -1,10 +1,11 @@
-<h1 align="center"> Bankintegration for posteringer til kommunalt økonomisystem (ØS) </h1> <br>
+<h1 align="center"> Fællesoffentlig bankintegration (FOBI) </h1> <br>
 
 # Indholdsfortegnelse
 
 - [Status](#status)
 - [Introduktion](#introduktion)
 - [Sådan fungerer det](#sådan-fungerer-det)
+- [Sådan kommer du i gang](#sådan-kommer-du-i-gang)
 - [Diagrammer](#diagrammer)
 - [Faglige ressourcer](#faglige-ressourcer)
 - [Tekniske ressourcer](#tekniske-ressourcer)
@@ -36,31 +37,38 @@
 
 # Introduktion
 
-De fleste kommunale økonomimedarbejdere koncentrerer sig primært om det kommunale økonomisystem, men al afregning med omverdnen foregår reelt på kommunernes bankkonti.
-Der bør derfor være en helt tæt forbindelse mellem kommunens transaktioner og kommunens økonomisystem.
-Det er desværre ikke altid tilfældet, og derfor bliver der rundt omkring i kommmunerne lavet rigtig mange manuelle bogføringer; særligt manuel bogføring af indbetalinger.
-En store del af disse transaktioner følger heldigvis ofte et mønster, så der er basis for automatisering.
+Fællesoffentlig bankintegration (FOBI) integrerer kommunernes økonomisystem (ØS) og bankkonti for fuldautomatisk bogføring af hovedkonto 8.22.05 og semi-automatisk bogføring af bankposteringer i kommunernes kontoplan.
 
-Projektet sørger altså for en stærkere integration mellem bankkonti og det interne økonomisystem og automatiserer bogføringen af størstedelen af kommunens transaktioner.
+Ved hjælp af brugeroprettede konteringsregler matcher og bogfører FOBI bankposteringer med den ønskede kontering i kommunernes ØS.
 
 # Sådan fungerer det
 
-Kommunerne udfylder stamdata og konteringsregler, som programmet bruger til at automatisere bogføringen af banktransaktioner.
+Kommunerne udfylder egne stamdata og konteringsregler, som programmet bruger til at automatisere bogføringen af banktransaktioner.
 En konteringsregel indeholder et sæt søgekriterier og et sæt konteringsoplysninger.
 Stamdata indeholder blandt andet information om kommunens administrator/kontaktperson og bankkontooplysninger.
 
-Programmet har planlagt kørsel dagligt kl. 5:30, hvor transaktionerne for seneste lukkede bankdag hentes.
-Transaktionerne matches op mod konteringsregler og påføres kontering.
-Konteringerne bliver lagt sammen i et finansbilag i csv-format.
-Finansbilaget udstilles på hjemmesiden.
-Der er også mulighed for at koble sig på en bilagsintegration hos leverandøren af ØS'et, så finansbilag automatisk indlæses i ØS. 
+FOBI har planlagt kørsel dagligt kl. 5:30, hvor transaktionerne for seneste lukkede bankdag hentes.
+Transaktionerne matches med konteringsregler og påføres kontering.
+Konteringerne samles i et finansbilag i csv-format eller leveres direkte til ØS via en bilagsintegration (FTP-forbindelse).
+
+# Sådan kommer du i gang
+
+1. Installér docker på dit system
+2. Klon dette repository til en projektmappe på dit system
+3. Navigér til projektmappen og kør kommandoen `docker-compose up --build` for initialisere og starte alle komponenter
+4. Gå til back-end udviklermiljøet Node-RED på adressen `http://localhost:1880`
+5. Gå til adressen `http://localhost:3000` for at se front-end
+6. Udfyld konfigurationen på første fane i Node-RED
+7. Følg vejledningen på forsiden af front-enden
 
 # Diagrammer
 
 ### Systemdesign
+
 ![System design](images/System%20design.svg)
 
 ### Server design
+
 ![Server design](images/Server%20design.svg)
 
 # Faglige ressourcer
@@ -83,8 +91,8 @@ Der er også mulighed for at koble sig på en bilagsintegration hos leverandøre
 
 ![](https://avatars.githubusercontent.com/u/5375661?s=36&v=4)  Node-RED som orkestrator
 
-![](https://avatars.githubusercontent.com/u/1529926?s=36&v=4)  Redis som bindeled til microservices
+![](https://avatars.githubusercontent.com/u/6128107?s=36&v=4)  Vue som front-end framework
 
-![](https://avatars.githubusercontent.com/u/1525981?s=36&v=4)  Python som microservice (konteringsforslag til umatchede posteringer)
+![](https://avatars.githubusercontent.com/u/1529926?s=36&v=4)  Redis som bindeled til microservices (ikke i brug)
 
-For mere information, læs [HOW-TO](/docs/HOW-TO.md) filen.
+![](https://avatars.githubusercontent.com/u/1525981?s=36&v=4)  Python som microservice (konteringsforslag til umatchede posteringer) (ikke i brug)
