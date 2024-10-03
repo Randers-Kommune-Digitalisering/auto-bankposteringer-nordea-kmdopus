@@ -6,8 +6,8 @@ const Node = {
   "name": "link out nordea pre-request",
   "mode": "return",
   "links": [],
-  "x": 295,
-  "y": 60,
+  "x": 165,
+  "y": 160,
   "wires": []
 }
 

@@ -11,13 +11,13 @@ const Node = {
   "onceDelay": 0.1,
   "topic": "",
   "x": 85,
-  "y": 580,
+  "y": 460,
   "wires": [
     [
       "2d11b50a914e60c1"
     ]
   ],
-  "icon": "font-awesome/fa-undo",
+  "icon": "font-awesome/fa-refresh",
   "l": false
 }
 

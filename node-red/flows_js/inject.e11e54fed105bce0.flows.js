@@ -17,6 +17,7 @@ const Node = {
       "862489a949fd3930"
     ]
   ],
+  "icon": "font-awesome/fa-mouse-pointer",
   "l": false
 }
 

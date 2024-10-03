@@ -1,7 +1,7 @@
 const Node = {
   "id": "32cf2bec698ca424",
   "type": "tab",
-  "label": "Hjemmeside-interaktion",
+  "label": "Frontend",
   "disabled": false,
   "info": "",
   "env": []

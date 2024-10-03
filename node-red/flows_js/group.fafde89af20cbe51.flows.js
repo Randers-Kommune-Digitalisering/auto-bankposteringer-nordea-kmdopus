@@ -2,7 +2,8 @@ const Node = {
   "id": "fafde89af20cbe51",
   "type": "group",
   "z": "ee0cf4ce372e2d36",
-  "name": "KMD Opus - file creation",
+  "g": "ae97f4f45deb77bb",
+  "name": "FIle creation",
   "style": {
     "stroke": "none",
     "fill": "#e3f3d3",
@@ -11,23 +12,19 @@ const Node = {
     "color": "#000000"
   },
   "nodes": [
-    "b7a5375ba9c70220",
     "e176ace9d52ca574",
     "51882f01fdac87d1",
     "e4b5680702fbfb57",
-    "98b1709c5174f90d",
-    "588edafd604283f6",
-    "b3fc293ad6a84acf",
-    "ccb74ec631aaebd6",
-    "ec6eb0551b979f4b",
-    "d833516eacb80991",
     "67210a275cdf01da",
-    "0b0b5788d39412b1"
+    "0b0b5788d39412b1",
+    "588edafd604283f6",
+    "21aa4428cc26761e",
+    "73f0b20e54524403"
   ],
-  "x": 204,
-  "y": 119,
-  "w": 552,
-  "h": 102
+  "x": 364,
+  "y": 39,
+  "w": 502,
+  "h": 122
 }
 
 module.exports = Node;

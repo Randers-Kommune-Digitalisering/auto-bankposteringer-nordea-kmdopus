@@ -1,9 +1,8 @@
 const Node = {
   "id": "98b1709c5174f90d",
   "type": "change",
-  "z": "ee0cf4ce372e2d36",
-  "d": true,
-  "g": "fafde89af20cbe51",
+  "z": "62eaf4407ee85a3a",
+  "g": "dc3f1bccec7ebeb1",
   "name": "Clean up",
   "rules": [
     {
@@ -17,11 +16,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 365,
-  "y": 160,
+  "x": 215,
+  "y": 1000,
   "wires": [
     [
-      "e176ace9d52ca574"
+      "64c4dc94baea05d0"
     ]
   ],
   "icon": "font-awesome/fa-trash",

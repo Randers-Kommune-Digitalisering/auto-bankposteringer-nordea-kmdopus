@@ -7,23 +7,9 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "configs.banking.domain",
+      "p": "configs.banking.id",
       "pt": "global",
-      "to": "https://open.nordea.com",
-      "tot": "str"
-    },
-    {
-      "t": "set",
-      "p": "configs.banking.domainShort",
-      "pt": "msg",
-      "to": "open.nordea.com",
-      "tot": "str"
-    },
-    {
-      "t": "set",
-      "p": "configs.banking.agreement",
-      "pt": "global",
-      "to": "AGREEMENT_ID",
+      "to": "CLIENT_ID",
       "tot": "env"
     },
     {
@@ -35,16 +21,37 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "configs.banking.id",
+      "p": "configs.banking.eidas.privateKey",
       "pt": "global",
-      "to": "CLIENT_ID",
+      "to": "EIDASPRIVATEKEY",
       "tot": "env"
     },
     {
       "t": "set",
-      "p": "configs.banking.eidas.privateKey",
-      "pt": "msg",
-      "to": "EIDASPRIVATEKEY",
+      "p": "configs.banking.provider",
+      "pt": "global",
+      "to": "Nordea",
+      "tot": "str"
+    },
+    {
+      "t": "set",
+      "p": "configs.banking.domain",
+      "pt": "global",
+      "to": "https://open.nordea.com",
+      "tot": "str"
+    },
+    {
+      "t": "set",
+      "p": "configs.banking.domainShort",
+      "pt": "global",
+      "to": "open.nordea.com",
+      "tot": "str"
+    },
+    {
+      "t": "set",
+      "p": "configs.banking.agreement",
+      "pt": "global",
+      "to": "AGREEMENT_ID",
       "tot": "env"
     }
   ],
@@ -54,7 +61,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 220,
-  "y": 780,
+  "y": 820,
   "wires": [
     [
       "96bf1732d9808f0b"

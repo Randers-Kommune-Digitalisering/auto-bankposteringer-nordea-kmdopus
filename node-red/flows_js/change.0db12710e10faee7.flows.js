@@ -35,9 +35,16 @@ const Node = {
     },
     {
       "t": "set",
+      "p": "accessDuration",
+      "pt": "flow",
+      "to": "129600",
+      "tot": "num"
+    },
+    {
+      "t": "set",
       "p": "data",
       "pt": "flow",
-      "to": "{\t   \"scope\":[\t       \"ACCOUNTS_BROADBAND\"\t   ],\t   \"duration\":129600,\t   \"agreement_number\":$globalContext(\"configs\").banking.agreement\t}",
+      "to": "{\t   \"scope\":[\t       \"ACCOUNTS_BROADBAND\"\t   ],\t   \"duration\":$flowContext(\"accessDuration\"),\t   \"agreement_number\":$globalContext(\"configs\").banking.agreement\t}",
       "tot": "jsonata"
     },
     {

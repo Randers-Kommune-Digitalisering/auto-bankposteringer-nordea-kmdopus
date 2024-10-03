@@ -23,8 +23,8 @@ const Node = {
       "module": "crypto-js"
     }
   ],
-  "x": 185,
-  "y": 60,
+  "x": 115,
+  "y": 160,
   "wires": [
     [
       "90beb0a595b2a03e"
@@ -40,6 +40,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   const method = flow.get("method").toLowerCase();
   const url = flow.get("url");
   const clientId = global.get("configs").banking.id;
+  const host = global.get("configs").banking.domainShort;
   msg.headers = {};
   
   // Digest Calculation
@@ -82,7 +83,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   const requestWithContentHeaders = "(request-target) x-nordea-originating-host x-nordea-originating-date content-type digest";
   
   function getSignatureBaseOnRequest() {
-      const host = global.get("configs").banking.domainShort;
       const path = constructPath();
       const date = moment().utc().format("ddd, DD MMM YYYY HH:mm:ss") + " GMT";
       const headers = method === "post" || method === "put" || method === "patch" ? requestWithContentHeaders : requestWithoutContentHeaders;
@@ -162,7 +162,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   msg.headers['X-IBM-Client-Secret'] = global.get("configs").banking.secret;
   msg.headers['Signature'] = signatureHeader;
   
-  if (url) msg.url = url;
+  if (url) msg.url = flow.get("url");
   if (data) msg.payload = resolveRequestBody();
   
   switch (method) {
