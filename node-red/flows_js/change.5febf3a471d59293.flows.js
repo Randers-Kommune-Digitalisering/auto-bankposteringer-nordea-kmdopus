@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "32cf2bec698ca424",
   "g": "0b5190b6f576f668",
-  "name": "Aktve regler",
+  "name": "Switch on type",
   "rules": [
     {
       "t": "set",
@@ -23,7 +23,7 @@ const Node = {
   "y": 80,
   "wires": [
     [
-      "55045eaac04f55a8"
+      "83d4326f88df7a48"
     ]
   ],
   "icon": "font-awesome/fa-filter",
