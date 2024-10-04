@@ -8,7 +8,7 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "{\t   \"Message\": \"XML-file successfully transferred to FTP-server\",\t   \"Path to file\": $flowContext('filenameFTPlocal'),\t   \"Timestamp\": $now()\t}",
+  "complete": "{\t   \"Message\": \"XML-file successfully transferred to FTP-server\",\t   \"Path to file\": msg.filename,\t   \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",

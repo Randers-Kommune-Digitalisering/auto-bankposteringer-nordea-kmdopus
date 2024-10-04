@@ -1,18 +1,18 @@
 const Node = {
-  "id": "676b592f3b5f96a4",
+  "id": "130bd51888f49db5",
   "type": "http in",
   "z": "32cf2bec698ca424",
   "g": "7dd9b7ddf80481c4",
-  "name": "List",
+  "name": "Output",
   "url": "/files",
   "method": "get",
   "upload": false,
   "swaggerDoc": "",
-  "x": 120,
-  "y": 980,
+  "x": 320,
+  "y": 880,
   "wires": [
     [
-      "8eac67becc9ec7af"
+      "5a11b12945ba0f8b"
     ]
   ]
 }

@@ -17,7 +17,7 @@ const Node = {
       "p": "filename",
       "pt": "msg",
       "to": "configs.ftp.filepaths.local.fullPath",
-      "tot": "flow"
+      "tot": "global"
     }
   ],
   "action": "",
