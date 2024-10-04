@@ -68,10 +68,10 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   
       const RuleID = index;
   
-      // Create "exception" attribute and remove Artskonto if true
       const shouldBeException = statusAccounts.includes(parseInt(Artskonto));
       cleanedData.Artskonto = shouldBeException ? null : Artskonto;
       const ExceptionBool = shouldBeException;
+      const LastUsed = "31-12-9999"
   
       return {
           Reference: Reference || null,
@@ -87,6 +87,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
           Notat: Notat || null,
           ActiveBool,
           ExceptionBool,
+          LastUsed,
           RuleID
       };
   });
