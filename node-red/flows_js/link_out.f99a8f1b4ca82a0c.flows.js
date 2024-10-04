@@ -6,7 +6,8 @@ const Node = {
   "name": "link out rules event",
   "mode": "link",
   "links": [
-    "129e530f670bdcca"
+    "129e530f670bdcca",
+    "68b84471e23a9d8b"
   ],
   "x": 945,
   "y": 80,

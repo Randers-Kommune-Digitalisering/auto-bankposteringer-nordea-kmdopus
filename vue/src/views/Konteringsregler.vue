@@ -81,7 +81,11 @@
             "hidden": true
         },
         "Notat": {
-            "key": "Notat"
+            "key": "Notat",
+            "hidden": true
+        },
+        "Sidst anvendt": {
+            "key": "LastUsed"
         }
     }
     

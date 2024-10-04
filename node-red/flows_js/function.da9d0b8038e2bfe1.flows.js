@@ -11,10 +11,11 @@ const Node = {
   "finalize": "",
   "libs": [],
   "x": 115,
-  "y": 340,
+  "y": 360,
   "wires": [
     [
-      "c49c5be7601cebc5"
+      "c49c5be7601cebc5",
+      "5eacaf9ba681643d"
     ]
   ],
   "icon": "font-awesome/fa-handshake-o",
@@ -23,14 +24,15 @@ const Node = {
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let erpArray = flow.get("erpArray") || [];
+  let erpPostings = [];
+  let transactionsWithNoMatch = [];
   const transactions = global.get("transactions");
   const transactionParameters = flow.get("transactionParameters");   // Has to match ruleParameters
   const accountingRules = global.get("accountingRules");
   const ruleParameters = Object.keys(accountingRules[0]).slice(0, 4);
-  const erpPostings = [];
-  const transactionsWithNoMatch = [];
   const erpFileHeaders = flow.get("erpFileHeaders").split(", ");
   const bankAccounts = global.get("bankAccounts");
+  const date = global.get("simpleDate");
   
   function calculateSpecificity(rule) {
       // Count the number of rule parameters where the value property is defined (truthy)
@@ -118,6 +120,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
                       generateErpPostings(currentBankAccount.statusAccount, rule.Artskonto, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, psp);
                   }
                   completeMatchBool = true;
+                  rule.LastUsed = date;
               }
           }
       }
@@ -128,7 +131,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           transactionsWithNoMatch.push(transaction);
       }
   }
-  
   
   transactions.forEach(transaction => {
       processPosting(transaction, accountingRules);

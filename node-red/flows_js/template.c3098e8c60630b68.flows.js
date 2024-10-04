@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS {{global.configs.names.accountingRules}} (
     Notat NVARCHAR(255) NULL,
     ActiveBool BOOLEAN,
     ExceptionBool BOOLEAN,
+    LastUsed NVARCHAR(10) NULL,
     RuleID INT PRIMARY KEY
 );
 `

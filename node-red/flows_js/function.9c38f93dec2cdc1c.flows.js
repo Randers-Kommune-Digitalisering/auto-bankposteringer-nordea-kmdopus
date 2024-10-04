@@ -22,7 +22,8 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let data = global.get("configs").initialData.accountingRules;
+  // data sets to accountingRules when matching script has run once during uptime, initial config data if not
+  let data = global.get("dateOfOrigin") ? global.get("accountingRules") : global.get("configs").initialData.accountingRules;
   let name = global.get("configs").names.accountingRules;
   
   if (Array.isArray(data) && data.length > 0) {
