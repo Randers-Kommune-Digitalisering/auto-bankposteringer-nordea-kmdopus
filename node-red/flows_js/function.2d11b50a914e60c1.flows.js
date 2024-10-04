@@ -16,7 +16,7 @@ const Node = {
     }
   ],
   "x": 135,
-  "y": 460,
+  "y": 180,
   "wires": [
     [
       "8553c6ad958744e2",
@@ -49,9 +49,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   global.set("date", findDate());
   global.set("dateOfOrigin", dayjs().format('YYYYMMDD'));
   global.set("timeOfOrigin", dayjs().format('HHmmss'));
+  global.set("simpleDate", dayjs().format('DD-MM-YYYY'));
   
   return msg;
-  
 }
 
 module.exports = Node;
