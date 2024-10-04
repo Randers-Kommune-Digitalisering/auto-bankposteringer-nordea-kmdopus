@@ -8,7 +8,7 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "{\t   \"Message\": \"Transactions matched and file created\",\t   \"Path to file\": $flowContext('filename'),\t   \"Timestamp\": $now()\t}",
+  "complete": "{\t   \"Message\": \"Transactions matched and file created\",\t   \"Path to file\": msg.filename,\t   \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",

@@ -8,12 +8,12 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "{\t   \"Message\": \"Matching script failed\",\t   \"Error\": msg.error,\t   \"Timestamp\": $now()\t}",
+  "complete": "{\t   \"Message\": \"Matching script error\",\t   \"Error\": msg.error,\t   \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1175,
-  "y": 240,
+  "x": 115,
+  "y": 540,
   "wires": [],
   "l": false
 }
