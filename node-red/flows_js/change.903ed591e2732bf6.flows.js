@@ -11,6 +11,11 @@ const Node = {
       "pt": "flow",
       "to": "0",
       "tot": "num"
+    },
+    {
+      "t": "delete",
+      "p": "adminAuthStatus",
+      "pt": "global"
     }
   ],
   "action": "",
