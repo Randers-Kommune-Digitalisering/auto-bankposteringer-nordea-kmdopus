@@ -25,6 +25,13 @@ const Node = {
       "pt": "flow",
       "to": "payload.response.continuation_key",
       "tot": "msg"
+    },
+    {
+      "t": "set",
+      "p": "messageIdentification",
+      "pt": "global",
+      "to": "payload.group_header.message_identification",
+      "tot": "msg"
     }
   ],
   "action": "",
