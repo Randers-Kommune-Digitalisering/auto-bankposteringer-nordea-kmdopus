@@ -30,6 +30,10 @@
         {
             title: "Undtagelser",
             url: "/konteringsregler/undtagelse",
+        },
+        {
+            title: "Kørselshistorik",
+            url: "/historik",
         }
     ])
 
