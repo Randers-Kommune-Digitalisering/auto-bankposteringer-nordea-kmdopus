@@ -202,7 +202,7 @@
                         <template v-else><IconDelete /></template>
                     </button>
 
-                    <button v-if="konteringsregel != null" @click="toggleActivation()" :class="konteringsregel.ActiveBool ? 'green' : 'red'">
+                    <button v-if="konteringsregel != null" @click="toggleActivation()" :class="konteringsregel.ActiveBool ? 'green' : 'red'" :disabled="konteringsregel.ExceptionBool">
                         {{ konteringsregel.ActiveBool ? 'Aktiv' : 'Inaktiv' }}</button>
 
 
