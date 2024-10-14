@@ -175,7 +175,6 @@
     function toggleActivation() {
         konteringsregel.value.ActiveBool = !konteringsregel.value.ActiveBool
         //activeBool.value = konteringsregel.value.ActiveBool
-        console.log("aktivstatus er nu " + activeBool.value)
     }
 
 </script>
