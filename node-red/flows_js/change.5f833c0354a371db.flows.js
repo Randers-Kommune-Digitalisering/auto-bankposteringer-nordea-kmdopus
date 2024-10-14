@@ -11,6 +11,13 @@ const Node = {
       "pt": "msg",
       "to": "masterData.admEmail",
       "tot": "global"
+    },
+    {
+      "t": "set",
+      "p": "from",
+      "pt": "msg",
+      "to": "SENDER_ADRESS",
+      "tot": "env"
     }
   ],
   "action": "",
