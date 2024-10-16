@@ -7,9 +7,9 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "addTransactions",
+      "p": "messageIdentification",
       "pt": "global",
-      "to": "payload.response.transactions",
+      "to": "payload.group_header.message_identification",
       "tot": "msg"
     },
     {
@@ -21,17 +21,18 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "continuation_key",
-      "pt": "flow",
-      "to": "payload.response.continuation_key",
-      "tot": "msg"
+      "p": "addTransactions",
+      "pt": "global",
+      "to": "payload.response.transactions ? payload.response.transactions : null",
+      "tot": "jsonata"
     },
     {
       "t": "set",
-      "p": "messageIdentification",
-      "pt": "global",
-      "to": "payload.group_header.message_identification",
-      "tot": "msg"
+      "p": "continuation_key",
+      "pt": "flow",
+      "to": "payload.response.continuation_key ? payload.response.continuation_key : null",
+      "tot": "jsonata",
+      "dc": true
     }
   ],
   "action": "",

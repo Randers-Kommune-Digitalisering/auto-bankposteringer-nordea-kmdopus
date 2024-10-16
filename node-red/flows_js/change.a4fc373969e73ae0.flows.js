@@ -48,7 +48,7 @@ const Node = {
       "14a5089d7e6463aa"
     ]
   ],
-  "icon": "font-awesome/fa-save",
+  "icon": "font-awesome/fa-cog",
   "l": false
 }
 

@@ -23,7 +23,6 @@ const Node = {
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let data = msg.payload;
-  let name = global.get("configs").names.masterData
   
   // Get the keys from the first object to use as column names
   let columns = Object.keys(data);
@@ -57,7 +56,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
   valueString += "WHERE admID = " + data.admID;
   
-  let sqlQuery = `UPDATE ${name} SET ${valueString}`;
+  let sqlQuery = `UPDATE masterData SET ${valueString}`;
   msg.sql = sqlQuery;
   
   return msg;

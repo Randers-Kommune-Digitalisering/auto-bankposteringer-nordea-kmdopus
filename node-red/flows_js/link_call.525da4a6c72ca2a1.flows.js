@@ -3,7 +3,7 @@ const Node = {
   "type": "link call",
   "z": "62eaf4407ee85a3a",
   "g": "0bbde93deecce205",
-  "name": "",
+  "name": "Fetch mail properties",
   "links": [
     "89b3ccfbe0d1a3dd"
   ],

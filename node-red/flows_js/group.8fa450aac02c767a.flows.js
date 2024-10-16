@@ -13,7 +13,6 @@ const Node = {
   "nodes": [
     "958508be3194fa9a",
     "be0b4dd41435bf32",
-    "56f5fcd2967faf8f",
     "75b26b5c314ea0cc",
     "6c66a2a9908402bf",
     "f5eb833aa8efaf2e",
@@ -25,7 +24,8 @@ const Node = {
     "eb01e84f2db8e259",
     "14993ffdd96526a2",
     "eb0856eb4570c1ce",
-    "e052fea69f59c088"
+    "e052fea69f59c088",
+    "5efd6070b9d22ead"
   ],
   "x": 14,
   "y": 19,

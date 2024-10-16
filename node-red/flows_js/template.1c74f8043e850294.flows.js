@@ -22,7 +22,7 @@ const Node = {
 }
 
 Node.template = `
-DELETE FROM {{global.configs.names.bankAccounts}}
+DELETE FROM bankAccounts
 `
 
 module.exports = Node;

@@ -32,7 +32,7 @@ const Node = {
       "2a1716f1529ef50c"
     ]
   ],
-  "icon": "font-awesome/fa-save",
+  "icon": "font-awesome/fa-cog",
   "l": false
 }
 

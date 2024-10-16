@@ -1,26 +1,24 @@
 <script setup>
     import { ref } from 'vue'
     import Content from '@/components/Content.vue'
-    import IconTable from '@/components/icons/IconTable.vue'
-    import IconCompass from '../components/icons/IconCompass.vue';
+    import IconClock from '@/components/icons/IconClock.vue'
+    import IconRefresh from '@/components/icons/IconRefresh.vue'
     
     const history = ref(null)
-    const reconFiles = ref(null)
 
     const keyMap = {
-        "id": {
-            "key": "uid"
-        },
         "dato": {
             "key": "dato"
         },
-        "success":
+        "id": {
+            "key": "uid"
+        },
+        "HTTP-kode":
         {
-            "key": "success"
+            "key": "successCode"
         }
     }
     
-    // Læs output filer
     fetch('/api/runhistory')
         .then(response => response = response.json())
         .then(value => history.value = value)
@@ -32,7 +30,6 @@
 
         fetch(url)
             .then(response => {
-                //restartedRunUid.value = uid
                 console.log(response.status)
                 restartedRunSuccess.value[uid] = response.status === 200
             })
@@ -40,7 +37,6 @@
             
     }
 
-    //var restartedRunUid = ref(null)
     var restartedRunSuccess = ref([])
 
 </script>
@@ -48,16 +44,18 @@
 <template>
 
     <h2>Kørselshistorik</h2>
-    
-    <span class="paragraph">
-        Hej
-    </span>
 
+    <Content>      
+        HTTP-koder der starter med "2" indikerer fuldendte kørsler.
+        <br>
+        HTTP-koder der starter med "4" eller "5" indikerer fejlede kørsler som har ikke genereret posteringer.
+    </Content>
+    
     <Content>
         <template #icon>
-            <IconTable />
+            <IconClock />
         </template>
-        <template #heading>Historik</template>
+        <template #heading>Kørsler</template>
         
         <table>
             <thead>
@@ -69,7 +67,7 @@
             <tr v-if="history != null && history.length > 0" v-for="obj in history">
                 <td v-for="key in keyMap">{{ key.obj != null ? obj[key.obj][key.key] : obj[key.key] }}</td>
                 <td><button @click="restartRun(obj[keyMap.id.key])" :class="restartedRunSuccess[obj[keyMap.id.key]] != null ? (restartedRunSuccess[obj[keyMap.id.key]] ? 'green' : 'red') : ''">
-                    <IconCompass />&nbsp;{{restartedRunSuccess[obj[keyMap.id.key]] != null  ? (restartedRunSuccess ? 'Kørsel genstartet' : 'Fejl ved genstart') : 'Genstart kørsel'}}</button></td>
+                    <IconRefresh />&nbsp;{{restartedRunSuccess[obj[keyMap.id.key]] != null  ? (restartedRunSuccess ? 'Kørsel genstartet' : 'Fejl ved genstart') : 'Genstart kørsel'}}</button></td>
             </tr>
             <tr v-else>
                 <td :colspan=" Object.keys(keyMap).length +1">Der er ingen kørsler at vise</td>

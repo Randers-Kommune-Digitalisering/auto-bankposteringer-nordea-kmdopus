@@ -22,7 +22,7 @@ const Node = {
 }
 
 Node.template = `
-SELECT * FROM {{global.configs.names.masterData}}
+SELECT * FROM masterData
 `
 
 module.exports = Node;

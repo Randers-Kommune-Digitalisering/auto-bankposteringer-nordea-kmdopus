@@ -22,7 +22,7 @@ const Node = {
 }
 
 Node.template = `
-DROP TABLE {{global.configs.names.accountingRules}}
+DROP TABLE accountingRules
 `
 
 module.exports = Node;

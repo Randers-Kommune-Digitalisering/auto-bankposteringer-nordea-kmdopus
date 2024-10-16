@@ -22,7 +22,7 @@ const Node = {
       "405c31e7c368685d"
     ]
   ],
-  "icon": "font-awesome/fa-save",
+  "icon": "font-awesome/fa-cog",
   "l": false,
   "info": ""
 }

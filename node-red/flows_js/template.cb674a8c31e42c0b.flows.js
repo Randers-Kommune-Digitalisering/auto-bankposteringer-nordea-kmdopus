@@ -22,7 +22,7 @@ const Node = {
 }
 
 Node.template = `
-SELECT * FROM {{global.configs.names.bankAccounts}}
+SELECT * FROM bankAccounts
 `
 
 module.exports = Node;

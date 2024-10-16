@@ -8,7 +8,7 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "{\t    \"Message\": $globalContext(\"configs\").names.bankAccounts & \" imported from database\",\t    \"Sum of accounts\": $globalContext(\"bankAccounts\") ~> $count(),\t    \"Timestamp\": $now()\t}",
+  "complete": "{\t    \"Message\": \"bankAccounts imported from database\",\t    \"Sum of accounts\": $globalContext(\"bankAccounts\") ~> $count(),\t    \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
