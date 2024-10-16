@@ -22,7 +22,7 @@ const Node = {
 }
 
 Node.template = `
-DELETE FROM {{global.configs.names.accountingRules}}
+DELETE FROM accountingRules
 `
 
 module.exports = Node;

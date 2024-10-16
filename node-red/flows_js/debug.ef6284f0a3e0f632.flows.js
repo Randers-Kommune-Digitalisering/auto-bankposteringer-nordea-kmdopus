@@ -8,7 +8,7 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "{\t    \"Message\": $globalContext(\"configs\").names.masterData & \" imported from database\",\t    \"Timestamp\": $now()\t}",
+  "complete": "{\t    \"Message\": \"masterData imported from database\",\t    \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",

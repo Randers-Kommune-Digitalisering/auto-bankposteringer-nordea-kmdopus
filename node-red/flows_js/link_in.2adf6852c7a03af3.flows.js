@@ -15,10 +15,14 @@ const Node = {
     "2d5dd0cd9ff1408a",
     "01422bb2dbcf1ff3",
     "0974040d37fa9eec",
-    "447b41c4e669b9f5"
+    "447b41c4e669b9f5",
+    "7d56084c8e565284",
+    "0b455e7ce04be89e",
+    "539ea8ad8ef84a14",
+    "7a3d9f817d3f3da0"
   ],
   "x": 175,
-  "y": 800,
+  "y": 940,
   "wires": [
     [
       "eb0f77342ab7d9c5"

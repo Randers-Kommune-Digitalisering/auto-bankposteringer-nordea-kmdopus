@@ -7,24 +7,17 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "isRestart",
-      "pt": "global",
-      "to": "true",
-      "tot": "bool"
-    },
-    {
-      "t": "set",
-      "p": "restartUid",
-      "pt": "global",
-      "to": "uid",
-      "tot": "msg"
-    },
-    {
-      "t": "set",
       "p": "date",
       "pt": "global",
       "to": "dato",
       "tot": "msg"
+    },
+    {
+      "t": "set",
+      "p": "runRestart",
+      "pt": "global",
+      "to": "true",
+      "tot": "bool"
     }
   ],
   "action": "",

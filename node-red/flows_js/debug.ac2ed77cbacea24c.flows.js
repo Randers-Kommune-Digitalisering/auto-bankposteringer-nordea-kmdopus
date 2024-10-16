@@ -8,7 +8,7 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "payload.affectedRows > 0 ?\t{\t    \"Message\": $globalContext(\"configs\").names.bankAccounts & \" updated\",\t    \"Number of accounts updated\": payload.affectedRows\t}\t:\t{\t    \"Message\": \"Nothing to update\"\t}\t",
+  "complete": "payload.affectedRows > 0 ?\t{\t    \"Message\": \"bankAccounts table updated\",\t    \"Number of accounts updated\": payload.affectedRows\t}\t:\t{\t    \"Message\": \"Nothing to update in bankAccounts\"\t}\t",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",

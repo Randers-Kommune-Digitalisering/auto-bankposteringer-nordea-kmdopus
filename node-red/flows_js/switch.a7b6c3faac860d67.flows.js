@@ -3,7 +3,7 @@ const Node = {
   "type": "switch",
   "z": "62eaf4407ee85a3a",
   "g": "9707809d7fe4863a",
-  "name": "Check status code from API response",
+  "name": "Check HTTP code from response",
   "property": "statusCode",
   "propertyType": "msg",
   "rules": [

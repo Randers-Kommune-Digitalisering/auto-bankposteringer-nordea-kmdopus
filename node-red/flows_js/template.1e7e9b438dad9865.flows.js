@@ -23,7 +23,7 @@ const Node = {
 
 Node.template = `
 DELETE FROM
-    {{global.configs.names.accountingRules}}
+    accountingRules
 WHERE
     RuleID = {{uid}}
 `

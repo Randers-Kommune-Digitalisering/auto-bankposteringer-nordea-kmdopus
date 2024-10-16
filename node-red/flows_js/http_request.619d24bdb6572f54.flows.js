@@ -19,7 +19,7 @@ const Node = {
   "y": 300,
   "wires": [
     [
-      "08c1d43ab51e8e69"
+      "2305a3093fbf2c0b"
     ]
   ],
   "l": false

@@ -22,7 +22,7 @@ const Node = {
 }
 
 Node.template = `
-DELETE FROM {{global.configs.names.masterData}}
+DELETE FROM masterData
 `
 
 module.exports = Node;

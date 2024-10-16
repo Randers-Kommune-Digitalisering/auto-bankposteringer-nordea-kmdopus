@@ -23,7 +23,6 @@ const Node = {
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let data = msg.payload;
-  let name = global.get("configs").names.accountingRules;
   
   // Get the keys from the first object to use as column names
   let columns = Object.keys(data);
@@ -43,7 +42,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   });
   
   
-  let sqlQuery = `INSERT INTO ${name} (${columns.join(', ')}) VALUES (${values.join(', ')});`;
+  let sqlQuery = `INSERT INTO accountingRules (${columns.join(', ')}) VALUES (${values.join(', ')});`;
   msg.sql = sqlQuery;
   
   return msg;

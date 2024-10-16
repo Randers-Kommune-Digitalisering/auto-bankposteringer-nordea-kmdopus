@@ -11,7 +11,7 @@ const Node = {
   "template": "",
   "output": "str",
   "x": 200,
-  "y": 500,
+  "y": 400,
   "wires": [
     [
       "c7d56102c53e8e83"
@@ -26,7 +26,7 @@ RuleID should not be renamed, as it breaks other nodes' functionality.
 `
 
 Node.template = `
-CREATE TABLE IF NOT EXISTS {{global.configs.names.accountingRules}} (
+CREATE TABLE IF NOT EXISTS accountingRules (
     Reference NVARCHAR(255) NULL,
     Advisliste NVARCHAR(255) NULL,
     Afsender NVARCHAR(255) NULL,

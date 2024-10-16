@@ -5,7 +5,7 @@ const Node = {
   "name": "link in config 15",
   "links": [],
   "x": 25,
-  "y": 920,
+  "y": 820,
   "wires": [
     [
       "f153f35a9ec08408"

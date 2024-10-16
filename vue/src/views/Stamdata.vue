@@ -6,6 +6,7 @@
     import IconAdd from '../components/icons/IconAdd.vue'
     import IconDelete from '../components/icons/IconDelete.vue'
     import IconSave from '../components/icons/IconSave.vue'
+    import IconProfile from '@/components/icons/IconProfile.vue'
 
     const isUpdating = ref(false)
     const hasUpdated = ref(false)
@@ -139,7 +140,7 @@
     
     <Content>
         <template #icon>
-            <IconTable />
+            <IconProfile />
         </template>
         <template #heading>Administrator- og integrationsoplysninger</template>
         
@@ -186,7 +187,7 @@
                     <th class="capitalize">IBAN</th>
                     <th class="capitalize">Statuskonto</th>     
                     <th class="capitalize">Mellemregning</th>     
-                    <th></th>
+                    <th class="capitalize">Slet</th>
                 </tr>
             </thead>
             <tr v-for="(value, index) in bankaccounts">

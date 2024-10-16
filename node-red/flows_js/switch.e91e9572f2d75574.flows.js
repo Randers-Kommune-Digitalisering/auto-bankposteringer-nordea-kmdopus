@@ -1,7 +1,8 @@
 const Node = {
   "id": "e91e9572f2d75574",
   "type": "switch",
-  "z": "b0363dafd369e927",
+  "z": "32cf2bec698ca424",
+  "g": "e2cf63522154167b",
   "name": "",
   "property": "uid",
   "propertyType": "msg",
@@ -16,8 +17,8 @@ const Node = {
   "checkall": "true",
   "repair": false,
   "outputs": 2,
-  "x": 570,
-  "y": 900,
+  "x": 475,
+  "y": 1480,
   "wires": [
     [
       "47fa4880ce8ed011"
@@ -25,7 +26,9 @@ const Node = {
     [
       "065dea81f9e031b7"
     ]
-  ]
+  ],
+  "icon": "font-awesome/fa-question",
+  "l": false
 }
 
 module.exports = Node;

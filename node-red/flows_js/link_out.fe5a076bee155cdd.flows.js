@@ -3,10 +3,9 @@ const Node = {
   "type": "link out",
   "z": "62eaf4407ee85a3a",
   "g": "9707809d7fe4863a",
-  "name": "link out HTTP 409",
+  "name": "link out HTTP status 409",
   "mode": "link",
   "links": [
-    "cc151ff22b441d0c",
     "ada2d0a8084dfe8e"
   ],
   "x": 245,
