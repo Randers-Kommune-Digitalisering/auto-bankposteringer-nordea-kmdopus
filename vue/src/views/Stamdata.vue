@@ -7,12 +7,16 @@
     import IconDelete from '../components/icons/IconDelete.vue'
     import IconSave from '../components/icons/IconSave.vue'
     import IconProfile from '@/components/icons/IconProfile.vue'
+    import IconRefresh from '@/components/icons/IconRefresh.vue'
 
     const isUpdating = ref(false)
     const hasUpdated = ref(false)
 
     const isUpdating2 = ref(false)
     const hasUpdated2 = ref(false)
+
+    const isUpdating3 = ref(false)
+    const hasUpdated3 = ref(false)
 
     const bankaccounts = ref(null)
 
@@ -21,6 +25,8 @@
     const adminEmail = ref("")
     const erpSystem = ref("")
     const integrationBool = ref(false)
+
+    const restartedAuthSuccess = ref(false)
 
     fetch('/api/masterdata')
         .then(response => response = response.json())
@@ -78,8 +84,7 @@
         .then(value => bankaccounts.value = value)
 
 
-    function addBankaccount()
-    {
+    function addBankaccount() {
         bankaccounts.value.push({
             "bankAccountName": "",
             "bankAccount": "",
@@ -88,17 +93,14 @@
         })
     }
 
-    function updateBankaccounts()
-    {
+    function updateBankaccounts() {
         console.log("Updating bank accounts")
         console.log(bankaccounts.value)
 
         hasUpdated2.value = false
         isUpdating2.value = true
-
-        const url =  '/api/bankaccounts'
         
-        fetch(url,
+        fetch('/api/bankaccounts',
         {
             method: 'PUT',
             headers: {
@@ -127,9 +129,28 @@
         console.log("ingrationsboolean er nu " + integrationBool.value)
     }
 
-    function removeBankaccount(index)
-    {
+    function removeBankaccount(index) {
         bankaccounts.value.splice(index, 1)
+    }
+
+    // needs to handle timeouts
+    function restartAuth() {
+        hasUpdated3.value = false
+        isUpdating3.value = true
+
+        fetch('/api/reauth/')
+            .then(response => {
+            if (response.ok) { 
+                console.log(response.status)
+                restartedAuthSuccess.value = true
+            }
+            else
+                throw new Error('Error connecting to back-end')
+            })
+            .finally(() => {
+                isUpdating3.value = false
+                hasUpdated3.value = true
+            })
     }
 
 </script>
@@ -171,6 +192,11 @@
             <template v-if="isUpdating">Gemmer...</template>
             <template v-if="hasUpdated">Ændringer gemt</template>
             <template v-else><IconSave /></template>
+        </button>
+        <button @click="restartAuth()" :disabled="isUpdating3">
+            <template v-if="isUpdating3">Genstarter autorisation...</template>
+            <template v-if="hasUpdated3">Autorisation oprettet</template>
+            <template v-else>Genstart autorisation</template>
         </button>
     </Content>
 

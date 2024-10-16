@@ -66,8 +66,10 @@
             </thead>
             <tr v-if="history != null && history.length > 0" v-for="obj in history">
                 <td v-for="key in keyMap">{{ key.obj != null ? obj[key.obj][key.key] : obj[key.key] }}</td>
-                <td><button @click="restartRun(obj[keyMap.id.key])" :class="restartedRunSuccess[obj[keyMap.id.key]] != null ? (restartedRunSuccess[obj[keyMap.id.key]] ? 'green' : 'red') : ''">
-                    <IconRefresh />&nbsp;{{restartedRunSuccess[obj[keyMap.id.key]] != null  ? (restartedRunSuccess ? 'Kørsel genstartet' : 'Fejl ved genstart') : 'Genstart kørsel'}}</button></td>
+                <td>
+                    <button @click="restartRun(obj[keyMap.id.key])" :class="restartedRunSuccess[obj[keyMap.id.key]] != null ? (restartedRunSuccess[obj[keyMap.id.key]] ? 'green' : 'red') : ''">
+                    <IconRefresh />&nbsp;{{restartedRunSuccess[obj[keyMap.id.key]] != null  ? (restartedRunSuccess ? 'Kørsel genstartet' : 'Fejl ved genstart') : 'Genstart kørsel'}}</button>
+                </td>
             </tr>
             <tr v-else>
                 <td :colspan=" Object.keys(keyMap).length +1">Der er ingen kørsler at vise</td>
