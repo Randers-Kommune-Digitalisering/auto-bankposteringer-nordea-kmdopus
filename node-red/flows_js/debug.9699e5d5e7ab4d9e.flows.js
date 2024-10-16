@@ -8,7 +8,7 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "payload.affectedRows > 0 ?\t{\t    \"Message\": \"Bank accounts updated\",\t    \"ruleCount\": payload.affectedRows\t}\t:\t{\t    \"Message\": \"No bank accounts to update\"\t}\t",
+  "complete": "payload.affectedRows > 0 ?\t{\t    \"Message\": \"bankAccounts updated\",\t    \"ruleCount\": payload.affectedRows\t}\t:\t{\t    \"Message\": \"Nothing to update in bankAccounts\"\t}\t",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",

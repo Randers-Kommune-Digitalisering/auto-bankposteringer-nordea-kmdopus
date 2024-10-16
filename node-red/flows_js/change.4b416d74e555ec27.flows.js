@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "62eaf4407ee85a3a",
   "g": "d35c0446ba72295e",
-  "name": "Set flow vars",
+  "name": "Initialize counters",
   "rules": [
     {
       "t": "set",
@@ -25,14 +25,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 585,
+  "x": 595,
   "y": 80,
   "wires": [
     [
       "c3ad8664145bd9e7"
     ]
   ],
-  "icon": "font-awesome/fa-save",
+  "icon": "font-awesome/fa-cog",
   "l": false
 }
 

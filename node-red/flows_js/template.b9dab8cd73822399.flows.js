@@ -22,7 +22,7 @@ const Node = {
 }
 
 Node.template = `
-SELECT * FROM {{global.configs.names.accountingRules}}
+SELECT * FROM accountingRules
 `
 
 module.exports = Node;

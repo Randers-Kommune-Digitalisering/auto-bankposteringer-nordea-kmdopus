@@ -4,7 +4,7 @@
     import { useRouter, useRoute } from 'vue-router'
     
     import Content from '@/components/Content.vue'
-    import IconTable from '@/components/icons/IconTable.vue'
+    import IconList from '@/components/icons/IconList.vue'
     import IconEdit from '@/components/icons/IconEdit.vue'
     import IconSearch from '../components/icons/IconSearch.vue'
     import IconAdd from '../components/icons/IconAdd.vue'
@@ -173,10 +173,10 @@
     
     <Content>
         <template #icon>
-            <IconTable />
+            <IconList />
         </template>
         <template #heading>
-            Aktuelle konteringsregler af typen {{ type }}
+            Konteringsrelger af typen: {{ type }}
         </template>
 
         <fieldset>           

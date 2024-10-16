@@ -24,7 +24,6 @@ const Node = {
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   // data sets to accountingRules when matching script has run once during uptime, initial config data if not
   let data = global.get("dateOfOrigin") ? global.get("accountingRules") : global.get("configs").initialData.accountingRules;
-  let name = global.get("configs").names.accountingRules;
   
   if (Array.isArray(data) && data.length > 0) {
       // Get the keys from the first object to use as column names
@@ -47,7 +46,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           return `(${values.join(', ')})`;
       });
   
-      let sqlQuery = `INSERT INTO ${name} (${columns.join(', ')}) VALUES ${rows.join(', ')};`;
+      let sqlQuery = `INSERT INTO accountingRules (${columns.join(', ')}) VALUES ${rows.join(', ')};`;
       msg.sql = sqlQuery;
       
   }

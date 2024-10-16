@@ -8,7 +8,7 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "payload.affectedRows > 0 ?\t{\t    \"Message\": $globalContext(\"configs\").names.masterData & \" created\",\t    \"Timestamp\": $now()\t\t}\t:\t{\t    \"Message\": $globalContext(\"configs\").names.masterData & \" table already exists\",\t    \"Timestamp\": $now()\t}",
+  "complete": "payload.affectedRows > 0 ?\t{\t    \"Message\": \"masterData table created\",\t    \"Timestamp\": $now()\t\t}\t:\t{\t    \"Message\": \"masterData table already exists\",\t    \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",

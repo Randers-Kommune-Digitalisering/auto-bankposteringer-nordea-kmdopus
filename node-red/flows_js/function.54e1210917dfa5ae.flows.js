@@ -23,7 +23,6 @@ const Node = {
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let data = global.get("configs").initialData.bankAccounts;
-  let name = global.get("configs").names.bankAccounts;
   
   if (Array.isArray(data) && data.length > 0) {
       // Get the keys from the first object to use as column names
@@ -46,7 +45,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           return `(${values.join(', ')})`;
       });
   
-      let sqlQuery = `INSERT INTO ${name} (${columns.join(', ')}) VALUES ${rows.join(', ')};`;
+      let sqlQuery = `INSERT INTO bankAccounts (${columns.join(', ')}) VALUES ${rows.join(', ')};`;
       msg.sql = sqlQuery;
       
   }
