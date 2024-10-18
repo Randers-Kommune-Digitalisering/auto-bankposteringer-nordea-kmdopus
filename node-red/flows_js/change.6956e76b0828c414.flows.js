@@ -2,7 +2,7 @@ const Node = {
   "id": "6956e76b0828c414",
   "type": "change",
   "z": "32cf2bec698ca424",
-  "g": "1ab12c0299de8032",
+  "g": "4169783d237ba908",
   "name": "",
   "rules": [
     {
@@ -15,7 +15,7 @@ const Node = {
     {
       "t": "set",
       "p": "deletedRule",
-      "pt": "flow",
+      "pt": "global",
       "to": "$globalContext(\"accountingRules\")[RuleID = $$.uid]",
       "tot": "jsonata"
     }
@@ -25,11 +25,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 705,
-  "y": 120,
+  "x": 195,
+  "y": 540,
   "wires": [
     [
-      "1e7e9b438dad9865"
+      "ed381bc21f3c1605"
     ]
   ],
   "icon": "font-awesome/fa-save",

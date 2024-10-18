@@ -2,23 +2,22 @@ const Node = {
   "id": "cb674a8c31e42c0b",
   "type": "template",
   "z": "92c28da6a66fdcb3",
-  "g": "83a83adf1d5ad76d",
-  "name": "SQL query \"SELECT\"",
+  "g": "e57ddaa2ec0eda65",
+  "name": "Select all",
   "field": "sql",
   "fieldType": "msg",
   "format": "sql",
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 835,
-  "y": 540,
+  "x": 160,
+  "y": 780,
   "wires": [
     [
-      "fb8f4917c8c0c561"
+      "c10c0878045be6f9"
     ]
   ],
-  "icon": "font-awesome/fa-search",
-  "l": false
+  "icon": "font-awesome/fa-search"
 }
 
 Node.template = `

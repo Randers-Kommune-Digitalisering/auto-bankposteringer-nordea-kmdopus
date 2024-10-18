@@ -5,7 +5,7 @@ const Node = {
   "name": "Status",
   "style": {
     "stroke": "none",
-    "fill": "#ffefbf",
+    "fill": "#e3f3d3",
     "label": true,
     "label-position": "n",
     "color": "#000000"

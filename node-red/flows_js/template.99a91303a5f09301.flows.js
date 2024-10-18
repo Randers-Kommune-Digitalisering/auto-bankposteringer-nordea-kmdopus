@@ -3,22 +3,21 @@ const Node = {
   "type": "template",
   "z": "92c28da6a66fdcb3",
   "g": "02fc47417527e1d2",
-  "name": "Add",
+  "name": "Insert",
   "field": "sql",
   "fieldType": "msg",
   "format": "sql",
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 525,
-  "y": 660,
+  "x": 150,
+  "y": 920,
   "wires": [
     [
-      "ec7d3e1c4d9d20fb"
+      "015d66cd112be473"
     ]
   ],
-  "icon": "font-awesome/fa-search-plus",
-  "l": false
+  "icon": "font-awesome/fa-search-plus"
 }
 
 Node.template = `

@@ -1,5 +1,5 @@
 <script setup>
-    import { ref } from 'vue'
+    import { ref, onMounted, onUnmounted } from 'vue'
     import eventBus from '@/eventBus.js'
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
@@ -11,12 +11,9 @@
 
     const isUpdating = ref(false)
     const hasUpdated = ref(false)
-
     const isUpdating2 = ref(false)
     const hasUpdated2 = ref(false)
-
     const isUpdating3 = ref(false)
-    const hasUpdated3 = ref(false)
 
     const bankaccounts = ref(null)
 
@@ -26,7 +23,21 @@
     const erpSystem = ref("")
     const integrationBool = ref(false)
 
-    const restartedAuthSuccess = ref(false)
+    const authStatus = ref("")
+
+    // Retreive updates to auth status
+    onMounted(() => {
+        const ws = new WebSocket('/api/wss/authstatus');
+        
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            authStatus.value = data.status; // Update status in your Vue app
+        };
+
+        onUnmounted(() => {
+            ws.close(); // Clean up when the component is destroyed
+        });
+    });
 
     fetch('/api/masterdata')
         .then(response => response = response.json())
@@ -38,8 +49,7 @@
             integrationBool.value = value.integrationBool
         })
 
-    function updateMasterdata()
-    {
+    function updateMasterdata() {
         hasUpdated.value = false
         isUpdating.value = true
 
@@ -70,6 +80,7 @@
             else
                 throw new Error('Error connecting to back-end')
         })
+
         .finally(() => {
             isUpdating.value = false
             hasUpdated.value = true
@@ -82,7 +93,6 @@
     fetch('/api/bankaccounts')
         .then(response => response = response.json())
         .then(value => bankaccounts.value = value)
-
 
     function addBankaccount() {
         bankaccounts.value.push({
@@ -100,8 +110,7 @@
         hasUpdated2.value = false
         isUpdating2.value = true
         
-        fetch('/api/bankaccounts',
-        {
+        fetch('/api/bankaccounts', {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
@@ -109,15 +118,12 @@
             },
             body: JSON.stringify(bankaccounts.value)
         })
-
         .then(response => {
-            if(response.ok)
-            {
+            if (response.ok) {
                 var value = response.json()
                 return value
             }
-            else
-                throw new Error('Error connecting to back-end')
+            else throw new Error('Error connecting to back-end')
         })
         .finally(() => {
             isUpdating2.value = false
@@ -125,32 +131,51 @@
         })
     }
 
-    function toggleIntegration() {
-        console.log("ingrationsboolean er nu " + integrationBool.value)
-    }
-
     function removeBankaccount(index) {
         bankaccounts.value.splice(index, 1)
     }
 
-    // needs to handle timeouts
-    function restartAuth() {
-        hasUpdated3.value = false
-        isUpdating3.value = true
+    function pollForStatus(url, interval, maxRetries, onError, onComplete) {
+        let retries = 0;
 
-        fetch('/api/reauth/')
-            .then(response => {
-            if (response.ok) { 
-                console.log(response.status)
-                restartedAuthSuccess.value = true
+        const poll = () => {
+            fetch(url)
+                .then(response => {
+                    if (response.status === 202 && retries < maxRetries) {
+                        console.log('Still processing, status 202, retrying...');
+                        retries++;
+                        setTimeout(poll, interval); // Retry after specified interval
+                    }
+                    else if (response.status === 200) {
+                        console.log('Authentication successful');
+                    } else {
+                        throw new Error(`Error: Status ${response.status}`);
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    onError(error);
+                })
+        };
+
+        poll(); // Start polling
+        onComplete();
+    }
+
+    function restartAuth() {
+        isUpdating3.value = true;
+
+        pollForStatus(
+            '/api/reauth',
+            2000, // Poll every 2 seconds
+            60,   // Max retries
+            (error) => { // onError
+                console.error(error);
+            },
+            () => { // onComplete
+                isUpdating3.value = false;
             }
-            else
-                throw new Error('Error connecting to back-end')
-            })
-            .finally(() => {
-                isUpdating3.value = false
-                hasUpdated3.value = true
-            })
+        );
     }
 
 </script>
@@ -163,7 +188,7 @@
         <template #icon>
             <IconProfile />
         </template>
-        <template #heading>Administrator- og integrationsoplysninger</template>
+        <template #heading>Opsætning</template>
         
         <table>
             <thead>
@@ -173,6 +198,8 @@
                     <th>E-mail</th>
                     <th>Økonomisystem</th>
                     <th>FTP til ØS</th>
+                    <th>Autorisation</th>
+                    <th>Genstart autorisation</th>
                 </tr>
             </thead>
             <tr>
@@ -184,7 +211,11 @@
                     <option>Fujitsu Prisme</option>
                     <option>ØS Indsigt</option>
                 </select></td>
-                <td><input type="checkbox" v-model="integrationBool" @change="toggleIntegration()"></td>
+                <td><input type="checkbox" v-model="integrationBool"></td>
+                <td><span>{{ authStatus ? authStatus : 'Inaktiv' }}</span></td>
+                <td>
+                    <button @click="restartAuth()" :disabled="isUpdating3"><IconRefresh /></button>
+                </td>
             </tr>
         </table>
         <br />
@@ -192,11 +223,6 @@
             <template v-if="isUpdating">Gemmer...</template>
             <template v-if="hasUpdated">Ændringer gemt</template>
             <template v-else><IconSave /></template>
-        </button>
-        <button @click="restartAuth()" :disabled="isUpdating3">
-            <template v-if="isUpdating3">Genstarter autorisation...</template>
-            <template v-if="hasUpdated3">Autorisation oprettet</template>
-            <template v-else>Genstart autorisation</template>
         </button>
     </Content>
 

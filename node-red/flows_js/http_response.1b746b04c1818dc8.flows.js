@@ -2,14 +2,13 @@ const Node = {
   "id": "1b746b04c1818dc8",
   "type": "http response",
   "z": "32cf2bec698ca424",
-  "g": "7ca48ca8d52524e7",
+  "g": "54195acebfd77c6b",
   "name": "",
-  "statusCode": "",
+  "statusCode": "200",
   "headers": {},
-  "x": 585,
-  "y": 1660,
-  "wires": [],
-  "l": false
+  "x": 980,
+  "y": 160,
+  "wires": []
 }
 
 module.exports = Node;

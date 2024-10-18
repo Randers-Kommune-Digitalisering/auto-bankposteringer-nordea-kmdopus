@@ -2,9 +2,16 @@ const Node = {
   "id": "b023cb0d9a7c23ee",
   "type": "change",
   "z": "32cf2bec698ca424",
-  "g": "7ca48ca8d52524e7",
+  "g": "54195acebfd77c6b",
   "name": "",
   "rules": [
+    {
+      "t": "set",
+      "p": "adminAuthStatus",
+      "pt": "global",
+      "to": "RESTARTING",
+      "tot": "str"
+    },
     {
       "t": "set",
       "p": "AuthRestart",
@@ -18,8 +25,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 335,
-  "y": 1660,
+  "x": 785,
+  "y": 160,
   "wires": [
     [
       "d707d5698ec5039a"

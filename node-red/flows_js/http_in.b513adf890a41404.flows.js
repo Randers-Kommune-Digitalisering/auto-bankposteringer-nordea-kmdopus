@@ -2,20 +2,19 @@ const Node = {
   "id": "b513adf890a41404",
   "type": "http in",
   "z": "32cf2bec698ca424",
-  "g": "a786d45e48e05c06",
-  "name": "",
+  "g": "890c3ba363dc8910",
+  "name": "Put data",
   "url": "/masterdata",
   "method": "put",
   "upload": false,
   "swaggerDoc": "",
-  "x": 285,
-  "y": 1180,
+  "x": 100,
+  "y": 860,
   "wires": [
     [
-      "f204a3cebff7b068"
+      "f4c77145867f1b64"
     ]
-  ],
-  "l": false
+  ]
 }
 
 module.exports = Node;

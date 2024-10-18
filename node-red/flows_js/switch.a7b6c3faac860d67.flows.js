@@ -8,22 +8,17 @@ const Node = {
   "propertyType": "msg",
   "rules": [
     {
-      "t": "eq",
-      "v": "409",
-      "vt": "num"
+      "t": "btwn",
+      "v": "500",
+      "vt": "num",
+      "v2": "599",
+      "v2t": "num"
     },
     {
       "t": "btwn",
       "v": "400",
       "vt": "num",
       "v2": "499",
-      "v2t": "num"
-    },
-    {
-      "t": "btwn",
-      "v": "500",
-      "vt": "num",
-      "v2": "599",
       "v2t": "num"
     },
     {
@@ -36,21 +31,18 @@ const Node = {
   ],
   "checkall": "false",
   "repair": false,
-  "outputs": 4,
-  "x": 115,
+  "outputs": 3,
+  "x": 105,
   "y": 480,
   "wires": [
     [
-      "2e449f988c67a99d"
+      "551dbd2ea88a85e6"
     ],
     [
-      "5b0e22c04ca85106"
+      "2de2b794607f5153"
     ],
     [
-      "5b0e22c04ca85106"
-    ],
-    [
-      "d4b848bdae2bb91b"
+      "517c1f5ec2d2b1d9"
     ]
   ],
   "icon": "font-awesome/fa-question",
