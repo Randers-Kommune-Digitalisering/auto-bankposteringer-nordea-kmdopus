@@ -2,20 +2,19 @@ const Node = {
   "id": "0cc9cd4b532e1e6b",
   "type": "http in",
   "z": "32cf2bec698ca424",
-  "g": "430c5bb113381f0a",
-  "name": "",
+  "g": "890c3ba363dc8910",
+  "name": "Get data",
   "url": "/masterdata",
   "method": "get",
   "upload": false,
   "swaggerDoc": "",
-  "x": 285,
-  "y": 1060,
+  "x": 100,
+  "y": 820,
   "wires": [
     [
-      "f44e7685c2fad11a"
+      "68b5498b43dcab49"
     ]
-  ],
-  "l": false
+  ]
 }
 
 module.exports = Node;

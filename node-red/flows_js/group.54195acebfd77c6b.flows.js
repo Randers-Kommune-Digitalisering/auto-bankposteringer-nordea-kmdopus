@@ -6,15 +6,27 @@ const Node = {
   "style": {
     "label": true,
     "label-position": "n",
-    "color": "#000000"
+    "color": "#000000",
+    "stroke": "none",
+    "fill": "#ffefbf"
   },
   "nodes": [
-    "7ca48ca8d52524e7"
+    "c9e3f5495d8676f5",
+    "1b746b04c1818dc8",
+    "d707d5698ec5039a",
+    "b023cb0d9a7c23ee",
+    "98287893906e410c",
+    "be1a01deddfcfba9",
+    "f2ed6cf9e6889698",
+    "b80cc4be8d126015",
+    "720caf0a9cba69a7",
+    "2bc91af6f819d5e1",
+    "3f7e2437c657aeb6"
   ],
-  "x": 218,
-  "y": 1593,
-  "w": 534,
-  "h": 174
+  "x": 534,
+  "y": 119,
+  "w": 532,
+  "h": 202
 }
 
 module.exports = Node;

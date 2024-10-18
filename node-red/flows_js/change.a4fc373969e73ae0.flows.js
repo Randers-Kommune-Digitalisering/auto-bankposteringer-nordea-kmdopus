@@ -2,7 +2,7 @@ const Node = {
   "id": "a4fc373969e73ae0",
   "type": "change",
   "z": "32cf2bec698ca424",
-  "g": "977c991daa71653f",
+  "g": "4169783d237ba908",
   "name": "Sæt værdier",
   "rules": [
     {
@@ -14,26 +14,11 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "newrule",
-      "pt": "msg",
+      "p": "newRule",
+      "pt": "global",
       "to": "payload",
       "tot": "msg",
       "dc": true
-    },
-    {
-      "t": "set",
-      "p": "ruleId",
-      "pt": "msg",
-      "to": "payload.RuleID",
-      "tot": "msg",
-      "dc": true
-    },
-    {
-      "t": "set",
-      "p": "newrule.RuleID",
-      "pt": "msg",
-      "to": "ruleId",
-      "tot": "msg"
     }
   ],
   "action": "",
@@ -41,11 +26,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 705,
-  "y": 300,
+  "x": 195,
+  "y": 580,
   "wires": [
     [
-      "14a5089d7e6463aa"
+      "8c6a11b0793c4d75"
     ]
   ],
   "icon": "font-awesome/fa-cog",

@@ -2,28 +2,26 @@ const Node = {
   "id": "9c38f93dec2cdc1c",
   "type": "function",
   "z": "92c28da6a66fdcb3",
-  "g": "59157a3330ff3d2f",
-  "name": "Construct SQL Query",
+  "g": "ef673a2e295a52ea",
+  "name": "Insert all",
   "func": "",
   "outputs": 1,
   "noerr": 0,
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 525,
+  "x": 350,
   "y": 240,
   "wires": [
     [
-      "95ea38a4344edd26"
+      "e80ac565620b6e2f"
     ]
   ],
-  "icon": "font-awesome/fa-search-plus",
-  "l": false
+  "icon": "font-awesome/fa-search-plus"
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  // data sets to accountingRules when matching script has run once during uptime, initial config data if not
-  let data = global.get("dateOfOrigin") ? global.get("accountingRules") : global.get("configs").initialData.accountingRules;
+  let data = global.get("configs").initialData.accountingRules ? global.get("configs").initialData.accountingRules : global.get("accountingRules");
   
   if (Array.isArray(data) && data.length > 0) {
       // Get the keys from the first object to use as column names

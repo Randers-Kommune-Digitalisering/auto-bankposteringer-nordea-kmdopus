@@ -2,22 +2,22 @@ const Node = {
   "id": "cadf1a02b9c8602b",
   "type": "function",
   "z": "92c28da6a66fdcb3",
-  "g": "08a9715c85ab97c1",
-  "name": "Clean data",
+  "g": "ef673a2e295a52ea",
+  "name": "Clean and save data",
   "func": "",
   "outputs": 1,
   "noerr": 0,
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 955,
-  "y": 240,
+  "x": 305,
+  "y": 400,
   "wires": [
     [
-      "89a0e2e2db597fe4"
+      "aafca5b9d325f315"
     ]
   ],
-  "icon": "font-awesome/fa-cog",
+  "icon": "font-awesome/fa-save",
   "l": false
 }
 
@@ -33,6 +33,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   msg.payload.forEach(item => {
       convertToBoolean(item, ["ActiveBool", "ExceptionBool"]);
   });
+  
+  global.set("accountingRules", msg.payload);
   
   return msg;
   

@@ -2,7 +2,7 @@ const Node = {
   "id": "5a11b12945ba0f8b",
   "type": "fs-file-lister",
   "z": "32cf2bec698ca424",
-  "g": "7dd9b7ddf80481c4",
+  "g": "1b0a88a05194f18e",
   "name": "",
   "start": "/data/output",
   "pattern": "*.csv",
@@ -14,8 +14,8 @@ const Node = {
   "depth": 0,
   "stat": true,
   "showWarnings": true,
-  "x": 425,
-  "y": 880,
+  "x": 275,
+  "y": 280,
   "wires": [
     [
       "4fb66acb8010f6d8"

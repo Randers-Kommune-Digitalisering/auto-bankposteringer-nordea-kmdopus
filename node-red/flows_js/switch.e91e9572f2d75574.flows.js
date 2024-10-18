@@ -2,8 +2,8 @@ const Node = {
   "id": "e91e9572f2d75574",
   "type": "switch",
   "z": "32cf2bec698ca424",
-  "g": "e2cf63522154167b",
-  "name": "",
+  "g": "88a5a801e4bf7e08",
+  "name": "Has uid?",
   "property": "uid",
   "propertyType": "msg",
   "rules": [
@@ -17,11 +17,11 @@ const Node = {
   "checkall": "true",
   "repair": false,
   "outputs": 2,
-  "x": 475,
-  "y": 1480,
+  "x": 245,
+  "y": 1020,
   "wires": [
     [
-      "47fa4880ce8ed011"
+      "b18d8a5195c23c7a"
     ],
     [
       "065dea81f9e031b7"

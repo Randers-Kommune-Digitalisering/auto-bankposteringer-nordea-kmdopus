@@ -2,7 +2,7 @@ const Node = {
   "id": "5febf3a471d59293",
   "type": "change",
   "z": "32cf2bec698ca424",
-  "g": "0b5190b6f576f668",
+  "g": "4169783d237ba908",
   "name": "Switch on type",
   "rules": [
     {
@@ -19,8 +19,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 385,
-  "y": 80,
+  "x": 245,
+  "y": 420,
   "wires": [
     [
       "83d4326f88df7a48"
