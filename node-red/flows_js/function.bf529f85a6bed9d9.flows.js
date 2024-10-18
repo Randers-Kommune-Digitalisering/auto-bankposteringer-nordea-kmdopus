@@ -2,29 +2,30 @@ const Node = {
   "id": "bf529f85a6bed9d9",
   "type": "function",
   "z": "92c28da6a66fdcb3",
-  "g": "769eb9119e1608d5",
-  "name": "Construct SQL Query",
+  "g": "883c8c287020e842",
+  "name": "Insert all",
   "func": "",
   "outputs": 1,
   "noerr": 0,
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 525,
-  "y": 380,
+  "x": 350,
+  "y": 560,
   "wires": [
     [
-      "1d83d371e5f21234"
+      "19a84ff81cf94db2"
     ]
   ],
-  "icon": "font-awesome/fa-search-plus",
-  "l": false
+  "icon": "font-awesome/fa-search-plus"
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let data = global.get("configs").initialData.masterData;
+  let data = global.get("configs").initialData.masterData ? global.get("configs").initialData.masterData : global.get("masterData");
+  let formattedData = [];
   
-  let columns = Object.keys(data);
+  formattedData.push(data);
+  data = formattedData
   
   if (Array.isArray(data) && data.length > 0) {
       // Get the keys from the first object to use as column names

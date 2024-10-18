@@ -4,11 +4,11 @@ const Node = {
   "z": "92c28da6a66fdcb3",
   "g": "42e21606623e991f",
   "name": "Set initial accountingRules",
-  "x": 585,
-  "y": 120,
+  "x": 525,
+  "y": 80,
   "wires": [
     [
-      "98f7dbecea9c5438"
+      "23d45fce19d2e18b"
     ],
     [
       "587111d207960881"

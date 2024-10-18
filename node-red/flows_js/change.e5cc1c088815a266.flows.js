@@ -3,28 +3,21 @@ const Node = {
   "type": "change",
   "z": "92c28da6a66fdcb3",
   "g": "42e21606623e991f",
-  "name": "Initiate db tables",
+  "name": "Make empty data structure if no inital data",
   "rules": [
     {
       "t": "set",
       "p": "configs.initialData.masterData",
       "pt": "global",
-      "to": "[{}]",
+      "to": "$globalContext(\"configs\").initialData.masterData ? $globalContext(\"configs\").initialData.masterData : {}",
       "tot": "jsonata"
     },
     {
       "t": "set",
       "p": "configs.initialData.bankAccounts",
       "pt": "global",
-      "to": "[{}]",
+      "to": "$globalContext(\"configs\").initialData.bankAccounts ? $globalContext(\"configs\").initialData.bankAccounts : [{}]",
       "tot": "jsonata"
-    },
-    {
-      "t": "set",
-      "p": "configs.initialData.masterData",
-      "pt": "global",
-      "to": "[{}]",
-      "tot": "json"
     }
   ],
   "action": "",
@@ -32,12 +25,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 585,
+  "x": 475,
   "y": 80,
   "wires": [
     [
-      "19f998658c30306b",
-      "dbc52ef3ec740e48"
+      "58216e489666bd0e"
     ]
   ],
   "icon": "font-awesome/fa-cog",

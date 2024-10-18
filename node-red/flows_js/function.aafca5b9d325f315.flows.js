@@ -2,7 +2,7 @@ const Node = {
   "id": "aafca5b9d325f315",
   "type": "function",
   "z": "92c28da6a66fdcb3",
-  "g": "08a9715c85ab97c1",
+  "g": "ef673a2e295a52ea",
   "name": "Sort accountingRules",
   "func": "",
   "outputs": 1,
@@ -10,8 +10,8 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 1055,
-  "y": 260,
+  "x": 355,
+  "y": 400,
   "wires": [
     [
       "b1772c1688248e29",

@@ -2,20 +2,20 @@ const Node = {
   "id": "c9e3f5495d8676f5",
   "type": "http in",
   "z": "32cf2bec698ca424",
-  "g": "7ca48ca8d52524e7",
-  "name": "",
+  "g": "54195acebfd77c6b",
+  "name": "Restart auth",
   "url": "/reauth",
   "method": "get",
   "upload": false,
   "swaggerDoc": "",
-  "x": 285,
-  "y": 1660,
+  "x": 630,
+  "y": 180,
   "wires": [
     [
-      "b023cb0d9a7c23ee"
+      "be1a01deddfcfba9",
+      "3f7e2437c657aeb6"
     ]
-  ],
-  "l": false
+  ]
 }
 
 module.exports = Node;

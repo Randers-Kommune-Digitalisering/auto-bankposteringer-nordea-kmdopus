@@ -2,23 +2,22 @@ const Node = {
   "id": "c04be7e7699c2a23",
   "type": "template",
   "z": "92c28da6a66fdcb3",
-  "g": "59157a3330ff3d2f",
-  "name": "SQL query \"DELETE\"",
+  "g": "ef673a2e295a52ea",
+  "name": "Delete all",
   "field": "sql",
   "fieldType": "msg",
   "format": "sql",
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 425,
-  "y": 280,
+  "x": 160,
+  "y": 240,
   "wires": [
     [
-      "7862c5126461b57c"
+      "96ae014bece8f2dd"
     ]
   ],
-  "icon": "font-awesome/fa-search-minus",
-  "l": false
+  "icon": "font-awesome/fa-search-minus"
 }
 
 Node.template = `
