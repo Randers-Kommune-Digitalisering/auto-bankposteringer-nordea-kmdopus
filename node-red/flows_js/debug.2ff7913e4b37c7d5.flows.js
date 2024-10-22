@@ -8,11 +8,11 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "{\t   \"Message\": \"Authorization status retrieved\",\t   \"Authorization Status\": $globalContext(\"adminAuthStatus\"),\t   \"Status Code\": msg.statusCode,\t   \"Number of status retrievals\": $globalContext(\"adminAuthAttempt\"),\t   \"Timestamp\": $now()\t}",
+  "complete": "{\t   \"Message\": \"Authorization status retrieved\",\t   \"Status Code\": msg.statusCode,\t   \"Auth Status\": msg.payload.response.status,\t   \"Response\": msg,\t   \"Number of status retrievals\": $globalContext(\"adminAuthAttempt\") + 1,\t   \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 995,
+  "x": 795,
   "y": 160,
   "wires": [],
   "l": false

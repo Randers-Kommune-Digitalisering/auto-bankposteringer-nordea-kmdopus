@@ -2,28 +2,26 @@ const Node = {
   "id": "54e1210917dfa5ae",
   "type": "function",
   "z": "92c28da6a66fdcb3",
-  "g": "e8e6c41949b01e67",
-  "name": "Construct SQL Query",
+  "g": "e57ddaa2ec0eda65",
+  "name": "Insert all",
   "func": "",
   "outputs": 1,
   "noerr": 0,
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 525,
-  "y": 520,
+  "x": 350,
+  "y": 740,
   "wires": [
     [
-      "73566ef987f29612"
+      "fe6f48306ad57f35"
     ]
   ],
-  "icon": "font-awesome/fa-search-plus",
-  "l": false
+  "icon": "font-awesome/fa-search-plus"
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let data = global.get("configs").initialData.bankAccounts;
-  let name = global.get("configs").names.bankAccounts;
+  let data = global.get("configs").initialData.bankAccounts ? global.get("configs").initialData.bankAccounts : global.get("bankAccounts");
   
   if (Array.isArray(data) && data.length > 0) {
       // Get the keys from the first object to use as column names
@@ -46,7 +44,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           return `(${values.join(', ')})`;
       });
   
-      let sqlQuery = `INSERT INTO ${name} (${columns.join(', ')}) VALUES ${rows.join(', ')};`;
+      let sqlQuery = `INSERT INTO bankAccounts (${columns.join(', ')}) VALUES ${rows.join(', ')};`;
       msg.sql = sqlQuery;
       
   }

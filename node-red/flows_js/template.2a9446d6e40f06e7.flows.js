@@ -2,27 +2,26 @@ const Node = {
   "id": "2a9446d6e40f06e7",
   "type": "template",
   "z": "92c28da6a66fdcb3",
-  "g": "769eb9119e1608d5",
-  "name": "SQL query \"DELETE\"",
+  "g": "883c8c287020e842",
+  "name": "Delete all",
   "field": "sql",
   "fieldType": "msg",
   "format": "sql",
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 425,
-  "y": 400,
+  "x": 160,
+  "y": 560,
   "wires": [
     [
-      "ebc4d88b187ec0f2"
+      "3116e0f4e3484858"
     ]
   ],
-  "icon": "font-awesome/fa-search-minus",
-  "l": false
+  "icon": "font-awesome/fa-search-minus"
 }
 
 Node.template = `
-DELETE FROM {{global.configs.names.masterData}}
+DELETE FROM masterData
 `
 
 module.exports = Node;

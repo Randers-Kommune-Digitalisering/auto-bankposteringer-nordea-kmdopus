@@ -347,59 +347,6 @@ code {
 .center
 { text-align: center; }
 
-div .activeToggle {
-    margin-bottom: 2rem;
-}
-
-.activeToggle label {
-    border-radius: .4rem;
-    line-height: 3.8rem;
-    height: 3.8rem;
-    text-align: center;
-    float: left;
-    overflow: hidden;
-    width: 11rem;
-}
-
-.activeToggle label span {
-    text-align: center;
-    padding: 3px 0;
-    display: block;
-    letter-spacing: .1rem;
-    font-size: 1.1rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #fff;
-    padding: 0 3rem;
-}
-
-.activeToggle label input {
-    position: absolute;
-    display: none;
-}
-
-.activeToggle label input:checked + span { background-color: var(--color-green); }
-
-#activeLabel {
-    transition: 120ms ease-in-out;
-}
-
-#activeLabel :hover {
-    background-color: var(--color-red-light);
-    cursor: pointer;
-}
-
-.activeToggle label input:not(:checked) + span { background-color: var(--color-red); }
-
-#inactiveLabel {
-    transition: 120ms ease-in-out;
-}
-
-#inactiveLabel :hover {
-    background-color: var(--color-green-light);
-    cursor: pointer;
-}
-
 /* Custom colored elements */
 
 span.red

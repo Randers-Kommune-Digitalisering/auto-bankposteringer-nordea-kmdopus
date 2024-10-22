@@ -25,7 +25,7 @@ const Node = {
       "f72448f1398c1221"
     ]
   ],
-  "icon": "node-red/cog.svg",
+  "icon": "font-awesome/fa-cog",
   "l": false
 }
 

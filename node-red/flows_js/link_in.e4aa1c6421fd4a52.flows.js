@@ -3,12 +3,12 @@ const Node = {
   "type": "link in",
   "z": "62eaf4407ee85a3a",
   "g": "dc3f1bccec7ebeb1",
-  "name": "link in 3",
+  "name": "link in multiple accounts",
   "links": [
     "7a169a19e7563608"
   ],
   "x": 65,
-  "y": 1020,
+  "y": 780,
   "wires": [
     [
       "a445693334ae4264"
