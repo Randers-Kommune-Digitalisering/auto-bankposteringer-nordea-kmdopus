@@ -11,17 +11,15 @@ const Node = {
   "template": "",
   "output": "str",
   "x": 180,
-  "y": 340,
+  "y": 240,
   "wires": [
-    [
-      "52d30ce0efab1472"
-    ]
+    []
   ],
   "icon": "font-awesome/fa-pencil"
 }
 
 Node.template = `
-CREATE TABLE IF NOT EXISTS {{global.configs.names.masterData}} (
+CREATE TABLE IF NOT EXISTS masterData (
     admName NVARCHAR(63),
     admEmail NVARCHAR(63),
     admID NVARCHAR(31) PRIMARY KEY,

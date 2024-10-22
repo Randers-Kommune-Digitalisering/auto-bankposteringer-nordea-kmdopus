@@ -1,4 +1,3 @@
-version: "1.0"
 services:
 
   node_red_vue:
@@ -36,6 +35,7 @@ services:
       DEBITORKONTO: ${DEBITORKONTO}
       AUTH_ID: ${PROD_AUTH_ID}
       AGREEMENT_ID: ${PROD_AGREEMENT_ID}
+      CREDENTIAL_SECRET: ${CREDENTIAL_SECRET}
 
       FLOWS: "/data/flows.json"
 

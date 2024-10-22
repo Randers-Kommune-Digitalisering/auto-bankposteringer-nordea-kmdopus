@@ -2,7 +2,7 @@ const Node = {
   "id": "e7c2685f6540a541",
   "type": "file in",
   "z": "32cf2bec698ca424",
-  "g": "8b39791da44fdf1f",
+  "g": "1b0a88a05194f18e",
   "name": "read file",
   "filename": "filepath",
   "filenameType": "msg",
@@ -11,8 +11,8 @@ const Node = {
   "sendError": false,
   "encoding": "utf8",
   "allProps": false,
-  "x": 585,
-  "y": 760,
+  "x": 435,
+  "y": 160,
   "wires": [
     [
       "b1ab19206ed81c2c"

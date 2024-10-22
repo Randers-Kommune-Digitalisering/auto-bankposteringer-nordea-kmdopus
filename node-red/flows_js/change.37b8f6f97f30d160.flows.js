@@ -7,35 +7,35 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "configs.initialData.masterData[0].admEmail",
+      "p": "configs.initialData.masterData.admEmail",
       "pt": "global",
       "to": "jan.molbaek@randers.dk",
       "tot": "str"
     },
     {
       "t": "set",
-      "p": "configs.initialData.masterData[0].admID",
+      "p": "configs.initialData.masterData.admID",
       "pt": "global",
       "to": "AUTH_ID",
       "tot": "env"
     },
     {
       "t": "set",
-      "p": "configs.initialData.masterData[0].admName",
+      "p": "configs.initialData.masterData.admName",
       "pt": "global",
       "to": "Jan Mølbæk",
       "tot": "str"
     },
     {
       "t": "set",
-      "p": "configs.initialData.masterData[0].integrationBool",
+      "p": "configs.initialData.masterData.integrationBool",
       "pt": "global",
       "to": "false",
       "tot": "bool"
     },
     {
       "t": "set",
-      "p": "configs.initialData.masterData[0].erpSystem",
+      "p": "configs.initialData.masterData.erpSystem",
       "pt": "global",
       "to": "KMD Opus",
       "tot": "str"
@@ -47,11 +47,9 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 220,
-  "y": 380,
+  "y": 280,
   "wires": [
-    [
-      "4bf5d6a9b5b9a77b"
-    ]
+    []
   ],
   "icon": "font-awesome/fa-pencil"
 }

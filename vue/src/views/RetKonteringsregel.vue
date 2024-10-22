@@ -19,7 +19,7 @@
     const konteringsregel = ref(isNewRule.value ? JSON.parse(JSON.stringify(newItem)) : null)
 
     const exceptionBool = ref(false)
-    const activeBool = ref(false)
+    // const activeBool = ref(false)
 
     if (isNewRule.value)
     {   
@@ -32,7 +32,7 @@
             .then(value => {
                 konteringsregel.value = value
                 exceptionBool.value = konteringsregel.value.ExceptionBool
-                activeBool.value = konteringsregel.value.ActiveBool
+                //activeBool.value = konteringsregel.value.ActiveBool
             })
     }
 
@@ -40,7 +40,7 @@
     watch(() => konteringsregel.value, newValue => {
         if (newValue) {
             exceptionBool.value = newValue.ExceptionBool
-            activeBool.value = newValue.ActiveBool
+            //activeBool.value = newValue.ActiveBool
         }
     })
 
@@ -174,8 +174,7 @@
 
     function toggleActivation() {
         konteringsregel.value.ActiveBool = !konteringsregel.value.ActiveBool
-        activeBool.value = konteringsregel.value.ActiveBool
-        console.log("aktivstatus er nu " + activeBool.value)
+        //activeBool.value = konteringsregel.value.ActiveBool
     }
 
 </script>
@@ -202,15 +201,10 @@
                         <template v-else><IconDelete /></template>
                     </button>
 
-                    <label :id="activeBool ? 'activeLabel' : 'inactiveLabel'">
-                        <input type="checkbox"
-                            v-model="activeBool"
-                            id="isActive"
-                            @change="toggleActivation()"
-                        />
-                        <span v-if="activeBool">Aktiv</span>
-                        <span v-else>Inaktiv</span>
-                    </label>
+                    <button v-if="konteringsregel != null" @click="toggleActivation()" :class="konteringsregel.ActiveBool ? 'green' : 'red'" :disabled="konteringsregel.ExceptionBool">
+                        {{ konteringsregel.ActiveBool ? 'Aktiv' : 'Inaktiv' }}</button>
+
+
                     <button id="submit" @click="updateRule" class="green" :disabled="isUpdating">
                         <template v-if="isUpdating">Gemmer ...</template>
                         <template v-else-if="hasUpdated">Rettelser gemt</template>
