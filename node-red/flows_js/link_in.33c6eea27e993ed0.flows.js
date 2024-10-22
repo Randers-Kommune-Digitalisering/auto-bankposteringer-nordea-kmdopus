@@ -2,8 +2,10 @@ const Node = {
   "id": "33c6eea27e993ed0",
   "type": "link in",
   "z": "431f85f122b4636d",
-  "name": "link in config 1",
-  "links": [],
+  "name": "link in config rules json file path",
+  "links": [
+    "96d06a03d8bc0b57"
+  ],
   "x": 25,
   "y": 60,
   "wires": [

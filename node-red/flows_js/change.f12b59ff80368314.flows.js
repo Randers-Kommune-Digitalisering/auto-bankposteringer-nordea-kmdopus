@@ -32,6 +32,13 @@ const Node = {
       "pt": "msg",
       "to": "masterData.admEmail",
       "tot": "global"
+    },
+    {
+      "t": "set",
+      "p": "from",
+      "pt": "msg",
+      "to": "SENDER_ADRESS",
+      "tot": "env"
     }
   ],
   "action": "",
@@ -40,7 +47,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 165,
-  "y": 760,
+  "y": 940,
   "wires": [
     [
       "502bdf88354d036b"

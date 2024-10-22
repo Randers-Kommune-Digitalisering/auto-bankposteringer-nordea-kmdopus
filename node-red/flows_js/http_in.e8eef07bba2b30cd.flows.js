@@ -2,21 +2,19 @@ const Node = {
   "id": "e8eef07bba2b30cd",
   "type": "http in",
   "z": "32cf2bec698ca424",
-  "g": "fd2d20f8e7169b95",
-  "name": "",
+  "g": "e5bb48e62cb30a3b",
+  "name": "Put data",
   "url": "/bankaccounts",
   "method": "put",
   "upload": false,
   "swaggerDoc": "",
-  "x": 285,
-  "y": 580,
+  "x": 100,
+  "y": 720,
   "wires": [
     [
-      "1c74f8043e850294",
       "a2ecb0bdb3091455"
     ]
-  ],
-  "l": false
+  ]
 }
 
 module.exports = Node;
