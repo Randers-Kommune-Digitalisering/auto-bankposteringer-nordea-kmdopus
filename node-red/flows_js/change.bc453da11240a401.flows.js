@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "ee0cf4ce372e2d36",
   "g": "b8fbf4f960a90422",
-  "name": "Remove id part of each line",
+  "name": "Format payload and set filename",
   "rules": [
     {
       "t": "set",

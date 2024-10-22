@@ -8,12 +8,12 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "payload.affectedRows > 0 ?\t{\t    \"Message\": $globalContext(\"configs\").names.bankAccounts & \" created\",\t    \"Timestamp\": $now()\t\t}\t:\t{\t    \"Message\": $globalContext(\"configs\").names.bankAccounts & \" table already exists\",\t    \"Timestamp\": $now()\t}",
+  "complete": "payload.affectedRows > 0 ?\t{\t    \"Message\": \"bankAccounts table created\",\t    \"Timestamp\": $now()\t\t}\t:\t{\t    \"Message\": \"bankAccounts table already exists\",\t    \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 265,
-  "y": 520,
+  "x": 585,
+  "y": 700,
   "wires": [],
   "l": false
 }

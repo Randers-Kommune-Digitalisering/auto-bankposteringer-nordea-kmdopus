@@ -18,6 +18,13 @@ const Node = {
       "pt": "global",
       "to": "payload.response.access_id",
       "tot": "msg"
+    },
+    {
+      "t": "set",
+      "p": "adminAuthStatus",
+      "pt": "global",
+      "to": "payload.response.status",
+      "tot": "msg"
     }
   ],
   "action": "",
@@ -25,11 +32,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 945,
-  "y": 80,
+  "x": 865,
+  "y": 100,
   "wires": [
     [
-      "d3a65d69010ad353"
+      "57ebed6f23b4abbd"
     ]
   ],
   "icon": "font-awesome/fa-save",

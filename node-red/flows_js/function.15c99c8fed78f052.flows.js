@@ -2,22 +2,22 @@ const Node = {
   "id": "15c99c8fed78f052",
   "type": "function",
   "z": "92c28da6a66fdcb3",
-  "g": "ccdbed98c6151465",
-  "name": "Clean data",
+  "g": "883c8c287020e842",
+  "name": "Clean and save data",
   "func": "",
   "outputs": 1,
   "noerr": 0,
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 955,
-  "y": 380,
+  "x": 305,
+  "y": 600,
   "wires": [
     [
-      "4479ede7fe552e73"
+      "ef6284f0a3e0f632"
     ]
   ],
-  "icon": "font-awesome/fa-cog",
+  "icon": "font-awesome/fa-save",
   "l": false
 }
 
@@ -36,7 +36,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
   msg.payload = JSON.parse(JSON.stringify(msg.payload));
   
-  msg.payload = msg.payload[0]
+  msg.payload = msg.payload[0];
+  
+  global.set("masterData", msg.payload);
   
   return msg;
 }

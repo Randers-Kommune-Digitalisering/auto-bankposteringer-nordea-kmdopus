@@ -8,12 +8,12 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "{\t   \"Message\": \"Dates generated\",\t   \"Timestamp\": $now(),\t   \"Transactions start date\": $globalContext(\"startdate\"),\t   \"Transactions end date\": $globalContext(\"enddate\")\t}",
+  "complete": "{\t   \"Message\": \"Transaction request initiated\",\t   \"Timestamp\": $now(),\t   \"Transaction date\": $globalContext(\"date\")\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 185,
-  "y": 160,
+  "x": 265,
+  "y": 200,
   "wires": [],
   "l": false
 }
