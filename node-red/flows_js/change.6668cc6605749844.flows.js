@@ -1,8 +1,8 @@
 const Node = {
-  "id": "f51a717902dc95f1",
+  "id": "6668cc6605749844",
   "type": "change",
   "z": "62eaf4407ee85a3a",
-  "g": "d35c0446ba72295e",
+  "g": "9707809d7fe4863a",
   "name": "Delete vars",
   "rules": [
     {
@@ -71,11 +71,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 965,
-  "y": 180,
+  "x": 165,
+  "y": 520,
   "wires": [
     [
-      "678501b1f63b474f"
+      "5e98d83c4a1fa3c6"
     ]
   ],
   "icon": "font-awesome/fa-trash",

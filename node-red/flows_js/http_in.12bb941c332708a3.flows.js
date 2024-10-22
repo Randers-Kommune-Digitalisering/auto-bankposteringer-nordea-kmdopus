@@ -1,19 +1,18 @@
 const Node = {
-  "id": "c9e3f5495d8676f5",
+  "id": "12bb941c332708a3",
   "type": "http in",
   "z": "32cf2bec698ca424",
   "g": "54195acebfd77c6b",
-  "name": "Restart auth",
-  "url": "/reauth",
+  "name": "Get status",
+  "url": "/authstatus",
   "method": "get",
   "upload": false,
   "swaggerDoc": "",
-  "x": 630,
-  "y": 180,
+  "x": 620,
+  "y": 280,
   "wires": [
     [
-      "3f7e2437c657aeb6",
-      "5972551ef434c68a"
+      "f2ed6cf9e6889698"
     ]
   ]
 }

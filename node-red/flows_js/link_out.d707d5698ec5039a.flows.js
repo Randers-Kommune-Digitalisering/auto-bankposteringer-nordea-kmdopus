@@ -6,8 +6,7 @@ const Node = {
   "name": "link out restart auth",
   "mode": "link",
   "links": [
-    "8af7ed2082372bf7",
-    "b80cc4be8d126015"
+    "8af7ed2082372bf7"
   ],
   "x": 835,
   "y": 160,

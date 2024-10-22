@@ -25,29 +25,7 @@
 
     const authStatus = ref("")
 
-    // Retreive updates to auth status
-    onMounted(() => {
-        const ws = new WebSocket('/api/wss/authstatus');
-        
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            authStatus.value = data.status; // Update status in your Vue app
-        };
-
-        onUnmounted(() => {
-            ws.close(); // Clean up when the component is destroyed
-        });
-    });
-
-    fetch('/api/masterdata')
-        .then(response => response = response.json())
-        .then(value => {
-            adminNavn.value = value.admName
-            adminAuthID.value = value.admID
-            adminEmail.value = value.admEmail
-            erpSystem.value = value.erpSystem
-            integrationBool.value = value.integrationBool
-        })
+    let pollInterval = null; // Polling interval reference
 
     function updateMasterdata() {
         hasUpdated.value = false
@@ -90,10 +68,6 @@
         eventBus.emit('integrationToggled', integrationBool.value);
     }
 
-    fetch('/api/bankaccounts')
-        .then(response => response = response.json())
-        .then(value => bankaccounts.value = value)
-
     function addBankaccount() {
         bankaccounts.value.push({
             "bankAccountName": "",
@@ -135,19 +109,40 @@
         bankaccounts.value.splice(index, 1)
     }
 
-    function pollForStatus(url, interval, maxRetries, onError, onComplete) {
+    function pollForAuthStatus() {
+        const fetchAuthStatus = () => {
+            fetch('/api/authstatus')
+                .then(response => response.json())
+                .then(data => {
+                    authStatus.value = data.status;
+                })
+                .catch(error => {
+                    console.error('Error fetching auth status:', error);
+                });
+        };
+
+        // Fetch immediately and then set the interval for continuous polling
+        fetchAuthStatus();
+        pollInterval = setInterval(fetchAuthStatus, 1000); // Poll every second
+    }
+
+    function pollForAuthRestartStatus(url, interval, maxRetries, onError, onSuccess) {
         let retries = 0;
+        let success = false;
 
         const poll = () => {
             fetch(url)
                 .then(response => {
-                    if (response.status === 202 && retries < maxRetries) {
+                    if (response.status === 200) {
+                        console.log('Authentication successful');
+                        onSuccess();
+                        success = true;
+                        return;
+                    }
+                    else if (response.status === 202 && retries < maxRetries) {
                         console.log('Still processing, status 202, retrying...');
                         retries++;
                         setTimeout(poll, interval); // Retry after specified interval
-                    }
-                    else if (response.status === 200) {
-                        console.log('Authentication successful');
                     } else {
                         throw new Error(`Error: Status ${response.status}`);
                     }
@@ -159,24 +154,47 @@
         };
 
         poll(); // Start polling
-        onComplete();
     }
 
     function restartAuth() {
         isUpdating3.value = true;
 
-        pollForStatus(
+        pollForAuthRestartStatus(
             '/api/reauth',
             2000, // Poll every 2 seconds
             60,   // Max retries
             (error) => { // onError
                 console.error(error);
             },
-            () => { // onComplete
+            () => { // onSuccess
                 isUpdating3.value = false;
             }
         );
     }
+
+    // Retrieve updates to auth status
+    onMounted(() => {
+        pollForAuthStatus(); // Start continuous fetching when the component is mounted
+
+        // Clean up polling when the component is destroyed
+        onUnmounted(() => {
+            clearInterval(pollInterval);
+        });
+    });
+
+    fetch('/api/masterdata')
+        .then(response => response = response.json())
+        .then(value => {
+            adminNavn.value = value.admName
+            adminAuthID.value = value.admID
+            adminEmail.value = value.admEmail
+            erpSystem.value = value.erpSystem
+            integrationBool.value = value.integrationBool
+        })
+
+    fetch('/api/bankaccounts')
+        .then(response => response = response.json())
+        .then(value => bankaccounts.value = value)
 
 </script>
 
@@ -188,24 +206,24 @@
         <template #icon>
             <IconProfile />
         </template>
-        <template #heading>Opsætning</template>
+        <template #heading>Stamdata og administrator-oplysninger</template>
         
         <table>
             <thead>
                 <tr>
                     <th>Navn</th>
-                    <th>Authenticator ID</th>
                     <th>E-mail</th>
+                    <th>Authenticator ID</th>
                     <th>Økonomisystem</th>
-                    <th>FTP til ØS</th>
+                    <th>FTP</th>
                     <th>Autorisation</th>
-                    <th>Genstart autorisation</th>
+                    <th>Genstart</th>
                 </tr>
             </thead>
             <tr>
                 <td><input v-model="adminNavn"></input></td>
-                <td><input v-model="adminAuthID"></input></td>
                 <td><input v-model="adminEmail"></input></td>
+                <td><input v-model="adminAuthID"></input></td>
                 <td><select v-model="erpSystem">
                     <option>KMD Opus</option>
                     <option>Fujitsu Prisme</option>
@@ -251,11 +269,13 @@
             </tr>
         </table>
         <br />
-        <button @click="addBankaccount()" class="blue"><IconAdd /></button>
-        <button @click="updateBankaccounts()" :disabled="isUpdating2">
-            <template v-if="isUpdating2">Gemmer...</template>
-            <template v-if="hasUpdated2">Ændringer gemt</template>
-            <template v-else><IconSave /></template>
-        </button>
+        <div class="flexbox">
+            <button @click="addBankaccount()" class="blue"><IconAdd /></button>
+            <button @click="updateBankaccounts()" :disabled="isUpdating2">
+                <template v-if="isUpdating2">Gemmer...</template>
+                <template v-if="hasUpdated2">Ændringer gemt</template>
+                <template v-else><IconSave /></template>
+            </button>
+        </div>
     </Content>
 </template>

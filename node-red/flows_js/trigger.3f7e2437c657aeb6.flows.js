@@ -9,7 +9,7 @@ const Node = {
   "op1type": "pay",
   "op2type": "nul",
   "duration": "2",
-  "extend": false,
+  "extend": true,
   "overrideDelay": false,
   "units": "min",
   "reset": "",
