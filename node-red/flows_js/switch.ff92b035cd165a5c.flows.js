@@ -1,15 +1,20 @@
 const Node = {
-  "id": "517c1f5ec2d2b1d9",
+  "id": "ff92b035cd165a5c",
   "type": "switch",
-  "z": "62eaf4407ee85a3a",
-  "g": "9707809d7fe4863a",
+  "z": "32cf2bec698ca424",
+  "g": "54195acebfd77c6b",
   "name": "What is auth status?",
   "property": "adminAuthStatus",
   "propertyType": "global",
   "rules": [
     {
       "t": "eq",
-      "v": "FAILED",
+      "v": "COMPLETE",
+      "vt": "str"
+    },
+    {
+      "t": "eq",
+      "v": "ACTIVE",
       "vt": "str"
     },
     {
@@ -18,23 +23,34 @@ const Node = {
       "vt": "str"
     },
     {
+      "t": "eq",
+      "v": "RESTARTING",
+      "vt": "str"
+    },
+    {
       "t": "else"
     }
   ],
   "checkall": "false",
   "repair": false,
-  "outputs": 3,
-  "x": 115,
-  "y": 500,
+  "outputs": 5,
+  "x": 875,
+  "y": 200,
   "wires": [
     [
-      "2de2b794607f5153"
+      "3183105c3c193643"
     ],
     [
-      "6ded66482c39c867"
+      "3183105c3c193643"
     ],
     [
-      "6668cc6605749844"
+      "be1a01deddfcfba9"
+    ],
+    [
+      "be1a01deddfcfba9"
+    ],
+    [
+      "be1a01deddfcfba9"
     ]
   ],
   "icon": "font-awesome/fa-question",

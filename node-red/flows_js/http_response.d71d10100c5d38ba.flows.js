@@ -1,13 +1,13 @@
 const Node = {
-  "id": "720caf0a9cba69a7",
-  "type": "websocket out",
+  "id": "d71d10100c5d38ba",
+  "type": "http response",
   "z": "32cf2bec698ca424",
   "g": "54195acebfd77c6b",
   "name": "",
-  "server": "f7246206922bfefd",
-  "client": "",
-  "x": 1025,
-  "y": 240,
+  "statusCode": "",
+  "headers": {},
+  "x": 1065,
+  "y": 280,
   "wires": [],
   "l": false
 }

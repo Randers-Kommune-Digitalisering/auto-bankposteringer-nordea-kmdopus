@@ -25,7 +25,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 545,
+  "x": 595,
   "y": 100,
   "wires": [
     [

@@ -1,16 +1,14 @@
 const Node = {
-  "id": "f2ed6cf9e6889698",
+  "id": "3183105c3c193643",
   "type": "change",
   "z": "32cf2bec698ca424",
   "g": "54195acebfd77c6b",
   "name": "",
   "rules": [
     {
-      "t": "set",
-      "p": "payload",
-      "pt": "msg",
-      "to": "{\t    \"status\": $globalContext(\"adminAuthStatus\")\t}",
-      "tot": "jsonata"
+      "t": "delete",
+      "p": "AuthRestart",
+      "pt": "global"
     }
   ],
   "action": "",
@@ -18,13 +16,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 785,
-  "y": 280,
+  "x": 925,
+  "y": 160,
   "wires": [
     [
-      "d71d10100c5d38ba"
+      "1b746b04c1818dc8"
     ]
   ],
+  "icon": "font-awesome/fa-cog",
   "l": false
 }
 
