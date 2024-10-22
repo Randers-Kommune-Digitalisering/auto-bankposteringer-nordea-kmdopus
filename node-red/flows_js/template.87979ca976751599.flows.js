@@ -2,27 +2,26 @@ const Node = {
   "id": "87979ca976751599",
   "type": "template",
   "z": "92c28da6a66fdcb3",
-  "g": "ccdbed98c6151465",
-  "name": "SQL query \"SELECT\"",
+  "g": "883c8c287020e842",
+  "name": "Select all",
   "field": "sql",
   "fieldType": "msg",
   "format": "sql",
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 835,
-  "y": 400,
+  "x": 160,
+  "y": 600,
   "wires": [
     [
-      "0d3f704c1edd5785"
+      "9df19e45e466d48e"
     ]
   ],
-  "icon": "font-awesome/fa-search",
-  "l": false
+  "icon": "font-awesome/fa-search"
 }
 
 Node.template = `
-SELECT * FROM {{global.configs.names.masterData}}
+SELECT * FROM masterData
 `
 
 module.exports = Node;

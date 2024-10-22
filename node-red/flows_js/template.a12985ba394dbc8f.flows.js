@@ -11,17 +11,15 @@ const Node = {
   "template": "",
   "output": "str",
   "x": 180,
-  "y": 420,
+  "y": 320,
   "wires": [
-    [
-      "2395eb909756205f"
-    ]
+    []
   ],
   "icon": "font-awesome/fa-pencil"
 }
 
 Node.template = `
-CREATE TABLE IF NOT EXISTS {{global.configs.names.bankAccounts}} (
+CREATE TABLE IF NOT EXISTS bankAccounts (
     bankAccount NVARCHAR(31) NULL PRIMARY KEY,
     bankAccountName NVARCHAR(63) NULL,
     statusAccount int NULL,

@@ -1,7 +1,7 @@
 const Node = {
   "id": "e5ed88aeaeb05808",
   "type": "group",
-  "z": "92c28da6a66fdcb3",
+  "z": "cc3305da0e5c71f6",
   "name": "Write rules to JSON",
   "style": {
     "stroke": "none",
@@ -16,10 +16,8 @@ const Node = {
     "72fca5943699a532",
     "0ffcf770d37caf8e"
   ],
-  "x": 344,
-  "y": 639,
-  "w": 252,
-  "h": 82
+  "x": 24,
+  "y": 19
 }
 
 module.exports = Node;
