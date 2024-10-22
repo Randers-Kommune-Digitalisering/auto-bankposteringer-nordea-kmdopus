@@ -2,8 +2,8 @@ const Node = {
   "id": "517c1f5ec2d2b1d9",
   "type": "switch",
   "z": "62eaf4407ee85a3a",
-  "g": "a537ba3361b4d03c",
-  "name": "What is request status?",
+  "g": "9707809d7fe4863a",
+  "name": "What is auth status?",
   "property": "adminAuthStatus",
   "propertyType": "global",
   "rules": [
@@ -14,7 +14,7 @@ const Node = {
     },
     {
       "t": "eq",
-      "v": "ACTIVE",
+      "v": "PENDING",
       "vt": "str"
     },
     {
@@ -25,16 +25,16 @@ const Node = {
   "repair": false,
   "outputs": 3,
   "x": 115,
-  "y": 600,
+  "y": 500,
   "wires": [
     [
-      "903ed591e2732bf6"
+      "2de2b794607f5153"
     ],
     [
-      "4e3c998f9a6def60"
+      "6ded66482c39c867"
     ],
     [
-      "50e6621c096c9f95"
+      "6668cc6605749844"
     ]
   ],
   "icon": "font-awesome/fa-question",

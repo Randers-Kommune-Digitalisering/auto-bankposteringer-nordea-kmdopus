@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "ee0cf4ce372e2d36",
   "g": "fafde89af20cbe51",
-  "name": "",
+  "name": "Set useful transaction parameters",
   "rules": [
     {
       "t": "set",

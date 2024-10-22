@@ -1,8 +1,8 @@
 <script setup>
     import { ref } from 'vue'
     import Content from '@/components/Content.vue'
-    import IconTable from '@/components/icons/IconTable.vue'
-    import IconDowload from '../components/icons/IconDowload.vue';
+    import IconDoc from '@/components/icons/IconDoc.vue'
+    import IconDownload from '../components/icons/IconDownload.vue';
     
     const outputFiles = ref(null)
     const reconFiles = ref(null)
@@ -45,7 +45,7 @@
 
     <Content>
         <template #icon>
-            <IconTable />
+            <IconDoc />
         </template>
         <template #heading>Posteringsbilag</template>
         
@@ -58,14 +58,14 @@
             </thead>
             <tr v-for="obj in outputFiles">
                 <td v-for="key in keyMap">{{ key.obj != null ? obj[key.obj][key.key] : obj[key.key] }}</td>
-                <td><a :href="'/api/filer/' + obj[keyMap.filnavn.key] + '/download'"><button @click=""><IconDowload /></button></a></td>
+                <td><a :href="'/api/filer/' + obj[keyMap.filnavn.key] + '/download'"><button @click=""><IconDownload /></button></a></td>
             </tr>
         </table>
     </Content>
 
     <Content>
         <template #icon>
-            <IconTable />
+            <IconDoc />
         </template>
         <template #heading>Afstemningsbilag</template>
         
@@ -78,7 +78,7 @@
             </thead>
             <tr v-for="obj in reconFiles">
                 <td v-for="key in keyMap">{{ key.obj != null ? obj[key.obj][key.key] : obj[key.key] }}</td>
-                <td><a :href="'/api/filer/' + obj[keyMap.filnavn.key] + '/download'"><button @click=""><IconDowload /></button></a></td>
+                <td><a :href="'/api/filer/' + obj[keyMap.filnavn.key] + '/download'"><button @click=""><IconDownload /></button></a></td>
             </tr>
         </table>
     </Content>

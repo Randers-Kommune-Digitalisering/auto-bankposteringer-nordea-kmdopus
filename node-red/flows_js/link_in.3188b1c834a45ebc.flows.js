@@ -6,13 +6,14 @@ const Node = {
   "name": "Step 1",
   "links": [
     "4b0e58cf1f6cac5f",
-    "8d42910b87fdded9"
+    "8d42910b87fdded9",
+    "6ce5dbd85b1a6e45"
   ],
-  "x": 480,
-  "y": 80,
+  "x": 460,
+  "y": 100,
   "wires": [
     [
-      "4b416d74e555ec27"
+      "0c5b3ed5962e2e9d"
     ]
   ],
   "l": true

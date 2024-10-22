@@ -3,7 +3,7 @@ const Node = {
   "type": "csv",
   "z": "ee0cf4ce372e2d36",
   "g": "b8fbf4f960a90422",
-  "name": "",
+  "name": "Parse csv",
   "sep": ";",
   "hdrin": false,
   "hdrout": "all",

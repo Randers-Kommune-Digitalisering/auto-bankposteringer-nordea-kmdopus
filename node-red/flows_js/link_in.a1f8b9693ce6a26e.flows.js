@@ -10,8 +10,8 @@ const Node = {
     "4ee43544775ac9aa",
     "2efe55213bd0cbc7"
   ],
-  "x": 595,
-  "y": 320,
+  "x": 495,
+  "y": 340,
   "wires": [
     [
       "c83d3435c2fc7e8e"

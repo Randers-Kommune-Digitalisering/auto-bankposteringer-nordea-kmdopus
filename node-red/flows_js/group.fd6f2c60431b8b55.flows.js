@@ -2,7 +2,7 @@ const Node = {
   "id": "fd6f2c60431b8b55",
   "type": "group",
   "z": "92c28da6a66fdcb3",
-  "name": "Load db to env",
+  "name": "Retrieve initial data",
   "style": {
     "stroke": "none",
     "fill": "#e3f3d3",
@@ -12,14 +12,14 @@ const Node = {
   },
   "nodes": [
     "9eefcaa37540b844",
-    "c8b3e7ea940dcf14",
-    "b966631ff1bc5a16",
-    "dde0bc8ea90747ea"
+    "dde0bc8ea90747ea",
+    "e6650b201931bc27",
+    "5b0f190780a072b1",
+    "6c63728841633635",
+    "0f43cbdaa279c2d5"
   ],
-  "x": 784,
-  "y": 39,
-  "w": 202,
-  "h": 122
+  "x": 644,
+  "y": 19
 }
 
 module.exports = Node;

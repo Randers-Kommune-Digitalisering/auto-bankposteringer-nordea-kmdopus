@@ -2,13 +2,13 @@ const Node = {
   "id": "b9abdf146aa1b73d",
   "type": "link in",
   "z": "92c28da6a66fdcb3",
-  "g": "769eb9119e1608d5",
-  "name": "link in update masterdata db",
+  "g": "883c8c287020e842",
+  "name": "link in insert all masterdata to db",
   "links": [
     "23d45fce19d2e18b"
   ],
-  "x": 375,
-  "y": 400,
+  "x": 65,
+  "y": 560,
   "wires": [
     [
       "2a9446d6e40f06e7"
