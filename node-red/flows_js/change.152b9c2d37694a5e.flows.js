@@ -32,11 +32,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 915,
+  "x": 865,
   "y": 100,
   "wires": [
     [
-      "a1d02033c5b07c48"
+      "57ebed6f23b4abbd"
     ]
   ],
   "icon": "font-awesome/fa-save",

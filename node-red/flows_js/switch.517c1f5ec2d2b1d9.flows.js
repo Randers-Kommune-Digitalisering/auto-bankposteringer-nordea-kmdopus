@@ -24,7 +24,7 @@ const Node = {
   "checkall": "false",
   "repair": false,
   "outputs": 3,
-  "x": 155,
+  "x": 115,
   "y": 500,
   "wires": [
     [
@@ -34,7 +34,7 @@ const Node = {
       "6ded66482c39c867"
     ],
     [
-      "5e98d83c4a1fa3c6"
+      "6668cc6605749844"
     ]
   ],
   "icon": "font-awesome/fa-question",

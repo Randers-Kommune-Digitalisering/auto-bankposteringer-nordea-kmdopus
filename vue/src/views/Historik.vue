@@ -48,7 +48,10 @@
     <Content>      
         HTTP-koder der starter med "2" indikerer fuldendte kørsler.
         <br>
-        HTTP-koder der starter med "4" eller "5" indikerer fejlede kørsler som har ikke genereret posteringer.
+        HTTP-koder der starter med "4" eller "5" indikerer fejlede kørsler som ikke har genereret posteringer.
+        <br>
+        <br>
+        Når en kørsel er genstartet, skal siden efterfølgende opdateres. HTTP-koden for kørslen vil herefter være opdateret.
     </Content>
     
     <Content>
