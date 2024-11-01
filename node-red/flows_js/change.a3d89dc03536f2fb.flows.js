@@ -1,8 +1,8 @@
 const Node = {
-  "id": "21aa4428cc26761e",
+  "id": "a3d89dc03536f2fb",
   "type": "change",
   "z": "ee0cf4ce372e2d36",
-  "g": "fafde89af20cbe51",
+  "g": "202a6b173abfc606",
   "name": "Set useful transaction parameters",
   "rules": [
     {
@@ -18,11 +18,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 455,
-  "y": 100,
+  "x": 115,
+  "y": 460,
   "wires": [
     [
-      "73f0b20e54524403"
+      "da9d0b8038e2bfe1"
     ]
   ],
   "icon": "font-awesome/fa-cog",

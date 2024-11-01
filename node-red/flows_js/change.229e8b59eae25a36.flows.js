@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "configs.ftp.dataProviderId",
       "pt": "global",
-      "to": "RAND",
+      "to": "6ROB",
       "tot": "str"
     },
     {

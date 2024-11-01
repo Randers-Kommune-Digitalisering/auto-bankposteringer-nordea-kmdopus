@@ -6,10 +6,10 @@ const Node = {
   "name": "link out 1",
   "mode": "link",
   "links": [
-    "67210a275cdf01da"
+    "8a5cd923f7f62d0a"
   ],
-  "x": 235,
-  "y": 480,
+  "x": 285,
+  "y": 580,
   "wires": []
 }
 

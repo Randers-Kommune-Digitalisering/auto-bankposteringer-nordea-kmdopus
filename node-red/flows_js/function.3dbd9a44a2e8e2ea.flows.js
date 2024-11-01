@@ -96,6 +96,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   
   msg.payload = jsonData;
   
+  global.set("accountingRules", msg.payload);
+  
   return msg;
 }
 

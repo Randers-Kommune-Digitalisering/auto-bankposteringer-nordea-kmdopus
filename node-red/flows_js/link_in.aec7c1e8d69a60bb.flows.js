@@ -5,7 +5,8 @@ const Node = {
   "g": "ef673a2e295a52ea",
   "name": "link in create rules db table",
   "links": [
-    "e052fea69f59c088"
+    "e052fea69f59c088",
+    "e5b28df7e070f00a"
   ],
   "x": 65,
   "y": 200,

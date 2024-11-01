@@ -16,7 +16,7 @@ const Node = {
     }
   ],
   "x": 135,
-  "y": 480,
+  "y": 580,
   "wires": [
     [
       "405c31e7c368685d"
@@ -32,33 +32,25 @@ Format: ISO 8601
 `
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, dayjs) {
-  function findDate(arg) {
-      let startDate = dayjs().startOf('day');
-      let endDate = dayjs().endOf('day').subtract(1, 'day');
+  function findDate() {
+      let date = dayjs().startOf('day');
   
-      if (startDate.day() === 1) { // If today is Monday
-          startDate = startDate.subtract(3, 'day');
+      if (date.day() === 1) { // If today is Monday
+          date = date.subtract(3, 'day');
       } else {
-          startDate = startDate.subtract(1, 'day');
+          date = date.subtract(1, 'day');
       }
   
-      if (arg === "start") {
-          return startDate.format('YYYY-MM-DD');
-      } else if (arg === "end") {
-          return endDate.format('YYYY-MM-DD');
-      }
+      return date.format('YYYY-MM-DD');
   }
   
   // Set global variables
-  global.set("startdate", findDate("start"));
-  global.set("enddate", findDate("end"));
+  global.set("date", findDate());
   global.set("dateOfOrigin", dayjs().format('YYYYMMDD'));
   global.set("timeOfOrigin", dayjs().format('HHmmss'));
-  global.set("accountStep", 0);
-  global.set("bankAccounts", ["DK20005908764988-DKK"]);
+  global.set("simpleDate", dayjs().format('DD-MM-YYYY'));
   
   return msg;
-  
 }
 
 module.exports = Node;
