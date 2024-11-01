@@ -4,7 +4,8 @@ const Node = {
   "z": "431f85f122b4636d",
   "name": "link in config masterData entries",
   "links": [
-    "96d06a03d8bc0b57"
+    "96d06a03d8bc0b57",
+    "bd7ebd08c8b487df"
   ],
   "x": 25,
   "y": 280,

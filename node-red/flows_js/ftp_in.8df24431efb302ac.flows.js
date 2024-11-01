@@ -9,7 +9,7 @@ const Node = {
   "filename": "",
   "localFilename": "",
   "name": "",
-  "x": 755,
+  "x": 745,
   "y": 200,
   "wires": [
     [

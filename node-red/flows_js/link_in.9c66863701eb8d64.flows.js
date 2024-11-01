@@ -6,7 +6,8 @@ const Node = {
   "name": "link in manual create db table",
   "links": [
     "e052fea69f59c088",
-    "2ed6323229b981a3"
+    "2ed6323229b981a3",
+    "e5b28df7e070f00a"
   ],
   "x": 65,
   "y": 700,

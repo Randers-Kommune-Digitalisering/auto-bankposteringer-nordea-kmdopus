@@ -3,9 +3,7 @@ const Node = {
   "type": "link in",
   "z": "431f85f122b4636d",
   "name": "link in config ftp fujitsu",
-  "links": [
-    "96d06a03d8bc0b57"
-  ],
+  "links": [],
   "x": 25,
   "y": 540,
   "wires": [
