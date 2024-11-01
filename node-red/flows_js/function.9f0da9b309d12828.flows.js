@@ -2,6 +2,7 @@ const Node = {
   "id": "9f0da9b309d12828",
   "type": "function",
   "z": "ee0cf4ce372e2d36",
+  "d": true,
   "g": "09ae44d941f2b3ed",
   "name": "Convert to XML compliance ",
   "func": "",
@@ -13,10 +14,14 @@ const Node = {
     {
       "var": "csv",
       "module": "csv-parser"
+    },
+    {
+      "var": "xml2js",
+      "module": "xml2js"
     }
   ],
-  "x": 455,
-  "y": 200,
+  "x": 495,
+  "y": 180,
   "wires": [
     [
       "ecaebc4d0cb38676"
@@ -26,14 +31,14 @@ const Node = {
   "l": false
 }
 
-Node.func = async function (node, msg, RED, context, flow, global, env, util, csv) {
+Node.func = async function (node, msg, RED, context, flow, global, env, util, csv, xml2js) {
   const date = global.get("dateOfOrigin");
   const time = global.get("timeOfOrigin");
   const compCode = global.get("configs").ftp.compCode;
   const prodEnv = global.get("configs").ftp.prodEnv;
   const dataProviderId = global.get("configs").ftp.dataProviderId;
   const dataProviderIdCode = global.get("configs").ftp.dataProviderIdCode;
-  const filename = flow.get("configs").ftp.filename;
+  const filename = global.get("configs").ftp.filename;
   const bankingDate = String(global.get("date"));
   let lineCounter = 0;
   let debetSum = 0;
@@ -66,12 +71,15 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   const docId = makeId(16);
   
   const LINES = {};
+  
   for (let posting of erpObject) {
       lineCounter++;
   
       let cleanedAmount = posting['Beløb'].replace(',', '.');
       let amount = posting['Debet/kredit'] === "Debet" ? cleanedAmount : cleanedAmount * -1;
       let psp = posting['PSP-element'] !== "" ? posting['PSP-element'] : undefined;
+  
+      console.log(posting);
   
       let line = {
           DEB_CRED_IND: posting['Debet/kredit'],
@@ -138,6 +146,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   };
   
   msg.payload = xmlObject;
+  global.set("xmlObject", xmlObject);
   
   return msg;
 }

@@ -22,7 +22,7 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  const accountValue = global.get("bankAccounts")[global.get("accountStep")].bankAccount;
+  const accountValue = global.get("bankAccounts")[global.get("accountStep")];
   let transactions = global.get("transactions") ? global.get("transactions") : [];
   let addTransactions = global.get("addTransactions");
   

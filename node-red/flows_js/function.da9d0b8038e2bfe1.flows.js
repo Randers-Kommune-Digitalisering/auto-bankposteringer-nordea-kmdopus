@@ -10,8 +10,8 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 115,
-  "y": 360,
+  "x": 165,
+  "y": 460,
   "wires": [
     [
       "c49c5be7601cebc5",
@@ -34,10 +34,10 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   const bankAccounts = global.get("bankAccounts");
   const date = global.get("simpleDate");
   
-  function calculateSpecificity(rule) {
+  function sumOfParametersGiven(rule) {
       // Count the number of rule parameters where the value property is defined (truthy)
       return Object.keys(rule)
-          .slice(0, 2)
+          .slice(0, 4)
           .filter(key => rule[key] || rule[key] || rule[key]).length;
   }
   
@@ -80,44 +80,42 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   }
   
   function generateErpPostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, psp) {
+      // Needs work. Length and placement of variables should be dynamic, based on headers.
       erpPostings.push([landingAccount, '', psp, '', '', landingDebetOrCredit, amount, '', text, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
       erpPostings.push([statusAccount, '', '', '', '', statusDebetOrCredit, amount, '', text, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
   }
   
-  function processPosting(transaction, sortedRules) {
+  function processPosting(transaction, rules) {
       let completeMatchBool = false;
   
-      let currentBankAccount = bankAccounts.find(account => account.bankAccount === transaction.account);
-  
-      let transactionAmount = parseFloat(transaction.amount);
-      let cleanedAmount = String(transactionAmount).replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
-      let statusDebetOrCredit = transactionAmount > 0 ? "Debet" : "Kredit";
+      transaction.amount = parseFloat(transaction.amount);
+      let cleanedAmount = String(transaction.amount).replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
+      let statusDebetOrCredit = transaction.amount > 0 ? "Debet" : "Kredit";
       let landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet"
   
-      for (let rule of sortedRules) {      
+      for (let rule of rules) {      
           let sumOfParametersMatched = 0;
           let psp = rule.PSP ? rule.PSP : '';
-          let ruleAmount1 = rule.Beløb1;          // ? parseFloat(rule.Beløb1.replace(',', '.')) : null;
-          let ruleAmount2 = rule.Beløb2;          // ? parseFloat(rule.Beløb2.replace(',', '.')) : null;
   
           if (completeMatchBool) {
               continue
           } else {
               for (let parameterIndex = 0; parameterIndex < transactionParameters.length; parameterIndex++) {
-                  let searchValue = rule[ruleParameters[parameterIndex]];
+                  let searchValue = rule[ruleParameters[parameterIndex]] ? rule[ruleParameters[parameterIndex]].toLowerCase() : null;
   
-                  if (searchValue && rule.Active && matchParameter(transaction, searchValue, transactionParameters[parameterIndex])) {
+                  if (searchValue && rule.ActiveBool && matchParameter(transaction, searchValue, transactionParameters[parameterIndex])) {
+  
                       sumOfParametersMatched += 1;
                   }
               }
   
-              let matchedAllParametersBool = sumOfParametersMatched === calculateSpecificity(rule);
-              let matchedAmountBool = matchAmount(transactionAmount, rule.Operator, ruleAmount1, ruleAmount2)
+              let matchedAllParametersBool = sumOfParametersMatched === sumOfParametersGiven(rule);
+              let matchedAmountBool = matchAmount(transaction.amount, rule.Operator, rule.Beløb1, rule.Beløb2)
   
               if (matchedAllParametersBool && matchedAmountBool) {
-                  if (!rule.Exception) {   // Don't write ERP postings if rule is an exception, but still count as match
+                  if (!rule.ExceptionBool) {   // Don't write ERP postings if rule is an exception, but still count as match
                       let text = textGeneration(rule.Posteringstekst, transaction.message, transaction.narrative, transaction.counterparty_name);
-                      generateErpPostings(currentBankAccount.statusAccount, rule.Artskonto, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, psp);
+                      generateErpPostings(transaction.account.statusAccount, rule.Artskonto, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, psp);
                   }
                   completeMatchBool = true;
                   rule.LastUsed = date;
@@ -127,7 +125,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       if (!completeMatchBool) {
           let text = transaction.transaction_id;
   
-          generateErpPostings(currentBankAccount.statusAccount, currentBankAccount.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, '');
+          generateErpPostings(transaction.account.statusAccount, transaction.account.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, '');
           transactionsWithNoMatch.push(transaction);
       }
   }

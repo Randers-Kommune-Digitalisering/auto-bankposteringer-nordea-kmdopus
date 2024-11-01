@@ -46,5 +46,11 @@
         "module": "dayjs",
         "builtin": false,
         "known": false
+    },
+    "xml2js": {
+        "spec": "xml2js",
+        "module": "xml2js",
+        "builtin": false,
+        "known": false
     }
 }

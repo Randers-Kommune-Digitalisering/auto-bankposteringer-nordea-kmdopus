@@ -21,7 +21,8 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let data = global.get("configs").initialData.accountingRules ? global.get("configs").initialData.accountingRules : global.get("accountingRules");
+  let data = global.get("configs").initialData ? global.get("configs").initialData.accountingRules : global.get("accountingRules");
+  
   
   if (Array.isArray(data) && data.length > 0) {
       // Get the keys from the first object to use as column names

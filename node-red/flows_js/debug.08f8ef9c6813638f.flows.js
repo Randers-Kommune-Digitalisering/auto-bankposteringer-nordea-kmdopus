@@ -8,7 +8,7 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "{\t    \"Message\": $globalContext(\"configs\").names.accountingRules & \" imported from csv-file\",\t    \"File location\": csvPath,\t    \"Timestamp\": $now()\t}",
+  "complete": "{\t    \"Message\": \"accountingRules imported from csv-file\",\t    \"File location\": csvPath,\t    \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
