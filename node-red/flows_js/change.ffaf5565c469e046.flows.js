@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "ee0cf4ce372e2d36",
   "g": "1c9d2e5a1088096c",
-  "name": "KMD Opus headers",
+  "name": "Set headers",
   "rules": [
     {
       "t": "set",
@@ -19,7 +19,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 165,
-  "y": 300,
+  "y": 480,
   "wires": [
     [
       "f72448f1398c1221"

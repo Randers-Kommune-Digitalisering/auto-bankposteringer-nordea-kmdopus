@@ -1,9 +1,10 @@
 const Node = {
-  "id": "93c2a846026b5e6a",
+  "id": "2eb27ff524e9b6b4",
   "type": "function",
   "z": "ee0cf4ce372e2d36",
+  "d": true,
   "g": "09ae44d941f2b3ed",
-  "name": "Convert to XML compliance",
+  "name": "Convert to XML compliance (test)",
   "func": "",
   "outputs": 1,
   "noerr": 0,
@@ -20,7 +21,7 @@ const Node = {
     }
   ],
   "x": 465,
-  "y": 180,
+  "y": 220,
   "wires": [
     [
       "ae9ec673824528b2"
@@ -34,15 +35,15 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   const date = global.get("dateOfOrigin");
   const time = global.get("timeOfOrigin");
   const compCode = global.get("configs").ftp.compCode;
-  const prodEnv = global.get("configs").ftp.prodEnv;
+  const prodEnv = "T02";
   const dataProviderId = global.get("configs").ftp.dataProviderId;
-  const dataProviderIdCode = global.get("configs").ftp.dataProviderIdCode;
-  const filename = global.get("configs").ftp.filename;
+  const dataProviderIdCode = "797";
+  const filename = `ZFIR_KMD_Opus_Posteringer_IND_${dataProviderIdCode}_${dataProviderId}_${date}_${time}.xml`;
   const bankingDate = date.replace(/-/g, "");
   
   let lineCounter = 0;
-  let debetSum = 0;
-  let kreditSum = 0;
+  let debetSum = parseFloat(0);
+  let kreditSum = parseFloat(0);
   
   // Konverter ERP-data array til objekter baseret på headers
   const dataArray = flow.get("erpArray");
@@ -74,14 +75,16 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
           let amount = posting['Beløb'].replace(',', '.');
           amount = parseFloat(amount);
           let amountPrefixed = posting['Debet/kredit'] === "Debet" ? amount : amount * -1;
-          
-          let psp = posting['PSP-element'] || undefined;
+  
+          let psp = posting['PSP-element'] ? "XG-9999999990-00001" : undefined;
+          let artskonto = String(posting['Artskonto'])
+          artskonto = artskonto.charAt(0) === "9" ? "90515060" : "29505050";
   
           let line = {
               DEB_CRED_IND: posting['Debet/kredit'].charAt(0),
               AMT_DOCCUR: amountPrefixed.toFixed(2),
               ITEM_TEXT: posting['Tekst'],
-              GL_ACCOUNT: posting['Artskonto'],
+              GL_ACCOUNT: artskonto,
               WBS_ELEMENT: psp,
               REF_KEY_3: String(lineCounter),
               ZZCSYSIDN: dataProviderId
