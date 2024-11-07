@@ -1,15 +1,15 @@
 const Node = {
-  "id": "2a1716f1529ef50c",
+  "id": "120272adaeb6b56c",
   "type": "link out",
   "z": "ee0cf4ce372e2d36",
-  "g": "85a5e54522cd21cc",
-  "name": "link out 1",
+  "g": "c9e7ab8a728c987d",
+  "name": "link out route ftp",
   "mode": "link",
   "links": [
-    "8a5cd923f7f62d0a"
+    "67210a275cdf01da"
   ],
-  "x": 285,
-  "y": 760,
+  "x": 265,
+  "y": 340,
   "wires": []
 }
 

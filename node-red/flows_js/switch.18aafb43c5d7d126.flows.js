@@ -11,20 +11,27 @@ const Node = {
       "t": "eq",
       "v": "Nordea",
       "vt": "str"
+    },
+    {
+      "t": "else"
     }
   ],
-  "checkall": "true",
+  "checkall": "false",
   "repair": false,
-  "outputs": 1,
-  "x": 135,
-  "y": 200,
+  "outputs": 2,
+  "x": 115,
+  "y": 220,
   "wires": [
     [
       "b2f0114ab8da2473"
+    ],
+    [
+      "4bbfbea153481518"
     ]
   ],
   "outputLabels": [
-    "Nordea"
+    "Nordea",
+    null
   ],
   "icon": "font-awesome/fa-question",
   "l": false

@@ -21,15 +21,11 @@ const Node = {
   "y": 80,
   "wires": [
     [
-      "84f96049f46a03fd"
+      "8963e3be6ad67a63"
     ],
     [
-      "58b540bd1c41656c"
+      "a5cfbbb818eb14ba"
     ]
-  ],
-  "outputLabels": [
-    "Yes",
-    "No"
   ],
   "icon": "font-awesome/fa-question",
   "l": false
