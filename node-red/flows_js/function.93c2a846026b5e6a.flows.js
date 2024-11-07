@@ -3,7 +3,7 @@ const Node = {
   "type": "function",
   "z": "ee0cf4ce372e2d36",
   "g": "09ae44d941f2b3ed",
-  "name": "Convert to XML compliance (ChatGPT)",
+  "name": "Convert to XML compliance",
   "func": "",
   "outputs": 1,
   "noerr": 0,
@@ -19,8 +19,8 @@ const Node = {
       "module": "xml2js"
     }
   ],
-  "x": 495,
-  "y": 220,
+  "x": 465,
+  "y": 180,
   "wires": [
     [
       "ae9ec673824528b2"
@@ -38,7 +38,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   const dataProviderId = global.get("configs").ftp.dataProviderId;
   const dataProviderIdCode = global.get("configs").ftp.dataProviderIdCode;
   const filename = global.get("configs").ftp.filename;
-  const bankingDate = String(global.get("date"));
+  const bankingDate = date.replace(/-/g, "");
   
   let lineCounter = 0;
   let debetSum = 0;
@@ -65,35 +65,41 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   }
   
   const docId = makeId(16);
-  const LINES = erpObject.map((posting, index) => {
-      lineCounter++;
   
-      let cleanedAmount = posting['Beløb'].replace(',', '.');
-      let amount = posting['Debet/kredit'] === "Debet" ? cleanedAmount : cleanedAmount * -1;
-      let psp = posting['PSP-element'] || undefined;
+  // Create a single LINES object with multiple LINE elements inside
+  const LINES = {
+      LINE: erpObject.map((posting, index) => {
+          lineCounter++;
   
-      let line = {
-          DEB_CRED_IND: posting['Debet/kredit'],
-          AMT_DOCCUR: String(amount),
-          ITEM_TEXT: posting['Tekst'],
-          GL_ACCOUNT: posting['Artskonto'],
-          WBS_ELEMENT: psp,
-          REF_KEY_3: String(lineCounter),
-          ZZCSYSIDN: dataProviderId
-      };
+          let amount = posting['Beløb'].replace(',', '.');
+          amount = parseFloat(amount);
+          let amountPrefixed = posting['Debet/kredit'] === "Debet" ? amount : amount * -1;
+          
+          let psp = posting['PSP-element'] || undefined;
   
-      // Fjern undefined værdier
-      Object.keys(line).forEach(key => line[key] === undefined && delete line[key]);
+          let line = {
+              DEB_CRED_IND: posting['Debet/kredit'].charAt(0),
+              AMT_DOCCUR: amountPrefixed.toFixed(2),
+              ITEM_TEXT: posting['Tekst'],
+              GL_ACCOUNT: posting['Artskonto'],
+              WBS_ELEMENT: psp,
+              REF_KEY_3: String(lineCounter),
+              ZZCSYSIDN: dataProviderId
+          };
   
-      // Opdater debet og kredit summer
-      if (posting['Debet/kredit'] === 'Debet') {
-          debetSum += parseFloat(cleanedAmount);
-      } else if (posting['Debet/kredit'] === 'Kredit') {
-          kreditSum += parseFloat(cleanedAmount);
-      }
+          // Remove undefined values
+          Object.keys(line).forEach(key => line[key] === undefined && delete line[key]);
   
-      return { LINE: line };
-  });
+          // Update debit and credit sums
+          if (posting['Debet/kredit'] === 'Debet') {
+              debetSum += amount;
+          } else if (posting['Debet/kredit'] === 'Kredit') {
+              kreditSum += amount;
+          }
+  
+          return line;
+      })
+  };
   
   const CONTROL_FIELDS = {
       SENDERID: prodEnv + "CLNT" + dataProviderIdCode,
@@ -104,9 +110,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   };
   
   const HEADER = {
-      'NO_DOC-POSITION': String(lineCounter),
-      'BALANCE_DEBET': String(debetSum.toFixed(2)),
-      'BALANCE_CREDIT': String(kreditSum.toFixed(2)),
+      'NO_DOC_POSITION': String(lineCounter),
+      'BALANCE_DEBET': debetSum.toFixed(2),
+      'BALANCE_CREDIT': kreditSum.toFixed(2),
       'MUNICIPALITY': dataProviderIdCode,
       'COMP_CODE': compCode,
       'DOC_DATE': bankingDate,
@@ -133,7 +139,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       xmldec: { version: '1.0', encoding: 'UTF-8' },
       renderOpts: { pretty: true }
   });
+  
   const xml = builder.buildObject(xmlObject);
+  
   msg.payload = xml;
   global.set("xmlObject", xml);
   

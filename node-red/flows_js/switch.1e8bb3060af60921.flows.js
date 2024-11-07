@@ -1,9 +1,9 @@
 const Node = {
-  "id": "84f96049f46a03fd",
+  "id": "1e8bb3060af60921",
   "type": "switch",
   "z": "ee0cf4ce372e2d36",
-  "g": "622bd279325fcb5d",
-  "name": "",
+  "g": "c9e7ab8a728c987d",
+  "name": "Provider?",
   "property": "configs.banking.provider",
   "propertyType": "global",
   "rules": [
@@ -11,20 +11,27 @@ const Node = {
       "t": "eq",
       "v": "Nordea",
       "vt": "str"
+    },
+    {
+      "t": "else"
     }
   ],
-  "checkall": "true",
+  "checkall": "false",
   "repair": false,
-  "outputs": 1,
-  "x": 215,
-  "y": 60,
+  "outputs": 2,
+  "x": 115,
+  "y": 360,
   "wires": [
     [
-      "9ccea994648c07a5"
+      "3f347f4442b5cd54"
+    ],
+    [
+      "d564e1258605dc5d"
     ]
   ],
   "outputLabels": [
-    "Nordea"
+    "Nordea",
+    null
   ],
   "icon": "font-awesome/fa-question",
   "l": false

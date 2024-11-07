@@ -3,10 +3,10 @@ const Node = {
   "type": "link in",
   "z": "ee0cf4ce372e2d36",
   "g": "202a6b173abfc606",
-  "name": "link in matching script",
+  "name": "link in kmd matching script",
   "links": [],
   "x": 65,
-  "y": 460,
+  "y": 640,
   "wires": [
     [
       "a3d89dc03536f2fb"

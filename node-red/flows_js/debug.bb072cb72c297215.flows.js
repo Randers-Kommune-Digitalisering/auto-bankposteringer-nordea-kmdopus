@@ -8,12 +8,12 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "{\t   \"Message\": \"Unrecognised ERP. Failed to produce file.\",\t   \"Timestamp\": $now()\t}",
+  "complete": "{\t   \"Message\": \"Unrecognised ERP. Failed to produce output.\",\t   \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
   "x": 165,
-  "y": 340,
+  "y": 520,
   "wires": [],
   "l": false
 }
