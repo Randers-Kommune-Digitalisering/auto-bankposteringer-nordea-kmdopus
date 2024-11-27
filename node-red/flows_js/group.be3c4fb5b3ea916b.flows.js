@@ -2,7 +2,6 @@ const Node = {
   "id": "be3c4fb5b3ea916b",
   "type": "group",
   "z": "62eaf4407ee85a3a",
-  "g": "41f07c818d4b858a",
   "name": "Transactions request",
   "style": {
     "label": true,
