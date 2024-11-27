@@ -2,7 +2,6 @@ const Node = {
   "id": "09ae44d941f2b3ed",
   "type": "group",
   "z": "ee0cf4ce372e2d36",
-  "g": "ae97f4f45deb77bb",
   "name": "FTP integration",
   "style": {
     "label": true,

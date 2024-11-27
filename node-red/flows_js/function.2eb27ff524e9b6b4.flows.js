@@ -2,7 +2,6 @@ const Node = {
   "id": "2eb27ff524e9b6b4",
   "type": "function",
   "z": "ee0cf4ce372e2d36",
-  "d": true,
   "g": "09ae44d941f2b3ed",
   "name": "Convert to XML compliance (test)",
   "func": "",
@@ -115,7 +114,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   const HEADER = {
       'NO_DOC_POSITION': String(lineCounter),
       'BALANCE_DEBET': debetSum.toFixed(2),
-      'BALANCE_CREDIT': kreditSum.toFixed(2),
+      'BALANCE_CREDIT': '-' + kreditSum.toFixed(2),
       'MUNICIPALITY': dataProviderIdCode,
       'COMP_CODE': compCode,
       'DOC_DATE': bankingDate,
