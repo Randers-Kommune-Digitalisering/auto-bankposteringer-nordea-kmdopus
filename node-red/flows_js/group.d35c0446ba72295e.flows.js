@@ -2,7 +2,6 @@ const Node = {
   "id": "d35c0446ba72295e",
   "type": "group",
   "z": "62eaf4407ee85a3a",
-  "g": "41f07c818d4b858a",
   "name": "Authentication",
   "style": {
     "stroke": "none",

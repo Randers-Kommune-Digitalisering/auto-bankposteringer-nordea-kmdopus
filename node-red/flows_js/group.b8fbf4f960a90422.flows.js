@@ -2,7 +2,6 @@ const Node = {
   "id": "b8fbf4f960a90422",
   "type": "group",
   "z": "ee0cf4ce372e2d36",
-  "g": "ae97f4f45deb77bb",
   "name": "Reconciliation file creation",
   "style": {
     "stroke": "none",
