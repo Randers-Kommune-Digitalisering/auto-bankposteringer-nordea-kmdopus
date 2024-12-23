@@ -21,10 +21,10 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "adminAuthStatus",
+      "p": "accessDuration",
       "pt": "global",
-      "to": "COMPLETE",
-      "tot": "str"
+      "to": "payload.response.expires_in",
+      "tot": "msg"
     }
   ],
   "action": "",
@@ -33,7 +33,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 865,
-  "y": 220,
+  "y": 240,
   "wires": [
     [
       "7be3097ce9fc8ed0"

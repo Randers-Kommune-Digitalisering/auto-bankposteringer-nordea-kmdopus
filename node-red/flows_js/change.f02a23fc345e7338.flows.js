@@ -8,8 +8,8 @@ const Node = {
     {
       "t": "set",
       "p": "accessDuration",
-      "pt": "flow",
-      "to": "$flowContext(\"accessDuration\") - 1440",
+      "pt": "global",
+      "to": "$globalContext(\"accessDuration\") - 1440",
       "tot": "jsonata"
     }
   ],

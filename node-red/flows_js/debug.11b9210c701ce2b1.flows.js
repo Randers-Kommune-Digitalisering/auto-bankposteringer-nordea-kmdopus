@@ -8,7 +8,7 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "{\t    \"Message\": $globalContext(\"configs\").names.accountingRules & \" written to json-file\",\t    \"File location\": jsonPath,\t    \"Timestamp\": $now()\t}",
+  "complete": "{\t    \"Message\": \"accountingRules written to json-file\",\t    \"File location\": jsonPath,\t    \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",

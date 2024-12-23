@@ -3,9 +3,9 @@ const Node = {
   "type": "switch",
   "z": "62eaf4407ee85a3a",
   "g": "af45fb910a71600f",
-  "name": "Less than 10 days",
+  "name": "",
   "property": "accessDuration",
-  "propertyType": "flow",
+  "propertyType": "global",
   "rules": [
     {
       "t": "gt",
@@ -16,7 +16,7 @@ const Node = {
       "t": "else"
     }
   ],
-  "checkall": "true",
+  "checkall": "false",
   "repair": false,
   "outputs": 2,
   "x": 115,
