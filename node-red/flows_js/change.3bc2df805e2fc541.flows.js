@@ -1,51 +1,58 @@
 const Node = {
-  "id": "bb11954f600ef730",
+  "id": "3bc2df805e2fc541",
   "type": "change",
   "z": "62eaf4407ee85a3a",
-  "g": "be3c4fb5b3ea916b",
-  "name": "Flow vars",
+  "g": "d35c0446ba72295e",
+  "name": "set request data",
   "rules": [
+    {
+      "t": "set",
+      "p": "step",
+      "pt": "flow",
+      "to": "5",
+      "tot": "num"
+    },
     {
       "t": "set",
       "p": "method",
       "pt": "flow",
-      "to": "GET",
+      "to": "POST",
       "tot": "str"
     },
     {
       "t": "set",
       "p": "path",
       "pt": "flow",
-      "to": "/corporate/premium/v4/accounts",
+      "to": "/corporate/v2/authorize/token",
       "tot": "str"
     },
     {
       "t": "set",
-      "p": "pathSuffix",
+      "p": "content-type",
       "pt": "flow",
-      "to": "/transactions",
+      "to": "application/x-www-form-urlencoded",
       "tot": "str"
     },
     {
       "t": "set",
-      "p": "urlParam",
+      "p": "data.grant_type",
       "pt": "flow",
-      "to": "selectedBankAccount",
-      "tot": "flow"
+      "to": "refresh_token",
+      "tot": "str"
     },
     {
       "t": "set",
-      "p": "queryParam1",
+      "p": "data.refresh_token",
       "pt": "flow",
-      "to": "date",
+      "to": "refresh_token",
       "tot": "global"
     },
     {
       "t": "set",
-      "p": "queryParam2",
-      "pt": "flow",
-      "to": "date",
-      "tot": "global"
+      "p": "url",
+      "pt": "msg",
+      "to": "$globalContext(\"configs\").banking.domain & $flowContext(\"path\")",
+      "tot": "jsonata"
     }
   ],
   "action": "",
@@ -54,10 +61,10 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 645,
-  "y": 360,
+  "y": 260,
   "wires": [
     [
-      "c3fd47014b3397d6"
+      "561e6ec1405501f5"
     ]
   ],
   "icon": "font-awesome/fa-cog",

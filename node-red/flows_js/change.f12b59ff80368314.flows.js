@@ -8,8 +8,8 @@ const Node = {
     {
       "t": "set",
       "p": "accessDurationDays",
-      "pt": "flow",
-      "to": "$floor($flowContext(\"accessDuration\") / 60 / 24)",
+      "pt": "global",
+      "to": "$floor($globalContext(\"accessDuration\") / 60 / 24)",
       "tot": "jsonata"
     },
     {
@@ -23,7 +23,7 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "\"Der er nu \" & $flowContext(\"accessDurationDays\") & \" dage tilbage af autorisation af automatisk bankindlæsning (FOBI)\"",
+      "to": "\"Der er nu \" & $globalContext(\"accessDurationDays\") & \" dage tilbage af autorisation af automatisk bankindlæsning (FOBI)\"",
       "tot": "jsonata"
     },
     {
@@ -50,7 +50,7 @@ const Node = {
   "y": 940,
   "wires": [
     [
-      "502bdf88354d036b"
+      "c966227c3ab9b9de"
     ]
   ],
   "icon": "font-awesome/fa-cog",
