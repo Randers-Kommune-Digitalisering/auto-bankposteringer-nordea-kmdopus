@@ -9,7 +9,7 @@ const Node = {
   "rules": [
     {
       "t": "gt",
-      "v": "14400",
+      "v": "0",
       "vt": "num"
     },
     {

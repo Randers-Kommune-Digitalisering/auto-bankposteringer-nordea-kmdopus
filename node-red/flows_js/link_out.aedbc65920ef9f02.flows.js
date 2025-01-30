@@ -6,7 +6,6 @@ const Node = {
   "name": "link out step 4-5",
   "mode": "link",
   "links": [
-    "e91f33a6490e5bb6",
     "1154327928d69857"
   ],
   "x": 965,

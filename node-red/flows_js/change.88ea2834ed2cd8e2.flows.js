@@ -7,7 +7,7 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "access_token",
+      "p": "token",
       "pt": "global",
       "to": "payload.response.access_token",
       "tot": "msg"

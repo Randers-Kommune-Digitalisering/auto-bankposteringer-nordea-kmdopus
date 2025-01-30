@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "$globalContext(\"transactions\").{\t  \"narrative\": narrative,\t  \"counterparty_name\": counterparty_name,\t  \"amount\": amount,\t  \"balance_after_transaction\": balance_after_transaction\t}",
+      "to": "$globalContext(\"transactions\").{\t  \"Reference\": narrative,\t  \"Afsender\": counterparty_name,\t  \"Beløb\": $string(amount).$replace(/\\./, ','),\t  \"Løbende_saldo\": $string(balance_after_transaction).$replace(/\\./, ',')\t}",
       "tot": "jsonata"
     },
     {
@@ -29,7 +29,8 @@ const Node = {
   "y": 280,
   "wires": [
     [
-      "0103cd774294d614"
+      "0103cd774294d614",
+      "ea287866b36b42fd"
     ]
   ],
   "icon": "font-awesome/fa-cog",

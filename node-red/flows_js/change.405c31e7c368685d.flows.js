@@ -14,8 +14,8 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "erpArray",
-      "pt": "flow",
+      "p": "payload",
+      "pt": "msg",
       "to": "[]",
       "tot": "json"
     }

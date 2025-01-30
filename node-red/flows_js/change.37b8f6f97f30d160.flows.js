@@ -30,7 +30,7 @@ const Node = {
       "t": "set",
       "p": "configs.initialData.masterData.integrationBool",
       "pt": "global",
-      "to": "true",
+      "to": "false",
       "tot": "bool"
     },
     {
