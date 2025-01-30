@@ -45,7 +45,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   let kreditSum = parseFloat(0);
   
   // Konverter ERP-data array til objekter baseret på headers
-  const dataArray = flow.get("erpArray");
+  const dataArray = msg.payload;
   const headersString = flow.get("erpFileHeaders");
   const headersArray = headersString.split(", ");
   const erpObject = dataArray.map((item) => {

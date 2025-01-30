@@ -26,19 +26,25 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let transactions = global.get("transactions") ? global.get("transactions") : [];
   let addTransactions = global.get("addTransactions");
   
-  // Ensure transactions is an array
-  transactions = Array.isArray(transactions) ? transactions : [];
+  // Ensure addTransactions is an array
+  if (Array.isArray(addTransactions)) {
   
-  // Concatenate add_transactions to transactions
-  transactions = transactions.concat(addTransactions);
+      // Add appropiate account to each transaction
+      addTransactions = addTransactions.map(obj => ({
+          ...obj,  // Spread the existing object properties
+          account: accountValue  // Add the new key-value pair
+      }));
   
-  const updatedTransactions = transactions.map(obj => ({
-      ...obj,  // Spread the existing object properties
-      account: accountValue  // Add the new key-value pair
-  }));
+      // Merge new transactions with existing ones
+      transactions = transactions.concat(addTransactions);
   
-  // Update the flow variable with the modified array
-  global.set("transactions", transactions);
+      // Update the flow variable with the modified array
+      global.set("transactions", addTransactions);
+  
+  } else {
+      node.error("No transactions to add");
+  }
+  
   global.set("addTransactions", {});
   
   return msg;

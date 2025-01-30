@@ -41,12 +41,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   const filename = global.get("configs").ftp.filename;
   const bankingDate = date.replace(/-/g, "");
   
-  let lineCounter = 0;
-  let debetSum = 0;
-  let kreditSum = 0;
-  
   // Konverter ERP-data array til objekter baseret på headers
-  const dataArray = flow.get("erpArray");
+  const dataArray = msg.payload;
   const headersString = flow.get("erpFileHeaders");
   const headersArray = headersString.split(", ");
   const erpObject = dataArray.map((item) => {
@@ -55,6 +51,10 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
           return obj;
       }, {});
   });
+  
+  let lineCounter = 0;
+  let debetSum = 0;
+  let kreditSum = 0;
   
   function makeId(length) {
       let result = '';

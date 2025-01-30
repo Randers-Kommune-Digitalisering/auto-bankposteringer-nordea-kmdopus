@@ -23,7 +23,6 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let erpArray = flow.get("erpArray") || [];
   let erpPostings = [];
   let transactionsWithNoMatch = [];
   const transactions = global.get("transactions");
@@ -135,9 +134,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   });
   
   global.set("transactionsWithNoMatch", transactionsWithNoMatch);
-  flow.set("erpArray", erpArray.concat(erpPostings));
   
-  msg.payload = erpArray.concat(erpPostings);
+  msg.payload = erpPostings;
   msg.columns = flow.get("erpFileHeaders");
   msg.filename = "/data/output/" + global.get("dateOfOrigin") + ".csv";
   
