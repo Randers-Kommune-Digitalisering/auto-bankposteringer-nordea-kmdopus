@@ -31,7 +31,7 @@ const Node = {
   ],
   "outputLabels": [
     "Nordea",
-    null
+    ""
   ],
   "icon": "font-awesome/fa-question",
   "l": false

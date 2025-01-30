@@ -2,7 +2,7 @@ const Node = {
   "id": "af45fb910a71600f",
   "type": "group",
   "z": "62eaf4407ee85a3a",
-  "name": "Warn admin of auth timeout",
+  "name": "Re-authenticate",
   "style": {
     "stroke": "none",
     "fill": "#e3f3d3",

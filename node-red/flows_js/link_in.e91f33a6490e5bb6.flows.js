@@ -6,8 +6,7 @@ const Node = {
   "name": "Step 4",
   "links": [
     "0f833ab532f965a0",
-    "678501b1f63b474f",
-    "aedbc65920ef9f02"
+    "678501b1f63b474f"
   ],
   "x": 460,
   "y": 220,

@@ -3,13 +3,13 @@ const Node = {
   "type": "change",
   "z": "62eaf4407ee85a3a",
   "g": "af45fb910a71600f",
-  "name": "",
+  "name": "minus 5 minutes",
   "rules": [
     {
       "t": "set",
       "p": "accessDuration",
       "pt": "global",
-      "to": "$globalContext(\"accessDuration\") - 1440",
+      "to": "$globalContext(\"accessDuration\") - 300",
       "tot": "jsonata"
     }
   ],
