@@ -14,7 +14,7 @@ const Node = {
   "y": 240,
   "wires": [
     [
-      "2d11b50a914e60c1"
+      "bd461b21e6eb659a"
     ]
   ],
   "icon": "font-awesome/fa-refresh",

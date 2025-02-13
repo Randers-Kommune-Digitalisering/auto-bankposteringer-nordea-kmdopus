@@ -3,7 +3,7 @@ const Node = {
   "type": "switch",
   "z": "62eaf4407ee85a3a",
   "g": "ea1bf65dfedc00a0",
-  "name": "",
+  "name": "statusCode",
   "property": "statusCode",
   "propertyType": "msg",
   "rules": [

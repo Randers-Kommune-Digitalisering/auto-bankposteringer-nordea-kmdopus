@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "$globalContext(\"transactions\").{\t  \"Reference\": narrative,\t  \"Afsender\": counterparty_name,\t  \"Beløb\": $string(amount).$replace(/\\./, ','),\t  \"Løbende_saldo\": $string(balance_after_transaction).$replace(/\\./, ',')\t}",
+      "to": "$globalContext(\"transactions\").{\t  \"Bogføringsdato\": $string(booking_date).$replace(/-/, ''),\t  \"Beløb\": $string(amount).$replace(/\\./, ','),\t  \"Posteringstype\": type_description,\t  \"Reference\": narrative,\t  \"Løbende_saldo\": $string(balance_after_transaction).$replace(/\\./, ','),\t  \"Statuskonto\": $string(account.statusAccount)\t}",
       "tot": "jsonata"
     },
     {
@@ -29,8 +29,7 @@ const Node = {
   "y": 280,
   "wires": [
     [
-      "0103cd774294d614",
-      "ea287866b36b42fd"
+      "0103cd774294d614"
     ]
   ],
   "icon": "font-awesome/fa-cog",
