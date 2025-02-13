@@ -39,13 +39,11 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       transactions = transactions.concat(addTransactions);
   
       // Update the flow variable with the modified array
-      global.set("transactions", addTransactions);
+      global.set("transactions", transactions);
   
   } else {
       node.error("No transactions to add");
   }
-  
-  global.set("addTransactions", {});
   
   return msg;
 }

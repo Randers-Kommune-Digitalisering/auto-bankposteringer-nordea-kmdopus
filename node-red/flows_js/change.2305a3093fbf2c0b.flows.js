@@ -23,7 +23,7 @@ const Node = {
       "t": "set",
       "p": "addTransactions",
       "pt": "global",
-      "to": "payload.response.transactions ? payload.response.transactions : null",
+      "to": "payload.response.transactions ? $reverse(payload.response.transactions) : null",
       "tot": "jsonata"
     },
     {

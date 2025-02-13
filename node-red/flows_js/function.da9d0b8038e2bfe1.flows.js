@@ -25,7 +25,7 @@ const Node = {
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let erpPostings = [];
   let transactionsWithNoMatch = [];
-  const transactions = global.get("transactions");
+  const transactions = global.get("transactions").reverse();
   const transactionParameters = flow.get("transactionParameters");   // Has to match ruleParameters
   const accountingRules = global.get("accountingRules");
   const ruleParameters = Object.keys(accountingRules[0]).slice(0, 4);
@@ -88,9 +88,10 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       let completeMatchBool = false;
   
       transaction.amount = parseFloat(transaction.amount);
+      let absoulute_amount = Math.abs(transaction.amount);
       let cleanedAmount = String(transaction.amount).replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
       let statusDebetOrCredit = transaction.amount > 0 ? "Debet" : "Kredit";
-      let landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet"
+      let landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet";
   
       for (let rule of rules) {      
           let sumOfParametersMatched = 0;
@@ -109,7 +110,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               }
   
               let matchedAllParametersBool = sumOfParametersMatched === sumOfParametersGiven(rule);
-              let matchedAmountBool = matchAmount(transaction.amount, rule.Operator, rule.Beløb1, rule.Beløb2)
+              let matchedAmountBool = matchAmount(absoulute_amount, rule.Operator, rule.Beløb1, rule.Beløb2)
   
               if (matchedAllParametersBool && matchedAmountBool) {
                   if (!rule.ExceptionBool) {   // Don't write ERP postings if rule is an exception, but still count as match
@@ -122,7 +123,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           }
       }
       if (!completeMatchBool) {
-          let text = transaction.transaction_id;
+          let text = transaction.narrative;
   
           generateErpPostings(transaction.account.statusAccount, transaction.account.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, '');
           transactionsWithNoMatch.push(transaction);
