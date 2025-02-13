@@ -1,782 +1,508 @@
-﻿Reference;Advisliste;Afsender;Posteringstype;match_regel;Beløb1;Beløb2;beløb_regel;Posteringstekst;Artskonto;PSP;SIO;Notat;;;;
-;;#LFM;;Indeholder;;;;Retur ;67300000;9900000800;;Elsebeth Morgensen vedr. spørgsmål;;;;
-#Plejevederlag/Plejeorlov;;;;Indeholder;;;;Tekst fra bank;10000000;;;Find PSP-element på samme måde som AUB el. Kommunal Kompetence Fond;;;;
-;;#Hjørnestenen;;Indeholder;;;;;95931400;;;UNDTAGELSE : Sygeref. skal til 95914005 (CPR-bogføring);;;;
-;;#Comm2IG;;Indeholder;;;;;;;;Typisk Skole / IT - Lars Bertelsen;;;;
-;;#Dansk retursys;;Starter med;;;;;79000000;XG-0000005229-00022;;Tjek efter kreditnota, hvis ikke, bogfør på kantinens konto. Ved ref = SÆKID, ofte Mellerup/Lone Andersen eller Ungdomsskolen/Berit Schneider Mogensen eller Oust Mølleskolen/Lene Matine Jensen;;;;
-;;#RDB plastics GmbH;;Starter med;;;;;;;;Tina Tran - vedr. affaldskontoret;;;;
-;#retur;;;Indeholder;;;;;95910009;;;Tilbagekaldelse løn / fejludb til nemkonto i Nordea. Husk CPR;;;;
-;;#Danish Agro;;Starter med;;;;;;;;Til betalingskontoret - Kan måske bare føres over på 95990009?;;;;
-#Donation;;;;Indeholder;;;;;79100000;;;Spørg Ivar ift. moms;;;;
-;;#Skatteankestyrelsen;;Indeholder;;;;;;;;Spørg Bettina Bak, tjek j.nr.;;;;
-#Rejsekort;;#Midttrafik;;Indeholder;;;;;40000000;XG-0000002349-00001;;Rejsekort att: Thake:  - UNDTAGEN Randers Specialskole samt ved andre Att: Skriv og spørg vedkommende;;;;
-#teaterref Scenit;;;;Starter med;;;;;86000000;XG-0000004075-00006;;Spørg Annette Skov eller Lene Bonne Rasmussen;;;;
-#Løntilskud;;#Kommune;;Indeholder;;;;;;;;Spørg Jan Ugur Atas for konteringsoplysninger;;;;
-"#Fleksjob ""FJ"" eller Skånejob";;#Kommune;;Indeholder;;;;;95914009;;;Skal CPR-bogføres, samt tekst angive afsender kommune.;;;;
-#Jobafklaring/ressourcerforløb;;#Kommune;;Indeholder;;;;;95914001;;;Skal CPR-bogføres;;;;
-#HSK;;;Overførsel;Starter med;;;;;52000000;XG-0000003394-00044;;Skal CPR-bogføres (Sociale begravelser);;;;
-;#Kundenr. 30114345;;;Indeholder;;;;;;;;Marianne Skovbo;;;;
-;;#Økonomistyrelsen - Statens administration;;Indeholder;;;;;95941300;;;"""FJ""";;;;
-;;#Place2Book;;Starter med;;;;;95941300;;;Hvis ikke til MOE, kontakt Trine Mains;;;;
-#SygeDP/DP retur;;;;Indeholder;;;;;95931013;;;Hvis ikke i indbetalinger@randers.dk, spørg sagsbehandler;;;;
-;;#Boet efter;;Indeholder;;;;;;;;Henvendelse til doedsbo.ran@domstol.dk;;;;
-;;#diverse;Gebyr;Indeholder;;;;;40000000;XG-0000000006-00007;;;;;;
-#Sikkerhedsstillelse;;;;Indeholder;;;;;79000000;XG-0000003323-00067;;Mail til Diana Knudsen + Helle Bade Larsen ved indbetalinger ;;;;
-#Moms retur;;;;Indeholder;;;;;95999010;;;Afstem med Ivars oversigt;;;;
-#Bådplads;;;;Indeholder;;;;;79000000;XG-0000004025-00001;;;;;;
-#Fyrværkeri;;;;Indeholder;;;;;79000000;XG-0000004013-00002;;Hanne Dahl Jakobsen / Kultur;;;;
-#Bådplads depositum;;;;Indeholder;;;;;40000000;XG-0000004025-00003;;;;;;
-#Vaskeri Lindevænget;;;;Indeholder;;;;;79000000;XG-0000004514-00022;;Marianne Dyrring Munck Basse;;;;
-5386888 030325;;;;Indeholder;;;;538688 030325 Depositum ifm. udlån af elcykler;79000000;XG-0000005063-00011;;Lukkes?;;;;
-5386888 0-0621;;;;Indeholder;;;;5386888 0-2121 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;;Lukkes?;;;;
-5386888 1-0621;;;;Indeholder;;;;5386888 1-2121 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;;Lukkes?;;;;
-5386888 212126;;;;Indeholder;;;;5386888 212126 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;;Lukkes?;;;;
-5386888 2-0621;;;;Indeholder;;;;5386888 2-2121 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;;Lukkes?;;;;
-5386888 3-0621;;;;Indeholder;;;;5386888 3-2121 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;;Lukkes?;;;;
-5386888 4-0621;;;;Indeholder;;;;5386888 4-2121 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;;Lukkes?;;;;
-5386888 5-0621;;;;Indeholder;;;;5386888 5-2121 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;;Lukkes?;;;;
-5386888 6-0621;;;;Indeholder;;;;5386888 6-2121 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;;Lukkes?;;;;
-5386888 7-0621;;;;Indeholder;;;;5386888 7-2121 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;;Lukkes?;;;;
-5386888 8-0621;;;;Indeholder;;;;5386888 8-2121 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;;Lukkes?;;;;
-5386888 9-0621;;;;Indeholder;;;;5386888 9-2121 UMT til kampagnen GIV RANDERS ET TRÆ;79000000;XA-9258200001-00041;;Lukkes?;;;;
-;;Sampension;;Indeholder;3000000,00;;Større end;Tekst fra bank;95914002;;;;;;;
-;;PFA Pension;;Starter med;;;;Advis fra bank;95914002;;;Posteringstekst inkl. CPR;;;;
-141360;;Børne- og undervisning;;Indeholder;;;;Advis fra bank;86000000;XG-0000002066-00003;;Kan gælde forskellige P-numre. P-nummer måske kun i advis.;;;;
-;;;Overførsel;Starter med;4552,00;;Lig med;Advis fra bank;79000000;XG-0000003025-00001;;Huslejenævnet;;;;
-;;;Overførsel;Starter med;167,00;;Lig med;Advis fra bank;79000000;XG-0000003025-00001;;;;;;
-Payment;;Verdo Produktion;;Indeholder;;;;Afsender fra bank;72000000;XG-0000005012-00297;;;;;;
-;250473;Struer;;Indeholder;;;;Tekst fra bank;95941300;;;;;;;
-;Kundenr: 32538967 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-;Kundenr: 26856671 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-;Kundenr: 29759561 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-;Kundenr: 29759626 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-;Kundenr: 29759642 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-;Kundenr: 29759669 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-;Kundenr: 29759677 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-;Kundenr: 29759812 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-;Kundenr: 31001846 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-;Kundenr: 31028264 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-;Kundenr: 31029295 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-;Kundenr: 32542972 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-;Kundenr: 41469048 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-;Kundenr: 29759448 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-;Kundenr: 29759480 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-;Kundenr: 29759596 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-;Kundenr: 33467699 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-;Kundenr: 34191697 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-;Kundenr: 33492324 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-;Kundenr: 35455078 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-;Kundenr: 41858648 Moms;;;Indeholder;;;;Advis fra bank;95999010;;;;;;;
-N27026;;Nets;;Starter med;;;;Tekst fra bank;95950005;;;100027026 Indefrysningslån;;;;
-N36549;;Nets;;Starter med;;;;Tekst fra bank;91407040;;;100036549 Mit betalingsoverblik;;;;
-N42250;;Nets;;Starter med;;;;Tekst fra bank;79000000;XG-0000003057-00002;;100042250 Adresse- og bopælsattest;;;;
-N54102;;Nets;;Starter med;;;;Tekst fra bank;95930015;;;100054102 Sygesikring;;;;
-141442;;Børne- og undervisning;;Indeholder;;;;Advis fra bank;86000000;XG-0000002067-00003;;;;;;
-141296;;Børne- og undervisning;;Indeholder;;;;Advis fra bank;86000000;XG-0000002068-00003;;;;;;
-141855;;Børne- og undervisning;;Indeholder;;;;Advis fra bank;86000000;XG-0000000034-00003;;;;;;
-143498;;Børne- og undervisning;;Indeholder;;;;Advis fra bank;86000000;XG-0000002069-00003;;;;;;
-142731;;Børne- og undervisning;;Indeholder;;;;Advis fra bank;86000000;XG-0000002806-00014;;;;;;
-;95943015;;;Indeholder;;;;Advis fra bank;95943015;;;;;;;
-95943015;;;;Indeholder;;;;Advis fra bank;95943015;;;;;;;
-AE 9476014980;;;;Starter med;;;;AE 9476014980;79000000;XG-0000005096-00001;;;;;;
-AE 9476060256;;;;Starter med;;;;AE 9476060256;79000000;XG-0000005094-00001;;;;;;
-KP-AarhusKommune;;;;Indeholder;;;;Afsender fra bank;95931700;;;KP;;;;
-(KP);;Kommune;;Indeholder;;;;Afsender fra bank;95931700;;;KP;;;;
-Team Pension;;Kommune;;Indeholder;;;;Afsender fra bank;95931700;;;KP;;;;
-KP-;;Kommune;Overførsel;Indeholder;;;;Afsender fra bank;95931700;;;KP;;;;
-KP-;;Kommune;Cap;Indeholder;;;;Afsender fra bank;95931700;;;KP;;;;
-Indskudslån;;;;Indeholder;1100,00;;Mindre end;Afsender fra bank;91407008;;;;;;;
-;AFK borger;;Bgs;Indeholder;;;;Afsender fra bank;79000000;XG-0000003070-00001;;;;;;
-AFK borger;;;Bgs;Indeholder;;;;Afsender fra bank;79000000;XG-0000003070-00001;;;;;;
-;AFK borger;;Overførsel;Indeholder;;;;Afsender fra bank;79000000;XG-0000003070-00001;;;;;;
-AFK borger;;;Overførsel;Indeholder;;;;Afsender fra bank;79000000;XG-0000003070-00001;;;;;;
-;;Svend Aage Sølvsten;;Indeholder;;;;Aktivitetsudvalget Korshøjscentret kageforplejning;79000000;XG-0000004526-00031;;;;;;
-006984;;;Pengeautomat;Indeholder;;;;Depositcard CBR 006984 ;90100010;;;Charlotte Keil Søgaard;;;;
-006974;;;Pengeautomat;Indeholder;;;;Depositcard ACR 006974 ;90100035;;;Charlotte Keil Søgaard;;;;
-011887;;;Pengeautomat;Indeholder;;;;Depositcard AF-koordinator 011887;79000000;XG-0000003070-00001;;;;;;
-012197;;;Pengeautomat;Indeholder;;;;Depositcard Assentoftskolen 012197;72000000;XG-0000002369-00021;;;;;;
-011781;;;Pengeautomat;Indeholder;;;;Depositcard Bakkegården 011781;72000000;XG-0000004526-00028;;;;;;
-006975;;;Pengeautomat;Indeholder;;;;Depositcard Bjerregrav Skole 006975;79000000;XG-0000002382-00015;;Kode til depositcard: 0867;;;;
-011784;;;Pengeautomat;Indeholder;;;;Depositcard Bjerregrav Skole 011784;72000000;XG-0000002382-00015;;;;;;
-011893;;;Pengeautomat;Indeholder;;;;Depositcard Blicherskolen Skolebod A 011893;79000000;XG-0000002392-00031;;;;;;
-011892;;;Pengeautomat;Indeholder;;;;Depositcard Blicherskolen Skolebod B 011892;79000000;XG-0000002392-00032;;;;;;
-012180;;;Pengeautomat;Indeholder;;;;Depositcard Borgerservice 012180;90100001;;;;;;;
-011785;;;Pengeautomat;Indeholder;;;;Depositcard Borupvænget 011785;72000000;XG-0000004526-00046;;;;;;
-012188;;;Pengeautomat;Indeholder;;;;Depositcard Cafe Lindevænget 012188;72000000;XG-0000004526-00036;;;;;;
-011792;;;Pengeautomat;Indeholder;;;;Depositcard Cafe Nellemann 011792;72000000;XG-0000004526-00037;;;;;;
-011778;;;Pengeautomat;Indeholder;;;;Depositcard Cafe Svaleparken 011778;72000000;XG-0000004526-00038;;;;;;
-011789;;;Pengeautomat;Indeholder;;;;Depositcard Cafe Thors Bakke 011789;72000000;XG-0000004526-00039;;;;;;
-011897;;;Pengeautomat;Indeholder;;;;Depositcard Cafe Vorup 011897;72000000;XG-0000004526-00041;;;;;;
-006983;;;Pengeautomat;Indeholder;;;;Depositcard CBR 006983;90100011;;;Charlotte Keil Søgaard;;;;
-011783;;;Pengeautomat;Indeholder;;;;Depositcard Dronnigborg 011783;72000000;XG-0000004526-00030;;;;;;
-011890;;;Pengeautomat;Indeholder;;;;Depositcard Fritidscentret 011890;95990009;;;;;;;
-011780;;;Pengeautomat;Indeholder;;;;Depositcard Fårup 011780;72000000;XG-0000004526-00047;;;;;;
-012200;;;Pengeautomat;Indeholder;;;;Depositcard Gaia Butik 012200;72000000;XG-0000003040-00018;;;;;;
-012199;;;Pengeautomat;Indeholder;;;;Depositcard Gaia Cafe 012199;72000000;XG-0000003040-00046;;;;;;
-006991;;;Pengeautomat;Indeholder;;;;Depositcard GAIA Museum 006991;79000000;XG-0000003098-00001;;;;;;
-006987;;;Pengeautomat;Indeholder;;;;Depositcard Hjørnestenen 006987;95931400;;;;;;;
-012196;;;Pengeautomat;Indeholder;;;;Depositcard Hobrovejens Juniorklub 012196;72000000;XG-0000002448-00001;;;;;;
-006986;;;Pengeautomat;Indeholder;;;;Depositcard Hobrovejens Skole 006986;72000000;XG-0000002439-00024;;;;;;
-011891;;;Pengeautomat;Indeholder;;;;Depositcard Huset Nyvang 011891;72000000;XG-0000004526-00035;;;;;;
-006984;;;Pengeautomat;Indeholder;;;;Depositcard Kildevang Cafe 006984;72000000;XG-0000004526-00045;;;;;;
-011791;;;Pengeautomat;Indeholder;;;;Depositcard Kollektivhuset 011791;72000000;XG-0000004526-00044;;;;;;
-012191;;;Pengeautomat;Indeholder;;;;Depositcard Kollektivhuset 012191;72000000;XG-0000004526-00044;;;;;;
-006978;;;Pengeautomat;Indeholder;;;;Depositcard Korshøjskolen 006978;72000000;XG-0000002465-00021;;;;;;
-006973;;;Pengeautomat;Indeholder;;;;Depositcard Kristrupcentret 006973;72000000;XG-0000004526-00042;;;;;;
-011786;;;Pengeautomat;Indeholder;;;;Depositcard Madservice 011786;72000000;XG-0000004526-00018;;;;;;
-006970;;;Pengeautomat;Indeholder;;;;Depositcard Matrielgården 006970;40000000;XG-0000005004-00023;;;;;;
-006982;;;Pengeautomat;Indeholder;;;;Depositcard Mellerup/Ragna 006982;79000000;XG-0000005094-00005;;;;;;
-012194;;;Pengeautomat;Indeholder;;;;Depositcard Munkholmskolen 012194;79000000;XG-0000004526-00048;;;;;;
-011888;;;Pengeautomat;Indeholder;;;;Depositcard Museum Østjylland 011888;95941300;;;;;;;
-011793;;;Pengeautomat;Indeholder;;;;Depositcard Møllevang 011793;72000000;XG-0000004526-00033;;;;;;
-006993;;;Pengeautomat;Indeholder;;;;Depositcard Nørrevangsskolen 006993;72000000;XG-0000002511-00021;;;;;;
-006979;;;Pengeautomat;Indeholder;;;;Depositcard Perron 4 006979;72000000;XG-0000003038-00053;;;;;;
-012198;;;Pengeautomat;Indeholder;;;;Depositcard Psykiatriens Hus 012198;72000000;XG-0000003038-00126;;;;;;
-012195;;;Pengeautomat;Indeholder;;;;Depositcard Randers Bibliotek 012195;95941202;;;;;;;
-006991;;;Pengeautomat;Indeholder;;;;Depositcard Randers Ungddomsskole 006991;79000000;XG-0000002667-00008;;;;;;
-006981;;;Pengeautomat;Indeholder;;;;Depositcard Regnskab 006981;95990009;;;;;;;
-011790;;;Pengeautomat;Indeholder;;;;Depositcard Rosevænget 011790;72000000;XG-0000004526-00027;;;;;;
-012183;;;Pengeautomat;Indeholder;;;;Depositcard RS Blommevej;79000000;XG-0000002648-00024;;;;;;
-012189;;;Pengeautomat;Indeholder;;;;Depositcard Senhjerneskadeområdet 012189;79000000;XG-0000003021-00043;;;;;;
-006980;;;Pengeautomat;Indeholder;;;;Depositcard Sprogcentret 006980;79000000;XG-0000003397-00012;;;;;;
-006976;;;Pengeautomat;Indeholder;;;;Depositcard Søndermarkskolen 006976;79000000;XG-0000002531-00016;;;;;;
-011787;;;Pengeautomat;Indeholder;;;;Depositcard Terneparken 011787;72000000;XG-0000004526-00048;;;;;;
-012185;;;Pengeautomat;Indeholder;;;;Depositcard Tirsdalen Skole 012185;72000000;XG-0000002544-00025;;;;;;
-012184;;;Pengeautomat;Indeholder;;;;Depositcard Tirsdalens plejehjem 012184;72000000;XG-0000004526-00040;;Annika Danmark;;;;
-006977;;;Pengeautomat;Indeholder;;;;Depositcard Udbyhøj 006977;79000000;XG-0000005094-00004;;;;;;
-012181;;;Pengeautomat;Indeholder;;;;Depositcard Udbyhøj 012181;95990009;;;;;;;
-006990;;;Pengeautomat;Indeholder;;;;Depositcard Vennelyst Juniorklub 006990;72000000;XG-0000002484-00001;;;;;;
-011788;;;Pengeautomat;Indeholder;;;;Depositcard Åbakken 011788;72000000;XG-0000004526-00031;;;;;;
-5386888 051672;;;;Indeholder;;;;DK 5386888 051672 Sprogcentret online-adgang til UV-programm;79000000;XG-0000003397-00044;;Lukkes?;;;;
-8537995;;;;Indeholder;;;;DK 8537995 Gaia Cafe ;72000000;XG-0000003040-00046;;;;;;
-1992317;;;;Indeholder;;;;DK1992317 Biblioteket;95941202;;;;;;;
-2271311;;;;Indeholder;;;;DK2271311 Affaldsterminalen;72000000;XG-0000005010-00080;;;;;;
-2471043;;;;Indeholder;;;;DK2471043 Museum Østjylland;95941300;;;;;;;
-3386896;;;;Indeholder;;;;DK3386896 Kollektivhuset;72000000;XG-0000004526-00044;;Afventer kontering fra Anette;;;;
-3796663;;;;Indeholder;;;;DK3796663 Vorup Plejehjem;72000000;XG-0000004526-00041;;;;;;
-3796671;;;;Indeholder;;;;DK3796671 Borupvænget;72000000;XG-0000004526-00046;;;;;;
-3796795;;;;Indeholder;;;;DK3796795 - Møllevang;72000000;XG-0000004526-00033;;;;;;
-3796817;;;;Indeholder;;;;DK3796817 - Bakkegården;72000000;XG-0000004526-00028;;;;;;
-3796868;;;;Indeholder;;;;DK3796868 Dronningborg;72000000;XG-0000004526-00030;;;;;;
-3796884;;;;Indeholder;;;;DK3796884 Svaleparken;72000000;XG-0000004526-00038;;;;;;
-3796892;;;;Indeholder;;;;DK3796892 - Rosenvænget;72000000;XG-0000004526-00027;;;;;;
-3796906;;;;Indeholder;;;;DK3796906;72000000;XG-0000004526-00040;;;;;;
-3796914;;;;Indeholder;;;;DK3796914 Kollektivhuset;72000000;XG-0000004526-00044;;;;;;
-3796930;;;;Indeholder;;;;DK3796930 Lindevænget;72000000;XG-0000004526-00036;;;;;;
-3796949;;;;Indeholder;;;;DK3796949 Huset Nyvang;72000000;XG-0000004526-00035;;;;;;
-4430778;;;DK-abonnement;Indeholder;;;;DK4430778 Abonnement;40000000;XG-0000003020-00258;;;;;;
-4430778;;;Dankort-salg;Indeholder;;;;DK4430778 Borgerservice;95931205;;;;;;;
-4430778;;;Dankortsalg-gebyr;Indeholder;;;;DK4430778 Gebyrer;40000000;XG-0000003020-00258;;;;;;
-4517148;;;;Indeholder;;;;DK4517148;79000000;XG-0000003057-00001;;;;;;
-4521609;;;;Indeholder;;;;DK4521609;95941200;;;;;;;
-4771842;;;;Indeholder;;;;DK4771842 GAIA PAPAYA;72000000;XG-0000003040-00046;;;;;;
-4771850;;;;Indeholder;;;;DK4771850 Gaia butik;72000000;XG-0000003040-00018;;;;;;
-4862821;;;;Indeholder;;;;DK4862821;79000000;XG-0000005094-00001;;;;;;
-4862899;;;;Indeholder;;;;DK4862899 Udbyhøj Færge;79000000;XG-0000005094-00001;;;;;;
-4922735;;;;Indeholder;;;;DK4922735;79000000;XG-0000005096-00001;;;;;;
-5157064;;;;Indeholder;;;;DK5157064 - Condomeriet;72000000;XG-0000004204-00002;;;;;;
-5247969;;;;Indeholder;;;;DK5247969 Museum Østjylland;95941300;;;;;;;
-5386888 102400;;;;Indeholder;;;;DK5386000 102400 Østervangsskolen, Lejrskole 5. årgang – ;79000000;XG-0000002568-00015;;Lukkes?;;;;
-5386888 120186;;;;Indeholder;;;;DK5386388 Assentoft;72000000;XG-0000002369-00021;;Lukkes?;;;;
-5386888 010631;;;;Indeholder;;;;DK538688 010631 Assentoftskolen skolefest;72000000;XG-0000002369-00022;;Lukkes?;;;;
-5386888 281359;;;;Indeholder;;;;DK5386888 - Kompostbeholder;72000000;XG-0000005280-00036;;Lukkes?;;;;
-5386888 003031;;;;Indeholder;;;;DK5386888 - P-licens;79000000;XG-0000005096-00009;;Lukkes?;;;;
-5386888 030031;;;;Indeholder;;;;DK5386888 - P-Licens;79000000;XG-0000005096-00009;;Lukkes?;;;;
-5386888 120031;;;;Indeholder;;;;DK5386888 - P-Licens;79000000;XG-0000005096-00009;;Lukkes?;;;;
-5386888 005070;;;;Indeholder;;;;DK5386888 005070 Sprogcentret - medborgerskabsprøve;79000000;XG-0000003397-00053;;Lukkes?;;;;
-5386888 013583;;;;Indeholder;;;;DK5386888 013583 Assentoftskolen 9. klasserne lejrskole;79000000;XG-0000002369-00020;;Lukkes?;;;;
-5386888 015106;;;;Indeholder;;;;DK5386888 015106 - Assentoft - Djurs sommerland 7-8. årgang;79000000;XG-0000002369-00029;;Lukkes?;;;;
-5386888 015538;;;;Indeholder;;;;DK5386888 015538 Valgfaget adventure på Assentoftskolen;79000000;XG-0000002369-00020;;Lukkes?;;;;
-5386888 015681;;;;Indeholder;;;;DK5386888 015681 - Betaling lejrskole 6. årgang;79000000;XG-0000002369-00020;;Lukkes?;;;;
-5386888 015687;;;;Indeholder;;;;DK5386888 015687 - Hyttetur 7. årgang Assentoftskolen;79000000;XG-0000002369-00021;;Lukkes?;;;;
-5386888 015689;;;;Indeholder;;;;DK5386888 015689 - Lejrskole 9. årgang Assentoftskolen;79000000;XG-0000002369-00020;;Lukkes?;;;;
-5386888 017737;;;;Indeholder;;;;DK5386888 017737 Assentoft - egenbetaling;79000000;XG-0000002369-00022;;Lukkes?;;;;
-5386888 017840;;;;Indeholder;;;;DK5386888 017840 Assentoft - Aktive tøser overnatningstur;79000000;XG-0000002369-00020;;Lukkes?;;;;
-5386888 030587;;;;Indeholder;;;;DK5386888 030433 - Gudenåløbet 2019;79000000;XG-0000005063-00010;;Lukkes?;;;;
-5386888 041575;;;;Indeholder;;;;DK5386888 041575 - Vestervangsskolen Skolefest;79000000;XG-0000002555-00023;;Lukkes?;;;;
-5386888 041575;;;;Indeholder;;;;DK5386888 041575 Vestervangsskolen Skolefest;79000000;XG-0000002555-00023;;Lukkes?;;;;
-5386888 048106;;;;Indeholder;;;;DK5386888 048106 - Lejrtur 6. årgang, Vestervangsskolen;79000000;XG-0000002555-00020;;Lukkes?;;;;
-5386888 050070;;;;Indeholder;;;;DK5386888 050070 Sprogcentret - medborgerskabsprøve;79000000;XG-0000003397-00053;;Lukkes?;;;;
-5386888 084190;;;;Indeholder;;;;DK5386888 083585 Grønhøjskolens Skolerejse for 9.A og 9.B KBH;79000000;XG-0000002415-00037;;Lukkes?;;;;
-5386888 083585;;;;Indeholder;;;;DK5386888 083585 Grønhøjskolens Studietur for 9.A og 9.B Prag;79000000;XG-0000002415-00037;;Lukkes?;;;;
-5386888 084052;;;;Indeholder;;;;DK5386888 084052 Grønhøj, Lejrtur Bornholm;79000000;XG-0000002415-00037;;Lukkes?;;;;
-5386888 101655;;;;Indeholder;;;;DK5386888 101655 Østervangsskolen Skolefest;72000000;XG-0000002415-00039;;Lukkes?;;;;
-5386888 102002;;;;Indeholder;;;;DK5386888 102002 Tirsdalens Skole skolebod;72000000;XG-0000002544-00025;;Lukkes?;;;;
-5386888 102156;;;;Indeholder;;;;DK5386888 102156 Østervangsskolen 1.e og 2.d lejrskole;79000000;XG-0000002568-00015;;Lukkes?;;;;
-5386888 102193;;;;Indeholder;;;;DK5386888 102193 Østervangsskolen Skolefest;72000000;XG-0000002415-00039;;Lukkes?;;;;
-5386888 102373;;;;Indeholder;;;;DK5386888 102373 Østervangsskolen -Lejrskole i I1, I2 og I3;79000000;XG-0000002568-00015;;Lukkes?;;;;
-5386888 111939;;;;Indeholder;;;;DK5386888 111939 Nørrevangsk. Studietur til Berlin for 10.kl;79000000;XG-0000002511-00020;;Lukkes?;;;;
-5386888 112030;;;;Indeholder;;;;DK5386888 112030 Nørrevangsskolen tur till Berlin for 9. årg;79000000;XG-0000002511-00020;;Lukkes?;;;;
-5386888 111923;;;;Indeholder;;;;DK5386888 119223 Nørrevangsskolen studietur ;79000000;XG-0000002511-00020;;Lukkes?;;;;
-5386888 131806;;;;Indeholder;;;;DK5386888 131806 Korshøjskolen, Skolerejse til København 9A+9B;79000000;XG-0000002465-00044;;Lukkes?;;;;
-5386888 131905;;;;Indeholder;;;;DK5386888 131905 - Korshøjskolen - billetter skuespil;79000000;XG-0000002465-00024;;Lukkes?;;;;
-5386888 131955;;;;Indeholder;;;;DK5386888 131955 Korshøjskolen - Djurs Sommerland 9A+9B;79000000;XG-0000002465-00024;;Lukkes?;;;;
-5386888 132419;;;;Indeholder;;;;DK5386888 132419 Korshøjskolen skolefest B-skolen;79000000;XG-0000002465-00024;;Lukkes?;;;;
-5386888 132761;;;;Indeholder;;;;DK5386888 132761 5. årgangs Hyttetur, Korshøjskolen ;79000000;XG-0000002465-00042;;Lukkes?;;;;
-5386888 132761;;;;Indeholder;;;;DK5386888 132761 Korshøjskolen Lejrtur 4A + 4B;79000000;XG-0000002465-00042;;Lukkes?;;;;
-5386888 133171;;;;Indeholder;;;;DK5386888 133171 Korshøjskolen, skolefest;79000000;XG-0000002465-00024;;Lukkes?;;;;
-5386888 133987;;;;Indeholder;;;;DK5386888 133987 8. årgang København - Korshøjskolen;79000000;XG-0000002465-00044;;Lukkes?;;;;
-5386888 141866;;;;Indeholder;;;;DK5386888 141866 - Tirsdalens Skole tur til Krakow for 9. kl.;79000000;XG-0000002544-00024;;Lukkes?;;;;
-5386888 142030;;;;Indeholder;;;;DK5386888 142030 Tirsdalens lejrskole 8. årgang;79000000;XG-0000002544-00024;;Lukkes?;;;;
-5386888 142063;;;;Indeholder;;;;DK5386888 142063 Lejrskole for 7.-klasser på Tirsdalens Skole.;79000000;XG-0000002544-00024;;Lukkes?;;;;
-5386888 142069;;;;Indeholder;;;;DK5386888 142069 Tirsdalensskole - skolerejse for 9. til Tje;79000000;XG-0000002544-00024;;Lukkes?;;;;
-5386888 142228;;;;Indeholder;;;;DK5386888 142228 - 8. årgang Tirsdalen Skole til Sønderborg;79000000;XG-0000002544-00024;;Lukkes?;;;;
-5386888 142514;;;;Indeholder;;;;DK5386888 1425814 Tirsdalens Skole 9. Årgang til Berlin;79000000;XG-0000002544-00024;;Lukkes?;;;;
-5386888 142729;;;;Indeholder;;;;DK5386888 142729 Tirsdalens skole - egenbetaling lejrtur;79000000;XG-0000002544-00024;;Lukkes?;;;;
-5386888 192046;;;;Indeholder;;;;DK5386888 192046 Hornbæk Skole. Lejrskole 8.x og 8.y til Køb;79000000;XG-0000002452-00020;;Lukkes?;;;;
-5386888 192104;;;;Indeholder;;;;DK5386888 192104 - Hornbæk skole skolefest;79000000;XG-0000002452-00024;;Lukkes?;;;;
-5386888 192411;;;;Indeholder;;;;DK5386888 192411 Hornbæk,Lejrskole for 9.x og 9.y til Københ;79000000;XG-0000002452-00020;;Lukkes?;;;;
-5386888 192715;;;;Indeholder;;;;DK5386888 192715 Hornbæk-Tur til Nordtyskland for 8. årgang;79000000;XG-0000002452-00020;;Lukkes?;;;;
-5386888 192764;;;;Indeholder;;;;DK5386888 192764 Honbæk skole, Lejrtur for 8. årgang til KBH;79000000;XG-0000002452-00020;;Lukkes?;;;;
-5386888 192789;;;;Indeholder;;;;DK5386888 192789 Hornbæk Skole, Lejrtur 6. årgang;79000000;XG-0000002452-00020;;Lukkes?;;;;
-5386888 192902;;;;Indeholder;;;;DK5386888 192902Hornbæk Skole, Lejrskole 5. årgang – ID 192902;79000000;XG-0000002452-00020;;Lukkes?;;;;
-5386888 192944;;;;Indeholder;;;;DK5386888 192944 Hornbæk Skole, Lejrskole 8. årgang – ID 192944;79000000;XG-0000002452-00020;;Lukkes?;;;;
-5386888 153001;;;;Indeholder;;;;DK5386888 2113400 Hobrovejens Skole. Lejrskole for 6. årgang;79000000;XG-0000002439-00022;;Lukkes?;;;;
-5386888 211363;;;;Indeholder;;;;DK5386888 211363 Rismølleskolen 8.årgang studietur KBH;79000000;XG-0000002521-00030;;Lukkes?;;;;
-5386888 211569;;;;Indeholder;;;;DK5386888 211369 - Rismølleskolen madbestilling;72000000;XG-0000002521-00031;;Lukkes?;;;;
-5386888 211390;;;;Indeholder;;;;DK5386888 211390 - Rismølleskolen madbestilling;72000000;XG-0000002521-00031;;Lukkes?;;;;
-5386888 191686;;;;Indeholder;;;;DK5386888 2114410 Hornbæk lejrskole Bornholm;79000000;XG-0000002452-00020;;Lukkes?;;;;
-5386888 132419;;;;Indeholder;;;;DK5386888 2115023 Korshøjskolen Skolefest B-skolen;79000000;XG-0000002465-00024;;Lukkes?;;;;
-5386888 211567;;;;Indeholder;;;;DK5386888 211567 - Rismølleskolen madbestilling;72000000;XG-0000002521-00031;;Lukkes?;;;;
-5386888 211568;;;;Indeholder;;;;DK5386888 211568 - Rismølleskolen madbestilling;72000000;XG-0000002521-00031;;Lukkes?;;;;
-5386888 211570;;;;Indeholder;;;;DK5386888 211570 - Rismølleskolen madbestilling;72000000;XG-0000002521-00031;;Lukkes?;;;;
-5386888 211571;;;;Indeholder;;;;DK5386888 211571 - Rismølleskolen madbestilling;72000000;XG-0000002521-00031;;Lukkes?;;;;
-5386888 2125038;;;;Indeholder;;;;DK5386888 2125038 9. Årgang til Berlin på Tirsdalens Skole;79000000;XG-0000002544-00024;;Lukkes?;;;;
-5386888 221365;;;;Indeholder;;;;DK5386888 221365 Madbestilling Søndermarkskolen;72000000;XG-0000002531-00016;;Lukkes?;;;;
-5386888 222807;;;;Indeholder;;;;DK5386888 222807 Søndermarkskolen skolefest;72000000;XG-0000002531-00017;;Lukkes?;;;;
-5386888 222815;;;;Indeholder;;;;DK5386888 222815 Søndermarkskolen Lejrtur Kattegat;79000000;XG-0000002531-00015;;Lukkes?;;;;
-5386888 224173;;;;Indeholder;;;;DK5386888 224173 - Søndermarkskolen hyttetur for 3. klasse;79000000;XG-0000002531-00015;;Lukkes?;;;;
-5386888 225082;;;;Indeholder;;;;DK5386888 225082 Søndermarkskolen skolefest 2019;72000000;XG-0000002531-00017;;Lukkes?;;;;
-5386888 225973;;;;Indeholder;;;;DK5386888 225973 Søndermarkskolen. Lejrtur Skagen;79000000;XG-0000002531-00015;;Lukkes?;;;;
-5386888 226407;;;;Indeholder;;;;DK5386888 226407 Søndermarkskolen, Hyttetur 3. årgang;79000000;XG-0000002531-00015;;Lukkes?;;;;
-5386888 121400;;;;Indeholder;;;;DK5386888 231400 - Bådpladser Udbyhøj;79000000;XG-0000004025-00001;;Lukkes?;;;;
-5386888 231400;;;;Indeholder;;;;DK5386888 231400 - Bådpladser Udbyhøj;79000000;XG-0000004025-00001;;Lukkes?;;;;
-5386888 231526;;;;Indeholder;;;;DK5386888 231400 - Bådpladser Udbyhøj;79000000;XG-0000004025-00001;;Lukkes?;;;;
-5386888 231529;;;;Indeholder;;;;DK5386888 231400 - Bådpladser Udbyhøj;79000000;XG-0000004025-00001;;Lukkes?;;;;
-5386888 241777;;;;Indeholder;;;;DK5386888 241777 - Kristrup Skole – Lejrskole for 6. klasserne;79000000;XG-0000002475-00015;;Lukkes?;;;;
-5386888 241798;;;;Indeholder;;;;DK5386888 241798 - Kristrup Skole – Lejrskole for 6. klasserne;79000000;XG-0000002475-00015;;Lukkes?;;;;
-5386888 241816;;;;Indeholder;;;;DK5386888 241816 / Hyttetur for 3. årgang;79000000;XG-0000002475-00015;;Lukkes?;;;;
-5386888 242118;;;;Indeholder;;;;DK5386888 242118 Kristrup Skole - Skolefest;79000000;XG-0000002475-00017;;Lukkes?;;;;
-5386888 242716;;;;Indeholder;;;;DK5386888 242716 Kristrup Skole 6 årgang Læsø;79000000;XG-0000002475-00015;;Lukkes?;;;;
-5386888 242740;;;;Indeholder;;;;DK5386888 242740 Kristrup skole Lejrskole 6. årgang;79000000;XG-0000002475-00015;;Lukkes?;;;;
-5386888 242823;;;;Indeholder;;;;DK5386888 242823 Hyttetur 3 A på Kristrup Skole;79000000;XG-0000002475-00015;;Lukkes?;;;;
-5386888 243011;;;;Indeholder;;;;DK5386888 243011 ;79000000;XG-0000002475-00015;;Lukkes?;;;;
-5386888 243153;;;;Indeholder;;;;DK5386888 243153 Hyttetur 3 årgang på Kristrup Skole;79000000;XG-0000002475-00015;;Lukkes?;;;;
-5386888 280691;;;;Indeholder;;;;DK5386888 280691 - Cykelparkering - abonnementsbetaling;79000000;XG-0000005063-00010;;Lukkes?;;;;
-5386888 280692;;;;Indeholder;;;;DK5386888 280692 - Cykelparkering - abonnementsbetaling;79000000;XG-0000005063-00010;;Lukkes?;;;;
-5386888 280693;;;;Indeholder;;;;DK5386888 280693 - Cykelparkering - abonnementsbetaling;79000000;XG-0000005063-00010;;Lukkes?;;;;
-5386888 281701;;;;Indeholder;;;;DK5386888 281701 - Cykelby;79000000;XG-0000005063-00010;;Lukkes?;;;;
-5386888 410066;;;;Indeholder;;;;DK5386888 410066 Vestervangsskolen overnatning 3. årgang;79000000;XG-0000002555-00020;;Lukkes?;;;;
-5386888 412905;;;;Indeholder;;;;DK5386888 412905 Vestervangsskolen - Lejrtur 9. årgang;79000000;XG-0000002555-00020;;Lukkes?;;;;
-5386888 417651;;;;Indeholder;;;;DK5386888 417651 Vestervangsskolen - Lejrtur 6. årgang;79000000;XG-0000002555-00020;;Lukkes?;;;;
-5386888 0_UDLY;;;;Indeholder;;;;DK5386888 Bådpladser Udbyhøj;79000000;XG-0000004025-00001;;Lukkes?;;;;
-5386888 1_UDLY;;;;Indeholder;;;;DK5386888 Bådpladser Udbyhøj;79000000;XG-0000004025-00001;;Lukkes?;;;;
-5386888 2_UDLY;;;;Indeholder;;;;DK5386888 Bådpladser Udbyhøj;79000000;XG-0000004025-00001;;Lukkes?;;;;
-5386888 3_UDLY;;;;Indeholder;;;;DK5386888 Bådpladser Udbyhøj;79000000;XG-0000004025-00001;;Lukkes?;;;;
-5386888 4_UDLY;;;;Indeholder;;;;DK5386888 Bådpladser Udbyhøj;79000000;XG-0000004025-00001;;Lukkes?;;;;
-5386888 5_UDLY;;;;Indeholder;;;;DK5386888 Bådpladser Udbyhøj;79000000;XG-0000004025-00001;;Lukkes?;;;;
-5386888 6_UDLY;;;;Indeholder;;;;DK5386888 Bådpladser Udbyhøj;79000000;XG-0000004025-00001;;Lukkes?;;;;
-5386888 7_UDLY;;;;Indeholder;;;;DK5386888 Bådpladser Udbyhøj;79000000;XG-0000004025-00001;;Lukkes?;;;;
-5386888 8_UDLY;;;;Indeholder;;;;DK5386888 Bådpladser Udbyhøj;79000000;XG-0000004025-00001;;Lukkes?;;;;
-5386888 9_UDLY;;;;Indeholder;;;;DK5386888 Bådpladser Udbyhøj;79000000;XG-0000004025-00001;;Lukkes?;;;;
-5386888 030012;;;;Indeholder;;;;DK5386888 Cykel;79000000;XG-0000005063-00010;;Lukkes?;;;;
-5386888 120012;;;;Indeholder;;;;DK5386888 Cykel;79000000;XG-0000005063-00010;;Lukkes?;;;;
-5386888 151445;;;;Indeholder;;;;DK5386888 Hobrovejensskole Lejrskole 2017 for 5. a og 5. b;79000000;XG-0000002439-00022;;Lukkes?;;;;
-5386888 191623;;;;Indeholder;;;;DK5386888 Hornbæk skole Lejrskole 2017 for 5. a og 5. b;79000000;XG-0000002452-00020;;Lukkes?;;;;
-5386888 151360;;;;Indeholder;;;;DK5386888 Indbetaling Lejrskole for vores 6. klasser;79000000;XG-0000002439-00022;;Lukkes?;;;;
-5386888 121786;;;;Indeholder;;;;DK5386888 Korshøjskolen Lejrtur 6. årgang til Skagen;79000000;XG-0000002465-00042;;Lukkes?;;;;
-5386888 131668;;;;Indeholder;;;;DK5386888 Korshøjskolen Skolefest for udskolingen;79000000;XG-0000002465-00024;;Lukkes?;;;;
-5386888 131786;;;;Indeholder;;;;DK5386888 Korshøjskolen Tur til Sønderborg for S1 og S2 ;79000000;XG-0000002465-00045;;Lukkes?;;;;
-5386888 241991;;;;Indeholder;;;;DK5386888 Kristrup Skole lejrskole København;79000000;XG-0000002475-00015;;Lukkes?;;;;
-5386888 241992;;;;Indeholder;;;;DK5386888 Kristrup Skole Lejrskole Voer 2018;79000000;XG-0000002475-00015;;Lukkes?;;;;
-5386888 241360;;;;Indeholder;;;;DK5386888 Kristrup Skole Skolefest;79000000;XG-0000002475-00017;;Lukkes?;;;;
-5386888 121806;;;;Indeholder;;;;DK5386888 Lejrtur 8.C Korshøjskolen;79000000;XG-0000002465-00044;;Lukkes?;;;;
-5386888 010186;;;;Indeholder;;;;DK5386888 Madsalg Assentoftskolen;72000000;XG-0000002369-00021;;Lukkes?;;;;
-5386888 001004;;;;Indeholder;;;;DK5386888 Madsalg Assentoftskolen 0-3 klasse;72000000;XG-0000002369-00021;;Lukkes?;;;;
-5386888 001186;;;;Indeholder;;;;DK5386888 Madsalg Assentoftsskolen;72000000;XG-0000002369-00021;;Lukkes?;;;;
-5386888 192461;;;;Indeholder;;;;DK5386888 Skolefest Hornbæk Skole;79000000;XG-0000002452-00024;;Lukkes?;;;;
-5386888 141501;;;;Indeholder;;;;DK5386888 Tirsdalens Skole – lejrskole i København;79000000;XG-0000002544-00024;;Lukkes?;;;;
-5386888 121614;;;;Indeholder;;;;DK5386888 Tirsdalens Skole - Skolefest;79000000;XG-0000002544-00026;;Lukkes?;;;;
-5386888 121600;;;;Indeholder;;;;DK5386888 Tirsdalens skole-Lejrskole på Samsø;79000000;XG-0000002544-00024;;Lukkes?;;;;
-cyke;;;;Slutter med;;;;DK5386888_cykel;79000000;XG-0000005063-00010;;Lukkes?;;;;
-cykel;;;;Slutter med;;;;DK5386888_cykel;79000000;XG-0000005063-00010;;Lukkes?;;;;
-5444748;;;;Indeholder;;;;DK5444748 Kantinen via GAIA;72000000;XG-0000003040-00034;;;;;;
-5541042;;;;Indeholder;;;;DK5541042 Udbyhøj Lystbådehavn;72000000;XG-0000004024-00003;;;;;;
-5541069;;;;Indeholder;;;;DK5541069 Udbyhøj Lystbådehavn;79000000;XG-0000004025-00002;;;;;;
-5846102;;;;Indeholder;;;;DK5846102 Kantinen Laksetorvet;72000000;XG-0000005228-00003;;;;;;
-5887356;;;;Indeholder;;;;DK5887356 Kildevang;72000000;XG-0000004526-00045;;;;;;
-5891507;;;;Indeholder;;;;DK5891507 - Åbakken;72000000;XG-0000004526-00031;;;;;;
-5908167;;;;Indeholder;;;;DK5908167 Asferg;72000000;XG-0000004526-00048;;;;;;
-5991390;;;;Indeholder;;;;DK5991390 Kantinen Sundhedshuset;72000000;XG-0000005228-00003;;;;;;
-6175937;;;;Indeholder;;;;DK6175937 køb af mærkater til erhvervs adgang til genbrugspl;79000000;XG-0000005285-00015;;;;;;
-6177549;;;;Indeholder;;;;DK6177549 Huslejenævnet. Indbetaling på Randers.dk;79000000;XG-0000003025-00001;;;;;;
-6201830;;;;Indeholder;;;;DK6201830 Kantinen Kasernen;72000000;XG-0000005228-00003;;;;;;
-6256651;;;;Indeholder;;;;DK6256651;95931206;;;;;;;
-6631479;;;;Indeholder;;;;DK6631479 Beboerlicens parkering RK;79000000;XG-0000005096-00009;;;;;;
-6687210;;;;Indeholder;;;;DK6687210 Trådløs Dankortterminal - Udlån fra Regnskab;95990009;;;Gældende indtil 01.05.2023 - Derefter 95990009;;;;
-6899625;;;;Indeholder;;;;DK6899625 Huset Nellemann;72000000;XG-0000004526-00037;;;;;;
-7131666;;;;Indeholder;;;;DK7131666 - Mit Betalingsoverblik;91407040;;;;;;;
-7221304;;;;Indeholder;;;;DK7221304 Gaia Via;72000000;XG-0000003040-00034;;;;;;
-8152290;;;;Indeholder;;;;DK8152290 Trådløs Dankortterminal - Udlån fra Regnskab;95990009;;;Gældende indtil 01.05.2023 - Derefter 95990009;;;;
-8357634;;;;Indeholder;;;;DK8357634 Huset Nellemann;72000000;XG-0000004526-00037;;;;;;
-8499089;;;;Indeholder;;;;DK8499089 - Mit Betalingsoverblik;91407040;;;;;;;
-8538001;;;;Indeholder;;;;DK8538001 Gaia Via;72000000;XG-0000003040-00034;;;;;;
-5386888 243086;;;;Indeholder;;;;DK8686888 243086 Kristrup 6. årg. SKAGEN.;79000000;XG-0000002475-00015;;Lukkes?;;;;
-E-lån;;Else Madsen;;Starter med;;;;E-lån 161239-1366;92500201;;;;;;;
-Elån;;Else Madsen;;Starter med;;;;E-lån 161239-1366;92500201;;;;;;;
-;E-penge;MSS;;Starter med;;;;E-penge;72000000;XG-0000005228-00003;;Kantinen;;;;
-E-penge;;MSS;;Starter med;;;;E-penge;72000000;XG-0000005228-00003;;Kantinen;;;;
-1007867103;;;Gebyr;Indeholder;;;;Gebyr af depot 1007867103;40000000;XG-0000000006-00007;;;;;;
-2121115030;;;Gebyr;Indeholder;;;;Gebyr af depot 2121115030;40000000;XG-0000000006-00007;;;;;;
-60151 VIPPS;;;Leverandørservice;Starter med;;;;Gebyr Mobile Pay leverandørservice;40000000;XG-0000000006-00007;;;;;;
-5386888 121623;;;;Starter med;;;;Hornbæk Skole – Lejrskole for 5. årgang til Odense;79000000;XG-0000002452-00020;;Lukkes?;;;;
-5386888 192832;;;;Indeholder;;;;Hornbæk skole, galla + Djurs Sommerland, 9. klasse;79000000;XG-0000002452-00029;;Lukkes?;;;;
-5386888 191360;;;;Indeholder;;;;Hornbæk Skoles skolefest;79000000;XG-0000002452-00024;;Lukkes?;;;;
-;Indskudslån;Lejerbo;;Indeholder;1100,00;;Mindre end;Indskudslån Lejerbo;91407008;;;;;;;
-8862559;;;;Indeholder;;;;INT8862559 Kollektivhuset;72000000;XG-0000004526-00044;;Afventer kontering fra Anette;;;;
-K 84788767;;;;Indeholder;;;;K 84788767;91407003;;;;;;;
-K 86136228;;;;Indeholder;;;;K 86136228;91407005;;;;;;;
-K 86446707;;;;Indeholder;;;;K 86446707;91407030;;;;;;;
-K 89182816;;;;Indeholder;;;;K 89182816;91407004;;;;;;;
-Fritid;;;Indbetaling;Indeholder;;;;Kontakt transaktion Fritidscentret;95990009;;;;;;;
-90100035;;;;Indeholder;;;;Kontant transaktion ACR;90100035;;;;;;;
-ACR;;;;Slutter med;;;;Kontant transaktion ACR;90100035;;;;;;;
-DAC;;;;Starter med;;;;Kontant transaktion ACR;90100035;;;;;;;
-3070-01;;;Indbetaling;Indeholder;;;;Kontant transaktion AFK;79000000;XG-0000003070-00001;;;;;;
-Assentoft;;;Indbetaling;Indeholder;;;;Kontant transaktion Assentoftskolens kantine;72000000;XG-0000002369-00021;;;;;;
-Bakkegården;;;Indbetaling;Indeholder;;;;Kontant transaktion Bakkegården;72000000;XG-0000004518-00093;;;;;;
-Blicherskolen A;;;Indbetaling;Indeholder;;;;Kontant transaktion Blicherskolen a-bod;72000000;XG-0000002392-00031;;;;;;
-Blicherskolen B;;;Indbetaling;Indeholder;;;;Kontant transaktion Blicherskolen b-bod;72000000;XG-0000002392-00032;;;;;;
-Borup;;;Indbetaling;Starter med;;;;Kontant transaktion Café Borupvænget;72000000;XG-0000004526-00046;;;;;;
-Cafe Borup;;;Indbetaling;Starter med;;;;Kontant transaktion Café Borupvænget;72000000;XG-0000004526-00046;;;;;;
-KC cafe;;;Indbetaling;Indeholder;;;;Kontant transaktion Café Kristrupcentret;72000000;XG-0000004526-00042;;;;;;
-Kristrupcentret;;;Indbetaling;Indeholder;;;;Kontant transaktion Café Kristrupcentret;72000000;XG-0000004526-00042;;;;;;
-Cafe-LV;;;Indbetaling;Indeholder;;;;Kontant transaktion Café Lindevænget;72000000;XG-0000004526-00036;;;;;;
-LV;;;Indbetaling;Slutter med;;;;Kontant transaktion Café Lindevænget;72000000;XG-0000004526-00036;;;;;;
-Cafe Nellemann;;;Indbetaling;Indeholder;;;;Kontant transaktion Café Nellemann;72000000;XG-0000004526-00037;;;;;;
-NM;;;;Slutter med;;;;Kontant transaktion Café Nellemann;72000000;XG-0000004526-00037;;;;;;
-Cafe Svaleparken;;;Indbetaling;Indeholder;;;;Kontant transaktion Café Svaleparken;72000000;XG-0000004526-00038;;;;;;
-Cafe-SP;;;Indbetaling;Indeholder;;;;Kontant transaktion Café Svaleparken;72000000;XG-0000004526-00038;;;;;;
-Svaleparken;;;Indbetaling;Indeholder;;;;Kontant transaktion Café Svaleparken;72000000;XG-0000004526-00038;;;;;;
-Cafe TB;;;Indbetaling;Indeholder;;;;Kontant transaktion Café Thors Bakke;72000000;XG-0000004526-00039;;;;;;
-Thors bakke;;;Indbetaling;Indeholder;;;;Kontant transaktion Café Thors Bakke;72000000;XG-0000004526-00039;;;;;;
-Thorsbakke;;;Indbetaling;Indeholder;;;;Kontant transaktion Café Thors Bakke;72000000;XG-0000004526-00039;;;;;;
-TB;;;Indbetaling;Starter med;;;;Kontant transaktion Café Thors Bakke;72000000;XG-0000004526-00039;;;;;;
-TD cafe;;;Indbetaling;Starter med;;;;Kontant transaktion Café Tirsdalen;72000000;XG-0000004526-00040;;;;;;
-Tirsdalen;;;Indbetaling;Starter med;;;;Kontant transaktion Café Tirsdalen;72000000;XG-0000004526-00040;;;;;;
-Cafe Vorup;;;Indbetaling;Indeholder;;;;Kontant transaktion Café Vorup Plejehjem;72000000;XG-0000004526-00041;;;;;;
-Cafe-VP;;;Indbetaling;Indeholder;;;;Kontant transaktion Café Vorup Plejehjem;72000000;XG-0000004526-00041;;;;;;
-Cafe VP;;;Indbetaling;Indeholder;;;;Kontant transaktion Café Vorup Plejehjem;72000000;XG-0000004526-00041;;;;;;
-CBR;;;Indbetaling;Indeholder;;;;Kontant transaktion CBR;90100011;;;;;;;
-90100011;;;;Indeholder;;;;Kontant transaktion CBR;90100011;;;;;;;
-Dronningborg;;;Indbetaling;Indeholder;;;;Kontant transaktion Dronningborg;72000000;XG-0000004518-00094;;;;;;
-Fårup;;;Indbetaling;Indeholder;;;;Kontant transaktion Fårup Café;72000000;XG-0000004526-00047;;;;;;
-Gaia Butik;;;Indbetaling;Indeholder;;;;Kontant transaktion Gaia Butik;72000000;XG-0000003040-00018;;;;;;
-Gaia Cafe;;;Indbetaling;Indeholder;;;;Kontant transaktion Gaia Papaya;72000000;XG-0000003040-00046;;;;;;
-Gaia papaya;;;Indbetaling;Indeholder;;;;Kontant transaktion Gaia Papaya;72000000;XG-0000003040-00046;;;;;;
-Gaia via;;;Indbetaling;Indeholder;;;;Kontant transaktion Gaia Via;72000000;XG-0000003040-00034;;;;;;
-95931400;;;Indbetaling;Indeholder;;;;Kontant transaktion Hjørnestenen;95931400;;;;;;;
-hobrovej junior;;;Indbetaling;Indeholder;;;;Kontant transaktion Hobrovejens Juniorklub;79000000;XG-0000002448-00007;;;;;;
-Hobrovejens Skole;;;Indbetaling;Indeholder;;;;Kontant transaktion Hobrovejens Skole;79000000;XG-0000002439-00014;;;;;;
-Kollektivhus;;;Indbetaling;Indeholder;;;;Kontant transaktion Kollektivhuset;72000000;XG-0000004526-00044;;;;;;
-2465-00021;;;Indbetaling;Indeholder;;;;Kontant transaktion Korshøjskolen Café;72000000;XG-0000002465-00021;;;;;;
-Korshøjskole;;;Indbetaling;Indeholder;;;;Kontant transaktion Korshøjskolen Café;72000000;XG-0000002465-00021;;;;;;
-Madservice;;;Indbetaling;Indeholder;;;;Kontant transaktion Madservice Kronjylland;72000000;XG-0000004526-00018;;;;;;
-MEL;;;Indbetaling;Slutter med;;;;Kontant transaktion Mellerup færge;79000000;XG-0000005094-00004;;;;;;
-MOE;;;Indbetaling;Starter med;;;;Kontant transaktion MOE;95941300;;;;;;;
-Munkholmskole;;;Indbetaling;Indeholder;;;;Kontant transaktion Munkholmskolen;79000000;XG-0000004526-00048;;;;;;
-Møllevang;;;Indbetaling;Indeholder;;;;Kontant transaktion Møllevang;72000000;XG-0000004518-00098;;;;;;
-301.408.72.05;;;Indbetaling;Indeholder;;;;Kontant transaktion Nørrevangsskolen;72000000;XG-0000002511-00021;;;;;;
-Perron 4;;;Indbetaling;Indeholder;;;;Kontant transaktion Perron 4;72000000;XG-0000003038-00053;;;;;;
-Bibliotek;;;Indbetaling;Indeholder;;;;Kontant transaktion Randers Bibliotek;95941202;;;;;;;
-Rosenvæng;;;Indbetaling;Indeholder;;;;Kontant transaktion Rosenvænget;72000000;XG-0000004518-00092;;;;;;
-XG-3397-50;;;Indbetaling;Starter med;;;;Kontant transaktion Sprogcenter;72000000;XG-0000003397-00050;;;;;;
-Sprogcenter - kaffe;;;;Indeholder;;;;Kontant transaktion Sprogcenter (kaffeautomat);79000000;XG-0000003397-00050;;;;;;
-Terneparken;;;Indbetaling;Indeholder;;;;Kontant transaktion Terneparken Café;72000000;XG-0000004526-00048;;;;;;
-UDB;;;Indbetaling;Slutter med;;;;Kontant transaktion Udbyhøj færge;79000000;XG-0000005094-00005;;;;;;
-5386888 101002;;;;Indeholder;;;;Kortbetaling - Søndermarkskolen;72000000;XG-0000002531-00016;;Lukkes?;;;;
-5386888 141359;;;;Indeholder;;;;Lejrskole 9. klasse Tirsdalen;79000000;XG-0000002544-00024;;Lukkes?;;;;
-40010;;;Leverandørservice;Indeholder;;;;Ls, kreditor 40010 Udbetaling;40000000;XG-0000000013-00001;;;;;;
-54879;;;Leverandørservice;Indeholder;;;;Ls, kreditor 54879 Udbetaling;40000000;XG-0000000013-00002;;;;;;
-56685;;;;Indeholder;;;;Ls, kreditor 56685Udbetaling Loomis;90100036;;;;;;;
-5386888 001683;;;;Indeholder;;;;Madbestilling førskolen Assentoft;72000000;XG-0000002369-00021;;Lukkes?;;;;
-5386888 010683;;;;Indeholder;;;;Madbestilling førskolen Assentoft;72000000;XG-0000002369-00021;;Lukkes?;;;;
-0200348681;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Affaldskontoret;72000000;XG-0000005285-00006;;;;;;
-0200320331;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Affaldsterminalen;72000000;XG-0000005010-00080;;;;;;
-0200142445;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Asferg Skole ;72000000;XG-0000002359-00016;;;;;;
-0200992725;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Assentoftskolen;79000000;XG-0000002369-00029;;;;;;
-0200660231;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Bar Ridehus/Amfi;72000000;XG-0000004100-00018;;;;;;
-0200013819;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Bibliotek sio 123;79000000;XG-0000002530-00003;;;;;;
-0200351378;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Bjerregrav skole-skolefest arrangementer;72000000;XG-0000002382-00017;;;;;;
-0200935134;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Blicherskolen;79000000;XG-0000002392-00042;;;;;;
-0200421255;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Boligerne Lene Bredahls Gade;79000000;XG-0000003038-00036;;;;;;
-0200816912;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Café Gaia Papaya;72000000;XG-0000003040-00046;;;;;;
-0202030244;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Café Nellemann;72000000;XG-0000004526-00037;;;;;;
-0200575147;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Cafe Thors Bakke ;72000000;XG-0000004526-00039;;;;;;
-0200582771;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Cafe Åbakken;72000000;XG-0000004526-00026;;;;;;
-0200547332;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Caféen Orangeriet Huset Nyvang;72000000;XG-0000004526-00051;;;;;;
-0200616946;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP CBR Randers ;90100011;;;;;;;
-0200601986;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Center for Psykiatri Indsats ;72000000;XG-0000003038-00126;;;;;;
-0200238451;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Condomeriet, Randers Sundhedscenter ;72000000;XG-0000004204-00002;;;;;;
-0200472001;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP CSV;95932400;;;;;;;
-0200127067;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Dagtilbuddet Aktivitetscenter Randers;79000000;XG-0000003038-00040;;;;;;
-0200778357;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Fantasifabrikken ;72000000;XG-0000002668-00011;;;;;;
-0200795511;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Filial Langå;95941206;;;;;;;
-0200301325;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Filial SYD;95941204;;;;;;;
-0200106833;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Filial ØST;95941205;;;;;;;
-0200995139;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Fritidsklubben Vennelyst;72000000;XG-0000002484-00001;;;;;;
-0200783487;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Fårup Skole og Børneby;72000000;XG-0000002402-00024;;;;;;
-0200151330;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Fårup Ældrecenter ;72000000;XG-0000004526-00048;;;;;;
-0200713400;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Gaia Butik;72000000;XG-0000003040-00018;;;;;;
-0200150664;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Giv Randers et træ;79000000;XA-9258200001-00041;;;;;;
-0200977572;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Grønhøjskolen ;72000000;XG-0000002415-00037;;;;;;
-0200659660;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Havndal Skole;79000000;XG-0000002426-00017;;;;;;
-0200293622;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Hjernecenter Randers ;79000000;XG-0000003020-00050;;;;;;
-0200797898;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Hobrovejens Skole ;72000000;XG-0000002439-00024;;;;;;
-0200531472;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Holbergkollegiet;79000000;XG-0000003038-00171;;;;;;
-0200742954;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Hornbæk Juniorklub;72000000;XG-0000002461-00001;;;;;;
-0200731049;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Hornbæk Skole;79000000;XG-0000002452-00024;;;;;;
-0200648811;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Håndværkerparkering;79000000;XG-0000005096-00009;;;;;;
-0200187771;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Jennumparkens fritidshjem;72000000;XG-0000002598-00003;;;;;;
-0200221686;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP KFUMs Fritidsgård, Solgården ;72000000;XG-0000002633-00003;;;;;;
-0200104171;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Kloge Hænder Messen 2024;79000000;XG-0000003020-00236;;;;;;
-0200646778;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Klub Assentoft ;72000000;XG-0000002668-00012;;;;;;
-0200155841;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Klub Fårup;72000000;XG-0000002668-00014;;;;;;
-0200310450;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Klub Harridslev ;72000000;XG-0000002668-00015;;;;;;
-0200227388;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Klub Hornbæk ;72000000;XG-0000002668-00016;;;;;;
-0200910387;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Klub Langå ;72000000;XG-0000002668-00017;;;;;;
-0200692988;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Klub Spentrup ;72000000;XG-0000002668-00018;;;;;;
-0200280120;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Klub Øster Tørslev ;72000000;XG-0000002668-00019;;;;;;
-0200711993;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Kollektivhuset;72000000;XG-0000004526-00044;;;;;;
-0200591851;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Korshøjskolen ;72000000;XG-0000002465-00029;;;;;;
-0200686410;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Kristrup Skole ;72000000;XG-0000002475-00016;;;;;;
-0200894390;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Kristrup skole-Elevråd;79000000;XG-0000002475-00018;;;;;;
-0200824395;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Kristrup Skole-Lejrskole;79000000;XG-0000002475-00015;;;;;;
-0200134100;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Kristrup skole-vilde vulkaner;79000000;XG-0000002481-00010;;;;;;
-0200248493;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Kristrupcentret;79000000;XG-0000004526-00034;;;;;;
-0200387202;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Langå Skole - Misical/skolefest;72000000;XG-0000002488-00025;;;;;;
-0200726082;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Madservice Kronjylland  ;72000000;xg-0000004526-00018;;;;;;
-0200755789;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Markedsgade;72000000;XG-0000003038-00105;;;;;;
-0200350353;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Matrielgården;79000000;XG-0000005004-00023;;;;;;
-0200991538;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP MOE Ebeltoft Rådhus;95941300;;;;;;;
-0200941386;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP MOE Farvergården;95941300;;;;;;;
-0200736118;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP MOE Håndværksmuseet;95941300;;;;;;;
-0200580075;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP MOE Kulturhuset;95941300;;;;;;;
-0200168470;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP MOE Købmandsgården;95941300;;;;;;;
-0200899149;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP MOE Siam;95941300;;;;;;;
-0200659127;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Munkholmskolen ;79000000;XG-0000002501-00022;;;;;;
-0200573604;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Museum Østjylland ;95941300;;;;;;;
-0200675451;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Møbelcirklen;72000000;XG-0000003078-00122;;;;;;
-0200599151;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Nellemann;72000000;XG-0000004526-00037;;;;;;
-0200866110;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Nørrevangsskolen ;72000000;XG-0000002511-00021;;;;;;
-0200808231;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Nørrevangsskolen - Lejrskole;72000000;XG-0000002511-00020;;;;;;
-0202048896;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Område Nord Bakkegården;72000000;XG-0000004526-00028;;;;;;
-0202021986;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Område Nord Dronningborg;72000000;XG-0000004526-00030;;;;;;
-0202042120;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Område Nord Møllevang;72000000;XG-0000004526-00033;;;;;;
-0202000132;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Område Norde Åbakken;72000000;XG-0000004526-00031;;;;;;
-0202007920;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Område Syd Huset Nyvang;72000000;XG-0000004526-00035;;;;;;
-0202019091;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Område Syd Lindevænget;72000000;XG-0000004526-00036;;;;;;
-0202031462;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Område Syd Svaleparken;72000000;XG-0000004526-00038;;;;;;
-0202044393;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Område Syd Tirsdalen;72000000;XG-0000004526-00040;;;;;;
-0202047104;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Område Syd Vorup Plejehjem cafe;72000000;XG-0000004526-00041;;;;;;
-0202024966;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Område Vest Borupvænget;72000000;XG-0000004526-00046;;;;;;
-0202009408;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Område Vest Kildevang;72000000;XG-0000004526-00045;;;;;;
-0202049835;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Område Vest Kollektivhuset;72000000;XG-0000004526-00044;;;;;;
-0202032548;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Område Vest Terneparken;72000000;XG-0000004526-00048;;;;;;
-0200355004;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Oust Mølle Rock ;72000000;XG-0000002663-00002;;;;;;
-0200958295;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Personalebet. Tirsdalens Skole ;72000000;XG-0000002548-00001;;;;;;
-0200469446;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP PLC;79000000;XG-0000002555-00002;;;;;;
-0200261333;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Plejecenter Lindevænget                                    ;72000000;XG-0000004526-00036;;;;;;
-0200866375;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Plejecenter Tirsdalen                                            ;72000000;XG-0000004526-00040;;;;;;
-0200764635;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Plejehjemmet Kildevang ;72000000;XG-0000004526-00045;;;;;;
-0202000468;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Randers Bibliotek;95941203;;;;;;;
-0200834138;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Randers Bibliotek, Betalingstermnial ;95941203;;;;;;;
-0200222297;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Randers Cykelby-Udlån cykler;79000000;XG-0000005063-00011;;;;;;
-0202042042;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Randers Fjords Færgefart;79000000;XG-0000005094-00001;;;;;;
-0200684007;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Randers Flyveplads ;79000000;XG-0000005086-00001;;;;;;
-0200430074;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Randers Kommune Fritidsaktiviteter (CHI);79000000;XG-0000003070-00001;;;;;;
-0200989541;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Randers Kommune Udlån 2 989541;95990009;;;;;;;
-0200669655;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Randers kommune udlån nr 3;95990009;;;;;;;
-0200735596;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Randers Kommune, Mobilepay 735596 Udlån 1;72000000;XG-0000002616-00002 ;;;;;;
-0200440754;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Randers Musikskole;72000000;XG-0000004087-00001;;;;;;
-0200211395;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Randers Naturcenter;72000000;XG-0000005050-00003;;;;;;
-0200429274;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Randers specialskoler;72000000;XG-0000002890-00056;;;;;;
-0200758343;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Randers Ungdomsskole - undervisning ;79000000;XG-0000002667-00008;;;;;;
-0200971414;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Randers Ungdomsskole Afdeling Heltidsundervisning;79000000;XG-0000002669-00008;;;;;;
-0200254904;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Rismølleskolen ;72000000;XG-0000002521-00031;;;;;;
-0200349250;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Rismølleskolen-Skolefest;72000000;XG-0000002521-00031;;;;;;
-0200192334;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP RU fælles kiosk;72000000;XG-0000002668-00027;;;;;;
-0200940094;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Sammenhængskonference i Familieområdet;79000000;XG-0000002830-00001;;;;;;
-0200778549;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Sprogcenter Til Webshop;79000000;XG-0000003397-00016;;;;;;
-0200133068;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Sprogcentret-Kantinekøb ;95930008;;;;;;;
-0200543825;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Svaleparken  ;72000000;XG-0000004526-00038;;;;;;
-0200694520;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Søndermarkskolen ;72000000;XG-0000002531-00016;;;;;;
-0200374111;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Søndermarkskolen - Skolefest;79000000;XG-0000002531-00002;;;;;;
-0202032095;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Thors Bakke;72000000;XG-0000004526-00039;;;;;;
-0200231633;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Tirsdalens Skole ;72000000;XG-0000002544-00025;;;;;;
-0200182105;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Tirsdalens Skole -Arrangementer/ lejr;79000000;XG-0000002544-00024;;;;;;
-0200010203;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Toftegaard,køkken;72000000;XG-0000002207-00001;;;;;;
-0200870951;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Trekløverskolen- Borup Byvej  - Fester ;72000000;XG-0000002890-00059;;;;;;
-0200287970;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Trekløverskolen Borup byvej salatordning;72000000;XG-0000002890-00056;;;;;;
-0200398278;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Udbyhøj Lystbådehavn;79000000;XG-0000004025-00002;;;;;;
-0200265828;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Ungdomsklubben Bjerregrav ;72000000;XG-0000002668-00013;;;;;;
-0200654227;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Ungemiljø Midt/Kaosambassaden ;72000000;XG-0000002668-00020;;;;;;
-0200344205;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Ungemiljø NORD ;72000000;XG-0000002668-00021;;;;;;
-0200917050;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Ungemiljø Syd ;72000000;XG-0000002668-00022;;;;;;
-0200830577;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Vestervangsskolen;79000000;XG-0000002555-00002;;;;;;
-0200344413;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Vestervangsskolen Juniorklubben;79000000;XG-0000002564-00001;;;;;;
-0200844608;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Vorup Plejehjem;72000000;XG-0000004526-00041;;;;;;
-0200448873;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Østervangsskolen ;72000000;XG-0000002568-00049;;;;;;
-0200031145;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;MP Hobrovejens Skole Juniorklub;72000000;XG-0000002448-00007;;;;;;
-mønt borgerservice;;;;Indeholder;;;;Mønt Borgerservice;90100001;;;;;;;
-Automat;;;;Slutter med;;;;Mønt-indbetaling parkering;79000000;XG-0000005096-00001;;;;;;
-P-mønt;;;;Starter med;;;;Mønt-indbetaling parkering;79000000;XG-0000005096-00001;;;;;;
-7221290;;;;Indeholder;;;;Nets 7221290 Gaia Cafe ;72000000;XG-0000003040-00046;;;;;;
-8516775;;;;Indeholder;;;;Nets 8516775 Gaia Butik;72000000;XG-0000003040-00018;;;;;;
-8674335;;;;Indeholder;;;;Nets 8674335 internationale kortbetalinger;95941202;;;;;;;
-9475369104;;;;Indeholder;;;;Nets nr. 9475369104;95941300;;;;;;;
-_962_;;Pay4It;;Indeholder;;;;Pay4it Automat;79000000;XG-0000002415-00038;;;;;;
-;Unge i uddannelse;Region Midt;;Indeholder;;;;Region Midtjylland - Ung i uddannelse;79000000;XG-0000002833-00003;;;;;;
-;Kundenr: 34199620;;;Indeholder;;;;Retur fra skat vedr. RW;95910006;;;;;;;
-Skattekontoen, kredi;;;;Starter med;;;;Skattekontoen, kreditering;95910006;;;;;;;
-5386888 001631;;;;Indeholder;;;;Skolefest Assentoftskolen;72000000;XG-0000002369-00022;;Lukkes?;;;;
-5386888 120070;;;;Indeholder;;;;Sprogcentret - medborgerskabsprøve;79000000;XG-0000003397-00053;;Lukkes?;;;;
-5386888 050035;;;;Indeholder;;;;Sprogcentret - Prøver;79000000;XG-0000003397-00044;;Lukkes?;;;;
-5386888 005027;;;;Indeholder;;;;Sprogcentret - Statsborgerskabsprøve;79000000;XG-0000003397-00053;;Lukkes?;;;;
-5386888 050027;;;;Indeholder;;;;Sprogcentret - Statsborgerskabsprøve;79000000;XG-0000003397-00053;;Lukkes?;;;;
-5386888 120027;;;;Indeholder;;;;Sprogcentret - Statsborgerskabsprøve;79000000;XG-0000003397-00053;;Lukkes?;;;;
-5386888 111313;;;;Indeholder;;;;Studietur til Berlin;79000000;XG-0000002511-00020;;Lukkes?;;;;
-5386888 111324;;;;Indeholder;;;;Studietur til New York;79000000;XG-0000002511-00020;;Lukkes?;;;;
-045P;;;Udenlandsk overførsel;Slutter med;;;;Sygedagpenge udenlandsk;90540000;;;KMD Udbetaling 045;;;;
-RESP;;;Udenlandsk overførsel;Indeholder;;;;Tekst fra bank;95931701;;;KY;;;;
-APOP;;;Udenlandsk overførsel;Indeholder;;;;Tekst fra bank;95931701;;;KY;;;;
-HTFP;;;Udenlandsk overførsel;Indeholder;;;;Tekst fra bank;95931701;;;KY;;;;
-1992317;;;DK-abonnement;Indeholder;;;;Tekst fra bank;95941202;;;;;;;
-6687210;;;;Indeholder;-333,00;;Lig med;Tekst fra bank;40000000;XG-0000000006-00007;;;;;;
-8152290;;;;Indeholder;-333,00;;Lig med;Tekst fra bank;40000000;XG-0000000006-00007;;;;;;
-Dep;;;;Starter med;30000,00;;Lig med;Tekst fra bank;95950000;;;"Salg af grunde. Kommer ikke altid med ""dep"", jævnligt kun adressen. Betina Bak.";;;;
-9913008388;;;Rente af obligationer;Indeholder;;;;Tekst fra bank;94600005;;;Randers Kommunes kunstfond;;;;
-9913008388;;;Udtrukne obligationer;Indeholder;;;;Tekst fra bank;94200011;;;Randers Kommunes kunstfond;;;;
-;;Danica Pension;;Starter med;1251,70;;Lig med;Tekst fra bank;95914002;;;Posteringstekst inkl. CPR. CPR er ikke med i banken?;;;;
-;;Danica Pension;;Starter med;1714,30;;Lig med;Tekst fra bank;95914002;;;Posteringstekst inkl. CPR. CPR er ikke med i banken?;;;;
-Regres;;Forsikring;;Indeholder;;;;Tekst fra bank;79000000;XG-0000003333-00003;;Pia Fonnesbæk vedr. spørgsmål.;;;;
-0019;;;Overførsel;Starter med;;;;Tekst fra bank;90520001;;;OBS-konto;;;;
-NKS-KY;;;Cap;Indeholder;;;;Tekst fra bank;95931701;;;KY;;;;
-Tilbagebetalinger;;;Cap;Indeholder;;;;Tekst fra bank;90540000;;;KMD Udbetaling 250;;;;
-Mellemkommunal afreg;;;Cap;Starter med;;;;Tekst fra bank;90540000;;;KMD Udbetaling 339;;;;
-Indfasningsstøtte;;;Cap;Starter med;;;;Tekst fra bank;90540000;;;KMD Udbetaling 210;;;;
-Rekvireret udb;;;Cap;Starter med;;;;Tekst fra bank;90540000;;;KMD Udbetaling 104;;;;
-Foreningstilskud;;;Cap;Starter med;;;;Tekst fra bank;90540000;;;KMD Udbetaling 102;;;;
-Leverandørudbetaling;;;Cap;Starter med;;;;Tekst fra bank;90540000;;;KMD Udbetaling 091;;;;
-KMF Begravelse;;;Cap;Starter med;;;;Tekst fra bank;90540000;;;KMD Udbetaling 057;;;;
-Sygedagpenge lønref;;;Cap;Starter med;;;;Tekst fra bank;90540000;;;KMD Udbetaling 047;;;;
-Sygedagpenge;;;Cap;Starter med;;;;Tekst fra bank;90540000;;;KMD Udbetaling 045;;;;
-Boliglån;;;Cap;Starter med;;;;Tekst fra bank;90540000;;;KMD Udbetaling 042;;;;
-Social pension;;;Cap;Starter med;;;;Tekst fra bank;90540000;;;KMD Udbetaling 039;;;;
-Tilskud til børnepas;;;Cap;Starter med;;;;Tekst fra bank;90540000;;;KMD Udbetaling 030;;;;
-;;;Overførsel;Starter med;357,00;;Lig med;Tekst fra bank;79000000;XG-0000003025-00001;;Huslejenævnet;;;;
-;;;Bgs;Starter med;357,00;;Lig med;Tekst fra bank;79000000;XG-0000003025-00001;;Huslejenævnet;;;;
-;;;Info-overførsel;Starter med;;;;Tekst fra bank;95912001;;;Elsebeth Morgensen vedr. spørgsmål;;;;
-Løn;;Randers Kunstmuseum;;Indeholder;;;;Tekst fra bank;95911000;;;Elsebeth Morgensen vedr. spørgsmål;;;;
-E-lån;;;;Starter med;;;;Tekst fra bank;92500201;;;CPR ell. ejendomsnr. skal med i posteringstekst;;;;
-Elån;;;;Starter med;;;;Tekst fra bank;92500201;;;CPR ell. ejendomsnr. skal med i posteringstekst;;;;
-030000000;;VIPPS MobilePay;;Starter med;;;;Tekst fra bank;91407041;;;91407041 efter bankfil mandag;;;;
-040000000;;VIPPS MobilePay;;Starter med;;;;Tekst fra bank;91407041;;;91407041 efter bankfil mandag;;;;
-_1048_;;Pay4It;;Indeholder;;;;Tekst fra bank;90540000;;;KMD snitflade for mikrobetalinger;;;;
-_1049_;;Pay4It;;Indeholder;;;;Tekst fra bank;90540000;;;KMD snitflade for mikrobetalinger;;;;
-_1060_;;Pay4It;;Indeholder;;;;Tekst fra bank;90540000;;;KMD snitflade for mikrobetalinger;;;;
-_1096_;;Pay4It;;Indeholder;;;;Tekst fra bank;90540000;;;KMD snitflade for mikrobetalinger;;;;
-_1080_;;Pay4It;;Indeholder;;;;Tekst fra bank;90540000;;;KMD snitflade for mikrobetalinger;;;;
-_1050_;;Pay4It;;Indeholder;;;;Tekst fra bank;90540000;;;KMD snitflade for mikrobetalinger;;;;
-;;Værket;;Starter med;500000,00;;Større end;Tekst fra bank;95941110;;;;;;;
-Kommunalt træk;;Udbetaling Danmark;;Indeholder;;;;Tekst fra bank;95932008;;;;;;;
-NKS-KP;;;;Indeholder;;;;Tekst fra bank;95931700;;;;;;;
-;Kundenr: 33485468;;;Indeholder;;;;Tekst fra bank;95931505;;;;;;;
-;Kundenr: 29759456;;;Indeholder;;;;Tekst fra bank;95931502;;;;;;;
-;Kundenr: 29759464;;;Indeholder;;;;Tekst fra bank;95931011;;;;;;;
-5386888 050607;;;;Indeholder;;;;Tekst fra bank;95930007;;;Lukkes?;;;;
-tj;;Vandmiljø Randers;;Starter med;;;;Tekst fra bank;95911002;;;;;;;
-;;Randers Havn;;Starter med;;;;Tekst fra bank;95911001;;;;;;;
-31 KAPITAL;;;Cap;Indeholder;;;;Tekst fra bank;95912000;;;SD;;;;
-30 KAPITAL;;;Cap;Indeholder;;;;Tekst fra bank;95912000;;;SD;;;;
-20 MÅNEDSL;;;Cap;Indeholder;;;;Tekst fra bank;95910014;;;SD;;;;
-29 ACONTO;;;Cap;Indeholder;;;;Tekst fra bank;95910014;;;SD;;;;
-90 PENSION;;;Cap;Indeholder;;;;Tekst fra bank;95910014;;;SD;;;;
-RG20938;;;;Starter med;;;;Tekst fra bank;95910014;;;;;;;
-;;;Fonds;Starter med;;;;Tekst fra bank;95000100;;;;;;;
-5386888 050016;;;;Indeholder;;;;Tekst fra bank;94700003;;;Lukkes?;;;;
-8871930;;;;Indeholder;;;;Tekst fra bank;91407032;;;;;;;
-BSR08871930;;;;Indeholder;;;;Tekst fra bank;91407032;;;;;;;
-K 82075348;;;;Indeholder;;;;Tekst fra bank;95952100;;;;;;;
-Gældst;;Skat;;Indeholder;;;;Tekst fra bank;91407020;;;PSRM;;;;
-- skat;;Skat;;Indeholder;;;;Tekst fra bank;91407020;;;PSRM;;;;
-- gælds;;Skat;;Indeholder;;;;Tekst fra bank;91407020;;;PSRM;;;;
-209082;;;;Indeholder;;;;Tekst fra bank;91407007;;;;;;;
-BSR00209082;;;;Indeholder;;;;Tekst fra bank;91407007;;;;;;;
-8871973;;;;Indeholder;;;;Tekst fra bank;91407006;;;;;;;
-BSR08871973;;;;Indeholder;;;;Tekst fra bank;91407006;;;;;;;
-;;;Udtrukne obligationer;Starter med;;;;Tekst fra bank;90800100;;;;;;;
-;mønter Bib;;;Starter med;;;;Tekst fra bank;90100002;;;;;;;
-udbetaling af mønt;;;;Indeholder;;;;Tekst fra bank;90100001;;;;;;;
-;KUREG;Slots- og kulturstyrelse;;Indeholder;;;;Tekst fra bank;86000000;XG-0000004083-00002;;;;;;
-5078318;;;;Indeholder;;;;Tekst fra bank;79000000;XG-0000002667-00008;;;;;;
-8189094;;;;Indeholder;;;;Tekst fra bank;79000000;XG-0000002667-00008;;;;;;
-;;ParkPark;;Indeholder;;;;Tekst fra bank;79000000;XG-0000005096-00010;;;;;;
-;;Parkman;;Indeholder;;;;Tekst fra bank;79000000;XG-0000005096-00010;;;;;;
-;;Park4U;;Indeholder;;;;Tekst fra bank;79000000;XG-0000005096-00010;;;;;;
-;;Easy Park;;Indeholder;;;;Tekst fra bank;79000000;XG-0000005096-00010;;;;;;
-;ParkOne;;;Indeholder;;;;Tekst fra bank;79000000;XG-0000005096-00010;;;;;;
-;OK parkering;;;Indeholder;;;;Tekst fra bank;79000000;XG-0000005096-00010;;;;;;
-;63470645;Bambora;;Starter med;;;;Tekst fra bank;79000000;XG-0000005096-00009;;;;;;
-;Landing fee;;;Indeholder;;;;Afsender fra bank;79000000;XG-0000005086-00001;;;;;;
-OY-;;;Overførsel;Starter med;;;;Tekst fra bank;79000000;XG-0000005086-00001;;;;;;
-;OY-;;Overførsel;Starter med;;;;Tekst fra bank;79000000;XG-0000005086-00001;;;;;;
-Ekstra;;Open Experience;;Starter med;;;;Tekst fra bank;72000000;XG-0000005285-00006;;;;;;
-;;Vindstød;;Indeholder;;;;Tekst fra bank;72000000;XG-0000005311-00001;;;;;;
-;GSRN;Energistyrelsen;;Indeholder;;;;Advis fra bank;72000000;XG-0000005311-00001;;;;;;
-;;Too good to go;;Starter med;;;;Tekst fra bank;72000000;XG-0000005228-00003;;;;;;
-;;Kanpla APS;;Starter med;;;;Tekst fra bank;72000000;XG-0000002511-00021;;;;;;
-;;Biometric Solutions;;Starter med;;;;Tekst fra bank;72000000;XG-0000003057-00003;;;;;;
-;;;OTC-betaling;Indeholder;;;;Tekst fra bank;67041004;;;;;;;
-;;;Rente af obligationer;Starter med;;;;Tekst fra bank;60800001;;;;;;;
-;;;Afkast overført til;Starter med;;;;Tekst fra bank;60500000;;;Fejlagtig nettoudligning på administrationskonti;;;;
-;;;Afkast overført fra;Starter med;;;;Tekst fra bank;90540000;;;78562;;;;
-3490120660;;;Debetrente;Indeholder;;;;Tekst fra bank;90800101;;;Undtagelse for renteudligning;;;;
-3490120660;;;Kreditrente;Indeholder;;;;Tekst fra bank;90800101;;;Undtagelse for renteudligning;;;;
-;;;Overtræksrente;Starter med;;;;Tekst fra bank;90540000;;;Renteudligning som hovedregel;;;;
-;;;Kreditrente;Indeholder;;;;Tekst fra bank;90540000;;;Renteudligning som hovedregel;;;;
-;;;Debetrente;Indeholder;;;;Tekst fra bank;90540000;;;Renteudligning som hovedregel;;;;
-KON konto;;;Debetrente;Indeholder;;;;Tekst fra bank;60500000;;;Koncern nettoafregning af renter;;;;
-KON konto;;;Kreditrente;Indeholder;;;;Tekst fra bank;60500000;;;Koncern nettoafregning af renter;;;;
-;;;Salg af obligationer;Indeholder;;;;Tekst fra bank;90800100;;;;;;;
-;;;Køb af obligationer;Indeholder;;;;Tekst fra bank;90800100;;;;;;;
-FAKTURA D0100;;;;Starter med;;;;Tekst fra bank;40000000;XG-0000000006-00007;;;;;;
-;;;Pbs overførsel;Indeholder;;;;Tekst fra bank;40000000;XG-0000000006-00007;;;;;;
-Mariendal;;420 Kristrup Børnehus;;Indeholder;;;;Tekst fra bank;10000000;XG-0000002281-00002;;;;;;
-7374697;;;;Indeholder;;;;Teller 7374697;79000000;XG-0000005096-00001;;;;;;
-7463073;;;;Indeholder;;;;Teller 7463073;72000000;XG-0000004204-00002;;;;;;
-7555139;;;;Indeholder;;;;Teller 7555139;79000000;XG-0000005094-00001;;;;;;
-7570562;;;;Indeholder;;;;Teller 7570562;79000000;XG-0000004025-00002;;;;;;
-7570567;;;;Indeholder;;;;Teller 7570567;72000000;XG-0000004024-00003;;;;;;
-7620659;;;;Indeholder;;;;Teller 7620659;95931205;;;;;;;
-7667973;;;;Indeholder;;;;Teller 7667973;72000000;XG-0000004526-00031;;;;;;
-7670788;;;;Indeholder;;;;Teller 7670788;72000000;XG-0000004526-00028;;;;;;
-7670789;;;;Indeholder;;;;Teller 7670789;72000000;XG-0000004526-00033;;;;;;
-7670796;;;;Indeholder;;;;Teller 7670796;72000000;XG-0000004526-00027;;;;;;
-7670797;;;;Indeholder;;;;Teller 7670797;72000000;XG-0000004526-00030;;;;;;
-7673000;;;;Indeholder;;;;Teller 7673000;95931202;;;;;;;
-7757974;;;;Indeholder;;;;Teller 7757974 / randers-affald;79000000;XG-0000005285-00015;;;;;;
-7810906;;;;Indeholder;;;;Teller 7810906 - Borgerservice Pas, billeder og fingeraftryk;95931206;;;;;;;
-7864309;;;;Indeholder;;;;Teller 7864309;95941300;;;;;;;
-7893415;;;;Indeholder;;;;Teller 7893415 - internationalekort Kommunikation;95990009;;;;;;;
-7978497;;;;Indeholder;;;;Teller 7978497;95941300;;;;;;;
-8094609;;;;Indeholder;;;;Teller 8094609 Beboerlicens parkering RK;79000000;XG-0000005096-00009;;;;;;
-8104226;;;;Indeholder;;;;Teller 8104226;72000000;XG-0000005010-00080;;;;;;
-;;Bolig- og planstyrelse;;Starter med;200000,00;;Lig med;Tilskud, Bolig- og Planstyrelsen;86000000;XG-0000000019-00002;;;;;;
-;Flere skal med;Styrelsen for arbejdsmarked;;Indeholder;;;;Tilskud, Flere skal med;86000000;XG-0000003906-00009;;;;;;
-;MUSIKSKOLE;Slots- og kulturstyrelse;;Indeholder;;;;Tilskud, Musikskole;86000000;XG-0000004089-00005;;;;;;
-;11735-0006;SOCIAL- OG BOLIGSTYRELSEN;;Indeholder;;;;Tilskud, Socialstyrelsen;86000000;XG-0000002907-00001;;Slettes medio 2027;;;;
-;11805-0011;SOCIAL- OG BOLIGSTYRELSEN;;Indeholder;;;;Tilskud, Socialstyrelsen;86000000;XG-0000003969-00099;;;;;;
-;3135-0006;SOCIAL- OG BOLIGSTYRELSEN;;Indeholder;;;;Tilskud, Socialstyrelsen;86000000;XG-0000004599-00002;;;;;;
-;7195-0011;SOCIAL- OG BOLIGSTYRELSEN;;Indeholder;;;;Tilskud, Socialstyrelsen;86000000;XG-0000003913-00090;;;;;;
-;7225-0013;SOCIAL- OG BOLIGSTYRELSEN;;Indeholder;;;;Tilskud, Socialstyrelsen;86000000;XG-0000002810-00001;;;;;;
-;6105-0135;SOCIAL- OG BOLIGSTYRELSEN;;Indeholder;;;;Tilskud, Socialstyrelsen;86000000;XG-0000003912-00004;;;;;;
-;2367-0075;SOCIAL- OG BOLIGSTYRELSEN;;Indeholder;;;;Tilskud, Socialstyrelsen;86000000;XG-0000004507-00131;;;;;;
-;2955-0014;SOCIAL- OG BOLIGSTYRELSEN;;Indeholder;;;;Tilskud, Socialstyrelsen;86000000;XG-0000004178-00007;;;;;;
-Bidrag;;Udbetaling Danmark;;Indeholder;;;;Udbetaling Danmark Bidrag;95920000;;;;;;;
-Afdrag indskudslån;;Udbetaling Danmark;;Indeholder;;;;UDK - afdrag indskudslån;95990009;;;Modposteres af BTK;;;;
-#??????;;;;Indeholder;;;;Uplacerbar;40000000;XG-0000000006-00020;;Bruges kun hvis posten har ligget på 95990009 længe;;;;
-;SDTN;Kvindecenter;;Indeholder;;;;Vedr. projekt SDTN Supervision;79000000;XG-0000002793-00004;;;;;;
-;Østjysk vækstbånd;Slots- og kulturstyrelse;;Indeholder;;;;Østjysk Vækstbånd;86000000;XG-0000004187-00001;;;;;;
-;KSD-;;;Indeholder;;;;;95914005;;;Dagpenge - Poster fra Hjørnesten og Randers Kunstmuseum skal tages manuelt;;;;
-;TBK 730;Udbetaling Danmark for bolig;;Indeholder;;;;;95990026;;;;;;;
-;;Velliv;;Indeholder;378,63;;Lig med;;95914002;;;Elsebeth Morgensen vedr. spørgsmål;;;;
-;Løn;Verdo;;Starter med;;;;;95990001;;;;;;;
-;BDP-;;;Indeholder;;;;;95914006;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;
+﻿Reference;Advisliste;Afsender;Posteringstype;match_regel;Beløb1;Beløb2;beløb_regel;Posteringstekst;Artskonto;PSP-element;SIO;Notat
+142731;;Børne- og undervisning;;Indeholder;;;;Advis fra bank;86000000;XG-0000002806-00014;;BS Økonomi
+;GSRN;Energistyrelsen;;Indeholder;;;;Advis fra bank;72000000;XG-0000005311-00001;;Energi og Projektering - Anders Weng Mikkelsen
+;;;Overførsel;Starter med;4597,00;;Lig med;Advis fra bank;79000000;XG-0000003025-00001;;Huslejeklagenævnet
+141360;;Børne- og undervisning;;Indeholder;;;;Advis fra bank;86000000;XG-0000002066-00003;;Kan gælde forskellige P-numre
+;Kundenr: 29189668;;;Indeholder;;;;Advis fra bank;95990036;;;Koncern - Skattekontoen
+;;PFA Pension;;Starter med;;;;Advis fra bank;95914002;;;Lønkontoret
+;Moms;SKATTEFORVALTNINGEN;;Indeholder;;;;Advis fra bank;95999010;;;Regnskab - Ivar
+95943015;;;;Indeholder;;;;Advis fra bank;95943015;;;Solbakken
+;95943015;;;Indeholder;;;;Advis fra bank;95943015;;;Solbakken
+AFK borger;;;Bgs;Indeholder;;;;Afsender fra bank;79000000;XG-0000003070-00001;;AF-koordinator
+AFK borger;;;Overførsel;Indeholder;;;;Afsender fra bank;79000000;XG-0000003070-00001;;AF-koordinator
+;AFK borger;;Bgs;Indeholder;;;;Afsender fra bank;79000000;XG-0000003070-00001;;AF-koordinator
+;AFK borger;;Overførsel;Indeholder;;;;Afsender fra bank;79000000;XG-0000003070-00001;;AF-koordinator
+Afdrag pligtlån;;;;Slutter med;1100,00;;Mindre end;Afsender fra bank;91407008;;;Betalingskontoret
+;Indskudslån;Lejerbo;;Indeholder;1100,00;;Mindre end;Afsender fra bank;91407008;;;Betalingskontoret
+Afdr. boligindsk.lån;;;;Indeholder;1100,00;;Mindre end;Afsender fra bank;91407008;;;Boliglån - Helena Balle
+boligindsk;;;;Indeholder;1100,00;;Mindre end;Afsender fra bank;91407008;;;Boliglån - Helena Balle
+Indskudslån;;;;Indeholder;1100,00;;Mindre end;Afsender fra bank;91407008;;;Boliglån - Helena Balle
+(KP);;Kommune;;Indeholder;;;;Afsender fra bank;95931700;;;KP
+KP-;;Kommune;Overførsel;Indeholder;;;;Afsender fra bank;95931700;;;KP
+KP-;;Kommune;Cap;Indeholder;;;;Afsender fra bank;95931700;;;KP
+KP-AarhusKommune;;;;Indeholder;;;;Afsender fra bank;95931700;;;KP
+Team Pension;;Kommune;;Indeholder;;;;Afsender fra bank;95931700;;;KP
+;Landing fee;;;Indeholder;;;;Afsender fra bank;79000000;XG-0000005086-00001;;Randers Flyveplads
+Payment;;Verdo Produktion;;Indeholder;;;;Afsender fra bank;72000000;XG-0000005012-00297;;UMT Økonomi - Tina Tran
+;;Svend Aage Sølvsten;;Indeholder;;;;Aktivitetsudvalget Korshøjscentret kageforplejning;79000000;XG-0000004526-00031;;Åbakken 
+4430778;;;DK-abonnement;Indeholder;;;;Dankort abonnement;40000000;XG-0000003020-00258;;Borgerservice
+4517148;;;DK-abonnement;Indeholder;;;;Dankort abonnement;40000000;XG-0000003020-00258;;Borgerservice
+6256651;;;DK-abonnement;Indeholder;;;;Dankort abonnement;40000000;XG-0000003020-00258;;Borgerservice
+1992317;;;DK-abonnement;Indeholder;;;;Dankort abonnement;95941202;;;Randers Bibliotek
+4430778;;;Dankortsalg-gebyr;Indeholder;;;;Dankort gebyrer;40000000;XG-0000003020-00258;;Borgerservice
+4517148;;;Dankortsalg-gebyr;Indeholder;;;;Dankort gebyrer;40000000;XG-0000003020-00258;;Borgerservice
+6256651;;;Dankortsalg-gebyr;Indeholder;;;;Dankort gebyrer;40000000;XG-0000003020-00258;;Borgerservice
+;;MSS Professional A/S;;Starter med;;;;E-penge;72000000;XG-0000005228-00003;;Kantinen
+Fleks;;Økonomistyrelsen;;Indeholder;;;;Fleksrefusion fra Økonomistyrelsen;95941300;;;Museum Østjylland
+1007867103;;;Gebyr;Indeholder;;;;Gebyr af depot 1007867103;40000000;XG-0000000006-00049;;Regnskab
+2121115030;;;Gebyr;Indeholder;;;;Gebyr af depot 2121115030;40000000;XG-0000000006-00049;;Regnskab
+60151 VIPPS;;;Leverandørservice;Starter med;;;;Gebyr for selvstændige MobilePay-salgssteder;40000000;XG-0000000006-00007;;Regnskab
+;63470645;Bambora;;Starter med;;;;Indtægter via Bambora;79000000;XG-0000005096-00009;;Parkering
+6175937;;;;Indeholder;;;;Indtægter via betalingskort;79000000;XG-0000005285-00040;;Affaldskontoret - Tina Tran
+7757974;;;;Indeholder;;;;Indtægter via betalingskort;79000000;XG-0000005285-00040;;Affaldskontoret - Tina Tran
+8104226;;;;Indeholder;;;;Indtægter via betalingskort;79000000;XG-0000005010-00112;;Affaldskontoret - Tina Tran
+2271311;;;;Indeholder;;;;Indtægter via betalingskort;79000000;XG-0000005010-00112;;Affaldskontoret - Tina Tran
+5908167;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00048;;Asferg/Terneparken
+3796817;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00028;;Bakkegården
+7670788;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00028;;Bakkegården
+7131666;;;;Indeholder;;;;Indtægter via betalingskort;91407040;;;Betalingskontoret
+8499089;;;;Indeholder;;;;Indtægter via betalingskort;91407040;;;Betalingskontoret
+3796671;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00046;;Borupvænget
+5157064;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004204-00002;;Condomeriet
+7463073;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004204-00002;;Condomeriet
+3796868;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00030;;Dronningborg
+7670797;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00030;;Dronningborg
+4771850;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000003040-00018;;Gaia Butik
+8516775;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000003040-00018;;Gaia Butik
+4771842;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000003040-00046;;Gaia Cafe
+7221290;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000003040-00046;;Gaia Cafe
+8537995;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000003040-00046;;Gaia Cafe
+7221304;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000003040-00034;;Gaia Via
+8538001;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000003040-00034;;Gaia Via
+3796949;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00035;;Huset Nyvang
+5887356;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00045;;Kildevang
+3386896;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00044;;Kollektivhuset
+3796914;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00044;;Kollektivhuset
+8862559;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00044;;Kollektivhuset
+3796930;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00036;;Lindevænget
+3796795;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00033;;Møllevang
+7670789;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00033;;Møllevang
+6899625;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00037;;Nellemann
+8357634;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00037;;Nellemann
+4922735;;;;Indeholder;;;;Indtægter via betalingskort;79000000;XG-0000005096-00001;;Parkering
+7374697;;;;Indeholder;;;;Indtægter via betalingskort;79000000;XG-0000005096-00001;;Parkering
+1992317;;;;Indeholder;;;;Indtægter via betalingskort;95941202;;;Randers Bibliotek
+3796892;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00027;;Rosenvænget
+7670796;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00027;;Rosenvænget
+3796884;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00038;;Svaleparken
+3796906;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00040;;Tirsdalen                                            
+7555139;;;;Indeholder;;;;Indtægter via betalingskort;79000000;XG-0000005094-00001;;Udbyhøj Færge
+5541042;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004024-00003;;Udbyhøj Lystbådehavn
+5541069;;;;Indeholder;;;;Indtægter via betalingskort;79000000;XG-0000004025-00002;;Udbyhøj Lystbådehavn
+7570562;;;;Indeholder;;;;Indtægter via betalingskort;79000000;XG-0000004025-00002;;Udbyhøj Lystbådehavn
+7570567;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004024-00003;;Udbyhøj Lystbådehavn
+3796663;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00041;;Vorup
+5891507;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00031;;Åbakken
+7667973;;;;Indeholder;;;;Indtægter via betalingskort;72000000;XG-0000004526-00031;;Åbakken
+6201830;;;;Indeholder;;;;Indtægter via betalingskort - Kasernen;72000000;XG-0000005228-00003;;Kantinen
+5846102;;;;Indeholder;;;;Indtægter via betalingskort - Laksetorvet;72000000;XG-0000005228-00003;;Kantinen
+5991390;;;;Indeholder;;;;Indtægter via betalingskort - Sundhedshuset;72000000;XG-0000005228-00003;;Kantinen
+6687210;;;;Indeholder;;;;Indtægter via betalingskort - Udlån fra Regnskab;95990009;;;Regnskab 
+8152290;;;;Indeholder;;;;Indtægter via betalingskort - Udlån fra Regnskab;95990009;;;Regnskab 
+4862821;;;;Indeholder;;;;Indtægter via betalingskort 4862821;79000000;XG-0000005094-00001;;Udbyhøj Færge
+4862899;;;;Indeholder;;;;Indtægter via betalingskort 4862899;79000000;XG-0000005094-00001;;Udbyhøj Færge
+BSR00209082;;;;Indeholder;;;;Indtægter via Betalingsservice - 0209082;91407007;;;Betalingskontoret
+8871930;;;;Indeholder;;;;Indtægter via Betalingsservice - 8871930;91407032;;;Betalingskontoret
+BSR08871930;;;;Indeholder;;;;Indtægter via Betalingsservice - 8871930;91407032;;;Betalingskontoret
+8871973;;;;Indeholder;;;;Indtægter via Betalingsservice - 8871973;91407006;;;Betalingskontoret
+BSR08871973;;;;Indeholder;;;;Indtægter via Betalingsservice - 8871973;91407006;;;Betalingskontoret
+4430778;;;Dankort-salg;Indeholder;;;;Indtægter via Dankort;95931205;;;Borgerservice
+4517148;;;Dankort-salg;Indeholder;;;;Indtægter via Dankort;79000000;XG-0000003057-00001;;Borgerservice
+6256651;;;Dankort-salg;Indeholder;;;;Indtægter via Dankort;95931206;;;Borgerservice
+2471043;;;;Indeholder;;;;Indtægter via Dankort 2471043;95941300;;;Museum Østjylland
+5247969;;;;Indeholder;;;;Indtægter via Dankort 5247969;95941300;;;Museum Østjylland
+;;Easy Park;;Indeholder;;;;Indtægter via EasyPark;79000000;XG-0000005096-00010;;Parkering
+K 84788767;;;;Indeholder;;;;Indtægter via FIK;91407003;;;Betalingskontoret
+K 86136228;;;;Indeholder;;;;Indtægter via FIK;91407005;;;Betalingskontoret
+K 86446707;;;;Indeholder;;;;Indtægter via FIK;91407030;;;Betalingskontoret
+K 89182816;;;;Indeholder;;;;Indtægter via FIK;91407004;;;Betalingskontoret
+K 82075348;;;;Indeholder;;;;Indtægter via FIK;95952100;;;Kirkegårdskontoret
+7620659;;;;Indeholder;;;;Indtægter via internationale kort;95931205;;;Borgerservice
+7810906;;;;Indeholder;;;;Indtægter via internationale kort;95931206;;;Borgerservice
+8674335;;;;Indeholder;;;;Indtægter via internationale kort;95941202;;;Randers Bibliotek
+7864309;;;;Indeholder;;;;Indtægter via internationale kort 7864309;95941300;;;Museum Østjylland
+7978497;;;;Indeholder;;;;Indtægter via internationale kort 7978497;95941300;;;Museum Østjylland
+;;Kanpla APS;;Starter med;;;;Indtægter via Kanpla;72000000;XG-0000002511-00021;;Nørrevangsskolen 
+90100035;;;;Indeholder;;;;Indtægter via kontanter;90100035;;;ACR - Charlotte Keil Søgaard
+006974;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;90100035;;;ACR - Charlotte Keil Søgaard
+ACR;;;;Slutter med;;;;Indtægter via kontanter;90100035;;;ACR - Charlotte Keil Søgaard
+DAC;;;;Starter med;;;;Indtægter via kontanter;90100035;;;ACR - Charlotte Keil Søgaard
+011887;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;79000000;XG-0000003070-00001;;AF-koordinator
+3070-01;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;79000000;XG-0000003070-00001;;AF-koordinator
+011787;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00048;;Asferg/Terneparken
+Terneparken;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00048;;Asferg/Terneparken
+012197;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000002369-00021;;Assentoftskolen
+Assentoft;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000002369-00021;;Assentoftskolen
+011781;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00028;;Bakkegården
+Bakkegården;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004518-00093;;Bakkegården
+006975;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;79000000;XG-0000002382-00015;;Bjerregrav Skole
+012190;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;79000000;XG-0000002392-00032;;Blicherskolen - Pia Olsen
+012192;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;79000000;XG-0000002392-00031;;Blicherskolen - Pia Olsen
+Blicherskolen A;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000002392-00031;;Blicherskolen - Pia Olsen
+Blicherskolen B;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000002392-00032;;Blicherskolen - Pia Olsen
+006992;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;90140017;;;Bocenter Harridslev - Jimmie Hofmann Pedersen
+012180;;;;Indeholder;;;;Indtægter via kontanter;90100001;;;Borgerservice
+mønt borgerservice;;;;Indeholder;;;;Indtægter via kontanter;90100001;;;Borgerservice
+011785;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00046;;Borupvænget
+Borup;;;Indbetaling;Starter med;;;;Indtægter via kontanter;72000000;XG-0000004526-00046;;Borupvænget
+Cafe Borup;;;Indbetaling;Starter med;;;;Indtægter via kontanter;72000000;XG-0000004526-00046;;Borupvænget
+90100011;;;;Indeholder;;;;Indtægter via kontanter;90100011;;;CBR - Charlotte Keil Søgaard
+006983;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;90100011;;;CBR - Charlotte Keil Søgaard
+006984;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;90100010;;;CBR - Charlotte Keil Søgaard
+CBR;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;90100011;;;CBR - Charlotte Keil Søgaard
+006991;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;79000000;XG-0000002667-00008;;Center for Undervisning og Læring
+011783;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00030;;Dronningborg
+Dronningborg;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004518-00094;;Dronningborg
+011780;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00047;;Fårup
+Fårup;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00047;;Fårup
+012200;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000003040-00018;;Gaia Butik
+Gaia Butik;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000003040-00018;;Gaia Butik
+012199;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000003040-00046;;Gaia Cafe
+Gaia Cafe;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000003040-00046;;Gaia Cafe
+Gaia papaya;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000003040-00046;;Gaia Cafe
+006991;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;79000000;XG-0000003098-00001;;Gaia Museum
+Gaia via;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000003040-00034;;Gaia Via
+95931400;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;95931400;;;Hjørnestenen
+006987;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;95931400;;;Hjørnestenen
+012196;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000002448-00001;;Hobrovejens Juniorklub
+hobrovej junior;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000002448-00007;;Hobrovejens Juniorklub
+006986;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000002439-00024;;Hobrovejens Skole
+Hobrovejens Skole;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000002439-00014;;Hobrovejens Skole
+011891;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00035;;Huset Nyvang
+006984;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00045;;Kildevang
+Kollektivhus;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00044;;Kollektivhuset
+011791;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00044;;Kollektivhuset 
+012191;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00044;;Kollektivhuset 
+2465-00021;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000002465-00021;;Korshøjskolen
+Korshøjskole;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000002465-00021;;Korshøjskolen
+006978;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000002465-00021;;Korshøjskolen 
+006973;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00042;;Kristrupcentret
+KC cafe;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00042;;Kristrupcentret
+Kristrupcentret;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00042;;Kristrupcentret
+012188;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00036;;Lindevænget
+Cafe LV;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00036;;Lindevænget
+Cafe-LV;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00036;;Lindevænget
+LV;;;Indbetaling;Slutter med;;;;Indtægter via kontanter;72000000;XG-0000004526-00036;;Lindevænget
+011786;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00018;;Madservice Kronjylland
+Madservice;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00018;;Madservice Kronjylland
+006970;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;40000000;XG-0000005004-00023;;Matrielgården
+Munkholmskole;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;79000000;XG-0000004526-00048;;Munkholmskolen
+012194;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;79000000;XG-0000004526-00048;;Munkholmskolen 
+MOE;;;Indbetaling;Starter med;;;;Indtægter via kontanter;95941300;;;Museum Østjylland
+011888;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;95941300;;;Museum Østjylland 
+Møllevang;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004518-00098;;Møllevang
+011793;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00033;;Møllevang 
+011792;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00037;;Nellemann
+Cafe Nellemann;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00037;;Nellemann
+NM;;;;Slutter med;;;;Indtægter via kontanter;72000000;XG-0000004526-00037;;Nellemann
+301.408.72.05;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000002511-00021;;Nørrevangsskolen
+006993;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000002511-00021;;Nørrevangsskolen 
+Automat;;;;Slutter med;;;;Indtægter via kontanter;79000000;XG-0000005096-00001;;Parkering
+P-mønt;;;;Starter med;;;;Indtægter via kontanter;79000000;XG-0000005096-00001;;Parkering
+006979;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000003038-00053;;Perron 4 
+Perron 4;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000003038-00053;;Perron 4 
+012198;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000003038-00126;;Psykiatriens Hus 
+Bibliotek;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;95941202;;;Randers Bibliotek
+012195;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;95941202;;;Randers Bibliotek 
+011790;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00027;;Rosenvænget
+Rosenvæng;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004518-00092;;Rosenvænget
+012189;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;79000000;XG-0000003021-00043;;Senhjerneskadeområdet 
+XG-3397-50;;;Indbetaling;Starter med;;;;Indtægter via kontanter;72000000;XG-0000003397-00050;;Sprogcentret
+006980;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;79000000;XG-0000003397-00012;;Sprogcentret 
+011778;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00038;;Svaleparken
+Cafe SP;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00038;;Svaleparken
+Cafe Svaleparken;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00038;;Svaleparken
+Cafe-SP;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00038;;Svaleparken
+Svaleparken;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00038;;Svaleparken
+006976;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;79000000;XG-0000002531-00016;;Søndermarkskolen
+011789;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00039;;Thors Bakke
+Cafe TB;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00039;;Thors Bakke
+TB;;;Indbetaling;Starter med;;;;Indtægter via kontanter;72000000;XG-0000004526-00039;;Thors Bakke
+Thors bakke;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00039;;Thors Bakke
+Thorsbakke;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00039;;Thors Bakke
+012184;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00040;;Tirsdalen                                            
+TD cafe;;;Indbetaling;Starter med;;;;Indtægter via kontanter;72000000;XG-0000004526-00040;;Tirsdalen                                            
+Tirsdalen;;;Indbetaling;Starter med;;;;Indtægter via kontanter;72000000;XG-0000004526-00040;;Tirsdalen                                            
+012185;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000002544-00025;;Tirsdalens Skole 
+006977;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;79000000;XG-0000005094-00004;;Udbyhøj Færge
+006982;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;79000000;XG-0000005094-00005;;Udbyhøj Færge
+MEL;;;Indbetaling;Slutter med;;;;Indtægter via kontanter;79000000;XG-0000005094-00004;;Udbyhøj Færge
+UDB;;;Indbetaling;Slutter med;;;;Indtægter via kontanter;79000000;XG-0000005094-00005;;Udbyhøj Færge
+006990;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000002484-00001;;Vennelyst Juniorklub 
+011897;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00041;;Vorup
+Cafe Vorup;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00041;;Vorup
+Cafe VP;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00041;;Vorup
+Cafe-VP;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00041;;Vorup
+Åbakken;;;Indbetaling;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00031;;Åbakken
+011788;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter;72000000;XG-0000004526-00031;;Åbakken 
+012183;;;Pengeautomat;Indeholder;;;;Indtægter via kontanter - Blommevej;79000000;XG-0000002648-00024;;Trekløverskolen
+Sprogcenter - kaffe;;;;Indeholder;;;;Indtægter via kontanter - Kaffeautomat;79000000;XG-0000003397-00050;;Sprogcentret 
+200127067;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000003038-00040;;ACR - Charlotte Keil Søgaard
+200348681;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000005285-00006;;Affaldskontoret
+200045216;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000005285-00040;;Affaldsterminalen
+200320331;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000005010-00112;;Affaldsterminalen
+200430074;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000003070-00001;;AF-koordinator
+200142445;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002359-00016;;Asferg Skole
+200992725;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000002369-00029;;Assentoftskolen
+200351378;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002382-00017;;Bjerregrav Skole
+200935134;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000002392-00042;;Blicherskolen
+200010203;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002207-00001;;Børnehuset Toftegården
+200616946;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;90100011;;;CBR - Charlotte Keil Søgaard
+200155841;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002668-00014;;Center for Fritidsmiljøer og Demokrati
+200192334;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002668-00027;;Center for Fritidsmiljøer og Demokrati
+200227388;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002668-00016;;Center for Fritidsmiljøer og Demokrati
+200265828;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002668-00013;;Center for Fritidsmiljøer og Demokrati
+200280120;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002668-00019;;Center for Fritidsmiljøer og Demokrati
+200310450;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002668-00015;;Center for Fritidsmiljøer og Demokrati
+200344205;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002668-00021;;Center for Fritidsmiljøer og Demokrati
+200646778;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002668-00012;;Center for Fritidsmiljøer og Demokrati
+200654227;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002668-00020;;Center for Fritidsmiljøer og Demokrati
+200692988;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002668-00018;;Center for Fritidsmiljøer og Demokrati
+200778357;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002668-00011;;Center for Fritidsmiljøer og Demokrati
+200910387;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002668-00017;;Center for Fritidsmiljøer og Demokrati
+200917050;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002668-00022;;Center for Fritidsmiljøer og Demokrati
+200971414;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000002669-00008;;Center for Heltidsundervisning
+200758343;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000002667-00008;;Center for Undervisning og Læring
+200104171;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000003020-00236;;Center for Virksomhedsservice og Rekruttering
+200238451;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000004204-00002;;Condomeriet
+200472001;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;95932400;;;CSV
+200940094;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000002830-00001;;Familieafdelingen
+200995139;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002484-00001;;Fritidsklubben Vennelyst
+200151330;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000004526-00048;;Fårup
+200783487;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002402-00024;;Fårup Skole og Børneby
+200713400;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000003040-00018;;Gaia Butik
+200816912;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000003040-00046;;Gaia Cafe
+200977572;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002415-00037;;Grønhøjskolen 
+200659660;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000002426-00017;;Havndal Skole
+200293622;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000003020-00050;;Hjernecenter Randers 
+200031145;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002448-00007;;Hobrovejens Juniorklub
+200797898;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002439-00024;;Hobrovejens Skole 
+200531472;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000003038-00171;;Holbergstien
+200742954;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002461-00001;;Hornbæk Juniorklub
+200731049;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000002452-00024;;Hornbæk Skole
+200547332;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000004526-00051;;Huset Nyvang
+200601986;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000003038-00126;;Huset Tværs
+200187771;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002598-00003;;Jennumparkens fritidshjem
+200764635;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000004526-00045;;Kildevang
+200711993;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000004526-00044;;Kollektivhuset
+200150664;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XA-9258200001-00041;;Kommunikation - Giv Randers et træ
+200591851;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002465-00029;;Korshøjskolen 
+200134100;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000002481-00010;;Kristrup skole
+200824395;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000002475-00015;;Kristrup Skole
+200894390;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000002475-00018;;Kristrup skole
+200686410;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002475-00016;;Kristrup Skole 
+200248493;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000004526-00034;;Kristrupcentret
+200421255;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000003038-00036;;Lene Bredahls Gade
+200261333;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000004526-00036;;Lindevænget
+200726082;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000004526-00018;;Madservice Kronjylland  
+200755789;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000003038-00105;;Markedsgade
+200350353;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000005004-00023;;Matrielgården
+200659127;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000002501-00022;;Munkholmskolen 
+200573604;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;95941300;;;Museum Østjylland 
+200675451;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000003078-00122;;Møbelcirklen
+200599151;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000004526-00037;;Nellemann
+200808231;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002511-00020;;Nørrevangsskolen 
+200866110;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002511-00021;;Nørrevangsskolen 
+200355004;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002663-00002;;Oust Mølleskolen
+200648811;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000005096-00009;;Parkering
+200834138;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;95941203;;;Randers Bibliotek 
+200795511;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;95941206;;;Randers Bibliotek - Filial Langå
+200301325;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;95941204;;;Randers Bibliotek - Filial SYD
+200106833;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;95941205;;;Randers Bibliotek - Filial ØST
+200222297;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000005063-00011;;Randers Cykelby
+200684007;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000005086-00001;;Randers Flyveplads 
+200440754;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000004087-00001;;Randers Musikskole
+200211395;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000005050-00003;;Randers Naturcenter
+200041975;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000002521-00034;;Rismølleskolen
+200254904;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002521-00031;;Rismølleskolen 
+200221686;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002633-00003;;Solgården
+200778549;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000003397-00016;;Sprogcentret
+200133068;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;95930008;;;Sprogcentret 
+200543825;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000004526-00038;;Svaleparken  
+200013819;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000002530-00003;;Søndermarkskolen
+200374111;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000002531-00002;;Søndermarkskolen
+200694520;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002531-00016;;Søndermarkskolen 
+200575147;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000004526-00039;;Thors Bakke
+200866375;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000004526-00040;;Tirsdalen                                            
+200182105;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000002544-00026;;Tirsdalens Skole 
+200231633;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002544-00025;;Tirsdalens Skole 
+200958295;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002548-00001;;Tirsdalens Skole 
+200429274;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002890-00056;;Trekløverskolen
+200398278;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000004025-00002;;Udbyhøj Lystbådehavn
+200344413;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000002564-00001;;Vestervang Juniorklub
+200830577;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;79000000;XG-0000002555-00002;;Vestervangsskolen
+200844608;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000004526-00041;;Vorup
+200660231;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000004100-00018;;Værket
+200448873;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000002585-00001;;Østervangsskolen 
+200582771;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay;72000000;XG-0000004526-00026;;Åbakken
+200287970;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay - Borup Byvej;72000000;XG-0000002890-00056;;Trekløverskolen
+200870951;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay - Borup Byvej;72000000;XG-0000002890-00059;;Trekløverskolen
+200991538;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay - Ebeltoft Rådhus;95941300;;;Museum Østjylland 
+200941386;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay - Farvergården;95941300;;;Museum Østjylland 
+200736118;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay - Håndværksmuseet;95941300;;;Museum Østjylland 
+200580075;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay - Kulturhuset;95941300;;;Museum Østjylland 
+200168470;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay - Købmandsgården;95941300;;;Museum Østjylland 
+200387202;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay - Musical/skolefest;72000000;XG-0000002488-00025;;Langå skole
+200469446;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay - PLC;79000000;XG-0000002555-00002;;Vestervangsskolen
+200899149;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay - Siam;95941300;;;Museum Østjylland 
+200349250;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay - Skolefest;72000000;XG-0000002521-00031;;Rismølleskolen 
+200735596;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay - Udlån 1;95990009;;;Regnskab
+200989541;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay - Udlån 2;95990009;;;Regnskab
+200669655;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay - Udlån 3;95990009;;;Regnskab
+202042042;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay (BEAS);79000000;XG-0000005094-00001;;Udbyhøj Færge
+202000468;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay (MSS Professional);95941203;;;Randers Bibliotek
+202032548;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay (OnlinePOS);72000000;XG-0000004526-00048;;Asferg/Terneparken
+202048896;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay (OnlinePOS);72000000;XG-0000004526-00028;;Bakkegården
+202024966;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay (OnlinePOS);72000000;XG-0000004526-00046;;Borupvænget
+202021986;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay (OnlinePOS);72000000;XG-0000004526-00030;;Dronningborg
+202007920;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay (OnlinePOS);72000000;XG-0000004526-00035;;Huset Nyvang
+202009408;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay (OnlinePOS);72000000;XG-0000004526-00045;;Kildevang
+202049835;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay (OnlinePOS);72000000;XG-0000004526-00044;;Kollektivhuset 
+202019091;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay (OnlinePOS);72000000;XG-0000004526-00036;;Lindevænget
+202042120;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay (OnlinePOS);72000000;XG-0000004526-00033;;Møllevang
+202030244;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay (OnlinePOS);72000000;XG-0000004526-00037;;Nellemann
+202031462;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay (OnlinePOS);72000000;XG-0000004526-00038;;Svaleparken
+202032095;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay (OnlinePOS);72000000;XG-0000004526-00039;;Thors Bakke
+202044393;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay (OnlinePOS);72000000;XG-0000004526-00040;;Tirsdalen                                            
+202047104;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay (OnlinePOS);72000000;XG-0000004526-00041;;Vorup
+202000132;;VIPPS MOBILEPAY;Overførsel;Starter med;;;;Indtægter via MobilePay (OnlinePOS);72000000;XG-0000004526-00031;;Åbakken
+;OK parkering;;;Indeholder;;;;Indtægter via OK Parkering;79000000;XG-0000005096-00010;;Parkering
+;;Park4U;;Indeholder;;;;Indtægter via Park4U;79000000;XG-0000005096-00010;;Parkering
+;;Parkman;;Indeholder;;;;Indtægter via Parkman;79000000;XG-0000005096-00010;;Parkering
+;ParkOne;;;Indeholder;;;;Indtægter via ParkOne;79000000;XG-0000005096-00010;;Parkering
+;;ParkPark;;Indeholder;;;;Indtægter via ParkPark;79000000;XG-0000005096-00010;;Parkering
+_962_;;Pay4It;;Indeholder;;;;Indtægter via Pay4It;79000000;XG-0000002415-00038;;Grønhøjskolen
+Moms;;Værket;;Indeholder;;;;Moms Værket;95999010;;;
+;;Bolig- og planstyrelse;;Starter med;200000,00;;Lig med;Overførsel af tilskud;86000000;XG-0000000019-00002;;Borgerrådgiver
+;7225-0013;SOCIAL- OG BOLIGSTYRELSEN;;Indeholder;;;;Overførsel af tilskud;86000000;XG-0000002810-00001;;BS Økonomi
+;Unge i uddannelse;Region Midt;;Indeholder;;;;Overførsel af tilskud;79000000;XG-0000002833-00003;;BS Økonomi
+;11735-0006;SOCIAL- OG BOLIGSTYRELSEN;;Indeholder;;;;Overførsel af tilskud;86000000;XG-0000002907-00001;;BS Økonomi - Slettes medio 2027
+;Flere skal med;Styrelsen for arbejdsmarked;;Indeholder;;;;Overførsel af tilskud;86000000;XG-0000003906-00009;;SA Økonomi
+;11805-0011;SOCIAL- OG BOLIGSTYRELSEN;;Indeholder;;;;Overførsel af tilskud;86000000;XG-0000003969-00099;;SA Økonomi
+;MUSIKSKOLE;Slots- og kulturstyrelse;;Indeholder;;;;Overførsel af tilskud;86000000;XG-0000004089-00005;;SKO Økonomi
+;2367-0075;SOCIAL- OG BOLIGSTYRELSEN;;Indeholder;;;;Overførsel af tilskud;86000000;XG-0000004507-00131;;SKO Økonomi
+;KUREG;Slots- og kulturstyrelse;;Indeholder;;;;Overførsel af tilskud;86000000;XG-0000004083-00002;;Østjysk Vækstbånd
+;Østjysk vækstbånd;Slots- og kulturstyrelse;;Indeholder;;;;Overførsel af tilskud;86000000;XG-0000004187-00001;;Østjysk Vækstbånd
+56685;;;Leverandørservice;Indeholder;;;;Overførsel via Leverandørservice (Loomis);90100036;;;Borgerservice
+40010;;;Leverandørservice;Indeholder;;;;Overførsel via Leverandørservice (UDK);40000000;XG-0000000013-00001;;Borgerservice
+54879;;;Leverandørservice;Indeholder;;;;Overførsel via Leverandørservice (UDK);40000000;XG-0000000013-00002;;Borgerservice
+;;#LFM;;Indeholder;;;;Retur ;67300000;9900000800;;Elsebeth Morgensen vedr. spørgsmål
+;Kundenr: 34199620;;;Indeholder;;;;Retur fra skat vedr. RW;95910006;;;Lønkontoret - Susan
+Ekstra;;Open Experience;;Starter med;;;;Tekst fra bank;72000000;XG-0000005285-00006;;Affaldskontoret
+;;;Overførsel;Starter med;169,00;;Lig med;Tekst fra bank;79000000;XG-0000003025-00001;;Beboerklagenævnet
+;;;Bgs;Starter med;169,00;;Lig med;Tekst fra bank;79000000;XG-0000003025-00001;;Beboerklagenævnet
+- gælds;;Skat;;Indeholder;;;;Tekst fra bank;91407020;;;Betalingskontoret
+- skat;;Skat;;Indeholder;;;;Tekst fra bank;91407020;;;Betalingskontoret
+00209082-00000;;;;Indeholder;;;;Tekst fra bank;91407007;;;Betalingskontoret
+30000000;;VIPPS MOBILEPAY;;Starter med;;;;Tekst fra bank;91407041;;;Betalingskontoret
+40000000;;VIPPS MOBILEPAY;;Starter med;;;;Tekst fra bank;91407041;;;Betalingskontoret
+Gældst;;Skat;;Indeholder;;;;Tekst fra bank;91407020;;;Betalingskontoret
+N27026;;Nets;;Starter med;;;;Tekst fra bank;95950005;;;Betalingskontoret
+N36549;;Nets;;Starter med;;;;Tekst fra bank;91407040;;;Betalingskontoret
+N42250;;Nets;;Starter med;;;;Tekst fra bank;79000000;XG-0000003057-00002;;Borgerservice
+N54102;;Nets;;Starter med;;;;Tekst fra bank;95930015;;;Borgerservice
+udbetaling af mønt;;;;Indeholder;;;;Tekst fra bank;90100001;;;Borgerservice
+;;Biometric Solutions;;Starter med;;;;Tekst fra bank;72000000;XG-0000003057-00003;;Borgerservice
+5078318;;;;Indeholder;;;;Tekst fra bank;79000000;XG-0000002667-00008;;Center for Undervisning og Læring
+8189094;;;;Indeholder;;;;Tekst fra bank;79000000;XG-0000002667-00008;;Center for Undervisning og Læring
+Elån;;;;Starter med;;;;Tekst fra bank;92500201;;;CPR-bogføring
+E-lån;;;;Starter med;;;;Tekst fra bank;92500201;;;CPR-bogføring
+;;Danica Pension;;Starter med;1251,70;;Lig med;Tekst fra bank;95914002;;;CPR-bogføring
+;;Danica Pension;;Starter med;1714,30;;Lig med;Tekst fra bank;95914002;;;CPR-bogføring
+Løn;;Randers Kunstmuseum;;Indeholder;;;;Tekst fra bank;95911000;;;Elsebeth Morgensen vedr. spørgsmål
+;;;Info-overførsel;Starter med;;;;Tekst fra bank;95912001;;;Elsebeth Morgensen vedr. spørgsmål
+;;Vindstød;;Indeholder;;;;Tekst fra bank;72000000;XG-0000005311-00001;;Energi og Projektering - Anders Weng Mikkelsen
+;;;Overførsel;Starter med;361,00;;Lig med;Tekst fra bank;79000000;XG-0000003025-00001;;Huslejeklagenævnet
+;;;Bgs;Starter med;361,00;;Lig med;Tekst fra bank;79000000;XG-0000003025-00001;;Huslejeklagenævnet
+;;;Overførsel;Starter med;602,00;;Lig med;Tekst fra bank;79000000;XG-0000003025-00001;;Huslejeklagenævnet
+;;;Bgs;Starter med;602,00;;Lig med;Tekst fra bank;79000000;XG-0000003025-00001;;Huslejeklagenævnet
+;;Too good to go;;Starter med;;;;Tekst fra bank;72000000;XG-0000005228-00003;;Kantinen
+FAKTURA D0100;;;;Starter med;;;;Tekst fra bank;40000000;XG-0000000006-00007;;Koncern
+;;;Rente af obligationer;Indeholder;;;;Tekst fra bank;60800001;;;Koncern
+;;;OTC-betaling;Indeholder;;;;Tekst fra bank;67041004;;;Koncern
+;;;Udtrukne obligationer;Indeholder;;;;Tekst fra bank;90800100;;;Koncern
+;;;Salg af obligationer;Indeholder;;;;Tekst fra bank;90800100;;;Koncern
+;;;Køb af obligationer;Indeholder;;;;Tekst fra bank;90800100;;;Koncern
+;;;Pbs overførsel;Indeholder;;;;Tekst fra bank;40000000;XG-0000000006-00007;;Koncern
+;;;Afkast overført til;Starter med;;;;Tekst fra bank;60500000;;;Koncern - Fejlagtig nettoafregning på administrationskonti
+KON konto;;;Debetrente;Indeholder;;;;Tekst fra bank;60500000;;;Koncern - nettoafregning af renter
+KON konto;;;Kreditrente;Indeholder;;;;Tekst fra bank;60500000;;;Koncern - nettoafregning af renter
+;;;Fonds;Starter med;999999,00;;Større end;Tekst fra bank;95000100;;;Koncern - REPO - Saldotømmes til 65000000
+;;;Fonds;Starter med;999999,00;;Mindre end;Tekst fra bank;90800100;;;Koncern - Salg ifm. REPO
+3490120660;;;Debetrente;Indeholder;;;;Tekst fra bank;90800101;;;Koncern - Undtagelse for renteudligning
+3490120660;;;Kreditrente;Indeholder;;;;Tekst fra bank;90800101;;;Koncern - Undtagelse for renteudligning
+NKS-KP;;;;Indeholder;;;;Tekst fra bank;95931700;;;KP
+APOP;;;Udenlandsk overførsel;Indeholder;;;;Tekst fra bank;95931701;;;KY
+HTFP;;;Udenlandsk overførsel;Indeholder;;;;Tekst fra bank;95931701;;;KY
+NKS-KY;;;Cap;Indeholder;;;;Tekst fra bank;95931701;;;KY
+RESP;;;Udenlandsk overførsel;Indeholder;;;;Tekst fra bank;95931701;;;KY
+RG20938;;;;Starter med;;;;Tekst fra bank;95910014;;;Lønkontoret
+;BDP-;Udbetaling Danmark;;Indeholder;;;;Tekst fra bank;95914006;;;Lønkontoret - Barselsdagpenge
+tj;;Vandmiljø Randers;;Starter med;;;;Tekst fra bank;95911002;;;Lønkontoret - Elsebeth Morgensen
+;Løn;Verdo;;Indeholder;;;;Tekst fra bank;95990001;;;Lønkontoret - Elsebeth Morgensen
+;Pension;Verdo;;Indeholder;;;;Tekst fra bank;95990001;;;Lønkontoret - Elsebeth Morgensen
+;;Randers Havn;;Starter med;;;;Tekst fra bank;95911001;;;Lønkontoret - Elsebeth Morgensen
+;;Sampension;;Indeholder;999999,00;;Større end;Tekst fra bank;95914002;;;Lønkontoret - Elsebeth Morgensen
+;;Velliv;;Indeholder;378,63;;Lig med;Tekst fra bank;95914002;;;Lønkontoret - Elsebeth Morgensen
+;250473;Struer;;Indeholder;;;;Tekst fra bank;95941300;;;Museum Østjylland
+OY-;;;Overførsel;Starter med;;;;Tekst fra bank;79000000;XG-0000005086-00001;;Randers Flyveplads
+;OY-;;Overførsel;Starter med;;;;Tekst fra bank;79000000;XG-0000005086-00001;;Randers Flyveplads 
+9913008388;;;Udtrukne obligationer;Indeholder;;;;Tekst fra bank;94200011;;;Randers Kommunes kunstfond
+9913008388;;;Rente af obligationer;Indeholder;;;;Tekst fra bank;94600005;;;Randers Kommunes kunstfond
+6687210;;;;Indeholder;333,00;;Lig med;Tekst fra bank;40000000;XG-0000000006-00007;;Regnskab
+8152290;;;;Indeholder;333,00;;Lig med;Tekst fra bank;40000000;XG-0000000006-00007;;Regnskab
+Skattekontoen, kredi;;;;Starter med;;;;Tekst fra bank;95990036;;;Regnskab - Christian
+0019;;;Overførsel;Starter med;;;;Tekst fra bank;90520001;;;Regnskab - Saldotømning fra OBS
+Kommunalt træk;;Udbetaling Danmark;;Indeholder;;;;Tekst fra bank;95932008;;;SA Økonomi - Marianne Skovbo
+;Kundenr: 29759456;;;Indeholder;;;;Tekst fra bank;95931502;;;SA Økonomi - Marianne Skovbo
+;Kundenr: 29759464;;;Indeholder;;;;Tekst fra bank;95931011;;;SA Økonomi - Marianne Skovbo
+;Kundenr: 33485468;;;Indeholder;;;;Tekst fra bank;95931505;;;SA Økonomi - Marianne Skovbo
+20 MÅNEDSL;;;Cap;Indeholder;;;;Tekst fra bank;95910014;;;SD
+29 ACONTO;;;Cap;Indeholder;;;;Tekst fra bank;95910014;;;SD
+30 KAPITAL;;;Cap;Indeholder;;;;Tekst fra bank;95912000;;;SD
+31 KAPITAL;;;Cap;Indeholder;;;;Tekst fra bank;95912000;;;SD
+90 PENSION;;;Cap;Indeholder;;;;Tekst fra bank;95910014;;;SD
+;;Værket;;Starter med;500000,00;;Større end;Tekst fra bank;95941110;;;SKO Økonomi - Annette Skov Thomsen
+Dep;;;;Starter med;30000,00;;Lig med;Tekst fra bank;95950000;;;UMT Økonomi - Betina Bak
+;TBK 730;Udbetaling Danmark for bolig;;Indeholder;;;;Tekst fra bank;95990026;;;UMT Økonomi - Betina Bak
+Regres;;Forsikring;;Indeholder;;;;Tekst fra bank;79000000;XG-0000003333-00003;;Ydelseskontoret - Pia Fonnesbæk
+;KSD-;;;Indeholder;;;;Tekst fra bank;95914005;;;Ydelseskontoret - Susanne Svith
+Bidrag;;Udbetaling Danmark;;Indeholder;;;;Udbetaling Danmark Bidrag;95920000;;;BS Økonomi - Karen Aagard Nielsen
+;SDTN;Kvindecenter;;Indeholder;;;;Vedr. projekt SDTN Supervision;79000000;XG-0000002793-00004;;Randers Krisecenter - Judith Toft
+;;#RDB plastics GmbH;;Starter med;;;;;;;;Affaldskontoret - Tina Tran
+;;#Danish Agro;;Starter med;;;;;;;;Betalingskontoret
+#Afdrag indskudslån;;Udbetaling Danmark;;Indeholder;;;;;;;;Betalingskontoret - Afvent modpost på 9'eren
+"#Fleksjob ""FJ"" eller Skånejob";;#Kommune;;Indeholder;;;;;95914009;;;CPR-bogføring
+#Jobafklaring/ressourcerforløb;;#Kommune;;Indeholder;;;;;95914001;;;CPR-bogføring
+#MÅNEDSLØN;#retur;;;Indeholder;;;;;95910009;;;CPR-bogføring
+#Social pension;;#Udbetaling Danmark;;Indeholder;;;;;95932001;;;CPR-bogføring
+#HSK;;;Overførsel;Starter med;;;;;52000000;XG-0000003394-00044;;CPR-bogføring- social begravelse
+;;#Dansk retursys;;Starter med;;;;;79000000;XG-0000005229-00022;;F-52
+#Rejsekort;;#Midttrafik;;Indeholder;;;;;40000000;XG-0000002349-00001;;F-52 UNDTAGEN Randers Specialskole
+#SygeDP/DP retur;;;;Indeholder;;;;;95931013;;;Hvis ikke i indbetalinger@randers.dk, spørg sagsbehandler
+;;#Place2Book;;Starter med;;;;;95941300;;;Hvis ikke til MOE, kontakt Trine Mains
+;;Pay4It;;Indeholder;;;;;90540000;;;KMD Mikrobetalinger
+Tilskud til børnepas;;;Cap;Starter med;;;;;90540000;;;KMD Udbetaling 030
+Social pension;;;Cap;Starter med;;;;;90540000;;;KMD Udbetaling 039
+Boliglån;;;Cap;Starter med;;;;;90540000;;;KMD Udbetaling 042
+045P;;;Udenlandsk overførsel;Slutter med;;;;;90540000;;;KMD Udbetaling 045
+Sygedagpenge;;;Cap;Starter med;;;;;90540000;;;KMD Udbetaling 045
+Sygedagpenge lønref;;;Cap;Starter med;;;;;90540000;;;KMD Udbetaling 047
+KMF Begravelse;;;Cap;Starter med;;;;;90540000;;;KMD Udbetaling 057
+Leverandørudbetaling;;;Cap;Starter med;;;;;90540000;;;KMD Udbetaling 091
+Foreningstilskud;;;Cap;Starter med;;;;;90540000;;;KMD Udbetaling 102
+Rekvireret udb;;;Cap;Starter med;;;;;90540000;;;KMD Udbetaling 104
+Indfasningsstøtte;;;Cap;Starter med;;;;;90540000;;;KMD Udbetaling 210
+Tilbagebetalinger;;;Cap;Indeholder;;;;;90540000;;;KMD Udbetaling 250
+Mellemkommunal afreg;;;Cap;Starter med;;;;;90540000;;;KMD Udbetaling 339
+;;#diverse;Gebyr;Indeholder;;;;;40000000;XG-0000000006-00007;;Koncern
+6297 188 087;;;Afkast overført til;Indeholder;;;;;90540000;;;Koncern - Renteudligning som hovedregel
+;;;Afkast overført fra;Starter med;;;;;90540000;;;Koncern - Renteudligning som hovedregel
+;;;Overtræksrente;Starter med;;;;;90540000;;;Koncern - Renteudligning som hovedregel
+;;;Kreditrente;Indeholder;;;;;90540000;;;Koncern - Renteudligning som hovedregel
+;;;Debetrente;Indeholder;;;;;90540000;;;Koncern - Renteudligning som hovedregel
+;;#Comm2IG;;Indeholder;;;;;;;;Lars Bertelsen
+#Vaskeri Lindevænget;;;;Indeholder;;;;;79000000;XG-0000004514-00022;;Lindevænget - Marianne Dyrring Munck Basse
+#??????;;;;Indeholder;;;;;40000000;XG-0000000006-00020;;Regnskab - Bogføring halvårligt
+#Sikkerhedsstillelse;;;;Indeholder;;;;;79000000;XG-0000003323-00067;;SA Økonomi - Mail til Diana Knudsen + Helle Bade Larsen 
+;#Kundenr. 30114345;;;Indeholder;;;;;;;;SA Økonomi - Marianne Skovbo
+#Løntilskud;;#Kommune;;Indeholder;;;;;;;;SD-opslag
+#Plejevederlag/Plejeorlov;;;;Indeholder;;;;;10000000;;;SD-opslag
+;;#Boet efter;;Indeholder;;;;;;;;Skifteportalen
+#teaterref Scenit;;;;Starter med;;;;;86000000;XG-0000004075-00006;;SKO Økonomi - Annette Skov Thomsen
+#Fyrværkeri;;;;Indeholder;;;;;79000000;XG-0000004013-00002;;SKO Økonomi - Hanne Dahl Jakobsen
+;;#Skatteankestyrelsen;;Indeholder;;;;;;;;Spørg Bettina Bak, tjek j.nr.
+#Donation;;;;Indeholder;;;;;79100000;;;Spørg Ivar ift. moms
+#Bådplads;;;;Indeholder;;;;;79000000;XG-0000004025-00001;;Udbyhøj Lystbådehavn
+#Bådplads depositum;;;;Indeholder;;;;;40000000;XG-0000004025-00003;;Udbyhøj Lystbådehavn
+;;#Hjørnestenen;;Indeholder;;;;;95931400;;;UNDTAGELSE: Sygeref. til 95914005 (CPR-bogføring)
