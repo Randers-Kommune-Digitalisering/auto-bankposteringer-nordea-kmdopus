@@ -126,7 +126,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               }
           }
           if (!completeMatchBool) {
-              let text = transaction.narrative;
+              let text = transaction.transaction_id;
   
               generateErpPostings(transaction.account.statusAccount, transaction.account.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, '');
               transactionsWithNoMatch.push(transaction);
