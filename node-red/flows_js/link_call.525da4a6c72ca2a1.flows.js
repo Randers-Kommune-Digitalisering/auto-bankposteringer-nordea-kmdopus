@@ -1,7 +1,7 @@
 const Node = {
   "id": "525da4a6c72ca2a1",
   "type": "link call",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "g": "0bbde93deecce205",
   "name": "Fetch email configs",
   "links": [
@@ -9,8 +9,8 @@ const Node = {
   ],
   "linkType": "static",
   "timeout": "30",
-  "x": 115,
-  "y": 1040,
+  "x": 395,
+  "y": 740,
   "wires": [
     [
       "5f833c0354a371db"

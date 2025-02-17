@@ -4,9 +4,11 @@ const Node = {
   "z": "92c28da6a66fdcb3",
   "g": "02fc47417527e1d2",
   "name": "link in load runHistory to env",
-  "links": [],
-  "x": 65,
-  "y": 1040,
+  "links": [
+    "9eefcaa37540b844"
+  ],
+  "x": 705,
+  "y": 360,
   "wires": [
     [
       "6075313023ba918d"

@@ -7,7 +7,9 @@ const Node = {
   "scope": [
     "881f5952a0e8c6f6",
     "9429a96fcb8c4459",
-    "a1a073eaab9509de"
+    "a1a073eaab9509de",
+    "58af0f1755275c01",
+    "c97cf3aed444eb14"
   ],
   "uncaught": false,
   "x": 325,

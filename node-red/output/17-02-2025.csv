@@ -1,0 +1,10 @@
+Artskonto;Omkostningssted;PSP-element;Profitcenter;Ordre;Debet/kredit;Beløb;Næste agent;Tekst;Betalingsart;Påligningsår;Betalingsmodtagernr.;Betalingsmodtagernr.kode;Ydelsesmodtagernr.;Ydelsesmodtagernr.kode;Ydelsesperiode fra;Ydelsesperiode til;Oplysningspligtnr.;Oplysningspligtmodtagernr.kode;Oplysningspligtkode;Netværk;Operation;Mængde;Mængdeenhed;Referencenøgle
+95991009;;;;;Kredit;83,73;;Bgs 110281-2197 Poul Chr           istensen;;;;;;;;;;;;;;;;
+90541000;;;;;Debet;83,73;;Bgs 110281-2197 Poul Chr           istensen;;;;;;;;;;;;;;;;
+95991009;;;;;Kredit;746,68;;FP 50071102;;;;;;;;;;;;;;;;
+90541000;;;;;Debet;746,68;;FP 50071102;;;;;;;;;;;;;;;;
+95991009;;;;;Kredit;3257,95;;FP50072270;;;;;;;;;;;;;;;;
+90541000;;;;;Debet;3257,95;;FP50072270;;;;;;;;;;;;;;;;
+95991009;;;;;Kredit;10,2;;FP50051517;;;;;;;;;;;;;;;;
+90541000;;;;;Debet;10,2;;FP50051517;;;;;;;;;;;;;;;;
+

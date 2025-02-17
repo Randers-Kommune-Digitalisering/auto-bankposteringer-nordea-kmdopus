@@ -10,8 +10,8 @@ const Node = {
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 150,
-  "y": 880,
+  "x": 790,
+  "y": 200,
   "wires": [
     [
       "253d621bf23f1aaf"
@@ -23,7 +23,7 @@ const Node = {
 Node.template = `
 CREATE TABLE IF NOT EXISTS runHistory (
     uid NVARCHAR(32) PRIMARY KEY,
-    dato DATE,
+    originDate DATE,
     statusCode INT,
     ts timestamp
 )

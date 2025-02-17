@@ -4,11 +4,10 @@ const Node = {
   "z": "431f85f122b4636d",
   "name": "link in config banking data provider",
   "links": [
-    "96d06a03d8bc0b57",
-    "bd7ebd08c8b487df"
+    "96d06a03d8bc0b57"
   ],
   "x": 25,
-  "y": 680,
+  "y": 720,
   "wires": [
     [
       "d5a67555f8a8e839"

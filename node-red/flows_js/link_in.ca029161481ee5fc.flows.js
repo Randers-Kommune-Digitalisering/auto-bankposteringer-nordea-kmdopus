@@ -5,7 +5,7 @@ const Node = {
   "name": "link in config ftp EG",
   "links": [],
   "x": 25,
-  "y": 580,
+  "y": 620,
   "wires": [
     [
       "522dea9db88ba22b"

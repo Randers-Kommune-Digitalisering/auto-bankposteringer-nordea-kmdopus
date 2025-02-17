@@ -1,14 +1,15 @@
 const Node = {
   "id": "092bf5b87feac09b",
   "type": "link in",
-  "z": "cc3305da0e5c71f6",
+  "z": "8c354b8d2ca56b7b",
   "g": "e5ed88aeaeb05808",
   "name": "link in Write JSON",
   "links": [
-    "b1772c1688248e29"
+    "b1772c1688248e29",
+    "1ceffc0961d2d72c"
   ],
-  "x": 65,
-  "y": 60,
+  "x": 55,
+  "y": 1240,
   "wires": [
     [
       "0ffcf770d37caf8e"

@@ -20,8 +20,8 @@ const Node = {
       "module": "xml2js"
     }
   ],
-  "x": 465,
-  "y": 180,
+  "x": 345,
+  "y": 300,
   "wires": [
     [
       "ae9ec673824528b2"
