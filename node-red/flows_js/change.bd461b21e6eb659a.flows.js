@@ -1,7 +1,7 @@
 const Node = {
   "id": "bd461b21e6eb659a",
   "type": "change",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "g": "9b2beb35be5bbb31",
   "name": "Delete vars",
   "rules": [
@@ -16,8 +16,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 135,
-  "y": 240,
+  "x": 385,
+  "y": 460,
   "wires": [
     [
       "2d11b50a914e60c1"

@@ -1,9 +1,9 @@
 const Node = {
   "id": "1d2ecef5fc3ef02f",
   "type": "switch",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "g": "ee31b70d7b508c0d",
-  "name": "",
+  "name": "Bank provider",
   "property": "configs.banking.provider",
   "propertyType": "global",
   "rules": [
@@ -16,11 +16,11 @@ const Node = {
   "checkall": "true",
   "repair": false,
   "outputs": 1,
-  "x": 135,
-  "y": 80,
+  "x": 125,
+  "y": 480,
   "wires": [
     [
-      "8d42910b87fdded9"
+      "90ef9573a5cdf3d6"
     ]
   ],
   "outputLabels": [

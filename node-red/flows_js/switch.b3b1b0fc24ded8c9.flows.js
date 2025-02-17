@@ -1,7 +1,7 @@
 const Node = {
   "id": "b3b1b0fc24ded8c9",
   "type": "switch",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "g": "dc3f1bccec7ebeb1",
   "name": "All accounts requested?",
   "property": "accountStep",
@@ -19,14 +19,14 @@ const Node = {
   "checkall": "false",
   "repair": false,
   "outputs": 2,
-  "x": 165,
-  "y": 780,
+  "x": 445,
+  "y": 620,
   "wires": [
     [
       "167217baaa7d871c"
     ],
     [
-      "2efe55213bd0cbc7"
+      "2fa6fed0e668bd79"
     ]
   ],
   "outputLabels": [

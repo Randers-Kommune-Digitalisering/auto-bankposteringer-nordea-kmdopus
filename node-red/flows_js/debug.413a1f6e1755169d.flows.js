@@ -1,7 +1,7 @@
 const Node = {
   "id": "413a1f6e1755169d",
   "type": "debug",
-  "z": "cc3305da0e5c71f6",
+  "z": "8c354b8d2ca56b7b",
   "g": "ae22b3761b2b50b0",
   "name": "Rules export error",
   "active": true,
@@ -12,8 +12,8 @@ const Node = {
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 375,
-  "y": 60,
+  "x": 365,
+  "y": 1240,
   "wires": [],
   "l": false
 }

@@ -10,8 +10,8 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 165,
-  "y": 640,
+  "x": 155,
+  "y": 80,
   "wires": [
     [
       "c49c5be7601cebc5",
@@ -24,9 +24,9 @@ const Node = {
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let erpPostings = [];
-  let transactionsWithNoMatch = [];
+  let transactionsWithNoMatch = global.get("transactionsWithNoMatch") ? global.get("transactionsWithNoMatch") : [];
   const transactions = global.get("transactions").reverse();
-  const transactionParameters = flow.get("transactionParameters");   // Has to match ruleParameters
+  const transactionParameters = flow.get("transactionParameters");   // Has to match ruleParameters length
   const accountingRules = global.get("accountingRules");
   const ruleParameters = Object.keys(accountingRules[0]).slice(0, 4);
   const erpFileHeaders = flow.get("erpFileHeaders").split(", ");
@@ -85,60 +85,66 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   }
   
   function processPosting(transaction, rules) {
-      let completeMatchBool = false;
-  
       transaction.amount = parseFloat(transaction.amount);
       let absoulute_amount = Math.abs(transaction.amount);
       let cleanedAmount = String(transaction.amount).replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
       let statusDebetOrCredit = transaction.amount > 0 ? "Debet" : "Kredit";
       let landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet";
+      
+      if (transaction.account.manual) {
+          generateErpPostings(transaction.account.statusAccount, transaction.account.Artskonto, statusDebetOrCredit, landingDebetOrCredit, transaction.account.text, cleanedAmount, transaction.account.PSP);
+      } else {
+          let completeMatchBool = false;
   
-      for (let rule of rules) {      
-          let sumOfParametersMatched = 0;
-          let psp = rule.PSP ? rule.PSP : '';
+          for (let rule of rules) {      
+              let sumOfParametersMatched = 0;
+              let psp = rule.PSP ? rule.PSP : '';
   
-          if (completeMatchBool) {
-              continue
-          } else {
-              for (let parameterIndex = 0; parameterIndex < transactionParameters.length; parameterIndex++) {
-                  let searchValue = rule[ruleParameters[parameterIndex]] ? rule[ruleParameters[parameterIndex]].toLowerCase() : null;
+              if (completeMatchBool) {
+                  continue
+              } else {
+                  for (let parameterIndex = 0; parameterIndex < transactionParameters.length; parameterIndex++) {
+                      let searchValue = rule[ruleParameters[parameterIndex]] ? rule[ruleParameters[parameterIndex]].toLowerCase() : null;
   
-                  if (searchValue && rule.ActiveBool && matchParameter(transaction, searchValue, transactionParameters[parameterIndex])) {
+                      if (searchValue && rule.ActiveBool && matchParameter(transaction, searchValue, transactionParameters[parameterIndex])) {
   
-                      sumOfParametersMatched += 1;
+                          sumOfParametersMatched += 1;
+                      }
                   }
-              }
   
-              let matchedAllParametersBool = sumOfParametersMatched === sumOfParametersGiven(rule);
-              let matchedAmountBool = matchAmount(absoulute_amount, rule.Operator, rule.Beløb1, rule.Beløb2)
+                  let matchedAllParametersBool = sumOfParametersMatched === sumOfParametersGiven(rule);
+                  let matchedAmountBool = matchAmount(absoulute_amount, rule.Operator, rule.Beløb1, rule.Beløb2)
   
-              if (matchedAllParametersBool && matchedAmountBool) {
-                  if (!rule.ExceptionBool) {   // Don't write ERP postings if rule is an exception, but still count as match
-                      let text = textGeneration(rule.Posteringstekst, transaction.message, transaction.narrative, transaction.counterparty_name);
-                      generateErpPostings(transaction.account.statusAccount, rule.Artskonto, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, psp);
+                  if (matchedAllParametersBool && matchedAmountBool) {
+                      if (!rule.ExceptionBool) {   // Don't write ERP postings if rule is an exception, but still count as match
+                          let text = textGeneration(rule.Posteringstekst, transaction.message, transaction.narrative, transaction.counterparty_name);
+                          generateErpPostings(transaction.account.statusAccount, rule.Artskonto, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, psp);
+                      }
+                      completeMatchBool = true;
+                      rule.LastUsed = date;
                   }
-                  completeMatchBool = true;
-                  rule.LastUsed = date;
               }
           }
-      }
-      if (!completeMatchBool) {
-          let text = transaction.narrative;
+          if (!completeMatchBool) {
+              let text = transaction.narrative;
   
-          generateErpPostings(transaction.account.statusAccount, transaction.account.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, '');
-          transactionsWithNoMatch.push(transaction);
-      }
+              generateErpPostings(transaction.account.statusAccount, transaction.account.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, '');
+              transactionsWithNoMatch.push(transaction);
+          }
+  
+          global.set("transactionsWithNoMatch", transactionsWithNoMatch);
+  
+      }   
+      
   }
   
   transactions.forEach(transaction => {
       processPosting(transaction, accountingRules);
   });
   
-  global.set("transactionsWithNoMatch", transactionsWithNoMatch);
-  
   msg.payload = erpPostings;
   msg.columns = flow.get("erpFileHeaders");
-  msg.filename = "/data/output/" + global.get("dateOfOrigin") + ".csv";
+  msg.filename = "/data/output/" + date + ".csv";
   
   return msg;
 }

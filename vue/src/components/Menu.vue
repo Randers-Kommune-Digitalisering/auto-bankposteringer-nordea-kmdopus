@@ -34,7 +34,11 @@
         {
             title: "Kørselshistorik",
             url: "/historik",
-        }
+        },
+        {
+            title: "Åbne posteringer",
+            url: "/postings",
+        },
     ])
 
     const normalizeUrl = (url) => url.replace(/\/+$/, '')  // Removes trailing slashes

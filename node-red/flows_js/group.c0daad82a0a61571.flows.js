@@ -1,7 +1,7 @@
 const Node = {
   "id": "c0daad82a0a61571",
   "type": "group",
-  "z": "32cf2bec698ca424",
+  "z": "8c354b8d2ca56b7b",
   "name": "Status",
   "style": {
     "stroke": "none",
@@ -16,7 +16,9 @@ const Node = {
     "c85ba2f69453a4f2"
   ],
   "x": 14,
-  "y": 19
+  "y": 899,
+  "w": 182,
+  "h": 82
 }
 
 module.exports = Node;

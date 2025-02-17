@@ -9,7 +9,7 @@ const Node = {
   "upload": false,
   "swaggerDoc": "",
   "x": 130,
-  "y": 160,
+  "y": 60,
   "wires": [
     [
       "c299a1f94979dbb1"

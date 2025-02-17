@@ -1,7 +1,7 @@
 const Node = {
   "id": "0bbde93deecce205",
   "type": "group",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "name": "Ping admin",
   "style": {
     "stroke": "none",
@@ -16,8 +16,8 @@ const Node = {
     "69f4f3edea4cbba4",
     "525da4a6c72ca2a1"
   ],
-  "x": 24,
-  "y": 999,
+  "x": 304,
+  "y": 699,
   "w": 232,
   "h": 82
 }

@@ -1,7 +1,7 @@
 const Node = {
   "id": "fb8258ed932b96d7",
   "type": "change",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "g": "9b2beb35be5bbb31",
   "name": "",
   "rules": [
@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "date",
       "pt": "global",
-      "to": "dato",
+      "to": "originDate",
       "tot": "msg"
     },
     {
@@ -25,12 +25,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 185,
-  "y": 200,
+  "x": 435,
+  "y": 500,
   "wires": [
     [
-      "19a9e954c5d433ab",
-      "8553c6ad958744e2"
+      "497a8a8d75494096"
     ]
   ],
   "l": false

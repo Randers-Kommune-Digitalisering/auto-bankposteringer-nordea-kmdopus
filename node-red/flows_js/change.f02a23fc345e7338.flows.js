@@ -1,7 +1,7 @@
 const Node = {
   "id": "f02a23fc345e7338",
   "type": "change",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "g": "af45fb910a71600f",
   "name": "minus 5 minutes",
   "rules": [
@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "accessDuration",
       "pt": "global",
-      "to": "$globalContext(\"accessDuration\") - 300",
+      "to": "$globalContext(\"accessDuration\") - 86400",
       "tot": "jsonata"
     }
   ],
@@ -18,10 +18,12 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 215,
-  "y": 900,
+  "x": 205,
+  "y": 740,
   "wires": [
-    []
+    [
+      "3017b668d2a14219"
+    ]
   ],
   "l": false
 }

@@ -1,7 +1,7 @@
 const Node = {
   "id": "7bc90509ca21d4f1",
   "type": "e-mail",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "g": "0bbde93deecce205",
   "server": "smtp.randers.dk",
   "port": "25",
@@ -12,8 +12,8 @@ const Node = {
   "tls": false,
   "name": "",
   "dname": "Send email",
-  "x": 215,
-  "y": 1040,
+  "x": 495,
+  "y": 740,
   "wires": [],
   "l": false
 }

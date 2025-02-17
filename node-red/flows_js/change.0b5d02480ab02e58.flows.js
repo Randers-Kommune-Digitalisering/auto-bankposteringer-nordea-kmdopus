@@ -1,7 +1,7 @@
 const Node = {
   "id": "0b5d02480ab02e58",
   "type": "change",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "g": "ea1bf65dfedc00a0",
   "name": "Set uid to origin uid",
   "rules": [
@@ -18,8 +18,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 215,
-  "y": 1140,
+  "x": 785,
+  "y": 600,
   "wires": [
     [
       "c40228fc31a4eb75"

@@ -1,7 +1,7 @@
 const Node = {
   "id": "ee31b70d7b508c0d",
   "type": "group",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "name": "Initiate auth",
   "style": {
     "stroke": "none",
@@ -12,13 +12,14 @@ const Node = {
   },
   "nodes": [
     "43f036ca5c91d652",
-    "8d42910b87fdded9",
+    "8af7ed2082372bf7",
     "1d2ecef5fc3ef02f",
-    "8af7ed2082372bf7"
+    "5826c318896a3d2a",
+    "90ef9573a5cdf3d6"
   ],
-  "x": 24,
-  "y": 19,
-  "w": 202,
+  "x": 14,
+  "y": 419,
+  "w": 252,
   "h": 122
 }
 

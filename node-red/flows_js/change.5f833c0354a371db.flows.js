@@ -1,7 +1,7 @@
 const Node = {
   "id": "5f833c0354a371db",
   "type": "change",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "g": "0bbde93deecce205",
   "name": "Skriv mail",
   "rules": [
@@ -25,8 +25,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 165,
-  "y": 1040,
+  "x": 445,
+  "y": 740,
   "wires": [
     [
       "7bc90509ca21d4f1"

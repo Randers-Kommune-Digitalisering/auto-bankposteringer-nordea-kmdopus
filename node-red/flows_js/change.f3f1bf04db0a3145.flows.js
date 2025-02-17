@@ -7,9 +7,9 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "dato",
+      "p": "originDate",
       "pt": "msg",
-      "to": "payload[0].dato",
+      "to": "payload[0].originDate",
       "tot": "msg"
     },
     {
@@ -25,8 +25,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 305,
-  "y": 1000,
+  "x": 945,
+  "y": 320,
   "wires": [
     [
       "459e7b1dcd1a5b28",
