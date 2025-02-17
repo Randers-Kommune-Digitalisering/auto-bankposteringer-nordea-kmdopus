@@ -10,8 +10,8 @@ const Node = {
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 150,
-  "y": 920,
+  "x": 790,
+  "y": 240,
   "wires": [
     [
       "015d66cd112be473"
@@ -21,7 +21,7 @@ const Node = {
 }
 
 Node.template = `
-INSERT INTO runHistory (uid, dato, statusCode) VALUES ({{uid}}, '{{dato}}', {{statusCode}})
+INSERT INTO runHistory (uid, originDate, statusCode) VALUES ({{uid}}, {{originDate}}, {{statusCode}})
 `
 
 module.exports = Node;

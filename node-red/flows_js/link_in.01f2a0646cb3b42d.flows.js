@@ -5,7 +5,9 @@ const Node = {
   "g": "be3c4fb5b3ea916b",
   "name": "link in first transaction request",
   "links": [
-    "19a9e954c5d433ab"
+    "19a9e954c5d433ab",
+    "d6cfde4862253f89",
+    "a08015d04ee5f1fd"
   ],
   "x": 425,
   "y": 360,

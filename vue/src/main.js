@@ -15,6 +15,7 @@ import RetKonteringsregel from './views/RetKonteringsregel.vue'
 import Filer from './views/Filer.vue'
 import Stamdata from './views/Stamdata.vue'
 import Historik from './views/Historik.vue'
+import Posteringer from './views/Posteringer.vue'
 
 // Opsætning af URL routing
 
@@ -55,6 +56,11 @@ const router = createRouter({
             path: '/historik', 
             name: "Kørselshistorik",
             component: Historik
+        },
+        {
+            path: '/postings', 
+            name: "Åbne posteringer",
+            component: Posteringer
         },
         {
             path: '/vue', 

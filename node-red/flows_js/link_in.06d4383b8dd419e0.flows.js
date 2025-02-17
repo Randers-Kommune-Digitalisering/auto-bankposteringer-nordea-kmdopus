@@ -5,8 +5,8 @@ const Node = {
   "g": "02fc47417527e1d2",
   "name": "link in select runHistory entry",
   "links": [],
-  "x": 65,
-  "y": 1000,
+  "x": 705,
+  "y": 320,
   "wires": [
     [
       "3ca099fa3448f505"

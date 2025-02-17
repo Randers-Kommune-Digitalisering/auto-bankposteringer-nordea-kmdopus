@@ -1,9 +1,9 @@
 const Node = {
   "id": "2d11b50a914e60c1",
   "type": "function",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "g": "9b2beb35be5bbb31",
-  "name": "set global vars",
+  "name": "set banking date",
   "func": "",
   "outputs": 1,
   "noerr": 0,
@@ -15,12 +15,11 @@ const Node = {
       "module": "dayjs"
     }
   ],
-  "x": 185,
-  "y": 240,
+  "x": 435,
+  "y": 460,
   "wires": [
     [
-      "8553c6ad958744e2",
-      "19a9e954c5d433ab"
+      "497a8a8d75494096"
     ]
   ],
   "icon": "font-awesome/fa-cog",
@@ -47,9 +46,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   
   // Set global variables
   global.set("date", findDate());
-  global.set("dateOfOrigin", dayjs().format('YYYYMMDD'));
-  global.set("timeOfOrigin", dayjs().format('HHmmss'));
-  global.set("simpleDate", dayjs().format('DD-MM-YYYY'));
   
   return msg;
 }

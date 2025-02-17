@@ -9,8 +9,8 @@ const Node = {
   "filename": "",
   "localFilename": "",
   "name": "",
-  "x": 715,
-  "y": 200,
+  "x": 595,
+  "y": 320,
   "wires": [
     [
       "664e50a3d32113ac"

@@ -1,7 +1,7 @@
 const Node = {
   "id": "d9447d0752f06d96",
   "type": "function",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "g": "9f0acbcfa0581c4a",
   "name": "Merge pages and add account",
   "func": "",
@@ -10,8 +10,8 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 115,
-  "y": 640,
+  "x": 105,
+  "y": 620,
   "wires": [
     [
       "467fddf2a063a289"

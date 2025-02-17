@@ -5,7 +5,7 @@ const Node = {
   "name": "link in config ftp fujitsu",
   "links": [],
   "x": 25,
-  "y": 540,
+  "y": 580,
   "wires": [
     [
       "1e059336af1ea040"

@@ -2,7 +2,7 @@ const Node = {
   "id": "202a6b173abfc606",
   "type": "group",
   "z": "ee0cf4ce372e2d36",
-  "name": "Matching script - KMD",
+  "name": "KMD matching script",
   "style": {
     "stroke": "none",
     "fill": "#e3f3d3",
@@ -17,8 +17,8 @@ const Node = {
     "5eacaf9ba681643d",
     "a3d89dc03536f2fb"
   ],
-  "x": 24,
-  "y": 579,
+  "x": 14,
+  "y": 19,
   "w": 232,
   "h": 122
 }
