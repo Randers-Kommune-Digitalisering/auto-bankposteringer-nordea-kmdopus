@@ -5,7 +5,7 @@ const Node = {
   "name": "link in config email",
   "links": [],
   "x": 25,
-  "y": 860,
+  "y": 820,
   "wires": [
     [
       "f153f35a9ec08408"

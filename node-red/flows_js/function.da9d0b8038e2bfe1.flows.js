@@ -45,6 +45,22 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   }
   
   function matchAmount(transactionAmount, amountOperator, ruleAmount1, ruleAmount2) {
+      switch (ruleAmount1) {
+          case null:
+              break;
+          default:
+              ruleAmount1 = parseFloat(ruleAmount1.replace(/\./g, '').replace(',', '.'));
+              break;
+      }
+  
+      switch (ruleAmount2) {
+          case null:
+              break;
+          default:
+              ruleAmount2 = parseFloat(ruleAmount2.replace(/\./g, '').replace(',', '.'));
+              break;
+      }
+      
       switch (amountOperator) {
           case '><':
               return transactionAmount >= ruleAmount1 && transactionAmount <= ruleAmount2;
@@ -129,7 +145,11 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               let text = transaction.transaction_id;
   
               generateErpPostings(transaction.account.statusAccount, transaction.account.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, '');
-              transactionsWithNoMatch.push(transaction);
+              
+              if (transaction.account.bankAccountName != "Debitorkonto") {
+                  transaction.amount = transaction.amount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                  transactionsWithNoMatch.push(transaction);
+              }
           }
   
           global.set("transactionsWithNoMatch", transactionsWithNoMatch);
