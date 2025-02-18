@@ -11,7 +11,7 @@ const Node = {
   "template": "",
   "output": "str",
   "x": 200,
-  "y": 400,
+  "y": 360,
   "wires": [
     []
   ],
@@ -29,8 +29,8 @@ CREATE TABLE IF NOT EXISTS accountingRules (
     Advisliste NVARCHAR(255) NULL,
     Afsender NVARCHAR(255) NULL,
     Posteringstype NVARCHAR(255) NULL,
-    Beløb1 DECIMAL(18,2) NULL,
-    Beløb2 DECIMAL(18,2) NULL,
+    Beløb1 NVARCHAR(20) NULL,
+    Beløb2 NVARCHAR(20) NULL,
     Operator NVARCHAR(2) NULL,
     Posteringstekst NVARCHAR(255) NULL,
     Artskonto NVARCHAR(50) NULL,

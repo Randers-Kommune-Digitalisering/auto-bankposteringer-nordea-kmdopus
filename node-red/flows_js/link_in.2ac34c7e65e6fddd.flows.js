@@ -5,7 +5,6 @@ const Node = {
   "g": "ef673a2e295a52ea",
   "name": "link in insert all rules to db",
   "links": [
-    "23d45fce19d2e18b",
     "48ce31279c408079",
     "5eacaf9ba681643d"
   ],

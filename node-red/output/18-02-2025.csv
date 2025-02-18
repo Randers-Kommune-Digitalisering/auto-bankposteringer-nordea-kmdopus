@@ -1,0 +1,26 @@
+Artskonto;Omkostningssted;PSP-element;Profitcenter;Ordre;Debet/kredit;Beløb;Næste agent;Tekst;Betalingsart;Påligningsår;Betalingsmodtagernr.;Betalingsmodtagernr.kode;Ydelsesmodtagernr.;Ydelsesmodtagernr.kode;Ydelsesperiode fra;Ydelsesperiode til;Oplysningspligtnr.;Oplysningspligtmodtagernr.kode;Oplysningspligtkode;Netværk;Operation;Mængde;Mængdeenhed;Referencenøgle
+95991009;;;;;Kredit;61,95;;H90356153150000000426;;;;;;;;;;;;;;;;
+90541000;;;;;Debet;61,95;;H90356153150000000426;;;;;;;;;;;;;;;;
+95991009;;;;;Kredit;8604,54;;H90356153150000000425;;;;;;;;;;;;;;;;
+90541000;;;;;Debet;8604,54;;H90356153150000000425;;;;;;;;;;;;;;;;
+95991009;;;;;Kredit;1589,56;;H90356153150000000424;;;;;;;;;;;;;;;;
+90541000;;;;;Debet;1589,56;;H90356153150000000424;;;;;;;;;;;;;;;;
+95990009;;;;;Kredit;503,5;;H59087649880000922148;;;;;;;;;;;;;;;;
+90540000;;;;;Debet;503,5;;H59087649880000922148;;;;;;;;;;;;;;;;
+95990009;;;;;Debet;4;;H59087649880000922147;;;;;;;;;;;;;;;;
+90540000;;;;;Kredit;4;;H59087649880000922147;;;;;;;;;;;;;;;;
+95990009;;;;;Debet;47465,61;;H59087649880000922146;;;;;;;;;;;;;;;;
+90540000;;;;;Kredit;47465,61;;H59087649880000922146;;;;;;;;;;;;;;;;
+95990009;;;;;Kredit;2972;;H59087649880000922145;;;;;;;;;;;;;;;;
+90540000;;;;;Debet;2972;;H59087649880000922145;;;;;;;;;;;;;;;;
+67041004;;;;;Kredit;71801,4;;Otc-betaling 2547552/4791830 NTRF;;;;;;;;;;;;;;;;
+90540000;;;;;Debet;71801,4;;Otc-betaling 2547552/4791830 NTRF;;;;;;;;;;;;;;;;
+72000000;;;;;Kredit;153;;Indtægter via betalingskort;;;;;;;;;;;;;;;;
+90540000;;;;;Debet;153;;Indtægter via betalingskort;;;;;;;;;;;;;;;;
+72000000;;;;;Kredit;30;;Indtægter via betalingskort;;;;;;;;;;;;;;;;
+90540000;;;;;Debet;30;;Indtægter via betalingskort;;;;;;;;;;;;;;;;
+79000000;;;;;Debet;25;;Indtægter via betalingskort;;;;;;;;;;;;;;;;
+90540000;;;;;Kredit;25;;Indtægter via betalingskort;;;;;;;;;;;;;;;;
+79000000;;;;;Kredit;200;;Indtægter via betalingskort;;;;;;;;;;;;;;;;
+90540000;;;;;Debet;200;;Indtægter via betalingskort;;;;;;;;;;;;;;;;
+

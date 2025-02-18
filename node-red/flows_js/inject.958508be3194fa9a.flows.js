@@ -7,7 +7,7 @@ const Node = {
   "props": [],
   "repeat": "",
   "crontab": "",
-  "once": true,
+  "once": false,
   "onceDelay": "0.1",
   "topic": "",
   "x": 85,
@@ -18,7 +18,7 @@ const Node = {
       "1ae1b145680266f5"
     ]
   ],
-  "icon": "font-awesome/fa-refresh",
+  "icon": "font-awesome/fa-mouse-pointer",
   "l": false
 }
 

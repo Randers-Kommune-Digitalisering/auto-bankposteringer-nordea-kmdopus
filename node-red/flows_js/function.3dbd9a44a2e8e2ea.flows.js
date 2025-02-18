@@ -60,8 +60,26 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       const isActive = !hasHash;
       const ActiveBool = isActive;
   
-      const amount1 = Beløb1 != null ? parseFloat(Beløb1.replace(',', '.')) : null;
-      const amount2 = Beløb2 != null ? parseFloat(Beløb2.replace(',', '.')) : null;
+      let amount1 = null;
+      let amount2 = null;
+  
+      switch (Beløb1) {
+          case undefined:
+              break;
+          default:
+              amount1 = parseFloat(Beløb1.replace(',', '.'));
+              amount1 = amount1.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+              break;
+      }
+  
+      switch (Beløb2) {
+          case undefined:
+              break;
+          default:
+              amount2 = parseFloat(Beløb2.replace(',', '.'));
+              amount2 = amount2.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+              break;
+      }
   
       const valueOperatorValue = operatorMapping[beløb_regel] || null;
       const Operator = valueOperatorValue;
@@ -92,11 +110,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       };
   });
   
-  // const rules = jsonData != null ? jsonData.map((rule, index) => ({ ...rule, 5: { ruleId: index } })) : [];
-  
-  msg.payload = jsonData;
-  
-  global.set("accountingRules", msg.payload);
+  global.set("accountingRules", jsonData);
   
   return msg;
 }
