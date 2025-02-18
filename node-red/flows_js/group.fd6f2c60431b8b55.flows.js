@@ -2,7 +2,7 @@ const Node = {
   "id": "fd6f2c60431b8b55",
   "type": "group",
   "z": "92c28da6a66fdcb3",
-  "name": "Retrieve initial data",
+  "name": "Retrieve data to env",
   "style": {
     "stroke": "none",
     "fill": "#e3f3d3",
@@ -18,8 +18,10 @@ const Node = {
     "6c63728841633635",
     "0f43cbdaa279c2d5"
   ],
-  "x": 644,
-  "y": 19
+  "x": 524,
+  "y": 19,
+  "w": 282,
+  "h": 122
 }
 
 module.exports = Node;

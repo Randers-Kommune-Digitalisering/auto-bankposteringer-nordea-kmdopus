@@ -2,7 +2,7 @@ const Node = {
   "id": "8847e25f4f390b2e",
   "type": "inject",
   "z": "92c28da6a66fdcb3",
-  "g": "42e21606623e991f",
+  "g": "fe110932d7bd703c",
   "name": "",
   "props": [],
   "repeat": "",
@@ -14,7 +14,7 @@ const Node = {
   "y": 60,
   "wires": [
     [
-      "e5cc1c088815a266"
+      "23d45fce19d2e18b"
     ]
   ],
   "icon": "font-awesome/fa-mouse-pointer",

@@ -5,8 +5,7 @@ const Node = {
   "g": "e5ed88aeaeb05808",
   "name": "link in Write JSON",
   "links": [
-    "b1772c1688248e29",
-    "1ceffc0961d2d72c"
+    "b1772c1688248e29"
   ],
   "x": 55,
   "y": 1240,

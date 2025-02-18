@@ -2,7 +2,7 @@ const Node = {
   "id": "edd77f8a8bccca10",
   "type": "group",
   "z": "92c28da6a66fdcb3",
-  "name": "Initialize all",
+  "name": "Restart all",
   "style": {
     "stroke": "none",
     "fill": "#e3f3d3",
@@ -18,7 +18,9 @@ const Node = {
     "e8a54ad9def1b555"
   ],
   "x": 24,
-  "y": 19
+  "y": 19,
+  "w": 252,
+  "h": 122
 }
 
 module.exports = Node;
