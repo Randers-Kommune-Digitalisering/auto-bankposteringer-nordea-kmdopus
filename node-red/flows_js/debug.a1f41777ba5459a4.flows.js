@@ -12,7 +12,7 @@ const Node = {
   "targetType": "jsonata",
   "statusVal": "{\t   \"Status Code\": msg.statusCode,\t   \"Amount of transactions\":$globalContext('transactions').length,\t   \"Response\": msg,\t   \"Timestamp\": $now()\t}",
   "statusType": "auto",
-  "x": 795,
+  "x": 425,
   "y": 340,
   "wires": [],
   "l": false

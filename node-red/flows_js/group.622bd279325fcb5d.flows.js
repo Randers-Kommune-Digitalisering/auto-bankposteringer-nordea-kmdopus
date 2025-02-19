@@ -2,7 +2,7 @@ const Node = {
   "id": "622bd279325fcb5d",
   "type": "group",
   "z": "8c354b8d2ca56b7b",
-  "name": "Provider routing - ERP-data",
+  "name": "Provider routing - ERP data",
   "style": {
     "stroke": "none",
     "fill": "#e3f3d3",

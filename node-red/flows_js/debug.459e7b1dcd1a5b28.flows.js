@@ -5,15 +5,15 @@ const Node = {
   "g": "02fc47417527e1d2",
   "name": "Update status",
   "active": true,
-  "tosidebar": true,
+  "tosidebar": false,
   "console": true,
   "tostatus": false,
   "complete": "{\t    \"Message\": \"runHistory entry retrieved\",\t    \"Entry\": payload[0],\t    \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1225,
-  "y": 320,
+  "x": 495,
+  "y": 680,
   "wires": [],
   "l": false
 }

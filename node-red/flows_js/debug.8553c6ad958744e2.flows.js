@@ -5,7 +5,7 @@ const Node = {
   "g": "9b2beb35be5bbb31",
   "name": "Transaction retrieval initiated",
   "active": true,
-  "tosidebar": true,
+  "tosidebar": false,
   "console": true,
   "tostatus": false,
   "complete": "{\t   \"Timestamp\": $now(),\t   \"Transaction date\": $globalContext(\"date\")\t}",

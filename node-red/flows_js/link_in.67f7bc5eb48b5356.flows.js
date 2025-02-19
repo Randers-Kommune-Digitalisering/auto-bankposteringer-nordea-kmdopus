@@ -5,8 +5,8 @@ const Node = {
   "g": "3bc210a9c1e58a78",
   "name": "link in nordea pre-request",
   "links": [],
-  "x": 65,
-  "y": 60,
+  "x": 685,
+  "y": 260,
   "wires": [
     [
       "6631af66c4a9aa4f"

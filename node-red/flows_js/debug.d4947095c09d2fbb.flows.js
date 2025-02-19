@@ -5,15 +5,15 @@ const Node = {
   "g": "77f345d4689dee38",
   "name": "Update status",
   "active": true,
-  "tosidebar": true,
+  "tosidebar": false,
   "console": true,
   "tostatus": false,
   "complete": "{\t    \"Message\": \"New unmatched transactions added\",\t    \"Transactions\": $globalContext(\"transactionsWithNoMatch\"),\t    \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1225,
-  "y": 520,
+  "x": 495,
+  "y": 880,
   "wires": [],
   "l": false
 }

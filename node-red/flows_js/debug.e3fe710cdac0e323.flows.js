@@ -5,15 +5,15 @@ const Node = {
   "g": "883c8c287020e842",
   "name": "Update status",
   "active": true,
-  "tosidebar": true,
+  "tosidebar": false,
   "console": true,
   "tostatus": false,
   "complete": "payload.affectedRows > 0 ?\t{\t    \"Message\": \"masterData table updated\",\t    \"Number of entries updated\": payload.affectedRows\t}\t:\t{\t    \"Message\": \"Nothing to update in masterData\"\t}\t",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 585,
-  "y": 560,
+  "x": 1125,
+  "y": 240,
   "wires": [],
   "l": false
 }
