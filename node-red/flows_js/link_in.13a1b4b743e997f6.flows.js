@@ -8,7 +8,7 @@ const Node = {
     "bd7ebd08c8b487df"
   ],
   "x": 25,
-  "y": 100,
+  "y": 60,
   "wires": [
     [
       "47305952d3fbea7e"

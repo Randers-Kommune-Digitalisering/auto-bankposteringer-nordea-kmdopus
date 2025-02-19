@@ -5,15 +5,15 @@ const Node = {
   "g": "02fc47417527e1d2",
   "name": "MySQL query status",
   "active": true,
-  "tosidebar": true,
+  "tosidebar": false,
   "console": true,
   "tostatus": false,
   "complete": "{\t    \"Message\": \"runHistory imported from database\",\t    \"Sum of entries\": $globalContext(\"runHistory\") ~> $count(),\t    \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1225,
-  "y": 360,
+  "x": 495,
+  "y": 720,
   "wires": [],
   "l": false
 }

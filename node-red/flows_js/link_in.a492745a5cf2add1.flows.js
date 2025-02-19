@@ -7,8 +7,8 @@ const Node = {
   "links": [
     "c966227c3ab9b9de"
   ],
-  "x": 460,
-  "y": 260,
+  "x": 90,
+  "y": 240,
   "wires": [
     [
       "3bc2df805e2fc541"

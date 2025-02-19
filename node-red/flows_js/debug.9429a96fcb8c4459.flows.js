@@ -5,15 +5,15 @@ const Node = {
   "g": "e57ddaa2ec0eda65",
   "name": "MySQL query status",
   "active": true,
-  "tosidebar": true,
+  "tosidebar": false,
   "console": true,
   "tostatus": false,
   "complete": "payload.affectedRows > 0 ?\t{\t    \"Message\": \"bankAccounts table created\",\t    \"Timestamp\": $now()\t\t}\t:\t{\t    \"Message\": \"bankAccounts table already exists\",\t    \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 585,
-  "y": 700,
+  "x": 1125,
+  "y": 380,
   "wires": [],
   "l": false
 }

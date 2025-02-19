@@ -5,15 +5,15 @@ const Node = {
   "g": "77f345d4689dee38",
   "name": "Update status",
   "active": true,
-  "tosidebar": true,
+  "tosidebar": false,
   "console": true,
   "tostatus": false,
   "complete": "{\t    \"Message\": \"Rule deleted\",\t    \"Rule\":$globalContext(\"deletedRule\")\t}\t",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1225,
-  "y": 560,
+  "x": 495,
+  "y": 920,
   "wires": [],
   "l": false
 }
