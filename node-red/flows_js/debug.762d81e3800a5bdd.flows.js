@@ -5,15 +5,15 @@ const Node = {
   "g": "d35c0446ba72295e",
   "name": "Authentication completed",
   "active": true,
-  "tosidebar": true,
+  "tosidebar": false,
   "console": true,
   "tostatus": false,
   "complete": "{\t   \"Auth status\": global.adminAuthStatus,\t   \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 915,
-  "y": 260,
+  "x": 545,
+  "y": 240,
   "wires": [],
   "l": false
 }

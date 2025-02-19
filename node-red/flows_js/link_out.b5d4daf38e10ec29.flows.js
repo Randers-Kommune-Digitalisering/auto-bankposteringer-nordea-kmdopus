@@ -6,8 +6,8 @@ const Node = {
   "name": "link out update bankAccounts to db",
   "mode": "return",
   "links": [],
-  "x": 545,
-  "y": 760,
+  "x": 1085,
+  "y": 440,
   "wires": []
 }
 

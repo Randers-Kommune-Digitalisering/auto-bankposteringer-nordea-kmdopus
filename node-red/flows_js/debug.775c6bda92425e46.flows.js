@@ -5,15 +5,15 @@ const Node = {
   "g": "02fc47417527e1d2",
   "name": "Update status",
   "active": true,
-  "tosidebar": true,
+  "tosidebar": false,
   "console": true,
   "tostatus": false,
   "complete": "payload.affectedRows > 0 ?\t{\t    \"Message\": \"runHistory table updated\",\t    \"Number of entries updated\": payload.affectedRows\t}\t:\t{\t    \"Message\": \"Nothing to update in runHistory\"\t}\t",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 1225,
-  "y": 240,
+  "x": 495,
+  "y": 620,
   "wires": [],
   "l": false
 }

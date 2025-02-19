@@ -5,15 +5,15 @@ const Node = {
   "g": "883c8c287020e842",
   "name": "MySQL query status",
   "active": true,
-  "tosidebar": true,
+  "tosidebar": false,
   "console": true,
   "tostatus": false,
   "complete": "{\t    \"Message\": \"masterData imported from database\",\t    \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 585,
-  "y": 600,
+  "x": 1125,
+  "y": 280,
   "wires": [],
   "l": false
 }

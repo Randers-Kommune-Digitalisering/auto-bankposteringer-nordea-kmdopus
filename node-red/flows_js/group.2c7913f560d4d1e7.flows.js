@@ -11,13 +11,12 @@ const Node = {
     "color": "#000000"
   },
   "nodes": [
-    "f47731a47fe46914",
     "47305952d3fbea7e"
   ],
   "x": 34,
   "y": 19,
   "w": 372,
-  "h": 122
+  "h": 82
 }
 
 module.exports = Node;
