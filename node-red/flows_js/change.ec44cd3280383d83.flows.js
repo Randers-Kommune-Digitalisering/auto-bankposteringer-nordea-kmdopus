@@ -1,5 +1,5 @@
 const Node = {
-  "id": "2b3c734a82c209e3",
+  "id": "ec44cd3280383d83",
   "type": "change",
   "z": "431f85f122b4636d",
   "name": "Set FTP filename",
@@ -13,16 +13,16 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "configs.ftp.filepaths.local.fullPath",
+      "p": "configs.ftp.filepaths.send.fullPath",
       "pt": "global",
-      "to": "$globalContext(\"configs\").ftp.filepaths.local.rootFolder&$globalContext(\"configs\").ftp.filename",
+      "to": "$globalContext(\"configs\").ftp.filepaths.send.rootFolder & $globalContext(\"configs\").ftp.filename",
       "tot": "jsonata"
     },
     {
       "t": "set",
-      "p": "configs.ftp.filepaths.remote.fullPath",
+      "p": "configs.ftp.filepaths.recieve.fullPath",
       "pt": "global",
-      "to": "$globalContext(\"configs\").ftp.filepaths.remote.rootFolder&$globalContext(\"configs\").ftp.filename",
+      "to": "$globalContext(\"configs\").ftp.filepaths.recieve.rootFolder & $globalContext(\"configs\").ftp.filename",
       "tot": "jsonata"
     }
   ],
@@ -35,7 +35,8 @@ const Node = {
   "y": 460,
   "wires": [
     [
-      "e831658a737feae9"
+      "e831658a737feae9",
+      "c4d60da477b26efd"
     ]
   ],
   "icon": "font-awesome/fa-cog",
