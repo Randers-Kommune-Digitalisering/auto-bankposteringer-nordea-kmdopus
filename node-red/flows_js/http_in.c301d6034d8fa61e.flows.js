@@ -1,17 +1,19 @@
 const Node = {
-  "id": "727d246a216f6932",
+  "id": "c301d6034d8fa61e",
   "type": "http in",
   "z": "32cf2bec698ca424",
   "g": "83692983b416dfd5",
-  "name": "Put data",
-  "url": "/postings",
-  "method": "put",
+  "name": "Get rule",
+  "url": "/postings/:uid",
+  "method": "get",
   "upload": false,
   "swaggerDoc": "",
-  "x": 540,
-  "y": 600,
+  "x": 530,
+  "y": 540,
   "wires": [
-    []
+    [
+      "a5aca8c0b4a9f518"
+    ]
   ]
 }
 

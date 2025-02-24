@@ -15,7 +15,7 @@
     const posting = ref(null)
 
     // Fetch regel
-    fetch(`/api/posting/${index.value}`)
+    fetch(`/api/postings/${index.value}`)
         .then(response => response.json())
         .then(value => {
             posting.value = value
@@ -58,7 +58,7 @@
         hasUpdated.value = false
         isUpdating.value = true
 
-        const url = `/api/posting/${posting.value.ID}`
+        const url = `/api/postings/${posting.value.ID}`
         
         fetch(url, {
             method: PUT,

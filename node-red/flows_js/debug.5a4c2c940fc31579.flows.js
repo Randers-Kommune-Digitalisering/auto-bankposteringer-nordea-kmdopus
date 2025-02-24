@@ -1,7 +1,7 @@
 const Node = {
   "id": "5a4c2c940fc31579",
   "type": "debug",
-  "z": "8c354b8d2ca56b7b",
+  "z": "92c28da6a66fdcb3",
   "g": "e3e2711444434a5d",
   "name": "CSV rules import error",
   "active": true,
@@ -12,8 +12,8 @@ const Node = {
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 435,
-  "y": 1240,
+  "x": 1465,
+  "y": 60,
   "wires": [],
   "l": false
 }
