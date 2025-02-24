@@ -1,7 +1,7 @@
 const Node = {
   "id": "46c70bcd77ca965a",
   "type": "group",
-  "z": "8c354b8d2ca56b7b",
+  "z": "92c28da6a66fdcb3",
   "name": "CSV overwrite rules to JSON",
   "style": {
     "stroke": "none",
@@ -18,10 +18,8 @@ const Node = {
     "1e64e4897ffb3d36",
     "48ce31279c408079"
   ],
-  "x": 14,
-  "y": 1199,
-  "w": 322,
-  "h": 102
+  "x": 1044,
+  "y": 19
 }
 
 module.exports = Node;

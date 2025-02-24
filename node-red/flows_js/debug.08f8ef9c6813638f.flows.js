@@ -1,7 +1,7 @@
 const Node = {
   "id": "08f8ef9c6813638f",
   "type": "debug",
-  "z": "8c354b8d2ca56b7b",
+  "z": "92c28da6a66fdcb3",
   "g": "46c70bcd77ca965a",
   "name": "Rules imported",
   "active": true,
@@ -12,8 +12,8 @@ const Node = {
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 275,
-  "y": 1240,
+  "x": 1305,
+  "y": 60,
   "wires": [],
   "l": false
 }

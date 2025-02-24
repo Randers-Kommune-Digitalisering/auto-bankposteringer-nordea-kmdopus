@@ -1,7 +1,7 @@
 const Node = {
   "id": "48ce31279c408079",
   "type": "link out",
-  "z": "8c354b8d2ca56b7b",
+  "z": "92c28da6a66fdcb3",
   "g": "46c70bcd77ca965a",
   "name": "link out csv rules overwrite",
   "mode": "link",
@@ -10,8 +10,8 @@ const Node = {
     "d3c120fa200f529b",
     "bd2b1009c2bb091a"
   ],
-  "x": 275,
-  "y": 1260,
+  "x": 1305,
+  "y": 80,
   "wires": []
 }
 
