@@ -1,7 +1,7 @@
 const Node = {
   "id": "869a470566656283",
   "type": "file in",
-  "z": "8c354b8d2ca56b7b",
+  "z": "92c28da6a66fdcb3",
   "g": "46c70bcd77ca965a",
   "name": "Get csv rules",
   "filename": "$globalContext(\"configs\").csvPath",
@@ -11,8 +11,8 @@ const Node = {
   "sendError": false,
   "encoding": "none",
   "allProps": true,
-  "x": 125,
-  "y": 1240,
+  "x": 1155,
+  "y": 60,
   "wires": [
     [
       "d67a96bfe204fbf8"
