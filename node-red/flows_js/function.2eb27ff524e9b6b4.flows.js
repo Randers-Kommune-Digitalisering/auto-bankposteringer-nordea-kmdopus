@@ -55,16 +55,16 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       }, {});
   });
   
-  function makeId(length) {
-      let result = '';
-      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      for (let i = 0; i < length; i++) {
-          result += characters.charAt(Math.floor(Math.random() * characters.length));
-      }
-      return result;
-  }
+  // function makeId(length) {
+  //     let result = '';
+  //     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  //     for (let i = 0; i < length; i++) {
+  //         result += characters.charAt(Math.floor(Math.random() * characters.length));
+  //     }
+  //     return result;
+  // }
   
-  const docId = makeId(16);
+  const docId = global.get("messageIdentification"); //makeId(16);
   
   // Create a single LINES object with multiple LINE elements inside
   const LINES = {
