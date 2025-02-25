@@ -35,16 +35,16 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "configs.ftp.filepaths.local.rootFolder",
+      "p": "configs.ftp.filepaths.send.rootFolder",
       "pt": "global",
-      "to": "/data/output/",
+      "to": "/fra-randers/",
       "tot": "str"
     },
     {
       "t": "set",
-      "p": "configs.ftp.filepaths.remote.rootFolder",
+      "p": "configs.ftp.filepaths.recieve.rootFolder",
       "pt": "global",
-      "to": "/some/folder/",
+      "to": "/til-randers/",
       "tot": "str"
     }
   ],
@@ -57,7 +57,7 @@ const Node = {
   "y": 460,
   "wires": [
     [
-      "2b3c734a82c209e3"
+      "ec44cd3280383d83"
     ]
   ],
   "icon": "font-awesome/fa-pencil"

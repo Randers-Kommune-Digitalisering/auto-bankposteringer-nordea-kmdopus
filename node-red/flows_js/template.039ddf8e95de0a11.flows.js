@@ -25,7 +25,8 @@ CREATE TABLE IF NOT EXISTS runHistory (
     uid NVARCHAR(32) PRIMARY KEY,
     originDate DATE,
     statusCode INT,
-    ts timestamp
+    ts timestamp,
+    success BOOL
 )
 `
 
