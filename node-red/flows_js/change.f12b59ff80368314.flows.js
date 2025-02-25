@@ -16,15 +16,15 @@ const Node = {
       "t": "set",
       "p": "topic",
       "pt": "msg",
-      "to": "Påmindelse - Autorisation af FOBI ",
-      "tot": "str"
+      "to": "configs.reminder.topic",
+      "tot": "global"
     },
     {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "\"Der er nu \" & $globalContext(\"accessDurationDays\") & \" dage tilbage af autorisation af automatisk bankindlæsning (FOBI)\"",
-      "tot": "jsonata"
+      "to": "configs.reminder.payload",
+      "tot": "global"
     },
     {
       "t": "set",

@@ -2,30 +2,9 @@ const Node = {
   "id": "68178c0808fb5be0",
   "type": "change",
   "z": "431f85f122b4636d",
-  "g": "d8a47ce7011eecce",
-  "name": "Angiv Open Banking oplysninger (Nordea)",
+  "g": "5126da366c0f2bdb",
+  "name": "Angiv Open Banking oplysninger",
   "rules": [
-    {
-      "t": "set",
-      "p": "configs.banking.id",
-      "pt": "global",
-      "to": "CLIENT_ID",
-      "tot": "env"
-    },
-    {
-      "t": "set",
-      "p": "configs.banking.secret",
-      "pt": "global",
-      "to": "CLIENT_SECRET",
-      "tot": "env"
-    },
-    {
-      "t": "set",
-      "p": "configs.banking.eidas.privateKey",
-      "pt": "global",
-      "to": "EIDASPRIVATEKEY",
-      "tot": "env"
-    },
     {
       "t": "set",
       "p": "configs.banking.provider",
@@ -49,6 +28,27 @@ const Node = {
     },
     {
       "t": "set",
+      "p": "configs.banking.id",
+      "pt": "global",
+      "to": "CLIENT_ID",
+      "tot": "env"
+    },
+    {
+      "t": "set",
+      "p": "configs.banking.secret",
+      "pt": "global",
+      "to": "CLIENT_SECRET",
+      "tot": "env"
+    },
+    {
+      "t": "set",
+      "p": "configs.banking.eidas.privateKey",
+      "pt": "global",
+      "to": "EIDASPRIVATEKEY",
+      "tot": "env"
+    },
+    {
+      "t": "set",
       "p": "configs.banking.agreement",
       "pt": "global",
       "to": "AGREEMENT_ID",
@@ -60,10 +60,12 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 220,
-  "y": 680,
+  "x": 210,
+  "y": 340,
   "wires": [
-    []
+    [
+      "12b79b33b84ebcc0"
+    ]
   ],
   "icon": "font-awesome/fa-pencil"
 }

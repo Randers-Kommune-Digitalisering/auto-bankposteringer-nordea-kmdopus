@@ -14,11 +14,12 @@ const Node = {
   "checkall": "true",
   "repair": false,
   "outputs": 1,
-  "x": 425,
+  "x": 375,
   "y": 100,
   "wires": [
     [
-      "23d45fce19d2e18b"
+      "20cabe0ccf7ceedf",
+      "4c8c98f2b04fb0ad"
     ]
   ],
   "icon": "font-awesome/fa-filter",

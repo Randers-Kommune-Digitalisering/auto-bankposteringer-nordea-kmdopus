@@ -19,15 +19,13 @@ const Node = {
   "checkall": "true",
   "repair": false,
   "outputs": 2,
-  "x": 495,
-  "y": 260,
+  "x": 155,
+  "y": 320,
   "wires": [
     [
       "ef489047b15f8a46"
     ],
-    [
-      "2ed58a04c2dcae64"
-    ]
+    []
   ],
   "icon": "font-awesome/fa-question",
   "l": false
