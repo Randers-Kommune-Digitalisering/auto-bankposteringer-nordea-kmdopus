@@ -16,11 +16,11 @@ const Node = {
   "checkall": "true",
   "repair": false,
   "outputs": 1,
-  "x": 585,
-  "y": 460,
+  "x": 275,
+  "y": 160,
   "wires": [
     [
-      "99c8856eb2f4cc6f"
+      "760f5521372d5142"
     ]
   ],
   "outputLabels": [

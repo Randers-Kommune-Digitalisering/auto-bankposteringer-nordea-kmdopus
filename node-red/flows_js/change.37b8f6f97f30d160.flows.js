@@ -46,10 +46,12 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 220,
-  "y": 200,
+  "x": 240,
+  "y": 140,
   "wires": [
-    []
+    [
+      "12b79b33b84ebcc0"
+    ]
   ],
   "icon": "font-awesome/fa-pencil"
 }

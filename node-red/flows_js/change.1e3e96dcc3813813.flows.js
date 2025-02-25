@@ -2,6 +2,7 @@ const Node = {
   "id": "1e3e96dcc3813813",
   "type": "change",
   "z": "431f85f122b4636d",
+  "g": "586bba4061b1d3f2",
   "name": "Set FTP filename",
   "rules": [
     {
@@ -31,11 +32,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 395,
-  "y": 540,
+  "x": 405,
+  "y": 560,
   "wires": [
     [
-      "e831658a737feae9"
+      "12b79b33b84ebcc0"
     ]
   ],
   "icon": "font-awesome/fa-cog",
