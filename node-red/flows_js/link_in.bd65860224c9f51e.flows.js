@@ -6,7 +6,7 @@ const Node = {
   "name": "link in insert rule to db",
   "links": [],
   "x": 65,
-  "y": 280,
+  "y": 380,
   "wires": [
     [
       "94e3041abbbf7c7f"

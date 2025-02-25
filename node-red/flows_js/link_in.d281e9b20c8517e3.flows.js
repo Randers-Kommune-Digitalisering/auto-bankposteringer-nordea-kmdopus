@@ -5,7 +5,7 @@ const Node = {
   "g": "57870c0de840c6e3",
   "name": "link in push to db",
   "links": [],
-  "x": 855,
+  "x": 755,
   "y": 80,
   "wires": [
     [

@@ -3,15 +3,15 @@ const Node = {
   "type": "change",
   "z": "431f85f122b4636d",
   "g": "586bba4061b1d3f2",
-  "name": "Angiv data til FTP-forbindelse (EG)",
+  "name": "EG",
   "rules": [],
   "action": "",
   "property": "",
   "from": "",
   "to": "",
   "reg": false,
-  "x": 200,
-  "y": 540,
+  "x": 130,
+  "y": 560,
   "wires": [
     [
       "1e3e96dcc3813813"

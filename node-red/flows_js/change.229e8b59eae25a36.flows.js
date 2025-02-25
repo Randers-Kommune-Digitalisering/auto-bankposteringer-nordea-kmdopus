@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "431f85f122b4636d",
   "g": "586bba4061b1d3f2",
-  "name": "Angiv data til FTP-forbindelse (KMD)",
+  "name": "KMD",
   "rules": [
     {
       "t": "set",
@@ -53,8 +53,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 210,
-  "y": 460,
+  "x": 130,
+  "y": 480,
   "wires": [
     [
       "ec44cd3280383d83"

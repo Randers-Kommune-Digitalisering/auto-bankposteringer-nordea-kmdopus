@@ -18,12 +18,10 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 175,
-  "y": 480,
+  "x": 535,
+  "y": 180,
   "wires": [
-    [
-      "5826c318896a3d2a"
-    ]
+    []
   ],
   "icon": "font-awesome/fa-cog",
   "l": false

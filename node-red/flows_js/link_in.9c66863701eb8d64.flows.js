@@ -3,14 +3,10 @@ const Node = {
   "type": "link in",
   "z": "92c28da6a66fdcb3",
   "g": "e57ddaa2ec0eda65",
-  "name": "link in manual create db table",
-  "links": [
-    "e052fea69f59c088",
-    "2ed6323229b981a3",
-    "e5b28df7e070f00a"
-  ],
+  "name": "link in create accounts table",
+  "links": [],
   "x": 605,
-  "y": 380,
+  "y": 500,
   "wires": [
     [
       "ad69cd49fca59109"

@@ -15,14 +15,14 @@ const Node = {
       "t": "set",
       "p": "user",
       "pt": "msg",
-      "to": "SFTP_USER",
+      "to": "SFTP_USERNAME",
       "tot": "env"
     },
     {
       "t": "set",
       "p": "password",
       "pt": "msg",
-      "to": "SFTP_PASS",
+      "to": "SFTP_PASSWORD",
       "tot": "env"
     },
     {
@@ -45,8 +45,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 570,
-  "y": 480,
+  "x": 450,
+  "y": 500,
   "wires": [
     [
       "90c9d21948cf0896"

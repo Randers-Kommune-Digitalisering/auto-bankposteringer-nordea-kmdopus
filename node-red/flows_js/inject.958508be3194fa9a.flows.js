@@ -11,11 +11,10 @@ const Node = {
   "onceDelay": "0.1",
   "topic": "",
   "x": 85,
-  "y": 80,
+  "y": 100,
   "wires": [
     [
-      "96d06a03d8bc0b57",
-      "1ae1b145680266f5"
+      "3ac9d5a0084c0654"
     ]
   ],
   "icon": "font-awesome/fa-mouse-pointer",
