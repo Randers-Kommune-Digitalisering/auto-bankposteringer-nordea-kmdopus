@@ -75,6 +75,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   }
   
   function textGeneration(textVariation, message, narrative, counterparty_name) {
+      textVariation = textVariation ? textVariation : "";
+  
       if (narrative && narrative.includes('BDP')) {
           return narrative.substring(narrative.indexOf('BDP'));
       } else if (narrative && narrative.includes('KSD')) {

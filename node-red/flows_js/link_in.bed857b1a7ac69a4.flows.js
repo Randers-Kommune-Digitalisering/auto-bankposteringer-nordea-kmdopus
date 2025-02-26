@@ -6,7 +6,7 @@ const Node = {
   "name": "link in push to db",
   "links": [],
   "x": 845,
-  "y": 80,
+  "y": 60,
   "wires": [
     [
       "7612c8ef961f1603"
