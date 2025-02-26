@@ -5,7 +5,7 @@ const Node = {
   "g": "83692983b416dfd5",
   "name": "Finder korrekt postering, men modtages ikke rigtigt på frontend",
   "info": "",
-  "x": 680,
+  "x": 700,
   "y": 540,
   "wires": []
 }

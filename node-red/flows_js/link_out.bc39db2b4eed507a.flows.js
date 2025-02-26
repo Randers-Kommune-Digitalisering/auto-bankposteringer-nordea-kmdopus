@@ -6,8 +6,8 @@ const Node = {
   "name": "link out KMD headers",
   "mode": "return",
   "links": [],
-  "x": 675,
-  "y": 200,
+  "x": 1025,
+  "y": 60,
   "wires": []
 }
 
