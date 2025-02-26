@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "431f85f122b4636d",
   "g": "5126da366c0f2bdb",
-  "name": "Angiv sti til regler i csv",
+  "name": "Angiv sti til regler i csv (evt. med tom værdi)",
   "rules": [
     {
       "t": "set",
@@ -18,7 +18,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 180,
+  "x": 250,
   "y": 60,
   "wires": [
     [

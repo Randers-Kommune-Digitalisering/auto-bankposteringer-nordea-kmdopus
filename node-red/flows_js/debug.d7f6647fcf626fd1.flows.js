@@ -2,6 +2,7 @@ const Node = {
   "id": "d7f6647fcf626fd1",
   "type": "debug",
   "z": "ee0cf4ce372e2d36",
+  "g": "20a8bc261e47e665",
   "name": "SFTP Download",
   "active": true,
   "tosidebar": true,
@@ -11,8 +12,8 @@ const Node = {
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 880,
-  "y": 500,
+  "x": 920,
+  "y": 360,
   "wires": []
 }
 

@@ -1,7 +1,7 @@
 const Node = {
   "id": "431f85f122b4636d",
   "type": "tab",
-  "label": "Opret konfiguration",
+  "label": "Variables",
   "disabled": false,
   "info": "",
   "env": []

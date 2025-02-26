@@ -5,7 +5,7 @@ const Node = {
   "name": "transactionsWithNoMtach",
   "style": {
     "stroke": "none",
-    "fill": "#ffefbf",
+    "fill": "#ffbfbf",
     "label": true,
     "label-position": "n",
     "color": "#000000"
@@ -25,8 +25,10 @@ const Node = {
     "2b021fe83cd382e2",
     "d2ce51f0bd1e480c"
   ],
-  "x": 434,
-  "y": 459
+  "x": 454,
+  "y": 459,
+  "w": 492,
+  "h": 202
 }
 
 module.exports = Node;

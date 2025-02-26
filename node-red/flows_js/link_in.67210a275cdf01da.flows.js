@@ -11,7 +11,7 @@ const Node = {
     "01a3a16df94b62dc"
   ],
   "x": 55,
-  "y": 80,
+  "y": 60,
   "wires": [
     [
       "e176ace9d52ca574"
