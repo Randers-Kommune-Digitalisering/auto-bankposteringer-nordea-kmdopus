@@ -1,8 +1,8 @@
 const Node = {
-  "id": "90ef9573a5cdf3d6",
+  "id": "3a5897fef804c181",
   "type": "change",
   "z": "8c354b8d2ca56b7b",
-  "g": "ee31b70d7b508c0d",
+  "g": "c3855a30da38df4f",
   "name": "",
   "rules": [
     {
@@ -18,10 +18,12 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 535,
-  "y": 180,
+  "x": 105,
+  "y": 300,
   "wires": [
-    []
+    [
+      "8d7669ee859a014f"
+    ]
   ],
   "icon": "font-awesome/fa-cog",
   "l": false
