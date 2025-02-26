@@ -15,7 +15,7 @@ const Node = {
       "module": "csv-parser"
     }
   ],
-  "x": 1225,
+  "x": 1205,
   "y": 60,
   "wires": [
     [
@@ -86,7 +86,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   
       const RuleID = index;
   
-      const shouldBeException = statusAccounts.includes(parseInt(Artskonto));
+      const shouldBeException = statusAccounts.includes(Artskonto);
       cleanedData.Artskonto = shouldBeException ? null : Artskonto;
       const ExceptionBool = shouldBeException;
       const LastUsed = "31-12-9999"

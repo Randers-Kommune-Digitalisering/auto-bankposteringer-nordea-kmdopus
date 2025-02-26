@@ -12,11 +12,6 @@ const Node = {
     },
     {
       "t": "delete",
-      "p": "statusCode",
-      "pt": "msg"
-    },
-    {
-      "t": "delete",
       "p": "responseUrl",
       "pt": "msg"
     },
