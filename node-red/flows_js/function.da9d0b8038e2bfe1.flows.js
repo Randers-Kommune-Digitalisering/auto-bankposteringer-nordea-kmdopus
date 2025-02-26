@@ -10,12 +10,11 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 625,
+  "x": 665,
   "y": 80,
   "wires": [
     [
-      "c49c5be7601cebc5",
-      "5eacaf9ba681643d"
+      "a52457ed55960f9b"
     ]
   ],
   "icon": "font-awesome/fa-handshake-o",

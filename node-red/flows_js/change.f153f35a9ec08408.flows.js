@@ -15,7 +15,7 @@ const Node = {
     {
       "t": "set",
       "p": "configs.reminder.payload",
-      "pt": "msg",
+      "pt": "global",
       "to": "Indlæsningen af bankposteringer kræver din godkendelse",
       "tot": "str"
     }
@@ -29,7 +29,7 @@ const Node = {
   "y": 380,
   "wires": [
     [
-      "12b79b33b84ebcc0"
+      "a5bf1fc2e8c7a32d"
     ]
   ],
   "icon": "font-awesome/fa-pencil"
