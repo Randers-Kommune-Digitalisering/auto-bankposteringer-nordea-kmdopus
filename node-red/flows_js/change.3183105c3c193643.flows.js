@@ -7,7 +7,7 @@ const Node = {
   "rules": [
     {
       "t": "delete",
-      "p": "AuthRestart",
+      "p": "auth.restart",
       "pt": "global"
     }
   ],

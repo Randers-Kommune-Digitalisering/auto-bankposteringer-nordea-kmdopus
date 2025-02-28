@@ -15,7 +15,7 @@ const Node = {
       "module": "csv-parser"
     }
   ],
-  "x": 995,
+  "x": 945,
   "y": 140,
   "wires": [
     [
@@ -27,7 +27,8 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, csv) {
-  const bankAccounts = global.get("bankAccounts") ?? [];
+  let masterDataObj = global.get("masterData");
+  const bankAccounts = global.get("masterData").bankAccounts ?? [];
   const statusAccounts = bankAccounts.map(account => account.statusAccount);
   const operatorMapping = {
       "Større end": ">",
@@ -110,7 +111,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       };
   });
   
-  global.set("accountingRules", jsonData);
+  masterDataObj.rules = jsonData;
+  global.set("masterData", masterDataObj);
   
   return msg;
 }

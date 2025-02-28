@@ -44,7 +44,7 @@ const Node = {
       "t": "set",
       "p": "urlParam",
       "pt": "flow",
-      "to": "access_id",
+      "to": "auth.accessId",
       "tot": "global"
     }
   ],

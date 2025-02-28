@@ -7,7 +7,7 @@ const Node = {
   "rules": [
     {
       "t": "delete",
-      "p": "transactions",
+      "p": "transactions.list",
       "pt": "global"
     }
   ],

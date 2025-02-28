@@ -14,21 +14,21 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "updatedFromTransaction",
-      "pt": "flow",
-      "to": "$globalContext(\"transactionsWithNoMatch\")[transaction_id= $$.uid]",
+      "p": "transactions.updatedFromTransaction",
+      "pt": "global",
+      "to": "$globalContext(\"transaction\").unmatched[transaction_id= $$.uid]",
       "tot": "jsonata"
     },
     {
       "t": "set",
-      "p": "updatedToTransaction",
+      "p": "transactions.updatedToTransaction",
       "pt": "global",
       "to": "payload",
       "tot": "msg"
     },
     {
       "t": "set",
-      "p": "date",
+      "p": "dates.bookingDate",
       "pt": "global",
       "to": "$flowContext(\"updatedFromTransaction\").booking_date",
       "tot": "jsonata"

@@ -7,7 +7,7 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "masterData",
+      "p": "masterData.admSysData",
       "pt": "global",
       "to": "payload",
       "tot": "msg"

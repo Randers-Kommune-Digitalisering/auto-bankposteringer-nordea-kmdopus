@@ -22,15 +22,19 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let accountStep = global.get("accountStep");
-  let accountLength = global.get("bankAccounts").length;
+  let transactionsObj = global.get("transactions");
+  let accountStep = transactionsObj.accountStep;
+  let accountLength = global.get("masterData").bankAccounts.length;
   
   if (accountStep + 1 !== accountLength) {
-      global.set("accountStep", accountStep += 1);
+      accountStep += 1;
   } else {
       // When there are no more accounts to check
-      global.set("accountStep", 0);
+      accountStep = 0;
   }
+  
+  transactionsObj.accountStep = accountStep;
+  global.set("transactions", transactionsObj);
   
   return msg;
 }

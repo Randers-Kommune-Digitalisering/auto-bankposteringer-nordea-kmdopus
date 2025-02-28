@@ -5,8 +5,8 @@ const Node = {
   "g": "6c0b1c62a8bd2bbc",
   "name": "link in KMD headers",
   "links": [],
-  "x": 805,
-  "y": 60,
+  "x": 565,
+  "y": 140,
   "wires": [
     [
       "97dbdd3f379bd5d1"

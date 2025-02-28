@@ -4,7 +4,7 @@ const Node = {
   "z": "32cf2bec698ca424",
   "g": "54195acebfd77c6b",
   "name": "What is auth status?",
-  "property": "adminAuthStatus",
+  "property": "auth.adminStatus",
   "propertyType": "global",
   "rules": [
     {

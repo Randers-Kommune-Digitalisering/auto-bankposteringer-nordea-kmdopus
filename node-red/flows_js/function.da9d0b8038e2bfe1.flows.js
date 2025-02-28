@@ -23,13 +23,16 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let erpPostings = [];
-  let transactionsWithNoMatch = global.get("transactionsWithNoMatch") ? global.get("transactionsWithNoMatch") : [];
-  const transactions = global.get("transactions").reverse();
-  const transactionParameters = flow.get("transactionParameters");   // Has to match ruleParameters length
-  const accountingRules = global.get("accountingRules");
+  let erpObj = global.get("erp");
+  let transactionsObj = global.get("transactions");
+  let masterDataObj = global.get("masterData").rules;
+  let postings = [];
+  let transactionsUnmatched = transactionsObj.unmatched ? transactionsObj.unmatched : [];
+  const transactions = transactionsObj.list.reverse();
+  const transactionParameters = transactionsObj.parameters;   // Has to match ruleParameters length
+  const accountingRules = masterDataObj.rules;
   const ruleParameters = Object.keys(accountingRules[0]).slice(0, 4);
-  const date = global.get("simpleDate");
+  const date = global.get("dates").simpleDate;
   
   function sumOfParametersGiven(rule) {
       // Count the number of rule parameters where the value property is defined (truthy)
@@ -94,8 +97,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       }
   }
   
-  function generateErpPostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, psp) {
-      erpPostings.push(
+  function generatePostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, psp) {
+      postings.push(
           {
               account: statusAccount,
               debetOrCredit: statusDebetOrCredit,
@@ -103,7 +106,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               text: text
           }
       )
-      erpPostings.push(
+      postings.push(
           {
               account: landingAccount,
               psp: psp,
@@ -117,21 +120,21 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
   function processPosting(transaction, rules) {
       transaction.amount = parseFloat(transaction.amount);
-      let absoulute_amount = Math.abs(transaction.amount);
+      let absoluteAmount = Math.abs(transaction.amount);
       let cleanedAmount = String(transaction.amount).replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
       let statusDebetOrCredit = transaction.amount > 0 ? "Debet" : "Kredit";
       let landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet";
       
       if (transaction.account.manual) {
-          generateErpPostings(transaction.account.statusAccount, transaction.account.Artskonto, statusDebetOrCredit, landingDebetOrCredit, transaction.account.text, cleanedAmount, transaction.account.PSP);
+          generatePostings(transaction.account.statusAccount, transaction.account.Artskonto, statusDebetOrCredit, landingDebetOrCredit, transaction.account.text, cleanedAmount, transaction.account.PSP);
       } else {
-          let completeMatchBool = false;
+          let completeMatch = false;
   
           for (let rule of rules) {      
               let sumOfParametersMatched = 0;
               let psp = rule.PSP ? rule.PSP : '';
   
-              if (completeMatchBool) {
+              if (completeMatch) {
                   continue
               } else {
                   for (let parameterIndex = 0; parameterIndex < transactionParameters.length; parameterIndex++) {
@@ -144,31 +147,32 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
                   }
   
                   let matchedAllParametersBool = sumOfParametersMatched === sumOfParametersGiven(rule);
-                  let matchedAmountBool = matchAmount(absoulute_amount, rule.Operator, rule.Beløb1, rule.Beløb2)
+                  let matchedAmountBool = matchAmount(absoluteAmount, rule.Operator, rule.Beløb1, rule.Beløb2)
   
                   if (matchedAllParametersBool && matchedAmountBool) {
                       if (!rule.ExceptionBool) {   // Don't write ERP postings if rule is an exception, but still count as match
                           let text = textGeneration(rule.Posteringstekst, transaction.message, transaction.narrative, transaction.counterparty_name);
-                          generateErpPostings(transaction.account.statusAccount, rule.Artskonto, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, psp);
+                          generatePostings(transaction.account.statusAccount, rule.Artskonto, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, psp);
                       }
-                      completeMatchBool = true;
+                      completeMatch = true;
                       rule.LastUsed = date;
                   }
               }
           }
-          if (!completeMatchBool) {
+          if (!completeMatch) {
               let text = transaction.transaction_id;
   
-              generateErpPostings(transaction.account.statusAccount, transaction.account.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, '');
+              generatePostings(transaction.account.statusAccount, transaction.account.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, '');
               
               // if (transaction.account.bankAccountName != "Debitorkonto") {
               if (transaction.account.bankAccountName != "TEST") {
                   transaction.amount = transaction.amount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                  transactionsWithNoMatch.push(transaction);
+                  transactionsUnmatched.push(transaction);
               }
           }
   
-          global.set("transactionsWithNoMatch", transactionsWithNoMatch);
+          transactionsObj.unmatched = transactionsUnmatched;
+          global.set("transactions", transactionsObj);
   
       }   
       
@@ -178,7 +182,11 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       processPosting(transaction, accountingRules);
   });
   
-  global.set("erpPostings", erpPostings);
+  erpObj.postings = postings;
+  global.set("erp", erpObj);
+  
+  masterDataObj.rules = accountingRules;
+  global.set("masterData", masterDataObj);
   
   return msg;
 }

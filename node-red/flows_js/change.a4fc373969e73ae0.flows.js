@@ -9,16 +9,8 @@ const Node = {
       "t": "set",
       "p": "payload.RuleID",
       "pt": "msg",
-      "to": "( ($globalContext(\"accountingRules\")).RuleID ~> $max() ) + 1",
+      "to": "($globalContext(\"masterData\").rules.RuleID ~> $max() ) + 1",
       "tot": "jsonata"
-    },
-    {
-      "t": "set",
-      "p": "newRule",
-      "pt": "global",
-      "to": "payload",
-      "tot": "msg",
-      "dc": true
     }
   ],
   "action": "",

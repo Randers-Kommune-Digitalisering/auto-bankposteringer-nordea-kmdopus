@@ -3,11 +3,11 @@ const Node = {
   "type": "change",
   "z": "62eaf4407ee85a3a",
   "g": "be3c4fb5b3ea916b",
-  "name": "Initialise account_step",
+  "name": "Initialise accountStep",
   "rules": [
     {
       "t": "set",
-      "p": "accountStep",
+      "p": "transactions.accountStep",
       "pt": "global",
       "to": "0",
       "tot": "num"

@@ -44,7 +44,7 @@ const Node = {
       "t": "set",
       "p": "data.refresh_token",
       "pt": "flow",
-      "to": "refresh_token",
+      "to": "auth.refreshToken",
       "tot": "global"
     },
     {

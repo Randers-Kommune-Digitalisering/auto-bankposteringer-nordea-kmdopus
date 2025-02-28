@@ -7,8 +7,8 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "erpFileHeaders",
-      "pt": "flow",
+      "p": "erp.csvHeaders",
+      "pt": "global",
       "to": "[\"Artskonto\",\"Omkostningssted\",\"PSP-element\",\"Profitcenter\",\"Ordre\",\"Debet/kredit\",\"Beløb\",\"Næste agent\",\"Tekst\",\"Betalingsart\",\"Påligningsår\",\"Betalingsmodtagernr.\",\"Betalingsmodtagernr.kode\",\"Ydelsesmodtagernr.\",\"Ydelsesmodtagernr.kode\",\"Ydelsesperiode fra\",\"Ydelsesperiode til\",\"Oplysningspligtnr.\",\"Oplysningspligtmodtagernr.kode\",\"Oplysningspligtkode\",\"Netværk\",\"Operation\",\"Mængde\",\"Mængdeenhed\",\"Referencenøgle\"]",
       "tot": "json"
     }
@@ -18,8 +18,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 855,
-  "y": 60,
+  "x": 615,
+  "y": 140,
   "wires": [
     [
       "f6228492c9e750d6"
