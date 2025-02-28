@@ -24,8 +24,8 @@ Node.template = `
 CREATE TABLE IF NOT EXISTS bankAccounts (
     bankAccount NVARCHAR(31) NULL PRIMARY KEY,
     bankAccountName NVARCHAR(63) NULL,
-    statusAccount int NULL,
-    intermediateAccount int NULL
+    statusAccount CHAR(8) NULL,
+    intermediateAccount CHAR(8) NULL
 );
 `
 

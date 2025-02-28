@@ -7,8 +7,8 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "originDate",
-      "pt": "msg",
+      "p": "date",
+      "pt": "global",
       "to": "payload[0].originDate",
       "tot": "msg"
     },

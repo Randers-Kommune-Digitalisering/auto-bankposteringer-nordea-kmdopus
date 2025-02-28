@@ -9,21 +9,28 @@ const Node = {
       "t": "set",
       "p": "uid",
       "pt": "msg",
-      "to": "req.params.uid ~> $number()",
+      "to": "req.params.uid ~> $string()",
       "tot": "jsonata"
     },
     {
       "t": "set",
-      "p": "transactions",
+      "p": "updatedFromTransaction",
+      "pt": "flow",
+      "to": "$globalContext(\"transactionsWithNoMatch\")[transaction_id= $$.uid]",
+      "tot": "jsonata"
+    },
+    {
+      "t": "set",
+      "p": "updatedToTransaction",
       "pt": "global",
       "to": "payload",
       "tot": "msg"
     },
     {
       "t": "set",
-      "p": "simpleDate",
+      "p": "date",
       "pt": "global",
-      "to": "$now()",
+      "to": "$flowContext(\"updatedFromTransaction\").booking_date",
       "tot": "jsonata"
     }
   ],

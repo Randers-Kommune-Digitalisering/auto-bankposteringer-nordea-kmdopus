@@ -1,17 +1,18 @@
 const Node = {
-  "id": "0d82e33f30f4a7dd",
+  "id": "78ddcf765998b0c2",
   "type": "debug",
-  "z": "32cf2bec698ca424",
-  "name": "debug 4",
+  "z": "a1dc9966e881ac6b",
+  "name": "Fejl - umatchede posteringer passer ikke i db",
   "active": true,
   "tosidebar": true,
   "console": false,
   "tostatus": false,
-  "complete": "false",
+  "complete": "true",
+  "targetType": "full",
   "statusVal": "",
   "statusType": "auto",
-  "x": 920,
-  "y": 300,
+  "x": 1110,
+  "y": 560,
   "wires": []
 }
 
