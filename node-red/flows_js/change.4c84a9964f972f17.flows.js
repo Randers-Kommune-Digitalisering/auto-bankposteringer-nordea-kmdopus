@@ -8,7 +8,7 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "$globalContext(\"transactionsWithNoMatch\")[transaction_id = $$.uid]",
+      "to": "$globalContext(\"transactions\").unmatched[transaction_id = $$.uid]",
       "tot": "jsonata",
       "dc": true
     }

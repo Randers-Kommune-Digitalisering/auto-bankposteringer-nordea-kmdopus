@@ -37,7 +37,7 @@ const Node = {
       "t": "set",
       "p": "data.code",
       "pt": "flow",
-      "to": "exchange_code",
+      "to": "auth.exchangeCode",
       "tot": "global"
     },
     {

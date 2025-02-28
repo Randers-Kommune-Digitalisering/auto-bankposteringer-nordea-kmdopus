@@ -23,7 +23,7 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let data = global.get("transactionsWithNoMatch");
+  let data = global.get("transactions").unmatched;
   
   // Get the keys from the first object to use as column names
   let columns = Object.keys(data);

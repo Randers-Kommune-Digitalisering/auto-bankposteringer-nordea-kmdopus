@@ -7,21 +7,21 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "exchange_code",
+      "p": "auth.exchangeCode",
       "pt": "global",
       "to": "payload.response.code",
       "tot": "msg"
     },
     {
       "t": "set",
-      "p": "adminAuthAttempt",
+      "p": "auth.adminStatusChecks",
       "pt": "global",
-      "to": "$globalContext('adminAuthAttempt') + 1",
+      "to": "$globalContext('auth').adminStatusChecks + 1",
       "tot": "jsonata"
     },
     {
       "t": "set",
-      "p": "adminAuthStatus",
+      "p": "auth.adminStatus",
       "pt": "global",
       "to": "payload.response.status",
       "tot": "msg"

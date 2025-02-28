@@ -22,6 +22,7 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
+  let masterDataObj = global.get("masterData");
   const convertToBoolean = (obj, keys) => {
       keys.forEach(key => {
           if (obj.hasOwnProperty(key)) {
@@ -38,7 +39,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
   msg.payload = msg.payload[0];
   
-  global.set("masterData", msg.payload);
+  masterDataObj.admSysData = msg.payload[0];
+  
+  global.set("masterData", masterDataObj);
   
   return msg;
 }

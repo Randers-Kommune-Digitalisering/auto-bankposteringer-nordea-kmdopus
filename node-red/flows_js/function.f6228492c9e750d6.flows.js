@@ -10,8 +10,8 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 905,
-  "y": 60,
+  "x": 665,
+  "y": 140,
   "wires": [
     [
       "bc39db2b4eed507a"
@@ -22,9 +22,11 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let erpFileHeaders = flow.get("erpFileHeaders");
+  let erp = global.get("erp");
+  const csvHeaders = global.get("erp").csvHeaders;
   
-  flow.set("erpFileHeaders", erpFileHeaders.join(', '));    
+  erp.csvHeaders = csvHeaders.join(', ');
+  global.set("erp", erp);    
   
   return msg;
 }

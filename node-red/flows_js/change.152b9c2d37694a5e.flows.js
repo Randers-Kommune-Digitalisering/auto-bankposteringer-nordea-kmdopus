@@ -7,21 +7,21 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "token",
+      "p": "auth.token",
       "pt": "global",
       "to": "payload.response.client_token",
       "tot": "msg"
     },
     {
       "t": "set",
-      "p": "access_id",
+      "p": "auth.accessId",
       "pt": "global",
       "to": "payload.response.access_id",
       "tot": "msg"
     },
     {
       "t": "set",
-      "p": "adminAuthStatus",
+      "p": "auth.adminStatus",
       "pt": "global",
       "to": "payload.response.status",
       "tot": "msg"

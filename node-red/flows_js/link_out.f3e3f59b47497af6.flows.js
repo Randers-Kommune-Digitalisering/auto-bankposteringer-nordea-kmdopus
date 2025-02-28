@@ -6,7 +6,7 @@ const Node = {
   "name": "link out push to db",
   "mode": "return",
   "links": [],
-  "x": 965,
+  "x": 915,
   "y": 60,
   "wires": []
 }

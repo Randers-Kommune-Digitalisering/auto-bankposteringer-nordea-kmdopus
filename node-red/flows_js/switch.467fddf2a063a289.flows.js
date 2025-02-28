@@ -4,8 +4,8 @@ const Node = {
   "z": "8c354b8d2ca56b7b",
   "g": "9f0acbcfa0581c4a",
   "name": "More pages?",
-  "property": "continuation_key",
-  "propertyType": "flow",
+  "property": "transactions.continuationKey",
+  "propertyType": "global",
   "rules": [
     {
       "t": "istype",

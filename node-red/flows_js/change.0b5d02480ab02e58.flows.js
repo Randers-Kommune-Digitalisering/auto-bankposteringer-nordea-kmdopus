@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "uid",
       "pt": "msg",
-      "to": "originalUid",
+      "to": "runs.originUid",
       "tot": "global"
     }
   ],

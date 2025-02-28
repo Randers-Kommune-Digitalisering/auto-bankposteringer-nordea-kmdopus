@@ -7,8 +7,8 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "transactionParameters",
-      "pt": "flow",
+      "p": "transactions.parameters",
+      "pt": "global",
       "to": "[\"narrative\",\"message\",\"counterparty_name\",\"type_description\"]",
       "tot": "json"
     }

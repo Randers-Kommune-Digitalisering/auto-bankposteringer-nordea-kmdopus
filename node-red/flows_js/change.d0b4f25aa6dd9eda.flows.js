@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "uid",
       "pt": "msg",
-      "to": "messageIdentification",
+      "to": "transactions.uid",
       "tot": "global"
     }
   ],

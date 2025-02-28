@@ -7,12 +7,12 @@ const Node = {
   "rules": [
     {
       "t": "delete",
-      "p": "continuation_key",
-      "pt": "flow"
+      "p": "transactions.continuationKey",
+      "pt": "global"
     },
     {
       "t": "delete",
-      "p": "addTransactions",
+      "p": "transactions.add",
       "pt": "global"
     }
   ],

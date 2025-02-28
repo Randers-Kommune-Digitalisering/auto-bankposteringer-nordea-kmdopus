@@ -32,9 +32,13 @@ Format: ISO 8601
 `
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, dayjs) {
-  global.set("dateOfOrigin", dayjs().format('YYYYMMDD'));
-  global.set("timeOfOrigin", dayjs().format('HHmmss'));
-  global.set("simpleDate", dayjs().format('DD-MM-YYYY'));
+  let dates = global.get("dates")
+  
+  dates.date = dayjs().format('YYYYMMDD');
+  dates.simpleDate = dayjs().format('DD-MM-YYYY');
+  dates.time = dayjs().format('HHmmss');
+  
+  global.set("dates", dates);
   
   return msg;
 }

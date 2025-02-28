@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "bankAccounts",
+      "to": "masterData.bankAccounts",
       "tot": "global"
     }
   ],

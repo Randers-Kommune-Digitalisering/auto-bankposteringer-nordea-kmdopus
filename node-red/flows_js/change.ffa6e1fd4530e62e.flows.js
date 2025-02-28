@@ -7,7 +7,7 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "runHistory",
+      "p": "runs.list",
       "pt": "global",
       "to": "payload",
       "tot": "msg"

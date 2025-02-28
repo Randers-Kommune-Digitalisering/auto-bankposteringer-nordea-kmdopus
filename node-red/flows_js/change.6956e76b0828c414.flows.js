@@ -11,13 +11,6 @@ const Node = {
       "pt": "msg",
       "to": "req.params.uid ~> $number()",
       "tot": "jsonata"
-    },
-    {
-      "t": "set",
-      "p": "deletedRule",
-      "pt": "global",
-      "to": "$globalContext(\"accountingRules\")[RuleID = $$.uid]",
-      "tot": "jsonata"
     }
   ],
   "action": "",

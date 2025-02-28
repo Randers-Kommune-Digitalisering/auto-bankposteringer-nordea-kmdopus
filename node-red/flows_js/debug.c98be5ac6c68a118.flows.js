@@ -3,7 +3,7 @@ const Node = {
   "type": "debug",
   "z": "a1dc9966e881ac6b",
   "g": "260ec49abb2a1b5b",
-  "name": "MySQL query status",
+  "name": "db populate",
   "active": true,
   "tosidebar": true,
   "console": true,
@@ -12,7 +12,7 @@ const Node = {
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 555,
+  "x": 505,
   "y": 140,
   "wires": [],
   "l": false

@@ -7,14 +7,14 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "date",
+      "p": "dates.bookingDate",
       "pt": "global",
       "to": "payload[0].originDate",
       "tot": "msg"
     },
     {
       "t": "set",
-      "p": "originalUid",
+      "p": "runs.originUid",
       "pt": "global",
       "to": "uid",
       "tot": "msg"

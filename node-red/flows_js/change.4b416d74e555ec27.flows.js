@@ -14,7 +14,7 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "adminAuthAttempt",
+      "p": "auth.adminStatusChecks",
       "pt": "global",
       "to": "0",
       "tot": "num"

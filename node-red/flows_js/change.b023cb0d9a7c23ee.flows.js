@@ -7,14 +7,14 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "adminAuthStatus",
+      "p": "auth.adminStatus",
       "pt": "global",
       "to": "RESTARTING",
       "tot": "str"
     },
     {
       "t": "set",
-      "p": "AuthRestart",
+      "p": "auth.restart",
       "pt": "global",
       "to": "true",
       "tot": "bool"

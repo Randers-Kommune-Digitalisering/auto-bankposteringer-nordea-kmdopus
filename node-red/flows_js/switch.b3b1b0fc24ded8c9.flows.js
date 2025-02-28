@@ -4,7 +4,7 @@ const Node = {
   "z": "8c354b8d2ca56b7b",
   "g": "dc3f1bccec7ebeb1",
   "name": "All accounts requested?",
-  "property": "accountStep",
+  "property": "transactions.accountStep",
   "propertyType": "global",
   "rules": [
     {

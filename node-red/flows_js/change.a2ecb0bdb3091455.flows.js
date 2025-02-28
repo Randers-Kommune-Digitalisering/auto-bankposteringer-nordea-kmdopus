@@ -7,7 +7,7 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "bankAccounts",
+      "p": "masterData.bankAccounts",
       "pt": "global",
       "to": "payload",
       "tot": "msg"
