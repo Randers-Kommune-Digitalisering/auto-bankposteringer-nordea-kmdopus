@@ -33,16 +33,16 @@ const Node = {
 Node.func = async function (node, msg, RED, context, flow, global, env, util, csv, xml2js) {
   const inProd = true;
   
-  const date = global.get("date");
-  const bankingDate = date.replace(/-/g, "");
-  const time = global.get("timeOfOrigin");
+  const date = global.get("dates").bookingDate;
+  const bookingDate = date.replace(/-/g, "");
+  const time = global.get("dates").time;
   const docId = global.get("messageIdentification");
   const compCode = global.get("configs").ftp.compCode;
   const dataProviderId = global.get("configs").ftp.dataProviderId;
   const prodEnv = inProd ? global.get("configs").ftp.prodEnv : "T02";
   const dataProviderIdCode = inProd ? global.get("configs").ftp.dataProviderIdCode : "797";
   const filename = `ZFIR_KMD_Opus_Posteringer_IND_${dataProviderIdCode}_${dataProviderId}_${date}_${time}.xml`;
-  const postings = global.get("erpPostings");
+  const postings = global.get("erp").postings;
   
   let lineCounter = 0;
   let debetSum = parseFloat(0);
@@ -53,8 +53,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   
   for (const posting of postings) {
       lineCounter++;
-  
-      global.set("posting", posting);
   
       let amount = posting.amount.replace(',', '.');
       amount = parseFloat(amount);
@@ -106,8 +104,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       'BALANCE_CREDIT': '-' + creditSum.toFixed(2),
       'MUNICIPALITY': dataProviderIdCode,
       'COMP_CODE': compCode,
-      'DOC_DATE': bankingDate,
-      'PSTNG_DATE': bankingDate,
+      'DOC_DATE': bookingDate,
+      'PSTNG_DATE': bookingDate,
       'RECEIV_DOC': docId,
       'HEADER_TXT': dataProviderId,
       'XREF1_HD': dataProviderId
@@ -135,8 +133,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   
   msg.filename = "/data/output/" + filename;
   msg.payload = xml;
-  
-  flow.set("filename", filename);
   
   return msg;
 }

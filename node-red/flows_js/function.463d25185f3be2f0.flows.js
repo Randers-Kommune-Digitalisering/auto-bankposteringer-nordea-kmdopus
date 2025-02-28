@@ -32,6 +32,7 @@ Format: ISO 8601
 `
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, dayjs) {
+  let dates = global.get("dates");
   function findDate() {
       let date = dayjs().startOf('day');
   
@@ -45,10 +46,12 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   }
   
   // Set global variables
-  global.set("date", findDate());
-  global.set("dateOfOrigin", dayjs().format('YYYYMMDD'));
-  global.set("timeOfOrigin", dayjs().format('HHmmss'));
-  global.set("simpleDate", dayjs().format('DD-MM-YYYY'));
+  dates.bookingDate = findDate();
+  dates.date = dayjs().format('YYYYMMDD');
+  dates.simpleDate = dayjs().format('DD-MM-YYYY');
+  dates.time = dayjs().format('HHmmss');
+  
+  global.set("dates", dates);
   
   return msg;
 }

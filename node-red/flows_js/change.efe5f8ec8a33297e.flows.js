@@ -9,20 +9,15 @@ const Node = {
       "t": "set",
       "p": "configs.ftp.filepaths.send.fullPath",
       "pt": "global",
-      "to": "$globalContext(\"configs\").ftp.filepaths.send.rootFolder & $flowContext(\"filename\")",
+      "to": "$globalContext(\"configs\").ftp.filepaths.send.rootFolder & filename",
       "tot": "jsonata"
     },
     {
       "t": "set",
       "p": "configs.ftp.filepaths.recieve.fullPath",
       "pt": "global",
-      "to": "$globalContext(\"configs\").ftp.filepaths.recieve.rootFolder & $flowContext(\"filename\")",
+      "to": "$globalContext(\"configs\").ftp.filepaths.recieve.rootFolder & filename",
       "tot": "jsonata"
-    },
-    {
-      "t": "delete",
-      "p": "filename",
-      "pt": "flow"
     }
   ],
   "action": "",

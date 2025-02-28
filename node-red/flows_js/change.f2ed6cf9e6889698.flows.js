@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "{\t    \"status\": $globalContext(\"adminAuthStatus\")\t}",
+      "to": "{\t    \"status\": $globalContext(\"auth\").adminStatus\t}",
       "tot": "jsonata"
     }
   ],

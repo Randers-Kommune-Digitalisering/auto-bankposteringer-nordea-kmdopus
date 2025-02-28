@@ -4,7 +4,7 @@ const Node = {
   "z": "8c354b8d2ca56b7b",
   "g": "ea1bf65dfedc00a0",
   "name": "Has a run been restarted?",
-  "property": "runRestart",
+  "property": "runs.restart",
   "propertyType": "global",
   "rules": [
     {

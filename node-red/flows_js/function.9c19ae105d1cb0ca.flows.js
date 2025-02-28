@@ -22,7 +22,8 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  const accountingRules = global.get("accountingRules");
+  let masterDataObj = global.get("masterData");
+  const accountingRules = global.get("masterData").rules;
   
   const convertToBoolean = (obj, keys) => {
       keys.forEach(key => {
@@ -70,7 +71,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       convertToBoolean(item, ["ActiveBool", "ExceptionBool"]);
   });
   
-  global.set("accountingRules", mergeSort(msg.payload));
+  masterDataObj.rules = mergeSort(msg.payload)
+  global.set("masterData", masterDataObj);
   
   return msg;
 }

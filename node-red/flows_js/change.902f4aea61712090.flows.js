@@ -7,7 +7,7 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "transactionsWithNoMatch",
+      "p": "transactions.unmatched",
       "pt": "global",
       "to": "payload",
       "tot": "msg"

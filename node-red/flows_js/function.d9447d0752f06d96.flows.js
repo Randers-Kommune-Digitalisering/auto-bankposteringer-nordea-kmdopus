@@ -22,9 +22,10 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  const accountValue = global.get("bankAccounts")[global.get("accountStep")];
-  let transactions = global.get("transactions") ? global.get("transactions") : [];
-  let addTransactions = global.get("addTransactions");
+  let transactionsObj = global.get("transactions");
+  const accountValue = global.get("masterData").bankAccounts[global.get("transactions").accountStep];
+  let transactions = global.get("transactions").list ? global.get("transactions").list : [];
+  let addTransactions = global.get("transactions").add;
   
   // Ensure addTransactions is an array
   if (Array.isArray(addTransactions)) {
@@ -39,7 +40,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       transactions = transactions.concat(addTransactions);
   
       // Update the flow variable with the modified array
-      global.set("transactions", transactions);
+      transactionsObj.list = transactions;
+      global.set("transactions", transactionsObj);
   
   } else {
       node.error("No transactions to add");

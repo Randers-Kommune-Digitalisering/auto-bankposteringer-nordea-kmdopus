@@ -7,7 +7,7 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "runRestart",
+      "p": "runs.restart",
       "pt": "global",
       "to": "true",
       "tot": "bool"

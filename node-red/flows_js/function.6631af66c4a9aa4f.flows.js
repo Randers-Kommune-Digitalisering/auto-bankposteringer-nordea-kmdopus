@@ -109,7 +109,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
       const queryParams = [];
       const queryParam1 = flow.get("queryParam1");
       const queryParam2 = flow.get("queryParam2");
-      const continuationKey = flow.get("continuation_key");
+      const continuationKey = global.get("transactions").continuationKey;
   
       if (queryParam1) {
           queryParams.push(`from_date=${queryParam1}`);
@@ -167,10 +167,10 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   
   switch (method) {
       case "get":
-          msg.headers['Authorization'] = "Bearer " + global.get("token");
+          msg.headers['Authorization'] = "Bearer " + global.get("auth").token;
           break;
       case "put":
-          msg.headers['Authorization'] = "Bearer " + global.get("token");
+          msg.headers['Authorization'] = "Bearer " + global.get("auth").token;
           msg.headers['Content-Type'] = contentType;
           break;
       case "post":

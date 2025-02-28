@@ -9,7 +9,7 @@ const Node = {
   "hdrout": "all",
   "multi": "mult",
   "ret": "\\r\\n",
-  "temp": "Bogføringsdato, Beløb, Posteringstype, Reference, Løbende_saldo, Statuskonto",
+  "temp": "",
   "skip": "0",
   "strings": true,
   "include_empty_strings": true,
