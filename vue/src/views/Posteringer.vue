@@ -180,6 +180,9 @@
                     </button>
                 </router-link></td>
             </tr>
+            <tr v-else-if="postings = []">
+                <td :colspan=" Object.keys(keyMap).length +1">Der er ingen posteringer at vise</td>
+            </tr>
             <tr v-else>
                 <td :colspan="(Object.values(keyMap).filter(value => !value.hidden).length)+1">Indlæser...</td>
             </tr>

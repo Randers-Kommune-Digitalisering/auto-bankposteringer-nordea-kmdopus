@@ -31,9 +31,9 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, csv, xml2js) {
-  const inProd = false;
+  const inProd = true;
   
-  const date = global.get("dateOfOrigin");
+  const date = global.get("date");
   const bankingDate = date.replace(/-/g, "");
   const time = global.get("timeOfOrigin");
   const docId = global.get("messageIdentification");
@@ -42,62 +42,55 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   const prodEnv = inProd ? global.get("configs").ftp.prodEnv : "T02";
   const dataProviderIdCode = inProd ? global.get("configs").ftp.dataProviderIdCode : "797";
   const filename = `ZFIR_KMD_Opus_Posteringer_IND_${dataProviderIdCode}_${dataProviderId}_${date}_${time}.xml`;
+  const postings = global.get("erpPostings");
   
   let lineCounter = 0;
   let debetSum = parseFloat(0);
   let creditSum = parseFloat(0);
   
-  // Konverter ERP-data array til objekter baseret på headers
-  const dataArray = msg.payload;
-  const headersString = flow.get("erpFileHeaders");
-  const headersArray = headersString.split(", ");
-  const erpObject = dataArray.map((item) => {
-      return headersArray.reduce((obj, header, index) => {
-          obj[header] = item[index];
-          return obj;
-      }, {});
-  });
-  
   // Create a single LINES object with multiple LINE elements inside
-  const LINES = {
-      LINE: erpObject.map((posting, index) => {
-          lineCounter++;
+  const LINES = { LINE: [] };
   
-          let amount = posting['Beløb'].replace(',', '.');
-          amount = parseFloat(amount);
-          let amountPrefixed = posting['Debet/kredit'] === "Debet" ? amount : amount * -1;
+  for (const posting of postings) {
+      lineCounter++;
   
-          let psp = posting['PSP-element'] || undefined;
-          let artskonto = String(posting['Artskonto']);
+      global.set("posting", posting);
   
-          if (!inProd) {
-              psp = posting['PSP-element'] ? "XG-9999999990-00001" : undefined;
-              artskonto = artskonto.charAt(0) === "9" ? "90515060" : "29505050";
-          }
-          
-          let line = {
-              DEB_CRED_IND: posting['Debet/kredit'].charAt(0),
-              AMT_DOCCUR: amountPrefixed.toFixed(2),
-              ITEM_TEXT: posting['Tekst'],
-              GL_ACCOUNT: artskonto,
-              WBS_ELEMENT: psp,
-              REF_KEY_3: String(lineCounter),
-              ZZCSYSIDN: dataProviderId
-          };
+      let amount = posting.amount.replace(',', '.');
+      amount = parseFloat(amount);
+      let amountPrefixed = posting.debetOrCredit === "Debet" ? amount : amount * -1;
   
-          // Remove undefined values
-          Object.keys(line).forEach(key => line[key] === undefined && delete line[key]);
+      let psp = posting.psp ? posting.psp : undefined;
+      let artskonto = String(posting.account);
   
-          // Update debit and credit sums
-          if (posting['Debet/kredit'] === 'Debet') {
-              debetSum += amount;
-          } else if (posting['Debet/kredit'] === 'Kredit') {
-              creditSum += amount;
-          }
+      if (!inProd) {
+          psp = posting.psp ? "XG-9999999990-00001" : undefined;
+          artskonto = artskonto.charAt(0) === "9" ? "90515060" : "29505050";
+      }
   
-          return line;
-      })
-  };
+      let line = {
+          DEB_CRED_IND: posting.debetOrCredit.charAt(0),
+          AMT_DOCCUR: amountPrefixed.toFixed(2),
+          ITEM_TEXT: posting.text,
+          GL_ACCOUNT: artskonto,
+          WBS_ELEMENT: psp,
+          REF_KEY_3: String(lineCounter),
+          ZZCSYSIDN: dataProviderId
+      };
+  
+      // Remove undefined values
+      Object.keys(line).forEach(key => line[key] === undefined && delete line[key]);
+  
+      // Update debit and credit sums
+      if (posting.debetOrCredit === 'Debet') {
+          debetSum += amount;
+      } else if (posting.debetOrCredit === 'Kredit') {
+          creditSum += amount;
+      }
+  
+      // Tilføj linjen til LINES.LINE arrayet
+      LINES.LINE.push(line);
+  }
   
   const CONTROL_FIELDS = {
       SENDERID: prodEnv + "CLNT" + dataProviderIdCode,

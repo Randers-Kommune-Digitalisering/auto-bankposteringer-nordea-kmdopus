@@ -11,10 +11,11 @@ const Node = {
   "finalize": "",
   "libs": [],
   "x": 665,
-  "y": 80,
+  "y": 60,
   "wires": [
     [
-      "a52457ed55960f9b"
+      "c49c5be7601cebc5",
+      "99eab2ad32c55cdb"
     ]
   ],
   "icon": "font-awesome/fa-handshake-o",
@@ -28,8 +29,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   const transactionParameters = flow.get("transactionParameters");   // Has to match ruleParameters length
   const accountingRules = global.get("accountingRules");
   const ruleParameters = Object.keys(accountingRules[0]).slice(0, 4);
-  const erpFileHeaders = flow.get("erpFileHeaders").split(", ");
-  const bankAccounts = global.get("bankAccounts");
   const date = global.get("simpleDate");
   
   function sumOfParametersGiven(rule) {
@@ -96,10 +95,25 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   }
   
   function generateErpPostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, psp) {
-      // Needs work. Length and placement of variables should be dynamic, based on headers.
-      erpPostings.push([landingAccount, '', psp, '', '', landingDebetOrCredit, amount, '', text, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
-      erpPostings.push([statusAccount, '', '', '', '', statusDebetOrCredit, amount, '', text, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+      erpPostings.push(
+          {
+              account: statusAccount,
+              debetOrCredit: statusDebetOrCredit,
+              amount: amount,
+              text: text
+          }
+      )
+      erpPostings.push(
+          {
+              account: landingAccount,
+              psp: psp,
+              debetOrCredit: landingDebetOrCredit,
+              amount: amount,
+              text: text
+          }
+      )
   }
+  
   
   function processPosting(transaction, rules) {
       transaction.amount = parseFloat(transaction.amount);
@@ -147,7 +161,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
               generateErpPostings(transaction.account.statusAccount, transaction.account.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, '');
               
-              if (transaction.account.bankAccountName != "Debitorkonto") {
+              // if (transaction.account.bankAccountName != "Debitorkonto") {
+              if (transaction.account.bankAccountName != "TEST") {
                   transaction.amount = transaction.amount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                   transactionsWithNoMatch.push(transaction);
               }
@@ -163,9 +178,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       processPosting(transaction, accountingRules);
   });
   
-  msg.payload = erpPostings;
-  msg.columns = flow.get("erpFileHeaders");
-  msg.filename = "/data/output/" + date + ".csv";
+  global.set("erpPostings", erpPostings);
   
   return msg;
 }

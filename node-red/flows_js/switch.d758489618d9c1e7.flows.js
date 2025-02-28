@@ -8,10 +8,10 @@ const Node = {
   "propertyType": "global",
   "rules": [
     {
-      "t": "true"
+      "t": "false"
     },
     {
-      "t": "false"
+      "t": "true"
     }
   ],
   "checkall": "false",
@@ -21,10 +21,10 @@ const Node = {
   "y": 300,
   "wires": [
     [
-      "f2f122a419822663"
+      "076e9bdf1e6b6059"
     ],
     [
-      "076e9bdf1e6b6059"
+      "f2f122a419822663"
     ]
   ],
   "icon": "font-awesome/fa-question",

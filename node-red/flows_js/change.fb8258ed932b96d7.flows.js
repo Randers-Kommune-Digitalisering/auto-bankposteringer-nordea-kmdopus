@@ -7,13 +7,6 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "date",
-      "pt": "global",
-      "to": "originDate",
-      "tot": "msg"
-    },
-    {
-      "t": "set",
       "p": "runRestart",
       "pt": "global",
       "to": "true",
@@ -32,6 +25,7 @@ const Node = {
       "497a8a8d75494096"
     ]
   ],
+  "icon": "font-awesome/fa-cog",
   "l": false
 }
 
