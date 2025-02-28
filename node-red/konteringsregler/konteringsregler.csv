@@ -1,4 +1,4 @@
-﻿Reference;Advisliste;Afsender;Posteringstype;match_regel;Beløb1;Beløb2;beløb_regel;Posteringstekst;Artskonto;PSP-element;SIO;Notat
+﻿Reference;Advisliste;Afsender;Posteringstype;match_regel;Beløb1;Beløb2;beløb_regel;Posteringstekst;Artskonto;PSP;SIO;Notat
 142731;;Børne- og undervisning;;Indeholder;;;;Advis fra bank;86000000;XG-0000002806-00014;;BS Økonomi
 ;GSRN;Energistyrelsen;;Indeholder;;;;Advis fra bank;72000000;XG-0000005311-00001;;Energi og Projektering - Anders Weng Mikkelsen
 ;;;Overførsel;Starter med;4597,00;;Lig med;Advis fra bank;79000000;XG-0000003025-00001;;Huslejeklagenævnet

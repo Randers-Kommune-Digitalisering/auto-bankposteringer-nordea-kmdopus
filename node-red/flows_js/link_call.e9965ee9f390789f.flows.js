@@ -5,7 +5,7 @@ const Node = {
   "g": "83692983b416dfd5",
   "name": "",
   "links": [
-    "da25473b2c2413de"
+    "3fdb7df28166b610"
   ],
   "linkType": "static",
   "timeout": "30",
@@ -13,7 +13,7 @@ const Node = {
   "y": 620,
   "wires": [
     [
-      "a3c286bb133fbb23"
+      "b8b5e747de06686a"
     ]
   ],
   "l": false

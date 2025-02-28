@@ -6,7 +6,7 @@ const Node = {
   "name": "link in kmd matching script",
   "links": [],
   "x": 565,
-  "y": 80,
+  "y": 60,
   "wires": [
     [
       "a3d89dc03536f2fb"

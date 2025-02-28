@@ -3,16 +3,17 @@ const Node = {
   "type": "http in",
   "z": "32cf2bec698ca424",
   "g": "83692983b416dfd5",
-  "name": "Get rule",
+  "name": "Get data",
   "url": "/postings/:uid",
   "method": "get",
   "upload": false,
   "swaggerDoc": "",
-  "x": 550,
+  "x": 560,
   "y": 540,
   "wires": [
     [
-      "a5aca8c0b4a9f518"
+      "a5aca8c0b4a9f518",
+      "7a3c4a0de3aa6778"
     ]
   ]
 }

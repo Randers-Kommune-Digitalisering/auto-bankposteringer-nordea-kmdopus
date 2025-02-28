@@ -14,7 +14,8 @@ const Node = {
   "y": 280,
   "wires": [
     [
-      "47554be7fa0c6e02"
+      "47554be7fa0c6e02",
+      "78ddcf765998b0c2"
     ]
   ],
   "icon": "font-awesome/fa-plus",
@@ -22,7 +23,7 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let data = msg.payload;
+  let data = global.get("transactionsWithNoMatch");
   
   // Get the keys from the first object to use as column names
   let columns = Object.keys(data);
@@ -41,11 +42,33 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       }
   });
   
-  
   let sqlQuery = `INSERT INTO transactionsWithNoMatch (${columns.join(', ')}) VALUES (${values.join(', ')});`;
   msg.sql = sqlQuery;
   
+  global.set("transactionsWithNoMatch", [])
+  
   return msg;
+  
+  // let data = global.get("transactionsWithNoMatch");
+  
+  // let sqlQueries = data.map(transaction => {
+  //     let transactionID = transaction.transaction_id ? `'${transaction.transaction_id.replace(/'/g, "''")}'` : 'NULL';
+  //     let counterpartyName = transaction.counterparty_account ? `'${transaction.counterparty_account.replace(/'/g, "''")}'` : 'NULL';
+  //     let narrative = transaction.narrative ? `'${transaction.narrative.replace(/'/g, "''")}'` : 'NULL';
+  //     let bankAccount = transaction.account?.bankAccount ? `'${transaction.account.bankAccount.replace(/'/g, "''")}'` : 'NULL';
+  //     let amount = transaction.amount ? parseFloat(transaction.amount.replace(/\./g, '').replace(',', '.')) : 'NULL';
+  //     let bookingDate = transaction.booking_date ? `'${transaction.booking_date}'` : 'NULL';
+  
+  //     return `INSERT INTO transactionsWithNoMatch (transactionID, counterpartyName, narrative, bankAccount, amount, bookingDate) 
+  //             VALUES (${transactionID}, ${counterpartyName}, ${narrative}, ${bankAccount}, ${amount}, ${bookingDate});`;
+  // });
+  
+  // msg.sql = sqlQueries.join("\n");
+  
+  // global.set("transactionsWithNoMatch", []);
+  
+  // return msg;
+  
 }
 
 module.exports = Node;

@@ -25,7 +25,7 @@
         "Bogføringsdato": { "key": "booking_date", "group": "Transaktionsoplysninger" },
         "Afsender": { "key": "counterparty_name", "group": "Transaktionsoplysninger" },
         "Reference": { "key": "narrative", "group": "Transaktionsoplysninger" },
-        "Beløb": { "key": "amount", "group": "Beløbsafgrænsning" },
+        "Beløb": { "key": "amount", "group": "Transaktionsoplysninger" },
         "Artskonto": { "key": "Artskonto", "group": "Kontering" },
         "PSP-element": { "key": "PSP", "group": "Kontering" },
         "Posteringstekst": { "key": "Posteringstekst", "group": "Kontering" },
@@ -42,7 +42,7 @@
         return groups
     })
 
-    const groupOrder = ['Transaktionsoplysninger', 'Beløbsafgrænsning', 'Kontering']
+    const groupOrder = ['Transaktionsoplysninger', 'Kontering']
 
     const sortedGroups = computed(() => {
         return groupOrder
@@ -84,11 +84,9 @@
 
 <template>
     
-    <h2 v-if="konteringsregel != null">
-        <span v-if="isNewRule">Ny konteringsregel</span>
-        <span v-else>Konteringsregel #{{konteringsregel[keyMap.id.key]}}</span>
+    <h2>
+        <span>Postering #{{posting[keyMap.id.key]}}</span>
     </h2>
-    <h2 v-else>Indlæser...</h2>
     
     <Content>
         <template #icon>

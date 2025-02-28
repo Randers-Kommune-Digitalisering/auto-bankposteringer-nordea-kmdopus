@@ -7,11 +7,10 @@ const Node = {
   "mode": "link",
   "links": [
     "3d000a158a8b1f58",
-    "42b18cd0bd05a22e",
-    "f7a16d7cd533e282"
+    "42b18cd0bd05a22e"
   ],
-  "x": 605,
-  "y": 300,
+  "x": 755,
+  "y": 340,
   "wires": []
 }
 
