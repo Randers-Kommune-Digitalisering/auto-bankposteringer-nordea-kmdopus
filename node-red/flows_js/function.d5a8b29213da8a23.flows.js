@@ -37,8 +37,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
   msg.payload = JSON.parse(JSON.stringify(msg.payload));
   
-  msg.payload = msg.payload[0];
-  
   masterDataObj.admSysData = msg.payload[0];
   
   global.set("masterData", masterDataObj);
