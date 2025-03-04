@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS transactionsWithNoMatch (
     counterpartyName NVARCHAR(63) NULL,
     narrative NVARCHAR(255) NULL,
     bankAccount NVARCHAR(31) NULL,
-    amount float NULL,
-    bookingDate date NULL
+    amount NVARCHAR(31) NULL,
+    bookingDate NVARCHAR(31) NULL
 );
 `
 

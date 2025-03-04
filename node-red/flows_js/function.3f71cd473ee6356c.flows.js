@@ -23,31 +23,28 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let data = global.get("transactions").unmatched;
+  let transactionsObj = global.get("transactions");
+  let data = transactionsObj.unmatched;
   
-  // Get the keys from the first object to use as column names
-  let columns = Object.keys(data);
+  let sqlQueries = data.map(transaction => {
+      let transactionID = `'${transaction.transaction_id.replace(/'/g, "''")}'`;
+      let counterpartyName = transaction.counterparty_name ? `'${transaction.counterparty_name.replace(/'/g, "''")}'` : 'NULL';
+      let narrative = transaction.narrative ? `'${transaction.narrative.replace(/'/g, "''")}'` : 'NULL';
+      let bankAccount = `'${transaction.account.bankAccount.replace(/'/g, "''")}'`;
+      let amount = `'${transaction.amount.replace(/'/g, "''")}'`;
+      let bookingDate = transaction.booking_date ? `'${transaction.booking_date}'` : 'NULL';
   
-  // Map over the array to generate values strings
-  let values = columns.map(col => {
-      let value = data[col];
-      if (value === null) {
-          return 'NULL';
-      } else if (typeof value === 'string') {
-          return `'${value.replace(/'/g, "''")}'`;
-      } else if (typeof value === 'boolean') {
-          return value ? 'TRUE' : 'FALSE';
-      } else {
-          return value;
-      }
+      return `INSERT INTO transactionsWithNoMatch (transactionID, counterpartyName, narrative, bankAccount, amount, bookingDate) 
+              VALUES (${transactionID}, ${counterpartyName}, ${narrative}, ${bankAccount}, ${amount}, ${bookingDate});`;
   });
   
-  let sqlQuery = `INSERT INTO transactionsWithNoMatch (${columns.join(', ')}) VALUES (${values.join(', ')});`;
-  msg.sql = sqlQuery;
+  msg.sql = sqlQueries.join("\n");
   
-  global.set("transactionsWithNoMatch", [])
+  transactionsObj.unmatched = [];
+  global.set("transactions", transactionsObj);
   
   return msg;
+  
   
   // let data = global.get("transactionsWithNoMatch");
   
