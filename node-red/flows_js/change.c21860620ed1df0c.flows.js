@@ -11,6 +11,13 @@ const Node = {
       "pt": "flow",
       "to": "true",
       "tot": "bool"
+    },
+    {
+      "t": "set",
+      "p": "dates",
+      "pt": "global",
+      "to": "{}",
+      "tot": "json"
     }
   ],
   "action": "",

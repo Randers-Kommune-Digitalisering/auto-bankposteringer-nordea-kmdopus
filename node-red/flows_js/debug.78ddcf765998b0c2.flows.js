@@ -13,7 +13,12 @@ const Node = {
   "statusType": "auto",
   "x": 1110,
   "y": 560,
-  "wires": []
+  "wires": [],
+  "info": ""
 }
+
+Node.info = `
+Blandt andet fordi amount ikke bliver parset til string på minusbeløb over 999 kr.
+`
 
 module.exports = Node;

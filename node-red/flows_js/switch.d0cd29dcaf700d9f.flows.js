@@ -4,7 +4,7 @@ const Node = {
   "z": "8c354b8d2ca56b7b",
   "g": "622bd279325fcb5d",
   "name": "transactionsWithNoMatch?",
-  "property": "transactionsWithNoMatch",
+  "property": "transactions.unmatched",
   "propertyType": "global",
   "rules": [
     {

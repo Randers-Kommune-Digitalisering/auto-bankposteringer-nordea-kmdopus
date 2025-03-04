@@ -33,6 +33,8 @@ Format: ISO 8601
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, dayjs) {
   let dates = global.get("dates");
+  let transactions = global.get("transactions");
+  
   function findDate() {
       let date = dayjs().startOf('day');
   
@@ -51,7 +53,10 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   dates.simpleDate = dayjs().format('DD-MM-YYYY');
   dates.time = dayjs().format('HHmmss');
   
+  transactions.list = [];
+  
   global.set("dates", dates);
+  global.set("transactions", transactions)
   
   return msg;
 }
