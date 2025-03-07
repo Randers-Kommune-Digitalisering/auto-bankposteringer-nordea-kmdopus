@@ -119,9 +119,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
   
   function processPosting(transaction, rules) {
-      transaction.amount = parseFloat(transaction.amount);
-      let absoluteAmount = Math.abs(transaction.amount);
-      let cleanedAmount = String(transaction.amount).replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
+      let absoluteAmount = Math.abs(parseFloat(transaction.amount));
+      let cleanedAmount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      transaction.amount = cleanedAmount;
       let statusDebetOrCredit = transaction.amount > 0 ? "Debet" : "Kredit";
       let landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet";
       
@@ -166,7 +166,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               
               // if (transaction.account.bankAccountName != "Debitorkonto") {
               if (transaction.account.bankAccountName != "TEST") {
-                  transaction.amount = transaction.amount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                   transactionsUnmatched.push(transaction);
               }
           }
