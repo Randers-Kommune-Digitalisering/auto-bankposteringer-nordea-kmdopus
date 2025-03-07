@@ -107,7 +107,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
           ActiveBool,
           ExceptionBool,
           LastUsed,
-          RuleID
+          RuleID,
+          relatedBankAccount: null
       };
   });
   

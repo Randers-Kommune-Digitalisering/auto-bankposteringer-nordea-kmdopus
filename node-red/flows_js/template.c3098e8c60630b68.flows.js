@@ -41,7 +41,9 @@ CREATE TABLE IF NOT EXISTS accountingRules (
     ActiveBool BOOLEAN,
     ExceptionBool BOOLEAN,
     LastUsed NVARCHAR(10) NULL,
-    RuleID INT PRIMARY KEY
+    RuleID INT PRIMARY KEY,
+    relatedBankAccount NVARCHAR(31) NULL,
+    FOREIGN KEY (relatedBankAccount) REFERENCES bankAccounts(bankAccount) ON DELETE SET NULL
 );
 `
 
