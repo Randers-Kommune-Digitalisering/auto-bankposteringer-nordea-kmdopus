@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "$globalContext(\"transactions\").list.{\t  \"Bogføringsdato\": $string(booking_date).$replace(/-/, ''),\t  \"Beløb\": $string(amount).$replace(/\\./, ','),\t  \"Posteringstype\": type_description,\t  \"Reference\": narrative,\t  \"Løbende_saldo\": $string(balance_after_transaction).$replace(/\\./, ','),\t  \"Statuskonto\": $string(account.statusAccount)\t}",
+      "to": "$globalContext(\"transactions\").list.{\t  \"Bogføringsdato\": $string(booking_date).$replace(/-/, ''),\t  \"Beløb\": amount,\t  \"Posteringstype\": type_description,\t  \"Reference\": narrative,\t  \"Løbende_saldo\": $string(balance_after_transaction).$replace(/\\./, ','),\t  \"Statuskonto\": $string(account.statusAccount)\t}",
       "tot": "jsonata"
     },
     {

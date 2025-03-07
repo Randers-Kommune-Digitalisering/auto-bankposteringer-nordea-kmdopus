@@ -19,7 +19,6 @@
     const konteringsregel = ref(isNewRule.value ? JSON.parse(JSON.stringify(newItem)) : null)
 
     const exceptionBool = ref(false)
-    // const activeBool = ref(false)
 
     if (isNewRule.value)
     {   
@@ -32,7 +31,6 @@
             .then(value => {
                 konteringsregel.value = value
                 exceptionBool.value = konteringsregel.value.ExceptionBool
-                //activeBool.value = konteringsregel.value.ActiveBool
             })
     }
 
@@ -40,13 +38,32 @@
     watch(() => konteringsregel.value, newValue => {
         if (newValue) {
             exceptionBool.value = newValue.ExceptionBool
-            //activeBool.value = newValue.ActiveBool
         }
     })
 
-    // Virker ikke
-    console.log(konteringsregel.value)
+    const bankaccounts = ref([])
+    const bankAccountOptions = ref([])
 
+    fetch('/api/bankaccounts')
+        .then(response => response.json())
+        .then(value => {
+            bankaccounts.value = value
+            bankAccountOptions.value = [
+                { label: 'Alle', value: null },
+                ...value.map(account => ({
+                    label: `${account.bankAccountName}`,
+                    value: account.bankAccount
+                }))
+            ]
+        })
+
+    const operatorOptions = [
+        { label: 'Større end', value: '>' },
+        { label: 'Mindre end', value: '<' },
+        { label: 'Mellem', value: '><' },
+        { label: 'Lig med', value: '==' }
+    ]
+    
     const keyMap_rule = {
         "id": { "key": "RuleID", "hidden": true },
         "Reference": { "key": "Reference", "group": "Transaktionsoplysninger" },
@@ -60,7 +77,8 @@
         "PSP-element": { "key": "PSP", "group": "Kontering" },
         "Posteringstekst": { "key": "Posteringstekst", "group": "Kontering" },
         "Notat": { "key": "Notat" },
-        "ActiveBool": { "key": "ActiveBool", "hidden": true }
+        "ActiveBool": { "key": "ActiveBool", "hidden": true },
+        "Tilknyttet bankkonto": { "key": "relatedBankAccount", "group": "Transaktionsoplysninger" }
     }
 
     const keyMap_exception = {
@@ -75,11 +93,16 @@
         "Artskonto": { "key": "Artskonto", "hidden": true, "group": "Kontering" },
         "PSP-element": { "key": "PSP", "hidden": true, "group": "Kontering" },
         "Posteringstekst": { "key": "Posteringstekst", "hidden": true, "group": "Kontering" },
-        "Notat": { "key": "Notat" }
+        "Notat": { "key": "Notat" },
+        "Tilknyttet bankkonto": { "key": "relatedBankAccount", "group": "Transaktionsoplysninger" }
     }
 
     const keyMap = computed(() => (index.value === 'nyundtagelse' ? keyMap_exception : keyMap_rule))
     
+    watch(() => konteringsregel.value.Operator, (newVal) => {
+        keyMap.value["Beløb 2"].hidden = !(newVal === '><')
+    })
+
     const groupedKeyMap = computed(() => {
         const groups = {}
         for (const [key, value] of Object.entries(keyMap.value)) {
@@ -99,20 +122,6 @@
                 fields: groupedKeyMap.value[groupName] || {}
             }))
             .filter(group => Object.keys(group.fields).length > 0)
-    })
-
-    const operatorOptions = [
-        { label: 'Større end', value: '>' },
-        { label: 'Mindre end', value: '<' },
-        { label: 'Mellem', value: '><' },
-        { label: 'Lig med', value: '==' }
-    ]
-
-    const selectedOperator = ref(operatorOptions[0].value)
-
-    watch(selectedOperator, (newVal) => {
-        konteringsregel.value.Operator = newVal
-        keyMap.value["Beløb 2"].hidden = !(newVal === '><')
     })
 
     function updateRule()
@@ -174,7 +183,6 @@
 
     function toggleActivation() {
         konteringsregel.value.ActiveBool = !konteringsregel.value.ActiveBool
-        //activeBool.value = konteringsregel.value.ActiveBool
     }
 
 </script>
@@ -221,8 +229,15 @@
                             <label :for="key" class="capitalize">{{ key }}</label>
 
                             <template v-if="key === 'Beløbsregel'">
-                                <select v-model="selectedOperator">
+                                <select v-model="konteringsregel.value.Operator">
                                     <option v-for="option in operatorOptions" :key="option.value" :value="option.value">
+                                        {{ option.label }}
+                                    </option>
+                                </select>
+                            </template>
+                            <template v-else-if="key === 'Tilknyttet bankkonto'">
+                                <select v-model="konteringsregel.value.relatedBankAccount">
+                                    <option v-for="option in bankAccountOptions" :key="option.value" :value="option.value">
                                         {{ option.label }}
                                     </option>
                                 </select>
