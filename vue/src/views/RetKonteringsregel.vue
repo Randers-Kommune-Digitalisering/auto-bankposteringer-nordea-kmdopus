@@ -98,10 +98,6 @@
     }
 
     const keyMap = computed(() => (index.value === 'nyundtagelse' ? keyMap_exception : keyMap_rule))
-    
-    watch(() => konteringsregel.value.Operator, (newVal) => {
-        keyMap.value["Beløb 2"].hidden = !(newVal === '><')
-    })
 
     const groupedKeyMap = computed(() => {
         const groups = {}
@@ -123,6 +119,26 @@
             }))
             .filter(group => Object.keys(group.fields).length > 0)
     })
+
+    const selectedOperator = ref(operatorOptions[0].value)
+ 
+    watch(selectedOperator, (newVal) => {
+        konteringsregel.value.Operator = newVal
+        keyMap["Beløb 2"].hidden = !(newVal === '><')
+    })
+
+    const selectedBankaccount = ref(null)
+
+    watch(bankAccountOptions, (newVal) => {
+        if (newVal.length > 0) {
+            selectedBankaccount.value = newVal[0].value
+        }
+    })
+
+    watch(selectedBankaccount, (newVal) => {
+        konteringsregel.value.relatedBankAccount = newVal
+    })
+
 
     function updateRule()
     {
@@ -229,14 +245,14 @@
                             <label :for="key" class="capitalize">{{ key }}</label>
 
                             <template v-if="key === 'Beløbsregel'">
-                                <select v-model="konteringsregel.value.Operator">
+                                <select v-model="selectedOperator">
                                     <option v-for="option in operatorOptions" :key="option.value" :value="option.value">
                                         {{ option.label }}
                                     </option>
                                 </select>
                             </template>
                             <template v-else-if="key === 'Tilknyttet bankkonto'">
-                                <select v-model="konteringsregel.value.relatedBankAccount">
+                                <select v-model="selectedBankaccount">
                                     <option v-for="option in bankAccountOptions" :key="option.value" :value="option.value">
                                         {{ option.label }}
                                     </option>
@@ -244,20 +260,20 @@
                             </template>
                             <template v-else>
                                 <input
-                                type="text"
-                                placeholder="..."
-                                :id="key"
-                                v-if="konteringsregel != null && !value.hidden"
-                                v-model="konteringsregel[value.key]"
-                                @change="hasUpdated = false"
-                                :disabled="value.disabled"
+                                    type="text"
+                                    placeholder="..."
+                                    :id="key"
+                                    v-if="konteringsregel != null && !value.hidden"
+                                    v-model="konteringsregel[value.key]"
+                                    @change="hasUpdated = false"
+                                    :disabled="value.disabled"
                                 />
                                 <input
-                                type="text"
-                                placeholder="Indlæser..."
-                                :id="key"
-                                v-if="konteringsregel == null && !value.hidden"
-                                disabled
+                                    type="text"
+                                    placeholder="Indlæser..."
+                                    :id="key"
+                                    v-if="konteringsregel == null && !value.hidden"
+                                    disabled
                                 />
                             </template>
                         </div>

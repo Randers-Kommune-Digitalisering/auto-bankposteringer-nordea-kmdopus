@@ -44,11 +44,11 @@
 
 
     const keyMap = {
-        "Bogføringsdato": { "key": "booking_date" },
-        "Afsender": { "key": "counterparty_name" }, 
+        "Bogføringsdato": { "key": "bookingDate" },
+        "Afsender": { "key": "counterpartyName" }, 
         "Reference": { "key": "narrative" },
         "Beløb": { "key": "amount" },
-        "ID": { "key": "transaction_id", "hidden": true }
+        "ID": { "key": "transactionID", "hidden": true }
     }
     
     function handleQueryParams()
@@ -171,7 +171,7 @@
                     {{ obj[value.key] }}
                 </td>
                 
-                <td><router-link :to="'/posting/' + obj[keyMap['ID'].key]">
+                <td><router-link :to="'/postings/' + obj[keyMap['ID'].key]">
                     <button class="editButton orange" @click="router.replace({ 
                         path: route.path,
                         query: isSearching ? { returnfrom: obj[keyMap['ID'].key], search: searchKeyword }

@@ -15,8 +15,8 @@ const Node = {
       "module": "csv-parser"
     }
   ],
-  "x": 945,
-  "y": 140,
+  "x": 995,
+  "y": 60,
   "wires": [
     [
       "90e52a55e15cdaf3"
@@ -28,7 +28,7 @@ const Node = {
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, csv) {
   let masterDataObj = global.get("masterData");
-  const bankAccounts = global.get("masterData").bankAccounts ?? [];
+  const bankAccounts = global.get("masterData").bankAccounts;
   const statusAccounts = bankAccounts.map(account => account.statusAccount);
   const operatorMapping = {
       "Større end": ">",
@@ -86,7 +86,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       const Operator = valueOperatorValue;
   
       const RuleID = index;
-  
+      
       const shouldBeException = statusAccounts.includes(Artskonto);
       cleanedData.Artskonto = shouldBeException ? null : Artskonto;
       const ExceptionBool = shouldBeException;
