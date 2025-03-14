@@ -27,7 +27,9 @@ CREATE TABLE IF NOT EXISTS transactionsWithNoMatch (
     narrative NVARCHAR(255) NULL,
     bankAccount NVARCHAR(31) NULL,
     amount NVARCHAR(31) NULL,
-    bookingDate NVARCHAR(31) NULL
+    bookingDate NVARCHAR(31) NULL,
+    Artskonto NVARCHAR(8) NULL,
+    PSP NVARCHAR(19) NULL
 );
 `
 

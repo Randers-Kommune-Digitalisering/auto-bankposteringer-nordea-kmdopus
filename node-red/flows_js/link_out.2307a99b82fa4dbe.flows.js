@@ -6,7 +6,7 @@ const Node = {
   "name": "link out update masterData to db",
   "mode": "return",
   "links": [],
-  "x": 1335,
+  "x": 1295,
   "y": 280,
   "wires": []
 }

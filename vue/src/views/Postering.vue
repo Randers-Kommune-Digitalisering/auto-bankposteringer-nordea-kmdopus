@@ -22,14 +22,14 @@
         })
 
     const keyMap = {
-        "Bogføringsdato": { "key": "booking_date", "group": "Transaktionsoplysninger" },
-        "Afsender": { "key": "counterparty_name", "group": "Transaktionsoplysninger" },
+        "Bogføringsdato": { "key": "bookingDate", "group": "Transaktionsoplysninger" },
+        "Afsender": { "key": "counterpartyName", "group": "Transaktionsoplysninger" },
         "Reference": { "key": "narrative", "group": "Transaktionsoplysninger" },
         "Beløb": { "key": "amount", "group": "Transaktionsoplysninger" },
         "Artskonto": { "key": "Artskonto", "group": "Kontering" },
         "PSP-element": { "key": "PSP", "group": "Kontering" },
         "Posteringstekst": { "key": "Posteringstekst", "group": "Kontering" },
-        "ID": { "key": "transaction_id", "hidden": true },
+        "ID": { "key": "transactionID", "hidden": true },
     }
     
     const groupedKeyMap = computed(() => {

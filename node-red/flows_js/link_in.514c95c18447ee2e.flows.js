@@ -5,7 +5,7 @@ const Node = {
   "g": "d992b55d9d319a30",
   "name": "link in delete rule to db",
   "links": [],
-  "x": 85,
+  "x": 65,
   "y": 360,
   "wires": [
     [
