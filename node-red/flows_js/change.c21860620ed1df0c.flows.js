@@ -18,6 +18,27 @@ const Node = {
       "pt": "global",
       "to": "{}",
       "tot": "json"
+    },
+    {
+      "t": "set",
+      "p": "masterData",
+      "pt": "global",
+      "to": "{}",
+      "tot": "json"
+    },
+    {
+      "t": "set",
+      "p": "runs",
+      "pt": "global",
+      "to": "{}",
+      "tot": "json"
+    },
+    {
+      "t": "set",
+      "p": "transactions",
+      "pt": "global",
+      "to": "{}",
+      "tot": "json"
     }
   ],
   "action": "",
