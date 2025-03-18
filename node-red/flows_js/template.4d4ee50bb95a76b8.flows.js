@@ -10,7 +10,7 @@ const Node = {
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 1095,
+  "x": 1135,
   "y": 320,
   "wires": [
     [
@@ -22,7 +22,7 @@ const Node = {
 }
 
 Node.template = `
-SELECT * FROM masterData
+SELECT * FROM admSysData
 `
 
 module.exports = Node;

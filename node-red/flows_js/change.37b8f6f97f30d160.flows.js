@@ -7,35 +7,35 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "configs.initialData.masterData.admEmail",
+      "p": "configs.initialData.admSysData.admEmail",
       "pt": "global",
       "to": "jan.molbaek@randers.dk",
       "tot": "str"
     },
     {
       "t": "set",
-      "p": "configs.initialData.masterData.admID",
+      "p": "configs.initialData.admSysData.admID",
       "pt": "global",
       "to": "AUTH_ID",
       "tot": "env"
     },
     {
       "t": "set",
-      "p": "configs.initialData.masterData.admName",
+      "p": "configs.initialData.admSysData.admName",
       "pt": "global",
       "to": "Jan Mølbæk",
       "tot": "str"
     },
     {
       "t": "set",
-      "p": "configs.initialData.masterData.integrationBool",
+      "p": "configs.initialData.admSysData.integrationBool",
       "pt": "global",
       "to": "true",
       "tot": "bool"
     },
     {
       "t": "set",
-      "p": "configs.initialData.masterData.erpSystem",
+      "p": "configs.initialData.admSysData.erpSystem",
       "pt": "global",
       "to": "KMD Opus",
       "tot": "str"

@@ -4,7 +4,7 @@ const Node = {
   "z": "431f85f122b4636d",
   "g": "5126da366c0f2bdb",
   "name": "Byg SQL-tabel til stamdata",
-  "field": "configs.database.masterData",
+  "field": "configs.database.admSysData",
   "fieldType": "global",
   "format": "sql",
   "syntax": "mustache",
@@ -21,7 +21,7 @@ const Node = {
 }
 
 Node.template = `
-CREATE TABLE IF NOT EXISTS masterData (
+CREATE TABLE IF NOT EXISTS admSysData (
     admName NVARCHAR(63),
     admEmail NVARCHAR(63),
     admID NVARCHAR(31) PRIMARY KEY,

@@ -3,11 +3,9 @@ const Node = {
   "type": "link in",
   "z": "a1dc9966e881ac6b",
   "g": "24481f222bcf4517",
-  "name": "link in load masterdata to env",
-  "links": [
-    "7d8046faef73edb6"
-  ],
-  "x": 1045,
+  "name": "load masterdata to env",
+  "links": [],
+  "x": 1085,
   "y": 320,
   "wires": [
     [
