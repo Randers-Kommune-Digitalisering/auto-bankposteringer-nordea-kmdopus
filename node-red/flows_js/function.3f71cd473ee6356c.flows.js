@@ -9,7 +9,12 @@ const Node = {
   "noerr": 0,
   "initialize": "",
   "finalize": "",
-  "libs": [],
+  "libs": [
+    {
+      "var": "dayjs",
+      "module": "dayjs"
+    }
+  ],
   "x": 835,
   "y": 280,
   "wires": [
@@ -21,7 +26,7 @@ const Node = {
   "l": false
 }
 
-Node.func = async function (node, msg, RED, context, flow, global, env, util) {
+Node.func = async function (node, msg, RED, context, flow, global, env, util, dayjs) {
   let transactionsObj = global.get("transactions");
   let data = transactionsObj.unmatched;
   
@@ -31,7 +36,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       let narrative = transaction.narrative ? `'${transaction.narrative.replace(/'/g, "''")}'` : 'NULL';
       let bankAccount = `'${transaction.account.bankAccount.replace(/'/g, "''")}'`;
       let amount = `'${transaction.amount.replace(/'/g, "''")}'`;
-      let bookingDate = transaction.booking_date ? `'${transaction.booking_date}'` : 'NULL';
+      let bookingDate = transaction.booking_date ? `'${dayjs(transaction.booking_date).format('DD-MM-YYYY')}'` : 'NULL';
   
       return `(${transactionID}, ${counterpartyName}, ${narrative}, ${bankAccount}, ${amount}, ${bookingDate})`;
   }).join(",\n");
@@ -43,27 +48,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   global.set("transactions", transactionsObj);
   
   return msg;
-  
-  
-  // let data = global.get("transactionsWithNoMatch");
-  
-  // let sqlQueries = data.map(transaction => {
-  //     let transactionID = transaction.transaction_id ? `'${transaction.transaction_id.replace(/'/g, "''")}'` : 'NULL';
-  //     let counterpartyName = transaction.counterparty_account ? `'${transaction.counterparty_account.replace(/'/g, "''")}'` : 'NULL';
-  //     let narrative = transaction.narrative ? `'${transaction.narrative.replace(/'/g, "''")}'` : 'NULL';
-  //     let bankAccount = transaction.account?.bankAccount ? `'${transaction.account.bankAccount.replace(/'/g, "''")}'` : 'NULL';
-  //     let amount = transaction.amount ? parseFloat(transaction.amount.replace(/\./g, '').replace(',', '.')) : 'NULL';
-  //     let bookingDate = transaction.booking_date ? `'${transaction.booking_date}'` : 'NULL';
-  
-  //     return `INSERT INTO transactionsWithNoMatch (transactionID, counterpartyName, narrative, bankAccount, amount, bookingDate) 
-  //             VALUES (${transactionID}, ${counterpartyName}, ${narrative}, ${bankAccount}, ${amount}, ${bookingDate});`;
-  // });
-  
-  // msg.sql = sqlQueries.join("\n");
-  
-  // global.set("transactionsWithNoMatch", []);
-  
-  // return msg;
   
 }
 

@@ -29,7 +29,8 @@ CREATE TABLE IF NOT EXISTS transactionsWithNoMatch (
     amount NVARCHAR(31) NULL,
     bookingDate NVARCHAR(31) NULL,
     Artskonto NVARCHAR(8) NULL,
-    PSP NVARCHAR(19) NULL
+    PSP NVARCHAR(19) NULL,
+    Posteringstekst NVARCHAR(255) NULL
 );
 `
 
