@@ -66,11 +66,6 @@
         exceptionBool.value = newValue.ExceptionBool
     })
 
-    watch(selectedOperator, (newValue) => {
-        konteringsregel.value.Operator = newValue
-        keyMap["Beløb 2"].hidden = !(newValue === '><')
-    })
-
     watch(bankAccountOptions, (newVal) => {
         if (newVal.length > 0) {
             selectedBankaccount.value = newVal[0].value
@@ -83,6 +78,7 @@
     
     const keyMap_rule = {
         "id": { "key": "RuleID", "hidden": true },
+        "Tilknyttet bankkonto": { "key": "relatedBankAccount", "group": "Transaktionsoplysninger" },
         "Reference": { "key": "Reference", "group": "Transaktionsoplysninger" },
         "Afsender": { "key": "Afsender", "group": "Transaktionsoplysninger" }, 
         "Advis": { "key": "Advisliste", "group": "Transaktionsoplysninger" },
@@ -94,12 +90,12 @@
         "PSP-element": { "key": "PSP", "group": "Kontering" },
         "Posteringstekst": { "key": "Posteringstekst", "group": "Kontering" },
         "Notat": { "key": "Notat" },
-        "ActiveBool": { "key": "ActiveBool", "hidden": true },
-        "Tilknyttet bankkonto": { "key": "relatedBankAccount", "group": "Transaktionsoplysninger" }
+        "ActiveBool": { "key": "ActiveBool", "hidden": true }
     }
 
     const keyMap_exception = {
         "id": { "key": "RuleID", "hidden": true },
+        "Tilknyttet bankkonto": { "key": "relatedBankAccount", "group": "Transaktionsoplysninger" },
         "Reference": { "key": "Reference", "group": "Transaktionsoplysninger" },
         "Afsender": { "key": "Afsender", "group": "Transaktionsoplysninger" }, 
         "Advis": { "key": "Advisliste", "group": "Transaktionsoplysninger" },
@@ -110,8 +106,7 @@
         "Artskonto": { "key": "Artskonto", "hidden": true, "group": "Kontering" },
         "PSP-element": { "key": "PSP", "hidden": true, "group": "Kontering" },
         "Posteringstekst": { "key": "Posteringstekst", "hidden": true, "group": "Kontering" },
-        "Notat": { "key": "Notat" },
-        "Tilknyttet bankkonto": { "key": "relatedBankAccount", "group": "Transaktionsoplysninger" }
+        "Notat": { "key": "Notat" }
     }
 
     const keyMap = computed(() => (index.value === 'nyundtagelse' ? keyMap_exception : keyMap_rule))
@@ -135,6 +130,11 @@
                 fields: groupedKeyMap.value[groupName] || {}
             }))
             .filter(group => Object.keys(group.fields).length > 0)
+    })
+
+    watch(selectedOperator, (newValue) => {
+        konteringsregel.value.Operator = newValue
+        keyMap.value["Beløb 2"].hidden = !(newValue === '><')
     })
 
     function updateRule()
@@ -197,6 +197,8 @@
     function toggleActivation() {
         konteringsregel.value.ActiveBool = !konteringsregel.value.ActiveBool
     }
+
+    console.log(keyMap.value)
 
 </script>
 

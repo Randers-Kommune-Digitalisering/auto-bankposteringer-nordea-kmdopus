@@ -7,16 +7,6 @@ const Node = {
   "rules": [
     {
       "t": "delete",
-      "p": "configs.initialData",
-      "pt": "global"
-    },
-    {
-      "t": "delete",
-      "p": "configs.database",
-      "pt": "global"
-    },
-    {
-      "t": "delete",
       "p": "isInitializing",
       "pt": "flow"
     }
