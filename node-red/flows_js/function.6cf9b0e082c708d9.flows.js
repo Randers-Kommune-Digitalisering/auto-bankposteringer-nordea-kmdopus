@@ -10,7 +10,7 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 1195,
+  "x": 1235,
   "y": 280,
   "wires": [
     [
@@ -22,7 +22,7 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let data = global.get("configs").initialData ? global.get("configs").initialData.masterData : global.get("masterData");
+  let data = global.get("configs").initialData ? global.get("configs").initialData.admSysData : global.get("admSysData");
   let formattedData = [];
   
   formattedData.push(data);
@@ -49,7 +49,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           return `(${values.join(', ')})`;
       });
   
-      let sqlQuery = `INSERT INTO masterData (${columns.join(', ')}) VALUES ${rows.join(', ')};`;
+      let sqlQuery = `INSERT INTO admSysData (${columns.join(', ')}) VALUES ${rows.join(', ')};`;
       msg.sql = sqlQuery;
   
   }

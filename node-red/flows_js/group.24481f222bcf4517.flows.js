@@ -2,7 +2,7 @@ const Node = {
   "id": "24481f222bcf4517",
   "type": "group",
   "z": "a1dc9966e881ac6b",
-  "name": "masterData",
+  "name": "admSysData",
   "style": {
     "stroke": "none",
     "fill": "#bfdbef",
@@ -26,11 +26,12 @@ const Node = {
     "d5a8b29213da8a23",
     "2307a99b82fa4dbe",
     "55be988b9af8045a",
-    "451d82b2fdb9c757"
+    "451d82b2fdb9c757",
+    "764cfc758bb59770"
   ],
-  "x": 1004,
+  "x": 1044,
   "y": 199,
-  "w": 332,
+  "w": 382,
   "h": 162
 }
 

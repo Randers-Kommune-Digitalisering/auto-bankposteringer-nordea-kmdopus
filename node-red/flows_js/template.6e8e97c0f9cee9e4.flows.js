@@ -10,7 +10,7 @@ const Node = {
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 1095,
+  "x": 1135,
   "y": 280,
   "wires": [
     [
@@ -22,7 +22,7 @@ const Node = {
 }
 
 Node.template = `
-DELETE FROM masterData
+DELETE FROM admSysData
 `
 
 module.exports = Node;
