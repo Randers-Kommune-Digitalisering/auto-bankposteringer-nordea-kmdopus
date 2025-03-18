@@ -7,39 +7,18 @@
     import IconSave from '../components/icons/IconSave.vue'
     import newItem from '@/assets/newItem.json'
 
+    const router = useRouter()
+    const route = useRoute()
+    const index = ref(route.params.id)
+
     const isUpdating = ref(false)
     const hasUpdated = ref(false)
 
-    const router = useRouter()
-    const route = useRoute()
-
-    const index = ref(route.params.id)
     const isNewRule = ref(index.value == "nyaktiv" || index.value == "nyinaktiv" || index.value == "nyundtagelse")
     
     const konteringsregel = ref(isNewRule.value ? JSON.parse(JSON.stringify(newItem)) : null)
 
     const exceptionBool = ref(false)
-
-    if (isNewRule.value)
-    {   
-        if (index.value === 'nyinaktiv') konteringsregel.value.ActiveBool = false
-        else if (index.value === 'nyundtagelse') konteringsregel.value.ExceptionBool = true
-    } else {
-        // Fetch regel
-        fetch(`/api/konteringsregler/${index.value}`)
-            .then(response => response.json())
-            .then(value => {
-                konteringsregel.value = value
-                exceptionBool.value = konteringsregel.value.ExceptionBool
-            })
-    }
-
-    // Watch for changes in konteringsregel to keep booleans updated
-    watch(() => konteringsregel.value, newValue => {
-        if (newValue) {
-            exceptionBool.value = newValue.ExceptionBool
-        }
-    })
 
     const bankaccounts = ref([])
     const bankAccountOptions = ref([])
@@ -63,6 +42,44 @@
         { label: 'Mellem', value: '><' },
         { label: 'Lig med', value: '==' }
     ]
+
+    const selectedOperator = ref(operatorOptions[0].value)
+    const selectedBankaccount = ref(null)
+
+    if (isNewRule.value)
+    {   
+        if (index.value === 'nyinaktiv') konteringsregel.value.ActiveBool = false
+        else if (index.value === 'nyundtagelse') konteringsregel.value.ExceptionBool = true
+    } else {
+        // Fetch regel
+        fetch(`/api/konteringsregler/${index.value}`)
+            .then(response => response.json())
+            .then(value => {
+                konteringsregel.value = value
+                exceptionBool.value = konteringsregel.value.ExceptionBool
+                selectedBankaccount.value = konteringsregel.value.relatedBankAccount // Set selectedBankaccount
+                selectedOperator.value = konteringsregel.value.Operator // Set selectedOperator
+            })
+    }
+
+    watch(konteringsregel.value, (newValue) => {
+        exceptionBool.value = newValue.ExceptionBool
+    })
+
+    watch(selectedOperator, (newValue) => {
+        konteringsregel.value.Operator = newValue
+        keyMap["Beløb 2"].hidden = !(newValue === '><')
+    })
+
+    watch(bankAccountOptions, (newVal) => {
+        if (newVal.length > 0) {
+            selectedBankaccount.value = newVal[0].value
+        }
+    })
+
+    watch(selectedBankaccount, (newValue) => {
+        konteringsregel.value.relatedBankAccount = newValue
+    })
     
     const keyMap_rule = {
         "id": { "key": "RuleID", "hidden": true },
@@ -119,26 +136,6 @@
             }))
             .filter(group => Object.keys(group.fields).length > 0)
     })
-
-    const selectedOperator = ref(operatorOptions[0].value)
- 
-    watch(selectedOperator, (newVal) => {
-        konteringsregel.value.Operator = newVal
-        keyMap["Beløb 2"].hidden = !(newVal === '><')
-    })
-
-    const selectedBankaccount = ref(null)
-
-    watch(bankAccountOptions, (newVal) => {
-        if (newVal.length > 0) {
-            selectedBankaccount.value = newVal[0].value
-        }
-    })
-
-    watch(selectedBankaccount, (newVal) => {
-        konteringsregel.value.relatedBankAccount = newVal
-    })
-
 
     function updateRule()
     {
@@ -225,9 +222,11 @@
                         <template v-else><IconDelete /></template>
                     </button>
 
-                    <button v-if="konteringsregel != null" @click="toggleActivation()" :class="konteringsregel.ActiveBool ? 'green' : 'red'" :disabled="konteringsregel.ExceptionBool">
-                        {{ konteringsregel.ActiveBool ? 'Aktiv' : 'Inaktiv' }}</button>
-
+                    <button v-if="konteringsregel != null" @click="toggleActivation()"
+                        :class="konteringsregel.ActiveBool ? 'green' : 'red'"
+                        :disabled="konteringsregel.ExceptionBool">
+                        {{ konteringsregel.ActiveBool ? 'Aktiv' : 'Inaktiv' }}
+                    </button>
 
                     <button id="submit" @click="updateRule" class="green" :disabled="isUpdating">
                         <template v-if="isUpdating">Gemmer ...</template>

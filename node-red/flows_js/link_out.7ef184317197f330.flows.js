@@ -6,8 +6,8 @@ const Node = {
   "name": "link out update rule to db",
   "mode": "return",
   "links": [],
-  "x": 365,
-  "y": 360,
+  "x": 395,
+  "y": 340,
   "wires": []
 }
 

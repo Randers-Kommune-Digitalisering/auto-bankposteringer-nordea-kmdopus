@@ -10,11 +10,11 @@ const Node = {
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 505,
+  "x": 535,
   "y": 240,
   "wires": [
     [
-      "e1cc4459676fd651"
+      "7479d1a84703884e"
     ]
   ],
   "icon": "font-awesome/fa-database",

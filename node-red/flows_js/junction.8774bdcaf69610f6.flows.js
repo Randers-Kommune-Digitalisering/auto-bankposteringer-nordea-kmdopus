@@ -1,15 +1,13 @@
 const Node = {
-  "id": "5d6aada71a913065",
-  "type": "link in",
+  "id": "8774bdcaf69610f6",
+  "type": "junction",
   "z": "a1dc9966e881ac6b",
   "g": "d992b55d9d319a30",
-  "name": "update rule to db",
-  "links": [],
-  "x": 65,
+  "x": 280,
   "y": 320,
   "wires": [
     [
-      "3959b018078734c3"
+      "b66ec246675c8e84"
     ]
   ]
 }

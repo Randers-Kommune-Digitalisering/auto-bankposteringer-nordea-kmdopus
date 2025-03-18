@@ -10,7 +10,7 @@ const Node = {
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 1095,
+  "x": 1135,
   "y": 240,
   "wires": [
     [
@@ -22,7 +22,7 @@ const Node = {
 }
 
 Node.template = `
-{{global.configs.database.masterData}}
+{{global.configs.database.admSysData}}
 `
 
 module.exports = Node;

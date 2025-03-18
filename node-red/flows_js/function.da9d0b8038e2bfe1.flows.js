@@ -147,8 +147,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
                   let matchedAllParametersBool = sumOfParametersMatched === sumOfParametersGiven(rule);
                   let matchedAmountBool = matchAmount(absoluteAmount, rule.Operator, rule.Beløb1, rule.Beløb2)
+                  let matchedAccountBool = transaction.account.bankAccount = rule.relatedBankAccount
   
-                  if (matchedAllParametersBool && matchedAmountBool) {
+                  if (matchedAllParametersBool && matchedAmountBool && matchedAccountBool) {
                       if (!rule.ExceptionBool) {   // Don't write ERP postings if rule is an exception, but still count as match
                           let text = textGeneration(rule.Posteringstekst, transaction.message, transaction.narrative, transaction.counterparty_name);
                           generatePostings(transaction.account.statusAccount, rule.Artskonto, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, psp);

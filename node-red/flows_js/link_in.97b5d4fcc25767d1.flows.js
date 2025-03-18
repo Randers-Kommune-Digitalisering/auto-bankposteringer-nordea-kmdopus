@@ -3,10 +3,8 @@ const Node = {
   "type": "link in",
   "z": "a1dc9966e881ac6b",
   "g": "d992b55d9d319a30",
-  "name": "link in load accountingrules to env",
-  "links": [
-    "7d8046faef73edb6"
-  ],
+  "name": "load rules to env",
+  "links": [],
   "x": 65,
   "y": 440,
   "wires": [

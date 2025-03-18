@@ -3,9 +3,9 @@ const Node = {
   "type": "link in",
   "z": "a1dc9966e881ac6b",
   "g": "24481f222bcf4517",
-  "name": "link in create masterdata table",
+  "name": "create masterdata table",
   "links": [],
-  "x": 1045,
+  "x": 1085,
   "y": 240,
   "wires": [
     [

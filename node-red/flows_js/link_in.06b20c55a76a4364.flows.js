@@ -3,11 +3,9 @@ const Node = {
   "type": "link in",
   "z": "a1dc9966e881ac6b",
   "g": "1d18d99feaaca4c4",
-  "name": "link in update runHistory obj",
-  "links": [
-    "c40228fc31a4eb75"
-  ],
-  "x": 455,
+  "name": "update run",
+  "links": [],
+  "x": 485,
   "y": 320,
   "wires": [
     [

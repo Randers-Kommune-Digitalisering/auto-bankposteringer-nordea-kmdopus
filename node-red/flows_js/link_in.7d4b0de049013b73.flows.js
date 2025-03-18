@@ -3,11 +3,9 @@ const Node = {
   "type": "link in",
   "z": "a1dc9966e881ac6b",
   "g": "1d18d99feaaca4c4",
-  "name": "link in add runHistory entry",
-  "links": [
-    "f718f404c61cc2b0"
-  ],
-  "x": 455,
+  "name": "insert run to db",
+  "links": [],
+  "x": 485,
   "y": 280,
   "wires": [
     [
