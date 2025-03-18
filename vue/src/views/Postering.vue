@@ -14,7 +14,7 @@
     
     const posting = ref(null)
 
-    // Fetch regel
+    // Fetch posting
     fetch(`/api/postings/${index.value}`)
         .then(response => response.json())
         .then(value => {
@@ -23,6 +23,7 @@
 
     const keyMap = {
         "Bogføringsdato": { "key": "bookingDate", "group": "Transaktionsoplysninger" },
+        "Konto": { "key": "bankAccount", "group": "Transaktionsoplysninger" },
         "Afsender": { "key": "counterpartyName", "group": "Transaktionsoplysninger" },
         "Reference": { "key": "narrative", "group": "Transaktionsoplysninger" },
         "Beløb": { "key": "amount", "group": "Transaktionsoplysninger" },
@@ -32,9 +33,11 @@
         "ID": { "key": "transactionID", "hidden": true },
     }
     
+    const keyMapComputed = computed(() => (keyMap))
+
     const groupedKeyMap = computed(() => {
         const groups = {}
-        for (const [key, value] of Object.entries(keyMap.value)) {
+        for (const [key, value] of Object.entries(keyMapComputed.value)) {
             const group = value.group || 'Diverse'
             if (!groups[group]) groups[group] = {}
             groups[group][key] = value
@@ -42,7 +45,7 @@
         return groups
     })
 
-    const groupOrder = ['Transaktionsoplysninger', 'Kontering']
+    const groupOrder = ['Transaktionsoplysninger', 'Kontering', 'Diverse']
 
     const sortedGroups = computed(() => {
         return groupOrder
@@ -53,15 +56,14 @@
             .filter(group => Object.keys(group.fields).length > 0)
     })
 
-    function updatePosting()
-    {
+    function updatePosting() {
         hasUpdated.value = false
         isUpdating.value = true
 
-        const url = `/api/postings/${posting.value.ID}`
+        const url = `/api/postings/${posting.value.transactionID}`
         
         fetch(url, {
-            method: PUT,
+            method: 'PUT',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
@@ -80,19 +82,21 @@
         })
     }
 
+    console.log(keyMapComputed.value)
+
 </script>
 
 <template>
-    
-    <h2>
-        <span>Postering #{{posting[keyMap.id.key]}}</span>
+    <h2 v-if="posting != null">
+        <span>Postering #{{ posting.transactionID }}</span>
     </h2>
-    
+    <h2 v-else>Indlæser...</h2>
+
     <Content>
         <template #icon>
             <IconTable />
         </template>
-        <template #heading>{{isNewRule ? 'Opret' : 'Redigér'}} konteringsregel</template>
+        <template #heading>Redigér postering</template>
         
         <form @submit.prevent="">
             <fieldset>
@@ -119,7 +123,7 @@
                                     @change="hasUpdated = false"
                                     :disabled="value.disabled"
                                 />
-                                    <input
+                                <input
                                     type="text"
                                     placeholder="Indlæser..."
                                     :id="key"
