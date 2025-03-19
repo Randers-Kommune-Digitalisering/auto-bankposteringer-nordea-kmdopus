@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "transactions.parameters",
       "pt": "global",
-      "to": "[\"narrative\",\"message\",\"counterparty_name\",\"type_description\"]",
+      "to": "[[\"narrative\",\"message\"],\"counterparty_name\",\"type_description\"]",
       "tot": "json"
     }
   ],
