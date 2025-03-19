@@ -39,8 +39,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   const docId = global.get("messageIdentification");
   const compCode = global.get("configs").ftp.compCode;
   const dataProviderId = global.get("configs").ftp.dataProviderId;
-  const prodEnv = inProd ? global.get("configs").ftp.prodEnv : "T02";
-  const dataProviderIdCode = inProd ? global.get("configs").ftp.dataProviderIdCode : "797";
+  const prodEnv = inProd ? global.get("configs").ftp.prodEnv : 'T02';
+  const dataProviderIdCode = inProd ? global.get("configs").ftp.dataProviderIdCode : '797';
   const filename = `ZFIR_KMD_Opus_Posteringer_IND_${dataProviderIdCode}_${dataProviderId}_${date}_${time}.xml`;
   const postings = global.get("erp").postings;
   
@@ -56,14 +56,14 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   
       let amount = posting.amount.replace(',', '.');
       amount = parseFloat(amount);
-      let amountPrefixed = posting.debetOrCredit === "Debet" ? amount : amount * -1;
+      let amountPrefixed = posting.debetOrCredit === 'Debet' ? amount : amount * -1;
   
       let psp = posting.psp ? posting.psp : undefined;
       let artskonto = String(posting.account);
   
       if (!inProd) {
-          psp = posting.psp ? "XG-9999999990-00001" : undefined;
-          artskonto = artskonto.charAt(0) === "9" ? "90515060" : "29505050";
+          psp = posting.psp ? 'XG-9999999990-00001' : undefined;
+          artskonto = artskonto.charAt(0) === '9' ? '90515060' : '29505050';
       }
   
       let line = {
@@ -73,7 +73,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
           GL_ACCOUNT: artskonto,
           WBS_ELEMENT: psp,
           REF_KEY_3: String(lineCounter),
-          ZZCSYSIDN: dataProviderId
+          ZZCSYSIDN: dataProviderId,
+          SERV_REC_NO_CODE: posting.cpr ? '02' : undefined,
+          SERV_REC_NO: posting.cpr ? posting.cpr : undefined 
       };
   
       // Remove undefined values
@@ -91,24 +93,24 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   }
   
   const CONTROL_FIELDS = {
-      SENDERID: prodEnv + "CLNT" + dataProviderIdCode,
-      RECEIVER: prodEnv + "CLNT" + dataProviderIdCode,
+      SENDERID: prodEnv + 'CLNT' + dataProviderIdCode,
+      RECEIVER: prodEnv + 'CLNT' + dataProviderIdCode,
       FILE_NAME: filename,
       SEND_DATE: date,
       SEND_TIME: time
   };
   
   const HEADER = {
-      'NO_DOC_POSITION': String(lineCounter),
-      'BALANCE_DEBET': debetSum.toFixed(2),
-      'BALANCE_CREDIT': '-' + creditSum.toFixed(2),
-      'MUNICIPALITY': dataProviderIdCode,
-      'COMP_CODE': compCode,
-      'DOC_DATE': bookingDate,
-      'PSTNG_DATE': bookingDate,
-      'RECEIV_DOC': docId,
-      'HEADER_TXT': dataProviderId,
-      'XREF1_HD': dataProviderId
+      NO_DOC_POSITION: String(lineCounter),
+      BALANCE_DEBET: debetSum.toFixed(2),
+      BALANCE_CREDIT: '-' + creditSum.toFixed(2),
+      MUNICIPALITY: dataProviderIdCode,
+      COMP_CODE: compCode,
+      DOC_DATE: bookingDate,
+      PSTNG_DATE: bookingDate,
+      RECEIV_DOC: docId,
+      HEADER_TXT: dataProviderId,
+      XREF1_HD: dataProviderId
   };
   
   // Byg hele objektet og tilføj namespace
@@ -131,7 +133,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   
   const xml = builder.buildObject(xmlObject);
   
-  msg.filename = "/data/output/" + filename;
+  msg.filename = '/data/output/' + filename;
   msg.payload = xml;
   
   return msg;
