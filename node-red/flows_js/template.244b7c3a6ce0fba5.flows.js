@@ -22,7 +22,7 @@ const Node = {
 }
 
 Node.template = `
-DROP TABLE transactionsWithNoMatch
+DROP TABLE accountingRules
 `
 
 module.exports = Node;
