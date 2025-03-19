@@ -23,9 +23,9 @@ const Node = {
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let transactionsObj = global.get("transactions");
-  const accountValue = global.get("masterData").bankAccounts[global.get("transactions").accountStep];
-  let transactions = global.get("transactions").list ? global.get("transactions").list : [];
-  let addTransactions = global.get("transactions").add;
+  const accountValue = global.get("masterData").bankAccounts[transactionsObj.accountStep];
+  let transactions = transactionsObj.list ? transactionsObj.list : [];
+  let addTransactions = transactionsObj.add;
   
   // Ensure addTransactions is an array
   if (Array.isArray(addTransactions)) {
