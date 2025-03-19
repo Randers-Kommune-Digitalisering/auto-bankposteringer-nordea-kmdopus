@@ -28,7 +28,6 @@ RuleID should not be renamed, as it breaks other nodes' functionality.
 Node.template = `
 CREATE TABLE IF NOT EXISTS accountingRules (
     Reference NVARCHAR(255) NULL,
-    Advisliste NVARCHAR(255) NULL,
     Afsender NVARCHAR(255) NULL,
     Posteringstype NVARCHAR(255) NULL,
     Beløb1 NVARCHAR(20) NULL,

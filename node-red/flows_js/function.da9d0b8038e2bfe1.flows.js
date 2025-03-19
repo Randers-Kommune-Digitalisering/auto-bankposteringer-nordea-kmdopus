@@ -26,22 +26,36 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let transactionsObj = global.get("transactions");
   let masterDataObj = global.get("masterData");
   let postings = [];
-  let transactionsUnmatched = transactionsObj.unmatched ? transactionsObj.unmatched : [];
+  let transactionsUnmatched = transactionsObj.addUnmatched ? transactionsObj.addUnmatched : [];
   const transactions = transactionsObj.list.reverse();
-  const transactionParameters = transactionsObj.parameters;   // Has to match ruleParameters length
+  const transactionParameters = transactionsObj.parameters;   // Has to match ruleParameters length, can be nested array
   const accountingRules = masterDataObj.rules;
-  const ruleParameters = Object.keys(accountingRules[0]).slice(0, 4);
+  const ruleParameters = Object.keys(accountingRules[0]).slice(0, 3);
   const date = global.get("dates").simpleDate;
   
   function sumOfParametersGiven(rule) {
       // Count the number of rule parameters where the value property is defined (truthy)
       return Object.keys(rule)
-          .slice(0, 4)
+          .slice(0, 3)
           .filter(key => rule[key] || rule[key] || rule[key]).length;
   }
   
   function matchParameter(transaction, searchValue, key) {
-      return transaction[key] ? transaction[key].toLowerCase().includes(searchValue) : false;
+      if (!searchValue) return false;
+  
+      const searchTokens = searchValue.split(/\s*,\s*/).map(token => token.trim().toLowerCase());
+  
+      if (Array.isArray(key)) {
+          return key.some(singleKey =>
+              transaction[singleKey]
+                  ? searchTokens.every(token => transaction[singleKey].toLowerCase().includes(token))
+                  : false
+          );
+      }
+  
+      return transaction[key]
+          ? searchTokens.every(token => transaction[key].toLowerCase().includes(token))
+          : false;
   }
   
   function matchAmount(transactionAmount, amountOperator, ruleAmount1, ruleAmount2) {
@@ -89,8 +103,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               return narrative;
           case "afsender fra bank":
               return counterparty_name || message;
-          case "advis fra bank":
-              return message || narrative;
           default:
               return textVariation;
       }
@@ -170,7 +182,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               }
           }
   
-          transactionsObj.unmatched = transactionsUnmatched;
+          transactionsObj.addUnmatched = transactionsUnmatched;
           global.set("transactions", transactionsObj);
   
       }   
@@ -183,6 +195,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
   erpObj.postings = postings;
   global.set("erp", erpObj);
+  
+  transactionsObj.list = []
+  global.set("transactions", transactionsObj);
   
   masterDataObj.rules = accountingRules;
   global.set("masterData", masterDataObj);

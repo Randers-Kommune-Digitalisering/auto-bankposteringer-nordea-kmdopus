@@ -37,6 +37,12 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       "Lig med": "==",
   };
   
+  function chooseLongestString(string1, string2) {
+      if (!string1) return string2 || null;
+      if (!string2) return string1 || null;
+      return string1.length >= string2.length ? string1 : string2;
+  }
+  
   const jsonData = msg.payload.map((data, index) => {  
       // Remove "#" character from all values
       const cleanedData = Object.fromEntries(
@@ -56,6 +62,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
           PSP,
           Notat
       } = cleanedData;
+  
+      const updatedReference = chooseLongestString(Reference, Advisliste);
   
       const hasHash = Object.values(data).some(value => value && String(value).includes("#"));
       const isActive = !hasHash;
@@ -93,8 +101,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       const LastUsed = "31-12-9999"
   
       return {
-          Reference: Reference || null,
-          Advisliste: Advisliste || null,
+          Reference: updatedReference || null,
           Afsender: Afsender || null,
           Posteringstype: Posteringstype || null,
           Beløb1: amount1,
