@@ -244,7 +244,7 @@
                         <div v-for="(value, key) in group.fields" :key="key" :class="value.hidden ? 'hidden' : ''">
                             <label :for="key" class="capitalize">{{ key }}</label>
 
-                            <template v-if="key === 'CPR-bogføring'">
+                            <template v-if="key === 'CPR-bogføring' && !value.hidden">
                                 <input type="checkbox" v-model="konteringsregel[value.key]" />
                             </template>
                             
