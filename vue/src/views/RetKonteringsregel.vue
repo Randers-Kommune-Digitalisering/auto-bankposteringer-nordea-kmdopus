@@ -88,6 +88,7 @@
         "Artskonto": { "key": "Artskonto", "group": "Kontering" },
         "PSP-element": { "key": "PSP", "group": "Kontering" },
         "Posteringstekst": { "key": "Posteringstekst", "group": "Kontering" },
+        "CPR-bogføring": { "key": "postWithCPR", "group": "Kontering" },
         "Notat": { "key": "Notat" },
         "ActiveBool": { "key": "ActiveBool", "hidden": true }
     }
@@ -104,6 +105,7 @@
         "Artskonto": { "key": "Artskonto", "hidden": true, "group": "Kontering" },
         "PSP-element": { "key": "PSP", "hidden": true, "group": "Kontering" },
         "Posteringstekst": { "key": "Posteringstekst", "hidden": true, "group": "Kontering" },
+        "CPR-bogføring": { "key": "postWithCPR", "hidden": true, "group": "Kontering" },
         "Notat": { "key": "Notat" }
     }
 
@@ -161,7 +163,6 @@
                 index.value = value.RuleID
                 konteringsregel.value.RuleID = value.RuleID
                 konteringsregel.value[keyMap.id.key] = value.RuleID
-
                 router.push(`/retkonteringsregel/${value.RuleID}`)
             }
         })
@@ -243,13 +244,18 @@
                         <div v-for="(value, key) in group.fields" :key="key" :class="value.hidden ? 'hidden' : ''">
                             <label :for="key" class="capitalize">{{ key }}</label>
 
-                            <template v-if="key === 'Beløbsregel'">
+                            <template v-if="key === 'CPR-bogføring'">
+                                <input type="checkbox" v-model="konteringsregel[value.key]" />
+                            </template>
+                            
+                            <template v-else-if="key === 'Beløbsregel'">
                                 <select v-model="selectedOperator">
                                     <option v-for="option in operatorOptions" :key="option.value" :value="option.value">
                                         {{ option.label }}
                                     </option>
                                 </select>
                             </template>
+
                             <template v-else-if="key === 'Tilknyttet bankkonto'">
                                 <select v-model="selectedBankaccount">
                                     <option v-for="option in bankAccountOptions" :key="option.value" :value="option.value">
@@ -257,6 +263,7 @@
                                     </option>
                                 </select>
                             </template>
+                            
                             <template v-else>
                                 <input
                                     type="text"

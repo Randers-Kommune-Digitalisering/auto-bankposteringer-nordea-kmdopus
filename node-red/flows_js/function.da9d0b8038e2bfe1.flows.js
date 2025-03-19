@@ -33,6 +33,18 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   const ruleParameters = Object.keys(accountingRules[0]).slice(0, 3);
   const date = global.get("dates").simpleDate;
   
+  function extractCPRNumber(inputString) {
+      const regex = /((((0[1-9]|[12][0-9]|3[01])(0[13578]|10|12)(\d{2}))|(([0][1-9]|[12][0-9]|30)(0[469]|11)(\d{2}))|((0[1-9]|1[0-9]|2[0-8])(02)(\d{2}))|((29)(02)(00))|((29)(02)([2468][048]))|((29)(02)([13579][26])))[-]*\d{4})/gm;
+  
+      const match = inputString.match(regex);
+  
+      if (match) {
+          return match[0]; // Returnerer det første match
+      } else {
+          return null; // Returnerer null, hvis der ikke findes noget match
+      }
+  }
+  
   function sumOfParametersGiven(rule) {
       // Count the number of rule parameters where the value property is defined (truthy)
       return Object.keys(rule)
@@ -108,7 +120,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       }
   }
   
-  function generatePostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, psp) {
+  function generatePostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, psp, cpr) {
       postings.push(
           {
               account: statusAccount,
@@ -123,7 +135,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               psp: psp,
               debetOrCredit: landingDebetOrCredit,
               amount: amount,
-              text: text
+              text: text,
+              cpr: cpr
           }
       )
   }
@@ -135,6 +148,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       transaction.amount = cleanedAmount;
       let statusDebetOrCredit = transaction.amount > 0 ? "Debet" : "Kredit";
       let landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet";
+  
+      let cpr = rules.postWithCPR ? extractCPRNumber(transaction.narrative) : null;
       
       if (transaction.account.manual) {
           generatePostings(transaction.account.statusAccount, transaction.account.Artskonto, statusDebetOrCredit, landingDebetOrCredit, transaction.account.text, cleanedAmount, transaction.account.PSP);
@@ -160,11 +175,11 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
                   let matchedAllParametersBool = sumOfParametersMatched === sumOfParametersGiven(rule);
                   let matchedAmountBool = matchAmount(absoluteAmount, rule.Operator, rule.Beløb1, rule.Beløb2)
                   let matchedAccountBool = transaction.account.bankAccount === rule.relatedBankAccount
-  
+                  
                   if (matchedAllParametersBool && matchedAmountBool && matchedAccountBool) {
                       if (!rule.ExceptionBool) {   // Don't write ERP postings if rule is an exception, but still count as match
                           let text = textGeneration(rule.Posteringstekst, transaction.message, transaction.narrative, transaction.counterparty_name);
-                          generatePostings(transaction.account.statusAccount, rule.Artskonto, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, psp);
+                          generatePostings(transaction.account.statusAccount, rule.Artskonto, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, psp, cpr);
                       }
                       completeMatch = true;
                       rule.LastUsed = date;
@@ -174,7 +189,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           if (!completeMatch) {
               let text = transaction.transaction_id;
   
-              generatePostings(transaction.account.statusAccount, transaction.account.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, '');
+              generatePostings(transaction.account.statusAccount, transaction.account.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, '', cpr);
               
               // if (transaction.account.bankAccountName != "Debitorkonto") {
               if (transaction.account.bankAccountName != "TEST") {
