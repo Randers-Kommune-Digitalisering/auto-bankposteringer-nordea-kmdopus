@@ -37,10 +37,10 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       "Lig med": "==",
   };
   
-  function chooseLongestString(string1, string2) {
+  function combineStrings(string1, string2) {
       if (!string1) return string2 || null;
       if (!string2) return string1 || null;
-      return string1.length >= string2.length ? string1 : string2;
+      return `${string1}, ${string2}`;
   }
   
   const jsonData = msg.payload.map((data, index) => {  
@@ -63,7 +63,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
           Notat
       } = cleanedData;
   
-      const updatedReference = chooseLongestString(Reference, Advisliste);
+      const updatedReference = combineStrings(Reference, Advisliste);
   
       const hasHash = Object.values(data).some(value => value && String(value).includes("#"));
       const isActive = !hasHash;
