@@ -22,15 +22,15 @@
         })
 
     const keyMap = {
-        "Bogføringsdato": { "key": "bookingDate", "group": "Transaktionsoplysninger" },
-        "Konto": { "key": "bankAccount", "group": "Transaktionsoplysninger" },
-        "Afsender": { "key": "counterpartyName", "group": "Transaktionsoplysninger" },
-        "Reference": { "key": "narrative", "group": "Transaktionsoplysninger" },
-        "Beløb": { "key": "amount", "group": "Transaktionsoplysninger" },
-        "Artskonto": { "key": "Artskonto", "group": "Kontering" },
-        "PSP-element": { "key": "PSP", "group": "Kontering" },
-        "Posteringstekst": { "key": "Posteringstekst", "group": "Kontering" },
-        "ID": { "key": "transactionID", "hidden": true },
+        "Bogføringsdato": { "key": "bookingDate", "group": "Transaktionsoplysninger" , "mutable": false },
+        "Konto": { "key": "bankAccount", "group": "Transaktionsoplysninger" , "mutable": false },
+        "Afsender": { "key": "counterpartyName", "group": "Transaktionsoplysninger" , "mutable": false },
+        "Reference": { "key": "narrative", "group": "Transaktionsoplysninger" , "mutable": false },
+        "Beløb": { "key": "amount", "group": "Transaktionsoplysninger" , "mutable": false },
+        "Artskonto": { "key": "Artskonto", "group": "Kontering" , "mutable": true },
+        "PSP-element": { "key": "PSP", "group": "Kontering" , "mutable": true },
+        "Posteringstekst": { "key": "Posteringstekst", "group": "Kontering" , "mutable": true },
+        "ID": { "key": "transactionID", "hidden": true , "mutable": false },
     }
     
     const groupedKeyMap = computed(() => {
@@ -43,7 +43,7 @@
         return groups
     })
 
-    const groupOrder = ['Transaktionsoplysninger', 'Kontering']
+    const groupOrder = ['Transaktionsoplysninger', 'Kontering', 'Diverse']
 
     const sortedGroups = computed(() => {
         return groupOrder
@@ -80,6 +80,8 @@
         })
     }
 
+    console.log(sortedGroups)
+
 </script>
 
 <template>
@@ -109,24 +111,22 @@
                         <h3>{{ group.name }}</h3>
                         <div v-for="(value, key) in group.fields" :key="key" :class="value.hidden ? 'hidden' : ''">
                             <label :for="key" class="capitalize">{{ key }}</label>
-                            <template>
-                                <input
-                                    type="text"
-                                    placeholder="..."
-                                    :id="key"
-                                    v-if="posting != null && !value.hidden"
-                                    v-model="posting[value.key]"
-                                    @change="hasUpdated = false"
-                                    :disabled="value.disabled"
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Indlæser..."
-                                    :id="key"
-                                    v-if="posting == null && !value.hidden"
-                                    disabled
-                                />
-                            </template>
+                            <input
+                                type="text"
+                                placeholder="..."
+                                :id="key"
+                                v-if="posting != null && !value.hidden"
+                                v-model="posting[value.key]"
+                                @change="hasUpdated = false"
+                                :disabled="value.mutable === false"
+                            />
+                            <input
+                                type="text"
+                                placeholder="Indlæser..."
+                                :id="key"
+                                v-if="posting == null && !value.hidden"
+                                disabled
+                            />
                         </div>
                     </div>
                 </div>
