@@ -32,7 +32,7 @@ Format: ISO 8601
 `
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, dayjs) {
-  let dates = global.get("dates");
+  let dates = global.get("dates") || [] ;
   
   function findDate() {
       let date = dayjs().startOf('day');
