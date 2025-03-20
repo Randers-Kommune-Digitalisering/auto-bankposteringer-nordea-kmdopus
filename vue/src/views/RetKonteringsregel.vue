@@ -105,7 +105,6 @@
         "Artskonto": { "key": "Artskonto", "hidden": true, "group": "Kontering" },
         "PSP-element": { "key": "PSP", "hidden": true, "group": "Kontering" },
         "Posteringstekst": { "key": "Posteringstekst", "hidden": true, "group": "Kontering" },
-        "CPR-bogføring": { "key": "postWithCPR", "hidden": true, "group": "Kontering" },
         "Notat": { "key": "Notat" }
     }
 
@@ -244,7 +243,7 @@
                         <div v-for="(value, key) in group.fields" :key="key" :class="value.hidden ? 'hidden' : ''">
                             <label :for="key" class="capitalize">{{ key }}</label>
 
-                            <template v-if="key === 'CPR-bogføring' && !value.hidden">
+                            <template v-if="key === 'CPR-bogføring'">
                                 <input type="checkbox" v-model="konteringsregel[value.key]" />
                             </template>
                             
