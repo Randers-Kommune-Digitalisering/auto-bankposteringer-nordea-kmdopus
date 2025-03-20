@@ -196,7 +196,7 @@
         konteringsregel.value.ActiveBool = !konteringsregel.value.ActiveBool
     }
 
-    console.log(keyMap.value)
+    console.log(sortedGroups)
 
 </script>
 
