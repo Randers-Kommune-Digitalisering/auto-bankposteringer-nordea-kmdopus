@@ -27,7 +27,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let masterDataObj = global.get("masterData");
   let postings = [];
   let transactionsUnmatched = transactionsObj.addUnmatched ? transactionsObj.addUnmatched : [];
-  const transactions = transactionsObj.list.reverse();
+  const transactions = transactionsObj.list ? transactionsObj.list.reverse() : null;
   const transactionParameters = transactionsObj.parameters;   // Has to match ruleParameters length, can be nested array
   const accountingRules = masterDataObj.rules;
   const ruleParameters = Object.keys(accountingRules[0]).slice(0, 3);
@@ -174,8 +174,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
                   let matchedAllParametersBool = sumOfParametersMatched === sumOfParametersGiven(rule);
                   let matchedAmountBool = matchAmount(absoluteAmount, rule.Operator, rule.Beløb1, rule.Beløb2)
-                  let matchedAccountBool = transaction.account.bankAccount === rule.relatedBankAccount
-                  
+                  let matchedAccountBool = transaction.account.bankAccount === rule.relatedBankAccount || rule.relatedBankAccount === null
+                                  
                   if (matchedAllParametersBool && matchedAmountBool && matchedAccountBool) {
                       if (!rule.ExceptionBool) {   // Don't write ERP postings if rule is an exception, but still count as match
                           let text = textGeneration(rule.Posteringstekst, transaction.message, transaction.narrative, transaction.counterparty_name);
@@ -204,9 +204,11 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       
   }
   
-  transactions.forEach(transaction => {
-      processPosting(transaction, accountingRules);
-  });
+  if (transactions) {
+      transactions.forEach(transaction => {
+          processPosting(transaction, accountingRules);
+      });
+  }
   
   erpObj.postings = postings;
   global.set("erp", erpObj);

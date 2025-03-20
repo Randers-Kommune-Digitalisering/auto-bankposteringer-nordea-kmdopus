@@ -6,7 +6,7 @@ const Node = {
   "name": "link in set global dates",
   "links": [],
   "x": 55,
-  "y": 60,
+  "y": 580,
   "wires": [
     [
       "5f9e38222a832d18"

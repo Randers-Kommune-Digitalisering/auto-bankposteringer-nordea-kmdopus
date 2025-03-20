@@ -9,22 +9,7 @@ const Node = {
   "rules": [
     {
       "t": "eq",
-      "v": "COMPLETE",
-      "vt": "str"
-    },
-    {
-      "t": "eq",
-      "v": "ACTIVE",
-      "vt": "str"
-    },
-    {
-      "t": "eq",
-      "v": "PENDING",
-      "vt": "str"
-    },
-    {
-      "t": "eq",
-      "v": "RESTARTING",
+      "v": "FAILED",
       "vt": "str"
     },
     {
@@ -33,21 +18,12 @@ const Node = {
   ],
   "checkall": "false",
   "repair": false,
-  "outputs": 5,
+  "outputs": 2,
   "x": 855,
   "y": 100,
   "wires": [
     [
       "3183105c3c193643"
-    ],
-    [
-      "3183105c3c193643"
-    ],
-    [
-      "be1a01deddfcfba9"
-    ],
-    [
-      "be1a01deddfcfba9"
     ],
     [
       "be1a01deddfcfba9"

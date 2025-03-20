@@ -10,10 +10,10 @@ const Node = {
   "linkType": "static",
   "timeout": "30",
   "x": 555,
-  "y": 340,
+  "y": 240,
   "wires": [
     [
-      "a52457ed55960f9b"
+      "1bae462fba8682e3"
     ]
   ],
   "l": false
