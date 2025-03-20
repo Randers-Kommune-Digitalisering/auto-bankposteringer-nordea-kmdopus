@@ -1,17 +1,17 @@
 const Node = {
-  "id": "1154327928d69857",
+  "id": "ab0cfdfc017ac9d6",
   "type": "link in",
   "z": "8c354b8d2ca56b7b",
-  "g": "af45fb910a71600f",
-  "name": "handle auth timeout",
+  "g": "0bbde93deecce205",
+  "name": "ping admin",
   "links": [
-    "aedbc65920ef9f02"
+    "de1e87d2da1e6049"
   ],
-  "x": 55,
+  "x": 245,
   "y": 480,
   "wires": [
     [
-      "6278ffd72bf9c641"
+      "5f833c0354a371db"
     ]
   ]
 }

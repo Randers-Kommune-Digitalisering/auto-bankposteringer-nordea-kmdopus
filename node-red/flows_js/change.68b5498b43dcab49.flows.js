@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "masterData.amdSysData",
+      "to": "masterData.admSysData",
       "tot": "global"
     }
   ],

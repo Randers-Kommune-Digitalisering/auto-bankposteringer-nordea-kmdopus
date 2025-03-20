@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "to",
       "pt": "msg",
-      "to": "masterData.admEmail",
+      "to": "masterData.admSysData.admEmail",
       "tot": "global"
     },
     {
@@ -18,6 +18,20 @@ const Node = {
       "pt": "msg",
       "to": "SENDER_ADRESS",
       "tot": "env"
+    },
+    {
+      "t": "set",
+      "p": "topic",
+      "pt": "msg",
+      "to": "configs.reminder.topic",
+      "tot": "global"
+    },
+    {
+      "t": "set",
+      "p": "payload",
+      "pt": "msg",
+      "to": "configs.reminder.payload",
+      "tot": "global"
     }
   ],
   "action": "",
@@ -25,8 +39,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 445,
-  "y": 580,
+  "x": 295,
+  "y": 480,
   "wires": [
     [
       "7bc90509ca21d4f1"

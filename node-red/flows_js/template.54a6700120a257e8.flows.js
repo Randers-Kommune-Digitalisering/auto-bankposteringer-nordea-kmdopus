@@ -22,7 +22,7 @@ const Node = {
 
 Node.template = `
 CREATE TABLE IF NOT EXISTS transactionsWithNoMatch (
-    transactionID NVARCHAR(21) NULL PRIMARY KEY,
+    transactionID NVARCHAR(29) NULL PRIMARY KEY,
     counterpartyName NVARCHAR(63) NULL,
     narrative NVARCHAR(255) NULL,
     bankAccount NVARCHAR(31) NULL,

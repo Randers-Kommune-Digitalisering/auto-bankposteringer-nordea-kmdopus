@@ -1,16 +1,14 @@
 const Node = {
-  "id": "8d7669ee859a014f",
+  "id": "f00e42b270c05f05",
   "type": "switch",
   "z": "8c354b8d2ca56b7b",
-  "g": "c3855a30da38df4f",
-  "name": "Bank provider?",
-  "property": "configs.banking.provider",
+  "g": "622bd279325fcb5d",
+  "name": "transactionsWithNoMatch?",
+  "property": "transactions.addUnmatched",
   "propertyType": "global",
   "rules": [
     {
-      "t": "eq",
-      "v": "Nordea",
-      "vt": "str"
+      "t": "nempty"
     },
     {
       "t": "else"
@@ -19,13 +17,15 @@ const Node = {
   "checkall": "true",
   "repair": false,
   "outputs": 2,
-  "x": 155,
-  "y": 220,
+  "x": 745,
+  "y": 200,
   "wires": [
     [
-      "ef489047b15f8a46"
+      "c1b47442eeb89524"
     ],
-    []
+    [
+      "ce6e75a363bb80b0"
+    ]
   ],
   "icon": "font-awesome/fa-question",
   "l": false

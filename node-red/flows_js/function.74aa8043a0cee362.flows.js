@@ -63,11 +63,11 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
           Notat
       } = cleanedData;
   
-      const updatedReference = combineStrings(Reference, Advisliste);
-  
       const hasHash = Object.values(data).some(value => value && String(value).includes("#"));
       const isActive = !hasHash;
       const ActiveBool = isActive;
+  
+      const updatedReference = combineStrings(Reference, Advisliste);
   
       let amount1 = null;
       let amount2 = null;

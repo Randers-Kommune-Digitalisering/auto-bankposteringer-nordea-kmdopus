@@ -1,16 +1,14 @@
 const Node = {
-  "id": "8d7669ee859a014f",
+  "id": "1a86c50bd83270ba",
   "type": "switch",
   "z": "8c354b8d2ca56b7b",
-  "g": "c3855a30da38df4f",
-  "name": "Bank provider?",
-  "property": "configs.banking.provider",
+  "g": "622bd279325fcb5d",
+  "name": "postings generated?",
+  "property": "erp.postings",
   "propertyType": "global",
   "rules": [
     {
-      "t": "eq",
-      "v": "Nordea",
-      "vt": "str"
+      "t": "nempty"
     },
     {
       "t": "else"
@@ -19,13 +17,19 @@ const Node = {
   "checkall": "true",
   "repair": false,
   "outputs": 2,
-  "x": 155,
-  "y": 220,
+  "x": 605,
+  "y": 200,
   "wires": [
     [
-      "ef489047b15f8a46"
+      "e24ed562df1850f1"
     ],
-    []
+    [
+      "8623331a1a94c27a"
+    ]
+  ],
+  "outputLabels": [
+    "true",
+    "false"
   ],
   "icon": "font-awesome/fa-question",
   "l": false

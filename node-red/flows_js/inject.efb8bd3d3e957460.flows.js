@@ -16,7 +16,7 @@ const Node = {
   "topic": "",
   "payload": "{}",
   "payloadType": "json",
-  "x": 935,
+  "x": 705,
   "y": 400,
   "wires": [
     [

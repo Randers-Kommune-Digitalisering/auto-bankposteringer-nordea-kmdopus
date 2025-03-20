@@ -33,11 +33,9 @@
         "ID": { "key": "transactionID", "hidden": true },
     }
     
-    const keyMapComputed = computed(() => (keyMap))
-
     const groupedKeyMap = computed(() => {
         const groups = {}
-        for (const [key, value] of Object.entries(keyMapComputed.value)) {
+        for (const [key, value] of Object.entries(keyMap)) {
             const group = value.group || 'Diverse'
             if (!groups[group]) groups[group] = {}
             groups[group][key] = value
@@ -45,7 +43,7 @@
         return groups
     })
 
-    const groupOrder = ['Transaktionsoplysninger', 'Kontering', 'Diverse']
+    const groupOrder = ['Transaktionsoplysninger', 'Kontering']
 
     const sortedGroups = computed(() => {
         return groupOrder
@@ -82,8 +80,6 @@
         })
     }
 
-    console.log(keyMapComputed.value)
-
 </script>
 
 <template>
@@ -100,7 +96,7 @@
         
         <form @submit.prevent="">
             <fieldset>
-                <div class="activeToggle">
+                <div class="bookPosting">
                     <button id="submit" @click="updatePosting" class="green" :disabled="isUpdating">
                         <template v-if="isUpdating">Danner bilag ...</template>
                         <template v-else-if="hasUpdated">Bilag dannet</template>
@@ -144,8 +140,8 @@
     .hidden {
         display:none;
     }
-    .activeToggle {
+    .bookPosting {
         display: flex;
-        justify-content: space-between;
+        justify-content: center;
     }
 </style>
