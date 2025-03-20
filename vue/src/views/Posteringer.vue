@@ -139,6 +139,10 @@
             Posteringer til manuel behandling
         </template>
 
+        <span class="paragraph">
+            Herunder håndteres de posteringer som ikke er matchet med en regel og som derfor manuelt skal bogføres. 
+        </span>
+
         <fieldset>           
             <div class="float-right searchButtonDiv">
                 <button :class="isSearching ? 'gray' : ''" @click="toggleSearch()">
@@ -147,10 +151,6 @@
                 </button>
             </div>
         </fieldset>
-        
-        <span class="paragraph">
-            Herunder håndteres de posteringer som ikke er matchet med en regel og som derfor manuelt skal bogføres. 
-        </span>
         
         <table>
             <thead>
@@ -163,7 +163,7 @@
                     <th v-for="([key, value]) in Object.entries(keyMap)" :key="key" :class="(value.hidden ? 'hidden ' : '')">
                         {{ key }}
                     </th>
-                    <th>Ændr</th>
+                    <th>Behandl</th>
                 </tr>
             </thead>
             <tr v-if="postings != null" v-for="(obj, index) in postings" :id="obj[keyMap['ID'].key]" :class="returningFrom == obj[keyMap['ID'].key] ? 'highlight' : ''">
@@ -201,7 +201,7 @@
     .searchButtonDiv 
     {
         padding-left: 0.55rem;
-    }
+    }NEEDIT TWO
     .addButton
     {
         padding-right: 0.55rem;

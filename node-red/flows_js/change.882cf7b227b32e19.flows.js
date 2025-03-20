@@ -37,7 +37,7 @@ const Node = {
       "t": "set",
       "p": "data",
       "pt": "flow",
-      "to": "{\t   \"authorizer_id\":$globalContext(\"masterData\").admID\t}",
+      "to": "{\t   \"authorizer_id\":$globalContext(\"masterData\").admSysData.admID\t}",
       "tot": "jsonata"
     },
     {

@@ -16,7 +16,7 @@ const Node = {
     }
   ],
   "x": 175,
-  "y": 160,
+  "y": 60,
   "wires": [
     [
       "497a8a8d75494096"
@@ -38,9 +38,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
       let date = dayjs().startOf('day');
   
       if (date.day() === 1) { // If today is Monday
-          date = date.subtract(3, 'day');
+          date = date.subtract(4, 'day');
       } else {
-          date = date.subtract(1, 'day');
+          date = date.subtract(2, 'day');
       }
   
       return date.format('YYYY-MM-DD');

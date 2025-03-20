@@ -38,16 +38,16 @@
 <template>
 
     <h2>Filbibliotek</h2>
-    
-    <span class="paragraph">
-        Bankdatoen fremgår af filnavnet
-    </span>
 
     <Content>
         <template #icon>
             <IconDoc />
         </template>
         <template #heading>Posteringsbilag</template>
+
+        <span class="paragraph">
+            Bankdatoen fremgår af filnavnet
+        </span>
         
         <table>
             <thead>

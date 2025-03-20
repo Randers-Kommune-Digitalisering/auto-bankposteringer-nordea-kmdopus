@@ -1,5 +1,5 @@
 const Node = {
-  "id": "4f305aa6c3681cd9",
+  "id": "c1b47442eeb89524",
   "type": "link call",
   "z": "8c354b8d2ca56b7b",
   "g": "622bd279325fcb5d",
@@ -9,8 +9,8 @@ const Node = {
   ],
   "linkType": "static",
   "timeout": "30",
-  "x": 655,
-  "y": 300,
+  "x": 795,
+  "y": 200,
   "wires": [
     [
       "ce6e75a363bb80b0"

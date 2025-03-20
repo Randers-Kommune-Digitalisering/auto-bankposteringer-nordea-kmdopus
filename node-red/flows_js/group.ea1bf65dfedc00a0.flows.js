@@ -2,7 +2,7 @@ const Node = {
   "id": "ea1bf65dfedc00a0",
   "type": "group",
   "z": "8c354b8d2ca56b7b",
-  "name": "Handle restarted runs",
+  "name": "Manage runs",
   "style": {
     "label": true,
     "stroke": "none",
@@ -21,7 +21,7 @@ const Node = {
     "df0c5064833643b0"
   ],
   "x": 444,
-  "y": 399,
+  "y": 299,
   "w": 302,
   "h": 122
 }
