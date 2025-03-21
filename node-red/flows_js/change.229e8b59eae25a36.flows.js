@@ -37,7 +37,7 @@ const Node = {
       "t": "set",
       "p": "configs.ftp.filepaths.send.rootFolder",
       "pt": "global",
-      "to": "/fra-randers/",
+      "to": "/data/output/",
       "tot": "str"
     },
     {
