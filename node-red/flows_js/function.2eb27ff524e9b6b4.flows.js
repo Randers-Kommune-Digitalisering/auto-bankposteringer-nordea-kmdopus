@@ -133,7 +133,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   
   const xml = builder.buildObject(xmlObject);
   
-  msg.filename = '/data/output/' + filename;
+  msg.filename = filename;
   msg.payload = xml;
   
   return msg;
