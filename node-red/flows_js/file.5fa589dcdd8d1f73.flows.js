@@ -4,7 +4,7 @@ const Node = {
   "z": "ee0cf4ce372e2d36",
   "g": "09ae44d941f2b3ed",
   "name": "",
-  "filename": "$globalContext(\"configs\").ftp.filepaths.send.rootFolder & filename",
+  "filename": "$globalContext(\"configs\").ftp.filepaths.send.fullPath",
   "filenameType": "jsonata",
   "appendNewline": true,
   "createDir": true,

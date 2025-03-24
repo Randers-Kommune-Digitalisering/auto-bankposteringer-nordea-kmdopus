@@ -28,8 +28,8 @@ const Node = {
       "t": "set",
       "p": "payload.filename",
       "pt": "msg",
-      "to": "filename",
-      "tot": "msg"
+      "to": "configs.ftp.filepaths.recieve.fullPath",
+      "tot": "global"
     }
   ],
   "action": "",
