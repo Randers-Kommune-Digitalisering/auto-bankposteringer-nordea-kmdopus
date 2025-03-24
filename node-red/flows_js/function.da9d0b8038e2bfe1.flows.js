@@ -10,8 +10,8 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 665,
-  "y": 60,
+  "x": 715,
+  "y": 100,
   "wires": [
     [
       "c49c5be7601cebc5"
@@ -22,13 +22,13 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let erpObj = global.get("erp");
+  let erpObj = global.get("erp") || {};
   let transactionsObj = global.get("transactions");
   let masterDataObj = global.get("masterData");
   let postings = [];
   let transactionsUnmatched = transactionsObj.addUnmatched ? transactionsObj.addUnmatched : [];
   const transactions = transactionsObj.list ? transactionsObj.list.reverse() : null;
-  const transactionParameters = transactionsObj.parameters;   // Has to match ruleParameters length, can be nested array
+  const transactionParameters = global.get("configs").banking.usefulParameters;   // Has to match ruleParameters length, can be nested array
   const accountingRules = masterDataObj.rules;
   const ruleParameters = Object.keys(accountingRules[0]).slice(0, 3);
   const date = global.get("dates").simpleDate;
@@ -151,56 +151,51 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
       let cpr = rules.postWithCPR ? extractCPRNumber(transaction.narrative) : null;
       
-      if (transaction.account.manual) {
-          generatePostings(transaction.account.statusAccount, transaction.account.Artskonto, statusDebetOrCredit, landingDebetOrCredit, transaction.account.text, cleanedAmount, transaction.account.PSP);
-      } else {
-          let completeMatch = false;
+      let completeMatch = false;
   
-          for (let rule of rules) {      
-              let sumOfParametersMatched = 0;
-              let psp = rule.PSP ? rule.PSP : '';
+      for (let rule of rules) {      
+          let sumOfParametersMatched = 0;
+          let psp = rule.PSP ? rule.PSP : '';
   
-              if (completeMatch) {
-                  continue
-              } else {
-                  for (let parameterIndex = 0; parameterIndex < transactionParameters.length; parameterIndex++) {
-                      let searchValue = rule[ruleParameters[parameterIndex]] ? rule[ruleParameters[parameterIndex]].toLowerCase() : null;
+          if (completeMatch) {
+              continue
+          } else {
+              for (let parameterIndex = 0; parameterIndex < transactionParameters.length; parameterIndex++) {
+                  let searchValue = rule[ruleParameters[parameterIndex]] ? rule[ruleParameters[parameterIndex]].toLowerCase() : null;
   
-                      if (searchValue && rule.ActiveBool && matchParameter(transaction, searchValue, transactionParameters[parameterIndex])) {
+                  if (searchValue && rule.ActiveBool && matchParameter(transaction, searchValue, transactionParameters[parameterIndex])) {
   
-                          sumOfParametersMatched += 1;
-                      }
-                  }
-  
-                  let matchedAllParametersBool = sumOfParametersMatched === sumOfParametersGiven(rule);
-                  let matchedAmountBool = matchAmount(absoluteAmount, rule.Operator, rule.Beløb1, rule.Beløb2)
-                  let matchedAccountBool = transaction.account.bankAccount === rule.relatedBankAccount || rule.relatedBankAccount === null
-                                  
-                  if (matchedAllParametersBool && matchedAmountBool && matchedAccountBool) {
-                      if (!rule.ExceptionBool) {   // Don't write ERP postings if rule is an exception, but still count as match
-                          let text = textGeneration(rule.Posteringstekst, transaction.message, transaction.narrative, transaction.counterparty_name);
-                          generatePostings(transaction.account.statusAccount, rule.Artskonto, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, psp, cpr);
-                      }
-                      completeMatch = true;
-                      rule.LastUsed = date;
+                      sumOfParametersMatched += 1;
                   }
               }
-          }
-          if (!completeMatch) {
-              let text = transaction.transaction_id;
   
-              generatePostings(transaction.account.statusAccount, transaction.account.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, '', cpr);
-              
-              // if (transaction.account.bankAccountName != "Debitorkonto") {
-              if (transaction.account.bankAccountName != "TEST") {
-                  transactionsUnmatched.push(transaction);
+              let matchedAllParametersBool = sumOfParametersMatched === sumOfParametersGiven(rule);
+              let matchedAmountBool = matchAmount(absoluteAmount, rule.Operator, rule.Beløb1, rule.Beløb2)
+              let matchedAccountBool = transaction.account.bankAccount === rule.relatedBankAccount || rule.relatedBankAccount === null
+                              
+              if (matchedAllParametersBool && matchedAmountBool && matchedAccountBool) {
+                  if (!rule.ExceptionBool) {   // Don't write ERP postings if rule is an exception, but still count as match
+                      let text = textGeneration(rule.Posteringstekst, transaction.message, transaction.narrative, transaction.counterparty_name);
+                      generatePostings(transaction.account.statusAccount, rule.Artskonto, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, psp, cpr);
+                  }
+                  completeMatch = true;
+                  rule.LastUsed = date;
               }
           }
+      }
+      if (!completeMatch) {
+          let text = transaction.transaction_id;
   
-          transactionsObj.addUnmatched = transactionsUnmatched;
-          global.set("transactions", transactionsObj);
+          generatePostings(transaction.account.statusAccount, transaction.account.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, '', cpr);
+          
+          // if (transaction.account.bankAccountName != "Debitorkonto") {
+          if (transaction.account.bankAccountName != "TEST") {
+              transactionsUnmatched.push(transaction);
+          }
+      }
   
-      }   
+      transactionsObj.addUnmatched = transactionsUnmatched;
+      global.set("transactions", transactionsObj);
       
   }
   

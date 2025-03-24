@@ -3,7 +3,7 @@ const Node = {
   "type": "debug",
   "z": "8c354b8d2ca56b7b",
   "g": "622bd279325fcb5d",
-  "name": "ERP error",
+  "name": "No postings",
   "active": true,
   "tosidebar": true,
   "console": true,
@@ -12,8 +12,8 @@ const Node = {
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 655,
-  "y": 220,
+  "x": 555,
+  "y": 240,
   "wires": [],
   "l": false
 }

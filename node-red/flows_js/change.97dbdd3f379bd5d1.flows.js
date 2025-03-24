@@ -1,16 +1,16 @@
 const Node = {
   "id": "97dbdd3f379bd5d1",
   "type": "change",
-  "z": "ee0cf4ce372e2d36",
-  "g": "6c0b1c62a8bd2bbc",
-  "name": "Set headers",
+  "z": "431f85f122b4636d",
+  "g": "586bba4061b1d3f2",
+  "name": "KMD finans",
   "rules": [
     {
       "t": "set",
-      "p": "erp.csvHeaders",
+      "p": "configs.erp.csvHeaders",
       "pt": "global",
-      "to": "[\"Artskonto\",\"Omkostningssted\",\"PSP-element\",\"Profitcenter\",\"Ordre\",\"Debet/kredit\",\"Beløb\",\"Næste agent\",\"Tekst\",\"Betalingsart\",\"Påligningsår\",\"Betalingsmodtagernr.\",\"Betalingsmodtagernr.kode\",\"Ydelsesmodtagernr.\",\"Ydelsesmodtagernr.kode\",\"Ydelsesperiode fra\",\"Ydelsesperiode til\",\"Oplysningspligtnr.\",\"Oplysningspligtmodtagernr.kode\",\"Oplysningspligtkode\",\"Netværk\",\"Operation\",\"Mængde\",\"Mængdeenhed\",\"Referencenøgle\"]",
-      "tot": "json"
+      "to": "Artskonto, Omkostningssted, PSP-element, Profitcenter, Ordre, Debet/kredit, Beløb, Næste agent, Tekst, Betalingsart, Påligningsår, Betalingsmodtagernr., Betalingsmodtagernr.kode, Ydelsesmodtagernr., Ydelsesmodtagernr.kode, Ydelsesperiode fra, Ydelsesperiode til, Oplysningspligtnr., Oplysningspligtmodtagernr.kode, Oplysningspligtkode, Netværk, Operation, Mængde, Mængdeenhed, Referencenøgle",
+      "tot": "str"
     }
   ],
   "action": "",
@@ -18,15 +18,14 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 615,
-  "y": 140,
+  "x": 370,
+  "y": 480,
   "wires": [
     [
-      "f6228492c9e750d6"
+      "12b79b33b84ebcc0"
     ]
   ],
-  "icon": "font-awesome/fa-cog",
-  "l": false
+  "icon": "font-awesome/fa-pencil"
 }
 
 module.exports = Node;

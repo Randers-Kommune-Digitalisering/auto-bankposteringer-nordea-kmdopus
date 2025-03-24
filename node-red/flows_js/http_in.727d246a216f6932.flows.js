@@ -4,14 +4,16 @@ const Node = {
   "z": "32cf2bec698ca424",
   "g": "83692983b416dfd5",
   "name": "Put data",
-  "url": "/postings",
+  "url": "/postings/:uid",
   "method": "put",
   "upload": false,
   "swaggerDoc": "",
-  "x": 560,
+  "x": 540,
   "y": 600,
   "wires": [
-    []
+    [
+      "dd879edc151aeda5"
+    ]
   ]
 }
 

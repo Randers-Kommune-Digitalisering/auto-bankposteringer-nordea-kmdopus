@@ -14,24 +14,24 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "transactions.updatedFromTransaction",
+      "p": "transactions.manual",
       "pt": "global",
-      "to": "$globalContext(\"transaction\").unmatched[transaction_id= $$.uid]",
+      "to": "[payload]",
       "tot": "jsonata"
-    },
-    {
-      "t": "set",
-      "p": "transactions.updatedToTransaction",
-      "pt": "global",
-      "to": "payload",
-      "tot": "msg"
     },
     {
       "t": "set",
       "p": "dates.bookingDate",
       "pt": "global",
-      "to": "$flowContext(\"updatedFromTransaction\").booking_date",
-      "tot": "jsonata"
+      "to": "payload.bookingDate",
+      "tot": "msg"
+    },
+    {
+      "t": "set",
+      "p": "messageIdentification",
+      "pt": "global",
+      "to": "uid",
+      "tot": "msg"
     }
   ],
   "action": "",
@@ -39,12 +39,12 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 655,
+  "x": 635,
   "y": 600,
   "wires": [
     [
-      "e9965ee9f390789f",
-      "2b2009c141cdc7df"
+      "bac1384d9ea7c900",
+      "3d18e2ece41ab7a9"
     ]
   ],
   "icon": "font-awesome/fa-save",
