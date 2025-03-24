@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "431f85f122b4636d",
   "g": "586bba4061b1d3f2",
-  "name": "KMD",
+  "name": "KMD ftp",
   "rules": [
     {
       "t": "set",
@@ -53,11 +53,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 150,
+  "x": 160,
   "y": 480,
   "wires": [
     [
-      "1af0b485f8baaab1"
+      "97dbdd3f379bd5d1"
     ]
   ],
   "icon": "font-awesome/fa-pencil"

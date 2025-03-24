@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "431f85f122b4636d",
   "g": "5126da366c0f2bdb",
-  "name": "Angiv Open Banking oplysninger",
+  "name": "Angiv Open Banking data",
   "rules": [
     {
       "t": "set",
@@ -53,6 +53,13 @@ const Node = {
       "pt": "global",
       "to": "AGREEMENT_ID",
       "tot": "env"
+    },
+    {
+      "t": "set",
+      "p": "configs.banking.usefulParameters",
+      "pt": "global",
+      "to": "[[\"narrative\",\"message\"],\"counterparty_name\",\"type_description\"]",
+      "tot": "json"
     }
   ],
   "action": "",
@@ -60,7 +67,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 230,
+  "x": 210,
   "y": 340,
   "wires": [
     [

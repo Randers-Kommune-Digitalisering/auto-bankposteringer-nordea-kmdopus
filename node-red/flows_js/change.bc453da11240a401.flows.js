@@ -16,7 +16,7 @@ const Node = {
       "t": "set",
       "p": "filename",
       "pt": "msg",
-      "to": "\"/data/afstemning/\" & $globalContext(\"dates\").date & \".csv\"",
+      "to": "\"/data/afstemning/\" & $globalContext(\"dates\").bookingDate & \".csv\"",
       "tot": "jsonata"
     },
     {
@@ -36,7 +36,7 @@ const Node = {
   "y": 180,
   "wires": [
     [
-      "0103cd774294d614"
+      "08eb7cc0cd32938e"
     ]
   ],
   "icon": "font-awesome/fa-cog",

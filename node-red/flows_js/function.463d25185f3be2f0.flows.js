@@ -15,11 +15,11 @@ const Node = {
       "module": "dayjs"
     }
   ],
-  "x": 805,
+  "x": 755,
   "y": 400,
   "wires": [
     [
-      "405c31e7c368685d"
+      "c6058b99801376b0"
     ]
   ],
   "icon": "font-awesome/fa-cog",
@@ -32,30 +32,10 @@ Format: ISO 8601
 `
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, dayjs) {
-  let dates = global.get("dates");
   let transactions = global.get("transactions");
-  
-  function findDate() {
-      let date = dayjs().startOf('day');
-  
-      if (date.day() === 1) { // If today is Monday
-          date = date.subtract(3, 'day');
-      } else {
-          date = date.subtract(1, 'day');
-      }
-  
-      return date.format('YYYY-MM-DD');
-  }
-  
-  // Set global variables
-  dates.bookingDate = findDate();
-  dates.date = dayjs().format('YYYYMMDD');
-  dates.simpleDate = dayjs().format('DD-MM-YYYY');
-  dates.time = dayjs().format('HHmmss');
   
   transactions.list = [];
   
-  global.set("dates", dates);
   global.set("transactions", transactions)
   
   return msg;

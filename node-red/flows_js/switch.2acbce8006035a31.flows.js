@@ -1,10 +1,10 @@
 const Node = {
-  "id": "1bae462fba8682e3",
+  "id": "2acbce8006035a31",
   "type": "switch",
-  "z": "8c354b8d2ca56b7b",
-  "g": "622bd279325fcb5d",
-  "name": "postings generated?",
-  "property": "erp.postings",
+  "z": "32cf2bec698ca424",
+  "g": "83692983b416dfd5",
+  "name": "manual posting to process?",
+  "property": "transactions.manual",
   "propertyType": "global",
   "rules": [
     {
@@ -14,17 +14,17 @@ const Node = {
       "t": "else"
     }
   ],
-  "checkall": "true",
+  "checkall": "false",
   "repair": false,
   "outputs": 2,
-  "x": 605,
-  "y": 240,
+  "x": 735,
+  "y": 620,
   "wires": [
     [
-      "a52457ed55960f9b"
+      "28ded5ec5bfc1e4c"
     ],
     [
-      "8623331a1a94c27a"
+      "a2d518219b3f9a29"
     ]
   ],
   "outputLabels": [

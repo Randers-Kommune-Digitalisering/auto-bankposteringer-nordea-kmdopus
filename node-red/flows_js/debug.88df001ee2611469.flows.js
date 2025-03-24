@@ -5,7 +5,7 @@ const Node = {
   "g": "ea1bf65dfedc00a0",
   "name": "Update status",
   "active": true,
-  "tosidebar": false,
+  "tosidebar": true,
   "console": true,
   "tostatus": false,
   "complete": "payload.affectedRows > 0 ?\t{\t    \"Message\": \"runHistory table updated\",\t    \"Number of entries updated\": payload.affectedRows\t}\t:\t{\t    \"Message\": \"Nothing to update in runHistory\"\t}",

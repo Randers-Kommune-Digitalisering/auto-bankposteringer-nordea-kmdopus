@@ -14,7 +14,8 @@ const Node = {
   "y": 320,
   "wires": [
     [
-      "47554be7fa0c6e02"
+      "47554be7fa0c6e02",
+      "d2b4eb8b76bffa6d"
     ]
   ],
   "icon": "font-awesome/fa-minus",
@@ -25,7 +26,7 @@ Node.template = `
 DELETE FROM
     transactionsWithNoMatch
 WHERE
-    transactionID = {{uid}}
+    transactionID = '{{uid}}'
 `
 
 module.exports = Node;
