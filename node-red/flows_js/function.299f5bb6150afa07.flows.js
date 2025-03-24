@@ -30,7 +30,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   }
   
   msg.payload = formattedPostings;
-  msg.columns = global.get("erp").csvHeaders.split(", ");
+  msg.columns = global.get("configs").erp.csvHeaders.split(", ");
   msg.filename = "/data/output/" + global.get("dates").simpleDate + ".csv";
   
   return msg;

@@ -17,6 +17,10 @@ const Node = {
     {
       "var": "xml2js",
       "module": "xml2js"
+    },
+    {
+      "var": "dayjs",
+      "module": "dayjs"
     }
   ],
   "x": 105,
@@ -30,18 +34,18 @@ const Node = {
   "l": false
 }
 
-Node.func = async function (node, msg, RED, context, flow, global, env, util, csv, xml2js) {
+Node.func = async function (node, msg, RED, context, flow, global, env, util, csv, xml2js, dayjs) {
   const inProd = true;
   
-  const date = global.get("dates").bookingDate;
-  const bookingDate = date.replace(/-/g, "");
-  const time = global.get("dates").time;
+  const docDate = dayjs().format('YYYYMMDD');
+  const docTime = dayjs().format('HHmmss');
+  const bookingDate = global.get("dates").bookingDate.replace(/-/g, "");
   const docId = global.get("messageIdentification");
   const compCode = global.get("configs").ftp.compCode;
   const dataProviderId = global.get("configs").ftp.dataProviderId;
   const prodEnv = inProd ? global.get("configs").ftp.prodEnv : 'T02';
   const dataProviderIdCode = inProd ? global.get("configs").ftp.dataProviderIdCode : '797';
-  const filename = `ZFIR_KMD_Opus_Posteringer_IND_${dataProviderIdCode}_${dataProviderId}_${date}_${time}.xml`;
+  const filename = `ZFIR_KMD_Opus_Posteringer_IND_${dataProviderIdCode}_${dataProviderId}_${docDate}_${docTime}.xml`;
   const postings = global.get("erp").postings;
   
   let lineCounter = 0;
@@ -96,8 +100,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       SENDERID: prodEnv + 'CLNT' + dataProviderIdCode,
       RECEIVER: prodEnv + 'CLNT' + dataProviderIdCode,
       FILE_NAME: filename,
-      SEND_DATE: date,
-      SEND_TIME: time
+      SEND_DATE: docDate,
+      SEND_TIME: docTime
   };
   
   const HEADER = {
@@ -106,7 +110,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       BALANCE_CREDIT: '-' + creditSum.toFixed(2),
       MUNICIPALITY: dataProviderIdCode,
       COMP_CODE: compCode,
-      DOC_DATE: bookingDate,
+      DOC_DATE: docDate,
       PSTNG_DATE: bookingDate,
       RECEIV_DOC: docId,
       HEADER_TXT: dataProviderId,

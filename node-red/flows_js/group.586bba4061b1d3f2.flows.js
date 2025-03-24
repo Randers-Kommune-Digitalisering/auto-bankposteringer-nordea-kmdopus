@@ -2,7 +2,7 @@ const Node = {
   "id": "586bba4061b1d3f2",
   "type": "group",
   "z": "431f85f122b4636d",
-  "name": "Angiv FTP-modtager",
+  "name": "Angiv ØS-data",
   "style": {
     "stroke": "none",
     "fill": "#ffffbf",
@@ -14,7 +14,8 @@ const Node = {
     "229e8b59eae25a36",
     "1e059336af1ea040",
     "522dea9db88ba22b",
-    "1af0b485f8baaab1"
+    "1af0b485f8baaab1",
+    "97dbdd3f379bd5d1"
   ],
   "x": 74,
   "y": 439,

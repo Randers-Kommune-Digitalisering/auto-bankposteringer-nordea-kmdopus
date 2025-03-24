@@ -2,7 +2,7 @@ const Node = {
   "id": "5259773178769a53",
   "type": "group",
   "z": "8c354b8d2ca56b7b",
-  "name": "Set global dates",
+  "name": "Set system dates",
   "style": {
     "stroke": "none",
     "fill": "#e3f3d3",

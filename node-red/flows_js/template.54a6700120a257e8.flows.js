@@ -25,12 +25,14 @@ CREATE TABLE IF NOT EXISTS transactionsWithNoMatch (
     transactionID NVARCHAR(29) NULL PRIMARY KEY,
     counterpartyName NVARCHAR(63) NULL,
     narrative NVARCHAR(255) NULL,
+    typeDescription NVARCHAR(29) NULL,
     bankAccount NVARCHAR(31) NULL,
     amount NVARCHAR(31) NULL,
     bookingDate NVARCHAR(31) NULL,
     Artskonto NVARCHAR(8) NULL,
     PSP NVARCHAR(19) NULL,
-    Posteringstekst NVARCHAR(255) NULL
+    Posteringstekst NVARCHAR(255) NULL,
+    cpr NVARCHAR(11) NULL
 );
 `
 
