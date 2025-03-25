@@ -1,7 +1,7 @@
 const Node = {
   "id": "dc3f1bccec7ebeb1",
   "type": "group",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "name": "Handle multiple accounts",
   "style": {
     "stroke": "none",
@@ -13,13 +13,12 @@ const Node = {
   "nodes": [
     "b3b1b0fc24ded8c9",
     "a445693334ae4264",
-    "2efe55213bd0cbc7",
-    "e4aa1c6421fd4a52",
-    "167217baaa7d871c"
+    "08341e4861c642c2",
+    "f8442862197f5a62"
   ],
-  "x": 24,
-  "y": 719,
-  "w": 232,
+  "x": 254,
+  "y": 299,
+  "w": 182,
   "h": 122
 }
 

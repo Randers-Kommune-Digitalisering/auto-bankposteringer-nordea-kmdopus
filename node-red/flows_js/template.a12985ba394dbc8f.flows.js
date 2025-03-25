@@ -10,10 +10,12 @@ const Node = {
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 180,
-  "y": 320,
+  "x": 220,
+  "y": 180,
   "wires": [
-    []
+    [
+      "4b2242664df55dc1"
+    ]
   ],
   "icon": "font-awesome/fa-pencil"
 }
@@ -22,8 +24,8 @@ Node.template = `
 CREATE TABLE IF NOT EXISTS bankAccounts (
     bankAccount NVARCHAR(31) NULL PRIMARY KEY,
     bankAccountName NVARCHAR(63) NULL,
-    statusAccount int NULL,
-    intermediateAccount int NULL
+    statusAccount CHAR(8) NULL,
+    intermediateAccount CHAR(8) NULL
 );
 `
 

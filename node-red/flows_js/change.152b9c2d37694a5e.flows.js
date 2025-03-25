@@ -7,21 +7,21 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "token",
+      "p": "auth.token",
       "pt": "global",
       "to": "payload.response.client_token",
       "tot": "msg"
     },
     {
       "t": "set",
-      "p": "access_id",
+      "p": "auth.accessId",
       "pt": "global",
       "to": "payload.response.access_id",
       "tot": "msg"
     },
     {
       "t": "set",
-      "p": "adminAuthStatus",
+      "p": "auth.adminStatus",
       "pt": "global",
       "to": "payload.response.status",
       "tot": "msg"
@@ -32,8 +32,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 865,
-  "y": 100,
+  "x": 495,
+  "y": 280,
   "wires": [
     [
       "57ebed6f23b4abbd"

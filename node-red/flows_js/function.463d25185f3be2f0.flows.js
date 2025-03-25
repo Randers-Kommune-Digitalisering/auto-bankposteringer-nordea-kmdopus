@@ -1,7 +1,7 @@
 const Node = {
   "id": "463d25185f3be2f0",
   "type": "function",
-  "z": "ee0cf4ce372e2d36",
+  "z": "62eaf4407ee85a3a",
   "g": "85a5e54522cd21cc",
   "name": "set global vars",
   "func": "",
@@ -15,11 +15,11 @@ const Node = {
       "module": "dayjs"
     }
   ],
-  "x": 135,
-  "y": 760,
+  "x": 755,
+  "y": 400,
   "wires": [
     [
-      "405c31e7c368685d"
+      "c6058b99801376b0"
     ]
   ],
   "icon": "font-awesome/fa-cog",
@@ -32,23 +32,11 @@ Format: ISO 8601
 `
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, dayjs) {
-  function findDate() {
-      let date = dayjs().startOf('day');
+  let transactions = global.get("transactions");
   
-      if (date.day() === 1) { // If today is Monday
-          date = date.subtract(3, 'day');
-      } else {
-          date = date.subtract(1, 'day');
-      }
+  transactions.list = [];
   
-      return date.format('YYYY-MM-DD');
-  }
-  
-  // Set global variables
-  global.set("date", findDate());
-  global.set("dateOfOrigin", dayjs().format('YYYYMMDD'));
-  global.set("timeOfOrigin", dayjs().format('HHmmss'));
-  global.set("simpleDate", dayjs().format('DD-MM-YYYY'));
+  global.set("transactions", transactions)
   
   return msg;
 }

@@ -1,7 +1,7 @@
 const Node = {
   "id": "ee31b70d7b508c0d",
   "type": "group",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "name": "Initiate auth",
   "style": {
     "stroke": "none",
@@ -12,14 +12,12 @@ const Node = {
   },
   "nodes": [
     "43f036ca5c91d652",
-    "8d42910b87fdded9",
-    "1d2ecef5fc3ef02f",
-    "8af7ed2082372bf7"
+    "87af11a3a270871c"
   ],
-  "x": 24,
+  "x": 324,
   "y": 19,
-  "w": 202,
-  "h": 122
+  "w": 152,
+  "h": 82
 }
 
 module.exports = Node;

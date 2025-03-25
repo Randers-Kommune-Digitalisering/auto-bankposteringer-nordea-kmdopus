@@ -2,7 +2,7 @@ const Node = {
   "id": "fafde89af20cbe51",
   "type": "group",
   "z": "ee0cf4ce372e2d36",
-  "name": "FIle creation",
+  "name": "File creation",
   "style": {
     "stroke": "none",
     "fill": "#e3f3d3",
@@ -16,12 +16,12 @@ const Node = {
     "e4b5680702fbfb57",
     "67210a275cdf01da",
     "0b0b5788d39412b1",
-    "588edafd604283f6"
+    "299f5bb6150afa07"
   ],
-  "x": 374,
-  "y": 39,
-  "w": 452,
-  "h": 122
+  "x": 14,
+  "y": 19,
+  "w": 552,
+  "h": 82
 }
 
 module.exports = Node;

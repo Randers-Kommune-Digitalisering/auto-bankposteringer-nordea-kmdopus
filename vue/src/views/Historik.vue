@@ -8,7 +8,7 @@
 
     const keyMap = {
         "dato": {
-            "key": "dato"
+            "key": "originDate"
         },
         "id": {
             "key": "uid"

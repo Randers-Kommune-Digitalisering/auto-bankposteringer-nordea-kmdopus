@@ -12,10 +12,10 @@
     <h2>Fællesoffentlig Bankintegration - FOBI</h2>
 
     <Content>      
-        Fællesoffentlig bankintegration (FOBI) integrerer kommunernes økonomisystem (ØS) og bankkonti for fuldautomatisk bogføring af hovedkonto 8.22.05 og semi-automatisk bogføring af bankposteringer i kommunernes kontoplan.
+        Fællesoffentlig bankintegration (FOBI) integrerer dit (ØS) og dine bankkonti for fuldautomatisk bogføring af hovedkonto 8.22.05 og semi-automatisk bogføring af bankposteringer i kommunernes kontoplan.
         <br>
         <br>
-        Ved hjælp af brugeroprettede konteringsregler matcher og bogfører FOBI bankposteringer med den ønskede kontering i kommunernes ØS.
+        Ved hjælp af konteringsregler matcher og bogfører FOBI bankposteringer med den ønskede kontering i kommunernes ØS.
     </Content>
 
     <Content>
@@ -28,21 +28,21 @@
         <br>
         Aftalen med din bank laves igennem en såkaldt <b>Open Banking-leverandør</b>.
         <br>
-        Nordea og Danske Bank leverer selv deres data, mens de resterende banker i Danmark leverer data igennem virksomhederne Bankdata, BEC eller SDC. Det fremgår af virksomhedernes hjemmeside, hvilke banker de leverer data for.
+        Nordea, Danske Bank og Lunar leverer selv deres data, mens de resterende banker i Danmark leverer data igennem virksomhederne Bankdata, BEC eller SDC. Det fremgår af virksomhedernes hjemmeside, hvilke banker de leverer data for.
         <br>
         Essensen af denne aftale er at du søger adgang til dine egne bankdata, og der er på nuværende tidspunkt stor forskel på hvordan leverandørerne håndterer denne ukonventionelle "manøvre".
-        Spørg din dataleverandør om mulighederne for adgang til egne transaktionsoplysninger.
+        Spørg din Open Banking-leverandør om mulighederne for adgang til egne transaktionsoplysninger.
         <br>
-        Når aftalen er lavet, får du nogle koder som skal angives i løsningens bagvedliggende filer.
+        Når aftalen er lavet, får du nogle koder som skal indlejres i løsningen. Det kan din IT-afdeling hjælper med.
         <br>
         <br>
         En lignende aftale indgås med din <b>ØS-leverandør</b>.
         <br>
-        I denne aftale er det er du som kommune leverandør af data, som skal indlæses i ØS.
+        I denne aftale oplyser du levarandøren at du vil levere data til indlæsning i ØS.
         <br>
-        Leveringen af data foregår igennem en FTP-forbindelse. Spørg din leverandør om mulighederne for tilslutning.
+        Leveringen af data foregår som regel igennem en SFTP-forbindelse. Spørg din leverandør om mulighederne for tilslutning.
         <br>
-        Ønsker man <i>ikke</i> denne tilslutning, vil FOBI i stedet oprette finansbilag til manuel indlæsning i ØS.
+        Ønsker man <i>ikke</i> denne tilslutning, vil FOBI i stedet oprette posteringsbilag til manuel indlæsning i ØS.
         <br>
         <br>
         Hvis du på forhånd har en lang række konteringsregler, som du gerne vil indlæse i denne løsning, er der oprettet en ØS-specifik skabelon, som ligger sammen med løsningens resterende filer.
@@ -59,7 +59,7 @@
         <br>
         I fanen <b>Stamdata</b> angives bl.a. oplysninger om kommunens FOBI-administrator og de bankkonti, som kommunen ønske at anvende FOBI til.
         <br>
-        Administratoren skal periodevis godkende FOBI's adgang til at hente jeres bankdata, hvilket er grunden til at disse oplysninger skal udfyldes.
+        Administratoren skal kunne godkende FOBI's adgang til at hente jeres bankdata, hvilket er grunden til at disse oplysninger skal udfyldes.
         <br>
         <br>
         Konteringsregler er opdelt i 3 faner efter deres type; hhv. aktive og inaktive regler, samt undtagelser.
@@ -77,8 +77,13 @@
         <i>NB: Oprettelse af nye regler/undtagelser sker på de respektive faner.</i>
         <br>
         <br>
-        Fanen <b>Filer</b>, vil kun være synlig hvis man ikke har en direkte integration til ØS.
-        Fanen vil i så fald indeholde de finansbilag som du som kommune manuelt skal indlæse i ØS, afgrænset efter lukkede bankdatoer.
+        Fanen <b>Filer</b> indeholder hhv. posteringsbilag og afstemningsbilag.
+        Hvis man har direkte integration til kommunens ØS, vil listen med posteringsbilag være tom.
+        Afstemningsbilag er en liste over de transaktioner som FOBI har hentet ind for den pågældende bogføringsdato og kan bruges til afstemning af bankkonti.
+        <br>
+        <br>
+        <i>Kontakt evt. FOBI-udvikler Christian Skermer Leonhardt på csl@randers.dk for hjælp med at komme igang.</i>
+        <br>
     </Content>
 
     <Content>
@@ -86,7 +91,6 @@
             <IconRSS />
         </template>
         <template #heading>Driftsstatus</template>
-        Løsningen benytter udviklingsmiljøet Node-RED til at håndtere back-end-funktionaliteter.
         
         <Status />
     </Content>

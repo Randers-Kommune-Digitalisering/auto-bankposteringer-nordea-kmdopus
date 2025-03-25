@@ -7,7 +7,7 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "adminAuthStatus",
+      "p": "auth.adminStatus",
       "pt": "global",
       "to": "payload.response.status",
       "tot": "msg"
@@ -18,8 +18,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 865,
-  "y": 140,
+  "x": 495,
+  "y": 320,
   "wires": [
     [
       "6c059eb1d2d52e58"

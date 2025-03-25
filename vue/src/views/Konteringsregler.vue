@@ -54,9 +54,6 @@
         "ID": {
             "key": "RuleID"
         },
-        "Advis": {
-            "key": "Advisliste"
-        },
         "Reference": {
             "key": "Reference"
         },
@@ -143,7 +140,6 @@
             return list
         return list.filter(x => (x[keyMap.Reference.key] != null && x[keyMap.Reference.key].toLowerCase().includes(keyword)) || /* Reference */
                                 (x[keyMap.Afsender.key] != null && x[keyMap.Afsender.key].toLowerCase().includes(keyword)) || /* Afsender */
-                                (x[keyMap.Advis.key] != null && x[keyMap.Advis.key].toLowerCase().includes(keyword)) || /* Advis */
                                 (x[keyMap.Posteringstype.key] != null && x[keyMap.Posteringstype.key].toLowerCase().includes(keyword)) || /* Posteringstype */
                                 (x[keyMap.Notat.key] != null && x[keyMap.Notat.key].toLowerCase().includes(keyword)) || /* Notat */
                                 (x[keyMap.ID.key] != null && x[keyMap.ID.key] == keyword) ) /* RuleID */

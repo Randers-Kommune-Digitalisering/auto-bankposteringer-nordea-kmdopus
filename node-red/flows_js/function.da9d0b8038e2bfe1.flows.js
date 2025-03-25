@@ -10,12 +10,11 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 165,
-  "y": 640,
+  "x": 715,
+  "y": 100,
   "wires": [
     [
-      "c49c5be7601cebc5",
-      "5eacaf9ba681643d"
+      "c49c5be7601cebc5"
     ]
   ],
   "icon": "font-awesome/fa-handshake-o",
@@ -23,28 +22,71 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let erpPostings = [];
-  let transactionsWithNoMatch = [];
-  const transactions = global.get("transactions").reverse();
-  const transactionParameters = flow.get("transactionParameters");   // Has to match ruleParameters
-  const accountingRules = global.get("accountingRules");
-  const ruleParameters = Object.keys(accountingRules[0]).slice(0, 4);
-  const erpFileHeaders = flow.get("erpFileHeaders").split(", ");
-  const bankAccounts = global.get("bankAccounts");
-  const date = global.get("simpleDate");
+  let erpObj = global.get("erp") || {};
+  let transactionsObj = global.get("transactions");
+  let masterDataObj = global.get("masterData");
+  let postings = [];
+  let transactionsUnmatched = transactionsObj.addUnmatched ? transactionsObj.addUnmatched : [];
+  const transactions = transactionsObj.list ? transactionsObj.list.reverse() : null;
+  const transactionParameters = global.get("configs").banking.usefulParameters;   // Has to match ruleParameters length, can be nested array
+  const accountingRules = masterDataObj.rules;
+  const ruleParameters = Object.keys(accountingRules[0]).slice(0, 3);
+  const date = global.get("dates").simpleDate;
+  
+  function extractCPRNumber(inputString) {
+      const regex = /((((0[1-9]|[12][0-9]|3[01])(0[13578]|10|12)(\d{2}))|(([0][1-9]|[12][0-9]|30)(0[469]|11)(\d{2}))|((0[1-9]|1[0-9]|2[0-8])(02)(\d{2}))|((29)(02)(00))|((29)(02)([2468][048]))|((29)(02)([13579][26])))[-]*\d{4})/gm;
+  
+      const match = inputString.match(regex);
+  
+      if (match) {
+          return match[0]; // Returnerer det første match
+      } else {
+          return null; // Returnerer null, hvis der ikke findes noget match
+      }
+  }
   
   function sumOfParametersGiven(rule) {
       // Count the number of rule parameters where the value property is defined (truthy)
       return Object.keys(rule)
-          .slice(0, 4)
+          .slice(0, 3)
           .filter(key => rule[key] || rule[key] || rule[key]).length;
   }
   
   function matchParameter(transaction, searchValue, key) {
-      return transaction[key] ? transaction[key].toLowerCase().includes(searchValue) : false;
+      if (!searchValue) return false;
+  
+      const searchTokens = searchValue.split(/\s*,\s*/).map(token => token.trim().toLowerCase());
+  
+      if (Array.isArray(key)) {
+          return key.some(singleKey =>
+              transaction[singleKey]
+                  ? searchTokens.every(token => transaction[singleKey].toLowerCase().includes(token))
+                  : false
+          );
+      }
+  
+      return transaction[key]
+          ? searchTokens.every(token => transaction[key].toLowerCase().includes(token))
+          : false;
   }
   
   function matchAmount(transactionAmount, amountOperator, ruleAmount1, ruleAmount2) {
+      switch (ruleAmount1) {
+          case null:
+              break;
+          default:
+              ruleAmount1 = parseFloat(ruleAmount1.replace(/\./g, '').replace(',', '.'));
+              break;
+      }
+  
+      switch (ruleAmount2) {
+          case null:
+              break;
+          default:
+              ruleAmount2 = parseFloat(ruleAmount2.replace(/\./g, '').replace(',', '.'));
+              break;
+      }
+      
       switch (amountOperator) {
           case '><':
               return transactionAmount >= ruleAmount1 && transactionAmount <= ruleAmount2;
@@ -60,6 +102,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   }
   
   function textGeneration(textVariation, message, narrative, counterparty_name) {
+      textVariation = textVariation ? textVariation : "";
+  
       if (narrative && narrative.includes('BDP')) {
           return narrative.substring(narrative.indexOf('BDP'));
       } else if (narrative && narrative.includes('KSD')) {
@@ -71,33 +115,49 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               return narrative;
           case "afsender fra bank":
               return counterparty_name || message;
-          case "advis fra bank":
-              return message || narrative;
           default:
               return textVariation;
       }
   }
   
-  function generateErpPostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, psp) {
-      // Needs work. Length and placement of variables should be dynamic, based on headers.
-      erpPostings.push([landingAccount, '', psp, '', '', landingDebetOrCredit, amount, '', text, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
-      erpPostings.push([statusAccount, '', '', '', '', statusDebetOrCredit, amount, '', text, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+  function generatePostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, psp, cpr) {
+      postings.push(
+          {
+              account: statusAccount,
+              debetOrCredit: statusDebetOrCredit,
+              amount: amount,
+              text: text
+          }
+      )
+      postings.push(
+          {
+              account: landingAccount,
+              psp: psp,
+              debetOrCredit: landingDebetOrCredit,
+              amount: amount,
+              text: text,
+              cpr: cpr
+          }
+      )
   }
   
-  function processPosting(transaction, rules) {
-      let completeMatchBool = false;
   
-      transaction.amount = parseFloat(transaction.amount);
-      let absoulute_amount = Math.abs(transaction.amount);
-      let cleanedAmount = String(transaction.amount).replace(/[^\d.-]/g, '').replace('-', '').replace('.', ',');
+  function processPosting(transaction, rules) {
+      let absoluteAmount = Math.abs(parseFloat(transaction.amount));
+      let cleanedAmount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      transaction.amount = cleanedAmount;
       let statusDebetOrCredit = transaction.amount > 0 ? "Debet" : "Kredit";
       let landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet";
+  
+      let cpr = rules.postWithCPR ? extractCPRNumber(transaction.narrative) : null;
+      
+      let completeMatch = false;
   
       for (let rule of rules) {      
           let sumOfParametersMatched = 0;
           let psp = rule.PSP ? rule.PSP : '';
   
-          if (completeMatchBool) {
+          if (completeMatch) {
               continue
           } else {
               for (let parameterIndex = 0; parameterIndex < transactionParameters.length; parameterIndex++) {
@@ -110,35 +170,49 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               }
   
               let matchedAllParametersBool = sumOfParametersMatched === sumOfParametersGiven(rule);
-              let matchedAmountBool = matchAmount(absoulute_amount, rule.Operator, rule.Beløb1, rule.Beløb2)
-  
-              if (matchedAllParametersBool && matchedAmountBool) {
+              let matchedAmountBool = matchAmount(absoluteAmount, rule.Operator, rule.Beløb1, rule.Beløb2)
+              let matchedAccountBool = transaction.account.bankAccount === rule.relatedBankAccount || rule.relatedBankAccount === null
+                              
+              if (matchedAllParametersBool && matchedAmountBool && matchedAccountBool) {
                   if (!rule.ExceptionBool) {   // Don't write ERP postings if rule is an exception, but still count as match
                       let text = textGeneration(rule.Posteringstekst, transaction.message, transaction.narrative, transaction.counterparty_name);
-                      generateErpPostings(transaction.account.statusAccount, rule.Artskonto, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, psp);
+                      generatePostings(transaction.account.statusAccount, rule.Artskonto, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, psp, cpr);
                   }
-                  completeMatchBool = true;
+                  completeMatch = true;
                   rule.LastUsed = date;
               }
           }
       }
-      if (!completeMatchBool) {
-          let text = transaction.narrative;
+      if (!completeMatch) {
+          let text = transaction.transaction_id;
   
-          generateErpPostings(transaction.account.statusAccount, transaction.account.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, '');
-          transactionsWithNoMatch.push(transaction);
+          generatePostings(transaction.account.statusAccount, transaction.account.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, '', cpr);
+          
+          // if (transaction.account.bankAccountName != "Debitorkonto") {
+          if (transaction.account.bankAccountName != "TEST") {
+              transactionsUnmatched.push(transaction);
+          }
       }
+  
+      transactionsObj.addUnmatched = transactionsUnmatched;
+      global.set("transactions", transactionsObj);
+      
   }
   
-  transactions.forEach(transaction => {
-      processPosting(transaction, accountingRules);
-  });
+  if (transactions) {
+      transactions.forEach(transaction => {
+          processPosting(transaction, accountingRules);
+      });
+  }
   
-  global.set("transactionsWithNoMatch", transactionsWithNoMatch);
+  erpObj.postings = postings;
+  global.set("erp", erpObj);
   
-  msg.payload = erpPostings;
-  msg.columns = flow.get("erpFileHeaders");
-  msg.filename = "/data/output/" + global.get("dateOfOrigin") + ".csv";
+  transactionsObj.list = []
+  global.set("transactions", transactionsObj);
+  
+  masterDataObj.rules = accountingRules;
+  global.set("masterData", masterDataObj);
   
   return msg;
 }

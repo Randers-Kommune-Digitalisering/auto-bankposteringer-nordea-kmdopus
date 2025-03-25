@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "(\t    type = \"aktiv\" ?\t        $globalContext(\"accountingRules\")[ActiveBool = true and ExceptionBool = false]\t    :\t    type = \"inaktiv\" ?\t        $globalContext(\"accountingRules\")[ActiveBool = false and ExceptionBool = false]\t    :\t    type = \"undtagelse\" ?\t        $globalContext(\"accountingRules\")[ExceptionBool = true]\t)\t",
+      "to": "(\t    type = \"aktiv\" ?\t        $globalContext(\"masterData\").rules[ActiveBool = true and ExceptionBool = false]\t    :\t    type = \"inaktiv\" ?\t        $globalContext(\"masterData\").rules[ActiveBool = false and ExceptionBool = false]\t    :\t    type = \"undtagelse\" ?\t        $globalContext(\"masterData\").rules[ExceptionBool = true] : {}\t)\t",
       "tot": "jsonata",
       "dc": true
     }
@@ -20,7 +20,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 245,
-  "y": 420,
+  "y": 320,
   "wires": [
     [
       "83d4326f88df7a48"

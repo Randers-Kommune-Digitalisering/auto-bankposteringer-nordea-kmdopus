@@ -1,7 +1,7 @@
 const Node = {
   "id": "b836b4319034b0cd",
   "type": "inject",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "g": "9b2beb35be5bbb31",
   "name": "▶",
   "props": [],
@@ -10,8 +10,8 @@ const Node = {
   "once": false,
   "onceDelay": 0.1,
   "topic": "",
-  "x": 85,
-  "y": 240,
+  "x": 75,
+  "y": 60,
   "wires": [
     [
       "bd461b21e6eb659a"

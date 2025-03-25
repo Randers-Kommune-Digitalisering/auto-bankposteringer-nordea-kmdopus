@@ -1,11 +1,11 @@
 const Node = {
   "id": "467fddf2a063a289",
   "type": "switch",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "g": "9f0acbcfa0581c4a",
   "name": "More pages?",
-  "property": "continuation_key",
-  "propertyType": "flow",
+  "property": "transactions.continuationKey",
+  "propertyType": "global",
   "rules": [
     {
       "t": "istype",
@@ -19,14 +19,14 @@ const Node = {
   "checkall": "true",
   "repair": false,
   "outputs": 2,
-  "x": 165,
-  "y": 640,
+  "x": 155,
+  "y": 360,
   "wires": [
     [
-      "4ee43544775ac9aa"
+      "f80d7088edc4a3f9"
     ],
     [
-      "f8442862197f5a62"
+      "11acf0ef42825127"
     ]
   ],
   "outputLabels": [
