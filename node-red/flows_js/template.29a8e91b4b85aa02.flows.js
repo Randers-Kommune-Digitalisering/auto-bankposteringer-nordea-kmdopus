@@ -22,7 +22,25 @@ const Node = {
 }
 
 Node.template = `
-{{global.configs.database.accountingRules}}
+CREATE TABLE IF NOT EXISTS accountingRules (
+    reference NVARCHAR(255) NULL,
+    sender NVARCHAR(255) NULL,
+    typeDescription NVARCHAR(255) NULL,
+    amount1 NVARCHAR(20) NULL,
+    amount2 NVARCHAR(20) NULL,
+    operator NVARCHAR(2) NULL,
+    text NVARCHAR(255) NULL,
+    account NVARCHAR(50) NULL,
+    accountSecondary NVARCHAR(50) NULL,
+    note NVARCHAR(255) NULL,
+    activeBool BOOLEAN,
+    exceptionBool BOOLEAN,
+    lastUsed NVARCHAR(10) NULL,
+    ruleID INT PRIMARY KEY,
+    relatedBankAccount NVARCHAR(31) NULL,
+    postWithCPR BOOLEAN  NULL,
+    FOREIGN KEY (relatedBankAccount) REFERENCES bankAccounts(bankAccount) ON DELETE SET NULL
+);
 `
 
 module.exports = Node;

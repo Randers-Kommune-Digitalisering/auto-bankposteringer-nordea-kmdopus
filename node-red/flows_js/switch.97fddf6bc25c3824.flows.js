@@ -1,7 +1,7 @@
 const Node = {
   "id": "97fddf6bc25c3824",
   "type": "switch",
-  "z": "ee0cf4ce372e2d36",
+  "z": "8c354b8d2ca56b7b",
   "g": "202a6b173abfc606",
   "name": "manual posting to process?",
   "property": "transactions.manual",
@@ -17,8 +17,8 @@ const Node = {
   "checkall": "false",
   "repair": false,
   "outputs": 2,
-  "x": 665,
-  "y": 80,
+  "x": 105,
+  "y": 700,
   "wires": [
     [
       "075475a32b89c455"

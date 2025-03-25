@@ -3,7 +3,7 @@ const Node = {
   "type": "link out",
   "z": "8c354b8d2ca56b7b",
   "g": "dc3f1bccec7ebeb1",
-  "name": "link out next transaction request",
+  "name": "go to next account",
   "mode": "link",
   "links": [
     "fb472657b954b42d"

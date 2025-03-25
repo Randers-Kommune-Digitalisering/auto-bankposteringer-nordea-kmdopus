@@ -2,7 +2,7 @@ const Node = {
   "id": "fafde89af20cbe51",
   "type": "group",
   "z": "ee0cf4ce372e2d36",
-  "name": "File creation",
+  "name": "csv file creation",
   "style": {
     "stroke": "none",
     "fill": "#e3f3d3",

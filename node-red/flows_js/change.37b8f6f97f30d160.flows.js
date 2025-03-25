@@ -2,7 +2,7 @@ const Node = {
   "id": "37b8f6f97f30d160",
   "type": "change",
   "z": "431f85f122b4636d",
-  "g": "5126da366c0f2bdb",
+  "g": "865ca641c6246507",
   "name": "Angiv stamdata (evt. med tomme værdier)",
   "rules": [
     {
@@ -47,7 +47,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 260,
-  "y": 140,
+  "y": 100,
   "wires": [
     [
       "422cec83cfba270e"

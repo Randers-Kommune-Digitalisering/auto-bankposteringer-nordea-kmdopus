@@ -2,7 +2,7 @@ const Node = {
   "id": "47305952d3fbea7e",
   "type": "change",
   "z": "431f85f122b4636d",
-  "g": "5126da366c0f2bdb",
+  "g": "865ca641c6246507",
   "name": "Angiv sti til regler i csv (evt. med tom værdi)",
   "rules": [
     {

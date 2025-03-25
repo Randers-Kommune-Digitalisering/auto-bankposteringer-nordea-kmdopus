@@ -52,37 +52,37 @@
 
     const keyMap = {
         "ID": {
-            "key": "RuleID"
+            "key": "ruleID"
         },
         "Reference": {
-            "key": "Reference"
+            "key": "reference"
         },
         "Afsender": {
-            "key": "Afsender"
+            "key": "sender"
         }, 
         "Posteringstype": {
-            "key": "Posteringstype"
+            "key": "typeDescription"
         },
         "Beløb 1": {
-            "key": "Beløb1"
+            "key": "amount1"
         },
         "Beløb 2": {
-            "key": "Beløb2"
+            "key": "amount2"
         },
         "Artskonto": {
-            "key": "Artskonto",
+            "key": "account",
             "hidden": true
         },
         "Posteringstekst": {
-            "key": "Posteringstekst",
+            "key": "text",
             "hidden": true
         },
         "Notat": {
-            "key": "Notat",
+            "key": "note",
             "hidden": true
         },
         "Sidst anvendt": {
-            "key": "LastUsed"
+            "key": "lastUsed"
         }
     }
     
