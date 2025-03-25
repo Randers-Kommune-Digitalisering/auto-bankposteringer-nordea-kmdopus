@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "431f85f122b4636d",
   "g": "586bba4061b1d3f2",
-  "name": "Angiv data til FTP-forbindelse (KMD)",
+  "name": "KMD ftp",
   "rules": [
     {
       "t": "set",
@@ -35,16 +35,16 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "configs.ftp.filepaths.local.rootFolder",
+      "p": "configs.ftp.filepaths.send.rootFolder",
       "pt": "global",
       "to": "/data/output/",
       "tot": "str"
     },
     {
       "t": "set",
-      "p": "configs.ftp.filepaths.remote.rootFolder",
+      "p": "configs.ftp.filepaths.recieve.rootFolder",
       "pt": "global",
-      "to": "/some/folder/",
+      "to": "/til-randers/",
       "tot": "str"
     }
   ],
@@ -53,11 +53,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 210,
-  "y": 500,
+  "x": 160,
+  "y": 480,
   "wires": [
     [
-      "2b3c734a82c209e3"
+      "97dbdd3f379bd5d1"
     ]
   ],
   "icon": "font-awesome/fa-pencil"

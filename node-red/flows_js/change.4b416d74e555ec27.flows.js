@@ -14,7 +14,7 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "adminAuthAttempt",
+      "p": "auth.adminStatusChecks",
       "pt": "global",
       "to": "0",
       "tot": "num"
@@ -25,8 +25,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 595,
-  "y": 100,
+  "x": 225,
+  "y": 280,
   "wires": [
     [
       "0db12710e10faee7"

@@ -4,7 +4,7 @@ const Node = {
   "z": "62eaf4407ee85a3a",
   "g": "9707809d7fe4863a",
   "name": "What is auth status?",
-  "property": "adminAuthStatus",
+  "property": "auth.adminStatus",
   "propertyType": "global",
   "rules": [
     {
@@ -24,8 +24,8 @@ const Node = {
   "checkall": "false",
   "repair": false,
   "outputs": 3,
-  "x": 115,
-  "y": 500,
+  "x": 105,
+  "y": 140,
   "wires": [
     [
       "2de2b794607f5153"

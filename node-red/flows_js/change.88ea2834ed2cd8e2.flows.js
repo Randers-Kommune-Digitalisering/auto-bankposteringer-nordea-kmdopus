@@ -7,21 +7,21 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "token",
+      "p": "auth.token",
       "pt": "global",
       "to": "payload.response.access_token",
       "tot": "msg"
     },
     {
       "t": "set",
-      "p": "refresh_token",
+      "p": "auth.refreshToken",
       "pt": "global",
       "to": "payload.response.refresh_token",
       "tot": "msg"
     },
     {
       "t": "set",
-      "p": "accessDuration",
+      "p": "auth.duration",
       "pt": "global",
       "to": "payload.response.expires_in",
       "tot": "msg"
@@ -32,8 +32,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 865,
-  "y": 240,
+  "x": 495,
+  "y": 400,
   "wires": [
     [
       "7be3097ce9fc8ed0"

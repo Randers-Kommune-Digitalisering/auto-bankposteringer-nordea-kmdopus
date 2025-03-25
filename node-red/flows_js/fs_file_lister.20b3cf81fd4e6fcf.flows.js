@@ -15,7 +15,7 @@ const Node = {
   "stat": true,
   "showWarnings": true,
   "x": 275,
-  "y": 320,
+  "y": 220,
   "wires": [
     [
       "f6c011e673f82d19"

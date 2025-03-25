@@ -5,12 +5,12 @@ const Node = {
   "g": "88a5a801e4bf7e08",
   "name": "",
   "links": [
-    "f972a3b21fdde9a7"
+    "900271bd593a378d"
   ],
   "linkType": "static",
   "timeout": "30",
-  "x": 345,
-  "y": 960,
+  "x": 835,
+  "y": 320,
   "wires": [
     [
       "5ca1fa77ff94916f"

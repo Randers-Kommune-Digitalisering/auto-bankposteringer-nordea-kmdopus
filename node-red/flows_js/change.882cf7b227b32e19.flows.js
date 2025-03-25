@@ -37,14 +37,14 @@ const Node = {
       "t": "set",
       "p": "data",
       "pt": "flow",
-      "to": "{\t   \"authorizer_id\":$globalContext(\"masterData\").admID\t}",
+      "to": "{\t   \"authorizer_id\":$globalContext(\"masterData\").admSysData.admID\t}",
       "tot": "jsonata"
     },
     {
       "t": "set",
       "p": "urlParam",
       "pt": "flow",
-      "to": "access_id",
+      "to": "auth.accessId",
       "tot": "global"
     }
   ],
@@ -53,8 +53,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 645,
-  "y": 140,
+  "x": 275,
+  "y": 320,
   "wires": [
     [
       "9e7c657749833710"

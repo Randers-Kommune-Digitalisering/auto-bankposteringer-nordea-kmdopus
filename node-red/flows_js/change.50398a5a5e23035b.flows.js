@@ -23,7 +23,7 @@ const Node = {
       "t": "set",
       "p": "urlParam",
       "pt": "flow",
-      "to": "access_id",
+      "to": "auth.accessId",
       "tot": "global"
     }
   ],
@@ -32,8 +32,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 645,
-  "y": 180,
+  "x": 275,
+  "y": 360,
   "wires": [
     [
       "04cf20b469f8852f"

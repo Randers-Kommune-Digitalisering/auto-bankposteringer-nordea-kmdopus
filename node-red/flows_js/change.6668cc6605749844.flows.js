@@ -12,11 +12,6 @@ const Node = {
     },
     {
       "t": "delete",
-      "p": "statusCode",
-      "pt": "msg"
-    },
-    {
-      "t": "delete",
       "p": "responseUrl",
       "pt": "msg"
     },
@@ -71,8 +66,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 165,
-  "y": 520,
+  "x": 155,
+  "y": 160,
   "wires": [
     [
       "5e98d83c4a1fa3c6"

@@ -10,10 +10,12 @@ const Node = {
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 200,
-  "y": 400,
+  "x": 240,
+  "y": 260,
   "wires": [
-    []
+    [
+      "7b6dac14defeedc2"
+    ]
   ],
   "icon": "font-awesome/fa-pencil",
   "info": ""
@@ -26,11 +28,10 @@ RuleID should not be renamed, as it breaks other nodes' functionality.
 Node.template = `
 CREATE TABLE IF NOT EXISTS accountingRules (
     Reference NVARCHAR(255) NULL,
-    Advisliste NVARCHAR(255) NULL,
     Afsender NVARCHAR(255) NULL,
     Posteringstype NVARCHAR(255) NULL,
-    Beløb1 DECIMAL(18,2) NULL,
-    Beløb2 DECIMAL(18,2) NULL,
+    Beløb1 NVARCHAR(20) NULL,
+    Beløb2 NVARCHAR(20) NULL,
     Operator NVARCHAR(2) NULL,
     Posteringstekst NVARCHAR(255) NULL,
     Artskonto NVARCHAR(50) NULL,
@@ -39,7 +40,10 @@ CREATE TABLE IF NOT EXISTS accountingRules (
     ActiveBool BOOLEAN,
     ExceptionBool BOOLEAN,
     LastUsed NVARCHAR(10) NULL,
-    RuleID INT PRIMARY KEY
+    RuleID INT PRIMARY KEY,
+    relatedBankAccount NVARCHAR(31) NULL,
+    postWithCPR BOOLEAN  NULL,
+    FOREIGN KEY (relatedBankAccount) REFERENCES bankAccounts(bankAccount) ON DELETE SET NULL
 );
 `
 

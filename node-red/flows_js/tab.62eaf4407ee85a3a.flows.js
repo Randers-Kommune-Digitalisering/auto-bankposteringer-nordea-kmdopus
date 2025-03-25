@@ -1,7 +1,7 @@
 const Node = {
   "id": "62eaf4407ee85a3a",
   "type": "tab",
-  "label": "Hent bankdata",
+  "label": "Nordea",
   "disabled": false,
   "info": "",
   "env": []

@@ -7,7 +7,7 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "messageIdentification",
+      "p": "transactions.uid",
       "pt": "global",
       "to": "payload.group_header.message_identification",
       "tot": "msg"
@@ -21,15 +21,15 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "addTransactions",
+      "p": "transactions.add",
       "pt": "global",
       "to": "payload.response.transactions ? $reverse(payload.response.transactions) : null",
       "tot": "jsonata"
     },
     {
       "t": "set",
-      "p": "continuation_key",
-      "pt": "flow",
+      "p": "transactions.continuationKey",
+      "pt": "global",
       "to": "payload.response.continuation_key ? payload.response.continuation_key : null",
       "tot": "jsonata",
       "dc": true
@@ -40,11 +40,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 865,
-  "y": 360,
+  "x": 1125,
+  "y": 280,
   "wires": [
     [
-      "53b00b686c170d67"
+      "03d05c73a6202e73"
     ]
   ],
   "icon": "font-awesome/fa-save",

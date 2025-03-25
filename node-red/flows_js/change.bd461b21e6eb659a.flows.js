@@ -1,13 +1,13 @@
 const Node = {
   "id": "bd461b21e6eb659a",
   "type": "change",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "g": "9b2beb35be5bbb31",
   "name": "Delete vars",
   "rules": [
     {
       "t": "delete",
-      "p": "transactions",
+      "p": "transactions.list",
       "pt": "global"
     }
   ],
@@ -16,11 +16,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 135,
-  "y": 240,
+  "x": 125,
+  "y": 60,
   "wires": [
     [
-      "2d11b50a914e60c1"
+      "497a8a8d75494096"
     ]
   ],
   "icon": "font-awesome/fa-trash",

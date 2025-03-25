@@ -11,20 +11,6 @@ const Node = {
       "pt": "msg",
       "to": "req.params.uid ~> $number()",
       "tot": "jsonata"
-    },
-    {
-      "t": "set",
-      "p": "updatedFromRule",
-      "pt": "global",
-      "to": "$globalContext(\"accountingRules\")[RuleID = $$.uid]",
-      "tot": "jsonata"
-    },
-    {
-      "t": "set",
-      "p": "updatedToRule",
-      "pt": "global",
-      "to": "payload",
-      "tot": "msg"
     }
   ],
   "action": "",
@@ -33,7 +19,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 195,
-  "y": 500,
+  "y": 400,
   "wires": [
     [
       "40fc13199736e30e"

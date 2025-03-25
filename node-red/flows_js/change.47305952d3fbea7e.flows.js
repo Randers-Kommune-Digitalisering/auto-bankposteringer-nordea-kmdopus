@@ -2,8 +2,8 @@ const Node = {
   "id": "47305952d3fbea7e",
   "type": "change",
   "z": "431f85f122b4636d",
-  "g": "2c7913f560d4d1e7",
-  "name": "Angiv evt. sti til regler der skal importeres",
+  "g": "5126da366c0f2bdb",
+  "name": "Angiv sti til regler i csv (evt. med tom værdi)",
   "rules": [
     {
       "t": "set",
@@ -18,10 +18,12 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 220,
-  "y": 140,
+  "x": 270,
+  "y": 60,
   "wires": [
-    []
+    [
+      "12b79b33b84ebcc0"
+    ]
   ],
   "icon": "font-awesome/fa-pencil"
 }

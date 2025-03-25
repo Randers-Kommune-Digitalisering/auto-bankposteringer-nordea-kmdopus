@@ -7,14 +7,14 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "adminAuthStatus",
+      "p": "auth.adminStatus",
       "pt": "global",
       "to": "RESTARTING",
       "tot": "str"
     },
     {
       "t": "set",
-      "p": "AuthRestart",
+      "p": "auth.restart",
       "pt": "global",
       "to": "true",
       "tot": "bool"
@@ -25,8 +25,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 785,
-  "y": 160,
+  "x": 765,
+  "y": 60,
   "wires": [
     [
       "d707d5698ec5039a"

@@ -1,10 +1,10 @@
 const Node = {
   "id": "f2662eb9b7faafdc",
   "type": "switch",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "g": "ea1bf65dfedc00a0",
   "name": "Has a run been restarted?",
-  "property": "runRestart",
+  "property": "runs.restart",
   "propertyType": "global",
   "rules": [
     {
@@ -17,8 +17,8 @@ const Node = {
   "checkall": "false",
   "repair": false,
   "outputs": 2,
-  "x": 165,
-  "y": 1180,
+  "x": 535,
+  "y": 380,
   "wires": [
     [
       "0b5d02480ab02e58"

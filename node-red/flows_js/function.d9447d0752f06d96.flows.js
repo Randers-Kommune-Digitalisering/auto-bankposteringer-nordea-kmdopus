@@ -1,7 +1,7 @@
 const Node = {
   "id": "d9447d0752f06d96",
   "type": "function",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "g": "9f0acbcfa0581c4a",
   "name": "Merge pages and add account",
   "func": "",
@@ -10,8 +10,8 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 115,
-  "y": 640,
+  "x": 105,
+  "y": 360,
   "wires": [
     [
       "467fddf2a063a289"
@@ -22,9 +22,10 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  const accountValue = global.get("bankAccounts")[global.get("accountStep")];
-  let transactions = global.get("transactions") ? global.get("transactions") : [];
-  let addTransactions = global.get("addTransactions");
+  let transactionsObj = global.get("transactions");
+  const accountValue = global.get("masterData").bankAccounts[transactionsObj.accountStep];
+  let transactions = transactionsObj.list ? transactionsObj.list : [];
+  let addTransactions = transactionsObj.add;
   
   // Ensure addTransactions is an array
   if (Array.isArray(addTransactions)) {
@@ -39,7 +40,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       transactions = transactions.concat(addTransactions);
   
       // Update the flow variable with the modified array
-      global.set("transactions", transactions);
+      transactionsObj.list = transactions;
+      global.set("transactions", transactionsObj);
   
   } else {
       node.error("No transactions to add");

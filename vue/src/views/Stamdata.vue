@@ -1,6 +1,5 @@
 <script setup>
     import { ref, onMounted, onUnmounted } from 'vue'
-    import eventBus from '@/eventBus.js'
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
     import IconAdd from '../components/icons/IconAdd.vue'
@@ -63,9 +62,6 @@
             isUpdating.value = false
             hasUpdated.value = true
         })
-
-        // Emit an event to notify other components
-        eventBus.emit('integrationToggled', integrationBool.value);
     }
 
     function addBankaccount() {
