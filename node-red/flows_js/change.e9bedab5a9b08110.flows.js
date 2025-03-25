@@ -2,7 +2,7 @@ const Node = {
   "id": "e9bedab5a9b08110",
   "type": "change",
   "z": "431f85f122b4636d",
-  "g": "5126da366c0f2bdb",
+  "g": "865ca641c6246507",
   "name": "Angiv bankkonti (evt. med tomme værdier)",
   "rules": [
     {
@@ -68,7 +68,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 270,
-  "y": 220,
+  "y": 140,
   "wires": [
     [
       "12b79b33b84ebcc0"

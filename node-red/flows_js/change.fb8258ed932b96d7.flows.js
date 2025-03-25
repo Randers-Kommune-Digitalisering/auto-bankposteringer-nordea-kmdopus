@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "8c354b8d2ca56b7b",
   "g": "9b2beb35be5bbb31",
-  "name": "",
+  "name": "set global.runs.restart = true",
   "rules": [
     {
       "t": "set",

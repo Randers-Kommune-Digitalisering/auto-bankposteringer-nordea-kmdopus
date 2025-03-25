@@ -26,7 +26,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let formattedPostings = [];
   
   for (let posting in postings) {
-      formattedPostings.push([posting.account, '', posting.psp || '', '', '', posting.debetOrCredit, posting.amount, '', posting.text, '', '', '', '', '02', posting.cpr || '', '', '', '', '', '', '', '', '', '', '']);
+      formattedPostings.push([posting.account, '', posting.accountSecondary || '', '', '', posting.debetOrCredit, posting.amount, '', posting.text, '', '', '', '', '02', posting.cpr || '', '', '', '', '', '', '', '', '', '', '']);
   }
   
   msg.payload = formattedPostings;

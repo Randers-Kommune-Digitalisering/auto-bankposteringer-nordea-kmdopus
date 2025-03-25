@@ -3,7 +3,7 @@ const Node = {
   "type": "link in",
   "z": "a1dc9966e881ac6b",
   "g": "1d18d99feaaca4c4",
-  "name": "insert run to db",
+  "name": "insert run",
   "links": [],
   "x": 485,
   "y": 280,

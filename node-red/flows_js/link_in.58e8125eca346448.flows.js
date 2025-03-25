@@ -3,7 +3,7 @@ const Node = {
   "type": "link in",
   "z": "a1dc9966e881ac6b",
   "g": "24481f222bcf4517",
-  "name": "insert all masterdata to db",
+  "name": "insert all admsysdata",
   "links": [],
   "x": 1085,
   "y": 280,

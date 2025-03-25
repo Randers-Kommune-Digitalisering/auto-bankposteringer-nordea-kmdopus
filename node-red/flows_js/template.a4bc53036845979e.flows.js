@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS runHistory (
     statusCode INT,
     ts timestamp,
     success BOOL
-)
+);
 `
 
 module.exports = Node;
