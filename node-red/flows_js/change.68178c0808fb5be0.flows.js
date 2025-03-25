@@ -2,7 +2,7 @@ const Node = {
   "id": "68178c0808fb5be0",
   "type": "change",
   "z": "431f85f122b4636d",
-  "g": "5126da366c0f2bdb",
+  "g": "865ca641c6246507",
   "name": "Angiv Open Banking data",
   "rules": [
     {
@@ -68,7 +68,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 210,
-  "y": 340,
+  "y": 180,
   "wires": [
     [
       "bdd39988053577ff"

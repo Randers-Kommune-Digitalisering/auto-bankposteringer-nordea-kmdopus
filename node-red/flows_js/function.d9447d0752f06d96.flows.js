@@ -33,7 +33,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       // Add appropiate account to each transaction
       addTransactions = addTransactions.map(obj => ({
           ...obj,  // Spread the existing object properties
-          account: accountValue  // Add the new key-value pair
+          relatedAccount: accountValue  // Add the new key-value pair
       }));
   
       // Merge new transactions with existing ones

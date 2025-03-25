@@ -2,7 +2,7 @@ const Node = {
   "id": "09ae44d941f2b3ed",
   "type": "group",
   "z": "ee0cf4ce372e2d36",
-  "name": "FTP integration",
+  "name": "Posteringer Ind-integration",
   "style": {
     "label": true,
     "stroke": "none",

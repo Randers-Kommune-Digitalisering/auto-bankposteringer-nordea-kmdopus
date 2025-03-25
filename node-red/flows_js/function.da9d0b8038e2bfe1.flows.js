@@ -1,7 +1,7 @@
 const Node = {
   "id": "da9d0b8038e2bfe1",
   "type": "function",
-  "z": "ee0cf4ce372e2d36",
+  "z": "8c354b8d2ca56b7b",
   "g": "202a6b173abfc606",
   "name": "Match postings with rules",
   "func": "",
@@ -10,8 +10,8 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 715,
-  "y": 100,
+  "x": 155,
+  "y": 720,
   "wires": [
     [
       "c49c5be7601cebc5"
@@ -28,7 +28,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let postings = [];
   let transactionsUnmatched = transactionsObj.addUnmatched ? transactionsObj.addUnmatched : [];
   const transactions = transactionsObj.list ? transactionsObj.list.reverse() : null;
-  const transactionParameters = global.get("configs").banking.usefulParameters;   // Has to match ruleParameters length, can be nested array
+  const transactionParameters = global.get("configs").banking.usefulParameters;   // Has to match ruleParameters length and order, can be nested array
   const accountingRules = masterDataObj.rules;
   const ruleParameters = Object.keys(accountingRules[0]).slice(0, 3);
   const date = global.get("dates").simpleDate;
@@ -120,7 +120,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       }
   }
   
-  function generatePostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, psp, cpr) {
+  function generatePostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, landingAccountSecondary, cpr) {
       postings.push(
           {
               account: statusAccount,
@@ -132,7 +132,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       postings.push(
           {
               account: landingAccount,
-              psp: psp,
+              accountSecondary: landingAccountSecondary,
               debetOrCredit: landingDebetOrCredit,
               amount: amount,
               text: text,
@@ -144,8 +144,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
   function processPosting(transaction, rules) {
       let absoluteAmount = Math.abs(parseFloat(transaction.amount));
-      let cleanedAmount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-      transaction.amount = cleanedAmount;
+      transaction.amount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
       let statusDebetOrCredit = transaction.amount > 0 ? "Debet" : "Kredit";
       let landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet";
   
@@ -155,7 +154,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
       for (let rule of rules) {      
           let sumOfParametersMatched = 0;
-          let psp = rule.PSP ? rule.PSP : '';
   
           if (completeMatch) {
               continue
@@ -163,33 +161,33 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               for (let parameterIndex = 0; parameterIndex < transactionParameters.length; parameterIndex++) {
                   let searchValue = rule[ruleParameters[parameterIndex]] ? rule[ruleParameters[parameterIndex]].toLowerCase() : null;
   
-                  if (searchValue && rule.ActiveBool && matchParameter(transaction, searchValue, transactionParameters[parameterIndex])) {
+                  if (searchValue && rule.activeBool && matchParameter(transaction, searchValue, transactionParameters[parameterIndex])) {
   
                       sumOfParametersMatched += 1;
                   }
               }
   
               let matchedAllParametersBool = sumOfParametersMatched === sumOfParametersGiven(rule);
-              let matchedAmountBool = matchAmount(absoluteAmount, rule.Operator, rule.Beløb1, rule.Beløb2)
-              let matchedAccountBool = transaction.account.bankAccount === rule.relatedBankAccount || rule.relatedBankAccount === null
+              let matchedAmountBool = matchAmount(absoluteAmount, rule.operator, rule.amount1, rule.amount2)
+              let matchedAccountBool = transaction.relatedAccount.bankAccount === rule.relatedBankAccount || rule.relatedBankAccount === null
                               
               if (matchedAllParametersBool && matchedAmountBool && matchedAccountBool) {
-                  if (!rule.ExceptionBool) {   // Don't write ERP postings if rule is an exception, but still count as match
-                      let text = textGeneration(rule.Posteringstekst, transaction.message, transaction.narrative, transaction.counterparty_name);
-                      generatePostings(transaction.account.statusAccount, rule.Artskonto, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, psp, cpr);
+                  if (!rule.exceptionBool) {   // Don't write ERP postings if rule is an exception, but still count as match
+                      let text = textGeneration(rule.text, transaction.message, transaction.narrative, transaction.counterparty_name);
+                      generatePostings(transaction.account.statusAccount, rule.account, statusDebetOrCredit, landingDebetOrCredit, text, transaction.amount, rule.accountSecondary || '', cpr);
                   }
                   completeMatch = true;
-                  rule.LastUsed = date;
+                  rule.lastUsed = date;
               }
           }
       }
+  
       if (!completeMatch) {
           let text = transaction.transaction_id;
   
-          generatePostings(transaction.account.statusAccount, transaction.account.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, '', cpr);
+          generatePostings(transaction.relatedAccount.statusAccount, transaction.relatedAccount.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, transaction.amount, '', cpr);
           
-          // if (transaction.account.bankAccountName != "Debitorkonto") {
-          if (transaction.account.bankAccountName != "TEST") {
+          if (transaction.account.bankAccountName != "Debitorkonto") {
               transactionsUnmatched.push(transaction);
           }
       }

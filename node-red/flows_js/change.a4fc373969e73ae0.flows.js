@@ -7,9 +7,9 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "payload.RuleID",
+      "p": "payload.ruleID",
       "pt": "msg",
-      "to": "($globalContext(\"masterData\").rules.RuleID ~> $max() ) + 1",
+      "to": "($globalContext(\"masterData\").rules.ruleID ~> $max() ) + 1",
       "tot": "jsonata"
     }
   ],

@@ -3,7 +3,7 @@ const Node = {
   "type": "link out",
   "z": "a1dc9966e881ac6b",
   "g": "68f21991ad3e5be0",
-  "name": "link out rules overwritten",
+  "name": "overwrite rules end",
   "mode": "return",
   "links": [],
   "x": 1095,

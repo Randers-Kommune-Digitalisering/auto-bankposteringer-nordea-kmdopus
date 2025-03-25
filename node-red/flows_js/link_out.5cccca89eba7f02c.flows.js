@@ -3,12 +3,12 @@ const Node = {
   "type": "link out",
   "z": "8c354b8d2ca56b7b",
   "g": "ea1bf65dfedc00a0",
-  "name": "link out make data",
+  "name": "go to erp data creation",
   "mode": "link",
   "links": [
     "8a5cd923f7f62d0a"
   ],
-  "x": 535,
+  "x": 635,
   "y": 340,
   "wires": []
 }

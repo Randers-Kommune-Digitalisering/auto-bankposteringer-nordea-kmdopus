@@ -48,17 +48,17 @@
 
     if (isNewRule.value)
     {   
-        if (index.value === 'nyinaktiv') konteringsregel.value.ActiveBool = false
-        else if (index.value === 'nyundtagelse') konteringsregel.value.ExceptionBool = true
+        if (index.value === 'nyinaktiv') konteringsregel.value.activeBool = false
+        else if (index.value === 'nyundtagelse') konteringsregel.value.exceptionBool = true
     } else {
         // Fetch regel
         fetch(`/api/konteringsregler/${index.value}`)
             .then(response => response.json())
             .then(value => {
                 konteringsregel.value = value
-                exceptionBool.value = konteringsregel.value.ExceptionBool
+                exceptionBool.value = konteringsregel.value.exceptionBool
                 selectedBankaccount.value = konteringsregel.value.relatedBankAccount // Set selectedBankaccount
-                selectedOperator.value = konteringsregel.value.Operator // Set selectedOperator
+                selectedOperator.value = konteringsregel.value.operator // Set selectedOperator
             })
     }
 
@@ -77,20 +77,20 @@
     })
     
     const keyMap_rule = {
-        "id": { "key": "RuleID", "hidden": true },
+        "id": { "key": "ruleID", "hidden": true },
         "Tilknyttet bankkonto": { "key": "relatedBankAccount", "group": "Transaktionsoplysninger" },
-        "Reference": { "key": "Reference", "group": "Transaktionsoplysninger" },
-        "Afsender": { "key": "Afsender", "group": "Transaktionsoplysninger" }, 
-        "Posteringstype": { "key": "Posteringstype", "group": "Transaktionsoplysninger" },
-        "Beløbsregel": { "key": "Operator", "group": "Beløbsafgrænsning" },
-        "Beløb 1": { "key": "Beløb1", "group": "Beløbsafgrænsning" },
-        "Beløb 2": { "key": "Beløb2", "hidden": true, "group": "Beløbsafgrænsning" },
-        "Artskonto": { "key": "Artskonto", "group": "Kontering" },
-        "PSP-element": { "key": "PSP", "group": "Kontering" },
-        "Posteringstekst": { "key": "Posteringstekst", "group": "Kontering" },
+        "Reference": { "key": "reference", "group": "Transaktionsoplysninger" },
+        "Afsender": { "key": "sender", "group": "Transaktionsoplysninger" }, 
+        "Posteringstype": { "key": "typeDescription", "group": "Transaktionsoplysninger" },
+        "Beløbsregel": { "key": "operator", "group": "Beløbsafgrænsning" },
+        "Beløb 1": { "key": "amount1", "group": "Beløbsafgrænsning" },
+        "Beløb 2": { "key": "amount2", "hidden": true, "group": "Beløbsafgrænsning" },
+        "Artskonto": { "key": "account", "group": "Kontering" },
+        "PSP-element": { "key": "accountSecondary", "group": "Kontering" },
+        "Posteringstekst": { "key": "text", "group": "Kontering" },
         "CPR-bogføring": { "key": "postWithCPR", "group": "Kontering" },
-        "Notat": { "key": "Notat" },
-        "ActiveBool": { "key": "ActiveBool", "hidden": true }
+        "Notat": { "key": "note" },
+        "ActiveBool": { "key": "activeBool", "hidden": true }
     }
 
     const keyMap_exception = {

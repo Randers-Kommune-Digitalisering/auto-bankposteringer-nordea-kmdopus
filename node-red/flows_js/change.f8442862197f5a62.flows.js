@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "8c354b8d2ca56b7b",
   "g": "dc3f1bccec7ebeb1",
-  "name": "Delete vars",
+  "name": "Clean up globlal.transactions",
   "rules": [
     {
       "t": "delete",
@@ -25,7 +25,7 @@ const Node = {
   "y": 340,
   "wires": [
     [
-      "9ad5392beeb7a718"
+      "f2662eb9b7faafdc"
     ]
   ],
   "icon": "font-awesome/fa-trash",
