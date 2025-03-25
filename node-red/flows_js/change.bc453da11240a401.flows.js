@@ -9,15 +9,22 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "$globalContext(\"transactions\").{\t  \"Bogføringsdato\": $string(booking_date).$replace(/-/, ''),\t  \"Beløb\": $string(amount).$replace(/\\./, ','),\t  \"Posteringstype\": type_description,\t  \"Reference\": narrative,\t  \"Løbende_saldo\": $string(balance_after_transaction).$replace(/\\./, ','),\t  \"Statuskonto\": $string(account.statusAccount)\t}",
+      "to": "$globalContext(\"transactions\").list.{\t  \"Bogføringsdato\": $string(booking_date).$replace(/-/, ''),\t  \"Beløb\": amount,\t  \"Posteringstype\": type_description,\t  \"Reference\": narrative,\t  \"Løbende_saldo\": $string(balance_after_transaction).$replace(/\\./, ','),\t  \"Statuskonto\": $string(account.statusAccount)\t}",
       "tot": "jsonata"
     },
     {
       "t": "set",
       "p": "filename",
       "pt": "msg",
-      "to": "\"/data/afstemning/\" & $globalContext(\"dateOfOrigin\") & \".csv\"",
+      "to": "\"/data/afstemning/\" & $globalContext(\"dates\").bookingDate & \".csv\"",
       "tot": "jsonata"
+    },
+    {
+      "t": "set",
+      "p": "columns",
+      "pt": "msg",
+      "to": "Bogføringsdato, Beløb, Posteringstype, Reference, Løbende_saldo, Statuskonto",
+      "tot": "str"
     }
   ],
   "action": "",
@@ -25,11 +32,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 465,
-  "y": 280,
+  "x": 105,
+  "y": 180,
   "wires": [
     [
-      "0103cd774294d614"
+      "08eb7cc0cd32938e"
     ]
   ],
   "icon": "font-awesome/fa-cog",

@@ -7,35 +7,35 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "configs.initialData.masterData.admEmail",
+      "p": "configs.initialData.admSysData.admEmail",
       "pt": "global",
       "to": "jan.molbaek@randers.dk",
       "tot": "str"
     },
     {
       "t": "set",
-      "p": "configs.initialData.masterData.admID",
+      "p": "configs.initialData.admSysData.admID",
       "pt": "global",
       "to": "AUTH_ID",
       "tot": "env"
     },
     {
       "t": "set",
-      "p": "configs.initialData.masterData.admName",
+      "p": "configs.initialData.admSysData.admName",
       "pt": "global",
       "to": "Jan Mølbæk",
       "tot": "str"
     },
     {
       "t": "set",
-      "p": "configs.initialData.masterData.integrationBool",
+      "p": "configs.initialData.admSysData.integrationBool",
       "pt": "global",
-      "to": "false",
+      "to": "true",
       "tot": "bool"
     },
     {
       "t": "set",
-      "p": "configs.initialData.masterData.erpSystem",
+      "p": "configs.initialData.admSysData.erpSystem",
       "pt": "global",
       "to": "KMD Opus",
       "tot": "str"
@@ -46,10 +46,12 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 220,
-  "y": 280,
+  "x": 260,
+  "y": 140,
   "wires": [
-    []
+    [
+      "422cec83cfba270e"
+    ]
   ],
   "icon": "font-awesome/fa-pencil"
 }

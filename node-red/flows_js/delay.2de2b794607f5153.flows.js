@@ -5,8 +5,8 @@ const Node = {
   "g": "9707809d7fe4863a",
   "name": "",
   "pauseType": "delay",
-  "timeout": "5",
-  "timeoutUnits": "minutes",
+  "timeout": "30",
+  "timeoutUnits": "seconds",
   "rate": "1",
   "nbRateUnits": "1",
   "rateUnits": "second",
@@ -16,8 +16,8 @@ const Node = {
   "drop": false,
   "allowrate": false,
   "outputs": 1,
-  "x": 215,
-  "y": 460,
+  "x": 205,
+  "y": 100,
   "wires": [
     [
       "4b0e58cf1f6cac5f"

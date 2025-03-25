@@ -1,6 +1,5 @@
 <script setup>
     import { ref, watch, onMounted, onUnmounted } from 'vue'
-    import eventBus from '@/eventBus.js'
 
     defineExpose({ setAlert })
 
@@ -17,7 +16,6 @@
         {
             title: "Filer",
             url: "/filer",
-            hidden: false,
         },
         {
             title: "Aktive regler",
@@ -34,7 +32,11 @@
         {
             title: "Kørselshistorik",
             url: "/historik",
-        }
+        },
+        {
+            title: "Åbne posteringer",
+            url: "/postings",
+        },
     ])
 
     const normalizeUrl = (url) => url.replace(/\/+$/, '')  // Removes trailing slashes
@@ -43,16 +45,6 @@
     const landingPageIndex = menuItems.value.findIndex(x =>
         normalizeUrl(x.url) === normalizeUrl(new URL(location.href).pathname)
     )
-
-    const integrationBool = ref(false)
-
-    // Watch for changes in integrationBool to hide/show the "Filer" menu item
-    watch(integrationBool, (newVal) => {
-        const filerItem = menuItems.value.find(item => item.title === "Filer")
-        if (filerItem) {
-            filerItem.hidden = newVal
-        }
-    })
 
     // Mark the landing page as selected
     if (landingPageIndex !== -1)
@@ -76,23 +68,6 @@
         const element = document.getElementById("body")
         element.classList.toggle("darkmode")
     }
-
-    // Listen for the integrationToggled event
-    onMounted(() => {
-        const handler = (newVal) => {
-            const filerItem = menuItems.value.find(item => item.title === 'Filer');
-            if (filerItem) {
-                filerItem.hidden = newVal;  // Show/hide based on the event data
-            }
-        };
-
-        eventBus.on('integrationToggled', handler);
-
-        // Clean up the event listener
-        onUnmounted(() => {
-            eventBus.off('integrationToggled', handler);
-        });
-    });
     
 </script>
 
@@ -100,7 +75,7 @@
 
     <div class="header">
         
-        <router-link v-for="item in menuItems.filter(value => !value.hidden)" :to="item.url" :class="item.selected ? 'selected' : ''" @click="select(item)">
+        <router-link v-for="item in menuItems" :to="item.url" :class="item.selected ? 'selected' : ''" @click="select(item)">
             <span v-if="item.alert" class="alert">{{item.alert}}</span>
             <span>{{item.title}}</span>
         </router-link>

@@ -9,13 +9,13 @@ const Node = {
   "hdrout": "all",
   "multi": "mult",
   "ret": "\\r\\n",
-  "temp": "Bogføringsdato, Beløb, Posteringstype, Reference, Løbende_saldo, Statuskonto",
+  "temp": "",
   "skip": "0",
   "strings": true,
   "include_empty_strings": true,
   "include_null_values": true,
-  "x": 515,
-  "y": 280,
+  "x": 205,
+  "y": 180,
   "wires": [
     [
       "2320b1b44e0b7a58"

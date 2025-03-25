@@ -37,15 +37,15 @@ const Node = {
       "t": "set",
       "p": "queryParam1",
       "pt": "flow",
-      "to": "date",
+      "to": "dates.bookingDate",
       "tot": "global"
     },
     {
       "t": "set",
       "p": "queryParam2",
       "pt": "flow",
-      "to": "date",
-      "tot": "global"
+      "to": "queryParam1",
+      "tot": "flow"
     }
   ],
   "action": "",
@@ -53,8 +53,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 645,
-  "y": 360,
+  "x": 905,
+  "y": 280,
   "wires": [
     [
       "c3fd47014b3397d6"

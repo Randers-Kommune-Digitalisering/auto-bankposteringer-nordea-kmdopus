@@ -3,19 +3,17 @@ const Node = {
   "type": "change",
   "z": "431f85f122b4636d",
   "g": "586bba4061b1d3f2",
-  "name": "Angiv data til FTP-forbindelse (Fujitsu)",
+  "name": "Fujitsu",
   "rules": [],
   "action": "",
   "property": "",
   "from": "",
   "to": "",
   "reg": false,
-  "x": 210,
-  "y": 540,
+  "x": 150,
+  "y": 520,
   "wires": [
-    [
-      "f9fac465a389e1ae"
-    ]
+    []
   ],
   "icon": "font-awesome/fa-pencil"
 }
