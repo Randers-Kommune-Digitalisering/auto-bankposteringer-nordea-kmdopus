@@ -3,13 +3,13 @@ const Node = {
   "type": "link out",
   "z": "32cf2bec698ca424",
   "g": "88a5a801e4bf7e08",
-  "name": "link out restart run",
+  "name": "go to restart run",
   "mode": "link",
   "links": [
     "44655a42c791505e"
   ],
-  "x": 885,
-  "y": 400,
+  "x": 445,
+  "y": 540,
   "wires": []
 }
 

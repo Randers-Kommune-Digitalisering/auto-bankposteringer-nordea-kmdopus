@@ -14,8 +14,8 @@ const Node = {
   "depth": 0,
   "stat": true,
   "showWarnings": true,
-  "x": 275,
-  "y": 180,
+  "x": 235,
+  "y": 320,
   "wires": [
     [
       "4fb66acb8010f6d8"
