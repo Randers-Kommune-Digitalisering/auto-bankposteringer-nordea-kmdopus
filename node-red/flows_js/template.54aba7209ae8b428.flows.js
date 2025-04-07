@@ -24,7 +24,7 @@ const Node = {
 Node.template = `
 CREATE TABLE IF NOT EXISTS transactionsWithNoMatch (
     transactionID NVARCHAR(29) NULL PRIMARY KEY,
-    sender NVARCHAR(63) NULL,
+    sender NVARCHAR(255) NULL,
     reference NVARCHAR(255) NULL,
     typeDescription NVARCHAR(29) NULL,
     bankAccount NVARCHAR(31) NULL,

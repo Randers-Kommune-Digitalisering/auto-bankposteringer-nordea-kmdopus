@@ -25,6 +25,13 @@ const Node = {
       "pt": "msg",
       "to": "200",
       "tot": "num"
+    },
+    {
+      "t": "set",
+      "p": "transactions.uid",
+      "pt": "global",
+      "to": "asdkasd",
+      "tot": "str"
     }
   ],
   "action": "",
