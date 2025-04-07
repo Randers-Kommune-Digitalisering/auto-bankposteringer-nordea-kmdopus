@@ -7,7 +7,7 @@
     const history = ref(null)
 
     const keyMap = {
-        "dato": {
+        "bankdato": {
             "key": "originDate"
         },
         "id": {
