@@ -3,14 +3,12 @@ const Node = {
   "type": "link in",
   "z": "62eaf4407ee85a3a",
   "g": "be3c4fb5b3ea916b",
-  "name": "link in first transaction request",
+  "name": "go to first transaction request",
   "links": [
-    "19a9e954c5d433ab",
-    "d6cfde4862253f89",
     "a08015d04ee5f1fd"
   ],
-  "x": 685,
-  "y": 280,
+  "x": 55,
+  "y": 460,
   "wires": [
     [
       "b92d2571799cd2f4"

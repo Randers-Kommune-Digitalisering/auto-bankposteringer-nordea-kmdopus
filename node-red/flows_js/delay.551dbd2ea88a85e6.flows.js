@@ -1,7 +1,7 @@
 const Node = {
   "id": "551dbd2ea88a85e6",
   "type": "delay",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "g": "9707809d7fe4863a",
   "name": "",
   "pauseType": "delay",
@@ -17,7 +17,7 @@ const Node = {
   "allowrate": false,
   "outputs": 1,
   "x": 155,
-  "y": 60,
+  "y": 340,
   "wires": [
     [
       "4b0e58cf1f6cac5f"
