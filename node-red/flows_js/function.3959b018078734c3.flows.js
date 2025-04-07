@@ -55,7 +55,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       
   }
   
-  valueString += "WHERE RuleID = " + data.RuleID;
+  valueString += "WHERE ruleID = " + data.ruleID;
   
   let sqlQuery = `UPDATE accountingRules SET ${valueString}`;
   msg.sql = sqlQuery;

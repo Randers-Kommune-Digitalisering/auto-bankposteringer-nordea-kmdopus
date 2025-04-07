@@ -1,7 +1,7 @@
 const Node = {
   "id": "da9d0b8038e2bfe1",
   "type": "function",
-  "z": "ee0cf4ce372e2d36",
+  "z": "8c354b8d2ca56b7b",
   "g": "202a6b173abfc606",
   "name": "Match postings with rules",
   "func": "",
@@ -10,8 +10,8 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 715,
-  "y": 100,
+  "x": 155,
+  "y": 880,
   "wires": [
     [
       "c49c5be7601cebc5"
@@ -28,20 +28,19 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let postings = [];
   let transactionsUnmatched = transactionsObj.addUnmatched ? transactionsObj.addUnmatched : [];
   const transactions = transactionsObj.list ? transactionsObj.list.reverse() : null;
-  const transactionParameters = global.get("configs").banking.usefulParameters;   // Has to match ruleParameters length, can be nested array
+  const transactionParameters = global.get("configs").banking.usefulParameters;   // Has to match ruleParameters length and order, can be nested array
   const accountingRules = masterDataObj.rules;
   const ruleParameters = Object.keys(accountingRules[0]).slice(0, 3);
   const date = global.get("dates").simpleDate;
   
   function extractCPRNumber(inputString) {
       const regex = /((((0[1-9]|[12][0-9]|3[01])(0[13578]|10|12)(\d{2}))|(([0][1-9]|[12][0-9]|30)(0[469]|11)(\d{2}))|((0[1-9]|1[0-9]|2[0-8])(02)(\d{2}))|((29)(02)(00))|((29)(02)([2468][048]))|((29)(02)([13579][26])))[-]*\d{4})/gm;
-  
       const match = inputString.match(regex);
   
       if (match) {
           return match[0]; // Returnerer det første match
       } else {
-          return null; // Returnerer null, hvis der ikke findes noget match
+          return null;
       }
   }
   
@@ -120,7 +119,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       }
   }
   
-  function generatePostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, psp, cpr) {
+  function generatePostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, landingAccountSecondary, cpr) {
       postings.push(
           {
               account: statusAccount,
@@ -132,7 +131,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       postings.push(
           {
               account: landingAccount,
-              psp: psp,
+              accountSecondary: landingAccountSecondary,
               debetOrCredit: landingDebetOrCredit,
               amount: amount,
               text: text,
@@ -143,19 +142,17 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
   
   function processPosting(transaction, rules) {
-      let absoluteAmount = Math.abs(parseFloat(transaction.amount));
-      let cleanedAmount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-      transaction.amount = cleanedAmount;
-      let statusDebetOrCredit = transaction.amount > 0 ? "Debet" : "Kredit";
-      let landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet";
+      const absoluteAmount = Math.abs(parseFloat(transaction.amount));
+      const statusDebetOrCredit = transaction.amount > 0 ? "Debet" : "Kredit";
+      const landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet";
+      transaction.amount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   
-      let cpr = rules.postWithCPR ? extractCPRNumber(transaction.narrative) : null;
+      const cpr = rules.postWithCPR ? extractCPRNumber(transaction.narrative) : null;
       
       let completeMatch = false;
   
       for (let rule of rules) {      
           let sumOfParametersMatched = 0;
-          let psp = rule.PSP ? rule.PSP : '';
   
           if (completeMatch) {
               continue
@@ -163,39 +160,33 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               for (let parameterIndex = 0; parameterIndex < transactionParameters.length; parameterIndex++) {
                   let searchValue = rule[ruleParameters[parameterIndex]] ? rule[ruleParameters[parameterIndex]].toLowerCase() : null;
   
-                  if (searchValue && rule.ActiveBool && matchParameter(transaction, searchValue, transactionParameters[parameterIndex])) {
+                  if (searchValue && rule.activeBool && matchParameter(transaction, searchValue, transactionParameters[parameterIndex])) {
   
                       sumOfParametersMatched += 1;
                   }
               }
   
               let matchedAllParametersBool = sumOfParametersMatched === sumOfParametersGiven(rule);
-              let matchedAmountBool = matchAmount(absoluteAmount, rule.Operator, rule.Beløb1, rule.Beløb2)
-              let matchedAccountBool = transaction.account.bankAccount === rule.relatedBankAccount || rule.relatedBankAccount === null
+              let matchedAmountBool = matchAmount(absoluteAmount, rule.operator, rule.amount1, rule.amount2)
+              let matchedAccountBool = transaction.relatedAccount.bankAccount === rule.relatedBankAccount || rule.relatedBankAccount === null
                               
               if (matchedAllParametersBool && matchedAmountBool && matchedAccountBool) {
-                  if (!rule.ExceptionBool) {   // Don't write ERP postings if rule is an exception, but still count as match
-                      let text = textGeneration(rule.Posteringstekst, transaction.message, transaction.narrative, transaction.counterparty_name);
-                      generatePostings(transaction.account.statusAccount, rule.Artskonto, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, psp, cpr);
+                  if (!rule.exceptionBool) {   // Don't write ERP postings if rule is an exception, but still count as match
+                      let text = textGeneration(rule.text, transaction.message, transaction.narrative, transaction.counterparty_name);
+                      generatePostings(transaction.relatedAccount.statusAccount, rule.account, statusDebetOrCredit, landingDebetOrCredit, text, transaction.amount, rule.accountSecondary || '', cpr);
                   }
                   completeMatch = true;
-                  rule.LastUsed = date;
+                  rule.lastUsed = date;
               }
           }
       }
-      if (!completeMatch) {
-          let text = transaction.transaction_id;
   
-          generatePostings(transaction.account.statusAccount, transaction.account.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, cleanedAmount, '', cpr);
-          
-          // if (transaction.account.bankAccountName != "Debitorkonto") {
-          if (transaction.account.bankAccountName != "TEST") {
-              transactionsUnmatched.push(transaction);
-          }
+      if (!completeMatch) {
+          generatePostings(transaction.relatedAccount.statusAccount, transaction.relatedAccount.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, transaction.transaction_id, transaction.amount, '', cpr);
+          transactionsUnmatched.push(transaction);
       }
   
       transactionsObj.addUnmatched = transactionsUnmatched;
-      global.set("transactions", transactionsObj);
       
   }
   

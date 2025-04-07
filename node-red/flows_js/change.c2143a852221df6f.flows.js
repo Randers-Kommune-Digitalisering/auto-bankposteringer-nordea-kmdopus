@@ -3,8 +3,15 @@ const Node = {
   "type": "change",
   "z": "a1dc9966e881ac6b",
   "g": "1d18d99feaaca4c4",
-  "name": "",
+  "name": "Set vars",
   "rules": [
+    {
+      "t": "set",
+      "p": "payload[0].originDate",
+      "pt": "msg",
+      "to": "$fromMillis($toMillis(payload[0].originDate), \"[D01]-[M01]-[Y]\")",
+      "tot": "jsonata"
+    },
     {
       "t": "set",
       "p": "dates.bookingDate",

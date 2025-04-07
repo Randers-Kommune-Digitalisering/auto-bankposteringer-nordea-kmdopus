@@ -1,7 +1,7 @@
 const Node = {
   "id": "a7b6c3faac860d67",
   "type": "switch",
-  "z": "62eaf4407ee85a3a",
+  "z": "8c354b8d2ca56b7b",
   "g": "9707809d7fe4863a",
   "name": "Check HTTP code from response",
   "property": "statusCode",
@@ -33,7 +33,7 @@ const Node = {
   "repair": false,
   "outputs": 3,
   "x": 105,
-  "y": 80,
+  "y": 360,
   "wires": [
     [
       "551dbd2ea88a85e6"

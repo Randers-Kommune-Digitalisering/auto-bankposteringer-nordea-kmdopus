@@ -6,9 +6,10 @@ const Node = {
   "name": "",
   "statusCode": "202",
   "headers": {},
-  "x": 840,
-  "y": 580,
-  "wires": []
+  "x": 445,
+  "y": 720,
+  "wires": [],
+  "l": false
 }
 
 module.exports = Node;

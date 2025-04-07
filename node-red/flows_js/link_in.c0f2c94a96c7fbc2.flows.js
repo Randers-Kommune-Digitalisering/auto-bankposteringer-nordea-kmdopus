@@ -3,7 +3,7 @@ const Node = {
   "type": "link in",
   "z": "a1dc9966e881ac6b",
   "g": "704dc03174bd43e2",
-  "name": "insert unmatched transactions to db",
+  "name": "insert unmatched transactions",
   "links": [],
   "x": 785,
   "y": 280,

@@ -5,7 +5,7 @@ const Node = {
   "g": "d35c0446ba72295e",
   "name": "Authentication completed",
   "active": true,
-  "tosidebar": false,
+  "tosidebar": true,
   "console": true,
   "tostatus": false,
   "complete": "{\t   \"Auth status\": global.adminAuthStatus,\t   \"Timestamp\": $now()\t}",
@@ -13,7 +13,7 @@ const Node = {
   "statusVal": "",
   "statusType": "auto",
   "x": 545,
-  "y": 440,
+  "y": 340,
   "wires": [],
   "l": false
 }

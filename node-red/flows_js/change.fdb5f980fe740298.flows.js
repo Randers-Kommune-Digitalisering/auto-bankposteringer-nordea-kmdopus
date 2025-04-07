@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "$globalContext(\"masterData\").rules[RuleID = $$.uid]",
+      "to": "$globalContext(\"masterData\").rules[ruleID = $$.uid]",
       "tot": "jsonata",
       "dc": true
     }
@@ -19,8 +19,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 245,
-  "y": 360,
+  "x": 745,
+  "y": 100,
   "wires": [
     [
       "cd069fd6c0669353"

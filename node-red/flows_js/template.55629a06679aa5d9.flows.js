@@ -25,7 +25,7 @@ Node.template = `
 DELETE FROM
     accountingRules
 WHERE
-    RuleID = {{uid}}
+    ruleID = {{uid}}
 `
 
 module.exports = Node;

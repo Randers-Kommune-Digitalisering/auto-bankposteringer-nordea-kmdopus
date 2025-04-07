@@ -3,14 +3,14 @@ const Node = {
   "type": "link out",
   "z": "62eaf4407ee85a3a",
   "g": "d35c0446ba72295e",
-  "name": "link out step 1",
+  "name": "step 1 completed",
   "mode": "link",
   "links": [
-    "b7cc9658c06005be",
-    "ab0cfdfc017ac9d6"
+    "ab0cfdfc017ac9d6",
+    "b7cc9658c06005be"
   ],
   "x": 595,
-  "y": 280,
+  "y": 180,
   "wires": []
 }
 

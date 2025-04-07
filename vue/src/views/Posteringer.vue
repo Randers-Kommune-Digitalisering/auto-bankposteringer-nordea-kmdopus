@@ -45,8 +45,8 @@
 
     const keyMap = {
         "Bogføringsdato": { "key": "bookingDate" },
-        "Afsender": { "key": "counterpartyName" }, 
-        "Reference": { "key": "narrative" },
+        "Afsender": { "key": "sender" }, 
+        "Reference": { "key": "reference" },
         "Beløb": { "key": "amount" },
         "ID": { "key": "transactionID", "hidden": true }
     }

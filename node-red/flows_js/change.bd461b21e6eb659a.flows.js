@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "8c354b8d2ca56b7b",
   "g": "9b2beb35be5bbb31",
-  "name": "Delete vars",
+  "name": "Delete global.transactions.list",
   "rules": [
     {
       "t": "delete",
