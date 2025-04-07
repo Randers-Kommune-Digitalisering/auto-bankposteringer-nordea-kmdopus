@@ -11,7 +11,7 @@ const Node = {
   "finalize": "",
   "libs": [],
   "x": 295,
-  "y": 360,
+  "y": 520,
   "wires": [
     [
       "b3b1b0fc24ded8c9"
@@ -24,13 +24,13 @@ const Node = {
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let transactionsObj = global.get("transactions");
   let accountStep = transactionsObj.accountStep;
-  let accountLength = global.get("masterData").bankAccounts.length;
+  const accountLength = global.get("masterData").bankAccounts.length;
   
-  if (accountStep + 1 !== accountLength) {
-      accountStep += 1;
-  } else {
+  if (accountStep + 1 === accountLength) {
       // When there are no more accounts to check
       accountStep = 0;
+  } else {
+      accountStep += 1;
   }
   
   transactionsObj.accountStep = accountStep;

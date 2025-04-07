@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "32cf2bec698ca424",
   "g": "83692983b416dfd5",
-  "name": "",
+  "name": "Set vars",
   "rules": [
     {
       "t": "set",
@@ -28,7 +28,7 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "messageIdentification",
+      "p": "transactions.uid",
       "pt": "global",
       "to": "uid",
       "tot": "msg"
@@ -39,15 +39,15 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 635,
-  "y": 600,
+  "x": 195,
+  "y": 740,
   "wires": [
     [
       "bac1384d9ea7c900",
       "3d18e2ece41ab7a9"
     ]
   ],
-  "icon": "font-awesome/fa-save",
+  "icon": "font-awesome/fa-cog",
   "l": false
 }
 

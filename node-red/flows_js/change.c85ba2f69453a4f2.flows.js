@@ -1,7 +1,7 @@
 const Node = {
   "id": "c85ba2f69453a4f2",
   "type": "change",
-  "z": "32cf2bec698ca424",
+  "z": "8c354b8d2ca56b7b",
   "g": "c0daad82a0a61571",
   "name": "Create status object",
   "rules": [
@@ -19,7 +19,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 105,
-  "y": 860,
+  "y": 980,
   "wires": [
     [
       "7aa893cfddc7abd2"

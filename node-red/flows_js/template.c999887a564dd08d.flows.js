@@ -22,7 +22,12 @@ const Node = {
 }
 
 Node.template = `
-{{global.configs.database.bankAccounts}}
+CREATE TABLE IF NOT EXISTS bankAccounts (
+    bankAccount NVARCHAR(31) NULL PRIMARY KEY,
+    bankAccountName NVARCHAR(63) NULL,
+    statusAccount CHAR(8) NULL,
+    intermediateAccount CHAR(8) NULL
+);
 `
 
 module.exports = Node;

@@ -11,7 +11,7 @@ const Node = {
   "finalize": "",
   "libs": [],
   "x": 105,
-  "y": 360,
+  "y": 520,
   "wires": [
     [
       "467fddf2a063a289"
@@ -23,7 +23,7 @@ const Node = {
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let transactionsObj = global.get("transactions");
-  const accountValue = global.get("masterData").bankAccounts[transactionsObj.accountStep];
+  const accountValue = global.get("transactions").selectedAccount;
   let transactions = transactionsObj.list ? transactionsObj.list : [];
   let addTransactions = transactionsObj.add;
   
@@ -33,7 +33,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       // Add appropiate account to each transaction
       addTransactions = addTransactions.map(obj => ({
           ...obj,  // Spread the existing object properties
-          account: accountValue  // Add the new key-value pair
+          relatedAccount: accountValue  // Add the new key-value pair
       }));
   
       // Merge new transactions with existing ones

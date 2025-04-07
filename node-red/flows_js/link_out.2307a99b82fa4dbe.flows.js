@@ -3,7 +3,7 @@ const Node = {
   "type": "link out",
   "z": "a1dc9966e881ac6b",
   "g": "24481f222bcf4517",
-  "name": "link out update masterData to db",
+  "name": "admsysdata db action end",
   "mode": "return",
   "links": [],
   "x": 1385,

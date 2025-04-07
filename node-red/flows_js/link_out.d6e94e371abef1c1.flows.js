@@ -3,7 +3,7 @@ const Node = {
   "type": "link out",
   "z": "a1dc9966e881ac6b",
   "g": "79633097bdfca497",
-  "name": "link out update bankAccounts to db",
+  "name": "bankaccounts db action end",
   "mode": "return",
   "links": [],
   "x": 1775,

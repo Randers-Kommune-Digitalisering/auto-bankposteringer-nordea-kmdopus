@@ -1,7 +1,7 @@
 const Node = {
   "id": "075475a32b89c455",
   "type": "function",
-  "z": "ee0cf4ce372e2d36",
+  "z": "8c354b8d2ca56b7b",
   "g": "202a6b173abfc606",
   "name": "Manual posting",
   "func": "",
@@ -10,8 +10,8 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 715,
-  "y": 60,
+  "x": 155,
+  "y": 840,
   "wires": [
     [
       "c49c5be7601cebc5"
@@ -30,7 +30,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   const statusAccount = global.get("masterData").bankAccounts;
   
   
-  function generatePostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, psp, cpr) {
+  function generatePostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, landingAccountSecondary, cpr) {
       postings.push(
           {
               account: statusAccount,
@@ -42,7 +42,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       postings.push(
           {
               account: landingAccount,
-              psp: psp,
+              accountSecondary: landingAccountSecondary,
               debetOrCredit: landingDebetOrCredit,
               amount: amount,
               text: text,
@@ -52,15 +52,14 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   }
   
   function processPosting(transaction) {
-      let absoluteAmount = Math.abs(parseFloat(transaction.amount));
-      let cleanedAmount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      const absoluteAmount = Math.abs(parseFloat(transaction.amount));
+      const cleanedAmount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      const statusDebetOrCredit = transaction.amount > 0 ? "Debet" : "Kredit";
+      const landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet";
+      const relatedAccount = masterDataObj.bankAccounts.find(account => account.bankAccount === transaction.bankAccount);
       transaction.amount = cleanedAmount;
-      let statusDebetOrCredit = transaction.amount > 0 ? "Debet" : "Kredit";
-      let landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet";
-      let relatedAccount = masterDataObj.bankAccounts.find(account => account.bankAccount === transaction.bankAccount);
-      let statusAccount = relatedAccount.intermediateAccount
   
-      generatePostings(statusAccount, transaction.Artskonto, statusDebetOrCredit, landingDebetOrCredit, transaction.Posteringstekst, cleanedAmount, transaction.PSP, transaction.cpr);
+      generatePostings(relatedAccount.intermediateAccount, transaction.account, statusDebetOrCredit, landingDebetOrCredit, transaction.text, cleanedAmount, transaction.accountSecondary, transaction.cpr);
   }
   
   if (transactions) {

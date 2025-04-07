@@ -51,7 +51,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   
       const {
           Reference,
-          Advisliste,
           Afsender,
           Posteringstype,
           Beløb1,
@@ -60,14 +59,13 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
           Posteringstekst,
           Artskonto,
           PSP,
-          Notat
+          Notat,
+          Bankkonto
       } = cleanedData;
   
       const hasHash = Object.values(data).some(value => value && String(value).includes("#"));
       const isActive = !hasHash;
-      const ActiveBool = isActive;
-  
-      const updatedReference = combineStrings(Reference, Advisliste);
+      const activeBool = isActive;
   
       let amount1 = null;
       let amount2 = null;
@@ -91,31 +89,31 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       }
   
       const valueOperatorValue = operatorMapping[beløb_regel] || null;
-      const Operator = valueOperatorValue;
+      const operator = valueOperatorValue;
   
-      const RuleID = index;
+      const ruleID = index;
       
       const shouldBeException = statusAccounts.includes(Artskonto);
       cleanedData.Artskonto = shouldBeException ? null : Artskonto;
-      const ExceptionBool = shouldBeException;
-      const LastUsed = "31-12-9999"
+      const exceptionBool = shouldBeException;
+      const lastUsed = "31-12-9999"
   
       return {
-          Reference: updatedReference || null,
-          Afsender: Afsender || null,
-          Posteringstype: Posteringstype || null,
-          Beløb1: amount1,
-          Beløb2: amount2,
-          Operator,
-          Posteringstekst: Posteringstekst || null,
-          Artskonto: Artskonto || null,
-          PSP: PSP || null,
-          Notat: Notat || null,
-          ActiveBool,
-          ExceptionBool,
-          LastUsed,
-          RuleID,
-          relatedBankAccount: null
+          reference: Reference || null,
+          sender: Afsender || null,
+          typeDescription: Posteringstype || null,
+          amount1,
+          amount2,
+          operator,
+          text: Posteringstekst || null,
+          account: Artskonto || null,
+          accountSecondary: PSP || null,
+          note: Notat || null,
+          activeBool,
+          exceptionBool,
+          lastUsed,
+          ruleID,
+          relatedBankAccount: Bankkonto || null
       };
   });
   
