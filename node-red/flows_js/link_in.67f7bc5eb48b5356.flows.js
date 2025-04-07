@@ -3,9 +3,9 @@ const Node = {
   "type": "link in",
   "z": "62eaf4407ee85a3a",
   "g": "3bc210a9c1e58a78",
-  "name": "link in nordea pre-request",
+  "name": "run nordea pre-request script",
   "links": [],
-  "x": 345,
+  "x": 55,
   "y": 60,
   "wires": [
     [

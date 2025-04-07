@@ -16,7 +16,7 @@ const Node = {
   "bytopic": "all",
   "topic": "topic",
   "outputs": 1,
-  "x": 715,
+  "x": 215,
   "y": 60,
   "wires": [
     [
