@@ -3,13 +3,13 @@ const Node = {
   "type": "link out",
   "z": "62eaf4407ee85a3a",
   "g": "be3c4fb5b3ea916b",
-  "name": "link out transaction request",
+  "name": "transaction request completed",
   "mode": "link",
   "links": [
     "2efd9544f1a97947"
   ],
-  "x": 1225,
-  "y": 280,
+  "x": 595,
+  "y": 460,
   "wires": []
 }
 

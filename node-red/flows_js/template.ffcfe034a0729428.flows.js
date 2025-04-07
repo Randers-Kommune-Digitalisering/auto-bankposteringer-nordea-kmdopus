@@ -22,7 +22,13 @@ const Node = {
 }
 
 Node.template = `
-{{global.configs.database.admSysData}}
+CREATE TABLE IF NOT EXISTS admSysData (
+    admName NVARCHAR(63),
+    admEmail NVARCHAR(63),
+    admID NVARCHAR(31) PRIMARY KEY,
+    erpSystem NVARCHAR(31),
+    integrationBool BOOL DEFAULT 0
+);
 `
 
 module.exports = Node;

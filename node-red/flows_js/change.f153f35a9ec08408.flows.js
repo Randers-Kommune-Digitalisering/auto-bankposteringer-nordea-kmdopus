@@ -2,7 +2,7 @@ const Node = {
   "id": "f153f35a9ec08408",
   "type": "change",
   "z": "431f85f122b4636d",
-  "g": "5126da366c0f2bdb",
+  "g": "865ca641c6246507",
   "name": "Konfigurér mailpåmindelse",
   "rules": [
     {
@@ -26,7 +26,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 220,
-  "y": 380,
+  "y": 220,
   "wires": [
     [
       "a5bf1fc2e8c7a32d"

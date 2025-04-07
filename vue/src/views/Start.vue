@@ -58,6 +58,7 @@
         <br>
         <br>
         I fanen <b>Stamdata</b> angives bl.a. oplysninger om kommunens FOBI-administrator og de bankkonti, som kommunen ønske at anvende FOBI til.
+        Bankkonti oplyses pt. i formatet "IBAN minus kontrolnøgle", "bindestreg" og "valutakode", f.eks. DK20001234567890-DKK.
         <br>
         Administratoren skal kunne godkende FOBI's adgang til at hente jeres bankdata, hvilket er grunden til at disse oplysninger skal udfyldes.
         <br>
@@ -65,13 +66,15 @@
         Konteringsregler er opdelt i 3 faner efter deres type; hhv. aktive og inaktive regler, samt undtagelser.
         <br>
         Alle regler er opdelt i transaktionsoplysninger og konteringsoplysninger. Transaktionsoplysningerne er de data der tilsammen udgøre bankposteringen.
-        Da der er stor forskel bankerne imellem, hvilke felter der leveres til kunden, er der lavet 4 grupper af data, som findes i alle bankposteringer i den ene eller anden form: reference, afsender, advis (sekundære tekstfelter) samt posteringstype.  
+        Da der er stor forskel bankerne imellem, hvilke transaktionsoplysninger der leveres til kunden, er der lavet 3 grupper af data, som findes i alle bankposteringer i den ene eller anden form: reference, afsender samt posteringstype.  
+        Tekstfelterne til de 3 datagrupper udfyldes med en eller flere tekststrenge (seperaret med komma), som bruges til at matche ud fra.
         <br>
-        <b>Aktive regler</b> er kernen af FOBI; det er disse konteringsregler der kan udløser en automatisk bogføring.
+        <b>Aktive regler</b> er kernen af FOBI; det er disse konteringsregler der udløser en automatisk bogføring.
         <br>
         <b>Inaktive regler</b> benytter FOBI ikke til konteringsmatch, men brugeren har fortsat mulighed for at tilpasse reglen og evt. genaktivere den på et senere tidspunkt.
         <br>
-        <b>Undtagelser</b> afholder bankposteringer fra at blive behandlet. Undtagelser bruges til at tage højde for andre integrationer mellem jeres bank og ØS. Det er f.eks. leverandørudbetalinger, der skal laves undtagelse for.
+        <b>Undtagelser</b> afholder bankposteringer fra at blive behandlet.
+        Undtagelser bruges til at tage højde for andre integrationer mellem jeres bank og ØS. Det er f.eks. leverandørudbetalinger, der skal laves undtagelse for.
         <br>
         <br>
         <i>NB: Oprettelse af nye regler/undtagelser sker på de respektive faner.</i>

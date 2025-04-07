@@ -8,8 +8,8 @@ const Node = {
   "method": "put",
   "upload": false,
   "swaggerDoc": "",
-  "x": 100,
-  "y": 760,
+  "x": 600,
+  "y": 500,
   "wires": [
     [
       "f4c77145867f1b64"

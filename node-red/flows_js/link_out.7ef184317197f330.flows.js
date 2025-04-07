@@ -3,7 +3,7 @@ const Node = {
   "type": "link out",
   "z": "a1dc9966e881ac6b",
   "g": "d992b55d9d319a30",
-  "name": "link out update rule to db",
+  "name": "rules db action end",
   "mode": "return",
   "links": [],
   "x": 395,

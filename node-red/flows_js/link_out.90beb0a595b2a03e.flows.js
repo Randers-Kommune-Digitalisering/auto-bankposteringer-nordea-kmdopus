@@ -6,7 +6,7 @@ const Node = {
   "name": "link out nordea pre-request",
   "mode": "return",
   "links": [],
-  "x": 445,
+  "x": 155,
   "y": 60,
   "wires": []
 }

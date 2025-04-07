@@ -40,7 +40,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   const docDate = dayjs().format('YYYYMMDD');
   const docTime = dayjs().format('HHmmss');
   const bookingDate = global.get("dates").bookingDate.replace(/-/g, "");
-  const docId = global.get("messageIdentification");
+  const docId = global.get("transactions").uid;
   const compCode = global.get("configs").ftp.compCode;
   const dataProviderId = global.get("configs").ftp.dataProviderId;
   const prodEnv = inProd ? global.get("configs").ftp.prodEnv : 'T02';
@@ -62,11 +62,11 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       amount = parseFloat(amount);
       let amountPrefixed = posting.debetOrCredit === 'Debet' ? amount : amount * -1;
   
-      let psp = posting.psp ? posting.psp : undefined;
+      let psp = posting.accountSecondary ? posting.accountSecondary : undefined;
       let artskonto = String(posting.account);
   
       if (!inProd) {
-          psp = posting.psp ? 'XG-9999999990-00001' : undefined;
+          psp = posting.accountSecondary ? 'XG-9999999990-00001' : undefined;
           artskonto = artskonto.charAt(0) === '9' ? '90515060' : '29505050';
       }
   
