@@ -19,6 +19,7 @@
     const konteringsregel = ref(isNewRule.value ? JSON.parse(JSON.stringify(newItem)) : null)
 
     const exceptionBool = ref(false)
+    const postWithCPR = ref(false)
 
     const bankaccounts = ref([])
     const bankAccountOptions = ref([])
@@ -57,13 +58,15 @@
             .then(value => {
                 konteringsregel.value = value
                 exceptionBool.value = konteringsregel.value.exceptionBool
+                postWithCPR.value = konteringsregel.value.postWithCPR
                 selectedBankaccount.value = konteringsregel.value.relatedBankAccount // Set selectedBankaccount
                 selectedOperator.value = konteringsregel.value.operator // Set selectedOperator
             })
     }
 
     watch(konteringsregel.value, (newValue) => {
-        exceptionBool.value = newValue.ExceptionBool
+        exceptionBool.value = newValue.exceptionBool
+        postWithCPR.value = newValue.postWithCPR
     })
 
     watch(bankAccountOptions, (newVal) => {
@@ -90,21 +93,21 @@
         "Posteringstekst": { "key": "text", "group": "Kontering" },
         "CPR-bogføring": { "key": "postWithCPR", "group": "Kontering" },
         "Notat": { "key": "note" },
-        "ActiveBool": { "key": "activeBool", "hidden": true }
+        "activeBool": { "key": "activeBool", "hidden": true }
     }
 
     const keyMap_exception = {
-        "id": { "key": "RuleID", "hidden": true },
+        "id": { "key": "ruleID", "hidden": true },
         "Tilknyttet bankkonto": { "key": "relatedBankAccount", "group": "Transaktionsoplysninger" },
-        "Reference": { "key": "Reference", "group": "Transaktionsoplysninger" },
-        "Afsender": { "key": "Afsender", "group": "Transaktionsoplysninger" }, 
+        "Reference": { "key": "reference", "group": "Transaktionsoplysninger" },
+        "Afsender": { "key": "sender", "group": "Transaktionsoplysninger" }, 
         "Posteringstype": { "key": "Posteringstype", "group": "Transaktionsoplysninger" },
-        "Beløbsregel": { "key": "Operator", "group": "Beløbsafgrænsning" },
-        "Beløb 1": { "key": "Beløb1", "group": "Beløbsafgrænsning" },
-        "Beløb 2": { "key": "Beløb2", "hidden": true, "group": "Beløbsafgrænsning" },
-        "Artskonto": { "key": "Artskonto", "hidden": true, "group": "Kontering" },
-        "PSP-element": { "key": "PSP", "hidden": true, "group": "Kontering" },
-        "Posteringstekst": { "key": "Posteringstekst", "hidden": true, "group": "Kontering" },
+        "Beløbsregel": { "key": "operator", "group": "Beløbsafgrænsning" },
+        "Beløb 1": { "key": "amount1", "group": "Beløbsafgrænsning" },
+        "Beløb 2": { "key": "amount2", "hidden": true, "group": "Beløbsafgrænsning" },
+        "Artskonto": { "key": "account", "hidden": true, "group": "Kontering" },
+        "PSP-element": { "key": "accountSecondary", "hidden": true, "group": "Kontering" },
+        "Posteringstekst": { "key": "text", "hidden": true, "group": "Kontering" },
         "Notat": { "key": "Notat" }
     }
 
@@ -128,11 +131,17 @@
                 name: groupName,
                 fields: groupedKeyMap.value[groupName] || {}
             }))
-            .filter(group => Object.keys(group.fields).length > 0)
-    })
+            .filter(group => {
+                // Exclude "Kontering" group if exceptionBool is true
+                if (konteringsregel.value?.exceptionBool && group.name === 'Kontering') {
+                    return false;
+                }
+                return Object.keys(group.fields).length > 0;
+            });
+    });
 
     watch(selectedOperator, (newValue) => {
-        konteringsregel.value.Operator = newValue
+        konteringsregel.value.operator = newValue
         keyMap.value["Beløb 2"].hidden = !(newValue === '><')
     })
 
@@ -141,7 +150,7 @@
         hasUpdated.value = false
         isUpdating.value = true
 
-        const url = isNewRule.value ? '/api/konteringsregler' : `/api/konteringsregler/${konteringsregel.value.RuleID}`
+        const url = isNewRule.value ? '/api/konteringsregler' : `/api/konteringsregler/${konteringsregel.value.ruleID}`
         
         fetch(url, {
             method: isNewRule.value ? 'POST' : 'PUT',
@@ -159,10 +168,10 @@
         .then(value => {
             if(isNewRule.value) {
                 isNewRule.value = false
-                index.value = value.RuleID
-                konteringsregel.value.RuleID = value.RuleID
-                konteringsregel.value[keyMap.id.key] = value.RuleID
-                router.push(`/retkonteringsregel/${value.RuleID}`)
+                index.value = value.ruleID
+                konteringsregel.value.ruleID = value.ruleID
+                konteringsregel.value[keyMap.id.key] = value.ruleID
+                router.push(`/retkonteringsregel/${value.ruleID}`)
             }
         })
         .finally(() => {
@@ -181,7 +190,7 @@
         else {
             isDeleting.value = true
 
-            fetch(`/api/konteringsregler/${konteringsregel.value.RuleID}`, {
+            fetch(`/api/konteringsregler/${konteringsregel.value.ruleID}`, {
                 method: 'DELETE',
                 headers: {
                     'Accept': 'application/json',
@@ -193,10 +202,10 @@
     }
 
     function toggleActivation() {
-        konteringsregel.value.ActiveBool = !konteringsregel.value.ActiveBool
+        konteringsregel.value.activeBool = !konteringsregel.value.activeBool
     }
 
-    console.log(sortedGroups)
+    console.log(konteringsregel)
 
 </script>
 
@@ -223,9 +232,9 @@
                     </button>
 
                     <button v-if="konteringsregel != null" @click="toggleActivation()"
-                        :class="konteringsregel.ActiveBool ? 'green' : 'red'"
-                        :disabled="konteringsregel.ExceptionBool">
-                        {{ konteringsregel.ActiveBool ? 'Aktiv' : 'Inaktiv' }}
+                        :class="konteringsregel.activeBool ? 'green' : 'red'"
+                        :disabled="konteringsregel.exceptionBool">
+                        {{ konteringsregel.activeBool ? 'Aktiv' : 'Inaktiv' }}
                     </button>
 
                     <button id="submit" @click="updateRule" class="green" :disabled="isUpdating">
@@ -244,7 +253,12 @@
                             <label :for="key" class="capitalize">{{ key }}</label>
 
                             <template v-if="key === 'CPR-bogføring'">
-                                <input type="checkbox" v-model="konteringsregel[value.key]" />
+                                <input
+                                    type="checkbox"
+                                    :id="key"
+                                    v-model="postWithCPR"
+                                    @change="console.log('Value of konteringsregel:', konteringsregel)"
+                                />
                             </template>
                             
                             <template v-else-if="key === 'Beløbsregel'">

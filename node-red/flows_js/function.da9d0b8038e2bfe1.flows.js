@@ -35,13 +35,12 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
   function extractCPRNumber(inputString) {
       const regex = /((((0[1-9]|[12][0-9]|3[01])(0[13578]|10|12)(\d{2}))|(([0][1-9]|[12][0-9]|30)(0[469]|11)(\d{2}))|((0[1-9]|1[0-9]|2[0-8])(02)(\d{2}))|((29)(02)(00))|((29)(02)([2468][048]))|((29)(02)([13579][26])))[-]*\d{4})/gm;
-  
       const match = inputString.match(regex);
   
       if (match) {
           return match[0]; // Returnerer det første match
       } else {
-          return null; // Returnerer null, hvis der ikke findes noget match
+          return null;
       }
   }
   
@@ -143,12 +142,12 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
   
   function processPosting(transaction, rules) {
-      let absoluteAmount = Math.abs(parseFloat(transaction.amount));
+      const absoluteAmount = Math.abs(parseFloat(transaction.amount));
+      const statusDebetOrCredit = transaction.amount > 0 ? "Debet" : "Kredit";
+      const landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet";
       transaction.amount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-      let statusDebetOrCredit = transaction.amount > 0 ? "Debet" : "Kredit";
-      let landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet";
   
-      let cpr = rules.postWithCPR ? extractCPRNumber(transaction.narrative) : null;
+      const cpr = rules.postWithCPR ? extractCPRNumber(transaction.narrative) : null;
       
       let completeMatch = false;
   
@@ -183,17 +182,11 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       }
   
       if (!completeMatch) {
-          let text = transaction.transaction_id;
-  
-          generatePostings(transaction.relatedAccount.statusAccount, transaction.relatedAccount.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, transaction.amount, '', cpr);
-          
-          if (transaction.relatedAccount.bankAccountName != "Debitorkonto") {
-              transactionsUnmatched.push(transaction);
-          }
+          generatePostings(transaction.relatedAccount.statusAccount, transaction.relatedAccount.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, transaction.transaction_id, transaction.amount, '', cpr);
+          transactionsUnmatched.push(transaction);
       }
   
       transactionsObj.addUnmatched = transactionsUnmatched;
-      global.set("transactions", transactionsObj);
       
   }
   

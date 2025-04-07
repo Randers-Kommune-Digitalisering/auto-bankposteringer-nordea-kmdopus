@@ -52,15 +52,14 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   }
   
   function processPosting(transaction) {
-      let absoluteAmount = Math.abs(parseFloat(transaction.amount));
-      let cleanedAmount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      const absoluteAmount = Math.abs(parseFloat(transaction.amount));
+      const cleanedAmount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      const statusDebetOrCredit = transaction.amount > 0 ? "Debet" : "Kredit";
+      const landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet";
+      const relatedAccount = masterDataObj.bankAccounts.find(account => account.bankAccount === transaction.bankAccount);
       transaction.amount = cleanedAmount;
-      let statusDebetOrCredit = transaction.amount > 0 ? "Debet" : "Kredit";
-      let landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet";
-      let relatedAccount = masterDataObj.bankAccounts.find(account => account.bankAccount === transaction.relatedAccount.bankAccount);
-      let statusAccount = relatedAccount.intermediateAccount;
   
-      generatePostings(statusAccount, transaction.landingAccount, statusDebetOrCredit, landingDebetOrCredit, transaction.text, cleanedAmount, transaction.landingAccountSecondary, transaction.cpr);
+      generatePostings(relatedAccount.intermediateAccount, transaction.account, statusDebetOrCredit, landingDebetOrCredit, transaction.text, cleanedAmount, transaction.accountSecondary, transaction.cpr);
   }
   
   if (transactions) {

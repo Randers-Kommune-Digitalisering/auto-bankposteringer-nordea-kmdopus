@@ -51,7 +51,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
   
       const {
           Reference,
-          Advisliste,
           Afsender,
           Posteringstype,
           Beløb1,
@@ -60,14 +59,13 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
           Posteringstekst,
           Artskonto,
           PSP,
-          Notat
+          Notat,
+          Bankkonto
       } = cleanedData;
   
       const hasHash = Object.values(data).some(value => value && String(value).includes("#"));
       const isActive = !hasHash;
       const activeBool = isActive;
-  
-      const updatedReference = combineStrings(Reference, Advisliste);
   
       let amount1 = null;
       let amount2 = null;
@@ -101,7 +99,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       const lastUsed = "31-12-9999"
   
       return {
-          reference: updatedReference || null,
+          reference: Reference || null,
           sender: Afsender || null,
           typeDescription: Posteringstype || null,
           amount1,
@@ -115,7 +113,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
           exceptionBool,
           lastUsed,
           ruleID,
-          relatedBankAccount: null
+          relatedBankAccount: Bankkonto || null
       };
   });
   

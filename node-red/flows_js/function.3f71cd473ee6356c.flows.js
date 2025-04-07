@@ -28,7 +28,7 @@ const Node = {
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, dayjs) {
   let transactionsObj = global.get("transactions");
-  let data = transactionsObj.addUnmatched;
+  const data = transactionsObj.addUnmatched;
   
   let sqlQuery = data.map(transaction => {
       let transactionID = `'${transaction.transaction_id.replace(/'/g, "''")}'`;
@@ -42,7 +42,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
       return `(${transactionID}, ${sender}, ${reference}, ${typeDescription}, ${bankAccount}, ${amount}, ${bookingDate})`;
   }).join(",\n");
   
-  msg.sql = `INSERT INTO transactionsWithNoMatch (transactionID, counterpartyName, narrative, typeDescription, bankAccount, amount, bookingDate) 
+  msg.sql = `INSERT INTO transactionsWithNoMatch (transactionID, sender, reference, typeDescription, bankAccount, amount, bookingDate) 
               VALUES ${sqlQuery};`;
   
   transactionsObj.addUnmatched = [];

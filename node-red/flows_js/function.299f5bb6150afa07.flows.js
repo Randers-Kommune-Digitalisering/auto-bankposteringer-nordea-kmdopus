@@ -25,13 +25,13 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let postings = global.get("erp").postings;
   let formattedPostings = [];
   
-  for (let posting in postings) {
-      formattedPostings.push([posting.account, '', posting.accountSecondary || '', '', '', posting.debetOrCredit, posting.amount, '', posting.text, '', '', '', '', '02', posting.cpr || '', '', '', '', '', '', '', '', '', '', '']);
+  for (let posting of postings) {
+      formattedPostings.push([posting.account, '', posting.accountSecondary || '', '', '', posting.debetOrCredit, posting.amount, '', posting.text, '', '', '', '', posting.cpr ? '02' : '', posting.cpr || '', '', '', '', '', '', '', '', '', '', '']);
   }
   
   msg.payload = formattedPostings;
-  msg.columns = global.get("configs").erp.csvHeaders.split(", ");
-  msg.filename = "/data/output/" + global.get("dates").simpleDate + ".csv";
+  msg.columns = global.get("configs").erp.csvHeaders;
+  msg.filename = "/data/output/" + global.get("dates").bookingDate + ".csv";
   
   return msg;
 }

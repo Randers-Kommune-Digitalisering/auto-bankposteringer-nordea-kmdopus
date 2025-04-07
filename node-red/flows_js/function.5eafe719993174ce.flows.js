@@ -3,7 +3,7 @@ const Node = {
   "type": "function",
   "z": "a1dc9966e881ac6b",
   "g": "1d18d99feaaca4c4",
-  "name": "function 1",
+  "name": "Format date + set vars",
   "func": "",
   "outputs": 1,
   "noerr": 0,
@@ -14,7 +14,6 @@ const Node = {
   "y": 400,
   "wires": [
     [
-      "4bc8e57c950a9311",
       "92d167152b47a4bc"
     ]
   ],
