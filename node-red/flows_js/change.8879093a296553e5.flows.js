@@ -9,6 +9,11 @@ const Node = {
       "t": "delete",
       "p": "isInitializing",
       "pt": "flow"
+    },
+    {
+      "t": "delete",
+      "p": "configs.initialData",
+      "pt": "global"
     }
   ],
   "action": "",

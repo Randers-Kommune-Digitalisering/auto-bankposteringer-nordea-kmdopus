@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "a1dc9966e881ac6b",
   "g": "1d18d99feaaca4c4",
-  "name": "",
+  "name": "Set vars",
   "rules": [
     {
       "t": "set",

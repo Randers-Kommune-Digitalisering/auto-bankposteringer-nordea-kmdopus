@@ -30,8 +30,8 @@ const Node = {
       "t": "set",
       "p": "urlParam",
       "pt": "flow",
-      "to": "selectedBankAccount",
-      "tot": "flow"
+      "to": "selectedAccount.bankAccount",
+      "tot": "global"
     },
     {
       "t": "set",
