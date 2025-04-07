@@ -174,7 +174,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               if (matchedAllParametersBool && matchedAmountBool && matchedAccountBool) {
                   if (!rule.exceptionBool) {   // Don't write ERP postings if rule is an exception, but still count as match
                       let text = textGeneration(rule.text, transaction.message, transaction.narrative, transaction.counterparty_name);
-                      generatePostings(transaction.account.statusAccount, rule.account, statusDebetOrCredit, landingDebetOrCredit, text, transaction.amount, rule.accountSecondary || '', cpr);
+                      generatePostings(transaction.relatedAccount.statusAccount, rule.account, statusDebetOrCredit, landingDebetOrCredit, text, transaction.amount, rule.accountSecondary || '', cpr);
                   }
                   completeMatch = true;
                   rule.lastUsed = date;
@@ -187,7 +187,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
           generatePostings(transaction.relatedAccount.statusAccount, transaction.relatedAccount.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, text, transaction.amount, '', cpr);
           
-          if (transaction.account.bankAccountName != "Debitorkonto") {
+          if (transaction.relatedAccount.bankAccountName != "Debitorkonto") {
               transactionsUnmatched.push(transaction);
           }
       }

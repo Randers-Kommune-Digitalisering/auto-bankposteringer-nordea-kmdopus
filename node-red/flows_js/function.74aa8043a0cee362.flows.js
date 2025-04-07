@@ -103,9 +103,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, cs
       return {
           reference: updatedReference || null,
           sender: Afsender || null,
-          postingType: Posteringstype || null,
-          amount1: amount1,
-          amount2: amount2,
+          typeDescription: Posteringstype || null,
+          amount1,
+          amount2,
           operator,
           text: Posteringstekst || null,
           account: Artskonto || null,

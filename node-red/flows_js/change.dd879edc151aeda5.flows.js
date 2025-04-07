@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "32cf2bec698ca424",
   "g": "83692983b416dfd5",
-  "name": "",
+  "name": "Set vars",
   "rules": [
     {
       "t": "set",
@@ -47,7 +47,7 @@ const Node = {
       "3d18e2ece41ab7a9"
     ]
   ],
-  "icon": "font-awesome/fa-save",
+  "icon": "font-awesome/fa-cog",
   "l": false
 }
 
