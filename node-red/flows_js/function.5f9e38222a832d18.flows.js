@@ -34,7 +34,7 @@ Format: ISO 8601
 Node.func = async function (node, msg, RED, context, flow, global, env, util, dayjs) {
   let dates = global.get("dates") || [];
   
-  function findDate() {
+  function findBookingDate() {
       let date = dayjs().startOf('day');
   
       if (date.day() === 1) { // If today is Monday
@@ -50,7 +50,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   dates.simpleDate = dayjs().format('DD-MM-YYYY');
   dates.time = dayjs().format('HHmmss');
   
-  dates.bookingDate = findDate();
+  dates.bookingDate = findBookingDate();
   
   global.set("dates", dates);
   

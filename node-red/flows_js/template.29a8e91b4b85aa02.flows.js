@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS accountingRules (
     lastUsed NVARCHAR(10) NULL,
     ruleID INT PRIMARY KEY,
     relatedBankAccount NVARCHAR(31) NULL,
-    postWithCPR BOOLEAN  NULL,
+    postWithCPR BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (relatedBankAccount) REFERENCES bankAccounts(bankAccount) ON DELETE SET NULL
 );
 `
