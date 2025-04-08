@@ -79,7 +79,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   
   function getSignatureBaseOnRequest() {
       const path = constructPath();
-      const date = dayjs().utc().format("ddd, DD MMM YYYY HH:mm:ss") + " GMT";
+      const date = dayjs().toDate().toUTCString();
       const headers = method === "post" || method === "put" || method === "patch" ? requestWithContentHeaders : requestWithoutContentHeaders;
   
       flow.set("url", `https://${host}${path}`);
