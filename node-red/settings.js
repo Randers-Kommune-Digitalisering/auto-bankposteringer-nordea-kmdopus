@@ -467,6 +467,7 @@ module.exports = {
          */
         functionGlobalContext: {
             // os:require('os'),
+            xml2js:require('xml2js')
         },
     
         /** The maximum number of messages nodes will buffer internally as part of their

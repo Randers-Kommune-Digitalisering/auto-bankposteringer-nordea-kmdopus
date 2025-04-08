@@ -15,10 +15,6 @@ const Node = {
       "module": "csv-parser"
     },
     {
-      "var": "xml2js",
-      "module": "xml2js"
-    },
-    {
       "var": "dayjs",
       "module": "dayjs"
     }
@@ -34,9 +30,10 @@ const Node = {
   "l": false
 }
 
-Node.func = async function (node, msg, RED, context, flow, global, env, util, csv, xml2js, dayjs) {
+Node.func = async function (node, msg, RED, context, flow, global, env, util, csv, dayjs) {
   const inProd = true;
   
+  const xml2js = global.get("xml2js");
   const docDate = dayjs().format('YYYYMMDD');
   const docTime = dayjs().format('HHmmss');
   const bookingDate = global.get("dates").bookingDate.replace(/-/g, "");
