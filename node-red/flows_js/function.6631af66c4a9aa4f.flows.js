@@ -11,8 +11,8 @@ const Node = {
   "finalize": "",
   "libs": [
     {
-      "var": "moment",
-      "module": "moment"
+      "var": "dayjs",
+      "module": "dayjs"
     },
     {
       "var": "forge",
@@ -34,7 +34,7 @@ const Node = {
   "l": false
 }
 
-Node.func = async function (node, msg, RED, context, flow, global, env, util, moment, forge, CryptoJS) {
+Node.func = async function (node, msg, RED, context, flow, global, env, util, dayjs, forge, CryptoJS) {
   const contentType = flow.get("content-type");
   const data = flow.get("data");
   const method = flow.get("method").toLowerCase();
@@ -84,7 +84,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, mo
   
   function getSignatureBaseOnRequest() {
       const path = constructPath();
-      const date = moment().utc().format("ddd, DD MMM YYYY HH:mm:ss") + " GMT";
+      const date = dayjs().utc().format("ddd, DD MMM YYYY HH:mm:ss") + " GMT";
       const headers = method === "post" || method === "put" || method === "patch" ? requestWithContentHeaders : requestWithoutContentHeaders;
   
       flow.set("url", `https://${host}${path}`);
