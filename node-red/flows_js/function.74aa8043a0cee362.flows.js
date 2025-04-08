@@ -9,12 +9,7 @@ const Node = {
   "noerr": 0,
   "initialize": "",
   "finalize": "",
-  "libs": [
-    {
-      "var": "csv",
-      "module": "csv-parser"
-    }
-  ],
+  "libs": [],
   "x": 995,
   "y": 60,
   "wires": [
@@ -26,7 +21,7 @@ const Node = {
   "l": false
 }
 
-Node.func = async function (node, msg, RED, context, flow, global, env, util, csv) {
+Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let masterDataObj = global.get("masterData");
   const bankAccounts = global.get("masterData").bankAccounts;
   const statusAccounts = bankAccounts.map(account => account.statusAccount);
