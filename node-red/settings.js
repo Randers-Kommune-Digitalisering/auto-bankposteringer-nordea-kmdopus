@@ -467,7 +467,9 @@ module.exports = {
          */
         functionGlobalContext: {
             // os:require('os'),
-            xml2js:require('xml2js')
+            xml2js:require('xml2js'),
+            forge:require('node-forge'),
+            CryptoJS:require('crypto-js')
         },
     
         /** The maximum number of messages nodes will buffer internally as part of their
