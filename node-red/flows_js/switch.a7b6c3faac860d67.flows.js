@@ -9,40 +9,26 @@ const Node = {
   "rules": [
     {
       "t": "btwn",
-      "v": "500",
-      "vt": "num",
-      "v2": "599",
-      "v2t": "num"
-    },
-    {
-      "t": "btwn",
-      "v": "400",
-      "vt": "num",
-      "v2": "499",
-      "v2t": "num"
-    },
-    {
-      "t": "btwn",
       "v": "200",
       "vt": "num",
       "v2": "299",
       "v2t": "num"
+    },
+    {
+      "t": "else"
     }
   ],
   "checkall": "false",
   "repair": false,
-  "outputs": 3,
+  "outputs": 2,
   "x": 105,
-  "y": 360,
+  "y": 420,
   "wires": [
     [
-      "551dbd2ea88a85e6"
-    ],
-    [
-      "2de2b794607f5153"
-    ],
-    [
       "517c1f5ec2d2b1d9"
+    ],
+    [
+      "0a9f12d3c30f9730"
     ]
   ],
   "icon": "font-awesome/fa-question",
