@@ -8,10 +8,10 @@ const Node = {
   "repeat": "",
   "crontab": "",
   "once": false,
-  "onceDelay": "0.1",
+  "onceDelay": "1",
   "topic": "",
   "x": 85,
-  "y": 100,
+  "y": 80,
   "wires": [
     [
       "c21860620ed1df0c"
