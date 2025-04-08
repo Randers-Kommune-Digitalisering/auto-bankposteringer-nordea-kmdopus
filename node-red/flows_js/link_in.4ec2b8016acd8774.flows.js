@@ -6,7 +6,7 @@ const Node = {
   "name": "link in HTTP status check",
   "links": [],
   "x": 55,
-  "y": 360,
+  "y": 380,
   "wires": [
     [
       "a7b6c3faac860d67"

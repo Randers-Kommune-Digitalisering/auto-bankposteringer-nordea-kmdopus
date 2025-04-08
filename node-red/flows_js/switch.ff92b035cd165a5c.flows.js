@@ -13,15 +13,23 @@ const Node = {
       "vt": "str"
     },
     {
+      "t": "eq",
+      "v": "ACTIVE",
+      "vt": "str"
+    },
+    {
       "t": "else"
     }
   ],
   "checkall": "false",
   "repair": false,
-  "outputs": 2,
+  "outputs": 3,
   "x": 345,
   "y": 100,
   "wires": [
+    [
+      "3183105c3c193643"
+    ],
     [
       "3183105c3c193643"
     ],

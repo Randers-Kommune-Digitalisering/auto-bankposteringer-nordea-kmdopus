@@ -9,12 +9,12 @@ const Node = {
   "rules": [
     {
       "t": "eq",
-      "v": "FAILED",
+      "v": "PENDING",
       "vt": "str"
     },
     {
       "t": "eq",
-      "v": "PENDING",
+      "v": "FAILED",
       "vt": "str"
     },
     {
@@ -28,10 +28,10 @@ const Node = {
   "y": 380,
   "wires": [
     [
-      "2de2b794607f5153"
+      "6ded66482c39c867"
     ],
     [
-      "6ded66482c39c867"
+      "0a9f12d3c30f9730"
     ],
     [
       "6668cc6605749844"
