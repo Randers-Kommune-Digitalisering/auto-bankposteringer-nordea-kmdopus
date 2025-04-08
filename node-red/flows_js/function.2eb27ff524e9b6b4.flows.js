@@ -11,10 +11,6 @@ const Node = {
   "finalize": "",
   "libs": [
     {
-      "var": "csv",
-      "module": "csv-parser"
-    },
-    {
       "var": "dayjs",
       "module": "dayjs"
     }
@@ -30,7 +26,7 @@ const Node = {
   "l": false
 }
 
-Node.func = async function (node, msg, RED, context, flow, global, env, util, csv, dayjs) {
+Node.func = async function (node, msg, RED, context, flow, global, env, util, dayjs) {
   const inProd = true;
   
   const xml2js = global.get("xml2js");

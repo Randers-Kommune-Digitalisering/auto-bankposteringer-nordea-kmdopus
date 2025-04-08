@@ -13,14 +13,6 @@ const Node = {
     {
       "var": "dayjs",
       "module": "dayjs"
-    },
-    {
-      "var": "forge",
-      "module": "node-forge"
-    },
-    {
-      "var": "CryptoJS",
-      "module": "crypto-js"
     }
   ],
   "x": 105,
@@ -34,7 +26,10 @@ const Node = {
   "l": false
 }
 
-Node.func = async function (node, msg, RED, context, flow, global, env, util, dayjs, forge, CryptoJS) {
+Node.func = async function (node, msg, RED, context, flow, global, env, util, dayjs) {
+  const CryptoJS = global.get("CryptoJS");
+  const forge = global.get("forge");
+  
   const contentType = flow.get("content-type");
   const data = flow.get("data");
   const method = flow.get("method").toLowerCase();
