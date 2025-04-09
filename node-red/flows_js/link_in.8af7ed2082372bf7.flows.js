@@ -5,8 +5,7 @@ const Node = {
   "g": "c3855a30da38df4f",
   "name": "link in initiate auth",
   "links": [
-    "d707d5698ec5039a",
-    "87af11a3a270871c"
+    "d707d5698ec5039a"
   ],
   "x": 55,
   "y": 200,
