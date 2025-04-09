@@ -18,20 +18,28 @@ const Node = {
       "vt": "str"
     },
     {
+      "t": "eq",
+      "v": "EXPIRED",
+      "vt": "str"
+    },
+    {
       "t": "else"
     }
   ],
   "checkall": "false",
   "repair": false,
-  "outputs": 3,
-  "x": 155,
-  "y": 360,
+  "outputs": 4,
+  "x": 105,
+  "y": 380,
   "wires": [
     [
       "6ded66482c39c867"
     ],
     [
       "0a9f12d3c30f9730"
+    ],
+    [
+      "6bca4eb11ffcecfc"
     ],
     [
       "6668cc6605749844"

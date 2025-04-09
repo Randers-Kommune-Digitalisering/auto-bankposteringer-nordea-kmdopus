@@ -22,7 +22,9 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let masterDataObj = global.get("masterData");
+  let masterDataObj = global.get("masterData") ? global.get("masterData") : {};
+  let authObj = global.get("auth") ? global.get("auth") : {};
+  
   const convertToBoolean = (obj, keys) => {
       keys.forEach(key => {
           if (obj.hasOwnProperty(key)) {
@@ -39,6 +41,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
   masterDataObj.admSysData = msg.payload[0];
   
+  if (masterDataObj.admSysData.accessToken) { authObj.adminStatus = "ACTIVE"; }
+  
+  global.set("auth", authObj);
   global.set("masterData", masterDataObj);
   
   return msg;

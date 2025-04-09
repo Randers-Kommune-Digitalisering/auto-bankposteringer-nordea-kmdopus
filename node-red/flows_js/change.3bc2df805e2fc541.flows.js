@@ -44,7 +44,7 @@ const Node = {
       "t": "set",
       "p": "data.refresh_token",
       "pt": "flow",
-      "to": "auth.refreshToken",
+      "to": "masterData.admSysData.refreshToken",
       "tot": "global"
     },
     {

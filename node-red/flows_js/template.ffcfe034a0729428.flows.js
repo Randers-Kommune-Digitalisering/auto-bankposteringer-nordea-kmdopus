@@ -23,6 +23,8 @@ const Node = {
 
 Node.template = `
 CREATE TABLE IF NOT EXISTS admSysData (
+    accessToken NVARCHAR(256) NULL,
+    refreshToken NVARCHAR(256) NULL,
     admName NVARCHAR(63),
     admEmail NVARCHAR(63),
     admID NVARCHAR(31) PRIMARY KEY,
