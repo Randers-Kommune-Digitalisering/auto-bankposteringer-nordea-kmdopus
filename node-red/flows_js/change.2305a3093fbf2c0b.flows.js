@@ -33,6 +33,13 @@ const Node = {
       "to": "payload.response.continuation_key ? payload.response.continuation_key : null",
       "tot": "jsonata",
       "dc": true
+    },
+    {
+      "t": "set",
+      "p": "auth.adminStatus",
+      "pt": "global",
+      "to": "statusCode = 401 ? \"EXPIRED\" : $globalContext(\"auth\").adminStatus",
+      "tot": "jsonata"
     }
   ],
   "action": "",
