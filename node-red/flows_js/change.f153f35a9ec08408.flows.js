@@ -18,6 +18,13 @@ const Node = {
       "pt": "global",
       "to": "Indlæsningen af bankposteringer kræver din godkendelse",
       "tot": "str"
+    },
+    {
+      "t": "set",
+      "p": "configs.reminder.sender",
+      "pt": "global",
+      "to": "SENDER_ADRESS",
+      "tot": "env"
     }
   ],
   "action": "",
