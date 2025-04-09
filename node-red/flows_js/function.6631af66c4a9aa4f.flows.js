@@ -162,10 +162,10 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   
   switch (method) {
       case "get":
-          msg.headers['Authorization'] = "Bearer " + global.get("auth").token;
+          msg.headers['Authorization'] = "Bearer " + global.get("masterData").admSysData.accessToken;
           break;
       case "put":
-          msg.headers['Authorization'] = "Bearer " + global.get("auth").token;
+          msg.headers['Authorization'] = "Bearer " + global.get("masterData").admSysData.accessToken;
           msg.headers['Content-Type'] = contentType;
           break;
       case "post":
