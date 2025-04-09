@@ -16,8 +16,8 @@ const Node = {
       "t": "set",
       "p": "from",
       "pt": "msg",
-      "to": "SENDER_ADRESS",
-      "tot": "env"
+      "to": "configs.reminder.sender",
+      "tot": "global"
     },
     {
       "t": "set",
