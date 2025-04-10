@@ -63,8 +63,8 @@ BSR08871973;;;;;;Indtægter via Betalingsservice - 8871973;91407006;;;Betalingsk
 00209082-00000;;;;;;Tekst fra bank;91407007;;;Betalingskontoret;DK20005908764988-DKK
 BSR00209082;;;;;;Indtægter via Betalingsservice - 0209082;91407007;;;Betalingskontoret;DK20005908764988-DKK
 Afdrag pligtlån;;;1100;;Mindre end;Afsender fra bank;91407008;;;Betalingskontoret;DK20005908764988-DKK
-#NAVN?;Skat;;;;;Tekst fra bank;91407020;;;Betalingskontoret;DK20005908764988-DKK
-#NAVN?;Skat;;;;;Tekst fra bank;91407020;;;Betalingskontoret;DK20005908764988-DKK
+- gælds;Skat;;;;;Tekst fra bank;91407020;;;Betalingskontoret;DK20005908764988-DKK
+- skat;Skat;;;;;Tekst fra bank;91407020;;;Betalingskontoret;DK20005908764988-DKK
 Gældst;Skat;;;;;Tekst fra bank;91407020;;;Betalingskontoret;DK20005908764988-DKK
 K 86446707;;;;;;Indtægter via FIK;91407030;;;Betalingskontoret;DK20005908764988-DKK
 8871930;;;;;;Indtægter via Betalingsservice - 8871930;91407032;;;Betalingskontoret;DK20005908764988-DKK
