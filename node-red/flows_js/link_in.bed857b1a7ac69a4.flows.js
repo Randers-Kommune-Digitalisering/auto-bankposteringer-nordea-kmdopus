@@ -5,8 +5,8 @@ const Node = {
   "g": "ab3c421f1f38e21f",
   "name": "push to db",
   "links": [],
-  "x": 795,
-  "y": 140,
+  "x": 1345,
+  "y": 60,
   "wires": [
     [
       "7612c8ef961f1603"

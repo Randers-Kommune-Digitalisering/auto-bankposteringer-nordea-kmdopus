@@ -10,8 +10,8 @@ const Node = {
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 535,
-  "y": 360,
+  "x": 545,
+  "y": 580,
   "wires": [
     [
       "ce63ab2768c7c169"
@@ -22,7 +22,7 @@ const Node = {
 }
 
 Node.template = `
-SELECT dato FROM runHistory WHERE uid = {{uid}}
+SELECT originDate FROM runHistory WHERE uid = {{uid}}
 `
 
 module.exports = Node;

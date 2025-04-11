@@ -5,8 +5,8 @@ const Node = {
   "g": "79633097bdfca497",
   "name": "load bankaccounts to env",
   "links": [],
-  "x": 1475,
-  "y": 320,
+  "x": 65,
+  "y": 840,
   "wires": [
     [
       "22e36697e66bda08"

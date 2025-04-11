@@ -3,7 +3,7 @@ const Node = {
   "type": "trigger",
   "z": "32cf2bec698ca424",
   "g": "54195acebfd77c6b",
-  "name": "",
+  "name": "Limiter",
   "op1": "",
   "op2": "",
   "op1type": "pay",

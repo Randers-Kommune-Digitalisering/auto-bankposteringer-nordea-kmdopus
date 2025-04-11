@@ -5,8 +5,8 @@ const Node = {
   "g": "79633097bdfca497",
   "name": "insert all bankaccounts",
   "links": [],
-  "x": 1475,
-  "y": 280,
+  "x": 65,
+  "y": 800,
   "wires": [
     [
       "f63ebcf05622cd78"

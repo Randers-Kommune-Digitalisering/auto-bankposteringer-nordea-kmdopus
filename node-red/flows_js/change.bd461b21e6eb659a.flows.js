@@ -3,12 +3,26 @@ const Node = {
   "type": "change",
   "z": "8c354b8d2ca56b7b",
   "g": "9b2beb35be5bbb31",
-  "name": "Delete global.transactions.list",
+  "name": "Clean vars",
   "rules": [
     {
       "t": "delete",
       "p": "transactions.list",
       "pt": "global"
+    },
+    {
+      "t": "set",
+      "p": "uid",
+      "pt": "msg",
+      "to": "null",
+      "tot": "jsonata"
+    },
+    {
+      "t": "set",
+      "p": "statusCode",
+      "pt": "msg",
+      "to": "null",
+      "tot": "jsonata"
     }
   ],
   "action": "",
