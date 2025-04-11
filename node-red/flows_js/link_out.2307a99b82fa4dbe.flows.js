@@ -6,8 +6,8 @@ const Node = {
   "name": "admsysdata db action end",
   "mode": "return",
   "links": [],
-  "x": 1385,
-  "y": 280,
+  "x": 365,
+  "y": 620,
   "wires": []
 }
 

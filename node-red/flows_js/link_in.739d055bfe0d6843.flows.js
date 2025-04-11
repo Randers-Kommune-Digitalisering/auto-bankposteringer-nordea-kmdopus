@@ -5,8 +5,8 @@ const Node = {
   "g": "24481f222bcf4517",
   "name": "load masterdata to env",
   "links": [],
-  "x": 1085,
-  "y": 320,
+  "x": 65,
+  "y": 660,
   "wires": [
     [
       "4d4ee50bb95a76b8"

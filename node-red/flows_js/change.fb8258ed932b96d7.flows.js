@@ -1,9 +1,9 @@
 const Node = {
   "id": "fb8258ed932b96d7",
   "type": "change",
-  "z": "8c354b8d2ca56b7b",
-  "g": "9b2beb35be5bbb31",
-  "name": "set global.runs.restart = true",
+  "z": "32cf2bec698ca424",
+  "g": "88a5a801e4bf7e08",
+  "name": "set vars",
   "rules": [
     {
       "t": "set",
@@ -11,6 +11,13 @@ const Node = {
       "pt": "global",
       "to": "true",
       "tot": "bool"
+    },
+    {
+      "t": "set",
+      "p": "originDate",
+      "pt": "msg",
+      "to": "req.params.date",
+      "tot": "msg"
     }
   ],
   "action": "",
@@ -18,11 +25,12 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 125,
-  "y": 100,
+  "x": 395,
+  "y": 520,
   "wires": [
     [
-      "497a8a8d75494096"
+      "ddd06dfd6f488d21",
+      "907046a328b857d3"
     ]
   ],
   "icon": "font-awesome/fa-cog",

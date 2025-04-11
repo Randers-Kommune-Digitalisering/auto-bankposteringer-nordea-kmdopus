@@ -23,15 +23,14 @@
         .then(response => response = response.json())
         .then(value => history.value = value)
 
-    function restartRun(uid)
+    function restartRun(date)
     {
-        const url = '/api/restart/' + uid
-       
+        const url = '/api/restart/' + date
 
         fetch(url)
             .then(response => {
                 console.log(response.status)
-                restartedRunSuccess.value[uid] = response.status === 200
+                restartedRunSuccess.value[date] = response.status === 200
             })
 
             
@@ -70,8 +69,8 @@
             <tr v-if="history != null && history.length > 0" v-for="obj in history">
                 <td v-for="key in keyMap">{{ key.obj != null ? obj[key.obj][key.key] : obj[key.key] }}</td>
                 <td>
-                    <button @click="restartRun(obj[keyMap.id.key])" :class="restartedRunSuccess[obj[keyMap.id.key]] != null ? (restartedRunSuccess[obj[keyMap.id.key]] ? 'green' : 'red') : ''">
-                    <IconRefresh />&nbsp;{{restartedRunSuccess[obj[keyMap.id.key]] != null  ? (restartedRunSuccess ? 'Kørsel genstartet' : 'Fejl ved genstart') : 'Genstart kørsel'}}</button>
+                    <button @click="restartRun(obj[keyMap.bankdato.key])" :class="restartedRunSuccess[obj[keyMap.bankdato.key]] != null ? (restartedRunSuccess[obj[keyMap.bankdato.key]] ? 'green' : 'red') : ''">
+                    <IconRefresh />&nbsp;{{restartedRunSuccess[obj[keyMap.bankdato.key]] != null  ? (restartedRunSuccess ? 'Kørsel genstartet' : 'Fejl ved genstart') : 'Genstart kørsel'}}</button>
                 </td>
             </tr>
             <tr v-else>

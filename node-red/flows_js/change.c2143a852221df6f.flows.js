@@ -7,17 +7,10 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "payload[0].originDate",
-      "pt": "msg",
-      "to": "$fromMillis($toMillis(payload[0].originDate), \"[D01]-[M01]-[Y]\")",
-      "tot": "jsonata"
-    },
-    {
-      "t": "set",
       "p": "dates.bookingDate",
       "pt": "global",
-      "to": "payload[0].originDate",
-      "tot": "msg"
+      "to": "$fromMillis($toMillis(payload[0].originDate), \"[D01]-[M01]-[Y]\")",
+      "tot": "jsonata"
     },
     {
       "t": "set",
@@ -32,8 +25,8 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 635,
-  "y": 360,
+  "x": 645,
+  "y": 580,
   "wires": [
     [
       "92d167152b47a4bc"
