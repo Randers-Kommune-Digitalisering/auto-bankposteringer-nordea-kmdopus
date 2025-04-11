@@ -4,7 +4,9 @@ const Node = {
   "z": "a1dc9966e881ac6b",
   "g": "24481f222bcf4517",
   "name": "insert all admsysdata",
-  "links": [],
+  "links": [
+    "aedbc65920ef9f02"
+  ],
   "x": 1085,
   "y": 280,
   "wires": [

@@ -8,7 +8,7 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "{\t   \"Status Code\": msg.statusCode,\t   \"Auth Status\": msg.payload.response.status,\t   \"Response\": msg,\t   \"Number of status retrievals\": $globalContext(\"adminAuthAttempt\") + 1,\t   \"Timestamp\": $now()\t}",
+  "complete": "{\t   \"Status Code\": msg.statusCode,\t   \"Auth Status\": msg.payload.response.status,\t   \"Number of status retrievals\": $globalContext(\"adminAuthAttempt\") + 1,\t   \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
