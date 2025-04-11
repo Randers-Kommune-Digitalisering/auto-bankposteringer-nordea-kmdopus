@@ -3,7 +3,7 @@ const Node = {
   "type": "debug",
   "z": "8c354b8d2ca56b7b",
   "g": "9707809d7fe4863a",
-  "name": "auth failed",
+  "name": "auth pending",
   "active": true,
   "tosidebar": true,
   "console": true,
