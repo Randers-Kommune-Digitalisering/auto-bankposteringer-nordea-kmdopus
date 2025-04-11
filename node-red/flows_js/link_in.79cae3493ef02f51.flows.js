@@ -5,8 +5,8 @@ const Node = {
   "g": "24481f222bcf4517",
   "name": "create masterdata table",
   "links": [],
-  "x": 1085,
-  "y": 240,
+  "x": 65,
+  "y": 580,
   "wires": [
     [
       "ffcfe034a0729428"

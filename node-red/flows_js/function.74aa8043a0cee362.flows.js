@@ -10,11 +10,11 @@ const Node = {
   "initialize": "",
   "finalize": "",
   "libs": [],
-  "x": 995,
-  "y": 60,
+  "x": 1145,
+  "y": 80,
   "wires": [
     [
-      "90e52a55e15cdaf3"
+      "cd450d4a1e35940d"
     ]
   ],
   "icon": "font-awesome/fa-arrows",
@@ -22,7 +22,7 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let masterDataObj = global.get("masterData");
+  let configsObj = global.get("configs");
   const bankAccounts = global.get("masterData").bankAccounts;
   const statusAccounts = bankAccounts.map(account => account.statusAccount);
   const operatorMapping = {
@@ -112,8 +112,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       };
   });
   
-  masterDataObj.rules = jsonData;
-  global.set("masterData", masterDataObj);
+  configsObj.initialData.rules = jsonData;
+  global.set("configs", configsObj);
   
   return msg;
 }

@@ -5,8 +5,8 @@ const Node = {
   "g": "79633097bdfca497",
   "name": "create bankaccounts table",
   "links": [],
-  "x": 1475,
-  "y": 240,
+  "x": 65,
+  "y": 760,
   "wires": [
     [
       "c999887a564dd08d"

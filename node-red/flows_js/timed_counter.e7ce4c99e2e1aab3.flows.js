@@ -10,12 +10,12 @@ const Node = {
   "fixedtimeout": false,
   "pertopic": false,
   "countlimit": "2",
-  "x": 455,
+  "x": 425,
   "y": 100,
   "wires": [
     [
       "c98be5ac6c68a118",
-      "8879093a296553e5"
+      "e017a56b4d070dbd"
     ]
   ],
   "icon": "font-awesome/fa-filter",

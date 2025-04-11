@@ -21,11 +21,13 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 505,
+  "x": 525,
   "y": 100,
   "wires": [
     [
-      "d656d05e3a263b7e"
+      "1f3de979ddd94bc2",
+      "02b56a95e132bf77",
+      "60b5ebfc1eed92a7"
     ]
   ],
   "icon": "font-awesome/fa-trash",

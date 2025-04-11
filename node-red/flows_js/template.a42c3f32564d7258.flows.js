@@ -10,8 +10,8 @@ const Node = {
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 535,
-  "y": 320,
+  "x": 545,
+  "y": 540,
   "wires": [
     [
       "e1cc4459676fd651"
@@ -22,7 +22,12 @@ const Node = {
 }
 
 Node.template = `
-UPDATE runHistory SET statusCode = {{statusCode}} WHERE uid = {{uid}}
+UPDATE runHistory 
+SET 
+  statusCode = {{statusCode}}, 
+  uid = "{{uid}}"
+WHERE 
+  originDate = "{{originDate}}"
 `
 
 module.exports = Node;

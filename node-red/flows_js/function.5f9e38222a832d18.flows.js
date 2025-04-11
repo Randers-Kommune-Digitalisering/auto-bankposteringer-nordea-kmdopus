@@ -16,7 +16,7 @@ const Node = {
     }
   ],
   "x": 105,
-  "y": 760,
+  "y": 780,
   "wires": [
     [
       "e14610f0a8d9018e"
@@ -50,7 +50,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   dates.simpleDate = dayjs().format('DD-MM-YYYY');
   dates.time = dayjs().format('HHmmss');
   
-  dates.bookingDate = findBookingDate();
+  dates.bookingDate = global.get("runs").restart ? msg.originDate : findBookingDate();
   
   global.set("dates", dates);
   

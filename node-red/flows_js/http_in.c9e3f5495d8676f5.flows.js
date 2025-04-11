@@ -3,12 +3,12 @@ const Node = {
   "type": "http in",
   "z": "32cf2bec698ca424",
   "g": "54195acebfd77c6b",
-  "name": "Restart auth",
+  "name": "Start auth",
   "url": "/reauth",
   "method": "get",
   "upload": false,
   "swaggerDoc": "",
-  "x": 110,
+  "x": 100,
   "y": 80,
   "wires": [
     [

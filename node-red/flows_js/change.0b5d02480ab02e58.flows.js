@@ -11,6 +11,11 @@ const Node = {
       "pt": "msg",
       "to": "runs.originUid",
       "tot": "global"
+    },
+    {
+      "t": "delete",
+      "p": "runs.restart",
+      "pt": "global"
     }
   ],
   "action": "",
@@ -19,7 +24,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 535,
-  "y": 520,
+  "y": 540,
   "wires": [
     [
       "0c3e96f69a239147"
