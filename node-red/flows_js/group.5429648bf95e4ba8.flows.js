@@ -12,7 +12,6 @@ const Node = {
   },
   "nodes": [
     "c16919e2acb37403",
-    "a9a03a6b1f5153f2",
     "6f9ca4534de9bb67",
     "262bab35f693be61",
     "8837094d561c8d47"

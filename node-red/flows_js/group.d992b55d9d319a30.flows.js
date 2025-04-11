@@ -38,8 +38,7 @@ const Node = {
     "6387e4fc534b0bda",
     "db5303417f8da280",
     "e28dd10da98a8d3b",
-    "9208b7ba656edc3c",
-    "9d517546540bf1f5"
+    "9208b7ba656edc3c"
   ],
   "x": 24,
   "y": 199,
