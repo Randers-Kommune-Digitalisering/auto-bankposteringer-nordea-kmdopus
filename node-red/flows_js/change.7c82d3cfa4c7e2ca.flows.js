@@ -7,7 +7,7 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "auth.exchangeCode",
+      "p": "masterData.admSysData.accessToken",
       "pt": "global",
       "to": "payload.response.code",
       "tot": "msg"
