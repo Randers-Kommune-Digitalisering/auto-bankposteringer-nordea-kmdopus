@@ -37,7 +37,7 @@ const Node = {
       "t": "set",
       "p": "data.code",
       "pt": "flow",
-      "to": "auth.exchangeCode",
+      "to": "masterData.admSysData.accessToken",
       "tot": "global"
     },
     {
