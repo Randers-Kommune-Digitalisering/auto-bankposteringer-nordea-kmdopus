@@ -1,4 +1,3 @@
-
 <script setup>
     import { ref, watch } from 'vue'
     import { useRouter, useRoute } from 'vue-router'
@@ -49,53 +48,38 @@
         fetchRules()
     })
 
-
     const keyMap = {
-        "ID": {
-            "key": "ruleID"
-        },
-        "Reference": {
-            "key": "reference"
-        },
-        "Afsender": {
-            "key": "sender"
-        }, 
-        "Posteringstype": {
-            "key": "typeDescription"
-        },
-        "Beløb 1": {
-            "key": "amount1"
-        },
-        "Beløb 2": {
-            "key": "amount2"
-        },
-        "Artskonto": {
-            "key": "account",
-            "hidden": true
-        },
-        "Posteringstekst": {
-            "key": "text",
-            "hidden": true
-        },
-        "Notat": {
-            "key": "note",
-            "hidden": true
-        },
-        "Sidst anvendt": {
-            "key": "lastUsed"
-        }
+        "ID": { "key": "ruleID" },
+        "Reference": { "key": "reference" },
+        "Afsender": { "key": "sender" }, 
+        "Posteringstype": { "key": "typeDescription" },
+        "Beløb 1": { "key": "amount1" },
+        "Beløb 2": { "key": "amount2" },
+        "Artskonto": { "key": "account", "hidden": true },
+        "Posteringstekst": { "key": "text", "hidden": true },
+        "Notat": { "key": "note", "hidden": true },
+        "Sidst anvendt": { "key": "lastUsed"}
     }
     
     function handleQueryParams()
     {        
-        if(isSearching.value)
-        {
+        if (isSearching.value) {
             search(searchKeyword.value)
         }
 
-        if(isReturning.value)
-        {
-            scrollTo(returningFrom.value)
+        if (isReturning.value) {
+            // Check if the item exists in the list before scrolling
+            const itemExists = konteringsregler.value?.some(
+                (item) => item?.[keyMap.ID.key] === returningFrom.value
+            ) || false
+
+            if (itemExists) {
+                scrollTo(returningFrom.value)
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+                returningFrom.value = null
+            }
+
             isReturning.value = false
         }
     }

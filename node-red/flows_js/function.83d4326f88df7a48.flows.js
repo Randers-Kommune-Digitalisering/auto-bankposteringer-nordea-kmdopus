@@ -22,10 +22,9 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  // Sort by RuleID in ascending order
-  const sortedRules = msg.payload.sort((a, b) => a.RuleID - b.RuleID);
-  
-  msg.payload = sortedRules; // Set the sorted rules back to msg.payload
+  if (Array.isArray(msg.payload)) {
+      msg.payload = msg.payload.sort((a, b) => a.RuleID - b.RuleID);
+  }
   
   return msg;
   

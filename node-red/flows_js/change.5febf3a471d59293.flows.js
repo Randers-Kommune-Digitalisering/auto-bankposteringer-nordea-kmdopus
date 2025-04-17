@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "(\t    type = \"aktiv\" ?\t        $globalContext(\"masterData\").rules[activeBool = true and exceptionBool = false]\t    :\t    type = \"inaktiv\" ?\t        $globalContext(\"masterData\").rules[activeBool = false and exceptionBool = false]\t    :\t    type = \"undtagelse\" ?\t        $globalContext(\"masterData\").rules[exceptionBool = true] : {}\t)\t",
+      "to": "type = \"aktiv\" ?\t    $globalContext(\"masterData\").rules[activeBool = true and exceptionBool = false and tempBool = false] :\ttype = \"inaktiv\" ?\t    $globalContext(\"masterData\").rules[activeBool = false and exceptionBool = false] :\ttype = \"undtagelse\" ?\t    $globalContext(\"masterData\").rules[exceptionBool = true] :\ttype = \"engangsregel\" ?\t    $globalContext(\"masterData\").rules[tempBool = true] :\t{}\t",
       "tot": "jsonata",
       "dc": true
     }
