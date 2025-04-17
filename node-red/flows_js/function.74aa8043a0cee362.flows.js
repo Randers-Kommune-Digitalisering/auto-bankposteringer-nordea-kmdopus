@@ -91,7 +91,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       const shouldBeException = statusAccounts.includes(Artskonto);
       cleanedData.Artskonto = shouldBeException ? null : Artskonto;
       const exceptionBool = shouldBeException;
-      const lastUsed = "31-12-9999"
+      const lastUsed = "31-12-9999";
+      const tempBool = false;
   
       return {
           reference: Reference || null,
@@ -106,6 +107,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           note: Notat || null,
           activeBool,
           exceptionBool,
+          tempBool,
           lastUsed,
           ruleID,
           relatedBankAccount: Bankkonto || null
