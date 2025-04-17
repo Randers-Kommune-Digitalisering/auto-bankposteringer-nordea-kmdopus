@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "configs.initialData.admSysData.admEmail",
       "pt": "global",
-      "to": "jan.molbaek@randers.dk",
+      "to": "csl@randers.dk",
       "tot": "str"
     },
     {
@@ -23,7 +23,7 @@ const Node = {
       "t": "set",
       "p": "configs.initialData.admSysData.admName",
       "pt": "global",
-      "to": "Jan Mølbæk",
+      "to": "Christian Leonhardt",
       "tot": "str"
     },
     {
