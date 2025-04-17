@@ -68,7 +68,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   }
   
   msg.payload.forEach(item => {
-      convertToBoolean(item, ["activeBool", "exceptionBool", "postWithCPR"]);
+      convertToBoolean(item, ["activeBool", "exceptionBool", "tempBool", "postWithCPR"]);
   });
   
   masterDataObj.rules = mergeSort(msg.payload)

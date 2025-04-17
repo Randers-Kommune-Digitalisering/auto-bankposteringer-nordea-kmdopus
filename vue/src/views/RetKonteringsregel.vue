@@ -14,7 +14,12 @@
     const isUpdating = ref(false)
     const hasUpdated = ref(false)
 
-    const isNewRule = ref(index.value == "nyaktiv" || index.value == "nyinaktiv" || index.value == "nyundtagelse")
+    const isNewRule = ref(
+        index.value === 'nyaktiv' || 
+        index.value === 'nyinaktiv' || 
+        index.value === 'nyundtagelse' || 
+        index.value === 'nyengangsregel'
+    )
     
     const konteringsregel = ref(isNewRule.value ? JSON.parse(JSON.stringify(newItem)) : null)
 
@@ -51,6 +56,7 @@
     {   
         if (index.value === 'nyinaktiv') konteringsregel.value.activeBool = false
         else if (index.value === 'nyundtagelse') konteringsregel.value.exceptionBool = true
+        else if (index.value === 'nyengangsregel') konteringsregel.value.tempBool = true
     } else {
         // Fetch regel
         fetch(`/api/konteringsregler/${index.value}`)
@@ -96,6 +102,11 @@
         "activeBool": { "key": "activeBool", "hidden": true }
     }
 
+    const keyMap_tempRule = {
+        ...keyMap_rule
+    }
+    delete keyMap_tempRule.activeBool
+
     const keyMap_exception = {
         "id": { "key": "ruleID", "hidden": true },
         "Tilknyttet bankkonto": { "key": "relatedBankAccount", "group": "Transaktionsoplysninger" },
@@ -111,7 +122,11 @@
         "Notat": { "key": "Notat" }
     }
 
-    const keyMap = computed(() => (index.value === 'nyundtagelse' ? keyMap_exception : keyMap_rule))
+    const keyMap = computed(() => {
+        if (index.value === 'nyundtagelse') return keyMap_exception
+        if (index.value === 'nyengangsregel') return keyMap_tempRule
+        return keyMap_rule
+    })
 
     const groupedKeyMap = computed(() => {
         const groups = {}
@@ -233,7 +248,7 @@
 
                     <button v-if="konteringsregel != null" @click="toggleActivation()"
                         :class="konteringsregel.activeBool ? 'green' : 'red'"
-                        :disabled="konteringsregel.exceptionBool">
+                        :disabled="konteringsregel.exceptionBool || konteringsregel.tempBool">
                         {{ konteringsregel.activeBool ? 'Aktiv' : 'Inaktiv' }}
                     </button>
 
