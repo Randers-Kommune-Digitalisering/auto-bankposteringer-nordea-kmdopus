@@ -42,7 +42,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   masterDataObj.admSysData = msg.payload[0];
   
   if (masterDataObj.admSysData.accessToken) {
-      authObj.adminStatus = "ACTIVE";
+      authObj.adminStatus = "COMPLETED";
   }
   
   global.set("auth", authObj);

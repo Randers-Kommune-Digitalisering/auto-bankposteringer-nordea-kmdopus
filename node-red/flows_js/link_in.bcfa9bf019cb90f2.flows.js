@@ -5,7 +5,8 @@ const Node = {
   "g": "ed2d8f9a9a392f4a",
   "name": "insert all admsysdata",
   "links": [
-    "2642f918f95a8a2c"
+    "2642f918f95a8a2c",
+    "6d34264d25662e91"
   ],
   "x": 65,
   "y": 860,

@@ -31,7 +31,7 @@ const Node = {
       "t": "set",
       "p": "auth.adminStatus",
       "pt": "global",
-      "to": "payload.group_header.http_code = 401 ? \"EXPIRED\" : $globalContext(\"auth\").adminStatus",
+      "to": "statusCode = 401 ? \"EXPIRED\" : $globalContext(\"auth\").adminStatus",
       "tot": "jsonata"
     }
   ],

@@ -25,7 +25,8 @@ const Node = {
   "y": 360,
   "wires": [
     [
-      "3ecf30ab26092ccd"
+      "3ecf30ab26092ccd",
+      "f87c3b578646101c"
     ]
   ],
   "icon": "font-awesome/fa-trash",

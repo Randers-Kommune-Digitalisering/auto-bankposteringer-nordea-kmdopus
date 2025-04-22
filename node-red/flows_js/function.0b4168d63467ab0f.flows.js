@@ -22,8 +22,13 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let data = global.get("configs").initialData ? global.get("configs").initialData.bankAccounts : global.get("masterData").bankAccounts;
+  const configsObj = global.get("configs");
+  const masterDataObj = global.get("masterData");
   
+  let data = (configsObj && configsObj.initialData && configsObj.initialData.bankAccounts)
+      ? configsObj.initialData.bankAccounts
+      : masterDataObj.bankAccounts;
+      
   if (Array.isArray(data) && data.length > 0) {
       // Get the keys from the first object to use as column names
       let columns = Object.keys(data[0]);
