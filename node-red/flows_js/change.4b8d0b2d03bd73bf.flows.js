@@ -1,0 +1,32 @@
+const Node = {
+  "id": "4b8d0b2d03bd73bf",
+  "type": "change",
+  "z": "88c6307a5ee1dd81",
+  "g": "54ef3083f50853f1",
+  "name": "",
+  "rules": [
+    {
+      "t": "set",
+      "p": "encoding",
+      "pt": "msg",
+      "to": "utf-8",
+      "tot": "str"
+    }
+  ],
+  "action": "",
+  "property": "",
+  "from": "",
+  "to": "",
+  "reg": false,
+  "x": 255,
+  "y": 60,
+  "wires": [
+    [
+      "85ebf58680e4023c"
+    ]
+  ],
+  "icon": "font-awesome/fa-cog",
+  "l": false
+}
+
+module.exports = Node;
