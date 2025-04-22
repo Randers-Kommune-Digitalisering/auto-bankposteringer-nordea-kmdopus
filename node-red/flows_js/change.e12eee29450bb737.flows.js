@@ -1,0 +1,47 @@
+const Node = {
+  "id": "e12eee29450bb737",
+  "type": "change",
+  "z": "2380efc0fb66c87e",
+  "g": "7113fec32fd218e0",
+  "name": "💾",
+  "rules": [
+    {
+      "t": "set",
+      "p": "masterData.admSysData.accessToken",
+      "pt": "global",
+      "to": "payload.response.access_token ? payload.response.access_token : $globalContext('masterData').admSysData.accessToken",
+      "tot": "jsonata"
+    },
+    {
+      "t": "set",
+      "p": "masterData.admSysData.refreshToken",
+      "pt": "global",
+      "to": "payload.response.refresh_token ? payload.response.refresh_token : $globalContext('masterData').admSysData.refreshToken",
+      "tot": "jsonata"
+    },
+    {
+      "t": "set",
+      "p": "auth.adminStatus",
+      "pt": "global",
+      "to": "payload.response.access_token ? \"COMPLETED\" : \"FAILED\"",
+      "tot": "jsonata"
+    }
+  ],
+  "action": "",
+  "property": "",
+  "from": "",
+  "to": "",
+  "reg": false,
+  "x": 405,
+  "y": 300,
+  "wires": [
+    [
+      "2695f47253a410da",
+      "c518b5f2d2c425da"
+    ]
+  ],
+  "icon": "font-awesome/fa-save",
+  "l": false
+}
+
+module.exports = Node;

@@ -14,6 +14,9 @@
     const isUpdating = ref(false)
     const hasUpdated = ref(false)
 
+    const awaitingDeleteConfirmation = ref(false)
+    const isDeleting = ref(false)
+
     const isNewRule = ref(
         index.value === 'nyaktiv' || 
         index.value === 'nyinaktiv' || 
@@ -102,11 +105,6 @@
         "activeBool": { "key": "activeBool", "hidden": true }
     }
 
-    const keyMap_tempRule = {
-        ...keyMap_rule
-    }
-    delete keyMap_tempRule.activeBool
-
     const keyMap_exception = {
         "id": { "key": "ruleID", "hidden": true },
         "Tilknyttet bankkonto": { "key": "relatedBankAccount", "group": "Transaktionsoplysninger" },
@@ -124,7 +122,6 @@
 
     const keyMap = computed(() => {
         if (index.value === 'nyundtagelse') return keyMap_exception
-        if (index.value === 'nyengangsregel') return keyMap_tempRule
         return keyMap_rule
     })
 
@@ -162,8 +159,8 @@
 
     function updateRule()
     {
-        hasUpdated.value = false
         isUpdating.value = true
+        hasUpdated.value = false
 
         const url = isNewRule.value ? '/api/konteringsregler' : `/api/konteringsregler/${konteringsregel.value.ruleID}`
         
@@ -180,25 +177,22 @@
             if (response.ok) return response.json()
             else throw new Error('Error connecting to back-end')
         })
+
         .then(value => {
             if(isNewRule.value) {
                 isNewRule.value = false
                 index.value = value.ruleID
                 konteringsregel.value.ruleID = value.ruleID
-                konteringsregel.value[keyMap.id.key] = value.ruleID
-                router.push(`/retkonteringsregel/${value.ruleID}`)
             }
         })
+
         .finally(() => {
+            router.push(`/retkonteringsregel/${konteringsregel.value.ruleID}`)
             isUpdating.value = false
             hasUpdated.value = true
             router.go(-1)
         })
     }
-
-
-    const awaitingDeleteConfirmation = ref(false)
-    const isDeleting = ref(false)
     
     function deleteRule() {
         if (!awaitingDeleteConfirmation.value) awaitingDeleteConfirmation.value = true
@@ -212,7 +206,10 @@
                     'Content-Type': 'application/json'
                 }
             })
-            .finally(() => router.go(-1))
+            .finally(() => {
+                isDeleting.value = false
+                router.go(-1)
+            })
         }
     }
 

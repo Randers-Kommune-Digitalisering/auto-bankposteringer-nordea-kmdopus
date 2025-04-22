@@ -1,0 +1,34 @@
+const Node = {
+  "id": "41eddf6a2458b264",
+  "type": "template",
+  "z": "47254dd1b3ed3b06",
+  "g": "30b2fd7f3bc3b0a9",
+  "name": "Create",
+  "field": "sql",
+  "fieldType": "msg",
+  "format": "sql",
+  "syntax": "mustache",
+  "template": "",
+  "output": "str",
+  "x": 545,
+  "y": 700,
+  "wires": [
+    [
+      "18be8dd5b4afccb1"
+    ]
+  ],
+  "icon": "font-awesome/fa-database",
+  "l": false
+}
+
+Node.template = `
+CREATE TABLE IF NOT EXISTS runHistory (
+    uid NVARCHAR(32) NULL,
+    originDate DATE PRIMARY KEY,
+    statusCode INT NULL,
+    ts timestamp,
+    success BOOL DEFAULT FALSE
+);
+`
+
+module.exports = Node;
