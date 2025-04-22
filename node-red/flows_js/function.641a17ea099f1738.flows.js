@@ -33,14 +33,15 @@ Format: ISO 8601
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, dayjs) {
   let dates = global.get("dates") || [];
+  const offset = 5; // offset = 1 until Nordea fixes date issue on server
   
   function findBookingDate() {
       let date = dayjs().startOf('day');
   
-      if (date.day() === 1) { // If today is Monday
-          date = date.subtract(4, 'day');
+      if (date.day() === (1 + offset)) {
+          date = date.subtract((3 + offset), 'day');
       } else {
-          date = date.subtract(2, 'day');
+          date = date.subtract((1 + offset), 'day');
       }
   
       return date.format('YYYY-MM-DD');

@@ -22,7 +22,7 @@ const Node = {
 }
 
 Node.template = `
-DROP TABLE transactionsWithNoMatch, accountingRules, admSysData, bankAccounts, runHistory
+DROP TABLE runHistory
 `
 
 module.exports = Node;
