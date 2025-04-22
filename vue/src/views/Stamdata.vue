@@ -108,9 +108,9 @@
     function pollForAuthStatus() {
         const fetchAuthStatus = () => {
             fetch('/api/authstatus')
-                .then(response => response.json())
+                .then(response => response.text())
                 .then(data => {
-                    authStatus.value = data.status;
+                    authStatus.value = data;
                 })
                 .catch(error => {
                     console.error('Error fetching auth status:', error);
@@ -157,7 +157,7 @@
 
         pollForAuthRestartStatus(
             '/api/reauth',
-            2000, // Poll every 2 seconds
+            15000, // Poll every 15 seconds
             60,   // Max retries
             (error) => { // onError
                 console.error(error);
