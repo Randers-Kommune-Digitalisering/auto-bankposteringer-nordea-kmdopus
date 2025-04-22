@@ -1,24 +1,30 @@
 const Node = {
-  "id": "92fe15301aaa1dc7",
+  "id": "227e1ddaf3ee20a7",
   "type": "switch",
-  "z": "2380efc0fb66c87e",
-  "g": "7113fec32fd218e0",
+  "z": "30ea9c666c3d34a6",
+  "g": "340a8358eb5b957c",
   "name": "hit?",
   "property": "payload",
   "propertyType": "msg",
   "rules": [
     {
       "t": "empty"
+    },
+    {
+      "t": "nempty"
     }
   ],
   "checkall": "true",
   "repair": false,
-  "outputs": 1,
-  "x": 555,
-  "y": 300,
+  "outputs": 2,
+  "x": 275,
+  "y": 80,
   "wires": [
     [
-      "f31638598b396871"
+      "b395a5509ee2a393"
+    ],
+    [
+      "6c2d2361da8e071c"
     ]
   ],
   "icon": "font-awesome/fa-question",

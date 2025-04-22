@@ -2,7 +2,7 @@ const Node = {
   "id": "ebde7a5ec7e3804c",
   "type": "group",
   "z": "47254dd1b3ed3b06",
-  "name": "Drop all tables",
+  "name": "Drop tables",
   "style": {
     "stroke": "none",
     "fill": "#bfdbef",

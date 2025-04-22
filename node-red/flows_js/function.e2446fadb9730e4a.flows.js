@@ -22,7 +22,13 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let data = global.get("configs").initialData ? global.get("configs").initialData.admSysData : global.get("masterData").admSysData;
+  const configsObj = global.get("configs");
+  const masterDataObj = global.get("masterData");
+  
+  let data = (configsObj && configsObj.initialData && configsObj.initialData.admSysData)
+      ? configsObj.initialData.admSysData
+      : masterDataObj.admSysData;
+  
   let formattedData = [];
   
   formattedData.push(data);
