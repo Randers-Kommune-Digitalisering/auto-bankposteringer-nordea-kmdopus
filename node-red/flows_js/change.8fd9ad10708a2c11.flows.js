@@ -9,14 +9,14 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "$globalContext(\"transactions\").list.{\t  \"Bogføringsdato\": $string(booking_date).$replace(/-/, ''),\t  \"Beløb\": amount,\t  \"Posteringstype\": type_description,\t  \"Reference\": narrative,\t  \"Løbende_saldo\": $string(balance_after_transaction).$replace(/\\./, ','),\t  \"Statuskonto\": $string(account.statusAccount)\t}",
+      "to": "$globalContext(\"transactions\").list.{\t  \"Bogføringsdato\": $string(booking_date).$replace(/-/, ''),\t  \"Beløb\": amount,\t  \"Posteringstype\": type_description,\t  \"Reference\": narrative,\t  \"Løbende_saldo\": $string(balance_after_transaction).$replace(/\\./, ','),\t  \"Statuskonto\": $string(relatedAccount.statusAccount)\t}",
       "tot": "jsonata"
     },
     {
       "t": "set",
       "p": "filename",
       "pt": "msg",
-      "to": "\"/data/afstemning/\" & $globalContext(\"dates\").bookingDate & \".csv\"",
+      "to": "\"/data/afstemning/\" & $globalContext(\"dates\").bookingDate & \"_afstem.csv\"",
       "tot": "jsonata"
     },
     {
