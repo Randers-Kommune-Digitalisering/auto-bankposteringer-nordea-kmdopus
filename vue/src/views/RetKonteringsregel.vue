@@ -14,7 +14,15 @@
     const isUpdating = ref(false)
     const hasUpdated = ref(false)
 
-    const isNewRule = ref(index.value == "nyaktiv" || index.value == "nyinaktiv" || index.value == "nyundtagelse")
+    const awaitingDeleteConfirmation = ref(false)
+    const isDeleting = ref(false)
+
+    const isNewRule = ref(
+        index.value === 'nyaktiv' || 
+        index.value === 'nyinaktiv' || 
+        index.value === 'nyundtagelse' || 
+        index.value === 'nyengangsregel'
+    )
     
     const konteringsregel = ref(isNewRule.value ? JSON.parse(JSON.stringify(newItem)) : null)
 
@@ -51,6 +59,7 @@
     {   
         if (index.value === 'nyinaktiv') konteringsregel.value.activeBool = false
         else if (index.value === 'nyundtagelse') konteringsregel.value.exceptionBool = true
+        else if (index.value === 'nyengangsregel') konteringsregel.value.tempBool = true
     } else {
         // Fetch regel
         fetch(`/api/konteringsregler/${index.value}`)
@@ -111,7 +120,10 @@
         "Notat": { "key": "Notat" }
     }
 
-    const keyMap = computed(() => (index.value === 'nyundtagelse' ? keyMap_exception : keyMap_rule))
+    const keyMap = computed(() => {
+        if (index.value === 'nyundtagelse') return keyMap_exception
+        return keyMap_rule
+    })
 
     const groupedKeyMap = computed(() => {
         const groups = {}
@@ -147,8 +159,8 @@
 
     function updateRule()
     {
-        hasUpdated.value = false
         isUpdating.value = true
+        hasUpdated.value = false
 
         const url = isNewRule.value ? '/api/konteringsregler' : `/api/konteringsregler/${konteringsregel.value.ruleID}`
         
@@ -165,25 +177,22 @@
             if (response.ok) return response.json()
             else throw new Error('Error connecting to back-end')
         })
+
         .then(value => {
             if(isNewRule.value) {
                 isNewRule.value = false
                 index.value = value.ruleID
                 konteringsregel.value.ruleID = value.ruleID
-                konteringsregel.value[keyMap.id.key] = value.ruleID
-                router.push(`/retkonteringsregel/${value.ruleID}`)
             }
         })
+
         .finally(() => {
+            router.push(`/retkonteringsregel/${konteringsregel.value.ruleID}`)
             isUpdating.value = false
             hasUpdated.value = true
             router.go(-1)
         })
     }
-
-
-    const awaitingDeleteConfirmation = ref(false)
-    const isDeleting = ref(false)
     
     function deleteRule() {
         if (!awaitingDeleteConfirmation.value) awaitingDeleteConfirmation.value = true
@@ -197,7 +206,10 @@
                     'Content-Type': 'application/json'
                 }
             })
-            .finally(() => router.go(-1))
+            .finally(() => {
+                isDeleting.value = false
+                router.go(-1)
+            })
         }
     }
 
@@ -233,7 +245,7 @@
 
                     <button v-if="konteringsregel != null" @click="toggleActivation()"
                         :class="konteringsregel.activeBool ? 'green' : 'red'"
-                        :disabled="konteringsregel.exceptionBool">
+                        :disabled="konteringsregel.exceptionBool || konteringsregel.tempBool">
                         {{ konteringsregel.activeBool ? 'Aktiv' : 'Inaktiv' }}
                     </button>
 
