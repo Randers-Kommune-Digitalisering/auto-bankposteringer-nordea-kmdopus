@@ -1,15 +1,15 @@
 const Node = {
-  "id": "f31638598b396871",
+  "id": "fefac7c4522ad10f",
   "type": "link out",
   "z": "2380efc0fb66c87e",
-  "g": "7113fec32fd218e0",
-  "name": "transactions not yet retrieved",
+  "g": "73b9b3deaf04ef3b",
+  "name": "transaction request completed",
   "mode": "link",
   "links": [
-    "d95952e867c99d8f"
+    "a74bdcbb828d8329"
   ],
   "x": 655,
-  "y": 300,
+  "y": 480,
   "wires": []
 }
 
