@@ -54,15 +54,17 @@ Eftersom der er stor forskel på IT-infrastrukturen i kommunerne, kan der ikke g
 Servicen er bygget til at blive hosted i en Kubernetes-cluste, som administreres af en tredjepart, men kan sagtens rekonfigureres til at køre f.eks. lokalt.
 Kommunens IT-ansvarlige bør tage stilling til hosting af løsningen.
 
-Servicen udstilles på `port 3000`
-Back-enden udviklermiljøet Node-RED udstilles på `port 1880`
+Servicen udstilles på `port 3000`.
+
+Back-enden udviklermiljøet Node-RED udstilles på `port 1880`.
 
 # Sådan kommer du i gang
 
 Når servicen er live, bør den IT-ansvarlige i samarbejde med systemejer...
 
 ... udfylde konfigurationen på første fane i Node-RED og
-... følge vejledningen på forsiden af front-enden
+
+... følge vejledningen på forsiden af front-enden.
 
 FOBI er fuldstændigt afhængig af systemejerens evne til at genkende mønstre i transaktionsoplysninger for at kunne fungere optimalt.
 FOBI vil med andre ord kun blive en succes hvis systemejeren koncentrerer sit arbejde med bankbogføring omkring systematisering og mønstergenkendelse af betalingsflowet generelt.
