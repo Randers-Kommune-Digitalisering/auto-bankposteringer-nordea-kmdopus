@@ -30,6 +30,10 @@
             url: "/konteringsregler/undtagelse",
         },
         {
+            title: "Engangsregler",
+            url: "/konteringsregler/engangsregel",
+        },
+        {
             title: "Kørselshistorik",
             url: "/historik",
         },
