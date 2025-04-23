@@ -5,7 +5,9 @@
 - [Status](#status)
 - [Introduktion](#introduktion)
 - [Sådan fungerer det](#sådan-fungerer-det)
+- [Teknisk implementering](#teknisk-implementering)
 - [Sådan kommer du i gang](#sådan-kommer-du-i-gang)
+- [Nye features](#nye-features)
 - [Diagrammer](#diagrammer)
 - [Faglige ressourcer](#faglige-ressourcer)
 - [Tekniske ressourcer](#tekniske-ressourcer)
@@ -13,27 +15,22 @@
 
 # Status
 
-![Under udvikling](https://img.shields.io/badge/Under%20udvikling-red)
+![Hosting status](https://img.shields.io/badge/I_test-lightgreen)
 
 ### Bankintegrationer:
 
-![Nordea](https://img.shields.io/badge/Nordea-OK-green)
-![Danske Bank](https://img.shields.io/badge/Danske_Bank-Mangler-red)
-![Bankdata](https://img.shields.io/badge/Bankdata-Mangler-red)
-![BEC](https://img.shields.io/badge/BEC-Mangler-red)
-![SDC](https://img.shields.io/badge/SDC-Mangler-red)
+![Nordea](https://img.shields.io/badge/Nordea-green)
+![Danske Bank](https://img.shields.io/badge/Danske_Bank-grey)
+![Lunar](https://img.shields.io/badge/Lunar-grey)
+![Bankdata](https://img.shields.io/badge/Bankdata-grey)
+![BEC](https://img.shields.io/badge/BEC-grey)
+![SDC](https://img.shields.io/badge/SDC-grey)
 
 ### Økonomisystemintegrationer:
 
-![KMD Opus](https://img.shields.io/badge/KMD_Opus-OK-green)
-![Fujitsu Prisme](https://img.shields.io/badge/Fujitsu_Prisme-Mangler-red)
-![ØS Indsigt](https://img.shields.io/badge/ØS_Indsigt-Mangler-red)
-
-### Bilagsintegration til ØS:
-
-![KMD Opus](https://img.shields.io/badge/KMD_Opus-Mangler-red)
-![Fujitsu Prisme](https://img.shields.io/badge/Fujitsu_Prisme-Mangler-red)
-![ØS Indsigt](https://img.shields.io/badge/ØS_Indsigt-Mangler-red)
+![KMD Opus](https://img.shields.io/badge/KMD_Opus-green)
+![Fujitsu Prisme](https://img.shields.io/badge/Fujitsu_Prisme-grey)
+![ØS Indsigt](https://img.shields.io/badge/ØS_Indsigt-grey)
 
 # Introduktion
 
@@ -49,17 +46,31 @@ Stamdata indeholder blandt andet information om kommunens administrator/kontaktp
 
 FOBI har planlagt kørsel dagligt kl. 5:30, hvor transaktionerne for seneste lukkede bankdag hentes.
 Transaktionerne matches med konteringsregler og påføres kontering.
-Konteringerne samles i et finansbilag i csv-format eller leveres direkte til ØS via en bilagsintegration (FTP-forbindelse).
+Konteringerne udstilles i et finansbilag i csv-format eller leveres direkte til ØS via en bilagsintegration (FTP-forbindelse).
+
+# Teknisk implementering
+
+Eftersom der er stor forskel på IT-infrastrukturen i kommunerne, kan der ikke gives en generel teknisk vejledning til implementering.
+Servicen er bygget til at blive hosted i en Kubernetes-cluste, som administreres af en tredjepart, men kan sagtens rekonfigureres til at køre f.eks. lokalt.
+Kommunens IT-ansvarlige bør tage stilling til hosting af løsningen.
+
+Servicen udstilles på `port 3000`
+Back-enden udviklermiljøet Node-RED udstilles på `port 1880`
 
 # Sådan kommer du i gang
 
-1. Installér docker på dit system
-2. Klon dette repository til en projektmappe på dit system
-3. Navigér til projektmappen og kør kommandoen `docker-compose up --build` for initialisere og starte alle komponenter
-4. Gå til back-end udviklermiljøet Node-RED på adressen `http://localhost:1880`
-5. Gå til adressen `http://localhost:3000` for at se front-end
-6. Udfyld konfigurationen på første fane i Node-RED
-7. Følg vejledningen på forsiden af front-enden
+Når servicen er live, bør den IT-ansvarlige i samarbejde med systemejer...
+
+... udfylde konfigurationen på første fane i Node-RED og
+... følge vejledningen på forsiden af front-enden
+
+FOBI er fuldstændigt afhængig af systemejerens evne til at genkende mønstre i transaktionsoplysninger for at kunne fungere optimalt.
+FOBI vil med andre ord kun blive en succes hvis systemejeren koncentrerer sit arbejde med bankbogføring omkring systematisering og mønstergenkendelse af betalingsflowet generelt.
+
+# Nye features
+
+Der udvikles løbende nye features.
+Ønsker til nye features findes i [Issues](https://github.com/Randers-Kommune-Digitalisering/auto-bankposteringer-nordea-kmdopus/issues).
 
 # Diagrammer
 
@@ -92,7 +103,3 @@ Konteringerne samles i et finansbilag i csv-format eller leveres direkte til ØS
 ![](https://avatars.githubusercontent.com/u/5375661?s=36&v=4)  Node-RED som orkestrator
 
 ![](https://avatars.githubusercontent.com/u/6128107?s=36&v=4)  Vue som front-end framework
-
-![](https://avatars.githubusercontent.com/u/1529926?s=36&v=4)  Redis som bindeled til microservices (ikke i brug)
-
-![](https://avatars.githubusercontent.com/u/1525981?s=36&v=4)  Python som microservice (konteringsforslag til umatchede posteringer) (ikke i brug)
