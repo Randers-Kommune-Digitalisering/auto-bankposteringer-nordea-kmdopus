@@ -7,16 +7,9 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "fileRequested",
-      "pt": "msg",
-      "to": "req.params.file",
-      "tot": "jsonata"
-    },
-    {
-      "t": "set",
       "p": "filepath",
       "pt": "msg",
-      "to": "\"/data/output/\" & fileRequested",
+      "to": "$substring(req.params.file, -11) = \"_afstem.csv\"\t    ? \"/data/afstemning/\" & req.params.file\t    : \"/data/output/\" & req.params.file\t",
       "tot": "jsonata"
     }
   ],

@@ -7,6 +7,20 @@ const Node = {
   "rules": [
     {
       "t": "set",
+      "p": "payload.accessToken",
+      "pt": "msg",
+      "to": "admSysData.accessToken",
+      "tot": "global"
+    },
+    {
+      "t": "set",
+      "p": "payload.refreshToken",
+      "pt": "msg",
+      "to": "masterData.admSysData.refreshToken",
+      "tot": "global"
+    },
+    {
+      "t": "set",
       "p": "masterData.admSysData",
       "pt": "global",
       "to": "payload",

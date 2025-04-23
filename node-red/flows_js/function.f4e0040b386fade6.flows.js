@@ -22,8 +22,8 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
+  const transactionsObj = global.get("transactions");
   let erpObj = global.get("erp") || {};
-  let transactionsObj = global.get("transactions");
   let masterDataObj = global.get("masterData");
   let postings = [];
   let transactionsUnmatched = transactionsObj.addUnmatched ? transactionsObj.addUnmatched : [];
@@ -204,9 +204,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
   erpObj.postings = postings;
   global.set("erp", erpObj);
-  
-  transactionsObj.list = []
-  global.set("transactions", transactionsObj);
   
   // Remove temporary rules marked for deletion
   masterDataObj.rules = accountingRules.filter(rule => !rule.toDelete);

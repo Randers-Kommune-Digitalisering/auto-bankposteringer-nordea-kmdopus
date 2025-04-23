@@ -6,11 +6,6 @@ const Node = {
   "name": "Clean vars",
   "rules": [
     {
-      "t": "delete",
-      "p": "transactions.list",
-      "pt": "global"
-    },
-    {
       "t": "set",
       "p": "uid",
       "pt": "msg",
@@ -34,7 +29,7 @@ const Node = {
   "y": 60,
   "wires": [
     [
-      "9068945792b1f486"
+      "6cc9793540d94cd5"
     ]
   ],
   "icon": "font-awesome/fa-trash",
