@@ -1,4 +1,3 @@
-
 <script setup>
     import { ref, watch } from 'vue'
     import { useRouter, useRoute } from 'vue-router'
@@ -25,84 +24,64 @@
 
     const isReturning = ref(returnFromParam ? true : false)
     const returningFrom = ref(returnFromParam ?? null)
-
-    console.log("returnFromParam: " + returnFromParam)
     
-    // Fetch regler
-    function fetchRules()
-    {
-        console.log("Fetching rules with type " + type.value)
+    function fetchRules() {
+        konteringsregler.value = null
 
         fetch('/api/listkonteringsregler/' + (type.value == null ? "" : type.value))
-            .then(response => response = response.json())
-            .then(value => allKonteringsregler.value = value)
-            .then(value => konteringsregler.value = value)
-            .then(value => handleQueryParams())
+            .then(response => response.json())
+            .then(value => {
+                allKonteringsregler.value = value
+                konteringsregler.value = value
+            })
+            .then(() => handleQueryParams())
     }
 
     fetchRules()
 
     // Watch and update rules if parameter changes
-    watch(() => route.params.type, (value) =>
-    {
+    watch(() => route.params.type, (value) => {
         type.value = value
         fetchRules()
     })
 
-
     const keyMap = {
-        "ID": {
-            "key": "ruleID"
-        },
-        "Reference": {
-            "key": "reference"
-        },
-        "Afsender": {
-            "key": "sender"
-        }, 
-        "Posteringstype": {
-            "key": "typeDescription"
-        },
-        "Beløb 1": {
-            "key": "amount1"
-        },
-        "Beløb 2": {
-            "key": "amount2"
-        },
-        "Artskonto": {
-            "key": "account",
-            "hidden": true
-        },
-        "Posteringstekst": {
-            "key": "text",
-            "hidden": true
-        },
-        "Notat": {
-            "key": "note",
-            "hidden": true
-        },
-        "Sidst anvendt": {
-            "key": "lastUsed"
-        }
+        "id": { "key": "ruleID" },
+        "Reference": { "key": "reference" },
+        "Afsender": { "key": "sender" }, 
+        "Posteringstype": { "key": "typeDescription" },
+        "Beløb 1": { "key": "amount1" },
+        "Beløb 2": { "key": "amount2" },
+        "Artskonto": { "key": "account", "hidden": true },
+        "Posteringstekst": { "key": "text", "hidden": true },
+        "Notat": { "key": "note", "hidden": true },
+        "Sidst anvendt": { "key": "lastUsed"}
     }
     
-    function handleQueryParams()
-    {        
-        if(isSearching.value)
-        {
+    function handleQueryParams() {        
+        if (isSearching.value) {
             search(searchKeyword.value)
         }
 
-        if(isReturning.value)
-        {
-            scrollTo(returningFrom.value)
+        if (isReturning.value) {
+            // Check if the item exists in the list before scrolling
+            const itemExists = konteringsregler.value?.some(
+                (item) => item?.[keyMap.id.key] === returningFrom.value
+            ) || false
+
+            if (itemExists) {
+                scrollTo(returningFrom.value)
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+                returningFrom.value = null
+            }
+
             isReturning.value = false
         }
     }
 
 
-    function toggleSearch()
-    {
+    function toggleSearch() {
         isSearching.value = !isSearching.value
 
         if(!isSearching.value)
@@ -111,19 +90,16 @@
             setTimeout(() => document.getElementById("searchInput").focus(), 50)
     }
 
-    function search(keyword)
-    {
+    function search(keyword) {
         if(allKonteringsregler.value == null)
             return
 
-        if(keyword == null)
-        {
+        if(keyword == null) {
             searchKeyword.value = ""
             konteringsregler.value = allKonteringsregler.value
         }
         
-        else
-        {
+        else {
             konteringsregler.value = searchList(allKonteringsregler.value, keyword)
 
             // Use vue-router to update the URL with search keyword
@@ -131,8 +107,7 @@
         }
     }
 
-    function searchList(list, keyword)
-    {
+    function searchList(list, keyword) {
         keyword = keyword.toLowerCase()
         keyword = keyword.trim()
         
@@ -142,7 +117,7 @@
                                 (x[keyMap.Afsender.key] != null && x[keyMap.Afsender.key].toLowerCase().includes(keyword)) || /* Afsender */
                                 (x[keyMap.Posteringstype.key] != null && x[keyMap.Posteringstype.key].toLowerCase().includes(keyword)) || /* Posteringstype */
                                 (x[keyMap.Notat.key] != null && x[keyMap.Notat.key].toLowerCase().includes(keyword)) || /* Notat */
-                                (x[keyMap.ID.key] != null && x[keyMap.ID.key] == keyword) ) /* RuleID */
+                                (x[keyMap.id.key] != null && x[keyMap.id.key] == keyword) ) /* ruleID */
     }
 
     function scrollTo(id)
@@ -185,7 +160,7 @@
 
             <div class="float-left addButton">
                 <router-link v-if="type != null" :to="'/retkonteringsregel/ny' + type">
-                    <button @click="router.replace({  path: '/konteringsregler' })"><IconAdd /></button>
+                    <button><IconAdd /></button>
                 </router-link>
             </div>
 
@@ -198,9 +173,15 @@
         <table>
             <thead>
                 <tr v-if="isSearching">
-                        <th :colspan="(Object.values(keyMap).filter(value => !value.hidden).length)+1">
-                            <input id="searchInput" type="text" placeholder="Søg efter regel" v-model="searchKeyword" :onchange="search(searchKeyword)" />
-                        </th>
+                    <th :colspan="(Object.values(keyMap).filter(value => !value.hidden).length)+1">
+                        <input
+                            id="searchInput"
+                            type="text"
+                            placeholder="Søg efter regel"
+                            v-model="searchKeyword"
+                            :onchange="search(searchKeyword)"
+                        />
+                    </th>
                 </tr>
                 <tr>
                     <th v-for="([key, value]) in Object.entries(keyMap)" :key="key" :class="(value.hidden ? 'hidden ' : '')">
@@ -209,22 +190,22 @@
                     <th>Ændr</th>
                 </tr>
             </thead>
-            <tr v-if="konteringsregler != null" v-for="(obj, index) in konteringsregler" :id="obj[keyMap['ID'].key]" :class="returningFrom == obj[keyMap['ID'].key] ? 'highlight' : ''">
+            <tr v-if="konteringsregler != null" v-for="(obj, index) in konteringsregler" :id="obj[keyMap.id.key]" :class="returningFrom == obj[keyMap.id.key] ? 'highlight' : ''">
                 <td v-for="(value, key) in keyMap" :class="(value.hidden ? 'hidden ' : '') + (key)">
                     {{ obj[value.key] }}
                 </td>
                 
-                <td><router-link :to="'/retkonteringsregel/' + obj[keyMap['ID'].key]">
+                <td><router-link :to="'/retkonteringsregel/' + obj[keyMap.id.key]">
                     <button class="editButton orange" @click="router.replace({ 
                         path: route.path,
-                        query: isSearching ? { returnfrom: obj[keyMap['ID'].key], search: searchKeyword }
-                                            : { returnfrom: obj[keyMap['ID'].key] }})">
+                        query: isSearching ? { returnfrom: obj[keyMap.id.key], search: searchKeyword }
+                                            : { returnfrom: obj[keyMap.id.key] }})">
                         <IconEdit />
                     </button>
                 </router-link></td>
             </tr>
             <tr v-else>
-                <td :colspan="(Object.values(keyMap).filter(value => !value.hidden).length)+1">Indlæser...</td>
+                <td :colspan="(Object.values(keyMap).filter(value => !value.hidden).length)+1">Ingen regler</td>
             </tr>
         </table>
     </Content>
@@ -238,32 +219,29 @@
     td {
         font-size: 0.9em;
     }
-    .searchButtonDiv 
-    {
+    th, thead {
+        text-transform: capitalize;
+    }
+    .searchButtonDiv {
         padding-left: 0.55rem;
     }
-    .addButton
-    {
+    .addButton {
         padding-right: 0.55rem;
     }
-    .editButton
-    {
+    .editButton {
         display: flex;
         align-items: center;
         justify-content: center;
         padding-left: 0.9rem;
         padding-right: 0.9rem;
     }
-    .notat
-    {
+    .notat {
         font-size: 0.8em;
     }
-    .highlight
-    {
+    .highlight {
         background-color: #f0f0f0;
     }
-    .ID
-    {
+    .id {
         font-weight: 600;
     }
 </style>
