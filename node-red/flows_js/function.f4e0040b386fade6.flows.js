@@ -11,7 +11,7 @@ const Node = {
   "finalize": "",
   "libs": [],
   "x": 155,
-  "y": 740,
+  "y": 720,
   "wires": [
     [
       "c265ac1bb029ed1e"
@@ -167,8 +167,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               }
   
               let matchedAllParametersBool = sumOfParametersMatched === sumOfParametersGiven(rule);
-              let matchedAmountBool = matchAmount(absoluteAmount, rule.operator, rule.amount1, rule.amount2)
-              let matchedAccountBool = transaction.relatedAccount.bankAccount === rule.relatedBankAccount || rule.relatedBankAccount === null
+              let matchedAmountBool = matchAmount(absoluteAmount, rule.operator, rule.amount1, rule.amount2);
+              let matchedAccountBool = transaction.relatedAccount.bankAccount === rule.relatedBankAccount || rule.relatedBankAccount === null;
                               
               if (matchedAllParametersBool && matchedAmountBool && matchedAccountBool) {
                   if (!rule.exceptionBool) {   // Don't write ERP postings if rule is an exception, but still count as match
