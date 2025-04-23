@@ -10,8 +10,8 @@ const Node = {
   "syntax": "mustache",
   "template": "",
   "output": "str",
-  "x": 565,
-  "y": 1000,
+  "x": 335,
+  "y": 380,
   "wires": [
     [
       "3577d2dc22b83335"
@@ -22,7 +22,7 @@ const Node = {
 }
 
 Node.template = `
-DROP TABLE runHistory
+DROP TABLE runHistory, transactionsWithNoMatch
 `
 
 module.exports = Node;

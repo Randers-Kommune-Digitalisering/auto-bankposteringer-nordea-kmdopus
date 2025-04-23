@@ -6,8 +6,9 @@ const Node = {
   "name": "send via sftp",
   "mode": "link",
   "links": [
-    "fdd8bf906c8de6b1",
-    "9a3e6bdf694f6fcc"
+    "9a3e6bdf694f6fcc",
+    "d91497dd552df622",
+    "fdd8bf906c8de6b1"
   ],
   "x": 755,
   "y": 240,

@@ -1,18 +1,17 @@
 const Node = {
-  "id": "8aae1ff02b27bcd0",
+  "id": "46f49d3a86651e43",
   "type": "debug",
-  "z": "2380efc0fb66c87e",
-  "name": "debug 1",
+  "z": "30ea9c666c3d34a6",
+  "name": "debug 2",
   "active": true,
   "tosidebar": true,
   "console": false,
   "tostatus": false,
-  "complete": "true",
-  "targetType": "full",
+  "complete": "false",
   "statusVal": "",
   "statusType": "auto",
-  "x": 440,
-  "y": 560,
+  "x": 720,
+  "y": 520,
   "wires": []
 }
 
