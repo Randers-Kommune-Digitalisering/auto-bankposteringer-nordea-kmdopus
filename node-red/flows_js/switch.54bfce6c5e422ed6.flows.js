@@ -1,15 +1,15 @@
 const Node = {
-  "id": "405b60b0c581acd8",
+  "id": "54bfce6c5e422ed6",
   "type": "switch",
-  "z": "30ea9c666c3d34a6",
-  "g": "a7d9b10b639c44bd",
-  "name": "erpSystem",
-  "property": "masterData.admSysData.erpSystem",
+  "z": "2380efc0fb66c87e",
+  "g": "73b9b3deaf04ef3b",
+  "name": "What is auth status?",
+  "property": "auth.adminStatus",
   "propertyType": "global",
   "rules": [
     {
       "t": "eq",
-      "v": "KMD Opus",
+      "v": "EXPIRED",
       "vt": "str"
     },
     {
@@ -19,19 +19,15 @@ const Node = {
   "checkall": "false",
   "repair": false,
   "outputs": 2,
-  "x": 405,
-  "y": 220,
+  "x": 605,
+  "y": 460,
   "wires": [
     [
-      "1058bf9602a0ba3f"
+      "9d33be9522a2ba30"
     ],
     [
-      "22afd54fd018d590"
+      "fefac7c4522ad10f"
     ]
-  ],
-  "outputLabels": [
-    "KMD Opus",
-    ""
   ],
   "icon": "font-awesome/fa-question",
   "l": false

@@ -16,7 +16,7 @@ const Node = {
     }
   ],
   "x": 105,
-  "y": 600,
+  "y": 580,
   "wires": [
     [
       "d2e3d87b68569e12"
@@ -33,7 +33,7 @@ Format: ISO 8601
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, dayjs) {
   let dates = global.get("dates") || [];
-  const offset = 5; // offset = 1 until Nordea fixes date issue on server
+  const offset = 6; // offset = 1 until Nordea fixes date issue on server
   
   function findBookingDate() {
       let date = dayjs().startOf('day');

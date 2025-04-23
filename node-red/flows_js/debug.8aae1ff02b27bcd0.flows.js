@@ -1,18 +1,18 @@
 const Node = {
-  "id": "f87c3b578646101c",
+  "id": "8aae1ff02b27bcd0",
   "type": "debug",
-  "z": "30ea9c666c3d34a6",
+  "z": "2380efc0fb66c87e",
   "name": "debug 1",
   "active": true,
   "tosidebar": true,
   "console": false,
   "tostatus": false,
-  "complete": "$globalContext(\"transactions\").list",
-  "targetType": "jsonata",
+  "complete": "true",
+  "targetType": "full",
   "statusVal": "",
   "statusType": "auto",
-  "x": 400,
-  "y": 660,
+  "x": 440,
+  "y": 560,
   "wires": []
 }
 

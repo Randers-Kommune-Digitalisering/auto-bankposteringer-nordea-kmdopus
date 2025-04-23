@@ -1,30 +1,26 @@
 const Node = {
-  "id": "227e1ddaf3ee20a7",
+  "id": "afb80cb62bb5f8e0",
   "type": "switch",
   "z": "30ea9c666c3d34a6",
   "g": "340a8358eb5b957c",
-  "name": "hit?",
-  "property": "payload",
-  "propertyType": "msg",
+  "name": "",
+  "property": "auth.adminStatus",
+  "propertyType": "global",
   "rules": [
     {
-      "t": "empty"
-    },
-    {
-      "t": "nempty"
+      "t": "eq",
+      "v": "COMPLETED",
+      "vt": "str"
     }
   ],
   "checkall": "true",
   "repair": false,
-  "outputs": 2,
-  "x": 325,
-  "y": 80,
+  "outputs": 1,
+  "x": 125,
+  "y": 60,
   "wires": [
     [
-      "b395a5509ee2a393"
-    ],
-    [
-      "6c2d2361da8e071c"
+      "547579249e32e3ec"
     ]
   ],
   "icon": "font-awesome/fa-question",

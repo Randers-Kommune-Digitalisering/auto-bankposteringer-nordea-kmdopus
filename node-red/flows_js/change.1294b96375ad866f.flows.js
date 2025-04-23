@@ -22,11 +22,10 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 395,
-  "y": 360,
+  "y": 340,
   "wires": [
     [
-      "3ecf30ab26092ccd",
-      "f87c3b578646101c"
+      "3ecf30ab26092ccd"
     ]
   ],
   "icon": "font-awesome/fa-trash",
