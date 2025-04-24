@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "transactions.uid",
       "pt": "global",
-      "to": "payload.group_header.message_identification",
+      "to": "_msgid",
       "tot": "msg"
     },
     {
