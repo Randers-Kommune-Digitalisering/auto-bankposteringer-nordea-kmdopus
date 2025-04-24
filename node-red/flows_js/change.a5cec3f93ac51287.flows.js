@@ -9,8 +9,8 @@ const Node = {
       "t": "set",
       "p": "dates.bookingDate",
       "pt": "global",
-      "to": "$fromMillis($toMillis(payload[0].originDate), \"[D01]-[M01]-[Y]\")",
-      "tot": "jsonata"
+      "to": "payload[0].bookingDate",
+      "tot": "msg"
     },
     {
       "t": "set",

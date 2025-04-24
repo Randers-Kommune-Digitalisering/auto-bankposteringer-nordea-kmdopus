@@ -16,7 +16,7 @@ const Node = {
       "t": "set",
       "p": "originDate",
       "pt": "msg",
-      "to": "req.params.date",
+      "to": "req.params.uid",
       "tot": "msg"
     }
   ],

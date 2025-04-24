@@ -24,10 +24,9 @@ const Node = {
 Node.template = `
 CREATE TABLE IF NOT EXISTS runHistory (
     uid NVARCHAR(32) NULL,
-    originDate DATE PRIMARY KEY,
-    statusCode INT NULL,
-    ts timestamp,
-    success BOOL DEFAULT FALSE
+    bookingDate NVARCHAR(31) PRIMARY KEY,
+    statusCode NVARCHAR(3) NULL,
+    ts timestamp
 );
 `
 

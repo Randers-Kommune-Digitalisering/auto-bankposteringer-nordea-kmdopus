@@ -24,10 +24,10 @@ const Node = {
 Node.template = `
 UPDATE runHistory 
 SET 
-  statusCode = {{statusCode}}, 
+  statusCode = "{{statusCode}}", 
   uid = "{{uid}}"
 WHERE 
-  originDate = "{{originDate}}"
+  bookingDate = "{{global.dates.bookingDate}}"
 `
 
 module.exports = Node;
