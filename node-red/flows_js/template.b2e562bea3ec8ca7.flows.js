@@ -22,7 +22,7 @@ const Node = {
 }
 
 Node.template = `
-INSERT INTO runHistory (originDate) VALUES ("{{global.dates.bookingDate}}")
+INSERT INTO runHistory (bookingDate) VALUES ("{{global.dates.bookingDate}}")
 `
 
 module.exports = Node;

@@ -157,7 +157,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   msg.headers['X-IBM-Client-Secret'] = global.get("configs").banking.secret;
   msg.headers['Signature'] = signatureHeader;
   
-  if (url) msg.url = flow.get("url");
+  msg.url = flow.get("url");
   if (data) msg.payload = resolveRequestBody();
   
   switch (method) {

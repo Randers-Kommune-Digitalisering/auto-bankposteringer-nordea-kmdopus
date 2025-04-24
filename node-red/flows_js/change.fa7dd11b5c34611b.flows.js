@@ -1,5 +1,5 @@
 const Node = {
-  "id": "9c221a6279c369bf",
+  "id": "fa7dd11b5c34611b",
   "type": "change",
   "z": "0a57a34536934723",
   "g": "f0b2b6a944eaa19d",
@@ -7,17 +7,10 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "runs.restart",
-      "pt": "global",
-      "to": "true",
-      "tot": "bool"
-    },
-    {
-      "t": "set",
-      "p": "originDate",
+      "p": "payload",
       "pt": "msg",
-      "to": "req.params.uid",
-      "tot": "msg"
+      "to": "runs.list",
+      "tot": "global"
     }
   ],
   "action": "",
@@ -26,11 +19,11 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 685,
-  "y": 400,
+  "y": 340,
   "wires": [
     [
-      "693dd74872b78c66",
-      "f6a3452a9f8c7e6e"
+      "043622f3ea199dc3",
+      "b75ab398c411fcf4"
     ]
   ],
   "icon": "font-awesome/fa-cog",

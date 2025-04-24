@@ -1,22 +1,15 @@
 const Node = {
-  "id": "a5cec3f93ac51287",
+  "id": "4589c9c080709a5d",
   "type": "change",
   "z": "47254dd1b3ed3b06",
   "g": "30b2fd7f3bc3b0a9",
-  "name": "Set vars",
+  "name": "",
   "rules": [
     {
       "t": "set",
-      "p": "dates.bookingDate",
+      "p": "runs.list",
       "pt": "global",
-      "to": "payload[0].bookingDate",
-      "tot": "msg"
-    },
-    {
-      "t": "set",
-      "p": "runs.originUid",
-      "pt": "global",
-      "to": "uid",
+      "to": "payload",
       "tot": "msg"
     }
   ],
@@ -26,7 +19,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 645,
-  "y": 820,
+  "y": 860,
   "wires": [
     [
       "265fb2fc1879d7fb"

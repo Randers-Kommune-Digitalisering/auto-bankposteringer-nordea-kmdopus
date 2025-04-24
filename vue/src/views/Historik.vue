@@ -8,14 +8,13 @@
 
     const keyMap = {
         "bankdato": {
-            "key": "originDate"
+            "key": "bookingDate"
         },
         "id": {
             "key": "uid"
         },
-        "HTTP-kode":
-        {
-            "key": "successCode"
+        "HTTP-kode": {
+            "key": "statusCode"
         }
     }
     
