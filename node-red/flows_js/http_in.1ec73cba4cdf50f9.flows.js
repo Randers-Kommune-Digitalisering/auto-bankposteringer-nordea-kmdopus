@@ -4,7 +4,7 @@ const Node = {
   "z": "0a57a34536934723",
   "g": "f20ee67701d7b737",
   "name": "Get file - dload",
-  "url": "/filer/:file/download",
+  "url": "/files/:file/download",
   "method": "get",
   "upload": false,
   "swaggerDoc": "",

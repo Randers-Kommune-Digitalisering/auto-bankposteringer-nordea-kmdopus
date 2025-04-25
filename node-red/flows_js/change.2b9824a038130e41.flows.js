@@ -14,6 +14,16 @@ const Node = {
     },
     {
       "t": "delete",
+      "p": "runs.originUid",
+      "pt": "global"
+    },
+    {
+      "t": "delete",
+      "p": "runs.originDate",
+      "pt": "global"
+    },
+    {
+      "t": "delete",
       "p": "runs.restart",
       "pt": "global"
     }

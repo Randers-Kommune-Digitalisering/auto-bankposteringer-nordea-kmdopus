@@ -4,17 +4,17 @@ const Node = {
   "z": "2380efc0fb66c87e",
   "g": "7113fec32fd218e0",
   "name": "hit?",
-  "property": "payload",
+  "property": "payload[0].uid",
   "propertyType": "msg",
   "rules": [
     {
-      "t": "empty"
+      "t": "null"
     }
   ],
   "checkall": "true",
   "repair": false,
   "outputs": 1,
-  "x": 605,
+  "x": 655,
   "y": 300,
   "wires": [
     [
