@@ -51,7 +51,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   dates.simpleDate = dayjs().format('DD-MM-YYYY');
   dates.time = dayjs().format('HHmmss');
   
-  dates.bookingDate = global.get("runs").restart ? msg.originDate : findBookingDate();
+  dates.bookingDate = global.get("runs").restart ? global.get("runs").originDate : findBookingDate();
   
   global.set("dates", dates);
   

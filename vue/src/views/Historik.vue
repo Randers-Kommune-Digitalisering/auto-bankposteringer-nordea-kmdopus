@@ -22,17 +22,13 @@
         .then(response => response = response.json())
         .then(value => history.value = value)
 
-    function restartRun(date)
-    {
-        const url = '/api/restart/' + date
-
+    function restartRun(date, id) {
+        const url = `/api/restart/${date}?id=${id}`; // Include id as a query parameter
         fetch(url)
             .then(response => {
-                console.log(response.status)
-                restartedRunSuccess.value[date] = response.status === 200
-            })
-
-            
+                console.log(response.status);
+                restartedRunSuccess.value[date] = response.status === 200;
+            });
     }
 
     var restartedRunSuccess = ref([])
@@ -68,8 +64,13 @@
             <tr v-if="history != null && history.length > 0" v-for="obj in history">
                 <td v-for="key in keyMap">{{ key.obj != null ? obj[key.obj][key.key] : obj[key.key] }}</td>
                 <td>
-                    <button @click="restartRun(obj[keyMap.bankdato.key])" :class="restartedRunSuccess[obj[keyMap.bankdato.key]] != null ? (restartedRunSuccess[obj[keyMap.bankdato.key]] ? 'green' : 'red') : ''">
-                    <IconRefresh />&nbsp;{{restartedRunSuccess[obj[keyMap.bankdato.key]] != null  ? (restartedRunSuccess ? 'Kørsel genstartet' : 'Fejl ved genstart') : 'Genstart kørsel'}}</button>
+                    <button 
+                        @click="restartRun(obj[keyMap.bankdato.key], obj[keyMap.id.key])" 
+                        :class="restartedRunSuccess[obj[keyMap.bankdato.key]] != null ? (restartedRunSuccess[obj[keyMap.bankdato.key]] ? 'green' : 'red') : ''"
+                        :disabled="obj[keyMap['HTTP-kode'].key]?.toString().startsWith('2')"
+                    >
+                        <IconRefresh />&nbsp;{{restartedRunSuccess[obj[keyMap.bankdato.key]] != null  ? (restartedRunSuccess[obj[keyMap.bankdato.key]] ? 'Kørsel genstartet' : 'Fejl ved genstart') : 'Genstart kørsel'}}
+                    </button>
                 </td>
             </tr>
             <tr v-else>

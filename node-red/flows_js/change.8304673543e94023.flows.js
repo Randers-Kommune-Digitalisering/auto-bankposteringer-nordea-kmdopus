@@ -58,7 +58,7 @@ const Node = {
       "t": "set",
       "p": "configs.banking.usefulParameters",
       "pt": "global",
-      "to": "[[\"narrative\",\"message\"],\"counterparty_name\",\"type_description\"]",
+      "to": "[[\"narrative\",\"message\"],[\"counterparty_name\",\"counterparty_address\"],\"type_description\"]",
       "tot": "json"
     }
   ],

@@ -4,14 +4,14 @@ const Node = {
   "z": "30ea9c666c3d34a6",
   "g": "340a8358eb5b957c",
   "name": "hit?",
-  "property": "payload",
+  "property": "payload[0].uid",
   "propertyType": "msg",
   "rules": [
     {
-      "t": "empty"
+      "t": "null"
     },
     {
-      "t": "nempty"
+      "t": "nnull"
     }
   ],
   "checkall": "true",

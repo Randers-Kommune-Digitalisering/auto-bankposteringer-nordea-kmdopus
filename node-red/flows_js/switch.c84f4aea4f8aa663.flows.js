@@ -1,24 +1,26 @@
 const Node = {
-  "id": "92fe15301aaa1dc7",
+  "id": "c84f4aea4f8aa663",
   "type": "switch",
   "z": "2380efc0fb66c87e",
   "g": "7113fec32fd218e0",
-  "name": "hit?",
-  "property": "payload[0].uid",
-  "propertyType": "msg",
+  "name": "What is auth status?",
+  "property": "auth.adminStatus",
+  "propertyType": "global",
   "rules": [
     {
-      "t": "null"
+      "t": "eq",
+      "v": "COMPLETED",
+      "vt": "str"
     }
   ],
-  "checkall": "true",
+  "checkall": "false",
   "repair": false,
   "outputs": 1,
-  "x": 655,
+  "x": 455,
   "y": 300,
   "wires": [
     [
-      "f31638598b396871"
+      "2695f47253a410da"
     ]
   ],
   "icon": "font-awesome/fa-question",
