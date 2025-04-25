@@ -49,7 +49,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   global.set("transactions", transactionsObj);
   
   return msg;
-  
 }
 
 module.exports = Node;

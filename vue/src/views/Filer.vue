@@ -21,6 +21,8 @@ Promise.all([
 ]).then(([output, recon]) => {
     outputFiles.value = output
     reconFiles.value = recon
+    console.log(outputFiles.value)
+    console.log(reconFiles.value)
 
     // Group files by the first 10 characters of their names
     const fileMap = new Map()
@@ -71,13 +73,13 @@ Promise.all([
                 <tr v-for="obj in groupedFiles" :key="obj.groupKey">
                     <td>{{ obj.groupKey }}</td>
                     <td>
-                        <a v-if="obj.output" :href="'/api/filer/' + obj.output[keyMap.bankdato.key] + '/download'">
+                        <a v-if="obj.output" :href="'/api/files/' + obj.groupKey + '.csv/download'">
                             <button><IconDownload /></button>
                         </a>
                         <button v-else disabled><IconDownload /></button>
                     </td>
                     <td>
-                        <a v-if="obj.recon" :href="'/api/filer/' + obj.recon[keyMap.bankdato.key] + '/download'">
+                        <a v-if="obj.recon" :href="'/api/files/' + obj.groupKey + '_afstem.csv/download'">
                             <button><IconDownload /></button>
                         </a>
                         <button v-else disabled><IconDownload /></button>

@@ -14,9 +14,16 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "originDate",
-      "pt": "msg",
+      "p": "runs.originDate",
+      "pt": "global",
       "to": "req.params.uid",
+      "tot": "msg"
+    },
+    {
+      "t": "set",
+      "p": "runs.originUid",
+      "pt": "global",
+      "to": "req.query.id",
       "tot": "msg"
     }
   ],
