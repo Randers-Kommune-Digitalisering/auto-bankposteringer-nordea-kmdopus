@@ -8,7 +8,7 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "{\t   \"Status Code\": msg.statusCode,\t    \"Auth status\": payload.response.status,\t   \"Amount of transactions\": $globalContext('transactions').length,\t   \"Timestamp\": $now()\t}",
+  "complete": "{\t   \"Status Code\": msg.statusCode,\t   \"Auth status\": payload.response.status,\t   \"Booking date\": $globalContext('dates').bookingDate,\t   \"Amount of transactions\": $count($globalContext('transactions').add ? $globalContext('transactions').add : []),\t   \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",

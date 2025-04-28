@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "filepath",
       "pt": "msg",
-      "to": "$substring(req.params.file, -11) = \"_afstem.csv\"\t    ? \"/data/afstemning/\" & req.params.file\t    : \"/data/output/\" & req.params.file\t",
+      "to": "\"/data/output/\" & req.params.file",
       "tot": "jsonata"
     }
   ],

@@ -16,7 +16,7 @@ const Node = {
     }
   ],
   "x": 105,
-  "y": 120,
+  "y": 220,
   "wires": [
     [
       "5d472e55a89e7806"
@@ -51,7 +51,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   for (const posting of postings) {
       lineCounter++;
   
-      let amount = posting.amount.replace(',', '.');
+      let amount = parseFloat(posting.amount.replace('.', '').replace(',', '.'));
       amount = parseFloat(amount);
       let amountPrefixed = posting.debetOrCredit === 'Debet' ? amount : amount * -1;
   

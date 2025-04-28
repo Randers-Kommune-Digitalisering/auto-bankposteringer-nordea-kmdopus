@@ -22,11 +22,10 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let erpObj = global.get("erp") || {};
-  let transactionsObj = global.get("transactions");
-  let postings = [];
   const masterDataObj = global.get("masterData");
-  const transactions = transactionsObj.manual;
+  const transactions = global.get("transactions").manual;
+  let erpObj = global.get("erp") || {};
+  let postings = [];
   
   function generatePostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, landingAccountSecondary, cpr) {
       postings.push(
@@ -50,14 +49,14 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   }
   
   function processPosting(transaction) {
-      const absoluteAmount = Math.abs(parseFloat(transaction.amount));
-      const cleanedAmount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      transaction.amount = parseFloat(transaction.amount.replace('.', '').replace(',', '.'));
+      const absoluteAmount = Math.abs(transaction.amount);
       const statusDebetOrCredit = transaction.amount > 0 ? "Debet" : "Kredit";
       const landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet";
       const relatedAccount = masterDataObj.bankAccounts.find(account => account.bankAccount === transaction.bankAccount);
-      transaction.amount = cleanedAmount;
+      transaction.amount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   
-      generatePostings(relatedAccount.intermediateAccount, transaction.account, statusDebetOrCredit, landingDebetOrCredit, transaction.text, cleanedAmount, transaction.accountSecondary, transaction.cpr);
+      generatePostings(relatedAccount.intermediateAccount, transaction.account, statusDebetOrCredit, landingDebetOrCredit, transaction.text, transaction.amount, transaction.accountSecondary, transaction.cpr);
   }
   
   if (transactions) {
@@ -68,9 +67,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
   erpObj.postings = postings;
   global.set("erp", erpObj);
-  
-  transactionsObj.manual = []
-  global.set("transactions", transactionsObj);
   
   return msg;
 }

@@ -1,30 +1,32 @@
 const Node = {
-  "id": "8b921406f1c88666",
+  "id": "d2595898600c160a",
   "type": "switch",
-  "z": "0a57a34536934723",
-  "g": "f5b0f2cb9d251540",
-  "name": "manual posting to process?",
+  "z": "30ea9c666c3d34a6",
+  "g": "a7d9b10b639c44bd",
+  "name": "manual postings?",
   "property": "transactions.manual",
   "propertyType": "global",
   "rules": [
     {
-      "t": "nempty"
+      "t": "istype",
+      "v": "undefined",
+      "vt": "undefined"
     },
     {
       "t": "else"
     }
   ],
-  "checkall": "false",
+  "checkall": "true",
   "repair": false,
   "outputs": 2,
-  "x": 1125,
-  "y": 180,
+  "x": 555,
+  "y": 200,
   "wires": [
     [
-      "02c9a49c9a580c08"
+      "124c0d3fd352bd92"
     ],
     [
-      "1ae55ae91ab4dbf4"
+      "be65729dd0f21f9b"
     ]
   ],
   "outputLabels": [

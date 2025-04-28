@@ -36,12 +36,18 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   const offset = 1; // offset = 1 until Nordea fixes date issue on server
   
   function findBookingDate() {
-      let date = dayjs().startOf('day');
+      let date = dayjs();
   
-      if (date.day() === (1 + offset)) {
-          date = date.subtract((3 + offset), 'day');
+      if (date.day() === 1) {
+          date = date.subtract(3, 'day');
       } else {
-          date = date.subtract((1 + offset), 'day');
+          date = date.subtract(1, 'day');
+      }
+  
+      // When offset sets date to weekend, round down to friday
+      date = date.subtract(offset, 'day');
+      while (date.day() > 5) {
+          date = date.subtract(1, 'day');
       }
   
       return date.format('YYYY-MM-DD');

@@ -22,7 +22,7 @@ const Node = {
 }
 
 Node.template = `
-SELECT uid FROM runHistory WHERE bookingDate = "{{global.dates.bookingDate}}"
+SELECT bookingDate FROM runHistory WHERE bookingDate = "{{global.dates.bookingDate}}"
 `
 
 module.exports = Node;
