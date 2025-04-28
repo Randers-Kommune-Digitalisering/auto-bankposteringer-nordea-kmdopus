@@ -4,27 +4,29 @@ const Node = {
   "z": "30ea9c666c3d34a6",
   "g": "340a8358eb5b957c",
   "name": "hit?",
-  "property": "payload[0].uid",
+  "property": "payload[0].bookingDate",
   "propertyType": "msg",
   "rules": [
     {
-      "t": "null"
+      "t": "istype",
+      "v": "undefined",
+      "vt": "undefined"
     },
     {
-      "t": "nnull"
+      "t": "else"
     }
   ],
   "checkall": "true",
   "repair": false,
   "outputs": 2,
-  "x": 375,
-  "y": 80,
+  "x": 425,
+  "y": 100,
   "wires": [
     [
       "b395a5509ee2a393"
     ],
     [
-      "6c2d2361da8e071c"
+      "dd82056ab0eaf890"
     ]
   ],
   "icon": "font-awesome/fa-question",

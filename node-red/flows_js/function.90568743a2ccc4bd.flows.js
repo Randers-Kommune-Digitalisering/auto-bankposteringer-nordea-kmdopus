@@ -37,12 +37,13 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
       let typeDescription = transaction.type_description ? `'${transaction.type_description.replace(/'/g, "''")}'` : 'NULL';
       let bankAccount = `'${transaction.relatedAccount.bankAccount.replace(/'/g, "''")}'`;
       let amount = `'${transaction.amount.replace(/'/g, "''")}'`;
-      let bookingDate = transaction.booking_date ? `'${dayjs(transaction.booking_date).format('DD-MM-YYYY')}'` : 'NULL';
+      let bookingDate = transaction.booking_date ? `'${transaction.booking_date.replace(/'/g, "''")}'` : 'NULL';
+      let direction = transaction.direction ? `'${transaction.direction.replace(/'/g, "''")}'` : 'NULL';
   
-      return `(${transactionID}, ${sender}, ${reference}, ${typeDescription}, ${bankAccount}, ${amount}, ${bookingDate})`;
+      return `(${transactionID}, ${sender}, ${reference}, ${typeDescription}, ${bankAccount}, ${amount}, ${direction}, ${bookingDate})`;
   }).join(",\n");
   
-  msg.sql = `INSERT INTO transactionsWithNoMatch (transactionID, sender, reference, typeDescription, bankAccount, amount, bookingDate) 
+  msg.sql = `INSERT INTO transactionsWithNoMatch (transactionID, sender, reference, typeDescription, bankAccount, amount, direction, bookingDate) 
               VALUES ${sqlQuery};`;
   
   transactionsObj.addUnmatched = [];

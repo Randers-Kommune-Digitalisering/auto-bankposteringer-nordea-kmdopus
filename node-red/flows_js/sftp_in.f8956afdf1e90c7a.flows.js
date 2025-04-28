@@ -12,11 +12,12 @@ const Node = {
   "workdir": "",
   "savedir": "",
   "name": "",
-  "x": 455,
-  "y": 120,
+  "x": 505,
+  "y": 220,
   "wires": [
     [
-      "180e9f18ea312ea4"
+      "180e9f18ea312ea4",
+      "574e4647d66b1c08"
     ]
   ],
   "icon": "font-awesome/fa-send",

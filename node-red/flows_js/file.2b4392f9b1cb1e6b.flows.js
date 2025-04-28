@@ -10,8 +10,8 @@ const Node = {
   "createDir": true,
   "overwriteFile": "true",
   "encoding": "utf8",
-  "x": 305,
-  "y": 120,
+  "x": 355,
+  "y": 220,
   "wires": [
     [
       "67e1d0acefc63298"

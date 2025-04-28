@@ -4,51 +4,36 @@ import Content from '@/components/Content.vue'
 import IconDoc from '@/components/icons/IconDoc.vue'
 import IconDownload from '../components/icons/IconDownload.vue';
 
-const outputFiles = ref([])
-const reconFiles = ref([])
 const groupedFiles = ref([])
 
-const keyMap = {
-    "bankdato": {
-        "key": "groupKey"
-    }
-}
-
 // Fetch and group files
-Promise.all([
-    fetch('/api/files').then(response => response.json()),
-    fetch('/api/recon').then(response => response.json())
-]).then(([output, recon]) => {
-    outputFiles.value = output
-    reconFiles.value = recon
-    console.log(outputFiles.value)
-    console.log(reconFiles.value)
+fetch('/api/files')
+    .then(response => response.json())
+    .then((files) => {
+        const fileMap = new Map()
 
-    // Group files by the first 10 characters of their names
-    const fileMap = new Map()
+        // Group files by the first 10 characters of their names
+        files.forEach(file => {
+            const groupKey = file.name.substring(0, 10)
+            if (!fileMap.has(groupKey)) {
+                fileMap.set(groupKey, { output: null, recon: null, manual: null })
+            }
+            if (file.name.endsWith('_manual.csv')) {
+                fileMap.get(groupKey).manual = file
+            } else if (file.name.endsWith('_afstem.csv')) {
+                fileMap.get(groupKey).recon = file
+            } else {
+                fileMap.get(groupKey).output = file
+            }
+        })
 
-    output.forEach(file => {
-        const groupKey = file.name.substring(0, 10)
-        if (!fileMap.has(groupKey)) {
-            fileMap.set(groupKey, { output: null, recon: null })
-        }
-        fileMap.get(groupKey).output = file
+        groupedFiles.value = Array.from(fileMap.entries()).map(([key, value]) => ({
+            groupKey: key,
+            output: value.output,
+            recon: value.recon,
+            manual: value.manual
+        }))
     })
-
-    recon.forEach(file => {
-        const groupKey = file.name.substring(0, 10)
-        if (!fileMap.has(groupKey)) {
-            fileMap.set(groupKey, { output: null, recon: null })
-        }
-        fileMap.get(groupKey).recon = file
-    })
-
-    groupedFiles.value = Array.from(fileMap.entries()).map(([key, value]) => ({
-        groupKey: key,
-        output: value.output,
-        recon: value.recon
-    }))
-})
 </script>
 
 <template>
@@ -67,6 +52,7 @@ Promise.all([
                     <th>Bankdato</th>
                     <th>Posteringsbilag</th>
                     <th>Afstemningsbilag</th>
+                    <th>Manuelle posteringer</th>
                 </tr>
             </thead>
             <tbody>
@@ -80,6 +66,12 @@ Promise.all([
                     </td>
                     <td>
                         <a v-if="obj.recon" :href="'/api/files/' + obj.groupKey + '_afstem.csv/download'">
+                            <button><IconDownload /></button>
+                        </a>
+                        <button v-else disabled><IconDownload /></button>
+                    </td>
+                    <td>
+                        <a v-if="obj.manual" :href="'/api/files/' + obj.groupKey + '_manual.csv/download'">
                             <button><IconDownload /></button>
                         </a>
                         <button v-else disabled><IconDownload /></button>

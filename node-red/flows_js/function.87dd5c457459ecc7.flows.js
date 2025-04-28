@@ -44,7 +44,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       global.set("transactions", transactionsObj);
   
   } else {
-      node.error("No transactions to add");
+      node.warn("No transactions to add");
   }
   
   return msg;

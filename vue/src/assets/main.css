@@ -69,9 +69,14 @@ input, a, button
     transition: 120ms ease-in-out;
 }
 
+h3 {
+    font-weight: 700;
+}
+
 h2 {
     border-bottom: 0.1rem solid var(--color-border); /* Old: rgb(235, 235, 235); */
     color:var(--color-text-dark);
+    font-weight: 700;
 }
 
 h2:not(:first-of-type), h3:not(:first-of-type), h4:not(:first-of-type), h5:not(:first-of-type), h6:not(:first-of-type)
@@ -86,7 +91,7 @@ h3 > svg
 
 th, label
 {
-    font-weight: 500;
+    font-weight: 700;
 }
 
 table, form
@@ -99,6 +104,7 @@ button, input[type='submit']
     display: flex;
     align-items: center;
     border: 0rem;
+    font-size: inherit;
 }
     button:disabled, input[type='submit']:disabled
     {

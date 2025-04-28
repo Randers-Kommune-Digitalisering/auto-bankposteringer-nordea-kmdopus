@@ -44,7 +44,7 @@ const Node = {
       "t": "set",
       "p": "configs.ftp.filepaths.recieve.rootFolder",
       "pt": "global",
-      "to": "/til-randers/",
+      "to": "",
       "tot": "str"
     }
   ],

@@ -3,12 +3,12 @@ const Node = {
   "type": "link in",
   "z": "88c6307a5ee1dd81",
   "g": "0fc5db670402470f",
-  "name": "link in ftp file creation",
+  "name": "kmd xml file creation",
   "links": [
     "60b663923937136d"
   ],
   "x": 55,
-  "y": 120,
+  "y": 220,
   "wires": [
     [
       "3861adb2319cf788"
