@@ -3,12 +3,12 @@ const Node = {
   "type": "http in",
   "z": "0a57a34536934723",
   "g": "f20ee67701d7b737",
-  "name": "Get files - output",
+  "name": "Get files",
   "url": "/files",
   "method": "get",
   "upload": false,
   "swaggerDoc": "",
-  "x": 120,
+  "x": 100,
   "y": 320,
   "wires": [
     [

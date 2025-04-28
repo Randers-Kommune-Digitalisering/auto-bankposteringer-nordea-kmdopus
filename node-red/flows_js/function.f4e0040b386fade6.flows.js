@@ -142,9 +142,11 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
   
   function processPosting(transaction, rules) {
+      const direction = transaction.amount.charAt(0) === "-" ? "outgoing" : "incoming";
+      transaction.direction = direction;
       const absoluteAmount = Math.abs(parseFloat(transaction.amount));
-      const statusDebetOrCredit = transaction.amount > 0 ? "Debet" : "Kredit";
-      const landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet";
+      const statusDebetOrCredit = direction === "incoming" ? "Debet" : "Kredit";
+      const landingDebetOrCredit = direction === "incoming" ? "Kredit" : "Debet";
       transaction.amount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   
       const cpr = rules.postWithCPR ? extractCPRNumber(transaction.narrative) : null;
@@ -161,7 +163,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
                   let searchValue = rule[ruleParameters[parameterIndex]] ? rule[ruleParameters[parameterIndex]].toLowerCase() : null;
   
                   if (searchValue && rule.activeBool && matchParameter(transaction, searchValue, transactionParameters[parameterIndex])) {
-  
                       sumOfParametersMatched += 1;
                   }
               }

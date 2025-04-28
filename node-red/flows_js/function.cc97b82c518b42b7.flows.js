@@ -11,10 +11,10 @@ const Node = {
   "finalize": "",
   "libs": [],
   "x": 105,
-  "y": 60,
+  "y": 80,
   "wires": [
     [
-      "65984a50da4fd189"
+      "d3ab108167e9cf9c"
     ]
   ],
   "icon": "font-awesome/fa-arrows",
@@ -24,14 +24,16 @@ const Node = {
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let postings = global.get("erp").postings;
   let formattedPostings = [];
+  let suffix = global.get("transactions").manual ? "_manual" : "";
+  const manualBool = global.get("transactions").manual ? global.get("transactions").manual : undefined;
   
   for (let posting of postings) {
-      formattedPostings.push([posting.account, '', posting.accountSecondary || '', '', '', posting.debetOrCredit, posting.amount, '', posting.text, '', '', '', '', posting.cpr ? '02' : '', posting.cpr || '', '', '', '', '', '', '', '', '', '', '']);
+      formattedPostings.push([posting.account, '', posting.accountSecondary || '', '', '', posting.debetOrCredit, posting.amount, '', posting.text || '', '', '', '', '', posting.cpr ? '02' : '', posting.cpr || '', '', '', '', '', '', '', '', '', '', '']);
   }
   
   msg.payload = formattedPostings;
   msg.columns = global.get("configs").erp.csvHeaders;
-  msg.filename = "/data/output/" + global.get("dates").bookingDate + ".csv";
+  msg.filename = "/data/output/" + global.get("dates").bookingDate + suffix + ".csv";
   
   return msg;
 }

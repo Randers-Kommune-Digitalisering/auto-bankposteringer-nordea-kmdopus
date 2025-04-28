@@ -217,8 +217,6 @@
         konteringsregel.value.activeBool = !konteringsregel.value.activeBool
     }
 
-    console.log(konteringsregel)
-
 </script>
 
 <template>
@@ -269,7 +267,6 @@
                                     type="checkbox"
                                     :id="key"
                                     v-model="postWithCPR"
-                                    @change="console.log('Value of konteringsregel:', konteringsregel)"
                                 />
                             </template>
                             
@@ -323,5 +320,6 @@
     .activeToggle {
         display: flex;
         justify-content: space-between;
+        margin-bottom: 3rem;
     }
 </style>

@@ -9,16 +9,22 @@ const Node = {
   "rules": [
     {
       "t": "nempty"
+    },
+    {
+      "t": "else"
     }
   ],
   "checkall": "true",
   "repair": false,
-  "outputs": 1,
+  "outputs": 2,
   "x": 155,
-  "y": 180,
+  "y": 360,
   "wires": [
     [
       "bccf2aa530888657"
+    ],
+    [
+      "1772f6ae9875fbb6"
     ]
   ],
   "icon": "font-awesome/fa-question",

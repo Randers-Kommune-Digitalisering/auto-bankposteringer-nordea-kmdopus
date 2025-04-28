@@ -14,12 +14,22 @@
     
     const posting = ref(null)
 
+    const errors = ref({
+        artskonto: null,
+        pspElement: null
+    });
+
     // Fetch posting
     fetch(`/api/postings/${index.value}`)
         .then(response => response.json())
         .then(value => {
-            posting.value = value
-        })
+            posting.value = value;
+
+            // Trigger initial validation
+            validateArtskonto(posting.value?.account || '');
+            validatePSPElement(posting.value?.accountSecondary || '');
+            validateDependencies();
+        });
 
     const keyMap = {
         "Bogføringsdato": { "key": "bookingDate", "group": "Transaktionsoplysninger" , "mutable": false },
@@ -56,8 +66,49 @@
             .filter(group => Object.keys(group.fields).length > 0)
     })
 
+    function validateArtskonto(value) {
+        const regex = /^(S|9|\d)\d{7}$/; // Matches 8 characters, first can be "S", "9", or a digit
+        if (!value) {
+            errors.value.artskonto = 'Artskonto er påkrævet.';
+        } else if (!regex.test(value)) {
+            errors.value.artskonto = 'Artskonto skal være præcis 8 tegn langt og starte med "S", "9" eller et tal.';
+        } else {
+            errors.value.artskonto = null;
+        }
+    }
+
+    function validatePSPElement(value) {
+        const regex = /^X[A-Z]-\d{10}-\d{5}$/i; // Matches X[A-Z]-**********-***** (case-insensitive)
+        if (!regex.test(value)) {
+            errors.value.pspElement = 'PSP-element skal matche formatet X[A-Z]-**********-*****.';
+        } else {
+            errors.value.pspElement = null;
+        }
+    }
+
+    function validateDependencies() {
+        const artskonto = posting.value?.account || '';
+        const pspElement = posting.value?.accountSecondary || '';
+
+        if (artskonto[0] !== '9' && artskonto[0] !== 'S' && !pspElement) {
+            errors.value.pspElement = 'PSP-element er påkrævet, når Artskonto ikke starter med "9" eller "S".';
+        } else if (artskonto[0] === '9' || artskonto[0] === 'S') {
+            errors.value.pspElement = null; // Clear PSP-element error if not required
+        }
+    }
+
+    // Computed property to check if there are any validation errors
+    const hasValidationErrors = computed(() => {
+        return Object.values(errors.value).some(error => error !== null)
+    })
+
+
     function updatePosting() {
-        hasUpdated.value = false
+        if (hasValidationErrors.value) {
+            alert('Der er valideringsfejl. Ret venligst fejlene før du fortsætter.')
+            return
+        }
+        
         isUpdating.value = true
 
         const url = `/api/postings/${posting.value.transactionID}`
@@ -82,8 +133,6 @@
         })
     }
 
-    console.log(sortedGroups)
-
 </script>
 
 <template>
@@ -101,7 +150,7 @@
         <form @submit.prevent="">
             <fieldset>
                 <div class="bookPosting">
-                    <button id="submit" @click="updatePosting" class="green" :disabled="isUpdating">
+                    <button id="submit" @click="updatePosting" class="green" :disabled="isUpdating || hasValidationErrors">
                         <template v-if="isUpdating">Danner bilag ...</template>
                         <template v-else-if="hasUpdated">Bilag dannet</template>
                         <template v-else>Bogfør</template>
@@ -113,7 +162,33 @@
                         <h3>{{ group.name }}</h3>
                         <div v-for="(value, key) in group.fields" :key="key" :class="value.hidden ? 'hidden' : ''">
                             <label :for="key" class="capitalize">{{ key }}</label>
-                            <template v-if="key === 'Afsender' || key === 'Reference'">
+                            <template v-if="key === 'Artskonto'">
+                                <input
+                                    type="text"
+                                    placeholder="..."
+                                    :id="key"
+                                    v-if="posting != null && !value.hidden"
+                                    v-model="posting[value.key]"
+                                    @input="validateArtskonto(posting[value.key]); validateDependencies()"
+                                    @change="hasUpdated = false"
+                                    :disabled="value.mutable === false"
+                                />
+                                <span v-if="errors.artskonto" class="error">{{ errors.artskonto }}</span>
+                            </template>
+                            <template v-else-if="key === 'PSP-element'">
+                                <input
+                                    type="text"
+                                    placeholder="..."
+                                    :id="key"
+                                    v-if="posting != null && !value.hidden"
+                                    v-model="posting[value.key]"
+                                    @input="validatePSPElement(posting[value.key]); validateDependencies()"
+                                    @change="hasUpdated = false"
+                                    :disabled="value.mutable === false"
+                                />
+                                <span v-if="errors.pspElement" class="error">{{ errors.pspElement }}</span>
+                            </template>
+                            <template v-else-if="key === 'Afsender' || key === 'Reference'">
                                 <textarea
                                     placeholder="..."
                                     :id="key"
@@ -157,5 +232,11 @@
     .bookPosting {
         display: flex;
         justify-content: center;
+        margin-bottom: 3rem;
+    }
+    .error {
+        color: red;
+        font-size: 0.9em;
+        margin-top: 0.2em;
     }
 </style>

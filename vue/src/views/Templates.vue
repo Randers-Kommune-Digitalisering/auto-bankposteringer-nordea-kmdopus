@@ -21,8 +21,7 @@
         }
     ])
 
-    function addDataSample()
-    {
+    function addDataSample() {
         sampleData.value.push(newDataSample.value)
         newDataSample.value = {}
     }
@@ -30,11 +29,8 @@
     const newDataSample = ref({})
     const selectedData = ref({})
 
-    function clickItem(obj)
-    {
+    function clickItem(obj) {
         selectedData.value = obj
-        console.log(selectedData.value)
-        console.log("Clicked item: " + sampleData.value.findIndex(x => x == obj))
     }
 
     const rangeValue = ref(50)

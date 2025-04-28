@@ -74,9 +74,6 @@
     }
 
     function updateBankaccounts() {
-        console.log("Updating bank accounts")
-        console.log(bankaccounts.value)
-
         hasUpdated2.value = false
         isUpdating2.value = true
         
@@ -112,9 +109,6 @@
                 .then(data => {
                     authStatus.value = data;
                 })
-                .catch(error => {
-                    console.error('Error fetching auth status:', error);
-                });
         };
 
         // Fetch immediately and then set the interval for continuous polling
@@ -122,7 +116,7 @@
         pollInterval = setInterval(fetchAuthStatus, 1000); // Poll every second
     }
 
-    function pollForAuthRestartStatus(url, interval, maxRetries, onError, onSuccess) {
+    function pollForAuthRestartStatus(url, interval, maxRetries, onSuccess) {
         let retries = 0;
         let success = false;
 
@@ -130,22 +124,14 @@
             fetch(url)
                 .then(response => {
                     if (response.status === 200) {
-                        console.log('Authentication successful');
                         onSuccess();
                         success = true;
                         return;
                     }
                     else if (response.status === 202 && retries < maxRetries) {
-                        console.log('Still processing, status 202, retrying...');
                         retries++;
                         setTimeout(poll, interval); // Retry after specified interval
-                    } else {
-                        throw new Error(`Error: Status ${response.status}`);
                     }
-                })
-                .catch(error => {
-                    console.error(error);
-                    onError(error);
                 })
         };
 
@@ -159,9 +145,6 @@
             '/api/reauth',
             15000, // Poll every 15 seconds
             60,   // Max retries
-            (error) => { // onError
-                console.error(error);
-            },
             () => { // onSuccess
                 isUpdating3.value = false;
             }

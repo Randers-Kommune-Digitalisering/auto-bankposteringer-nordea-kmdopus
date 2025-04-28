@@ -17,14 +17,14 @@ const Node = {
   "checkall": "false",
   "repair": false,
   "outputs": 2,
-  "x": 705,
+  "x": 855,
   "y": 220,
   "wires": [
     [
-      "46beaf4a64b6f64a"
+      "45bdcb5fc64e9543"
     ],
     [
-      "60b663923937136d"
+      "7582ec071bb24715"
     ]
   ],
   "icon": "font-awesome/fa-question",
