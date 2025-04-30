@@ -46,7 +46,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   
       // When offset sets date to weekend, round down to friday
       date = date.subtract(offset, 'day');
-      while (date.day() > 5) {
+      while (date.day() === 0 || date.day() === 6) {
           date = date.subtract(1, 'day');
       }
   
