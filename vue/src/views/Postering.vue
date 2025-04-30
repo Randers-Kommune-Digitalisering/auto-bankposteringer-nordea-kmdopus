@@ -102,7 +102,6 @@
         return Object.values(errors.value).some(error => error !== null)
     })
 
-
     function updatePosting() {
         if (hasValidationErrors.value) {
             alert('Der er valideringsfejl. Ret venligst fejlene før du fortsætter.')
