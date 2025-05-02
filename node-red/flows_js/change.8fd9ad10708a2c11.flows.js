@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "$globalContext(\"transactions\").list.{\t  \"Bogføringsdato\": $string(booking_date).$replace(/-/, ''),\t  \"Beløb\": amount,\t  \"Posteringstype\": type_description,\t  \"Reference\": narrative,\t  \"Løbende_saldo\": $string(balance_after_transaction).$replace(/\\./, ','),\t  \"Statuskonto\": $string(relatedAccount.statusAccount)\t}",
+      "to": "$globalContext(\"transactions\").list.{\t  \"Bogføringsdato\": $string(booking_date).$replace(/-/, ''),\t  \"Beløb\": direction = \"incoming\" ? amount : \"-\" & amount,\t  \"Posteringstype\": type_description,\t  \"Reference\": narrative,\t  \"Løbende_saldo\": $string(balance_after_transaction).$replace(/\\./, ','),\t  \"Statuskonto\": $string(relatedAccount.statusAccount)\t}",
       "tot": "jsonata"
     },
     {
@@ -36,7 +36,8 @@ const Node = {
   "y": 360,
   "wires": [
     [
-      "4406b95204f5295a"
+      "4406b95204f5295a",
+      "1959b112eba6d0f7"
     ]
   ],
   "icon": "font-awesome/fa-cog",
