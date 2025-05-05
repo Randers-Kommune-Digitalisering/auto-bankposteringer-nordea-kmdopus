@@ -1,15 +1,15 @@
 const Node = {
-  "id": "f6a3452a9f8c7e6e",
+  "id": "e3b7a4ff93701ebc",
   "type": "link out",
   "z": "0a57a34536934723",
-  "g": "f0b2b6a944eaa19d",
-  "name": "go to restart run",
+  "g": "b9fd86e23e147a4d",
+  "name": "link out 1",
   "mode": "link",
   "links": [
-    "f069c4a9849dbff1"
+    "d0881f68240cc793"
   ],
-  "x": 735,
-  "y": 500,
+  "x": 785,
+  "y": 320,
   "wires": []
 }
 

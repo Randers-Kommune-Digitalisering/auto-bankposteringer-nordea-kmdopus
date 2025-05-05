@@ -151,6 +151,23 @@
         );
     }
 
+    function restartDatabase() {
+        if (confirm('Er du sikker på, at du vil genstarte databasen? Kørselshistorik og åbne posteringer slettes.')) {
+            fetch('/api/wipe-db')
+                .then(response => {
+                    if (response.ok) {
+                        alert('Databasen er blevet genstartet.');
+                    } else {
+                        throw new Error('Kunne ikke genstarte. Prøv igen senere.');
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('Der opstod en fejl under genstart.');
+                });
+        }
+    }
+
     // Retrieve updates to auth status
     onMounted(() => {
         pollForAuthStatus(); // Start continuous fetching when the component is mounted
@@ -216,11 +233,14 @@
             </tr>
         </table>
         <br />
-        <button @click="updateMasterdata()" :disabled="isUpdating">
-            <template v-if="isUpdating">Gemmer...</template>
-            <template v-if="hasUpdated">Ændringer gemt</template>
-            <template v-else><IconSave /></template>
-        </button>
+        <div class="flexbox">
+            <button @click="updateMasterdata()" :disabled="isUpdating">
+                <template v-if="isUpdating">Gemmer...</template>
+                <template v-if="hasUpdated">Ændringer gemt</template>
+                <template v-else><IconSave /></template>
+            </button>
+            <button @click="restartDatabase()" class="red">Genstart database</button>
+        </div>
     </Content>
 
     <Content>
@@ -258,3 +278,18 @@
         </div>
     </Content>
 </template>
+
+<style scoped>
+button.red {
+    background-color: #e74c3c; /* Red color */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button.red:hover {
+    background-color: #c0392b; /* Darker red on hover */
+}
+</style>
