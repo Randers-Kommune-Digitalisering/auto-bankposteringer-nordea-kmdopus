@@ -30,7 +30,7 @@ const Node = {
       "t": "set",
       "p": "configs.initialData.admSysData.integrationBool",
       "pt": "global",
-      "to": "false",
+      "to": "true",
       "tot": "bool"
     },
     {
