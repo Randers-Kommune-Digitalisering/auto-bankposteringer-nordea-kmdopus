@@ -166,7 +166,10 @@
                     <th>Behandl</th>
                 </tr>
             </thead>
-            <tr v-if="postings != null" v-for="(obj, index) in postings" :id="obj[keyMap['ID'].key]" :class="returningFrom == obj[keyMap['ID'].key] ? 'highlight' : ''">
+            <tr v-if="postings != null && postings.length === 0">
+                <td :colspan=" Object.keys(keyMap).length +1">Der er ingen posteringer at vise</td>
+            </tr>
+            <tr v-else-if="postings != null" v-for="(obj, index) in postings" :id="obj[keyMap['ID'].key]" :class="returningFrom == obj[keyMap['ID'].key] ? 'highlight' : ''">
                 <td v-for="(value, key) in keyMap" :class="(value.hidden ? 'hidden ' : '') + (key)">
                     {{ obj[value.key] }}
                 </td>
@@ -179,12 +182,6 @@
                         <IconEdit />
                     </button>
                 </router-link></td>
-            </tr>
-            <tr v-else-if="postings = []">
-                <td :colspan=" Object.keys(keyMap).length +1">Der er ingen posteringer at vise</td>
-            </tr>
-            <tr v-else>
-                <td :colspan="(Object.values(keyMap).filter(value => !value.hidden).length)+1">Indlæser...</td>
             </tr>
         </table>
     </Content>

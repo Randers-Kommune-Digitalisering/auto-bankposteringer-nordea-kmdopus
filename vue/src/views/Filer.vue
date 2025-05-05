@@ -5,6 +5,7 @@ import IconDoc from '@/components/icons/IconDoc.vue'
 import IconDownload from '../components/icons/IconDownload.vue';
 
 const groupedFiles = ref([])
+const downloadedFiles = ref(new Set(JSON.parse(localStorage.getItem('downloadedFiles') || '[]')))
 
 // Fetch and group files
 fetch('/api/files')
@@ -34,6 +35,12 @@ fetch('/api/files')
             manual: value.manual
         }))
     })
+
+function markAsDownloaded(groupKey) {
+    downloadedFiles.value.add(groupKey)
+    localStorage.setItem('downloadedFiles', JSON.stringify(Array.from(downloadedFiles.value)))
+}
+
 </script>
 
 <template>
@@ -59,20 +66,20 @@ fetch('/api/files')
                 <tr v-for="obj in groupedFiles" :key="obj.groupKey">
                     <td>{{ obj.groupKey }}</td>
                     <td>
-                        <a v-if="obj.output" :href="'/api/files/' + obj.groupKey + '.csv/download'">
-                            <button><IconDownload /></button>
+                        <a v-if="obj.output" :href="'/api/files/' + obj.groupKey + '.csv/download'" @click="markAsDownloaded(obj.groupKey)">
+                            <button :class="{ downloaded: downloadedFiles.has(obj.groupKey) }"><IconDownload /></button>
                         </a>
                         <button v-else disabled><IconDownload /></button>
                     </td>
                     <td>
-                        <a v-if="obj.recon" :href="'/api/files/' + obj.groupKey + '_afstem.csv/download'">
-                            <button><IconDownload /></button>
+                        <a v-if="obj.recon" :href="'/api/files/' + obj.groupKey + '_afstem.csv/download'" @click="markAsDownloaded(obj.groupKey + '_afstem')">
+                            <button :class="{ downloaded: downloadedFiles.has(obj.groupKey + '_afstem') }"><IconDownload /></button>
                         </a>
                         <button v-else disabled><IconDownload /></button>
                     </td>
                     <td>
-                        <a v-if="obj.manual" :href="'/api/files/' + obj.groupKey + '_manual.csv/download'">
-                            <button><IconDownload /></button>
+                        <a v-if="obj.manual" :href="'/api/files/' + obj.groupKey + '_manual.csv/download'" @click="markAsDownloaded(obj.groupKey + '_manual')">
+                            <button :class="{ downloaded: downloadedFiles.has(obj.groupKey + '_manual') }"><IconDownload /></button>
                         </a>
                         <button v-else disabled><IconDownload /></button>
                     </td>
@@ -80,5 +87,10 @@ fetch('/api/files')
             </tbody>
         </table>
     </Content>
-
 </template>
+
+<style scoped>
+    button.downloaded {
+        background-color: var(--randers-color-light) !important;
+    }
+</style>
