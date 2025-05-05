@@ -16,7 +16,8 @@
 
     const errors = ref({
         artskonto: null,
-        pspElement: null
+        pspElement: null,
+        cpr: null
     });
 
     // Fetch posting
@@ -86,9 +87,22 @@
         }
     }
 
+    function validateCPR(value) {
+        const regex = /((((0[1-9]|[12][0-9]|3[01])(0[13578]|10|12)(\d{2}))|(([0][1-9]|[12][0-9]|30)(0[469]|11)(\d{2}))|((0[1-9]|1[0-9]|2[0-8])(02)(\d{2}))|((29)(02)(00))|((29)(02)([2468][048]))|((29)(02)([13579][26])))[-]*\d{4})/gm;
+
+        if (!value) {
+            // Allow empty CPR field
+            errors.value.cpr = null;
+        } else if (!regex.test(value)) {
+            errors.value.cpr = 'CPR skal matche formatet DDMMÅÅ-XXXX eller DDMMÅÅXXXX.';
+        } else {
+            errors.value.cpr = null;
+        }
+    }
+
     function validateDependencies() {
-        const artskonto = posting.value?.account || '';
-        const pspElement = posting.value?.accountSecondary || '';
+        const artskonto = posting.value.account || '';
+        const pspElement = posting.value.accountSecondary || '';
 
         if (artskonto[0] !== '9' && artskonto[0] !== 'S' && !pspElement) {
             errors.value.pspElement = 'PSP-element er påkrævet, når Artskonto ikke starter med "9" eller "S".';
@@ -186,6 +200,19 @@
                                     :disabled="value.mutable === false"
                                 />
                                 <span v-if="errors.pspElement" class="error">{{ errors.pspElement }}</span>
+                            </template>
+                            <template v-else-if="key === 'CPR'">
+                                <input
+                                    type="text"
+                                    placeholder="..."
+                                    :id="key"
+                                    v-if="posting != null && !value.hidden"
+                                    v-model="posting[value.key]"
+                                    @input="validateCPR(posting[value.key])"
+                                    @change="hasUpdated = false"
+                                    :disabled="value.mutable === false"
+                                />
+                                <span v-if="errors.cpr" class="error">{{ errors.cpr }}</span>
                             </template>
                             <template v-else-if="key === 'Afsender' || key === 'Reference'">
                                 <textarea
