@@ -24,8 +24,7 @@
     const returningFrom = ref(returnFromParam ?? null)
     
     // Fetch regler
-    function fetchPostings()
-    {
+    function fetchPostings() {
         fetch('/api/postings/')
             .then(response => response = response.json())
             .then(value => allPostings.value = value)
@@ -36,8 +35,7 @@
     fetchPostings()
 
     // Watch and update rules if parameter changes
-    watch(() => route.params.type, (value) =>
-    {
+    watch(() => route.params.type, (value) => {
         type.value = value
         fetchPostings()
     })
@@ -51,8 +49,7 @@
         "ID": { "key": "transactionID", "hidden": true }
     }
     
-    function handleQueryParams()
-    {        
+    function handleQueryParams() {        
         if(isSearching.value)
         {
             search(searchKeyword.value)
@@ -66,8 +63,7 @@
     }
 
 
-    function toggleSearch()
-    {
+    function toggleSearch() {
         isSearching.value = !isSearching.value
 
         if(!isSearching.value)
@@ -76,8 +72,7 @@
             setTimeout(() => document.getElementById("searchInput").focus(), 50)
     }
 
-    function search(keyword)
-    {
+    function search(keyword) {
         if(allPostings.value == null)
             return
 
@@ -96,8 +91,7 @@
         }
     }
 
-    function searchList(list, keyword)
-    {
+    function searchList(list, keyword) {
         keyword = keyword.toLowerCase()
         keyword = keyword.trim()
         
@@ -109,8 +103,7 @@
                                 (x[keyMap.Bogføringsdato.key] != null && x[keyMap.Bogføringsdato.key] == keyword) )
     }
 
-    function scrollTo(id)
-    {
+    function scrollTo(id) {
         setTimeout(function()
         {
             const item = document.getElementById(id)
@@ -198,7 +191,7 @@
     .searchButtonDiv 
     {
         padding-left: 0.55rem;
-    }NEEDIT TWO
+    }
     .addButton
     {
         padding-right: 0.55rem;
