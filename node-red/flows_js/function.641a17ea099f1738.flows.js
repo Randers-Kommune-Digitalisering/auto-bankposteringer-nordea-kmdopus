@@ -38,14 +38,17 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   function findBookingDate() {
       let date = dayjs();
   
+      // Subtract offset days first (1 = second latest banking day)
+      date = date.subtract(offset, 'day');
+  
+      // Then subtract 1 more day if today is Monday (to skip weekend)
       if (date.day() === 1) {
-          date = date.subtract(3, 'day');
+          date = date.subtract(3, 'day'); // Monday → back to Friday
       } else {
-          date = date.subtract(1, 'day');
+          date = date.subtract(1, 'day'); // Other weekdays → back 1 day
       }
   
-      // When offset sets date to weekend, round down to friday
-      date = date.subtract(offset, 'day');
+      // Skip weekends
       while (date.day() === 0 || date.day() === 6) {
           date = date.subtract(1, 'day');
       }
