@@ -16,14 +16,14 @@ const Node = {
       "t": "set",
       "p": "user",
       "pt": "msg",
-      "to": "SFTP_USER",
+      "to": "SFTP_USERNAME",
       "tot": "env"
     },
     {
       "t": "set",
       "p": "password",
       "pt": "msg",
-      "to": "SFTP_PASS",
+      "to": "SFTP_PASSWORD",
       "tot": "env"
     },
     {
