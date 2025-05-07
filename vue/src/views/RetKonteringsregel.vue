@@ -216,8 +216,8 @@
             return
         }
 
-        if (posting.value.accountSecondary) {
-            posting.value.accountSecondary = padPSPElement(posting.value.accountSecondary);
+        if (konteringsregel.value.accountSecondary) {
+            konteringsregel.value.accountSecondary = padPSPElement(konteringsregel.value.accountSecondary);
         }
         
         isUpdating.value = true
