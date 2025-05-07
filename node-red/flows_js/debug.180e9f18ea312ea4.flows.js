@@ -8,7 +8,7 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "{\t   \"Message\": \"XML-file successfully transferred to SFTP-server\",\t   \"Succes\": payload.filepath ~> $exists() ? true : false,\t   \"Timestamp\": $now()\t}",
+  "complete": "{\t   \"Message\": \"XML-file successfully transferred to SFTP-server\",\t   \"Timestamp\": $now()\t}",
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
