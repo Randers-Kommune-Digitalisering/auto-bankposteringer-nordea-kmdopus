@@ -53,7 +53,9 @@
         "Beløb 1": { "key": "amount1" },
         "Beløb 2": { "key": "amount2" },
         "Artskonto": { "key": "account", "hidden": true },
+        "PSP-element": { "key": "accountSecondary", "hidden": true },
         "Posteringstekst": { "key": "text", "hidden": true },
+        "Bankkonto": { "key": "relatedBankAccount", "hidden": true },
         "Notat": { "key": "note", "hidden": true },
         "Sidst anvendt": { "key": "lastUsed"}
     }
@@ -113,11 +115,17 @@
         
         if(keyword == null)
             return list
-        return list.filter(x => (x[keyMap.Reference.key] != null && x[keyMap.Reference.key].toLowerCase().includes(keyword)) || /* Reference */
-                                (x[keyMap.Afsender.key] != null && x[keyMap.Afsender.key].toLowerCase().includes(keyword)) || /* Afsender */
-                                (x[keyMap.Posteringstype.key] != null && x[keyMap.Posteringstype.key].toLowerCase().includes(keyword)) || /* Posteringstype */
-                                (x[keyMap.Notat.key] != null && x[keyMap.Notat.key].toLowerCase().includes(keyword)) || /* Notat */
-                                (x[keyMap.id.key] != null && x[keyMap.id.key] == keyword) ) /* ruleID */
+        return list.filter(x => (x[keyMap.Reference.key] != null && x[keyMap.Reference.key].toLowerCase().includes(keyword)) ||
+                                (x[keyMap.Afsender.key] != null && x[keyMap.Afsender.key].toLowerCase().includes(keyword)) ||
+                                (x[keyMap.Posteringstype.key] != null && x[keyMap.Posteringstype.key].toLowerCase().includes(keyword)) ||
+                                (x[keyMap.Notat.key] != null && x[keyMap.Notat.key].toLowerCase().includes(keyword)) ||
+                                (x[keyMap["Beløb 1"].key] != null && x[keyMap["Beløb 1"].key].toLowerCase().includes(keyword)) ||
+                                (x[keyMap["Beløb 2"].key] != null && x[keyMap["Beløb 2"].key].toLowerCase().includes(keyword)) ||
+                                (x[keyMap.Bankkonto.key] != null && x[keyMap.Bankkonto.key].toLowerCase().includes(keyword)) ||
+                                (x[keyMap.Artskonto.key] != null && x[keyMap.Artskonto.key].toLowerCase().includes(keyword)) ||
+                                (x[keyMap["PSP-element"].key] != null && x[keyMap["PSP-element"].key].toLowerCase().includes(keyword)) ||
+                                (x[keyMap.Posteringstekst.key] != null && x[keyMap.Posteringstekst.key].toLowerCase().includes(keyword)) ||
+                                (x[keyMap.id.key] != null && x[keyMap.id.key] == keyword) )
     }
 
     function scrollTo(id)

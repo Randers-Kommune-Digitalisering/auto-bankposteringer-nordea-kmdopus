@@ -1,0 +1,4795 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<n1:FinancePostingRequest xmlns:n1="http://kmd.dk/fir/posting/external">
+  <CONTROL_FIELDS>
+    <SENDERID>P04CLNT730</SENDERID>
+    <RECEIVER>P04CLNT730</RECEIVER>
+    <FILE_NAME>ZFIR_KMD_Opus_Posteringer_IND_730_6ROB_20250507_084043.xml</FILE_NAME>
+    <SEND_DATE>20250507</SEND_DATE>
+    <SEND_TIME>084043</SEND_TIME>
+  </CONTROL_FIELDS>
+  <POSTING_DOCUMENT>
+    <HEADER>
+      <NO_DOC_POSITION>574</NO_DOC_POSITION>
+      <BALANCE_DEBET>1534891.34</BALANCE_DEBET>
+      <BALANCE_CREDIT>-1534891.34</BALANCE_CREDIT>
+      <MUNICIPALITY>730</MUNICIPALITY>
+      <COMP_CODE>0020</COMP_CODE>
+      <DOC_DATE>20250507</DOC_DATE>
+      <PSTNG_DATE>20250505</PSTNG_DATE>
+      <RECEIV_DOC>e2b0ecb781c1fc17</RECEIV_DOC>
+      <HEADER_TXT>6ROB</HEADER_TXT>
+      <XREF1_HD>6ROB</XREF1_HD>
+    </HEADER>
+    <LINES>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>522.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>1</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-522.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>2</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>3</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>4</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>5</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>6</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>370.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>7</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-370.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>8</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>9</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>10</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>996.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort - Kasernen</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>11</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-996.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort - Kasernen</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005228-00003</WBS_ELEMENT>
+        <REF_KEY_3>12</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>541.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort - Sundhedshuset</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>13</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-541.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort - Sundhedshuset</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005228-00003</WBS_ELEMENT>
+        <REF_KEY_3>14</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>159.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>15</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-159.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00031</WBS_ELEMENT>
+        <REF_KEY_3>16</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>75.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>17</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-75.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00045</WBS_ELEMENT>
+        <REF_KEY_3>18</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>4160.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort - Laksetorvet</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>19</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-4160.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort - Laksetorvet</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005228-00003</WBS_ELEMENT>
+        <REF_KEY_3>20</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>405.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>21</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-405.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004025-00002</WBS_ELEMENT>
+        <REF_KEY_3>22</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>200.00</AMT_DOCCUR>
+        <ITEM_TEXT>Dankort-salg 02.05 5078318 2823</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>23</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-200.00</AMT_DOCCUR>
+        <ITEM_TEXT>Dankort-salg 02.05 5078318 2823</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002667-00008</WBS_ELEMENT>
+        <REF_KEY_3>24</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>227.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>25</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-227.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>26</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1021.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>27</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1021.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>28</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>373.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>29</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-373.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>30</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>798.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>31</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-798.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>32</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>354.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>33</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-354.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>34</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>195.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>35</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-195.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>36</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>422.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>37</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-422.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>38</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>892.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>39</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-892.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>40</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>95.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>41</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-95.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>42</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>62.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>43</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-62.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>44</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>148.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>45</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-148.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>46</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>49.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>47</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-49.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>48</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>147.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>49</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-147.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>50</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>136.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>51</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-136.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>52</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>96.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>53</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-96.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>54</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>128.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>55</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-128.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>56</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>120.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>57</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-120.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>58</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>426.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>59</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-426.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>60</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>219.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>61</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-219.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>62</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>464.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>63</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-464.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>64</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>306.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>65</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-306.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>66</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>294.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>67</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-294.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>68</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>24.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>69</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-24.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>70</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>181.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>71</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-181.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>72</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>739.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>73</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-739.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>74</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>240.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>75</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-240.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>76</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>6300.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort 4862899</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>77</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-6300.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort 4862899</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005094-00001</WBS_ELEMENT>
+        <REF_KEY_3>78</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>3480.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort 4862899</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>79</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-3480.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort 4862899</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005094-00001</WBS_ELEMENT>
+        <REF_KEY_3>80</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>600.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>81</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-600.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931205</GL_ACCOUNT>
+        <REF_KEY_3>82</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>600.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>83</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-600.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931205</GL_ACCOUNT>
+        <REF_KEY_3>84</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>570.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>85</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-570.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00036</WBS_ELEMENT>
+        <REF_KEY_3>86</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>62.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>87</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-62.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00044</WBS_ELEMENT>
+        <REF_KEY_3>88</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1355.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>89</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1355.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00044</WBS_ELEMENT>
+        <REF_KEY_3>90</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>346.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>91</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-346.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00027</WBS_ELEMENT>
+        <REF_KEY_3>92</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>315.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>93</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-315.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00038</WBS_ELEMENT>
+        <REF_KEY_3>94</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>79.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>95</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-79.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00030</WBS_ELEMENT>
+        <REF_KEY_3>96</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>288.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>97</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-288.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00028</WBS_ELEMENT>
+        <REF_KEY_3>98</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>67.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>99</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-67.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00033</WBS_ELEMENT>
+        <REF_KEY_3>100</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1041.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>101</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1041.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00046</WBS_ELEMENT>
+        <REF_KEY_3>102</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>411.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>103</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-411.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00041</WBS_ELEMENT>
+        <REF_KEY_3>104</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>122.50</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort 2471043</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>105</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-122.50</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort 2471043</ITEM_TEXT>
+        <GL_ACCOUNT>95941300</GL_ACCOUNT>
+        <REF_KEY_3>106</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>25.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>107</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-25.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>95941202</GL_ACCOUNT>
+        <REF_KEY_3>108</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>13904.50</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Bambora</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>109</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-13904.50</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Bambora</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00009</WBS_ELEMENT>
+        <REF_KEY_3>110</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>34934.40</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Bambora</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>111</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-34934.40</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Bambora</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00009</WBS_ELEMENT>
+        <REF_KEY_3>112</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>117.78</AMT_DOCCUR>
+        <ITEM_TEXT>Overførsel 2025-03 Vindstød</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>113</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-117.78</AMT_DOCCUR>
+        <ITEM_TEXT>Overførsel 2025-03 Vindstød</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005311-00001</WBS_ELEMENT>
+        <REF_KEY_3>114</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>227.02</AMT_DOCCUR>
+        <ITEM_TEXT>Overførsel 2025-03 Vindstød</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>115</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-227.02</AMT_DOCCUR>
+        <ITEM_TEXT>Overførsel 2025-03 Vindstød</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005311-00001</WBS_ELEMENT>
+        <REF_KEY_3>116</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>169.45</AMT_DOCCUR>
+        <ITEM_TEXT>Overførsel 2025-03 Vindstød</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>117</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-169.45</AMT_DOCCUR>
+        <ITEM_TEXT>Overførsel 2025-03 Vindstød</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005311-00001</WBS_ELEMENT>
+        <REF_KEY_3>118</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>8284.00</AMT_DOCCUR>
+        <ITEM_TEXT>Overførsel N36549770447</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>119</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-8284.00</AMT_DOCCUR>
+        <ITEM_TEXT>Overførsel N36549770447</ITEM_TEXT>
+        <GL_ACCOUNT>91407040</GL_ACCOUNT>
+        <REF_KEY_3>120</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>17495.32</AMT_DOCCUR>
+        <ITEM_TEXT>Overførsel N27026770280</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>121</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-17495.32</AMT_DOCCUR>
+        <ITEM_TEXT>Overførsel N27026770280</ITEM_TEXT>
+        <GL_ACCOUNT>95950005</GL_ACCOUNT>
+        <REF_KEY_3>122</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>628.51</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933801</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>123</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-628.51</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933801</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>124</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>13501.40</AMT_DOCCUR>
+        <ITEM_TEXT>Udbetaling Danmark Bidrag</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>125</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-13501.40</AMT_DOCCUR>
+        <ITEM_TEXT>Udbetaling Danmark Bidrag</ITEM_TEXT>
+        <GL_ACCOUNT>95920000</GL_ACCOUNT>
+        <REF_KEY_3>126</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>19011.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933799</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>127</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-19011.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933799</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>128</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>4764.49</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933798</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>129</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-4764.49</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933798</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>130</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>14960.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933797</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>131</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-14960.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933797</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>132</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>9200.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933796</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>133</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-9200.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933796</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>134</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>11273.60</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933795</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>135</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-11273.60</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933795</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>136</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>11040.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933794</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>137</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-11040.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933794</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>138</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>14800.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933793</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>139</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-14800.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933793</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>140</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>14528.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933792</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>141</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-14528.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933792</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>142</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>928.15</AMT_DOCCUR>
+        <ITEM_TEXT>219961 041074 Iben H</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>143</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-928.15</AMT_DOCCUR>
+        <ITEM_TEXT>219961 041074 Iben H</ITEM_TEXT>
+        <GL_ACCOUNT>90520001</GL_ACCOUNT>
+        <REF_KEY_3>144</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>450.30</AMT_DOCCUR>
+        <ITEM_TEXT>219927 040587 Nicoli</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>145</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-450.30</AMT_DOCCUR>
+        <ITEM_TEXT>219927 040587 Nicoli</ITEM_TEXT>
+        <GL_ACCOUNT>90520001</GL_ACCOUNT>
+        <REF_KEY_3>146</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>450.30</AMT_DOCCUR>
+        <ITEM_TEXT>219926 270882 Louise</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>147</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-450.30</AMT_DOCCUR>
+        <ITEM_TEXT>219926 270882 Louise</ITEM_TEXT>
+        <GL_ACCOUNT>90520001</GL_ACCOUNT>
+        <REF_KEY_3>148</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>450.30</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933788</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>149</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-450.30</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933788</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>150</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>891.03</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933787</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>151</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-891.03</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933787</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>152</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>55286.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933786</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>153</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-55286.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933786</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>154</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>29718.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933785</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>155</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-29718.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933785</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>156</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>14442.52</AMT_DOCCUR>
+        <ITEM_TEXT>Udbetaling Danmark                 Meddelnr. 02346919025123</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>157</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-14442.52</AMT_DOCCUR>
+        <ITEM_TEXT>Udbetaling Danmark                 Meddelnr. 02346919025123</ITEM_TEXT>
+        <GL_ACCOUNT>90520001</GL_ACCOUNT>
+        <REF_KEY_3>158</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>18821.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933783</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>159</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-18821.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933783</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>160</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>13707.22</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933782</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>161</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-13707.22</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933782</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>162</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>6934.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933781</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>163</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-6934.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933781</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>164</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>100.00</AMT_DOCCUR>
+        <ITEM_TEXT>OY-BKL, 1/5 - 25.</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>165</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-100.00</AMT_DOCCUR>
+        <ITEM_TEXT>OY-BKL, 1/5 - 25.</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005086-00001</WBS_ELEMENT>
+        <REF_KEY_3>166</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>147.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933779</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>167</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-147.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933779</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>168</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>10273.00</AMT_DOCCUR>
+        <ITEM_TEXT>HSK, Rds. Bolig                    3006581985</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>169</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-10273.00</AMT_DOCCUR>
+        <ITEM_TEXT>HSK, Rds. Bolig                    3006581985</ITEM_TEXT>
+        <GL_ACCOUNT>90520001</GL_ACCOUNT>
+        <REF_KEY_3>170</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>200.00</AMT_DOCCUR>
+        <ITEM_TEXT>Boligselskabet af 2014</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>171</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-200.00</AMT_DOCCUR>
+        <ITEM_TEXT>Boligselskabet af 2014</ITEM_TEXT>
+        <GL_ACCOUNT>91407008</GL_ACCOUNT>
+        <REF_KEY_3>172</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>230.00</AMT_DOCCUR>
+        <ITEM_TEXT>Boligforeningen Kronjylland</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>173</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-230.00</AMT_DOCCUR>
+        <ITEM_TEXT>Boligforeningen Kronjylland</ITEM_TEXT>
+        <GL_ACCOUNT>91407008</GL_ACCOUNT>
+        <REF_KEY_3>174</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>640.00</AMT_DOCCUR>
+        <ITEM_TEXT>Boligorganisationen</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>175</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-640.00</AMT_DOCCUR>
+        <ITEM_TEXT>Boligorganisationen</ITEM_TEXT>
+        <GL_ACCOUNT>91407008</GL_ACCOUNT>
+        <REF_KEY_3>176</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-3830.87</AMT_DOCCUR>
+        <ITEM_TEXT>0310660124HTFP                     PSBGS25004732533                   3512516613      NTRF</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>177</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>3830.87</AMT_DOCCUR>
+        <ITEM_TEXT>0310660124HTFP                     PSBGS25004732533                   3512516613      NTRF</ITEM_TEXT>
+        <GL_ACCOUNT>95931701</GL_ACCOUNT>
+        <REF_KEY_3>178</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>750.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933773</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>179</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-750.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933773</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>180</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>32143.05</AMT_DOCCUR>
+        <ITEM_TEXT>Mobilepay 4000000000010405251</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>181</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-32143.05</AMT_DOCCUR>
+        <ITEM_TEXT>Mobilepay 4000000000010405251</ITEM_TEXT>
+        <GL_ACCOUNT>91407041</GL_ACCOUNT>
+        <REF_KEY_3>182</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1491.50</AMT_DOCCUR>
+        <ITEM_TEXT>Mobilepay 3000000000010405252</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>183</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1491.50</AMT_DOCCUR>
+        <ITEM_TEXT>Mobilepay 3000000000010405252</ITEM_TEXT>
+        <GL_ACCOUNT>91407041</GL_ACCOUNT>
+        <REF_KEY_3>184</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>563.50</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>185</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-563.50</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00044</WBS_ELEMENT>
+        <REF_KEY_3>186</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>45.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>187</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-45.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00033</WBS_ELEMENT>
+        <REF_KEY_3>188</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>149.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>189</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-149.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00038</WBS_ELEMENT>
+        <REF_KEY_3>190</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>69.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>191</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-69.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00030</WBS_ELEMENT>
+        <REF_KEY_3>192</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>44.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>193</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-44.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00036</WBS_ELEMENT>
+        <REF_KEY_3>194</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1500.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>195</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1500.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002415-00039</WBS_ELEMENT>
+        <REF_KEY_3>196</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>200.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay - Siam</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>197</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-200.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay - Siam</ITEM_TEXT>
+        <GL_ACCOUNT>95941300</GL_ACCOUNT>
+        <REF_KEY_3>198</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1800.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>199</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1800.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000003397-00016</WBS_ELEMENT>
+        <REF_KEY_3>200</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>280.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>201</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-280.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002461-00001</WBS_ELEMENT>
+        <REF_KEY_3>202</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>245.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>203</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-245.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002475-00016</WBS_ELEMENT>
+        <REF_KEY_3>204</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>500.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>205</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-500.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002426-00017</WBS_ELEMENT>
+        <REF_KEY_3>206</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>250.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>207</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-250.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002465-00029</WBS_ELEMENT>
+        <REF_KEY_3>208</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>60.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>209</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-60.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00026</WBS_ELEMENT>
+        <REF_KEY_3>210</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>450.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>211</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-450.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002585-00001</WBS_ELEMENT>
+        <REF_KEY_3>212</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>75.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>213</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-75.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002564-00001</WBS_ELEMENT>
+        <REF_KEY_3>214</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>40.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay - Borup Byvej</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>215</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-40.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay - Borup Byvej</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002890-00056</WBS_ELEMENT>
+        <REF_KEY_3>216</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>250.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>217</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-250.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002359-00016</WBS_ELEMENT>
+        <REF_KEY_3>218</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>120.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>219</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-120.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002481-00010</WBS_ELEMENT>
+        <REF_KEY_3>220</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>162.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>221</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-162.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>95930008</GL_ACCOUNT>
+        <REF_KEY_3>222</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>163156.40</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933979</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>223</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-163156.40</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933979</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>224</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-300.00</AMT_DOCCUR>
+        <ITEM_TEXT>Cap NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>225</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>300.00</AMT_DOCCUR>
+        <ITEM_TEXT>Cap NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>95931701</GL_ACCOUNT>
+        <REF_KEY_3>226</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-3040.00</AMT_DOCCUR>
+        <ITEM_TEXT>Cap NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>227</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>3040.00</AMT_DOCCUR>
+        <ITEM_TEXT>Cap NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>95931701</GL_ACCOUNT>
+        <REF_KEY_3>228</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-7000.00</AMT_DOCCUR>
+        <ITEM_TEXT>Cap NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>229</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>7000.00</AMT_DOCCUR>
+        <ITEM_TEXT>Cap NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>95931701</GL_ACCOUNT>
+        <REF_KEY_3>230</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-93.00</AMT_DOCCUR>
+        <ITEM_TEXT>Cap NKS-KP</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>231</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>93.00</AMT_DOCCUR>
+        <ITEM_TEXT>Cap NKS-KP</ITEM_TEXT>
+        <GL_ACCOUNT>95931700</GL_ACCOUNT>
+        <REF_KEY_3>232</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-23167.23</AMT_DOCCUR>
+        <ITEM_TEXT>RG-250506 29 ACONTO</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>233</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>23167.23</AMT_DOCCUR>
+        <ITEM_TEXT>RG-250506 29 ACONTO</ITEM_TEXT>
+        <GL_ACCOUNT>95910014</GL_ACCOUNT>
+        <REF_KEY_3>234</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-10798.00</AMT_DOCCUR>
+        <ITEM_TEXT>NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>235</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>10798.00</AMT_DOCCUR>
+        <ITEM_TEXT>NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>95931701</GL_ACCOUNT>
+        <REF_KEY_3>236</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-753.36</AMT_DOCCUR>
+        <ITEM_TEXT>NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>237</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>753.36</AMT_DOCCUR>
+        <ITEM_TEXT>NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>95931701</GL_ACCOUNT>
+        <REF_KEY_3>238</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-9266.76</AMT_DOCCUR>
+        <ITEM_TEXT>NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>239</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>9266.76</AMT_DOCCUR>
+        <ITEM_TEXT>NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>95931701</GL_ACCOUNT>
+        <REF_KEY_3>240</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-15055.80</AMT_DOCCUR>
+        <ITEM_TEXT>NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>241</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>15055.80</AMT_DOCCUR>
+        <ITEM_TEXT>NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>95931701</GL_ACCOUNT>
+        <REF_KEY_3>242</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-556.76</AMT_DOCCUR>
+        <ITEM_TEXT>NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>243</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>556.76</AMT_DOCCUR>
+        <ITEM_TEXT>NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>95931701</GL_ACCOUNT>
+        <REF_KEY_3>244</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-537.79</AMT_DOCCUR>
+        <ITEM_TEXT>NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>245</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>537.79</AMT_DOCCUR>
+        <ITEM_TEXT>NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>95931701</GL_ACCOUNT>
+        <REF_KEY_3>246</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1684.10</AMT_DOCCUR>
+        <ITEM_TEXT>NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>247</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1684.10</AMT_DOCCUR>
+        <ITEM_TEXT>NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>95931701</GL_ACCOUNT>
+        <REF_KEY_3>248</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-993.40</AMT_DOCCUR>
+        <ITEM_TEXT>NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>249</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>993.40</AMT_DOCCUR>
+        <ITEM_TEXT>NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>95931701</GL_ACCOUNT>
+        <REF_KEY_3>250</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-341202.18</AMT_DOCCUR>
+        <ITEM_TEXT>NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>251</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>341202.18</AMT_DOCCUR>
+        <ITEM_TEXT>NKS-KY</ITEM_TEXT>
+        <GL_ACCOUNT>95931701</GL_ACCOUNT>
+        <REF_KEY_3>252</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-60.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933961</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>253</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>60.00</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933961</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>254</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>14085.94</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via FIK</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>255</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-14085.94</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via FIK</ITEM_TEXT>
+        <GL_ACCOUNT>91407004</GL_ACCOUNT>
+        <REF_KEY_3>256</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>82387.90</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via FIK</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>257</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-82387.90</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via FIK</ITEM_TEXT>
+        <GL_ACCOUNT>91407030</GL_ACCOUNT>
+        <REF_KEY_3>258</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>5171.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via FIK</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>259</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-5171.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via FIK</ITEM_TEXT>
+        <GL_ACCOUNT>91407005</GL_ACCOUNT>
+        <REF_KEY_3>260</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>13624.37</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via FIK</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>261</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-13624.37</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via FIK</ITEM_TEXT>
+        <GL_ACCOUNT>91407003</GL_ACCOUNT>
+        <REF_KEY_3>262</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>219096.97</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933956</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>263</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-219096.97</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933956</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>264</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-14973.62</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933955</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>265</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>14973.62</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933955</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>266</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-455.26</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933954</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>267</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>455.26</AMT_DOCCUR>
+        <ITEM_TEXT>P5908764988202505050000933954</ITEM_TEXT>
+        <GL_ACCOUNT>95990009</GL_ACCOUNT>
+        <REF_KEY_3>268</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>750.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>269</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-750.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004025-00002</WBS_ELEMENT>
+        <REF_KEY_3>270</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>200.00</AMT_DOCCUR>
+        <ITEM_TEXT>Dankort-salg 04.05 5078318 2826</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>271</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-200.00</AMT_DOCCUR>
+        <ITEM_TEXT>Dankort-salg 04.05 5078318 2826</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002667-00008</WBS_ELEMENT>
+        <REF_KEY_3>272</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>24.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>273</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-24.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>274</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>52.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>275</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-52.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>276</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>120.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>277</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-120.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>278</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>120.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>279</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-120.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>280</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>120.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>281</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-120.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>282</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>69.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>283</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-69.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>284</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>120.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>285</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-120.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>286</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>5.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>287</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-5.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>288</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>17.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>289</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-17.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>290</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>32.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>291</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-32.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>292</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>35.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>293</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-35.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>294</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1570.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort 4862899</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>295</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1570.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort 4862899</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005094-00001</WBS_ELEMENT>
+        <REF_KEY_3>296</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>5700.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort 4862899</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>297</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-5700.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort 4862899</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005094-00001</WBS_ELEMENT>
+        <REF_KEY_3>298</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>495.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>299</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-495.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00036</WBS_ELEMENT>
+        <REF_KEY_3>300</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1908.50</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>301</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1908.50</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00044</WBS_ELEMENT>
+        <REF_KEY_3>302</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>114.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>303</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-114.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00027</WBS_ELEMENT>
+        <REF_KEY_3>304</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>358.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>305</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-358.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00038</WBS_ELEMENT>
+        <REF_KEY_3>306</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>66.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>307</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-66.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00033</WBS_ELEMENT>
+        <REF_KEY_3>308</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>702.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort 2471043</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>309</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-702.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort 2471043</ITEM_TEXT>
+        <GL_ACCOUNT>95941300</GL_ACCOUNT>
+        <REF_KEY_3>310</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>6008.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>311</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-6008.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000003040-00046</WBS_ELEMENT>
+        <REF_KEY_3>312</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>90.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>313</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-90.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004025-00002</WBS_ELEMENT>
+        <REF_KEY_3>314</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>713.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort 5247969</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>315</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-713.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort 5247969</ITEM_TEXT>
+        <GL_ACCOUNT>95941300</GL_ACCOUNT>
+        <REF_KEY_3>316</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>150.00</AMT_DOCCUR>
+        <ITEM_TEXT>Dankort-salg 03.05 5078318 2824</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>317</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-150.00</AMT_DOCCUR>
+        <ITEM_TEXT>Dankort-salg 03.05 5078318 2824</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002667-00008</WBS_ELEMENT>
+        <REF_KEY_3>318</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>217.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>319</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-217.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>320</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>120.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>321</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-120.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>322</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>185.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>323</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-185.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>324</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>120.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>325</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-120.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>326</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>304.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>327</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-304.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>328</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>2765.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>329</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-2765.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>330</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>272.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>331</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-272.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>332</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>119.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>333</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-119.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>334</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>206.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>335</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-206.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>336</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>60.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>337</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-60.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>338</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>116.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>339</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-116.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>340</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>327.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>341</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-327.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>342</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>106.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>343</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-106.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>344</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>95.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>345</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-95.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>346</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>52.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>347</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-52.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>348</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>86.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>349</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-86.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>350</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>426.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>351</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-426.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>352</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>97.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>353</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-97.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>354</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>945.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>355</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-945.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>356</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>209.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>357</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-209.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>358</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>501.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>359</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-501.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>360</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>197.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>361</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-197.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>362</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>38.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>363</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-38.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>364</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1036.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>365</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1036.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>366</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>120.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>367</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-120.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005096-00001</WBS_ELEMENT>
+        <REF_KEY_3>368</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1815.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort 4862899</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>369</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1815.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort 4862899</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005094-00001</WBS_ELEMENT>
+        <REF_KEY_3>370</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>4880.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort 4862899</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>371</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-4880.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort 4862899</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005094-00001</WBS_ELEMENT>
+        <REF_KEY_3>372</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>380.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>373</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-380.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000003040-00018</WBS_ELEMENT>
+        <REF_KEY_3>374</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>434.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>375</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-434.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00036</WBS_ELEMENT>
+        <REF_KEY_3>376</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1324.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>377</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1324.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00044</WBS_ELEMENT>
+        <REF_KEY_3>378</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>348.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>379</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-348.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00027</WBS_ELEMENT>
+        <REF_KEY_3>380</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>164.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>381</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-164.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00038</WBS_ELEMENT>
+        <REF_KEY_3>382</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>155.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>383</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-155.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00033</WBS_ELEMENT>
+        <REF_KEY_3>384</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1330.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort 2471043</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>385</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1330.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort 2471043</ITEM_TEXT>
+        <GL_ACCOUNT>95941300</GL_ACCOUNT>
+        <REF_KEY_3>386</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>50.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>387</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-50.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>95941202</GL_ACCOUNT>
+        <REF_KEY_3>388</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>321.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>389</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-321.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via betalingskort</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000003040-00046</WBS_ELEMENT>
+        <REF_KEY_3>390</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>391</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>392</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>393</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>394</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>322.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>395</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-322.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>396</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>290.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>397</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-290.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>398</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>290.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>399</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-290.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>400</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>401</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>402</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>522.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>403</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-522.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>404</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>405</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>406</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>407</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>408</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>522.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>409</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-522.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>410</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>411</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>412</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>322.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>413</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-322.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>414</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>290.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>415</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-290.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>416</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>417</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>418</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>522.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>419</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-522.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>420</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>290.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>421</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-290.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>422</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>423</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>424</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>425</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>426</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>427</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>428</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>429</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>430</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>431</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>432</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>433</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>434</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>435</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>436</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>894.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>437</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-894.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>438</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>290.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>439</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-290.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>440</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>441</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>442</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>330.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>443</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-330.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>444</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>140.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>445</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-140.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>446</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>447</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>448</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>449</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1034.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via Dankort</ITEM_TEXT>
+        <GL_ACCOUNT>95931206</GL_ACCOUNT>
+        <REF_KEY_3>450</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>30783.50</AMT_DOCCUR>
+        <ITEM_TEXT>Mobilepay 4000000000010305254</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>451</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-30783.50</AMT_DOCCUR>
+        <ITEM_TEXT>Mobilepay 4000000000010305254</ITEM_TEXT>
+        <GL_ACCOUNT>91407041</GL_ACCOUNT>
+        <REF_KEY_3>452</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>475.53</AMT_DOCCUR>
+        <ITEM_TEXT>Mobilepay 3000000000010305255</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>453</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-475.53</AMT_DOCCUR>
+        <ITEM_TEXT>Mobilepay 3000000000010305255</ITEM_TEXT>
+        <GL_ACCOUNT>91407041</GL_ACCOUNT>
+        <REF_KEY_3>454</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>224.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>455</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-224.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00044</WBS_ELEMENT>
+        <REF_KEY_3>456</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>25.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>457</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-25.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00033</WBS_ELEMENT>
+        <REF_KEY_3>458</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>73.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>459</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-73.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00038</WBS_ELEMENT>
+        <REF_KEY_3>460</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>56.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>461</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-56.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00030</WBS_ELEMENT>
+        <REF_KEY_3>462</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>25.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>463</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-25.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00036</WBS_ELEMENT>
+        <REF_KEY_3>464</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>50.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (MSS Professional)</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>465</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-50.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (MSS Professional)</ITEM_TEXT>
+        <GL_ACCOUNT>95941203</GL_ACCOUNT>
+        <REF_KEY_3>466</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>190.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>467</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-190.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000003040-00046</WBS_ELEMENT>
+        <REF_KEY_3>468</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>50.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>469</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-50.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000003038-00105</WBS_ELEMENT>
+        <REF_KEY_3>470</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>60.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>471</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-60.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000003040-00018</WBS_ELEMENT>
+        <REF_KEY_3>472</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>230.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>473</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-230.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002475-00016</WBS_ELEMENT>
+        <REF_KEY_3>474</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>50.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>475</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-50.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002465-00029</WBS_ELEMENT>
+        <REF_KEY_3>476</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>3085.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>477</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-3085.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>95941300</GL_ACCOUNT>
+        <REF_KEY_3>478</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>30.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>479</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-30.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00051</WBS_ELEMENT>
+        <REF_KEY_3>480</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>75.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>481</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-75.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000003070-00001</WBS_ELEMENT>
+        <REF_KEY_3>482</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>40.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>483</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-40.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000003038-00036</WBS_ELEMENT>
+        <REF_KEY_3>484</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>220.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>485</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-220.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004025-00002</WBS_ELEMENT>
+        <REF_KEY_3>486</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>675.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay - Musical/skolefest</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>487</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-675.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay - Musical/skolefest</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002488-00025</WBS_ELEMENT>
+        <REF_KEY_3>488</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>50.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>489</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-50.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00036</WBS_ELEMENT>
+        <REF_KEY_3>490</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>500.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>491</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-500.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005063-00011</WBS_ELEMENT>
+        <REF_KEY_3>492</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>185.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>493</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-185.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005050-00003</WBS_ELEMENT>
+        <REF_KEY_3>494</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>71.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay - Købmandsgården</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>495</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-71.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay - Købmandsgården</ITEM_TEXT>
+        <GL_ACCOUNT>95941300</GL_ACCOUNT>
+        <REF_KEY_3>496</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>225.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>497</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-225.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002359-00016</WBS_ELEMENT>
+        <REF_KEY_3>498</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>800.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>499</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-800.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002481-00010</WBS_ELEMENT>
+        <REF_KEY_3>500</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>495.05</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>501</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-495.05</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005285-00040</WBS_ELEMENT>
+        <REF_KEY_3>502</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>63785.10</AMT_DOCCUR>
+        <ITEM_TEXT>Mobilepay 4000000000010205257</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>503</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-63785.10</AMT_DOCCUR>
+        <ITEM_TEXT>Mobilepay 4000000000010205257</ITEM_TEXT>
+        <GL_ACCOUNT>91407041</GL_ACCOUNT>
+        <REF_KEY_3>504</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>3136.52</AMT_DOCCUR>
+        <ITEM_TEXT>Mobilepay 3000000000010205258</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>505</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-3136.52</AMT_DOCCUR>
+        <ITEM_TEXT>Mobilepay 3000000000010205258</ITEM_TEXT>
+        <GL_ACCOUNT>91407041</GL_ACCOUNT>
+        <REF_KEY_3>506</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1030.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>507</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1030.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00044</WBS_ELEMENT>
+        <REF_KEY_3>508</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>228.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>509</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-228.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00041</WBS_ELEMENT>
+        <REF_KEY_3>510</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>58.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>511</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-58.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00033</WBS_ELEMENT>
+        <REF_KEY_3>512</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>84.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>513</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-84.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00048</WBS_ELEMENT>
+        <REF_KEY_3>514</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>279.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>515</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-279.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00038</WBS_ELEMENT>
+        <REF_KEY_3>516</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>493.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>517</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-493.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00046</WBS_ELEMENT>
+        <REF_KEY_3>518</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>307.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>519</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-307.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00030</WBS_ELEMENT>
+        <REF_KEY_3>520</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>247.50</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>521</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-247.50</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00036</WBS_ELEMENT>
+        <REF_KEY_3>522</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>567.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>523</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-567.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay (OnlinePOS)</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00045</WBS_ELEMENT>
+        <REF_KEY_3>524</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>127.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>525</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-127.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00040</WBS_ELEMENT>
+        <REF_KEY_3>526</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>459.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>527</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-459.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002511-00021</WBS_ELEMENT>
+        <REF_KEY_3>528</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>35.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>529</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-35.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00041</WBS_ELEMENT>
+        <REF_KEY_3>530</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>189.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>531</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-189.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000003040-00046</WBS_ELEMENT>
+        <REF_KEY_3>532</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1800.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>533</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1800.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000003397-00016</WBS_ELEMENT>
+        <REF_KEY_3>534</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>560.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>535</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-560.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002461-00001</WBS_ELEMENT>
+        <REF_KEY_3>536</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>165.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>537</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-165.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00018</WBS_ELEMENT>
+        <REF_KEY_3>538</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>140.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>539</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-140.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000003040-00018</WBS_ELEMENT>
+        <REF_KEY_3>540</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>8.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>541</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-8.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00044</WBS_ELEMENT>
+        <REF_KEY_3>542</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>440.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>543</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-440.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002475-00016</WBS_ELEMENT>
+        <REF_KEY_3>544</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>300.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>545</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-300.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002426-00017</WBS_ELEMENT>
+        <REF_KEY_3>546</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>971.50</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>547</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-971.50</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90100011</GL_ACCOUNT>
+        <REF_KEY_3>548</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>165.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>549</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-165.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00037</WBS_ELEMENT>
+        <REF_KEY_3>550</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>250.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>551</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-250.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002465-00029</WBS_ELEMENT>
+        <REF_KEY_3>552</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1434.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>553</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1434.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00026</WBS_ELEMENT>
+        <REF_KEY_3>554</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>287.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>555</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-287.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004526-00051</WBS_ELEMENT>
+        <REF_KEY_3>556</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>675.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>557</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-675.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002585-00001</WBS_ELEMENT>
+        <REF_KEY_3>558</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1500.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>559</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1500.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000004087-00001</WBS_ELEMENT>
+        <REF_KEY_3>560</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>225.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay - Musical/skolefest</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>561</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-225.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay - Musical/skolefest</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002488-00025</WBS_ELEMENT>
+        <REF_KEY_3>562</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>10.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>563</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-10.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002564-00001</WBS_ELEMENT>
+        <REF_KEY_3>564</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>2000.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>565</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-2000.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005063-00011</WBS_ELEMENT>
+        <REF_KEY_3>566</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>175.50</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>567</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-175.50</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>72000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000002598-00003</WBS_ELEMENT>
+        <REF_KEY_3>568</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>65.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay - Købmandsgården</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>569</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-65.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay - Købmandsgården</ITEM_TEXT>
+        <GL_ACCOUNT>95941300</GL_ACCOUNT>
+        <REF_KEY_3>570</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>1568.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>571</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-1568.00</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>95930008</GL_ACCOUNT>
+        <REF_KEY_3>572</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>D</DEB_CRED_IND>
+        <AMT_DOCCUR>990.10</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>90540000</GL_ACCOUNT>
+        <REF_KEY_3>573</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+      <LINE>
+        <DEB_CRED_IND>K</DEB_CRED_IND>
+        <AMT_DOCCUR>-990.10</AMT_DOCCUR>
+        <ITEM_TEXT>Indtægter via MobilePay</ITEM_TEXT>
+        <GL_ACCOUNT>79000000</GL_ACCOUNT>
+        <WBS_ELEMENT>XG-0000005285-00040</WBS_ELEMENT>
+        <REF_KEY_3>574</REF_KEY_3>
+        <ZZCSYSIDN>6ROB</ZZCSYSIDN>
+      </LINE>
+    </LINES>
+  </POSTING_DOCUMENT>
+</n1:FinancePostingRequest>
