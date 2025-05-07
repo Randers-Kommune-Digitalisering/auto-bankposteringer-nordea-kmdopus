@@ -174,12 +174,24 @@
     }
     
     function validatePSPElement(value) {
-        const regex = /^X[A-Z]-\d{10}-\d{5}$/i; // Matches X[A-Z]-**********-***** (case-insensitive)
+        const regex = /^X[A-Z]-\d{1,10}-\d{1,5}$/i; // Matches X[A-Z]-* (1-10 digits) -* (1-5 digits)
         if (!regex.test(value)) {
             errors.value.pspElement = 'PSP-element skal matche formatet X[A-Z]-**********-*****.';
         } else {
             errors.value.pspElement = null;
         }
+    }
+
+    function padPSPElement(value) {
+        const regex = /^X([A-Z])-(\d{1,10})-(\d{1,5})$/i;
+        const match = value.match(regex);
+        if (match) {
+            const part1 = match[1];
+            const part2 = match[2].padStart(10, '0'); // Pad the second substring to 10 digits
+            const part3 = match[3].padStart(5, '0');  // Pad the third substring to 5 digits
+            return `X${part1}-${part2}-${part3}`;
+        }
+        return value; // Return the original value if it doesn't match the regex
     }
 
     function validateDependencies() {
@@ -202,6 +214,10 @@
         if (hasValidationErrors.value) {
             alert('Der er valideringsfejl. Ret venligst fejlene før du fortsætter.')
             return
+        }
+
+        if (posting.value.accountSecondary) {
+            posting.value.accountSecondary = padPSPElement(posting.value.accountSecondary);
         }
         
         isUpdating.value = true
