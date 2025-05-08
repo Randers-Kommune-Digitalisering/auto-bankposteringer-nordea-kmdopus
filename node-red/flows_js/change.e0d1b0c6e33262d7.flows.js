@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "encoding",
       "pt": "msg",
-      "to": "utf-8",
+      "to": "cp1252",
       "tot": "str"
     }
   ],

@@ -9,7 +9,7 @@ const Node = {
   "appendNewline": true,
   "createDir": true,
   "overwriteFile": "true",
-  "encoding": "none",
+  "encoding": "setbymsg",
   "x": 355,
   "y": 340,
   "wires": [
