@@ -4,9 +4,9 @@ const Node = {
   "z": "0a57a34536934723",
   "g": "f5b0f2cb9d251540",
   "name": "",
-  "statusCode": "200",
+  "statusCode": "",
   "headers": {},
-  "x": 1175,
+  "x": 1225,
   "y": 160,
   "wires": [],
   "l": false

@@ -9,6 +9,13 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
+      "to": "erp.formattedPostings",
+      "tot": "global"
+    },
+    {
+      "t": "set",
+      "p": "payload",
+      "pt": "msg",
       "to": "$join(\t  $filter(\t    $split($string(payload), \"\\n\"),\t    function($v, $i, $a) {\t      $i > 0\t    }\t  ),\t  \"\\n\"\t)",
       "tot": "jsonata"
     }
