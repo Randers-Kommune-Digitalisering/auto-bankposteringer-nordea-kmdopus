@@ -22,9 +22,9 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  let postings = global.get("erp").postings;
   let formattedPostings = [];
   let suffix = global.get("transactions").manual ? "_manual" : "";
+  const postings = global.get("erp").postings;
   const manualBool = global.get("transactions").manual ? global.get("transactions").manual : undefined;
   
   for (let posting of postings) {
@@ -32,6 +32,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   }
   
   msg.payload = formattedPostings;
+  
   msg.columns = global.get("configs").erp.csvHeaders;
   msg.filename = "/data/output/" + global.get("dates").bookingDate + suffix + ".csv";
   

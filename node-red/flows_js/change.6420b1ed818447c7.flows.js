@@ -32,6 +32,13 @@ const Node = {
       "pt": "global",
       "to": "uid",
       "tot": "msg"
+    },
+    {
+      "t": "set",
+      "p": "res",
+      "pt": "flow",
+      "to": "res",
+      "tot": "msg"
     }
   ],
   "action": "",
@@ -43,8 +50,7 @@ const Node = {
   "y": 160,
   "wires": [
     [
-      "ea5478841b46be30",
-      "1ae55ae91ab4dbf4"
+      "ea5478841b46be30"
     ]
   ],
   "icon": "font-awesome/fa-cog",

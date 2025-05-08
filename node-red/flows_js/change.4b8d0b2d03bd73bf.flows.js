@@ -11,6 +11,13 @@ const Node = {
       "pt": "msg",
       "to": "utf-8",
       "tot": "str"
+    },
+    {
+      "t": "set",
+      "p": "erp.formattedPostings",
+      "pt": "global",
+      "to": "payload",
+      "tot": "msg"
     }
   ],
   "action": "",

@@ -8,12 +8,12 @@ const Node = {
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "true",
-  "targetType": "full",
+  "complete": "{\t    \"Message\": \"File deletion status\",\t    \"Deleted files\": deletedFiles\t}",
+  "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
   "x": 425,
-  "y": 920,
+  "y": 1100,
   "wires": [],
   "l": false
 }

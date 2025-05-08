@@ -20,7 +20,7 @@ const Node = {
     }
   ],
   "x": 325,
-  "y": 920,
+  "y": 1100,
   "wires": [
     [
       "delete-files"
@@ -41,6 +41,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, fs
   }).map(file => file.filename);
   
   msg.files = oldFiles;
+  msg.deletedFiles = oldFiles;
   
   return msg;
 }

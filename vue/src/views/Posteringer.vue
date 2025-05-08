@@ -40,7 +40,6 @@
         fetchPostings()
     })
 
-
     const keyMap = {
         "Bogføringsdato": { "key": "bookingDate" },
         "Afsender": { "key": "sender" }, 
