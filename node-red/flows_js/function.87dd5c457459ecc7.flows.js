@@ -36,8 +36,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           relatedAccount: accountValue  // Add the new key-value pair
       }));
   
-      // Merge new transactions with existing ones
-      transactions = transactions.concat(addTransactions);
+      // Add new transactions at the beginning of the list
+      transactions = addTransactions.concat(transactions);
   
       // Update the flow variable with the modified array
       transactionsObj.list = transactions;
