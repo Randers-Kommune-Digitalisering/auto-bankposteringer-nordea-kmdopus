@@ -7,7 +7,7 @@ const Node = {
   "sep": ";",
   "hdrin": true,
   "hdrout": "all",
-  "multi": "one",
+  "multi": "mult",
   "ret": "\\r\\n",
   "temp": "",
   "skip": "0",

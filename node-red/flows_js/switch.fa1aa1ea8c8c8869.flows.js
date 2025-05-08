@@ -1,5 +1,5 @@
 const Node = {
-  "id": "55fd4e2e82581fb7",
+  "id": "fa1aa1ea8c8c8869",
   "type": "switch",
   "z": "30ea9c666c3d34a6",
   "g": "25a291d67b31ccca",
@@ -8,28 +8,30 @@ const Node = {
   "propertyType": "global",
   "rules": [
     {
-      "t": "nempty"
+      "t": "istype",
+      "v": "undefined",
+      "vt": "undefined"
     },
     {
       "t": "else"
     }
   ],
-  "checkall": "false",
+  "checkall": "true",
   "repair": false,
   "outputs": 2,
   "x": 105,
-  "y": 700,
+  "y": 880,
   "wires": [
     [
-      "225810e12abada52"
+      "f4e0040b386fade6"
     ],
     [
-      "f4e0040b386fade6"
+      "225810e12abada52"
     ]
   ],
   "outputLabels": [
-    "true",
-    "false"
+    "false",
+    "true"
   ],
   "icon": "font-awesome/fa-question",
   "l": false

@@ -1,19 +1,26 @@
 const Node = {
-  "id": "1294b96375ad866f",
+  "id": "e187b3f677059c2c",
   "type": "change",
-  "z": "30ea9c666c3d34a6",
-  "g": "28fa0d73a52eaed0",
+  "z": "0a57a34536934723",
+  "g": "f5b0f2cb9d251540",
   "name": "Clean up globlal.transactions",
   "rules": [
     {
       "t": "delete",
-      "p": "transactions.continuationKey",
+      "p": "transactions.manual",
       "pt": "global"
     },
     {
+      "t": "set",
+      "p": "res",
+      "pt": "msg",
+      "to": "res",
+      "tot": "flow"
+    },
+    {
       "t": "delete",
-      "p": "transactions.add",
-      "pt": "global"
+      "p": "res",
+      "pt": "flow"
     }
   ],
   "action": "",
@@ -21,11 +28,11 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 395,
-  "y": 520,
+  "x": 1175,
+  "y": 160,
   "wires": [
     [
-      "3ecf30ab26092ccd"
+      "1ae55ae91ab4dbf4"
     ]
   ],
   "icon": "font-awesome/fa-trash",

@@ -13,7 +13,7 @@ const Node = {
   "name": "",
   "dname": "Send email",
   "x": 155,
-  "y": 480,
+  "y": 660,
   "wires": [],
   "l": false
 }
