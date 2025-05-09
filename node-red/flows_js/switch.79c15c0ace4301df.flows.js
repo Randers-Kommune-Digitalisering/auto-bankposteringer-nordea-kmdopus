@@ -27,8 +27,7 @@ const Node = {
     ],
     [
       "d1d1c1aa6183e98d",
-      "76c02b9387861543",
-      "f867bef8bb98eb23"
+      "76c02b9387861543"
     ]
   ],
   "outputLabels": [
