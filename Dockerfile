@@ -5,6 +5,9 @@ FROM nodered/node-red
 COPY node-red/package.json .
 RUN npm install --unsafe-perm --no-update-notifier --no-fund --only=production
 
+# Set the volume for output data
+VOLUME ["/data"]
+
 # Copy _your_ Node-RED project files into place
 # NOTE: This will only work if you DO NOT later mount /data as an external volume.
 #       If you need to use an external volume for persistence then
@@ -36,9 +39,6 @@ RUN cd /app/express && npm install
 
 # Build express server
 RUN cd /app/express && npm ci --only=production
-
-# Set the volume for output data
-VOLUME ["/data/output"]
 
 USER node-red
 
