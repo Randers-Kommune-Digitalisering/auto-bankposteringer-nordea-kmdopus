@@ -37,7 +37,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, fs
   // Filtrer filer med birthtime ældre end cutoffDate
   const oldFiles = msg.files.filter(file => {
       const birthtime = new Date(file.birthtime);
-      return birthtime > cutoffDate;
+      return birthtime < cutoffDate;
   }).map(file => file.filename);
   
   msg.files = oldFiles;
