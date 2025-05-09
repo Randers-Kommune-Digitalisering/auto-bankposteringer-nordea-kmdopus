@@ -16,8 +16,8 @@ const Node = {
       "t": "set",
       "p": "transactions.unmatched",
       "pt": "global",
-      "to": "payload",
-      "tot": "msg"
+      "to": "($type(payload) = \"array\") ? payload : [payload]",
+      "tot": "jsonata"
     }
   ],
   "action": "",
