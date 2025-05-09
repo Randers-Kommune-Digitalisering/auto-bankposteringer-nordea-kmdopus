@@ -37,6 +37,9 @@ RUN cd /app/express && npm install
 # Build express server
 RUN cd /app/express && npm ci --only=production
 
+# Set the volume for output data
+VOLUME ["/data/output"]
+
 USER node-red
 
 # Copy entrypoint script
