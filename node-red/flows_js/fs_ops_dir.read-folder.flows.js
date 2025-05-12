@@ -4,8 +4,8 @@ const Node = {
   "z": "30ea9c666c3d34a6",
   "g": "e213a029bb7d65e7",
   "name": "Fetch files",
-  "path": "/data/output/",
-  "pathType": "str",
+  "path": "path",
+  "pathType": "msg",
   "filter": "",
   "filterType": "str",
   "dir": "files",
@@ -14,7 +14,7 @@ const Node = {
   "y": 1100,
   "wires": [
     [
-      "59d95569023e0b41"
+      "4772a10c5411107e"
     ]
   ],
   "icon": "font-awesome/fa-database",

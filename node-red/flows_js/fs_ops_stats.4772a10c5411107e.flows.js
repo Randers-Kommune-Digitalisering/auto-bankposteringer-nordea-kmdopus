@@ -4,13 +4,13 @@ const Node = {
   "z": "30ea9c666c3d34a6",
   "g": "e213a029bb7d65e7",
   "name": "",
-  "path": "/data/output/",
-  "pathType": "str",
+  "path": "path",
+  "pathType": "msg",
   "filename": "files",
   "filenameType": "msg",
   "stats": "stats",
   "sizeType": "msg",
-  "x": 225,
+  "x": 175,
   "y": 1100,
   "wires": [
     [
