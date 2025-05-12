@@ -4,7 +4,13 @@ const Node = {
   "z": "30ea9c666c3d34a6",
   "g": "e213a029bb7d65e7",
   "name": "",
-  "props": [],
+  "props": [
+    {
+      "p": "path",
+      "v": "/data/output/",
+      "vt": "str"
+    }
+  ],
   "repeat": "86400",
   "crontab": "",
   "once": true,
