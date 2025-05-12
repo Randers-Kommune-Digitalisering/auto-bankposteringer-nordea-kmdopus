@@ -19,7 +19,7 @@ const Node = {
       "module": "path"
     }
   ],
-  "x": 325,
+  "x": 275,
   "y": 1100,
   "wires": [
     [
