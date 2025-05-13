@@ -28,7 +28,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   const manualBool = global.get("transactions").manual ? global.get("transactions").manual : undefined;
   
   for (let posting of postings) {
-      formattedPostings.push([posting.account, '', posting.accountSecondary || '', '', '', posting.debetOrCredit, posting.amount, '', posting.text || '', '', '', '', '', posting.cpr ? '02' : '', posting.cpr || '', '', '', '', '', '', '', '', '', '', '']);
+      formattedPostings.push([posting.account, '', posting.accountSecondary || '', '', '', posting.debetOrCredit, posting.amount, '', posting.text || '', '', '', '', '', posting.cpr || '', posting.cpr ? '02' : '', '', '', '', '', '', '', '', '', '', '']);
   }
   
   msg.payload = formattedPostings;
