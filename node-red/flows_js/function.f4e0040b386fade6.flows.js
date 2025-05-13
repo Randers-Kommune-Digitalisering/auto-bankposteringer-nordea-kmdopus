@@ -144,7 +144,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   function processPosting(transaction, rules) {
       const direction = transaction.amount.charAt(0) === "-" ? "outgoing" : "incoming";
       transaction.direction = direction;
-      const absoluteAmount = Math.abs(parseFloat(transaction.amount));
+      const absoluteAmount = Math.abs(parseFloat(transaction.amount.replace(/\./g, '').replace(',', '.')));
       const statusDebetOrCredit = direction === "incoming" ? "Debet" : "Kredit";
       const landingDebetOrCredit = direction === "incoming" ? "Kredit" : "Debet";
       transaction.amount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })

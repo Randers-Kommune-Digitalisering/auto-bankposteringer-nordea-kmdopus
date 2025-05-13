@@ -24,6 +24,7 @@ const Node = {
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   const masterDataObj = global.get("masterData");
   const transactions = global.get("transactions").manual;
+  const uid = global.get("transactions").uid;
   let erpObj = global.get("erp") || {};
   let postings = [];
   
@@ -33,7 +34,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               account: statusAccount,
               debetOrCredit: statusDebetOrCredit,
               amount: amount,
-              text: text
+              text: uid
           }
       )
       postings.push(
@@ -49,7 +50,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   }
   
   function processPosting(transaction) {
-      transaction.amount = parseFloat(transaction.amount.replace('.', '').replace(',', '.'));
+      transaction.amount = parseFloat(transaction.amount.replace(/\./g, '').replace(',', '.'));
       const absoluteAmount = Math.abs(transaction.amount);
       const statusDebetOrCredit = transaction.amount > 0 ? "Debet" : "Kredit";
       const landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet";
