@@ -70,22 +70,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   }
   
   function matchAmount(transactionAmount, amountOperator, ruleAmount1, ruleAmount2) {
-      switch (ruleAmount1) {
-          case null:
-              break;
-          default:
-              ruleAmount1 = parseFloat(ruleAmount1.replace(/\./g, '').replace(',', '.'));
-              break;
-      }
-  
-      switch (ruleAmount2) {
-          case null:
-              break;
-          default:
-              ruleAmount2 = parseFloat(ruleAmount2.replace(/\./g, '').replace(',', '.'));
-              break;
-      }
-      
       switch (amountOperator) {
           case '><':
               return transactionAmount >= ruleAmount1 && transactionAmount <= ruleAmount2;
@@ -144,10 +128,12 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   function processPosting(transaction, rules) {
       const direction = transaction.amount.charAt(0) === "-" ? "outgoing" : "incoming";
       transaction.direction = direction;
-      const absoluteAmount = Math.abs(parseFloat(transaction.amount.replace(/\./g, '').replace(',', '.')));
+      const floatAmount = transaction.amount;
+      const absoluteAmount = Math.abs(floatAmount);
       const statusDebetOrCredit = direction === "incoming" ? "Debet" : "Kredit";
       const landingDebetOrCredit = direction === "incoming" ? "Kredit" : "Debet";
       transaction.amount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  
   
       const cpr = rules.postWithCPR ? extractCPRNumber(transaction.narrative) : null;
       
@@ -168,7 +154,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               }
   
               let matchedAllParametersBool = sumOfParametersMatched === sumOfParametersGiven(rule);
-              let matchedAmountBool = matchAmount(transaction.amount, rule.operator, rule.amount1, rule.amount2);
+              let matchedAmountBool = matchAmount(floatAmount, rule.operator, rule.amount1, rule.amount2);
               let matchedAccountBool = transaction.relatedAccount.bankAccount === rule.relatedBankAccount || rule.relatedBankAccount === null;
                               
               if (matchedAllParametersBool && matchedAmountBool && matchedAccountBool) {
