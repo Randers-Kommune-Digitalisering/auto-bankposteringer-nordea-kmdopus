@@ -54,19 +54,19 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   function matchParameter(transaction, searchValue, key) {
       if (!searchValue) return false;
   
+      // Split searchValue and normalize
       const searchTokens = searchValue.split(/\s*,\s*/).map(token => token.trim().toLowerCase());
   
+      // Check each token against the transaction field(s)
       if (Array.isArray(key)) {
-          return key.some(singleKey =>
-              transaction[singleKey]
-                  ? searchTokens.every(token => transaction[singleKey].toLowerCase().includes(token))
-                  : false
-          );
+          return key.some(singleKey => {
+              const fieldValue = transaction[singleKey] ? transaction[singleKey].replace(/\s+/g, ' ').trim().toLowerCase() : '';
+              return searchTokens.every(token => fieldValue.includes(token));
+          });
       }
   
-      return transaction[key]
-          ? searchTokens.every(token => transaction[key].toLowerCase().includes(token))
-          : false;
+      const fieldValue = transaction[key] ? transaction[key].replace(/\s+/g, ' ').trim().toLowerCase() : '';
+      return searchTokens.every(token => fieldValue.includes(token));
   }
   
   function matchAmount(transactionAmount, amountOperator, ruleAmount1, ruleAmount2) {
