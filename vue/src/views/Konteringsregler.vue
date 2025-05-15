@@ -57,8 +57,12 @@
         "Posteringstekst": { "key": "text", "hidden": true },
         "Bankkonto": { "key": "relatedBankAccount", "hidden": true },
         "Notat": { "key": "note", "hidden": true },
-        "Sidst anvendt": { "key": "lastUsed"}
+        "Sidst anvendt": { "key": "lastUsed", "hidden": false },
     }
+
+    watch(type, (newType) => {
+        keyMap["Sidst anvendt"].hidden = newType === 'engangsregel'
+    }, { immediate: true })
     
     function handleQueryParams() {        
         if (isSearching.value) {
@@ -226,9 +230,6 @@
     }
     td {
         font-size: 0.9em;
-    }
-    th, thead {
-        text-transform: capitalize;
     }
     .searchButtonDiv {
         padding-left: 0.55rem;
