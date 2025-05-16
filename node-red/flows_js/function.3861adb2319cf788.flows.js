@@ -33,7 +33,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   const docDate = dayjs().format('YYYYMMDD');
   const docTime = dayjs().format('HHmmss');
   const bookingDate = global.get("dates").bookingDate.replace(/-/g, "");
-  const docId = global.get("transactions").uid;
+  const docId = global.get("transactions").uid.slice(-10);
   const compCode = global.get("configs").ftp.compCode;
   const dataProviderId = global.get("configs").ftp.dataProviderId;
   const prodEnv = inProd ? global.get("configs").ftp.prodEnv : 'T02';
@@ -72,7 +72,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
           REF_KEY_3: String(lineCounter),
           ZZCSYSIDN: dataProviderId,
           SERV_REC_NO_CODE: posting.cpr ? '02' : undefined,
-          SERV_REC_NO: posting.cpr ? posting.cpr : undefined 
+          SERV_REC_NO: posting.cpr ? posting.cpr : undefined,
+          BENEFIT_VALFROM: bookingDate,
+          BENEFIT_VALTO: bookingDate
       };
   
       // Remove undefined values
