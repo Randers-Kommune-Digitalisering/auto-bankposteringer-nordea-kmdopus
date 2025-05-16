@@ -73,8 +73,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
           ZZCSYSIDN: dataProviderId,
           SERV_REC_NO_CODE: posting.cpr ? '02' : undefined,
           SERV_REC_NO: posting.cpr ? posting.cpr : undefined,
-          BENEFIT_VALFROM: bookingDate,
-          BENEFIT_VALTO: bookingDate
+          BENEFIT_VALFROM: posting.cpr ? bookingDate : undefined,
+          BENEFIT_VALTO: posting.cpr ? bookingDate : undefined
       };
   
       // Remove undefined values
