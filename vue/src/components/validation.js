@@ -30,7 +30,11 @@ export function validateAccountSecondary(value, errors) {
 }
 
 export function validateText(value, errors) {
-    if (value && value.length > 50) {
+    if (!value) {
+        errors.text = 'Posteringstekst er påkrævet.';
+        return false;
+        
+    } else if (value && value.length > 50) {
         errors.text = 'Maks. 50 tegn';
         return false;
     } else {
