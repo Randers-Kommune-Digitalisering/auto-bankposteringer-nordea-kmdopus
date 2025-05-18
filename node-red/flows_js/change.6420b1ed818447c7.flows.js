@@ -16,7 +16,7 @@ const Node = {
       "t": "set",
       "p": "transactions.manual",
       "pt": "global",
-      "to": "[payload]",
+      "to": "$append(\t   $exists($globalContext(\"transactions\").manual) ? $globalContext(\"transactions\").manual : [],\t   payload\t)\t",
       "tot": "jsonata"
     },
     {

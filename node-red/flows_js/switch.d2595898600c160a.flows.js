@@ -13,15 +13,21 @@ const Node = {
       "vt": "undefined"
     },
     {
-      "t": "else"
+      "t": "empty"
+    },
+    {
+      "t": "nempty"
     }
   ],
   "checkall": "true",
   "repair": false,
-  "outputs": 2,
+  "outputs": 3,
   "x": 255,
   "y": 380,
   "wires": [
+    [
+      "124c0d3fd352bd92"
+    ],
     [
       "124c0d3fd352bd92"
     ],
@@ -30,6 +36,7 @@ const Node = {
     ]
   ],
   "outputLabels": [
+    "",
     "true",
     "false"
   ],

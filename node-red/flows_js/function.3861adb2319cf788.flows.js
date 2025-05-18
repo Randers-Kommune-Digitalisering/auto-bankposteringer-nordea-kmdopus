@@ -63,6 +63,10 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
           artskonto = artskonto.charAt(0) === '9' ? '90515060' : '29505050';
       }
   
+      if (posting.text.length > 50) {
+          posting.text = posting.text.substr(0, 50);
+      }
+  
       let line = {
           DEB_CRED_IND: posting.debetOrCredit.charAt(0),
           AMT_DOCCUR: amountPrefixed.toFixed(2),

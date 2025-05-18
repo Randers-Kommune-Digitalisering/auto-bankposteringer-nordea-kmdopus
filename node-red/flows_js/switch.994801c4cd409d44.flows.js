@@ -13,15 +13,21 @@ const Node = {
       "vt": "undefined"
     },
     {
-      "t": "else"
+      "t": "empty"
+    },
+    {
+      "t": "nempty"
     }
   ],
   "checkall": "true",
   "repair": false,
-  "outputs": 2,
+  "outputs": 3,
   "x": 305,
   "y": 80,
   "wires": [
+    [
+      "85ebf58680e4023c"
+    ],
     [
       "85ebf58680e4023c"
     ],
