@@ -14,7 +14,8 @@ const Node = {
   "y": 860,
   "wires": [
     [
-      "c265ac1bb029ed1e"
+      "c265ac1bb029ed1e",
+      "652fdef827d670f9"
     ]
   ],
   "icon": "font-awesome/fa-handshake-o",
@@ -133,7 +134,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       const statusDebetOrCredit = direction === "incoming" ? "Debet" : "Kredit";
       const landingDebetOrCredit = direction === "incoming" ? "Kredit" : "Debet";
       transaction.amount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-  
   
       const cpr = rules.postWithCPR ? extractCPRNumber(transaction.narrative) : null;
       

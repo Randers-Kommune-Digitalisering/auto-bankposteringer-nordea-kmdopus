@@ -6,9 +6,11 @@ const Node = {
   "name": "Clean up globlal.transactions",
   "rules": [
     {
-      "t": "delete",
+      "t": "set",
       "p": "transactions.manual",
-      "pt": "global"
+      "pt": "global",
+      "to": "$splice($globalContext(\"transactions\").manual, 0, 1)",
+      "tot": "jsonata"
     },
     {
       "t": "set",

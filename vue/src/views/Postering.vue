@@ -1,6 +1,7 @@
 <script setup>
     import { ref, computed } from 'vue'
     import { useRouter, useRoute } from 'vue-router'
+    import { validateDependencies, formatAccountSecondary, validateCPR, validateText } from '@/components/validation.js'
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
 
@@ -15,8 +16,8 @@
     const posting = ref(null)
 
     const errors = ref({
-        artskonto: null,
-        pspElement: null,
+        account: null,
+        accountSecondary: null,
         cpr: null,
         text: null
     });
@@ -26,11 +27,10 @@
         .then(response => response.json())
         .then(value => {
             posting.value = value;
-
-            // Trigger initial validation
-            validateArtskonto(posting.value?.account || '');
-            validatePSPElement(posting.value?.accountSecondary || '');
-            validateDependencies();
+            validateDependencies(
+                posting.value,
+                errors.value
+            )
         });
 
     const keyMap = {
@@ -68,93 +68,23 @@
             .filter(group => Object.keys(group.fields).length > 0)
     })
 
-    function validateArtskonto(value) {
-        const regex = /^(S|9|\d)\d{7}$/; // Matches 8 characters, first can be "S", "9", or a digit
-        if (!value) {
-            errors.value.artskonto = 'Artskonto er påkrævet.';
-        } else if (!regex.test(value)) {
-            errors.value.artskonto = 'Artskonto skal være præcis 8 tegn langt og starte med "S", "9" eller et tal.';
-        } else {
-            errors.value.artskonto = null;
-        }
-    }
-
-    function validatePSPElement(value) {
-        const artskonto = posting.value?.account || '';
-
-        if (artskonto[0] === 'S' || artskonto[0] === '9') {
-            if (value && value.trim() !== '') {
-                errors.value.pspElement = 'PSP-element må ikke udfyldes, når Artskonto starter med "S" eller "9".';
-            } else {
-                errors.value.pspElement = null;
-            }
-            return;
-        }
-        const regex = /^X[A-Z]-\d{1,10}-\d{1,5}$/i;
-        if (!regex.test(value)) {
-            errors.value.pspElement = 'PSP-element skal matche formatet X[A-Z]-**********-*****.';
-        } else {
-            errors.value.pspElement = null;
-        }
-    }
-
-    function padPSPElement(value) {
-        const regex = /^X([A-Z])-(\d{1,10})-(\d{1,5})$/i;
-        const match = value.match(regex);
-        if (match) {
-            const part1 = match[1];
-            const part2 = match[2].padStart(10, '0'); // Pad the second substring to 10 digits
-            const part3 = match[3].padStart(5, '0');  // Pad the third substring to 5 digits
-            return `X${part1}-${part2}-${part3}`;
-        }
-        return value; // Return the original value if it doesn't match the regex
-    }
-
-    function validateCPR(value) {
-        const regex = /\b((0[1-9]|[12][0-9]|3[01])(0[13578]|10|12)|([0][1-9]|[12][0-9]|30)(0[469]|11)|(0[1-9]|1[0-9]|2[0-8])(02)|(29)(02)(00)|((29)(02)([2468][048]))|((29)(02)([13579][26])))(\d{2})(\d{4})\b/gm;
-
-        if (!value) {
-            // Allow empty CPR field
-            errors.value.cpr = null;
-        } else if (!regex.test(value)) {
-            errors.value.cpr = 'CPR skal matche formatet DDMMÅÅXXXX.';
-        } else {
-            errors.value.cpr = null;
-        }
-    }
-
-    function validateText(value) {
-        if (value && value.length > 50) {
-            errors.value.text = 'Teksten må maksimalt være på 50 tegn';
-        } else {
-            errors.value.text = null;
-        }
-    }
-
-    function validateDependencies() {
-        const artskonto = posting.value.account || '';
-        const pspElement = posting.value.accountSecondary || '';
-
-        if (artskonto[0] !== '9' && artskonto[0] !== 'S' && !pspElement) {
-            errors.value.pspElement = 'PSP-element er påkrævet, når Artskonto ikke starter med "9" eller "S".';
-        } else if (artskonto[0] === '9' || artskonto[0] === 'S') {
-            errors.value.pspElement = null; // Clear PSP-element error if not required
-        }
-    }
-
     // Computed property to check if there are any validation errors
     const hasValidationErrors = computed(() => {
         return Object.values(errors.value).some(error => error !== null)
     })
 
     function updatePosting() {
+        validateDependencies(posting.value, errors.value);
+        validateCPR(posting.value.cpr, errors.value);
+        validateText(posting.value.text, errors.value);
+        
         if (hasValidationErrors.value) {
-            alert('Der er valideringsfejl. Ret venligst fejlene før du fortsætter.')
+            alert('Der er fejl i din indtastning. Ret venligst fejlene før du fortsætter.')
             return
         }
 
         if (posting.value.accountSecondary) {
-            posting.value.accountSecondary = padPSPElement(posting.value.accountSecondary);
+            posting.value.accountSecondary = formatAccountSecondary(posting.value.accountSecondary);
         }
         
         isUpdating.value = true
@@ -217,11 +147,11 @@
                                     :id="key"
                                     v-if="posting != null && !value.hidden"
                                     v-model="posting[value.key]"
-                                    @input="validateArtskonto(posting[value.key]); validateDependencies()"
+                                    @input="validateDependencies(posting, errors)"
                                     @change="hasUpdated = false"
                                     :disabled="value.mutable === false"
                                 />
-                                <span v-if="errors.artskonto" class="error">{{ errors.artskonto }}</span>
+                                <span v-if="errors.account" class="error">{{ errors.account }}</span>
                             </template>
                             <template v-else-if="key === 'PSP-element'">
                                 <input
@@ -230,11 +160,11 @@
                                     :id="key"
                                     v-if="posting != null && !value.hidden"
                                     v-model="posting[value.key]"
-                                    @input="validatePSPElement(posting[value.key]); validateDependencies()"
+                                    @input="validateDependencies(posting, errors)"
                                     @change="hasUpdated = false"
                                     :disabled="value.mutable === false"
                                 />
-                                <span v-if="errors.pspElement" class="error">{{ errors.pspElement }}</span>
+                                <span v-if="errors.accountSecondary" class="error">{{ errors.accountSecondary }}</span>
                             </template>
                             <template v-else-if="key === 'CPR'">
                                 <input
@@ -243,7 +173,7 @@
                                     :id="key"
                                     v-if="posting != null && !value.hidden"
                                     v-model="posting[value.key]"
-                                    @input="validateCPR(posting[value.key])"
+                                    @input="validateCPR(posting[value.key], errors)"
                                     @change="hasUpdated = false"
                                     :disabled="value.mutable === false"
                                 />
@@ -256,7 +186,7 @@
                                     :id="key"
                                     v-if="posting != null && !value.hidden"
                                     v-model="posting[value.key]"
-                                    @input="validateText(posting[value.key])"
+                                    @input="validateText(posting[value.key], errors)"
                                     @change="hasUpdated = false"
                                     :disabled="value.mutable === false"
                                 />
