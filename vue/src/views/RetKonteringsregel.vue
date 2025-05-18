@@ -75,10 +75,8 @@
                 konteringsregel.value = value
                 selectedBankaccount.value = konteringsregel.value.relatedBankAccount
                 selectedOperator.value = konteringsregel.value.operator
-                validateDependencies(
-                    konteringsregel.value,
-                    errors.value
-                )
+                validateDependencies(konteringsregel.value, errors.value);
+                validateText(konteringsregel.value.text, errors.value);
             })
     }
 

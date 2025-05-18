@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "transactions.manual",
       "pt": "global",
-      "to": "$splice($globalContext(\"transactions\").manual, 0, 1)",
+      "to": "$globalContext(\"transactions\").manual[$index > 0]",
       "tot": "jsonata"
     },
     {

@@ -27,10 +27,8 @@
         .then(response => response.json())
         .then(value => {
             posting.value = value;
-            validateDependencies(
-                posting.value,
-                errors.value
-            )
+            validateText(posting.value.text, errors.value);
+            validateDependencies(posting.value, errors.value);
         });
 
     const keyMap = {
