@@ -1,6 +1,7 @@
 <script setup>
     import { ref, watch, computed } from 'vue'
     import { useRouter, useRoute } from 'vue-router'
+    import { validateDependencies, formatAccountSecondary, formatAmount, validateText } from '@/components/validation.js'
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
     import IconDelete from '../components/icons/IconDelete.vue'
@@ -14,11 +15,6 @@
     const isUpdating = ref(false)
     const hasUpdated = ref(false)
 
-    const errors = ref({
-        artskonto: null,
-        pspElement: null
-    })
-
     const awaitingDeleteConfirmation = ref(false)
     const isDeleting = ref(false)
 
@@ -31,11 +27,15 @@
     
     const konteringsregel = ref(isNewRule.value ? JSON.parse(JSON.stringify(newItem)) : null)
 
-    const exceptionBool = ref(false)
-    const postWithCPR = ref(false)
-
     const bankaccounts = ref([])
     const bankAccountOptions = ref([])
+
+    const errors = ref({
+        account: null,
+        accountSecondary: null,
+        cpr: null,
+        text: null
+    });
 
     fetch('/api/bankaccounts')
         .then(response => response.json())
@@ -64,24 +64,23 @@
         if (index.value === 'nyinaktiv') konteringsregel.value.activeBool = false
         else if (index.value === 'nyundtagelse') konteringsregel.value.exceptionBool = true
         else if (index.value === 'nyengangsregel') konteringsregel.value.tempBool = true
-        validateDependencies()
+        validateDependencies(
+            konteringsregel.value,
+            errors.value
+        )
     } else {
         fetch(`/api/konteringsregler/${index.value}`)
             .then(response => response.json())
             .then(value => {
                 konteringsregel.value = value
-                exceptionBool.value = konteringsregel.value.exceptionBool
-                postWithCPR.value = konteringsregel.value.postWithCPR
                 selectedBankaccount.value = konteringsregel.value.relatedBankAccount
                 selectedOperator.value = konteringsregel.value.operator
-                validateDependencies()
+                validateDependencies(
+                    konteringsregel.value,
+                    errors.value
+                )
             })
     }
-
-    watch(konteringsregel.value, (newValue) => {
-        exceptionBool.value = newValue.exceptionBool
-        postWithCPR.value = newValue.postWithCPR
-    })
 
     watch(bankAccountOptions, (newVal) => {
         if (newVal.length > 0) {
@@ -162,62 +161,29 @@
         keyMap.value["Beløb 2"].hidden = !(newValue === '><')
     })
 
-    function validateArtskonto(value) {
-        const regex = /^(S|9|\d)\d{7}$/; // Matches 8 characters, first can be "S", "9", or a digit
-        if (!value) {
-            errors.value.artskonto = 'Artskonto er påkrævet.';
-        } else if (!regex.test(value)) {
-            errors.value.artskonto = 'Artskonto skal være præcis 8 tegn langt og starte med "S", "9" eller et tal.';
-        } else {
-            errors.value.artskonto = null;
-        }
-    }
-    
-    function validatePSPElement(value) {
-        const regex = /^X[A-Z]-\d{1,10}-\d{1,5}$/i; // Matches X[A-Z]-* (1-10 digits) -* (1-5 digits)
-        if (!regex.test(value)) {
-            errors.value.pspElement = 'PSP-element skal matche formatet X[A-Z]-**********-*****.';
-        } else {
-            errors.value.pspElement = null;
-        }
-    }
-
-    function padPSPElement(value) {
-        const regex = /^X([A-Z])-(\d{1,10})-(\d{1,5})$/i;
-        const match = value.match(regex);
-        if (match) {
-            const part1 = match[1];
-            const part2 = match[2].padStart(10, '0'); // Pad the second substring to 10 digits
-            const part3 = match[3].padStart(5, '0');  // Pad the third substring to 5 digits
-            return `X${part1}-${part2}-${part3}`;
-        }
-        return value; // Return the original value if it doesn't match the regex
-    }
-
-    function validateDependencies() {
-        const artskonto = konteringsregel.value?.account || ''
-        const pspElement = konteringsregel.value?.accountSecondary || ''
-
-        if (artskonto[0] !== '9' && artskonto[0] !== 'S' && !pspElement) {
-            errors.value.pspElement = 'PSP-element er påkrævet, når Artskonto ikke starter med "9" eller "S".';
-        } else if (artskonto[0] === '9' || artskonto[0] === 'S') {
-            errors.value.pspElement = null; // Clear PSP-element error if not required
-        }
-    }
-
-    // Computed property to check if there are any validation errors
     const hasValidationErrors = computed(() => {
         return Object.values(errors.value).some(error => error !== null)
     })
 
     function updateRule() {
+        validateDependencies(konteringsregel.value, errors.value);
+        validateText(konteringsregel.value.text, errors.value);
+        
         if (hasValidationErrors.value) {
             alert('Der er valideringsfejl. Ret venligst fejlene før du fortsætter.')
             return
         }
 
         if (konteringsregel.value.accountSecondary) {
-            konteringsregel.value.accountSecondary = padPSPElement(konteringsregel.value.accountSecondary);
+            konteringsregel.value.accountSecondary = formatAccountSecondary(konteringsregel.value.accountSecondary);
+        }
+
+        if (konteringsregel.value.amount1) {
+            konteringsregel.value.amount1 = formatAmount(konteringsregel.value.amount1);
+        }
+
+        if (konteringsregel.value.amount2) {
+            konteringsregel.value.amount2 = formatAmount(konteringsregel.value.amount2);
         }
         
         isUpdating.value = true
@@ -273,10 +239,6 @@
         }
     }
 
-    function toggleActivation() {
-        konteringsregel.value.activeBool = !konteringsregel.value.activeBool
-    }
-
 </script>
 
 <template>
@@ -301,7 +263,8 @@
                         <template v-else><IconDelete /></template>
                     </button>
 
-                    <button v-if="konteringsregel != null" @click="toggleActivation()"
+                    <button v-if="konteringsregel != null"
+                        @click="konteringsregel.activeBool = !konteringsregel.activeBool"
                         :class="konteringsregel.activeBool ? 'green' : 'red'"
                         :disabled="konteringsregel.exceptionBool || konteringsregel.tempBool">
                         {{ konteringsregel.activeBool ? 'Aktiv' : 'Inaktiv' }}
@@ -328,9 +291,9 @@
                                     placeholder="..."
                                     :id="key"
                                     v-model="konteringsregel[value.key]"
-                                    @input="validateArtskonto(konteringsregel[value.key]); validateDependencies()"
+                                    @input="validateDependencies(konteringsregel, errors)"
                                 />
-                                <span v-if="errors.artskonto" class="error">{{ errors.artskonto }}</span>
+                                <span v-if="errors.account" class="error">{{ errors.account }}</span>
                             </template>
 
                             <template v-else-if="key === 'PSP-element'">
@@ -339,17 +302,28 @@
                                     placeholder="..."
                                     :id="key"
                                     v-model="konteringsregel[value.key]"
-                                    @input="validatePSPElement(konteringsregel[value.key]); validateDependencies()"
+                                    @input="validateDependencies(konteringsregel, errors)"
                                 />
-                                <span v-if="errors.pspElement" class="error">{{ errors.pspElement }}</span>
+                                <span v-if="errors.accountSecondary" class="error">{{ errors.accountSecondary }}</span>
                             </template>
                             
                             <template v-else-if="key === 'CPR-bogføring'">
                                 <input
                                     type="checkbox"
                                     :id="key"
-                                    v-model="postWithCPR"
+                                    v-model="konteringsregel[value.key]"
                                 />
+                            </template>
+
+                            <template v-else-if="key === 'Posteringstekst'">
+                                <input
+                                    type="text"
+                                    placeholder="..."
+                                    :id="key"
+                                    v-model="konteringsregel[value.key]"
+                                    @input="validateText(konteringsregel[value.key], errors)"
+                                />
+                                <span v-if="errors.text" class="error">{{ errors.text }}</span>
                             </template>
                             
                             <template v-else-if="key === 'Beløbsregel'">

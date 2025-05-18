@@ -23,9 +23,8 @@ const Node = {
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let formattedPostings = [];
-  let suffix = global.get("transactions").manual ? "_manual" : "";
+  let suffix = (global.get("transactions").manual || []).length > 0 ? "_manual" : "";
   const postings = global.get("erp").postings;
-  const manualBool = global.get("transactions").manual ? global.get("transactions").manual : undefined;
   
   for (let posting of postings) {
       formattedPostings.push([posting.account, '', posting.accountSecondary || '', '', '', posting.debetOrCredit, posting.amount, '', posting.text || '', '', '', '', '', posting.cpr || '', posting.cpr ? '02' : '', '', '', '', '', '', '', '', '', '', '']);

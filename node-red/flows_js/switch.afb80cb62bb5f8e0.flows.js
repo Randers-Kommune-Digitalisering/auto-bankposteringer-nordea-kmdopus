@@ -3,7 +3,7 @@ const Node = {
   "type": "switch",
   "z": "30ea9c666c3d34a6",
   "g": "340a8358eb5b957c",
-  "name": "",
+  "name": "Check auth status",
   "property": "auth.adminStatus",
   "propertyType": "global",
   "rules": [

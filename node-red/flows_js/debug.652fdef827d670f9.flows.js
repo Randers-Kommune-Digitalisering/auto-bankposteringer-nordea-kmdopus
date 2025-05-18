@@ -1,17 +1,17 @@
 const Node = {
-  "id": "6ac7e65eae7356ad",
+  "id": "652fdef827d670f9",
   "type": "debug",
-  "z": "2380efc0fb66c87e",
+  "z": "30ea9c666c3d34a6",
   "name": "debug 1",
   "active": true,
   "tosidebar": true,
-  "console": true,
+  "console": false,
   "tostatus": false,
-  "complete": "true",
-  "targetType": "full",
+  "complete": "$globalContext(\"transactions\").addUnmatched",
+  "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 630,
+  "x": 480,
   "y": 700,
   "wires": []
 }
