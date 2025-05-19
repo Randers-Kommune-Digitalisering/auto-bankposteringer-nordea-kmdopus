@@ -9,15 +9,22 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "$map($$, function($v, $i, $a) {     $v.accountTertiary ? $v : $merge([$v, {\"accountTertiary\": null}]) })",
-      "tot": "jsonata"
+      "to": "req.files[0].buffer",
+      "tot": "msg"
     },
     {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "masterData.rules",
-      "tot": "global"
+      "to": "$map(\t   payload,\t   function($v, $i, $a) {\t       $v.accountTertiary ? $v : $merge([$v, {\"accountTertiary\": null}]) \t   }\t)",
+      "tot": "jsonata"
+    },
+    {
+      "t": "set",
+      "p": "masterData.rules",
+      "pt": "global",
+      "to": "payload",
+      "tot": "msg"
     }
   ],
   "action": "",
