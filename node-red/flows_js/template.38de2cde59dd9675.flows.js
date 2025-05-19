@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS transactionsWithNoMatch (
     bookingDate NVARCHAR(31),
     account NVARCHAR(8) NULL,
     accountSecondary NVARCHAR(19) NULL,
+    accountTertiary NVARCHAR(50) NULL,
     text NVARCHAR(255) NULL,
     cpr NVARCHAR(11) NULL
 );
