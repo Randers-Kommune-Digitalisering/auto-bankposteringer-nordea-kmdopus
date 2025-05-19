@@ -28,7 +28,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let erpObj = global.get("erp") || {};
   let postings = [];
   
-  function generatePostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, landingAccountSecondary, cpr) {
+  function generatePostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, landingAccountSecondary, landingAccountTertiary, cpr) {
       postings.push(
           {
               account: statusAccount,
@@ -41,6 +41,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           {
               account: landingAccount,
               accountSecondary: landingAccountSecondary,
+              accountTertiary: landingAccountTertiary,
               debetOrCredit: landingDebetOrCredit,
               amount: amount,
               text: text,
@@ -57,7 +58,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       const relatedAccount = masterDataObj.bankAccounts.find(account => account.bankAccount === transaction.bankAccount);
       transaction.amount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   
-      generatePostings(relatedAccount.intermediateAccount, transaction.account, statusDebetOrCredit, landingDebetOrCredit, transaction.text, transaction.amount, transaction.accountSecondary, transaction.cpr);
+      generatePostings(relatedAccount.intermediateAccount, transaction.account, statusDebetOrCredit, landingDebetOrCredit, transaction.text, transaction.amount, transaction.accountSecondary, transaction.accountTertiary, transaction.cpr);
   }
   
   if (transactions) {

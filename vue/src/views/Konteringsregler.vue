@@ -6,6 +6,7 @@
     import IconList from '@/components/icons/IconList.vue'
     import IconEdit from '@/components/icons/IconEdit.vue'
     import IconSearch from '../components/icons/IconSearch.vue'
+    import IconSearchClose from '../components/icons/IconSearchClose.vue'
     import IconAdd from '../components/icons/IconAdd.vue'
 
     const allKonteringsregler = ref(null)
@@ -165,7 +166,7 @@
         <fieldset>           
             <div class="float-right searchButtonDiv">
                 <button :class="isSearching ? 'gray' : ''" @click="toggleSearch()">
-                    <template v-if="isSearching">Luk søgning</template>
+                    <template v-if="isSearching"><IconSearchClose /></template>
                     <template v-else><IconSearch /></template>
                 </button>
             </div>

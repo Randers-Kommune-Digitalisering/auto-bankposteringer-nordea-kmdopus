@@ -7,6 +7,7 @@
     import IconSave from '../components/icons/IconSave.vue'
     import IconProfile from '@/components/icons/IconProfile.vue'
     import IconRefresh from '@/components/icons/IconRefresh.vue'
+    import IconUpload from '@/components/icons/IconUpload.vue'
 
     const isUpdating = ref(false)
     const hasUpdated = ref(false)
@@ -23,6 +24,9 @@
     const integrationBool = ref(false)
 
     const authStatus = ref("")
+
+    const uploadStatus = ref('')
+    const fileInput = ref(null)
 
     let pollInterval = null; // Polling interval reference
 
@@ -168,6 +172,40 @@
         }
     }
 
+    function triggerFileInput() {
+        fileInput.value && fileInput.value.click();
+    }
+
+    function uploadRulesFile(event) {
+        const file = event.target.files[0]
+        if (!file) return
+
+        const formData = new FormData()
+        formData.append('file', file)
+
+        uploadStatus.value = 'Uploader...'
+
+        fetch('/api/upload/rules', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                uploadStatus.value = 'Uploadet!'
+            } else {
+                uploadStatus.value = 'Fejl ved upload'
+            }
+        })
+        .catch(() => {
+            uploadStatus.value = 'Fejl ved upload'
+        })
+        .finally(() => {
+            // Reset file input so same file can be uploaded again if needed
+            if (fileInput.value) fileInput.value.value = ''
+            setTimeout(() => uploadStatus.value = '', 3000)
+        })
+    }
+
     // Retrieve updates to auth status
     onMounted(() => {
         pollForAuthStatus(); // Start continuous fetching when the component is mounted
@@ -202,7 +240,7 @@
         <template #icon>
             <IconProfile />
         </template>
-        <template #heading>Stamdata og administrator-oplysninger</template>
+        <template #heading>Administration</template>
         
         <table>
             <thead>
@@ -234,12 +272,30 @@
         </table>
         <br />
         <div class="flexbox">
+            <a :href="'/api/download/rules'" download="konteringsregler.json">
+                <button type="button">Download regler</button>
+            </a>
+            <input
+                type="file"
+                accept="application/json"
+                @change="uploadRulesFile"
+                ref="fileInput"
+                style="display: none;"
+            />
+            <button type="button" @click="triggerFileInput">Upload regler</button>
+            <span v-if="uploadStatus" class="upload-status">{{ uploadStatus }}</span>
+        </div>
+        <br />
+        <div class="flexbox">
+            <button @click="restartDatabase()" class="red">Genstart database</button>
+        </div>
+        <br />
+        <div class="flexbox">
             <button @click="updateMasterdata()" :disabled="isUpdating">
                 <template v-if="isUpdating">Gemmer...</template>
                 <template v-if="hasUpdated">Ændringer gemt</template>
                 <template v-else><IconSave /></template>
             </button>
-            <button @click="restartDatabase()" class="red">Genstart database</button>
         </div>
     </Content>
 
@@ -280,16 +336,25 @@
 </template>
 
 <style scoped>
-button.red {
-    background-color: #e74c3c; /* Red color */
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-button.red:hover {
-    background-color: #c0392b; /* Darker red on hover */
-}
+    button.red {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    button.red:hover {
+        background-color: #c0392b;
+    }
+    .upload-label {
+        display: inline-block;
+        cursor: pointer;
+        margin-left: 1rem;
+    }
+    .upload-status {
+        margin-left: 1rem;
+        color: #2ecc40;
+        font-weight: bold;
+    }
 </style>
