@@ -8,6 +8,7 @@
     "text": null,
     "account": null,
     "accountSecondary": null,
+    "accountTertiary": null,
     "note": null,
     "activeBool": true,
     "exceptionBool": false,

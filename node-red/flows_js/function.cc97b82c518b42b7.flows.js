@@ -27,7 +27,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   const postings = global.get("erp").postings;
   
   for (let posting of postings) {
-      formattedPostings.push([posting.account, '', posting.accountSecondary || '', '', '', posting.debetOrCredit, posting.amount, '', posting.text || '', '', '', '', '', posting.cpr || '', posting.cpr ? '02' : '', '', '', '', '', '', '', '', '', '', '']);
+      formattedPostings.push([posting.account, posting.accountTertiary || '', posting.accountSecondary || '', '', '', posting.debetOrCredit, posting.amount, '', posting.text || '', '', '', '', '', posting.cpr || '', posting.cpr ? '02' : '', '', '', '', '', '', '', '', '', '', '']);
   }
   
   msg.payload = formattedPostings;

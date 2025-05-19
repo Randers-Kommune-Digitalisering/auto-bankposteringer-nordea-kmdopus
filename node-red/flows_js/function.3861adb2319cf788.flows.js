@@ -71,6 +71,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
           DEB_CRED_IND: posting.debetOrCredit.charAt(0),
           AMT_DOCCUR: amountPrefixed.toFixed(2),
           ITEM_TEXT: posting.text,
+          COSTCENTER: posting.accountTertiary,
           GL_ACCOUNT: artskonto,
           WBS_ELEMENT: psp,
           REF_KEY_3: String(lineCounter),

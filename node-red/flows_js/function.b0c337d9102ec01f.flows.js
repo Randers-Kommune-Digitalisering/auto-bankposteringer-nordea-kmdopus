@@ -93,6 +93,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       const exceptionBool = shouldBeException;
       const lastUsed = "9999-12-31";
       const tempBool = false;
+      const accountTertiary = null;
   
       return {
           reference: Reference || null,
@@ -104,6 +105,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           text: Posteringstekst || null,
           account: Artskonto || null,
           accountSecondary: PSP || null,
+          accountTertiary,
           note: Notat || null,
           activeBool,
           exceptionBool,
