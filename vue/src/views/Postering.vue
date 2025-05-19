@@ -1,7 +1,7 @@
 <script setup>
     import { ref, computed } from 'vue'
     import { useRouter, useRoute } from 'vue-router'
-    import { validateDependencies, formatAccountSecondary, validateCPR, validateText } from '@/components/validation.js'
+    import { validateDependencies, formatAccountSecondary, formatAccountTertiary, validateCPR, validateText } from '@/components/validation.js'
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
 
@@ -18,6 +18,7 @@
     const errors = ref({
         account: null,
         accountSecondary: null,
+        accountTertiary: null,
         cpr: null,
         text: null
     });
@@ -40,7 +41,8 @@
         "Reference": { "key": "reference", "group": "Transaktionsoplysninger" , "mutable": false },
         "Artskonto": { "key": "account", "group": "Kontering" , "mutable": true },
         "PSP-element": { "key": "accountSecondary", "group": "Kontering" , "mutable": true },
-        "Posteringstekst": { "key": "text", "group": "Kontering" , "mutable": true },
+        "Omkostningssted": { "key": "accountTertiary", "group": "Kontering", "mutable": true },
+        "Posteringstekst": { "key": "text", "group": "Kontering", "mutable": true },
         "CPR": { "key": "cpr", "group": "Kontering" , "mutable": true },
         "ID": { "key": "transactionID", "hidden": true , "mutable": false },
     }
@@ -83,6 +85,10 @@
 
         if (posting.value.accountSecondary) {
             posting.value.accountSecondary = formatAccountSecondary(posting.value.accountSecondary);
+        }
+
+        if (posting.value.accountTertiary) {
+            posting.value.accountTertiary = formatAccountTertiary(posting.value.accountTertiary);
         }
         
         isUpdating.value = true
@@ -151,6 +157,7 @@
                                 />
                                 <span v-if="errors.account" class="error">{{ errors.account }}</span>
                             </template>
+
                             <template v-else-if="key === 'PSP-element'">
                                 <input
                                     type="text"
@@ -164,6 +171,21 @@
                                 />
                                 <span v-if="errors.accountSecondary" class="error">{{ errors.accountSecondary }}</span>
                             </template>
+
+                            <template v-else-if="key === 'Omkostningssted'">
+                                <input
+                                    type="text"
+                                    placeholder="..."
+                                    :id="key"
+                                    v-if="posting != null && !value.hidden"
+                                    v-model="posting[value.key]"
+                                    @input="validateDependencies(posting, errors)"
+                                    @change="hasUpdated = false"
+                                    :disabled="value.mutable === false"
+                                />
+                                <span v-if="errors.accountTertiary" class="error">{{ errors.accountTertiary }}</span>
+                            </template>
+
                             <template v-else-if="key === 'CPR'">
                                 <input
                                     type="text"
@@ -177,6 +199,7 @@
                                 />
                                 <span v-if="errors.cpr" class="error">{{ errors.cpr }}</span>
                             </template>
+                            
                             <template v-else-if="key === 'Posteringstekst'">
                                 <input
                                     type="text"
@@ -190,6 +213,7 @@
                                 />
                                 <span v-if="errors.text" class="error">{{ errors.text }}</span>
                             </template>
+
                             <template v-else-if="key === 'Afsender' || key === 'Reference'">
                                 <textarea
                                     placeholder="..."
@@ -200,6 +224,7 @@
                                     :disabled="value.mutable === false"
                                 ></textarea>
                             </template>
+                            
                             <template v-else>
                                 <input
                                     type="text"

@@ -103,7 +103,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       }
   }
   
-  function generatePostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, landingAccountSecondary, cpr) {
+  function generatePostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, landingAccountSecondary, landingAccountTertiary, cpr) {
       postings.push(
           {
               account: statusAccount,
@@ -116,6 +116,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           {
               account: landingAccount,
               accountSecondary: landingAccountSecondary,
+              accountTertiary: landingAccountTertiary,
               debetOrCredit: landingDebetOrCredit,
               amount: amount,
               text: text,
@@ -159,7 +160,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               if (matchedAllParametersBool && matchedAmountBool && matchedAccountBool) {
                   if (!rule.exceptionBool) {   // Don't write ERP postings if rule is an exception, but still count as match
                       let text = textGeneration(rule.text, transaction.message, transaction.narrative, transaction.counterparty_name);
-                      generatePostings(transaction.relatedAccount.statusAccount, rule.account, statusDebetOrCredit, landingDebetOrCredit, text, transaction.amount, rule.accountSecondary || '', cpr);
+                      generatePostings(transaction.relatedAccount.statusAccount, rule.account, statusDebetOrCredit, landingDebetOrCredit, text, transaction.amount, rule.accountSecondary || '', rule.accountTertiary || '', cpr);
                   }
   
                   completeMatch = true;

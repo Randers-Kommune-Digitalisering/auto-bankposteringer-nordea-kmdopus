@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS accountingRules (
     text NVARCHAR(255) NULL,
     account NVARCHAR(50) NULL,
     accountSecondary NVARCHAR(50) NULL,
+    accountTertiary NVARCHAR(50) NULL,
     note NVARCHAR(255) NULL,
     activeBool BOOLEAN,
     exceptionBool BOOLEAN,

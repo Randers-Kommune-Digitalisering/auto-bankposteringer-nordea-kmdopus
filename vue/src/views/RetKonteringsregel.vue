@@ -1,7 +1,7 @@
 <script setup>
     import { ref, watch, computed } from 'vue'
     import { useRouter, useRoute } from 'vue-router'
-    import { validateDependencies, formatAccountSecondary, formatAmount, validateText } from '@/components/validation.js'
+    import { validateDependencies, formatAccountSecondary, formatAccountTertiary, formatAmount, validateText } from '@/components/validation.js'
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
     import IconDelete from '../components/icons/IconDelete.vue'
@@ -33,7 +33,7 @@
     const errors = ref({
         account: null,
         accountSecondary: null,
-        cpr: null,
+        accountTertiary: null,
         text: null
     });
 
@@ -101,6 +101,7 @@
         "Beløb 2": { "key": "amount2", "hidden": true, "group": "Beløbsafgrænsning" },
         "Artskonto": { "key": "account", "group": "Kontering" },
         "PSP-element": { "key": "accountSecondary", "group": "Kontering" },
+        "Omkostningssted": { "key": "accountTertiary", "group": "Kontering" },
         "Posteringstekst": { "key": "text", "group": "Kontering" },
         "CPR-bogføring": { "key": "postWithCPR", "group": "Kontering" },
         "Notat": { "key": "note" },
@@ -115,9 +116,10 @@
         "Posteringstype": { "key": "Posteringstype", "group": "Transaktionsoplysninger" },
         "Beløbsregel": { "key": "operator", "group": "Beløbsafgrænsning" },
         "Beløb 1": { "key": "amount1", "group": "Beløbsafgrænsning" },
-        "Beløb 2": { "key": "amount2", "hidden": true, "group": "Beløbsafgrænsning" },
+        "Beløb 2": { "key": "amount2", "group": "Beløbsafgrænsning" },
         "Artskonto": { "key": "account", "hidden": true, "group": "Kontering" },
         "PSP-element": { "key": "accountSecondary", "hidden": true, "group": "Kontering" },
+        "Omkostningssted": { "key": "accountTertiary", "hidden": true, "group": "Kontering" },
         "Posteringstekst": { "key": "text", "hidden": true, "group": "Kontering" },
         "Notat": { "key": "Notat" }
     }
@@ -167,13 +169,18 @@
         validateDependencies(konteringsregel.value, errors.value);
         validateText(konteringsregel.value.text, errors.value);
         
-        if (hasValidationErrors.value) {
-            alert('Der er valideringsfejl. Ret venligst fejlene før du fortsætter.')
-            return
+        // Only block update if rule is active and there are validation errors
+        if (konteringsregel.value.activeBool && hasValidationErrors.value) {
+            alert('Der er valideringsfejl. Ret venligst fejlene før du fortsætter.');
+            return;
         }
 
         if (konteringsregel.value.accountSecondary) {
             konteringsregel.value.accountSecondary = formatAccountSecondary(konteringsregel.value.accountSecondary);
+        }
+
+        if (konteringsregel.value.accountTertiary) {
+            konteringsregel.value.accountTertiary = formatAccountTertiary(konteringsregel.value.accountTertiary);
         }
 
         if (konteringsregel.value.amount1) {
@@ -237,6 +244,11 @@
         }
     }
 
+    function toggleActiveAndGoBack() {
+        konteringsregel.value.activeBool = !konteringsregel.value.activeBool;
+        updateRule();
+    }
+
 </script>
 
 <template>
@@ -262,17 +274,20 @@
                     </button>
 
                     <button v-if="konteringsregel != null"
-                        @click="konteringsregel.activeBool = !konteringsregel.activeBool"
-                        :class="konteringsregel.activeBool ? 'green' : 'red'"
-                        :disabled="konteringsregel.exceptionBool || konteringsregel.tempBool">
-                        {{ konteringsregel.activeBool ? 'Aktiv' : 'Inaktiv' }}
+                        @click="toggleActiveAndGoBack"
+                        :class="isUpdating ? 'blue' : konteringsregel.activeBool ? 'red' : 'green'"
+                        :disabled="konteringsregel.exceptionBool || konteringsregel.tempBool || (!konteringsregel.activeBool && hasValidationErrors)">
+                        <template v-if="isUpdating">Gemmer ...</template>
+                        <template v-else>{{ konteringsregel.activeBool ? 'Deaktivér' : 'Aktivér' }}</template>
                     </button>
 
-                    <button id="submit" @click="updateRule" class="green" :disabled="isUpdating || hasValidationErrors">
-                        <template v-if="isUpdating">Gemmer ...</template>
-                        <template v-else-if="hasUpdated">Rettelser gemt</template>
-                        <template v-else-if="isNewRule"><IconSave /></template>
-                        <template v-else><IconSave /></template>
+                    <button
+                        id="submit"
+                        @click="updateRule"
+                        class="green"
+                        :disabled="isUpdating || !konteringsregel.exceptionBool && konteringsregel.activeBool && hasValidationErrors"
+                    >
+                        <IconSave />
                     </button>
 
                 </div>
@@ -281,7 +296,7 @@
                     <div v-for="group in sortedGroups" :key="group.name">
                         <h3>{{ group.name }}</h3>
                         <div v-for="(value, key) in group.fields" :key="key" :class="value.hidden ? 'hidden' : ''">
-                            <label :for="key" class="capitalize">{{ key }}</label>
+                            <label :for="key">{{ key }}</label>
 
                             <template v-if="key === 'Artskonto'">
                                 <input
@@ -303,6 +318,17 @@
                                     @input="validateDependencies(konteringsregel, errors)"
                                 />
                                 <span v-if="errors.accountSecondary" class="error">{{ errors.accountSecondary }}</span>
+                            </template>
+
+                            <template v-else-if="key === 'Omkostningssted'">
+                                <input
+                                    type="text"
+                                    placeholder="..."
+                                    :id="key"
+                                    v-model="konteringsregel[value.key]"
+                                    @input="validateDependencies(konteringsregel, errors)"
+                                />
+                                <span v-if="errors.accountTertiary" class="error">{{ errors.accountTertiary }}</span>
                             </template>
                             
                             <template v-else-if="key === 'CPR-bogføring'">
