@@ -156,7 +156,7 @@
     }
 
     function restartDatabase() {
-        if (confirm('Er du sikker på, at du vil genstarte databasen? Kørselshistorik og åbne posteringer slettes.')) {
+        if (confirm('Er du sikker på, at du vil genstarte databasen? Alle regler sættes til importerede csv-regler eller slettes. Kørselshistorik og åbne posteringer slettes.')) {
             fetch('/api/wipe-db')
                 .then(response => {
                     if (response.ok) {

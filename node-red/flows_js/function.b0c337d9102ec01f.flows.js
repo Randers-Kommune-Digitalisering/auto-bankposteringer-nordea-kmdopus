@@ -94,6 +94,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       const lastUsed = "9999-12-31";
       const tempBool = false;
       const accountTertiary = null;
+      const postWithCPR = false;
+      const cpr = null;
   
       return {
           reference: Reference || null,
@@ -112,7 +114,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           tempBool,
           lastUsed,
           ruleID,
-          relatedBankAccount: Bankkonto || null
+          relatedBankAccount: Bankkonto || null,
+          postWithCPR,
+          cpr
       };
   });
   
