@@ -23,7 +23,6 @@ const Node = {
 
 Node.template = `
 DROP TABLE
-    accountingRules,
     runHistory,
     transactionsWithNoMatch
 `

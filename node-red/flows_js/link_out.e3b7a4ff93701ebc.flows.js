@@ -3,13 +3,13 @@ const Node = {
   "type": "link out",
   "z": "0a57a34536934723",
   "g": "b9fd86e23e147a4d",
-  "name": "link out 1",
+  "name": "wipe db",
   "mode": "link",
   "links": [
     "d0881f68240cc793"
   ],
-  "x": 835,
-  "y": 180,
+  "x": 785,
+  "y": 140,
   "wires": []
 }
 
