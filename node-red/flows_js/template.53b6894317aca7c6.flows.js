@@ -1,5 +1,5 @@
 const Node = {
-  "id": "99e40eabfb47c43f",
+  "id": "53b6894317aca7c6",
   "type": "template",
   "z": "47254dd1b3ed3b06",
   "g": "ebde7a5ec7e3804c",
@@ -11,7 +11,7 @@ const Node = {
   "template": "",
   "output": "str",
   "x": 875,
-  "y": 500,
+  "y": 540,
   "wires": [
     [
       "3577d2dc22b83335"
@@ -23,8 +23,7 @@ const Node = {
 
 Node.template = `
 DROP TABLE
-    runHistory,
-    transactionsWithNoMatch
+    accountingRules
 `
 
 module.exports = Node;
