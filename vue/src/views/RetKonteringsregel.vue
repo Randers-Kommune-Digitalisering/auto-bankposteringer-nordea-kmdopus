@@ -1,7 +1,7 @@
 <script setup>
     import { ref, watch, computed } from 'vue'
     import { useRouter, useRoute } from 'vue-router'
-    import { validateDependencies, formatAccountSecondary, formatAccountTertiary, formatAmount, validateText } from '@/components/validation.js'
+    import { validateDependencies, formatAccountSecondary, formatAccountTertiary, formatAmount, validateText, validateCPR } from '@/components/validation.js'
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
     import IconDelete from '../components/icons/IconDelete.vue'
@@ -30,11 +30,14 @@
     const bankaccounts = ref([])
     const bankAccountOptions = ref([])
 
+    const cprMode = ref("Ingen");
+
     const errors = ref({
         account: null,
         accountSecondary: null,
         accountTertiary: null,
-        text: null
+        text: null,
+        cpr: null
     });
 
     fetch('/api/bankaccounts')
@@ -57,39 +60,15 @@
         { label: 'Lig med', value: '==' }
     ]
 
+    const cprModeOptions = [
+        { label: 'Ingen', value: 'Ingen' },
+        { label: 'Scan fra transaktion', value: 'Scan fra transaktion' },
+        { label: 'Statisk', value: 'Statisk' }
+    ];
+
     const selectedOperator = ref(isNewRule.value ? null : operatorOptions[0].value)
     const selectedBankaccount = ref(null)
 
-    if (isNewRule.value) {   
-        if (index.value === 'nyinaktiv') konteringsregel.value.activeBool = false
-        else if (index.value === 'nyundtagelse') konteringsregel.value.exceptionBool = true
-        else if (index.value === 'nyengangsregel') konteringsregel.value.tempBool = true
-        validateDependencies(
-            konteringsregel.value,
-            errors.value
-        )
-    } else {
-        fetch(`/api/konteringsregler/${index.value}`)
-            .then(response => response.json())
-            .then(value => {
-                konteringsregel.value = value
-                selectedBankaccount.value = konteringsregel.value.relatedBankAccount
-                selectedOperator.value = konteringsregel.value.operator
-                validateDependencies(konteringsregel.value, errors.value);
-                validateText(konteringsregel.value.text, errors.value);
-            })
-    }
-
-    watch(bankAccountOptions, (newVal) => {
-        if (newVal.length > 0) {
-            selectedBankaccount.value = newVal[0].value
-        }
-    })
-
-    watch(selectedBankaccount, (newValue) => {
-        konteringsregel.value.relatedBankAccount = newValue
-    })
-    
     const keyMap_rule = {
         "id": { "key": "ruleID", "hidden": true },
         "Tilknyttet bankkonto": { "key": "relatedBankAccount", "group": "Transaktionsoplysninger" },
@@ -104,6 +83,7 @@
         "Omkostningssted": { "key": "accountTertiary", "group": "Kontering" },
         "Posteringstekst": { "key": "text", "group": "Kontering" },
         "CPR-bogføring": { "key": "postWithCPR", "group": "Kontering" },
+        "CPR": { "key": "cpr", "hidden": true, "group": "Kontering" },
         "Notat": { "key": "note" },
         "activeBool": { "key": "activeBool", "hidden": true }
     }
@@ -124,6 +104,36 @@
         "Notat": { "key": "Notat" }
     }
 
+    if (isNewRule.value) {   
+        if (index.value === 'nyinaktiv') konteringsregel.value.activeBool = false
+        else if (index.value === 'nyundtagelse') konteringsregel.value.exceptionBool = true
+        else if (index.value === 'nyengangsregel') konteringsregel.value.tempBool = true
+        validateDependencies(
+            konteringsregel.value,
+            errors.value
+        )
+    } else {
+        fetch(`/api/konteringsregler/${index.value}`)
+            .then(response => response.json())
+            .then(value => {
+                konteringsregel.value = value
+                selectedBankaccount.value = konteringsregel.value.relatedBankAccount
+                selectedOperator.value = konteringsregel.value.operator
+                validateDependencies(konteringsregel.value, errors.value);
+                validateText(konteringsregel.value.text, errors.value);
+
+                // Force cprMode and trigger validation
+                if (konteringsregel.value.postWithCPR) {
+                    cprMode.value = 'Scan fra transaktion';
+                } else if (konteringsregel.value.cpr) {
+                    cprMode.value = 'Statisk';
+                    validateCPR(konteringsregel.value.cpr, errors.value);
+                } else {
+                    cprMode.value = 'Ingen';
+                }
+            })
+    }
+        
     const keyMap = computed(() => {
         if (index.value === 'nyundtagelse') return keyMap_exception
         return keyMap_rule
@@ -158,8 +168,47 @@
 
     watch(selectedOperator, (newValue) => {
         konteringsregel.value.operator = newValue
-        keyMap.value["Beløb 2"].hidden = !(newValue === '><')
+        const map = index.value === 'nyundtagelse' ? keyMap_exception : keyMap_rule;
+        map["Beløb 2"].hidden = !(newValue === '><')
     })
+
+    watch(bankAccountOptions, (newVal) => {
+        if (newVal.length > 0) {
+            selectedBankaccount.value = newVal[0].value
+        }
+    })
+
+    watch(selectedBankaccount, (newValue) => {
+        konteringsregel.value.relatedBankAccount = newValue
+    })
+
+    watch(() => konteringsregel.value.cpr, (val) => {
+        if (cprMode.value === 'Statisk') {
+            if (!val || val.trim() === '') {
+                errors.value.cpr = 'CPR skal angives i statisk tilstand';
+            } else {
+                validateCPR(val, errors.value);
+            }
+        } else {
+            errors.value.cpr = null;
+        }
+    });
+
+    watch(cprMode, (mode) => {
+        const map = index.value === 'nyundtagelse' ? keyMap_exception : keyMap_rule;
+        map["CPR"].hidden = !(mode === 'Statisk');
+        konteringsregel.value.postWithCPR = (mode === 'Scan fra transaktion');
+        // Immediately validate CPR when switching to Statisk
+        if (mode === 'Statisk') {
+            if (!konteringsregel.value.cpr || konteringsregel.value.cpr.trim() === '') {
+                errors.value.cpr = 'CPR skal angives i statisk tilstand';
+            } else {
+                validateCPR(konteringsregel.value.cpr, errors.value);
+            }
+        } else {
+            errors.value.cpr = null;
+        }
+    });
 
     const hasValidationErrors = computed(() => {
         return Object.values(errors.value).some(error => error !== null)
@@ -173,6 +222,10 @@
         if (konteringsregel.value.activeBool && hasValidationErrors.value) {
             alert('Der er valideringsfejl. Ret venligst fejlene før du fortsætter.');
             return;
+        }
+
+        if (cprMode.value !== 'Statisk') {
+            konteringsregel.value.cpr = null;
         }
 
         if (konteringsregel.value.accountSecondary) {
@@ -192,6 +245,7 @@
         }
         
         isUpdating.value = true
+        cprMode.value = 'Ingen'
 
         const url = isNewRule.value ? '/api/konteringsregler' : `/api/konteringsregler/${konteringsregel.value.ruleID}`
         
@@ -332,11 +386,21 @@
                             </template>
                             
                             <template v-else-if="key === 'CPR-bogføring'">
+                                <select id="cprMode" v-model="cprMode">
+                                    <option v-for="option in cprModeOptions" :key="option.value" :value="option.value">
+                                        {{ option.label }}
+                                    </option>
+                                </select>
+                            </template>
+
+                            <template v-else-if="key === 'CPR'">
                                 <input
-                                    type="checkbox"
+                                    type="text"
+                                    placeholder="..."
                                     :id="key"
                                     v-model="konteringsregel[value.key]"
                                 />
+                                <span v-if="errors.cpr" class="error">{{ errors.cpr }}</span>
                             </template>
 
                             <template v-else-if="key === 'Posteringstekst'">
