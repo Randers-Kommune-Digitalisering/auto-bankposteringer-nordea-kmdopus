@@ -156,8 +156,25 @@
     }
 
     function restartDatabase() {
-        if (confirm('Er du sikker på, at du vil genstarte databasen? Alle regler sættes til importerede csv-regler eller slettes. Kørselshistorik og åbne posteringer slettes.')) {
+        if (confirm('Er du sikker på, at du vil genstarte databasen? Kørselshistorik og åbne posteringer slettes.')) {
             fetch('/api/wipe-db')
+                .then(response => {
+                    if (response.ok) {
+                        alert('Databasen er blevet genstartet.');
+                    } else {
+                        throw new Error('Kunne ikke genstarte. Prøv igen senere.');
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('Der opstod en fejl under genstart.');
+                });
+        }
+    }
+
+    function restartRules() {
+        if (confirm('Er du sikker på, at du vil genstarte databasen? Alle regler sættes til importerede csv-regler eller slettes.')) {
+            fetch('/api/wipe-rules')
                 .then(response => {
                     if (response.ok) {
                         alert('Databasen er blevet genstartet.');
@@ -287,6 +304,7 @@
         </div>
         <br />
         <div class="flexbox">
+            <button @click="restartRules()" class="red">Genstart regler</button>
             <button @click="restartDatabase()" class="red">Genstart database</button>
         </div>
         <br />

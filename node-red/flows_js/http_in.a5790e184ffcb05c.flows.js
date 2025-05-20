@@ -1,18 +1,18 @@
 const Node = {
-  "id": "b86b0f673e6bb49e",
+  "id": "a5790e184ffcb05c",
   "type": "http in",
   "z": "0a57a34536934723",
   "g": "b9fd86e23e147a4d",
-  "name": "Wipe db",
-  "url": "/wipe-db",
+  "name": "Wipe rules",
+  "url": "/wipe-rules",
   "method": "get",
   "upload": false,
   "swaggerDoc": "",
   "x": 590,
-  "y": 140,
+  "y": 180,
   "wires": [
     [
-      "e3b7a4ff93701ebc",
+      "39df744355adf59e",
       "9f69714ca63f023d"
     ]
   ]
