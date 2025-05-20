@@ -5,10 +5,10 @@ const CPR_REGEX = /\b((0[1-9]|[12][0-9]|3[01])(0[13578]|10|12)|([0][1-9]|[12][0-
 
 export function validateAccount(value, errors) {
     if (!value) {
-        errors.account = 'Artskonto er påkrævet.';
+        errors.account = 'Artskonto skal angives';
         return false;
     } else if (!ACCOUNT_REGEX.test(value)) {
-        errors.account = 'Artskonto skal være præcis 8 tegn langt og starte med "S", "9" eller et tal.';
+        errors.account = 'Artskonto skal være præcis 8 tegn langt og starte med "S", "9" eller et tal';
         return false;
     } else {
         errors.account = null;
@@ -22,7 +22,7 @@ export function validateAccountSecondary(value, errors) {
         return true;
     }
     if (!ACCOUNTSECONDARY_REGEX.test(value)) {
-        errors.accountSecondary = 'PSP-element skal matche formatet X*-**********-*****.';
+        errors.accountSecondary = 'PSP-element skal matche formatet X*-**********-*****';
         return false;
     } else {
         errors.accountSecondary = null;
@@ -36,7 +36,7 @@ export function validateAccountTertiary(value, errors) {
         return true;
     }
     if (!ACCOUNTTERTIARY_REGEX.test(value)) {
-        errors.accountTertiary = 'Omkostningssted skal være 1-10 tegn (bogstaver og tal).';
+        errors.accountTertiary = 'Omkostningssted skal være 1-10 tegn (bogstaver og tal)';
         return false;
     } else {
         errors.accountTertiary = null;
@@ -46,7 +46,7 @@ export function validateAccountTertiary(value, errors) {
 
 export function validateText(value, errors) {
     if (!value) {
-        errors.text = 'Posteringstekst er påkrævet.';
+        errors.text = 'Posteringstekst skal angives';
         return false;
         
     } else if (value && value.length > 50) {
@@ -84,8 +84,8 @@ export function validateDependencies(obj, errors) {
     
     // Mutual exclusion: begge må ikke være udfyldt
     if (accountSecondary && accountTertiary) {
-        errors.accountSecondary = 'PSP-element og Omkostningssted må ikke udfyldes samtidig.';
-        errors.accountTertiary = 'PSP-element og Omkostningssted må ikke udfyldes samtidig.';
+        errors.accountSecondary = 'PSP-element og Omkostningssted må ikke udfyldes samtidig';
+        errors.accountTertiary = 'PSP-element og Omkostningssted må ikke udfyldes samtidig';
         return false;
     } else {
         // Nulstil fejl hvis kun én er udfyldt
@@ -103,11 +103,11 @@ export function validateDependencies(obj, errors) {
 
     if (account[0] === '9' || account[0] === 'S') {
         if (accountSecondary) {
-            errors.accountSecondary = 'PSP-element må ikke udfyldes, når Artskonto starter med "9" eller "S".';
+            errors.accountSecondary = 'PSP-element må ikke udfyldes, når Artskonto starter med "9" eller "S"';
             return false;
         }
         if (accountTertiary) {
-            errors.accountTertiary = 'Omkostningssted må ikke udfyldes, når Artskonto starter med "9" eller "S".';
+            errors.accountTertiary = 'Omkostningssted må ikke udfyldes, når Artskonto starter med "9" eller "S"';
             return false;
         }
         errors.accountSecondary = null;
@@ -115,8 +115,8 @@ export function validateDependencies(obj, errors) {
         return validateAccount(account, errors);
     } else {
         if (!accountSecondary && !accountTertiary) {
-            errors.accountSecondary = 'PSP-element eller Omkostningssted er påkrævet, når Artskonto ikke starter med "9" eller "S".';
-            errors.accountTertiary = 'PSP-element eller Omkostningssted er påkrævet, når Artskonto ikke starter med "9" eller "S".';
+            errors.accountSecondary = 'PSP-element eller Omkostningssted skal angives, når Artskonto ikke starter med "9" eller "S"';
+            errors.accountTertiary = 'PSP-element eller Omkostningssted skal angives, når Artskonto ikke starter med "9" eller "S"';
             return false;
         }
         if (accountSecondary) {

@@ -135,7 +135,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       const landingDebetOrCredit = direction === "incoming" ? "Kredit" : "Debet";
       transaction.amount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   
-      const cpr = rules.postWithCPR ? extractCPRNumber(transaction.narrative) : null;
+      const cpr = rules.cpr ? rules.cpr : rules.postWithCPR ? extractCPRNumber(transaction.narrative) : null;
       
       let completeMatch = false;
   

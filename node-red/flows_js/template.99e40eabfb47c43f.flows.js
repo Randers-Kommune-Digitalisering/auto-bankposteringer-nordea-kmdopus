@@ -23,9 +23,9 @@ const Node = {
 
 Node.template = `
 DROP TABLE
+    accountingRules,
     runHistory,
-    transactionsWithNoMatch,
-    accountingRules
+    transactionsWithNoMatch
 `
 
 module.exports = Node;

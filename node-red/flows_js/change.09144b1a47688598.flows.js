@@ -30,7 +30,7 @@ const Node = {
       "t": "set",
       "p": "configs.initialData.bankAccounts[0].intermediateAccount",
       "pt": "global",
-      "to": "95990009",
+      "to": "95999999",
       "tot": "str"
     },
     {
