@@ -7,17 +7,17 @@ const Node = {
   "props": [
     {
       "p": "path",
-      "v": "/data/output/",
-      "vt": "str"
+      "v": "configs.ftp.filepaths.send.rootFolder",
+      "vt": "global"
     }
   ],
   "repeat": "86400",
   "crontab": "",
   "once": true,
-  "onceDelay": 0.1,
+  "onceDelay": "5",
   "topic": "",
   "x": 75,
-  "y": 1100,
+  "y": 1120,
   "wires": [
     [
       "read-folder"

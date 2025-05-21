@@ -9,7 +9,14 @@ const Node = {
       "t": "set",
       "p": "files",
       "pt": "msg",
-      "to": "$map(files, function($value, $index) {\t    {\t        \"filename\": $value,\t        \"birthtime\": stats[$index].birthtime\t    }\t})",
+      "to": "$map(files, function($value, $index) {\t    {\t        \"filename\": $value,\t        \"birthtime\": stats[$index].mtime\t    }\t})",
+      "tot": "jsonata"
+    },
+    {
+      "t": "set",
+      "p": "filesCount",
+      "pt": "msg",
+      "to": "$count(files)",
       "tot": "jsonata"
     }
   ],
@@ -19,10 +26,10 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 225,
-  "y": 1100,
+  "y": 1120,
   "wires": [
     [
-      "check-files"
+      "374a53ba4bf9667e"
     ]
   ],
   "icon": "font-awesome/fa-cog",

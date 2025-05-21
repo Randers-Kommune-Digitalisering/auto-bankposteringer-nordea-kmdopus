@@ -45,7 +45,7 @@ const Node = {
       "574e4647d66b1c08"
     ]
   ],
-  "icon": "font-awesome/fa-language",
+  "icon": "font-awesome/fa-arrows",
   "l": false
 }
 
