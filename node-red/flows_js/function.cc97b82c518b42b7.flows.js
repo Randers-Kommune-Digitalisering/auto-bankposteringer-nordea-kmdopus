@@ -33,7 +33,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   msg.payload = formattedPostings;
   
   msg.columns = global.get("configs").erp.csvHeaders;
-  msg.filename = "/data/output/" + global.get("dates").bookingDate + suffix + ".csv";
+  msg.filename = global.get("configs").ftp.filepaths.send.rootFolder + global.get("dates").bookingDate + suffix + ".csv";
   
   return msg;
 }

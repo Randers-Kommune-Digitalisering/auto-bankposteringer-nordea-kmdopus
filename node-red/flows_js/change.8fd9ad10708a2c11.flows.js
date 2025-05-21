@@ -16,7 +16,7 @@ const Node = {
       "t": "set",
       "p": "filename",
       "pt": "msg",
-      "to": "\"/data/output/\" & $globalContext(\"dates\").bookingDate & \"_afstem.csv\"",
+      "to": "$globalContext(\"configs\").ftp.filepaths.send.rootFolder & $globalContext(\"dates\").bookingDate & \"_afstem.csv\"",
       "tot": "jsonata"
     },
     {
