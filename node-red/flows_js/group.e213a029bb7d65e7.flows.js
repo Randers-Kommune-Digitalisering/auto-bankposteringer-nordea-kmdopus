@@ -12,17 +12,18 @@ const Node = {
   },
   "nodes": [
     "check-folder",
-    "check-files",
     "log-deletion",
     "delete-files",
     "read-folder",
     "4772a10c5411107e",
-    "e71fc547a36a4f03"
+    "e71fc547a36a4f03",
+    "374a53ba4bf9667e",
+    "check-files"
   ],
   "x": 14,
   "y": 1059,
-  "w": 422,
-  "h": 82
+  "w": 472,
+  "h": 102
 }
 
 module.exports = Node;

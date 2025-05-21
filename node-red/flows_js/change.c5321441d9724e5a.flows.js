@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "filepath",
       "pt": "msg",
-      "to": "\"/data/output/\" & req.params.file",
+      "to": "$globalContext(\"configs\").ftp.filepaths.send.rootFolder & req.params.file",
       "tot": "jsonata"
     }
   ],
