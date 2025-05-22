@@ -108,10 +108,8 @@
         if (index.value === 'nyinaktiv') konteringsregel.value.activeBool = false
         else if (index.value === 'nyundtagelse') konteringsregel.value.exceptionBool = true
         else if (index.value === 'nyengangsregel') konteringsregel.value.tempBool = true
-        validateDependencies(
-            konteringsregel.value,
-            errors.value
-        )
+        validateDependencies(konteringsregel.value, errors.value);
+        validateText(konteringsregel.value.text, errors.value);
     } else {
         fetch(`/api/konteringsregler/${index.value}`)
             .then(response => response.json())
