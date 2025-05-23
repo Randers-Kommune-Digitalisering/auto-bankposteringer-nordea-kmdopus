@@ -3,49 +3,49 @@ const Node = {
   "type": "change",
   "z": "ac21bbbed3962f80",
   "g": "af9e589c452c6701",
-  "name": "KMD ftp",
+  "name": "SFTP",
   "rules": [
     {
       "t": "set",
       "p": "configs.ftp.dataProviderId",
       "pt": "global",
-      "to": "6ROB",
-      "tot": "str"
+      "to": "ERP_DATAPROVIDERID",
+      "tot": "env"
     },
     {
       "t": "set",
       "p": "configs.ftp.dataProviderIdCode",
       "pt": "global",
-      "to": "730",
-      "tot": "str"
+      "to": "ERP_DATAPROVIDERIDCODE",
+      "tot": "jsonata"
     },
     {
       "t": "set",
       "p": "configs.ftp.compCode",
       "pt": "global",
-      "to": "0020",
-      "tot": "str"
+      "to": "ERP_COMPCODE",
+      "tot": "env"
     },
     {
       "t": "set",
       "p": "configs.ftp.prodEnv",
       "pt": "global",
-      "to": "P04",
-      "tot": "str"
+      "to": "ERP_PRODENV",
+      "tot": "env"
     },
     {
       "t": "set",
       "p": "configs.ftp.filepaths.send.rootFolder",
       "pt": "global",
-      "to": "/data/output/",
-      "tot": "str"
+      "to": "SFTP_SEND_DIR",
+      "tot": "env"
     },
     {
       "t": "set",
       "p": "configs.ftp.filepaths.recieve.rootFolder",
       "pt": "global",
-      "to": "/fra-randers/",
-      "tot": "str"
+      "to": "SFTP_RECEIVE_DIR",
+      "tot": "env"
     }
   ],
   "action": "",
@@ -53,7 +53,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 180,
+  "x": 170,
   "y": 300,
   "wires": [
     [

@@ -9,8 +9,8 @@ const Node = {
       "t": "set",
       "p": "configs.initialData.admSysData.admEmail",
       "pt": "global",
-      "to": "csl@randers.dk",
-      "tot": "str"
+      "to": "AUTH_SENDER_ADDRESS",
+      "tot": "env"
     },
     {
       "t": "set",
@@ -23,22 +23,22 @@ const Node = {
       "t": "set",
       "p": "configs.initialData.admSysData.admName",
       "pt": "global",
-      "to": "Christian Leonhardt",
-      "tot": "str"
+      "to": "AUTH_NAME",
+      "tot": "env"
     },
     {
       "t": "set",
       "p": "configs.initialData.admSysData.integrationBool",
       "pt": "global",
-      "to": "true",
-      "tot": "bool"
+      "to": "$string($env(\"ERP_INTEGRATION_BOOL\")) = \"true\"",
+      "tot": "jsonata"
     },
     {
       "t": "set",
       "p": "configs.initialData.admSysData.erpSystem",
       "pt": "global",
-      "to": "KMD Opus",
-      "tot": "str"
+      "to": "ERP_NAME",
+      "tot": "env"
     }
   ],
   "action": "",
