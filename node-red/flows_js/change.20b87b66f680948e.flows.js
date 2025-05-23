@@ -23,7 +23,7 @@ const Node = {
       "t": "set",
       "p": "configs.reminder.sender",
       "pt": "global",
-      "to": "SENDER_ADRESS",
+      "to": "AUTH_SENDER_ADDRESS",
       "tot": "env"
     }
   ],

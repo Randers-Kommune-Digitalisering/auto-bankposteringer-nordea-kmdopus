@@ -9,56 +9,56 @@ const Node = {
       "t": "set",
       "p": "configs.initialData.bankAccounts[0].bankAccount",
       "pt": "global",
-      "to": "DK20005908764988-DKK",
+      "to": "",
       "tot": "str"
     },
     {
       "t": "set",
       "p": "configs.initialData.bankAccounts[0].bankAccountName",
       "pt": "global",
-      "to": "Hovedkonto",
+      "to": "",
       "tot": "str"
     },
     {
       "t": "set",
       "p": "configs.initialData.bankAccounts[0].statusAccount",
       "pt": "global",
-      "to": "90540000",
+      "to": "",
       "tot": "str"
     },
     {
       "t": "set",
       "p": "configs.initialData.bankAccounts[0].intermediateAccount",
       "pt": "global",
-      "to": "95999999",
+      "to": "",
       "tot": "str"
     },
     {
       "t": "set",
       "p": "configs.initialData.bankAccounts[1].bankAccount",
       "pt": "global",
-      "to": "DK20009035615315-DKK",
+      "to": "",
       "tot": "str"
     },
     {
       "t": "set",
       "p": "configs.initialData.bankAccounts[1].bankAccountName",
       "pt": "global",
-      "to": "Debitorkonto",
+      "to": "",
       "tot": "str"
     },
     {
       "t": "set",
       "p": "configs.initialData.bankAccounts[1].statusAccount",
       "pt": "global",
-      "to": "90541000",
+      "to": "",
       "tot": "str"
     },
     {
       "t": "set",
       "p": "configs.initialData.bankAccounts[1].intermediateAccount",
       "pt": "global",
-      "to": "95991009",
+      "to": "",
       "tot": "str"
     }
   ],

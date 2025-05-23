@@ -9,57 +9,57 @@ const Node = {
       "t": "set",
       "p": "configs.banking.provider",
       "pt": "global",
-      "to": "Nordea",
-      "tot": "str"
+      "to": "BANKING_NAME",
+      "tot": "env"
     },
     {
       "t": "set",
       "p": "configs.banking.domain",
       "pt": "global",
-      "to": "https://open.nordea.com",
-      "tot": "str"
+      "to": "BANKING_DOMAIN",
+      "tot": "env"
     },
     {
       "t": "set",
       "p": "configs.banking.domainShort",
       "pt": "global",
-      "to": "open.nordea.com",
-      "tot": "str"
+      "to": "BANKING_DOMAIN_SHORT",
+      "tot": "env"
     },
     {
       "t": "set",
       "p": "configs.banking.id",
       "pt": "global",
-      "to": "CLIENT_ID",
+      "to": "BANKING_CLIENT_ID",
       "tot": "env"
     },
     {
       "t": "set",
       "p": "configs.banking.secret",
       "pt": "global",
-      "to": "CLIENT_SECRET",
+      "to": "BANKING_CLIENT_SECRET",
       "tot": "env"
     },
     {
       "t": "set",
       "p": "configs.banking.eidas.privateKey",
       "pt": "global",
-      "to": "EIDASPRIVATEKEY",
+      "to": "BANKING_EIDASPRIVATEKEY",
       "tot": "env"
     },
     {
       "t": "set",
       "p": "configs.banking.agreement",
       "pt": "global",
-      "to": "AGREEMENT_ID",
+      "to": "BANKING_AGREEMENT_ID",
       "tot": "env"
     },
     {
       "t": "set",
       "p": "configs.banking.usefulParameters",
       "pt": "global",
-      "to": "[[\"narrative\",\"message\"],[\"counterparty_name\",\"counterparty_address\"],\"type_description\"]",
-      "tot": "json"
+      "to": "$eval($env(\"BANKING_USEFUL_PARAMETERS\"))",
+      "tot": "jsonata"
     }
   ],
   "action": "",
