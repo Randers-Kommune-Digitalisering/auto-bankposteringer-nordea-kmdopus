@@ -17,7 +17,7 @@ const Node = {
       "p": "configs.ftp.dataProviderIdCode",
       "pt": "global",
       "to": "ERP_DATAPROVIDERIDCODE",
-      "tot": "jsonata"
+      "tot": "env"
     },
     {
       "t": "set",
