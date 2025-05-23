@@ -129,17 +129,20 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   function processPosting(transaction, rules) {
       const direction = transaction.amount.charAt(0) === "-" ? "outgoing" : "incoming";
       transaction.direction = direction;
-      const floatAmount = transaction.amount;
+      const floatAmount = parseFloat(transaction.amount);
       const absoluteAmount = Math.abs(floatAmount);
       const statusDebetOrCredit = direction === "incoming" ? "Debet" : "Kredit";
       const landingDebetOrCredit = direction === "incoming" ? "Kredit" : "Debet";
-      transaction.amount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      const formattedAmount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   
       const cpr = rules.cpr ? rules.cpr : rules.postWithCPR ? extractCPRNumber(transaction.narrative) : null;
       
       let completeMatch = false;
   
       for (let rule of rules) {      
+          const floatRuleAmount1 = rule.amount1 ? parseFloat(rule.amount1.replace(/\./g, '').replace(',', '.')) : undefined;
+          const floatRuleAmount2 = rule.amount2 ? parseFloat(rule.amount2.replace(/\./g, '').replace(',', '.')) : undefined;
+          
           let sumOfParametersMatched = 0;
   
           if (completeMatch) {
@@ -154,13 +157,13 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               }
   
               let matchedAllParametersBool = sumOfParametersMatched === sumOfParametersGiven(rule);
-              let matchedAmountBool = matchAmount(floatAmount, rule.operator, rule.amount1, rule.amount2);
+              let matchedAmountBool = matchAmount(floatAmount, rule.operator, floatRuleAmount1, floatRuleAmount2);
               let matchedAccountBool = transaction.relatedAccount.bankAccount === rule.relatedBankAccount || rule.relatedBankAccount === null;
                               
               if (matchedAllParametersBool && matchedAmountBool && matchedAccountBool) {
                   if (!rule.exceptionBool) {   // Don't write ERP postings if rule is an exception, but still count as match
                       let text = textGeneration(rule.text, transaction.message, transaction.narrative, transaction.counterparty_name);
-                      generatePostings(transaction.relatedAccount.statusAccount, rule.account, statusDebetOrCredit, landingDebetOrCredit, text, transaction.amount, rule.accountSecondary || '', rule.accountTertiary || '', cpr);
+                      generatePostings(transaction.relatedAccount.statusAccount, rule.account, statusDebetOrCredit, landingDebetOrCredit, text, formattedAmount, rule.accountSecondary || '', rule.accountTertiary || '', cpr);
                   }
   
                   completeMatch = true;
@@ -174,7 +177,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       }
   
       if (!completeMatch) {
-          generatePostings(transaction.relatedAccount.statusAccount, transaction.relatedAccount.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, transaction.transaction_id, transaction.amount, '', cpr);
+          generatePostings(transaction.relatedAccount.statusAccount, transaction.relatedAccount.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, transaction.transaction_id, formattedAmount, '', cpr);
           transactionsUnmatched.push(transaction);
       }
   
