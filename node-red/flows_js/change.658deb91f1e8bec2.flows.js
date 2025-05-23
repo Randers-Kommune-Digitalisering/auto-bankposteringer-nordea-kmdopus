@@ -9,8 +9,8 @@ const Node = {
       "t": "set",
       "p": "configs.csvPath",
       "pt": "global",
-      "to": "/data/konteringsregler/konteringsregler.csv",
-      "tot": "str"
+      "to": "ERP_IMPORTRULES_PATH",
+      "tot": "env"
     }
   ],
   "action": "",

@@ -17,16 +17,33 @@ services:
       DB_PORT: 3306
       DB_DATABASE: demo
 
-      CLIENT_ID: ${PRODUKTIONSKEY}
-      CLIENT_SECRET: ${PRODUKTIONSSECRET}
-      EIDASPRIVATEKEY: ${PROD_EIDASPRIVATEKEY}
-      AUTH_ID: ${PROD_AUTH_ID}
-      AGREEMENT_ID: ${PROD_AGREEMENT_ID}
+      BANKING_NAME: Nordea # NEW
+      BANKING_DOMAIN: https://open.nordea.com # NEW
+      BANKING_DOMAIN_SHORT: open.nordea.com # NEW
+      BANKING_CLIENT_ID: ${PRODUKTIONSKEY} # KEY CHANGED
+      BANKING_CLIENT_SECRET: ${PRODUKTIONSSECRET} # KEY CHANGED
+      BANKING_EIDASPRIVATEKEY: ${PROD_EIDASPRIVATEKEY} # KEY CHANGED
+      BANKING_AGREEMENT_ID: ${PROD_AGREEMENT_ID} # KEY CHANGED
+      BANKING_USEFUL_PARAMETERS: '[["narrative","message"],["counterparty_name","counterparty_address"],"type_description"]' # NEW
 
-      SENDER_ADRESS: ${SENDER_ADRESS}
+      AUTH_ID: ${PROD_AUTH_ID}
+      AUTH_NAME: ${AUTH_NAME} # NEW
+      AUTH_SENDER_ADDRESS: ${SENDER_ADRESS} # KEY CHANGED
+
       SFTP_URL: ${SFTP_URL}
       SFTP_USERNAME: ${SFTP_USERNAME}
       SFTP_PASSWORD: ${SFTP_PASSWORD}
+      SFTP_SEND_DIR: /data/output/ # NEW
+      SFTP_RECEIVE_DIR: /fra-randers/ # NEW
+
+      ERP_NAME: KMD Opus # NEW
+      ERP_DATAPROVIDERID: 6ROB # NEW
+      ERP_DATAPROVIDERIDCODE: "730" # NEW
+      ERP_COMPCODE: "0020" # NEW
+      ERP_PRODENV: P04 # NEW
+      ERP_INTEGRATION_BOOL: "true" # NEW
+      ERP_FILE_HEADERS: "Artskonto, Omkostningssted, PSP-element, Profitcenter, Ordre, Debet/kredit, Beløb, Næste agent, Tekst, Betalingsart, Påligningsår, Betalingsmodtagernr., Betalingsmodtagernr.kode, Ydelsesmodtagernr., Ydelsesmodtagernr.kode, Ydelsesperiode fra, Ydelsesperiode til, Oplysningspligtnr., Oplysningspligtmodtagernr.kode, Oplysningspligtkode, Netværk, Operation, Mængde, Mængdeenhed, Referencenøgle" # NEW
+      ERP_IMPORTRULES_PATH: /data/konteringsregler/konteringsregler.csv # NEW
 
       FLOWS: "/data/flows.json"
 
