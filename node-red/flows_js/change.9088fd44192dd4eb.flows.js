@@ -7,6 +7,13 @@ const Node = {
   "rules": [
     {
       "t": "set",
+      "p": "payload",
+      "pt": "msg",
+      "to": "$map(payload, function($v, $i, $a) {\t  $merge([\t    $v,\t    {\"amount\": $v.direction = \"outgoing\" ? \"-\" & $v.amount : $v.amount}\t  ])\t})",
+      "tot": "jsonata"
+    },
+    {
+      "t": "set",
       "p": "transactions.unmatched",
       "pt": "global",
       "to": "($type(payload) = \"array\") ? payload : [payload]",

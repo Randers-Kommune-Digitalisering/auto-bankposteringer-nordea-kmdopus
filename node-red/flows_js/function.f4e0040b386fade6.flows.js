@@ -178,6 +178,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
       if (!completeMatch) {
           generatePostings(transaction.relatedAccount.statusAccount, transaction.relatedAccount.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, transaction.transaction_id, formattedAmount, '', cpr);
+          transaction.amount = formattedAmount;
           transactionsUnmatched.push(transaction);
       }
   
