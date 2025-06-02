@@ -48,11 +48,16 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   // Create a single LINES object with multiple LINE elements inside
   const LINES = { LINE: [] };
   
+  function parseDanishAmount(str) {
+      // Fjern mellemrum og tusindtalsseparatorer
+      let clean = str.replace(/\./g, '').replace(',', '.').trim();
+      return parseFloat(clean);
+  }
+  
   for (const posting of postings) {
       lineCounter++;
   
-      let amount = parseFloat(posting.amount.replace('.', '').replace(',', '.'));
-      amount = parseFloat(amount);
+      let amount = parseDanishAmount(posting.amount);
       let amountPrefixed = posting.debetOrCredit === 'Debet' ? amount : amount * -1;
   
       let psp = posting.accountSecondary ? posting.accountSecondary : undefined;
@@ -85,11 +90,14 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
       // Remove undefined values
       Object.keys(line).forEach(key => line[key] === undefined && delete line[key]);
   
+      // Convert amount to avoid rounding issues
+      let amountInOre = Math.round(amount * 100);
+  
       // Update debit and credit sums
       if (posting.debetOrCredit === 'Debet') {
-          debetSum += amount;
+          debetSum += amountInOre;
       } else if (posting.debetOrCredit === 'Kredit') {
-          creditSum += amount;
+          creditSum += amountInOre;
       }
   
       // Tilføj linjen til LINES.LINE arrayet
@@ -106,8 +114,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   
   const HEADER = {
       NO_DOC_POSITION: String(lineCounter),
-      BALANCE_DEBET: debetSum.toFixed(2),
-      BALANCE_CREDIT: '-' + creditSum.toFixed(2),
+      BALANCE_DEBET: (debetSum / 100).toFixed(2),
+      BALANCE_CREDIT: '-' + (creditSum / 100).toFixed(2),
       MUNICIPALITY: dataProviderIdCode,
       COMP_CODE: compCode,
       DOC_DATE: docDate,
