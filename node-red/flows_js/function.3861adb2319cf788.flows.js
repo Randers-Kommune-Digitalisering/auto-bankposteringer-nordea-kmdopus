@@ -80,9 +80,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
           GL_ACCOUNT: artskonto,
           WBS_ELEMENT: psp,
           REF_KEY_3: String(lineCounter),
-          ZZCSYSIDN: dataProviderId,
           SERV_REC_NO_CODE: posting.cpr ? '02' : undefined,
           SERV_REC_NO: posting.cpr ? posting.cpr : undefined,
+          ZZCSYSIDN: dataProviderId,
           BENEFIT_VALFROM: posting.cpr ? bookingDate : undefined,
           BENEFIT_VALTO: posting.cpr ? bookingDate : undefined
       };

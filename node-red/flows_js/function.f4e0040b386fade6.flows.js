@@ -11,7 +11,7 @@ const Node = {
   "finalize": "",
   "libs": [],
   "x": 155,
-  "y": 860,
+  "y": 960,
   "wires": [
     [
       "c265ac1bb029ed1e"
@@ -25,6 +25,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   const transactionsObj = global.get("transactions");
   let erpObj = global.get("erp") || {};
   let masterDataObj = global.get("masterData");
+  let notifications = [];
   let postings = [];
   let transactionsUnmatched = transactionsObj.addUnmatched ? transactionsObj.addUnmatched : [];
   const transactions = transactionsObj.list ? transactionsObj.list.reverse() : null;
@@ -169,6 +170,15 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
                   completeMatch = true;
                   rule.lastUsed = date;
   
+                  if (rule.notificationRecipient) {
+                      notifications.push(
+                          {
+                              text: "Din indbetaling på " + formattedAmount + " kr. fra " + transaction.counterparty_name + " er modtaget og er blevet bogført med nedenstående kontering:\n\n" + rule.account + "\n\n" + rule.accountSecondary,
+                              recipient: rule.notificationRecipient
+                          }
+                      )
+                  }
+  
                   if (rule.tempBool) {
                       rule.toDelete = true;
                   }
@@ -192,6 +202,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       });
   }
   
+  global.set("notifications", notifications);
   
   erpObj.postings = postings;
   global.set("erp", erpObj);

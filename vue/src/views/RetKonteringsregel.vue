@@ -18,17 +18,35 @@
     const awaitingDeleteConfirmation = ref(false)
     const isDeleting = ref(false)
 
-    const isNewRule = ref(
-        index.value === 'nyaktiv' || 
-        index.value === 'nyinaktiv' || 
-        index.value === 'nyundtagelse' || 
-        index.value === 'nyengangsregel'
-    )
+    const isNewRule = computed(() => index.value && index.value.startsWith('ny'))
     
+    const ruleType = computed(() => {
+        if (konteringsregel.value?.exceptionBool) return 'exception'
+        if (konteringsregel.value?.tempBool) return 'temporary'
+        if (konteringsregel.value && konteringsregel.value.activeBool === false) return 'inactive'
+        return 'active'
+    })
+
     const konteringsregel = ref(isNewRule.value ? JSON.parse(JSON.stringify(newItem)) : null)
 
     const bankaccounts = ref([])
     const bankAccountOptions = ref([])
+
+    const operatorOptions = [
+        { label: 'Større end', value: '>' },
+        { label: 'Mindre end', value: '<' },
+        { label: 'Mellem', value: '><' },
+        { label: 'Lig med', value: '==' }
+    ]
+
+    const cprModeOptions = [
+        { label: 'Ingen', value: 'Ingen' },
+        { label: 'Scan fra transaktion', value: 'Scan fra transaktion' },
+        { label: 'Statisk', value: 'Statisk' }
+    ];
+
+    const selectedOperator = ref(isNewRule.value ? null : operatorOptions[0].value)
+    const selectedBankaccount = ref(null)
 
     const cprMode = ref("Ingen");
 
@@ -53,68 +71,21 @@
             ]
         })
 
-    const operatorOptions = [
-        { label: 'Større end', value: '>' },
-        { label: 'Mindre end', value: '<' },
-        { label: 'Mellem', value: '><' },
-        { label: 'Lig med', value: '==' }
-    ]
-
-    const cprModeOptions = [
-        { label: 'Ingen', value: 'Ingen' },
-        { label: 'Scan fra transaktion', value: 'Scan fra transaktion' },
-        { label: 'Statisk', value: 'Statisk' }
-    ];
-
-    const selectedOperator = ref(isNewRule.value ? null : operatorOptions[0].value)
-    const selectedBankaccount = ref(null)
-
-    const keyMap_rule = {
-        "id": { "key": "ruleID", "hidden": true },
-        "Tilknyttet bankkonto": { "key": "relatedBankAccount", "group": "Transaktionsoplysninger" },
-        "Reference": { "key": "reference", "group": "Transaktionsoplysninger" },
-        "Afsender": { "key": "sender", "group": "Transaktionsoplysninger" }, 
-        "Posteringstype": { "key": "typeDescription", "group": "Transaktionsoplysninger" },
-        "Beløbsregel": { "key": "operator", "group": "Beløbsafgrænsning" },
-        "Beløb 1": { "key": "amount1", "group": "Beløbsafgrænsning" },
-        "Beløb 2": { "key": "amount2", "hidden": true, "group": "Beløbsafgrænsning" },
-        "Artskonto": { "key": "account", "group": "Kontering" },
-        "PSP-element": { "key": "accountSecondary", "group": "Kontering" },
-        "Omkostningssted": { "key": "accountTertiary", "group": "Kontering" },
-        "Posteringstekst": { "key": "text", "group": "Kontering" },
-        "CPR-bogføring": { "key": "postWithCPR", "group": "Kontering" },
-        "CPR": { "key": "cpr", "hidden": true, "group": "Kontering" },
-        "Notat": { "key": "note" },
-        "activeBool": { "key": "activeBool", "hidden": true }
-    }
-
-    const keyMap_exception = {
-        "id": { "key": "ruleID", "hidden": true },
-        "Tilknyttet bankkonto": { "key": "relatedBankAccount", "group": "Transaktionsoplysninger" },
-        "Reference": { "key": "reference", "group": "Transaktionsoplysninger" },
-        "Afsender": { "key": "sender", "group": "Transaktionsoplysninger" }, 
-        "Posteringstype": { "key": "Posteringstype", "group": "Transaktionsoplysninger" },
-        "Beløbsregel": { "key": "operator", "group": "Beløbsafgrænsning" },
-        "Beløb 1": { "key": "amount1", "group": "Beløbsafgrænsning" },
-        "Beløb 2": { "key": "amount2", "group": "Beløbsafgrænsning" },
-        "Artskonto": { "key": "account", "hidden": true, "group": "Kontering" },
-        "PSP-element": { "key": "accountSecondary", "hidden": true, "group": "Kontering" },
-        "Omkostningssted": { "key": "accountTertiary", "hidden": true, "group": "Kontering" },
-        "Posteringstekst": { "key": "text", "hidden": true, "group": "Kontering" },
-        "Notat": { "key": "Notat" }
-    }
-
-    if (isNewRule.value) {   
-        if (index.value === 'nyinaktiv') konteringsregel.value.activeBool = false
-        else if (index.value === 'nyundtagelse') konteringsregel.value.exceptionBool = true
-        else if (index.value === 'nyengangsregel') konteringsregel.value.tempBool = true
+    if (isNewRule.value) {
+        // New rule
+        konteringsregel.value = JSON.parse(JSON.stringify(newItem));
+        if (index.value === 'nyaktiv') konteringsregel.value.activeBool = false;
+        if (index.value === 'nyundtagelse') konteringsregel.value.exceptionBool = true;
+        if (index.value === 'nyengangsregel') konteringsregel.value.tempBool = true;
         validateDependencies(konteringsregel.value, errors.value);
         validateText(konteringsregel.value.text, errors.value);
     } else {
+        // Existing rule
         fetch(`/api/konteringsregler/${index.value}`)
             .then(response => response.json())
             .then(value => {
-                konteringsregel.value = value
+                konteringsregel.value = value;
+
                 selectedBankaccount.value = konteringsregel.value.relatedBankAccount
                 selectedOperator.value = konteringsregel.value.operator
                 validateDependencies(konteringsregel.value, errors.value);
@@ -129,13 +100,61 @@
                 } else {
                     cprMode.value = 'Ingen';
                 }
-            })
+            });
     }
-        
+
     const keyMap = computed(() => {
-        if (index.value === 'nyundtagelse') return keyMap_exception
-        return keyMap_rule
-    })
+        // Base fields for all rules
+        const map = {
+            "id": { "key": "ruleID", "hidden": true },
+            "Tilknyttet bankkonto": { "key": "relatedBankAccount", "group": "Transaktionsoplysninger" },
+            "Reference": { "key": "reference", "group": "Transaktionsoplysninger" },
+            "Afsender": { "key": "sender", "group": "Transaktionsoplysninger" }, 
+            "Posteringstype": { "key": "typeDescription", "group": "Transaktionsoplysninger" },
+            "Beløbsregel": { "key": "operator", "group": "Beløbsafgrænsning" },
+            "Beløb 1": { "key": "amount1", "group": "Beløbsafgrænsning" },
+            "Beløb 2": { "key": "amount2", "hidden": true, "group": "Beløbsafgrænsning" },
+            "Notat": { "key": "note" },
+            "activeBool": { "key": "activeBool", "hidden": true },
+            "Artskonto": { 
+                "key": "account", 
+                "group": "Kontering", 
+                "hidden": () => ruleType.value === 'exception' 
+            },
+            "PSP-element": { 
+                "key": "accountSecondary", 
+                "group": "Kontering", 
+                "hidden": () => ruleType.value === 'exception' 
+            },
+            "Omkostningssted": { 
+                "key": "accountTertiary", 
+                "group": "Kontering", 
+                "hidden": () => ruleType.value === 'exception' 
+            },
+            "Posteringstekst": { 
+                "key": "text", 
+                "group": "Kontering", 
+                "hidden": () => ruleType.value === 'exception' 
+            },
+            "CPR-bogføring": { 
+                "key": "postWithCPR", 
+                "group": "Kontering", 
+                "hidden": () => ruleType.value === 'exception' 
+            },
+            "CPR": { 
+                "key": "cpr", 
+                "group": "Kontering", 
+                "hidden": () => cprMode.value !== 'Statisk' || ruleType.value === 'exception' 
+            },
+            "Mail til advisering": { 
+                "key": "notificationRecipient", 
+                "group": "Diverse", 
+                "hidden": () => ruleType.value !== 'temporary' 
+            }
+        };
+
+        return map;
+    });
 
     const groupedKeyMap = computed(() => {
         const groups = {}
@@ -166,8 +185,7 @@
 
     watch(selectedOperator, (newValue) => {
         konteringsregel.value.operator = newValue
-        const map = index.value === 'nyundtagelse' ? keyMap_exception : keyMap_rule;
-        map["Beløb 2"].hidden = !(newValue === '><')
+        keyMap.value["Beløb 2"].hidden = !(newValue === '><')
     })
 
     watch(bankAccountOptions, (newVal) => {
@@ -193,8 +211,7 @@
     });
 
     watch(cprMode, (mode) => {
-        const map = index.value === 'nyundtagelse' ? keyMap_exception : keyMap_rule;
-        map["CPR"].hidden = !(mode === 'Statisk');
+        keyMap.value["CPR"].hidden = !(mode === 'Statisk');
         konteringsregel.value.postWithCPR = (mode === 'Scan fra transaktion');
         // Immediately validate CPR when switching to Statisk
         if (mode === 'Statisk') {
@@ -263,7 +280,6 @@
 
         .then(value => {
             if(isNewRule.value) {
-                isNewRule.value = false
                 index.value = value.ruleID
                 konteringsregel.value.ruleID = value.ruleID
             }
@@ -347,7 +363,8 @@
                 <div class="flexbox">
                     <div v-for="group in sortedGroups" :key="group.name">
                         <h3>{{ group.name }}</h3>
-                        <div v-for="(value, key) in group.fields" :key="key" :class="value.hidden ? 'hidden' : ''">
+                        <div v-for="(value, key) in group.fields" :key="key"
+                            :class="typeof value.hidden === 'function' ? (value.hidden() ? 'hidden' : '') : (value.hidden ? 'hidden' : '')">
                             <label :for="key">{{ key }}</label>
 
                             <template v-if="key === 'Artskonto'">
@@ -435,7 +452,7 @@
                                     :id="key"
                                     v-model="konteringsregel[value.key]"
                                     @change="hasUpdated = false"
-                                    :disabled="value.disabled || value.hidden"
+                                    :disabled="value.disabled || (typeof value.hidden === 'function' ? value.hidden() : value.hidden)"
                                 />
                             </template>
                         </div>
