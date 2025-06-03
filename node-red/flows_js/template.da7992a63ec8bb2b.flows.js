@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS accountingRules (
     activeBool BOOLEAN,
     exceptionBool BOOLEAN,
     tempBool BOOLEAN DEFAULT FALSE,
+    notificationRecipient NVARCHAR(255) NULL,
     lastUsed NVARCHAR(10) NULL,
     ruleID INT PRIMARY KEY,
     relatedBankAccount NVARCHAR(31) NULL,
