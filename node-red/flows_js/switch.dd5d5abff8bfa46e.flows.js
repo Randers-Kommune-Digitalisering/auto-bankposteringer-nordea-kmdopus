@@ -1,44 +1,41 @@
 const Node = {
-  "id": "79c15c0ace4301df",
+  "id": "dd5d5abff8bfa46e",
   "type": "switch",
   "z": "30ea9c666c3d34a6",
   "g": "a7d9b10b639c44bd",
-  "name": "manual postings?",
-  "property": "transactions.manual",
+  "name": "did restarted run originally succeed?",
+  "property": "runs.originStatusCode",
   "propertyType": "global",
   "rules": [
+    {
+      "t": "eq",
+      "v": "200",
+      "vt": "str"
+    },
     {
       "t": "istype",
       "v": "undefined",
       "vt": "undefined"
     },
     {
-      "t": "empty"
-    },
-    {
-      "t": "nempty"
+      "t": "else"
     }
   ],
   "checkall": "true",
   "repair": false,
   "outputs": 3,
-  "x": 705,
-  "y": 400,
+  "x": 355,
+  "y": 360,
   "wires": [
     [
-      "0a30c5d1c401a59f"
+      "d02f1289b869fe6b"
     ],
     [
-      "0a30c5d1c401a59f"
+      "f39ed81546d8a834"
     ],
     [
-      "0a30c5d1c401a59f"
+      "f39ed81546d8a834"
     ]
-  ],
-  "outputLabels": [
-    "",
-    "false",
-    "true"
   ],
   "icon": "font-awesome/fa-question",
   "l": false

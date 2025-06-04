@@ -11,21 +11,6 @@ const Node = {
       "pt": "msg",
       "to": "runs.originUid",
       "tot": "global"
-    },
-    {
-      "t": "delete",
-      "p": "runs.originUid",
-      "pt": "global"
-    },
-    {
-      "t": "delete",
-      "p": "runs.originDate",
-      "pt": "global"
-    },
-    {
-      "t": "delete",
-      "p": "runs.restart",
-      "pt": "global"
     }
   ],
   "action": "",

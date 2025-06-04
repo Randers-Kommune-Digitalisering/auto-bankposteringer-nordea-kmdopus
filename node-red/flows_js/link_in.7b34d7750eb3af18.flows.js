@@ -5,8 +5,7 @@ const Node = {
   "g": "a7d9b10b639c44bd",
   "name": "route to erp data creation",
   "links": [
-    "33b149fc34883e74",
-    "8c31f531a4053170"
+    "33b149fc34883e74"
   ],
   "x": 55,
   "y": 400,
