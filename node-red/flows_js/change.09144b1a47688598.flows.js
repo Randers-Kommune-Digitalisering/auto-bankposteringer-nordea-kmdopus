@@ -7,58 +7,86 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "configs.initialData.bankAccounts[0].bankAccount",
+      "p": "configs.initialData.bankAccounts[0].bankAccountName",
       "pt": "global",
-      "to": "",
+      "to": "Hovedkonto",
       "tot": "str"
     },
     {
       "t": "set",
-      "p": "configs.initialData.bankAccounts[0].bankAccountName",
+      "p": "configs.initialData.bankAccounts[0].bankAccount",
       "pt": "global",
-      "to": "",
+      "to": "DK20005908764988-DKK",
       "tot": "str"
     },
     {
       "t": "set",
       "p": "configs.initialData.bankAccounts[0].statusAccount",
       "pt": "global",
-      "to": "",
+      "to": "90540000",
       "tot": "str"
     },
     {
       "t": "set",
       "p": "configs.initialData.bankAccounts[0].intermediateAccount",
       "pt": "global",
-      "to": "",
-      "tot": "str"
-    },
-    {
-      "t": "set",
-      "p": "configs.initialData.bankAccounts[1].bankAccount",
-      "pt": "global",
-      "to": "",
+      "to": "95999999",
       "tot": "str"
     },
     {
       "t": "set",
       "p": "configs.initialData.bankAccounts[1].bankAccountName",
       "pt": "global",
-      "to": "",
+      "to": "Debitorkonto",
+      "tot": "str"
+    },
+    {
+      "t": "set",
+      "p": "configs.initialData.bankAccounts[1].bankAccount",
+      "pt": "global",
+      "to": "DK20009035615315-DKK",
       "tot": "str"
     },
     {
       "t": "set",
       "p": "configs.initialData.bankAccounts[1].statusAccount",
       "pt": "global",
-      "to": "",
+      "to": "90541000",
       "tot": "str"
     },
     {
       "t": "set",
       "p": "configs.initialData.bankAccounts[1].intermediateAccount",
       "pt": "global",
-      "to": "",
+      "to": "95999999",
+      "tot": "str"
+    },
+    {
+      "t": "set",
+      "p": "configs.initialData.bankAccounts[2].bankAccountName",
+      "pt": "global",
+      "to": "Ydelseskontoret",
+      "tot": "str"
+    },
+    {
+      "t": "set",
+      "p": "configs.initialData.bankAccounts[2].bankAccount",
+      "pt": "global",
+      "to": "DK20009039143205-DKK",
+      "tot": "str"
+    },
+    {
+      "t": "set",
+      "p": "configs.initialData.bankAccounts[2].statusAccount",
+      "pt": "global",
+      "to": "90540014",
+      "tot": "str"
+    },
+    {
+      "t": "set",
+      "p": "configs.initialData.bankAccounts[2].intermediateAccount",
+      "pt": "global",
+      "to": "95999999",
       "tot": "str"
     }
   ],
