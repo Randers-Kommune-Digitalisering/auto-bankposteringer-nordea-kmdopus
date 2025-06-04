@@ -22,17 +22,17 @@ const Node = {
   "checkall": "true",
   "repair": false,
   "outputs": 3,
-  "x": 655,
-  "y": 380,
+  "x": 705,
+  "y": 400,
   "wires": [
     [
-      "56f2fa5975d90d08"
+      "0a30c5d1c401a59f"
     ],
     [
-      "56f2fa5975d90d08"
+      "0a30c5d1c401a59f"
     ],
     [
-      "56f2fa5975d90d08"
+      "0a30c5d1c401a59f"
     ]
   ],
   "outputLabels": [
