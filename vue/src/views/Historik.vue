@@ -23,7 +23,10 @@
         .then(value => history.value = value)
 
     function restartRun(date, id) {
-        const url = `/api/restart/${date}?id=${id}`; // Include id as a query parameter
+        if (!confirm('Er du sikker på, at du vil genstarte kørsel for ' + date + '?')) {
+            return;
+        }
+        const url = `/api/restart/${date}?id=${id}`;
         fetch(url)
             .then(response => {
                 console.log(response.status);
@@ -46,6 +49,11 @@
         <br>
         <br>
         Når en kørsel er genstartet, skal siden efterfølgende opdateres. HTTP-koden for kørslen vil herefter være opdateret.
+        <br>
+        <br>
+        Genstarter man en fuldendt kørsel, dannes der ikke manuelle posteringer. Der er således risiko for tabte bankposteringer.
+        <br>
+        Man bør derfor kun genstarte fuldendte kørsler, hvis man har brug for at genlevere filen for en bestemt bankdato til økonomisystemet.
     </Content>
     
     <Content>
@@ -67,7 +75,6 @@
                     <button 
                         @click="restartRun(obj[keyMap.bankdato.key], obj[keyMap.id.key])" 
                         :class="restartedRunSuccess[obj[keyMap.bankdato.key]] != null ? (restartedRunSuccess[obj[keyMap.bankdato.key]] ? 'green' : 'red') : ''"
-                        :disabled="obj[keyMap['HTTP-kode'].key]?.toString().startsWith('2')"
                     >
                         <IconRefresh />&nbsp;{{restartedRunSuccess[obj[keyMap.bankdato.key]] != null  ? (restartedRunSuccess[obj[keyMap.bankdato.key]] ? 'Kørsel genstartet' : 'Fejl ved genstart') : 'Genstart kørsel'}}
                     </button>
