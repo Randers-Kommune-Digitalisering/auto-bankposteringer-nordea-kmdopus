@@ -189,7 +189,7 @@
     })
 
     watch(bankAccountOptions, (newVal) => {
-        if (newVal.length > 0) {
+        if (newVal.length > 0 && selectedBankaccount.value === null) {
             selectedBankaccount.value = newVal[0].value
         }
     })
