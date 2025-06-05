@@ -74,7 +74,7 @@
     if (isNewRule.value) {
         // New rule
         konteringsregel.value = JSON.parse(JSON.stringify(newItem));
-        if (index.value === 'nyaktiv') konteringsregel.value.activeBool = false;
+        if (index.value === 'nyinaktiv') konteringsregel.value.activeBool = false;
         if (index.value === 'nyundtagelse') konteringsregel.value.exceptionBool = true;
         if (index.value === 'nyengangsregel') konteringsregel.value.tempBool = true;
         validateDependencies(konteringsregel.value, errors.value);
