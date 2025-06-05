@@ -26,13 +26,13 @@ const Node = {
   "y": 400,
   "wires": [
     [
-      "0a30c5d1c401a59f"
+      "56f2fa5975d90d08"
     ],
     [
-      "0a30c5d1c401a59f"
+      "56f2fa5975d90d08"
     ],
     [
-      "0a30c5d1c401a59f"
+      "56f2fa5975d90d08"
     ]
   ],
   "outputLabels": [
