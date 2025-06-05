@@ -151,7 +151,7 @@ export function formatAccountTertiary(value) {
 
 export function formatAmount(value) {
     if (value === null || value === undefined) return null;
-    value = value.toString().replace('.', '').replace(',', '.');
+    value = value.toString().replace(/\./g, '').replace(',', '.');
     value = parseFloat(value);
     if (isNaN(value)) return null;
     return value.toLocaleString('da-DK', {
