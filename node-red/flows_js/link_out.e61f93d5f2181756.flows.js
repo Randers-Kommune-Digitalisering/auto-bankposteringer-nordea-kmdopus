@@ -6,7 +6,7 @@ const Node = {
   "name": "write initial admSysData end",
   "mode": "return",
   "links": [],
-  "x": 805,
+  "x": 855,
   "y": 260,
   "wires": []
 }

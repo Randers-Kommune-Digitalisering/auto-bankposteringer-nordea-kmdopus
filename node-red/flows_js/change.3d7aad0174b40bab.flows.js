@@ -28,7 +28,8 @@ const Node = {
       "af39499baa34661d",
       "7e0104b998f9057d",
       "aa6f233951945b6d",
-      "68742e88f51c8eac"
+      "68742e88f51c8eac",
+      "4429331a3b465a3b"
     ]
   ],
   "icon": "font-awesome/fa-trash",

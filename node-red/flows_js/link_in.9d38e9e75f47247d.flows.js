@@ -4,9 +4,7 @@ const Node = {
   "z": "47254dd1b3ed3b06",
   "g": "1e97f626957f10f8",
   "name": "insert all rules",
-  "links": [
-    "e1feb970c23d4ba6"
-  ],
+  "links": [],
   "x": 65,
   "y": 640,
   "wires": [

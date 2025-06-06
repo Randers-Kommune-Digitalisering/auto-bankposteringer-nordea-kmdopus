@@ -6,7 +6,7 @@ const Node = {
   "name": "write initial rules end",
   "mode": "return",
   "links": [],
-  "x": 515,
+  "x": 565,
   "y": 260,
   "wires": []
 }
