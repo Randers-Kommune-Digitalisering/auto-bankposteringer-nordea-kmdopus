@@ -37,13 +37,15 @@
         { label: 'Mindre end', value: '<' },
         { label: 'Mellem', value: '><' },
         { label: 'Lig med', value: '==' }
-    ]
+    ];
 
     const cprModeOptions = [
         { label: 'Ingen', value: 'Ingen' },
         { label: 'Scan fra transaktion', value: 'Scan fra transaktion' },
         { label: 'Statisk', value: 'Statisk' }
     ];
+
+    const typeOptions = ref([{ label: 'Ingen', value: null }]);
 
     const selectedOperator = ref(isNewRule.value ? null : operatorOptions[0].value)
     const selectedBankaccount = ref(null)
@@ -67,6 +69,18 @@
                 ...value.map(account => ({
                     label: `${account.bankAccountName}`,
                     value: account.bankAccount
+                }))
+            ]
+        })
+
+    fetch('/api/typedescriptions')
+        .then(response => response.json())
+        .then(types => {
+            typeOptions.value = [
+                { label: 'Ingen', value: null },
+                ...types.map(type => ({
+                    label: type.typeDescriptionName,
+                    value: type.typeDescriptionName
                 }))
             ]
         })
@@ -427,6 +441,14 @@
                                     @input="validateText(konteringsregel[value.key], errors)"
                                 />
                                 <span v-if="errors.text" class="error">{{ errors.text }}</span>
+                            </template>
+
+                            <template v-else-if="key === 'Posteringstype'">
+                                <select v-model="konteringsregel[value.key]">
+                                    <option v-for="option in typeOptions" :key="option.value" :value="option.value">
+                                        {{ option.label }}
+                                    </option>
+                                </select>
                             </template>
                             
                             <template v-else-if="key === 'Beløbsregel'">

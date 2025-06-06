@@ -9,7 +9,7 @@ const Node = {
   "withhold": true,
   "fixedtimeout": false,
   "pertopic": false,
-  "countlimit": "4",
+  "countlimit": "5",
   "x": 625,
   "y": 100,
   "wires": [
