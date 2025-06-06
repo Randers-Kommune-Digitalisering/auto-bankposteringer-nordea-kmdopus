@@ -3,7 +3,7 @@ const Node = {
   "type": "change",
   "z": "30ea9c666c3d34a6",
   "g": "7b845d1f4aada5fa",
-  "name": "Set uid to origin uid",
+  "name": "Clean runs obj",
   "rules": [
     {
       "t": "delete",
@@ -31,7 +31,7 @@ const Node = {
   "from": "",
   "to": "",
   "reg": false,
-  "x": 685,
+  "x": 735,
   "y": 560,
   "wires": [
     [

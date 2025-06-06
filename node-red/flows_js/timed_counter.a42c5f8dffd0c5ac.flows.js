@@ -9,14 +9,15 @@ const Node = {
   "withhold": true,
   "fixedtimeout": false,
   "pertopic": false,
-  "countlimit": "4",
+  "countlimit": "5",
   "x": 255,
   "y": 100,
   "wires": [
     [
       "ac9bf96845164ca6",
       "f379a503bfd3bcf8",
-      "04cfdd1f22bdc333"
+      "04cfdd1f22bdc333",
+      "33853f42a4d60bd2"
     ]
   ],
   "icon": "font-awesome/fa-filter",

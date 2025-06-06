@@ -6,7 +6,7 @@ const Node = {
   "name": "write initial bankAccounts end",
   "mode": "return",
   "links": [],
-  "x": 1095,
+  "x": 1145,
   "y": 260,
   "wires": []
 }
