@@ -11,7 +11,7 @@ const Node = {
   "finalize": "",
   "libs": [],
   "x": 155,
-  "y": 1000,
+  "y": 1020,
   "wires": [
     [
       "c265ac1bb029ed1e"
@@ -28,7 +28,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let erpObj = global.get("erp") || {};
   let postings = [];
   
-  function generatePostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, landingAccountSecondary, landingAccountTertiary, cpr) {
+  function generatePostings(statusAccount, landingAccount, statusDebetOrCredit, landingDebetOrCredit, text, amount, landingAccountSecondary, landingAccountTertiary, cpr, file) {
       postings.push(
           {
               account: statusAccount,
@@ -45,7 +45,10 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               debetOrCredit: landingDebetOrCredit,
               amount: amount,
               text: text,
-              cpr: cpr
+              cpr: cpr,
+              attachmentName: file.attachmentName || undefined,
+              attachmentType: file.attachmentType || undefined,
+              attachmentData: file.attachmentData || undefined
           }
       )
   }
@@ -57,8 +60,15 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       const landingDebetOrCredit = statusDebetOrCredit === "Debet" ? "Kredit" : "Debet";
       const relatedAccount = masterDataObj.bankAccounts.find(account => account.bankAccount === transaction.bankAccount);
       transaction.amount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      const file = transaction.attachmentName
+          ? {
+              attachmentName: transaction.attachmentName,
+              attachmentType: transaction.attachmentType,
+              attachmentData: transaction.attachmentData
+          }
+          : {};
   
-      generatePostings(relatedAccount.intermediateAccount, transaction.account, statusDebetOrCredit, landingDebetOrCredit, transaction.text, transaction.amount, transaction.accountSecondary, transaction.accountTertiary, transaction.cpr);
+      generatePostings(relatedAccount.intermediateAccount, transaction.account, statusDebetOrCredit, landingDebetOrCredit, transaction.text, transaction.amount, transaction.accountSecondary, transaction.accountTertiary, transaction.cpr, file);
   }
   
   if (transactions) {

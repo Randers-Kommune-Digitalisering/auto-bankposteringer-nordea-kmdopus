@@ -35,7 +35,10 @@ CREATE TABLE IF NOT EXISTS transactionsWithNoMatch (
     accountSecondary NVARCHAR(19) NULL,
     accountTertiary NVARCHAR(50) NULL,
     text NVARCHAR(255) NULL,
-    cpr NVARCHAR(11) NULL
+    cpr NVARCHAR(11) NULL,
+    attachmentName NVARCHAR(255) NULL,
+    attachmentType NVARCHAR(10) NULL,
+    attachmentData LONGTEXT NULL
 );
 `
 

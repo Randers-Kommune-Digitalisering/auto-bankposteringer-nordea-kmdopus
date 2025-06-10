@@ -40,6 +40,17 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   const dataProviderIdCode = inProd ? global.get("configs").ftp.dataProviderIdCode : '797';
   const filename = `ZFIR_KMD_Opus_Posteringer_IND_${dataProviderIdCode}_${dataProviderId}_${docDate}_${docTime}.xml`;
   const postings = global.get("erp").postings;
+  const manualBool = global.get("transactions").manual ? true : false;
+  
+  node.warn(manualBool);
+  
+  let file = manualBool
+      ? {
+          attachmentName: postings[1].attachmentName, // File is attached to second object in manual posting, since its the landing account
+          attachmentType: postings[1].attachmentType,
+          attachmentData: postings[1].attachmentData
+      }
+      : {};
   
   let lineCounter = 0;
   let debetSum = parseFloat(0);
@@ -47,6 +58,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   
   // Create a single LINES object with multiple LINE elements inside
   const LINES = { LINE: [] };
+  
+  
   
   function parseDanishAmount(str) {
       // Fjern mellemrum og tusindtalsseparatorer
@@ -76,12 +89,12 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
           DEB_CRED_IND: posting.debetOrCredit.charAt(0),
           AMT_DOCCUR: amountPrefixed.toFixed(2),
           ITEM_TEXT: posting.text,
-          COSTCENTER: posting.accountTertiary,
+          COSTCENTER: posting.accountTertiary || undefined,
           GL_ACCOUNT: artskonto,
           WBS_ELEMENT: psp,
           REF_KEY_3: String(lineCounter),
           SERV_REC_NO_CODE: posting.cpr ? '02' : undefined,
-          SERV_REC_NO: posting.cpr ? posting.cpr : undefined,
+          SERV_REC_NO: posting.cpr || undefined,
           ZZCSYSIDN: dataProviderId,
           BENEFIT_VALFROM: posting.cpr ? bookingDate : undefined,
           BENEFIT_VALTO: posting.cpr ? bookingDate : undefined
@@ -122,7 +135,10 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
       PSTNG_DATE: bookingDate,
       RECEIV_DOC: docId,
       HEADER_TXT: dataProviderId,
-      XREF1_HD: dataProviderId
+      XREF1_HD: dataProviderId,
+      FILE_NAME: file.attachmentName || undefined,
+      FILE_TYPE: file.attachmentType || undefined,
+      FILE: file.attachmentData || undefined
   };
   
   // Byg hele objektet og tilføj namespace
