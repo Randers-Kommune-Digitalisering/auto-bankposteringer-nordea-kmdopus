@@ -11,7 +11,7 @@ const Node = {
   "finalize": "",
   "libs": [],
   "x": 105,
-  "y": 760,
+  "y": 780,
   "wires": [
     [
       "9c872303673d278a"
@@ -22,14 +22,23 @@ const Node = {
 }
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
-  const inputArray = global.get("notifications");
+  const notifications = global.get("notifications");
+  let inputArray = [];
+  
+  if (Array.isArray(notifications)) {
+      inputArray = notifications;
+  } else if (notifications && typeof notifications === "object") {
+      inputArray = [notifications];
+  }
+  
+  if (!inputArray.length) return null;
   
   for (let obj of inputArray) {
       const newMsg = {
-          topic: "Indbetaling modtaget og bogført",
-          payload: obj.text,
+          'from': global.get("configs").reminder.sender,
           to: obj.recipient,
-          'from': global.get("configs").reminder.sender
+          title: "Indbetaling modtaget og bogført",
+          body: obj.text
       };
       node.send(newMsg); // send individuelt
   }

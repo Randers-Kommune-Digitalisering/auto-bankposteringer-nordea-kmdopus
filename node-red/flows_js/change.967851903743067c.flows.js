@@ -7,13 +7,6 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "to",
-      "pt": "msg",
-      "to": "masterData.admSysData.admEmail",
-      "tot": "global"
-    },
-    {
-      "t": "set",
       "p": "from",
       "pt": "msg",
       "to": "configs.reminder.sender",
@@ -21,14 +14,21 @@ const Node = {
     },
     {
       "t": "set",
-      "p": "topic",
+      "p": "to",
+      "pt": "msg",
+      "to": "masterData.admSysData.admEmail",
+      "tot": "global"
+    },
+    {
+      "t": "set",
+      "p": "title",
       "pt": "msg",
       "to": "configs.reminder.topic",
       "tot": "global"
     },
     {
       "t": "set",
-      "p": "payload",
+      "p": "body",
       "pt": "msg",
       "to": "configs.reminder.payload",
       "tot": "global"
@@ -40,10 +40,10 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 105,
-  "y": 660,
+  "y": 680,
   "wires": [
     [
-      "e40818f162029cd6"
+      "fa0e33087ff529cc"
     ]
   ],
   "icon": "font-awesome/fa-cog",
