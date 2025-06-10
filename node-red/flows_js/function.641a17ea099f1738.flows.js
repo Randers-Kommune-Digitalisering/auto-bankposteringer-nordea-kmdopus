@@ -33,40 +33,36 @@ Format: ISO 8601
 
 Node.func = async function (node, msg, RED, context, flow, global, env, util, dayjs) {
   let dates = global.get("dates") || [];
-  const offset = 1; // offset = 1 until Nordea fixes date issue on server
+  let closedDates = JSON.parse(env.get("BANKING_CLOSED_DATES"));
+  const offset = 2; // offset = 2 until Nordea fixes date issue on server
+  
+  function isBankClosed(date) {
+      return date.day() === 0 || date.day() === 6 || closedDates.includes(date.format('YYYY-MM-DD'));
+  }
   
   function findBookingDate() {
       let date = dayjs();
+      let bankDaysFound = 0;
   
-      // Subtract offset days first (1 = second latest banking day) and skip weekends
-      date = date.subtract(offset, 'day');
-      while (date.day() === 0 || date.day() === 6) {
+      while (bankDaysFound < offset) {
           date = date.subtract(1, 'day');
-      }
-  
-      // Set latest banking day
-      if (date.day() === 1) {
-          date = date.subtract(3, 'day'); // Monday → back to Friday
-      } else {
-          date = date.subtract(1, 'day'); // Other weekdays → back 1 day
-      }
-  
-      // Skip weekends
-      while (date.day() === 0 || date.day() === 6) {
-          date = date.subtract(1, 'day');
+          if (!isBankClosed(date)) {
+              bankDaysFound++;
+          }
       }
   
       return date.format('YYYY-MM-DD');
   }
   
+  // Brug dagens dato i forskellige formater
   dates.date = dayjs().format('YYYYMMDD');
   dates.simpleDate = dayjs().format('DD-MM-YYYY');
   dates.time = dayjs().format('HHmmss');
   
+  // Sæt bookingdato baseret på restart-flag
   dates.bookingDate = global.get("runs").restart ? global.get("runs").originDate : findBookingDate();
   
   global.set("dates", dates);
-  
   return msg;
 }
 
