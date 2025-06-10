@@ -7,28 +7,28 @@ const Node = {
   "rules": [
     {
       "t": "set",
-      "p": "from",
+      "p": "payload.from",
       "pt": "msg",
       "to": "configs.reminder.sender",
       "tot": "global"
     },
     {
       "t": "set",
-      "p": "to",
+      "p": "payload.to",
       "pt": "msg",
       "to": "masterData.admSysData.admEmail",
       "tot": "global"
     },
     {
       "t": "set",
-      "p": "title",
+      "p": "payload.title",
       "pt": "msg",
       "to": "configs.reminder.topic",
       "tot": "global"
     },
     {
       "t": "set",
-      "p": "body",
+      "p": "payload.body",
       "pt": "msg",
       "to": "configs.reminder.payload",
       "tot": "global"
