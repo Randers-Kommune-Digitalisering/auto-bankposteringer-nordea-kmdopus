@@ -46,7 +46,7 @@
         "CPR": { "key": "cpr", "group": "Kontering", "mutable": true },
         "attachmentName": { "key": "attachmentName", "hidden": true, "mutable": false },
         "attachmentType": { "key": "attachmentType", "hidden": true, "mutable": false },
-        "Vedhæft fil": { "key": "attachmentData", "group": "Kontering", "mutable": false },
+        "Vedhæftning": { "key": "attachmentData", "group": "Kontering", "mutable": false },
         "ID": { "key": "transactionID", "hidden": true , "mutable": false },
     }
     
@@ -247,7 +247,7 @@
                                 ></textarea>
                             </template>
 
-                            <template v-else-if="key === 'Vedhæft fil'">
+                            <template v-else-if="key === 'Vedhæftning'">
                                 <input
                                     type="file"
                                     accept="application/pdf"
