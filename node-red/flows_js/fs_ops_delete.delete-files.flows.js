@@ -9,7 +9,7 @@ const Node = {
   "filename": "files",
   "filenameType": "msg",
   "x": 375,
-  "y": 1200,
+  "y": 1220,
   "wires": [
     [
       "log-deletion"

@@ -43,7 +43,10 @@
         "PSP-element": { "key": "accountSecondary", "group": "Kontering" , "mutable": true },
         "Omkostningssted": { "key": "accountTertiary", "group": "Kontering", "mutable": true },
         "Posteringstekst": { "key": "text", "group": "Kontering", "mutable": true },
-        "CPR": { "key": "cpr", "group": "Kontering" , "mutable": true },
+        "CPR": { "key": "cpr", "group": "Kontering", "mutable": true },
+        "attachmentName": { "key": "attachmentName", "hidden": true, "mutable": false },
+        "attachmentType": { "key": "attachmentType", "hidden": true, "mutable": false },
+        "Vedhæft fil": { "key": "attachmentData", "group": "Kontering", "mutable": false },
         "ID": { "key": "transactionID", "hidden": true , "mutable": false },
     }
     
@@ -72,6 +75,25 @@
     const hasValidationErrors = computed(() => {
         return Object.values(errors.value).some(error => error !== null)
     })
+
+    function handleFileUpload(event) {
+        const file = event.target.files[0]
+        if (!file) return
+
+        if (file.type !== "application/pdf") {
+            alert("Kun PDF-filer er tilladt.")
+            return
+        }
+
+        const reader = new FileReader()
+        reader.onload = function(e) {
+            const base64String = e.target.result.split(',')[1]
+            posting.value.attachmentName = file.name
+            posting.value.attachmentType = "pdf"
+            posting.value.attachmentData = base64String
+        }
+        reader.readAsDataURL(file)
+    }
 
     function updatePosting() {
         validateDependencies(posting.value, errors.value);
@@ -223,6 +245,16 @@
                                     @change="hasUpdated = false"
                                     :disabled="value.mutable === false"
                                 ></textarea>
+                            </template>
+
+                            <template v-else-if="key === 'Vedhæft fil'">
+                                <input
+                                    type="file"
+                                    accept="application/pdf"
+                                    :id="key"
+                                    @change="handleFileUpload"
+                                    :disabled="isUpdating"
+                                />
                             </template>
                             
                             <template v-else>

@@ -19,10 +19,10 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 155,
-  "y": 760,
+  "y": 780,
   "wires": [
     [
-      "fc76cce7c5492471"
+      "ee35a431a0497015"
     ]
   ],
   "icon": "font-awesome/fa-trash",
