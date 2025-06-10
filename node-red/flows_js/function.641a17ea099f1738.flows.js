@@ -34,7 +34,7 @@ Format: ISO 8601
 Node.func = async function (node, msg, RED, context, flow, global, env, util, dayjs) {
   let dates = global.get("dates") || [];
   let closedDates = JSON.parse(env.get("BANKING_CLOSED_DATES"));
-  const offset = 2; // offset = 2 until Nordea fixes date issue on server
+  const offset = 3; // offset = 2 until Nordea fixes date issue on server
   
   function isBankClosed(date) {
       return date.day() === 0 || date.day() === 6 || closedDates.includes(date.format('YYYY-MM-DD'));
