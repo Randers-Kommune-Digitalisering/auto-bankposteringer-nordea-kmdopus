@@ -35,10 +35,12 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
   for (let obj of inputArray) {
       const newMsg = {
-          'from': global.get("configs").reminder.sender,
-          to: obj.recipient,
-          title: "Indbetaling modtaget og bogført",
-          body: obj.text
+          payload: {
+              from: global.get("configs").reminder.sender,
+              to: obj.recipient,
+              title: "Indbetaling modtaget og bogført",
+              body: obj.text
+          }
       };
       node.send(newMsg); // send individuelt
   }
