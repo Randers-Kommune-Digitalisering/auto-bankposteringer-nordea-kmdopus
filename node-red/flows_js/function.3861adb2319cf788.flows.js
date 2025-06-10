@@ -42,8 +42,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   const postings = global.get("erp").postings;
   const manualBool = global.get("transactions").manual ? true : false;
   
-  node.warn(manualBool);
-  
   let file = manualBool
       ? {
           attachmentName: postings[1].attachmentName, // File is attached to second object in manual posting, since its the landing account
