@@ -136,9 +136,13 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   
   // Tilføj kun filfelter hvis de findes
   if (file.attachmentName) {
-      HEADER.FILE_NAME = file.attachmentName;
-      HEADER.FILE_TYPE = file.attachmentType;
-      HEADER.FILE = file.attachmentData;
+      HEADER.FILES = [
+          {
+              FILE_NAME: file.attachmentName,
+              FILE_TYPE: file.attachmentType,
+              FILE: file.attachmentData
+          }
+      ];
   }
   
   // Byg hele objektet og tilføj namespace
