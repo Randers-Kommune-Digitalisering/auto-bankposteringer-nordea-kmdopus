@@ -5,8 +5,8 @@ const Node = {
   "g": "bae1c13f6f716fe4",
   "name": "create unmatched transactions table",
   "links": [],
-  "x": 495,
-  "y": 480,
+  "x": 65,
+  "y": 820,
   "wires": [
     [
       "38de2cde59dd9675"

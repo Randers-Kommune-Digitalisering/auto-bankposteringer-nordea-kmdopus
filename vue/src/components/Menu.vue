@@ -26,12 +26,12 @@
             url: "/konteringsregler/inaktiv",
         },
         {
-            title: "Undtagelser",
-            url: "/konteringsregler/undtagelse",
-        },
-        {
             title: "Engangsregler",
             url: "/konteringsregler/engangsregel",
+        },
+        {
+            title: "Undtagelser",
+            url: "/konteringsregler/undtagelse",
         },
         {
             title: "Kørselshistorik",

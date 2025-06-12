@@ -63,6 +63,8 @@
 
     watch(type, (newType) => {
         keyMap["Sidst anvendt"].hidden = newType === 'engangsregel'
+        keyMap["Beløb 1"].hidden = newType !== 'engangsregel'
+        keyMap["Beløb 2"].hidden = newType !== 'engangsregel'
     }, { immediate: true })
     
     function handleQueryParams() {        

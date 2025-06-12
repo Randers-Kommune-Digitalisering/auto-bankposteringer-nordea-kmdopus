@@ -6,8 +6,8 @@ const Node = {
   "name": "bankaccounts db action end",
   "mode": "return",
   "links": [],
-  "x": 365,
-  "y": 1080,
+  "x": 795,
+  "y": 740,
   "wires": []
 }
 

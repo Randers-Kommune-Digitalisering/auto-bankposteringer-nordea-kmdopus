@@ -6,7 +6,9 @@ const Node = {
   "name": "restart run",
   "links": [
     "f6a3452a9f8c7e6e",
-    "d1ff9bdfc5876450"
+    "d1ff9bdfc5876450",
+    "098e02b6a910e5c3",
+    "5f988bcf73cfbd57"
   ],
   "x": 175,
   "y": 100,
