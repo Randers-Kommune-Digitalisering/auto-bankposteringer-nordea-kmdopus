@@ -5,8 +5,8 @@ const Node = {
   "g": "d185a894a0ce7b49",
   "name": "load types to env",
   "links": [],
-  "x": 65,
-  "y": 1340,
+  "x": 495,
+  "y": 1000,
   "wires": [
     [
       "aa3065ca9b735d0c"

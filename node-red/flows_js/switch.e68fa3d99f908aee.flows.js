@@ -11,20 +11,28 @@ const Node = {
       "t": "true"
     },
     {
+      "t": "istype",
+      "v": "undefined",
+      "vt": "undefined"
+    },
+    {
       "t": "else"
     }
   ],
   "checkall": "true",
   "repair": false,
-  "outputs": 2,
+  "outputs": 3,
   "x": 375,
   "y": 80,
   "wires": [
     [
-      "6c2d2361da8e071c"
+      "dfe6a36d2b87d4fb"
     ],
     [
-      "227e1ddaf3ee20a7"
+      "fe466d9de08849f7"
+    ],
+    [
+      "fe466d9de08849f7"
     ]
   ],
   "icon": "font-awesome/fa-question",

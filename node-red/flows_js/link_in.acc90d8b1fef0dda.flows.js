@@ -5,8 +5,8 @@ const Node = {
   "g": "ed2d8f9a9a392f4a",
   "name": "load admSysData to env",
   "links": [],
-  "x": 65,
-  "y": 900,
+  "x": 495,
+  "y": 560,
   "wires": [
     [
       "cdde9eb3365b3f60"

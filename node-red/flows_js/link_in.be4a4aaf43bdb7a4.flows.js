@@ -5,8 +5,8 @@ const Node = {
   "g": "d185a894a0ce7b49",
   "name": "create types db",
   "links": [],
-  "x": 65,
-  "y": 1260,
+  "x": 495,
+  "y": 920,
   "wires": [
     [
       "855873d2b3129e50"

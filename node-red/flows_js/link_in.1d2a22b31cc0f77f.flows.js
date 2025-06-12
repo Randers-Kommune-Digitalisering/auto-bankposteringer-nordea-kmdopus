@@ -5,8 +5,8 @@ const Node = {
   "g": "d185a894a0ce7b49",
   "name": "insert all types",
   "links": [],
-  "x": 65,
-  "y": 1300,
+  "x": 495,
+  "y": 960,
   "wires": [
     [
       "187971070d085741"

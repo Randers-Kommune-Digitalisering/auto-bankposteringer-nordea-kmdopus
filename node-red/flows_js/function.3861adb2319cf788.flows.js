@@ -42,9 +42,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   const postings = global.get("erp").postings;
   const manualBool = global.get("transactions").manual ? true : false;
   
-  let file = manualBool
+  let file = postings[1].attachmentName
       ? {
-          attachmentName: postings[1].attachmentName, // File is attached to second object in manual posting, since its the landing account
+          attachmentName: postings[1].attachmentName, // File is attached to second object in manual postings, since its the landing account
           attachmentType: postings[1].attachmentType,
           attachmentData: postings[1].attachmentData
       }
@@ -56,8 +56,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   
   // Create a single LINES object with multiple LINE elements inside
   const LINES = { LINE: [] };
-  
-  
   
   function parseDanishAmount(str) {
       // Fjern mellemrum og tusindtalsseparatorer
@@ -133,11 +131,15 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
       PSTNG_DATE: bookingDate,
       RECEIV_DOC: docId,
       HEADER_TXT: dataProviderId,
-      XREF1_HD: dataProviderId,
-      FILE_NAME: file.attachmentName || undefined,
-      FILE_TYPE: file.attachmentType || undefined,
-      FILE: file.attachmentData || undefined
+      XREF1_HD: dataProviderId
   };
+  
+  // Tilføj kun filfelter hvis de findes
+  if (file.attachmentName) {
+      HEADER.FILE_NAME = file.attachmentName;
+      HEADER.FILE_TYPE = file.attachmentType;
+      HEADER.FILE = file.attachmentData;
+  }
   
   // Byg hele objektet og tilføj namespace
   const xmlObject = {

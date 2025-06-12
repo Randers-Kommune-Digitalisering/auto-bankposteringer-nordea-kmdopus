@@ -5,8 +5,8 @@ const Node = {
   "g": "30b2fd7f3bc3b0a9",
   "name": "create runs table",
   "links": [],
-  "x": 495,
-  "y": 700,
+  "x": 65,
+  "y": 1080,
   "wires": [
     [
       "41eddf6a2458b264"
