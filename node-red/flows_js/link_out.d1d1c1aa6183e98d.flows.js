@@ -6,8 +6,8 @@ const Node = {
   "name": "manual postings end",
   "mode": "return",
   "links": [],
-  "x": 775,
-  "y": 440,
+  "x": 825,
+  "y": 480,
   "wires": []
 }
 

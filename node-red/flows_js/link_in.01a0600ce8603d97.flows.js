@@ -5,8 +5,8 @@ const Node = {
   "g": "ed2d8f9a9a392f4a",
   "name": "create admSysData table",
   "links": [],
-  "x": 65,
-  "y": 820,
+  "x": 495,
+  "y": 480,
   "wires": [
     [
       "c3360db28782f113"

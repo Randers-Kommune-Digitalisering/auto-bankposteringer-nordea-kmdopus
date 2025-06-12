@@ -5,8 +5,8 @@ const Node = {
   "g": "30b2fd7f3bc3b0a9",
   "name": "check if transactions already retrieved for current bookingDate",
   "links": [],
-  "x": 495,
-  "y": 900,
+  "x": 65,
+  "y": 1280,
   "wires": [
     [
       "11d72b9936a1e6ab"

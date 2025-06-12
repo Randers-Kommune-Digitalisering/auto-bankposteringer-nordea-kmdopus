@@ -24,6 +24,11 @@ const Node = {
       "t": "delete",
       "p": "runs.restart",
       "pt": "global"
+    },
+    {
+      "t": "delete",
+      "p": "runs.remake",
+      "pt": "global"
     }
   ],
   "action": "",
@@ -32,7 +37,7 @@ const Node = {
   "to": "",
   "reg": false,
   "x": 735,
-  "y": 560,
+  "y": 600,
   "wires": [
     [
       "56c6b2cd9b4261ad"

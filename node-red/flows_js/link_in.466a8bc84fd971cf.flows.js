@@ -5,8 +5,8 @@ const Node = {
   "g": "30b2fd7f3bc3b0a9",
   "name": "update run",
   "links": [],
-  "x": 495,
-  "y": 780,
+  "x": 65,
+  "y": 1160,
   "wires": [
     [
       "2adc17d11cb99408"
