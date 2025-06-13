@@ -49,12 +49,21 @@
         { label: 'Statisk', value: 'Statisk' }
     ];
 
+    const textModeOptions = [
+        { label: 'Afsender fra bank', value: 'sender' },
+        { label: 'Tekst fra bank', value: 'reference' },
+        { label: 'Statisk', value: 'static' }
+    ];
+
     const typeOptions = ref([{ label: 'Ingen', value: null }]);
 
     const selectedOperator = ref(isNewRule.value ? null : operatorOptions[0].value)
     const selectedBankaccount = ref(null)
 
     const cprMode = ref("Ingen");
+
+    const textMode = ref('static');
+    const staticText = ref('');
 
     const errors = ref({
         account: null,
@@ -233,7 +242,7 @@
             errors.value.cpr = null;
         }
     });
-
+    
     watch(cprMode, (mode) => {
         keyMap.value["CPR"].hidden = !(mode === 'Statisk');
         konteringsregel.value.postWithCPR = (mode === 'Scan fra transaktion');
@@ -246,6 +255,32 @@
             }
         } else {
             errors.value.cpr = null;
+        }
+    });
+    
+    watch(
+        () => konteringsregel.value && konteringsregel.value.text,
+        (val) => {
+            if (val === 'Afsender fra bank') {
+                textMode.value = 'sender';
+            } else if (val === 'Tekst fra bank') {
+                textMode.value = 'reference';
+            } else {
+                textMode.value = 'static';
+                staticText.value = val || '';
+            }
+        },
+        { immediate: true }
+    );
+
+    watch([textMode, staticText], ([mode, text]) => {
+        if (!konteringsregel.value) return;
+        if (mode === 'sender') {
+            konteringsregel.value.text = 'Afsender fra bank';
+        } else if (mode === 'reference') {
+            konteringsregel.value.text = 'Tekst fra bank';
+        } else {
+            konteringsregel.value.text = text;
         }
     });
 
@@ -443,7 +478,13 @@
                             </template>
 
                             <template v-else-if="key === 'Posteringstekst'">
+                                <select v-model="textMode">
+                                    <option v-for="option in textModeOptions" :key="option.value" :value="option.value">
+                                        {{ option.label }}
+                                    </option>
+                                </select>
                                 <input
+                                    v-if="textMode === 'static'"
                                     type="text"
                                     placeholder="..."
                                     :id="key"
