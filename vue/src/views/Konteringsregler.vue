@@ -1,6 +1,7 @@
 <script setup>
     import { ref, watch } from 'vue'
     import { useRouter, useRoute } from 'vue-router'
+    import { useSort } from '@/components/useSort.js'
     
     import Content from '@/components/Content.vue'
     import IconList from '@/components/icons/IconList.vue'
@@ -11,6 +12,8 @@
 
     const allKonteringsregler = ref(null)
     const konteringsregler = ref(null)
+
+    const { sortKey, sortAsc, sortList } = useSort()
     
     const router = useRouter()
     const route = useRoute()
@@ -135,10 +138,8 @@
                                 (x[keyMap.id.key] != null && x[keyMap.id.key] == keyword) )
     }
 
-    function scrollTo(id)
-    {
-        setTimeout(function()
-        {
+    function scrollTo(id) {
+        setTimeout(function() {
             const item = document.getElementById(id)
             let rect = item.getBoundingClientRect()
             let calc = rect.top - (window.innerHeight - 240)
@@ -150,6 +151,9 @@
         }, 50) // Wait ms before scrolling
     }
 
+    function sortBy(key) {
+        konteringsregler.value = sortList(konteringsregler.value, key)
+    }
 
 </script>
 
@@ -199,8 +203,17 @@
                     </th>
                 </tr>
                 <tr>
-                    <th v-for="([key, value]) in Object.entries(keyMap)" :key="key" :class="(value.hidden ? 'hidden ' : '')">
-                        {{ key }}
+                    <th
+                      v-for="([key, value]) in Object.entries(keyMap)"
+                      :key="key"
+                      :class="(value.hidden ? 'hidden ' : '')"
+                      @click="!value.hidden && sortBy(value.key)"
+                      style="cursor: pointer;"
+                    >
+                      {{ key }}
+                      <span v-if="sortKey === value.key">
+                        {{ sortAsc ? '▲' : '▼' }}
+                      </span>
                     </th>
                     <th>Ændr</th>
                 </tr>
@@ -255,5 +268,11 @@
     }
     .id {
         font-weight: 600;
+    }
+    th {
+        user-select: none;
+    }
+    th[style*="cursor: pointer;"]:hover {
+        background: #f5f5f5;
     }
 </style>
