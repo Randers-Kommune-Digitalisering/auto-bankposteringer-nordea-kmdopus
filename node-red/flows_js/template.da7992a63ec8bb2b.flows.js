@@ -43,7 +43,10 @@ CREATE TABLE IF NOT EXISTS accountingRules (
     relatedBankAccount NVARCHAR(31) NULL,
     postWithCPR BOOLEAN DEFAULT FALSE,
     cpr NVARCHAR(10) NULL, 
-    FOREIGN KEY (relatedBankAccount) REFERENCES bankAccounts(bankAccount) ON DELETE SET NULL
+    FOREIGN KEY (relatedBankAccount) REFERENCES bankAccounts(bankAccount) ON DELETE SET NULL,
+    attachmentName NVARCHAR(255) NULL,
+    attachmentType NVARCHAR(10) NULL,
+    attachmentData LONGTEXT NULL
 );
 `
 

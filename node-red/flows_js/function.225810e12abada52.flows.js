@@ -46,9 +46,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               amount: amount,
               text: text,
               cpr: cpr,
-              attachmentName: file.attachmentName || undefined,
-              attachmentType: file.attachmentType || undefined,
-              attachmentData: file.attachmentData || undefined
+              attachmentName: file?.attachmentName,
+              attachmentType: file?.attachmentType,
+              attachmentData: file?.attachmentData
           }
       )
   }
