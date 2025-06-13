@@ -1,7 +1,7 @@
-
 <script setup>
     import { ref, watch } from 'vue'
     import { useRouter, useRoute } from 'vue-router'
+    import { useSort } from '@/components/useSort.js'
     
     import Content from '@/components/Content.vue'
     import IconList from '@/components/icons/IconList.vue'
@@ -11,6 +11,8 @@
 
     const allPostings = ref(null)
     const postings = ref(null)
+
+    const { sortKey, sortAsc, sortList } = useSort()
     
     const router = useRouter()
     const route = useRoute()
@@ -117,6 +119,9 @@
         }, 50) // Wait ms before scrolling
     }
 
+    function sortBy(key) {
+        postings.value = sortList(postings.value, key)
+    }
 
 </script>
 
@@ -153,8 +158,17 @@
                         </th>
                 </tr>
                 <tr>
-                    <th v-for="([key, value]) in Object.entries(keyMap)" :key="key" :class="(value.hidden ? 'hidden ' : '')">
-                        {{ key }}
+                    <th
+                      v-for="([key, value]) in Object.entries(keyMap)"
+                      :key="key"
+                      :class="(value.hidden ? 'hidden ' : '')"
+                      @click="!value.hidden && sortBy(value.key)"
+                      style="cursor: pointer;"
+                    >
+                      {{ key }}
+                      <span v-if="sortKey === value.key">
+                        {{ sortAsc ? '▲' : '▼' }}
+                      </span>
                     </th>
                     <th>Behandl</th>
                 </tr>

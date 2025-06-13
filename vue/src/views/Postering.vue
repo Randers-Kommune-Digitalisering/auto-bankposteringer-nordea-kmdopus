@@ -88,7 +88,7 @@
         const reader = new FileReader()
         reader.onload = function(e) {
             const base64String = e.target.result.split(',')[1]
-            posting.value.attachmentName = file.name
+            posting.value.attachmentName = file.name.replace(/\.[^/.]+$/, "");
             posting.value.attachmentType = "pdf"
             posting.value.attachmentData = base64String
         }
