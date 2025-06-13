@@ -2,8 +2,12 @@
     import { ref, computed } from 'vue'
     import { useRouter, useRoute } from 'vue-router'
     import { validateDependencies, formatAccountSecondary, formatAccountTertiary, validateCPR, validateText } from '@/components/validation.js'
+    import fileUpload from '@/components/fileUpload.vue'
+
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
+    import IconDelete from '@/components/icons/IconDelete.vue'
+    import IconUpload from '@/components/icons/IconUpload.vue'
 
     const isUpdating = ref(false)
     const hasUpdated = ref(false)
@@ -75,25 +79,6 @@
     const hasValidationErrors = computed(() => {
         return Object.values(errors.value).some(error => error !== null)
     })
-
-    function handleFileUpload(event) {
-        const file = event.target.files[0]
-        if (!file) return
-
-        if (file.type !== "application/pdf") {
-            alert("Kun PDF-filer er tilladt.")
-            return
-        }
-
-        const reader = new FileReader()
-        reader.onload = function(e) {
-            const base64String = e.target.result.split(',')[1]
-            posting.value.attachmentName = file.name.replace(/\.[^/.]+$/, "");
-            posting.value.attachmentType = "pdf"
-            posting.value.attachmentData = base64String
-        }
-        reader.readAsDataURL(file)
-    }
 
     function updatePosting() {
         validateDependencies(posting.value, errors.value);
@@ -246,17 +231,16 @@
                                     :disabled="value.mutable === false"
                                 ></textarea>
                             </template>
-
+                            
                             <template v-else-if="key === 'Vedhæftning'">
-                                <input
-                                    type="file"
-                                    accept="application/pdf"
-                                    :id="key"
-                                    @change="handleFileUpload"
+                                <fileUpload
+                                    v-model="posting.attachmentData"
+                                    :fileName="posting.attachmentName"
                                     :disabled="isUpdating"
+                                    @update:fileName="val => posting.attachmentName = val"
                                 />
                             </template>
-                            
+
                             <template v-else>
                                 <input
                                     type="text"
@@ -275,6 +259,7 @@
                                     disabled
                                 />
                             </template>
+
                         </div>
                     </div>
                 </div>

@@ -42,14 +42,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   const postings = global.get("erp").postings;
   const manualBool = global.get("transactions").manual ? true : false;
   
-  let file = postings[1].attachmentName
-      ? {
-          attachmentName: postings[1].attachmentName, // File is attached to second object in manual postings, since its the landing account
-          attachmentType: postings[1].attachmentType,
-          attachmentData: postings[1].attachmentData
-      }
-      : {};
-  
+  let files = [];
   let lineCounter = 0;
   let debetSum = parseFloat(0);
   let creditSum = parseFloat(0);
@@ -111,6 +104,14 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   
       // Tilføj linjen til LINES.LINE arrayet
       LINES.LINE.push(line);
+  
+      if (posting.attachmentData) {
+          files.push({
+              FILE_NAME: posting.attachmentName,
+              FILE_TYPE: posting.attachmentType,
+              FILE: posting.attachmentData
+          });
+      }
   }
   
   const CONTROL_FIELDS = {
@@ -135,14 +136,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   };
   
   // Tilføj kun filfelter hvis de findes
-  if (file.attachmentName) {
-      HEADER.FILES = [
-          {
-              FILE_NAME: file.attachmentName,
-              FILE_TYPE: file.attachmentType,
-              FILE: file.attachmentData
-          }
-      ];
+  if (files.length > 0) {
+      HEADER.FILES = files;
   }
   
   // Byg hele objektet og tilføj namespace

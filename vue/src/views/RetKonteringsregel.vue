@@ -2,10 +2,14 @@
     import { ref, watch, computed } from 'vue'
     import { useRouter, useRoute } from 'vue-router'
     import { validateDependencies, formatAccountSecondary, formatAccountTertiary, formatAmount, validateText, validateCPR } from '@/components/validation.js'
+    import fileUpload from '@/components/fileUpload.vue'
+
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
     import IconDelete from '../components/icons/IconDelete.vue'
     import IconSave from '../components/icons/IconSave.vue'
+    import IconUpload from '@/components/icons/IconUpload.vue'
+    
     import newItem from '@/assets/newItem.json'
 
     const router = useRouter()
@@ -118,7 +122,6 @@
     }
 
     const keyMap = computed(() => {
-        // Base fields for all rules
         const map = {
             "id": { "key": "ruleID", "hidden": true },
             "Tilknyttet bankkonto": { "key": "relatedBankAccount", "group": "Transaktionsoplysninger" },
@@ -160,10 +163,17 @@
                 "group": "Kontering", 
                 "hidden": () => cprMode.value !== 'Statisk' || ruleType.value === 'exception' 
             },
-            "Mail til advisering": { 
-                "key": "notificationRecipient", 
-                "group": "Diverse", 
-                "hidden": () => ruleType.value !== 'temporary' 
+            "attachmentName": { "key": "attachmentName", "hidden": true, "mutable": false },
+            "attachmentType": { "key": "attachmentType", "hidden": true, "mutable": false },
+            "Vedhæftning": {
+                "key": "attachmentData",
+                "group": "Kontering",
+                "hidden": () => ruleType.value !== 'temporary'
+            },
+            "Mail til advisering": {
+                "key": "notificationRecipient",
+                "group": "Diverse",
+                "hidden": () => ruleType.value !== 'temporary'
             }
         };
 
@@ -465,6 +475,15 @@
                                         {{ option.label }}
                                     </option>
                                 </select>
+                            </template>
+
+                            <template v-else-if="key === 'Vedhæftning'">
+                                <fileUpload
+                                    v-model="konteringsregel.attachmentData"
+                                    :fileName="konteringsregel.attachmentName"
+                                    :disabled="isUpdating"
+                                    @update:fileName="val => konteringsregel.attachmentName = val"
+                                />
                             </template>
                             
                             <template v-else>
