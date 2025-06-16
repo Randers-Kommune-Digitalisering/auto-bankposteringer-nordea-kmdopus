@@ -238,6 +238,7 @@
                                     :fileName="posting.attachmentName"
                                     :disabled="isUpdating"
                                     @update:fileName="val => posting.attachmentName = val"
+                                    @update:fileType="val => posting.attachmentType = val"
                                 />
                             </template>
 
