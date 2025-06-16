@@ -36,7 +36,7 @@ function onFileChange(e) {
     const reader = new FileReader()
     reader.onload = function(ev) {
         emit('update:modelValue', ev.target.result.split(',')[1])
-        emit('update:fileName', file.name.replace(/\.[^/.]+$/, ""))
+        emit('update:fileName', file.name)
         emit('update:fileType', file.name.split('.').pop().toLowerCase())
     }
     reader.readAsDataURL(file)
@@ -70,7 +70,7 @@ function removeFile() {
         <a
             v-if="modelValue"
             :href="`data:${mimeType.value};base64,${modelValue}`"
-            :download="fileName + (fileType.value ? '.' + fileType.value : '')"
+            :download="fileName"
             target="_blank"
             rel="noopener"
             style="text-decoration: underline; color: #007bff; cursor: pointer;"
