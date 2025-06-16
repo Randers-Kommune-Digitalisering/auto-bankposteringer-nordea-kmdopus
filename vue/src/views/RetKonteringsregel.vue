@@ -524,6 +524,7 @@
                                     :fileName="konteringsregel.attachmentName"
                                     :disabled="isUpdating"
                                     @update:fileName="val => konteringsregel.attachmentName = val"
+                                    @update:fileType="val => konteringsregel.attachmentType = val"
                                 />
                             </template>
                             
