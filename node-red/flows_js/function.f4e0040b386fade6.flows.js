@@ -137,10 +137,9 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       const statusDebetOrCredit = direction === "incoming" ? "Debet" : "Kredit";
       const landingDebetOrCredit = direction === "incoming" ? "Kredit" : "Debet";
       const formattedAmount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  
-      const cpr = rules.cpr ? rules.cpr : rules.postWithCPR ? extractCPRNumber(transaction.narrative) : null;
       
       let completeMatch = false;
+      let cpr = undefined;
   
       for (let rule of rules) {      
           const floatRuleAmount1 = rule.amount1 ? parseFloat(rule.amount1.replace(/\./g, '').replace(',', '.')) : undefined;
@@ -167,6 +166,12 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
                   if (!rule.exceptionBool) {   // Don't write ERP postings if rule is an exception, but still count as match
                       let text = textGeneration(rule.text, transaction.message, transaction.narrative, transaction.counterparty_name);
                       
+                      if (rule.cpr) {
+                          cpr = rule.cpr;
+                      } else if (rule.postWithCPR) {
+                          cpr = extractCPRNumber(transaction.narrative);
+                      }
+  
                       const file = rule.attachmentName
                           ? {
                               attachmentName: rule.attachmentName,
@@ -175,7 +180,17 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
                           }
                           : {};
                       
-                      generatePostings(transaction.relatedAccount.statusAccount, rule.account, statusDebetOrCredit, landingDebetOrCredit, text, formattedAmount, rule.accountSecondary || '', rule.accountTertiary || '', cpr, file);
+                      generatePostings(
+                          transaction.relatedAccount.statusAccount,
+                          rule.account, statusDebetOrCredit,
+                          landingDebetOrCredit,
+                          text,
+                          formattedAmount,
+                          rule.accountSecondary || '',
+                          rule.accountTertiary || '',
+                          cpr,
+                          file
+                      );
                   }
   
                   completeMatch = true;
@@ -198,7 +213,18 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       }
   
       if (!completeMatch) {
-          generatePostings(transaction.relatedAccount.statusAccount, transaction.relatedAccount.intermediateAccount, statusDebetOrCredit, landingDebetOrCredit, transaction.transaction_id, formattedAmount, '', cpr, {});
+          generatePostings(
+              transaction.relatedAccount.statusAccount,
+              transaction.relatedAccount.intermediateAccount,
+              statusDebetOrCredit,
+              landingDebetOrCredit,
+              transaction.transaction_id,
+              formattedAmount,
+              '', // landingAccountSecondary
+              '', // landingAccountTertiary
+              undefined, // cpr
+              {} // file
+          );
           transaction.amount = formattedAmount;
           transactionsUnmatched.push(transaction);
       }
