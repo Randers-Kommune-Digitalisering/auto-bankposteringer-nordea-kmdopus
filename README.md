@@ -15,7 +15,7 @@
 
 # Status
 
-![Hosting status](https://img.shields.io/badge/I_test-lightgreen)
+![Hosting status](https://img.shields.io/badge/I_produktion-green)
 
 ### Bankintegrationer:
 
