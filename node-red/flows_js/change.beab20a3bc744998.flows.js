@@ -22,7 +22,7 @@ const Node = {
   "y": 500,
   "wires": [
     [
-      "db053a3a7abc90db"
+      "34aed80f407f8789"
     ]
   ],
   "icon": "font-awesome/fa-save",

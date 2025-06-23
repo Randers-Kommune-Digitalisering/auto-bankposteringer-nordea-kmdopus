@@ -3,7 +3,7 @@ const Node = {
   "type": "debug",
   "z": "30ea9c666c3d34a6",
   "g": "7b845d1f4aada5fa",
-  "name": "Update status",
+  "name": "Run ended",
   "active": true,
   "tosidebar": true,
   "console": true,
@@ -12,7 +12,7 @@ const Node = {
   "targetType": "jsonata",
   "statusVal": "",
   "statusType": "auto",
-  "x": 785,
+  "x": 835,
   "y": 600,
   "wires": [],
   "l": false

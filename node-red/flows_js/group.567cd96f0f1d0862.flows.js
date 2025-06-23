@@ -1,8 +1,8 @@
 const Node = {
-  "id": "52cf6c5808bde6ed",
+  "id": "567cd96f0f1d0862",
   "type": "group",
   "z": "30ea9c666c3d34a6",
-  "name": "Status",
+  "name": "Autoindex rules",
   "style": {
     "stroke": "none",
     "fill": "#e3f3d3",
@@ -11,13 +11,14 @@ const Node = {
     "color": "#000000"
   },
   "nodes": [
-    "b30eabf8a8db8009",
-    "0d23da834a7a47df",
-    "f7d11ee25f4d53b6"
+    "725dec5f3e107c72",
+    "a9d825d798e659bf",
+    "6fb6990743626dd2",
+    "9f676b58f8e05d1b"
   ],
   "x": 14,
-  "y": 1219,
-  "w": 182,
+  "y": 1119,
+  "w": 232,
   "h": 82
 }
 
