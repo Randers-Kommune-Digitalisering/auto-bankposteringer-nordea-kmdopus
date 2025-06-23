@@ -104,8 +104,10 @@
         if (index.value === 'nyinaktiv') konteringsregel.value.activeBool = false;
         if (index.value === 'nyundtagelse') konteringsregel.value.exceptionBool = true;
         if (index.value === 'nyengangsregel') konteringsregel.value.tempBool = true;
-        validateDependencies(konteringsregel.value, errors.value);
-        validateText(konteringsregel.value.text, errors.value);
+        if (!konteringsregel.value.exceptionBool) {
+            validateDependencies(konteringsregel.value, errors.value);
+            validateText(konteringsregel.value.text, errors.value);
+        }
     } else {
         // Existing rule
         fetch(`/api/konteringsregler/${index.value}`)
@@ -115,8 +117,10 @@
 
                 selectedBankaccount.value = konteringsregel.value.relatedBankAccount
                 selectedOperator.value = konteringsregel.value.operator
-                validateDependencies(konteringsregel.value, errors.value);
-                validateText(konteringsregel.value.text, errors.value);
+                if (!konteringsregel.value.exceptionBool) {
+                    validateDependencies(konteringsregel.value, errors.value);
+                    validateText(konteringsregel.value.text, errors.value);
+                }
 
                 // Force cprMode and trigger validation
                 if (konteringsregel.value.postWithCPR) {
@@ -277,8 +281,10 @@
         if (!konteringsregel.value) return;
         if (mode === 'sender') {
             konteringsregel.value.text = 'Afsender fra bank';
+            errors.value.text = null;
         } else if (mode === 'reference') {
             konteringsregel.value.text = 'Tekst fra bank';
+            errors.value.text = null;
         } else {
             konteringsregel.value.text = text;
         }
@@ -289,11 +295,12 @@
     })
 
     function updateRule() {
-        validateDependencies(konteringsregel.value, errors.value);
-        validateText(konteringsregel.value.text, errors.value);
-        
+        if (!konteringsregel.value.exceptionBool) {
+            validateDependencies(konteringsregel.value, errors.value);
+            validateText(konteringsregel.value.text, errors.value);
+        }        
         // Only block update if rule is active and there are validation errors
-        if (konteringsregel.value.activeBool && hasValidationErrors.value) {
+        if (konteringsregel.value.activeBool && !konteringsregel.value.exceptionBool && hasValidationErrors.value) {
             alert('Der er valideringsfejl. Ret venligst fejlene før du fortsætter.');
             return;
         }
@@ -488,8 +495,8 @@
                                     type="text"
                                     placeholder="..."
                                     :id="key"
-                                    v-model="konteringsregel[value.key]"
-                                    @input="validateText(konteringsregel[value.key], errors)"
+                                    v-model="staticText"
+                                    @input="validateText(staticText, errors)"
                                 />
                                 <span v-if="errors.text" class="error">{{ errors.text }}</span>
                             </template>

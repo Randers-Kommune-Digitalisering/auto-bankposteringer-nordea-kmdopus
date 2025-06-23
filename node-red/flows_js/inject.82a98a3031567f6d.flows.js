@@ -6,7 +6,7 @@ const Node = {
   "name": "▶",
   "props": [],
   "repeat": "",
-  "crontab": "30 03 * * 1,2,3,4,5",
+  "crontab": "30 02 * * 1,2,3,4,5",
   "once": false,
   "onceDelay": 0.1,
   "topic": "",
