@@ -2,7 +2,7 @@ const Node = {
   "id": "429af30a15f7bb2e",
   "type": "group",
   "z": "30ea9c666c3d34a6",
-  "name": "Ping admin",
+  "name": "Notify admin",
   "style": {
     "stroke": "none",
     "label": true,
