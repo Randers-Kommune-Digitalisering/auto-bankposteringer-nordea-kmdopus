@@ -1,20 +1,19 @@
 const Node = {
   "id": "82a98a3031567f6d",
   "type": "inject",
-  "z": "30ea9c666c3d34a6",
-  "g": "340a8358eb5b957c",
+  "z": "ac21bbbed3962f80",
   "name": "▶",
   "props": [],
   "repeat": "",
   "crontab": "30 02 * * 1,2,3,4,5",
-  "once": false,
-  "onceDelay": 0.1,
+  "once": true,
+  "onceDelay": "1",
   "topic": "",
-  "x": 75,
-  "y": 60,
+  "x": 35,
+  "y": 180,
   "wires": [
     [
-      "afb80cb62bb5f8e0"
+      "7a4b676971a481a4"
     ]
   ],
   "icon": "font-awesome/fa-refresh",
