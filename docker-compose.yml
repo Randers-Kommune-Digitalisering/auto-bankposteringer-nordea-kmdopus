@@ -59,6 +59,7 @@ services:
   redis_microservice:
     build:
       context: ./redis_microservice
+    # image:  docker.io/library/redis:latest
     networks:
       - node_red_vue
 
