@@ -2,6 +2,7 @@ const Node = {
   "id": "2e1bcc15ab1088e0",
   "type": "inject",
   "z": "4049a8755a332ca0",
+  "d": true,
   "name": "Start restore",
   "props": [
     {

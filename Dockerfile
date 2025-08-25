@@ -20,14 +20,7 @@ COPY node-red/konteringsregler/konteringsregler.csv /data/konteringsregler/konte
 # https://flows.nodered.org/node/node-red-contrib-js-storage
 COPY ./node-red/flows_js /data/flows_js
 
-COPY  ./node-red/backup.py /data/backup.py
-COPY  ./node-red/restore.py /data/restore.py
-
 USER root
-
-RUN apk update
-RUN apk add python3 py3-pip
-RUN pip install paramiko --break-system-packages
 
 RUN chown -R node-red:node-red /data
 # Copy project files and folders to the current working directory
