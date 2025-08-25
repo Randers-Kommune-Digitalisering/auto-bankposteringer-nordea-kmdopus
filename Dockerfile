@@ -29,6 +29,7 @@ RUN apk update
 RUN apk add python3 py3-pip
 RUN pip install paramiko --break-system-packages
 
+RUN chown -R node-red:node-red /data
 # Copy project files and folders to the current working directory
 COPY vue /app
 
