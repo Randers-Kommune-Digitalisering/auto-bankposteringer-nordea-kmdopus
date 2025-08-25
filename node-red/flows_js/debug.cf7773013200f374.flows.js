@@ -1,18 +1,18 @@
 const Node = {
-  "id": "770ccf4587e8a9bd",
+  "id": "cf7773013200f374",
   "type": "debug",
   "z": "4049a8755a332ca0",
-  "name": "backup debug",
+  "name": "File permission debug",
   "active": true,
   "tosidebar": true,
   "console": true,
   "tostatus": false,
-  "complete": "payload",
-  "targetType": "msg",
+  "complete": "true",
+  "targetType": "full",
   "statusVal": "",
   "statusType": "auto",
-  "x": 720,
-  "y": 80,
+  "x": 750,
+  "y": 280,
   "wires": []
 }
 
