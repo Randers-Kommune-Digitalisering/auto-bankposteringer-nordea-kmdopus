@@ -1,8 +1,8 @@
 const Node = {
-  "id": "8284229b6eb26da5",
+  "id": "a05f5ba28de8fb60",
   "type": "inject",
   "z": "4049a8755a332ca0",
-  "name": "Create file",
+  "name": "Start backup",
   "props": [
     {
       "p": "payload"
@@ -11,15 +11,15 @@ const Node = {
   "repeat": "",
   "crontab": "",
   "once": true,
-  "onceDelay": "10",
+  "onceDelay": "2",
   "topic": "",
-  "payload": "test",
-  "payloadType": "str",
+  "payload": "",
+  "payloadType": "date",
   "x": 130,
-  "y": 240,
+  "y": 80,
   "wires": [
     [
-      "1eb40cf0f6b8f3fd"
+      "f610d91fe38324fa"
     ]
   ]
 }

@@ -21,9 +21,7 @@ const Node = {
     "check-files"
   ],
   "x": 14,
-  "y": 1319,
-  "w": 472,
-  "h": 102
+  "y": 1319
 }
 
 module.exports = Node;
