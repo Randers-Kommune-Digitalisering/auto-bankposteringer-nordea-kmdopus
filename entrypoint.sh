@@ -2,10 +2,6 @@
 
 trap stop SIGINT SIGTERM
 
-chown -R node-red:node-red /data
-find /data -type f -exec chown node-red:node-red {} +
-chmod -R u+rwX /data
-
 function stop() {
 	kill $EXPRESS_PID
 	kill $NODE_RED_PID
