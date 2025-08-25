@@ -1,4 +1,5 @@
 import os
+import stat
 import paramiko
 
 SFTP_URL = os.getenv("SFTP_URL", None)
@@ -23,7 +24,7 @@ def download_dir(remote_path, local_path):
     for item in sftp.listdir_attr(remote_path):
         remote_item = remote_path + "/" + item.filename
         local_item = os.path.join(local_path, item.filename)
-        if paramiko.S_ISDIR(item.st_mode):
+        if stat.S_ISDIR(item.st_mode):
             download_dir(remote_item, local_item)
         else:
             sftp.get(remote_item, local_item)
