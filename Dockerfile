@@ -22,7 +22,6 @@ COPY ./node-red/flows_js /data/flows_js
 
 USER root
 
-RUN chown -R node-red:node-red /data
 # Copy project files and folders to the current working directory
 COPY vue /app
 
@@ -38,7 +37,7 @@ RUN cd /app/express && npm install
 # Build express server
 RUN cd /app/express && npm ci --only=production
 
-# USER node-red
+USER node-red
 
 # Copy entrypoint script
 COPY entrypoint.sh .
