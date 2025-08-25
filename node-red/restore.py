@@ -10,8 +10,8 @@ host = SFTP_URL
 port = 22
 username = SFTP_USERNAME
 password = SFTP_PASSWORD
-local_dir = "/data"
-remote_dir = "backup"
+local_dir = "/data/output"
+remote_dir = "backup/output"
 
 transport = paramiko.Transport((host, port))
 transport.connect(username=username, password=password)
