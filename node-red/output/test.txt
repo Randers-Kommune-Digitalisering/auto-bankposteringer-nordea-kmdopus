@@ -1,2 +1,0 @@
-Hello from Node-RED!\nThis is a new line.
-Another line
