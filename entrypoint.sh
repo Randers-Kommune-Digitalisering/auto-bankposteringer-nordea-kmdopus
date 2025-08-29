@@ -13,6 +13,8 @@ function stop() {
 
 EXPRESS_PID="$!"
 
+rmdir -r '/data/node_modules/dayjs/plugin'
+
 /usr/local/bin/node $NODE_OPTIONS node_modules/node-red/red.js --userDir /data $FLOWS "${@}" &
 
 NODE_RED_PID="$!"
