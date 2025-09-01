@@ -127,10 +127,10 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   }
   
   function getPrivateKey() {
-      // let eidasPrivateKey = global.get("configs").banking.eidas.privateKey;
+      let eidasPrivateKey = global.get("configs").banking.eidas.privateKey;
   
-      let myEnvVar = global.get("configs").banking.eidas.privateKey;
-      let eidasPrivateKey = myEnvVar.replace(/\\n/g, "\n"); 
+      // let myEnvVar = global.get("configs").banking.eidas.privateKey;
+      // let eidasPrivateKey = myEnvVar.replace(/\\n/g, "\n"); 
   
       if (!eidasPrivateKey.includes('PRIVATE KEY')) {
           eidasPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\n" + eidasPrivateKey + "\n" + "-----END RSA PRIVATE KEY-----";

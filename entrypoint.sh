@@ -9,6 +9,8 @@ function stop() {
 	wait $NODE_RED_PID
 }
 
+ls -l /data/output
+
 /usr/local/bin/node /app/express/server.js &
 
 EXPRESS_PID="$!"
