@@ -39,9 +39,7 @@ RUN cd /app/express && npm ci --only=production
 
 # USER node-red
 
-RUN apt-get update
-
-RUN apt-get install netcat
+RUN apk add netcat-openbsd
 
 # Copy entrypoint script
 COPY entrypoint.sh .
