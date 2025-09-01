@@ -37,7 +37,11 @@ RUN cd /app/express && npm install
 # Build express server
 RUN cd /app/express && npm ci --only=production
 
-USER node-red
+# USER node-red
+
+RUN apt-get update
+
+RUN apt-get install netcat
 
 # Copy entrypoint script
 COPY entrypoint.sh .
