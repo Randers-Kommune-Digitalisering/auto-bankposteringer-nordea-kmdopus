@@ -29,7 +29,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   }
   
   return msg;
-  
 }
 
 module.exports = Node;

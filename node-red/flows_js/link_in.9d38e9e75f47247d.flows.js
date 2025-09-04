@@ -6,7 +6,7 @@ const Node = {
   "name": "insert all rules",
   "links": [],
   "x": 65,
-  "y": 640,
+  "y": 680,
   "wires": [
     [
       "77200ab701411b59"

@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS accountingRules (
     tempBool BOOLEAN DEFAULT FALSE,
     notificationRecipient NVARCHAR(255) NULL,
     lastUsed NVARCHAR(10) NULL,
-    ruleID INT PRIMARY KEY,
+    ruleID INT PRIMARY KEY AUTO_INCREMENT,
     relatedBankAccount NVARCHAR(31) NULL,
     postWithCPR BOOLEAN DEFAULT FALSE,
     cpr NVARCHAR(10) NULL, 
