@@ -5,7 +5,7 @@
     
     import Content from '@/components/Content.vue'
     import IconList from '@/components/icons/IconList.vue'
-    import IconEdit from '@/components/icons/IconEdit.vue'
+    import IconPencil from '@/components/icons/IconPencil.vue'
     import IconSearch from '../components/icons/IconSearch.vue'
     import IconSearchClose from '../components/icons/IconSearchClose.vue'
 
@@ -186,7 +186,7 @@
                         path: route.path,
                         query: isSearching ? { returnfrom: obj[keyMap['ID'].key], search: searchKeyword }
                                             : { returnfrom: obj[keyMap['ID'].key] }})">
-                        <IconEdit />
+                        <IconPencil />
                     </button>
                 </router-link></td>
             </tr>
