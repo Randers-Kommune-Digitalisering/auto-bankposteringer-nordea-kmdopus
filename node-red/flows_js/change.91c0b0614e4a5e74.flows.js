@@ -11,13 +11,6 @@ const Node = {
       "pt": "msg",
       "to": "{}",
       "tot": "json"
-    },
-    {
-      "t": "set",
-      "p": "payload.ruleID",
-      "pt": "msg",
-      "to": "$globalContext(\"masterData\").rules.ruleID ~> $max()",
-      "tot": "jsonata"
     }
   ],
   "action": "",

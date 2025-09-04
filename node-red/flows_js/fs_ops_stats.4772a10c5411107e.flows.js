@@ -11,7 +11,7 @@ const Node = {
   "stats": "stats",
   "sizeType": "msg",
   "x": 175,
-  "y": 1380,
+  "y": 1280,
   "wires": [
     [
       "e71fc547a36a4f03"

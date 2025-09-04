@@ -20,7 +20,7 @@ const Node = {
     }
   ],
   "x": 325,
-  "y": 1360,
+  "y": 1260,
   "wires": [
     [
       "delete-files"

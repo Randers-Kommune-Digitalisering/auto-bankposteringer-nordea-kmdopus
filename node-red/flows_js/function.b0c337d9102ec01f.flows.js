@@ -85,8 +85,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
       const valueOperatorValue = operatorMapping[beløb_regel] || null;
       const operator = valueOperatorValue;
-  
-      const ruleID = index;
       
       const shouldBeException = statusAccounts.includes(Artskonto);
       cleanedData.Artskonto = shouldBeException ? null : Artskonto;
@@ -113,7 +111,6 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           exceptionBool,
           tempBool,
           lastUsed,
-          ruleID,
           relatedBankAccount: Bankkonto || null,
           postWithCPR,
           cpr
