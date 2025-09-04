@@ -26,9 +26,7 @@ const Node = {
     "e187b3f677059c2c"
   ],
   "x": 894,
-  "y": 19,
-  "w": 422,
-  "h": 182
+  "y": 19
 }
 
 module.exports = Node;
