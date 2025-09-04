@@ -6,11 +6,9 @@ const Node = {
   "name": "Sæt værdier",
   "rules": [
     {
-      "t": "set",
+      "t": "delete",
       "p": "payload.ruleID",
-      "pt": "msg",
-      "to": "($globalContext(\"masterData\").rules.ruleID ~> $max() ) + 1",
-      "tot": "jsonata"
+      "pt": "msg"
     }
   ],
   "action": "",

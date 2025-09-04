@@ -6,7 +6,7 @@ const Node = {
   "name": "load rules to env",
   "links": [],
   "x": 65,
-  "y": 680,
+  "y": 720,
   "wires": [
     [
       "ae6b1d1758cd9ae9"
