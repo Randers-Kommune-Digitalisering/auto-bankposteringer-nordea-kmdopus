@@ -42,6 +42,16 @@ const Node = {
     },
     {
       "t": "delete",
+      "p": "req",
+      "pt": "msg"
+    },
+    {
+      "t": "delete",
+      "p": "res",
+      "pt": "msg"
+    },
+    {
+      "t": "delete",
       "p": "data",
       "pt": "flow"
     },
