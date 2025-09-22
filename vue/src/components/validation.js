@@ -2,13 +2,14 @@ const ACCOUNT_REGEX = /^(S|9|\d)\d{7}$/;
 const ACCOUNTSECONDARY_REGEX = /^X[A-Z]-\d{1,10}-\d{1,5}$/i;
 const ACCOUNTTERTIARY_REGEX = /^[a-zA-Z0-9]{1,10}$/;
 const CPR_REGEX = /\b((0[1-9]|[12][0-9]|3[01])(0[13578]|10|12)|([0][1-9]|[12][0-9]|30)(0[469]|11)|(0[1-9]|1[0-9]|2[0-8])(02)|(29)(02)(00)|((29)(02)([2468][048]))|((29)(02)([13579][26])))(\d{2})(\d{4})\b/m;
+const EMAIL_REGEX = /^[A-Za-z0-9._%+-]+@randers\.dk$/i;
 
 export function validateAccount(value, errors) {
     if (!value) {
         errors.account = 'Artskonto skal angives';
         return false;
     } else if (!ACCOUNT_REGEX.test(value)) {
-        errors.account = 'Artskonto skal være præcis 8 tegn langt og starte med "S", "9" eller et tal';
+        errors.account = 'Artskonto skal være præcis 8 tegn langt og starte med "S" eller et tal';
         return false;
     } else {
         errors.account = null;
@@ -68,6 +69,20 @@ export function validateCPR(value, errors) {
         return false;
     } else {
         errors.cpr = null;
+        return true;
+    }
+}
+
+export function validateEmail(value, errors) {
+    if (!value || value.trim() === '') {
+        errors.email = null;
+        return true;
+    }
+    if (!EMAIL_REGEX.test(value)) {
+        errors.email = 'Adressen skal slutte på @randers.dk';
+        return false;
+    } else {
+        errors.email = null;
         return true;
     }
 }

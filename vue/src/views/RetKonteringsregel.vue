@@ -1,14 +1,13 @@
 <script setup>
     import { ref, watch, computed } from 'vue'
     import { useRouter, useRoute } from 'vue-router'
-    import { validateDependencies, formatAccountSecondary, formatAccountTertiary, formatAmount, validateText, validateCPR } from '@/components/validation.js'
+    import { validateDependencies, formatAccountSecondary, formatAccountTertiary, formatAmount, validateText, validateCPR, validateEmail } from '@/components/validation.js'
     import fileUpload from '@/components/fileUpload.vue'
 
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
     import IconDelete from '../components/icons/IconDelete.vue'
     import IconSave from '../components/icons/IconSave.vue'
-    import IconUpload from '@/components/icons/IconUpload.vue'
     
     import newItem from '@/assets/newItem.json'
 
@@ -70,7 +69,8 @@
         accountSecondary: null,
         accountTertiary: null,
         text: null,
-        cpr: null
+        cpr: null,
+        email: null
     });
 
     fetch('/api/bankaccounts')
@@ -183,7 +183,7 @@
                 "group": "Kontering",
                 "hidden": () => ruleType.value !== 'temporary'
             },
-            "Mail til advisering": {
+            "Mailadresse til advisering": {
                 "key": "notificationRecipient",
                 "group": "Diverse",
                 "hidden": () => ruleType.value !== 'temporary'
@@ -298,6 +298,7 @@
         if (!konteringsregel.value.exceptionBool) {
             validateDependencies(konteringsregel.value, errors.value);
             validateText(konteringsregel.value.text, errors.value);
+            validateEmail(konteringsregel.value.notificationRecipient, errors.value);
         }        
         // Only block update if rule is active and there are validation errors
         if (konteringsregel.value.activeBool && !konteringsregel.value.exceptionBool && hasValidationErrors.value) {
@@ -499,6 +500,17 @@
                                     @input="validateText(staticText, errors)"
                                 />
                                 <span v-if="errors.text" class="error">{{ errors.text }}</span>
+                            </template>
+                            
+                            <template v-else-if="key === 'Mailadresse til advisering'">
+                                <input
+                                    type="email"
+                                    placeholder="..."
+                                    :id="key"
+                                    v-model="konteringsregel[value.key]"
+                                    @input="validateEmail(konteringsregel[value.key], errors)"
+                                />
+                                <span v-if="errors.email" class="error">{{ errors.email }}</span>
                             </template>
 
                             <template v-else-if="key === 'Posteringstype'">
