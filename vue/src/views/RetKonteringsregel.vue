@@ -143,8 +143,16 @@
             "Afsender": { "key": "sender", "group": "Transaktionsoplysninger" }, 
             "Posteringstype": { "key": "typeDescription", "group": "Transaktionsoplysninger" },
             "Beløbsregel": { "key": "operator", "group": "Beløbsafgrænsning" },
-            "Beløb 1": { "key": "amount1", "group": "Beløbsafgrænsning" },
-            "Beløb 2": { "key": "amount2", "hidden": true, "group": "Beløbsafgrænsning" },
+            "Beløb 1": { 
+                "key": "amount1", 
+                "hidden": () => selectedOperator.value === null, // Skjul hvis "Ingen" valgt
+                "group": "Beløbsafgrænsning"
+            },
+            "Beløb 2": { 
+                "key": "amount2", 
+                "hidden": () => selectedOperator.value !== '><', // Skjul hvis ikke "Mellem"
+                "group": "Beløbsafgrænsning" 
+            },
             "Notat": { "key": "note" },
             "activeBool": { "key": "activeBool", "hidden": true },
             "Artskonto": { 
