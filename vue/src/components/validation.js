@@ -87,6 +87,47 @@ export function validateEmail(value, errors) {
     }
 }
 
+export function validateAmounts(operator, amount1, amount2, errors) {
+    errors.amount1 = null;
+    errors.amount2 = null;
+
+    // Hjælpefunktion til tal-validering
+    function isValidNumber(val) {
+        if (!val || val.toString().trim() === '') return true;
+        const cleaned = val.toString().replace(/\./g, '').replace(',', '.');
+        return !isNaN(parseFloat(cleaned));
+    }
+
+    let valid = true;
+
+    switch (operator) {
+        case '>':
+        case '<':
+        case '==':
+            if (!isValidNumber(amount1)) {
+                errors.amount1 = 'Beløbet skal være et tal';
+                valid = false;
+            }
+            break;
+        case '><':
+            if (!isValidNumber(amount1)) {
+                errors.amount1 = 'Beløbet skal være et tal';
+                valid = false;
+            }
+            if (!isValidNumber(amount2)) {
+                errors.amount2 = 'Beløbet skal være et tal';
+                valid = false;
+            }
+            break;
+        case null:
+        case undefined:
+        default:
+            break;
+    }
+
+    return valid;
+}
+
 export function validateDependencies(obj, errors) {
     const account = obj?.account || '';
     const accountSecondary = obj?.accountSecondary || '';

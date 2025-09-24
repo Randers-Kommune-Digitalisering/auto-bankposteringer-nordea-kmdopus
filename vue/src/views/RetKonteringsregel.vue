@@ -36,6 +36,7 @@
     const bankAccountOptions = ref([])
 
     const operatorOptions = [
+        { label: 'Ingen', value: null },
         { label: 'Større end', value: '>' },
         { label: 'Mindre end', value: '<' },
         { label: 'Mellem', value: '><' },
@@ -547,10 +548,56 @@
                                 />
                             </template>
                             
+                            <template v-else-if="key === 'Beløb 1'">
+                                <input
+                                    type="text"
+                                    inputmode="decimal"
+                                    placeholder="..."
+                                    :id="key"
+                                    v-model="konteringsregel[value.key]"
+                                    @input="e => {
+                                        // Kun cifre, komma og punktum - minus fjernes
+                                        const filtered = e.target.value.replace(/[^0-9.,]/g, '');
+                                        e.target.value = filtered;
+                                        konteringsregel[value.key] = filtered;
+                                        validateAmounts(
+                                            konteringsregel.value.operator,
+                                            konteringsregel.value.amount1,
+                                            konteringsregel.value.amount2,
+                                            errors.value
+                                        );
+                                    }"
+                                />
+                                <span v-if="errors.amount1" class="error">{{ errors.amount1 }}</span>
+                            </template>
+
+                            <template v-else-if="key === 'Beløb 2'">
+                                <input
+                                    type="text"
+                                    inputmode="decimal"
+                                    placeholder="..."
+                                    :id="key"
+                                    v-model="konteringsregel[value.key]"
+                                    @input="e => {
+                                        // Kun cifre, komma og punktum - minus fjernes
+                                        const filtered = e.target.value.replace(/[^0-9.,]/g, '');
+                                        e.target.value = filtered;
+                                        konteringsregel[value.key] = filtered;
+                                        validateAmounts(
+                                            konteringsregel.value.operator,
+                                            konteringsregel.value.amount1,
+                                            konteringsregel.value.amount2,
+                                            errors.value
+                                        );
+                                    }"                            />
+                                <span v-if="errors.amount2" class="error">{{ errors.amount2 }}</span>
+                            </template>
+
                             <template v-else>
                                 <input
                                     type="text"
                                     placeholder="..."
+                                    inputmode="decimal"
                                     :id="key"
                                     v-model="konteringsregel[value.key]"
                                     @change="hasUpdated = false"
