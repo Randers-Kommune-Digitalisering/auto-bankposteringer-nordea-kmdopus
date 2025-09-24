@@ -139,8 +139,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   function processPosting(transaction, rules) {
       const direction = transaction.amount.charAt(0) === "-" ? "outgoing" : "incoming";
       transaction.direction = direction;
-      const floatAmount = parseFloat(transaction.amount);
-      const absoluteAmount = Math.abs(floatAmount);
+      const absoluteAmount = Math.abs(parseFloat(transaction.amount));
       const statusDebetOrCredit = direction === "incoming" ? "Debet" : "Kredit";
       const landingDebetOrCredit = direction === "incoming" ? "Kredit" : "Debet";
       const formattedAmount = absoluteAmount.toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -163,7 +162,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
               }
   
               let matchedAllParametersBool = sumOfParametersMatched === sumOfParametersGiven(rule);
-              let matchedAmountBool = matchAmount(floatAmount, rule.operator, rule.amount1, rule.amount2);
+              let matchedAmountBool = matchAmount(absoluteAmount, rule.operator, rule.amount1, rule.amount2);
               let matchedAccountBool = transaction.relatedAccount.bankAccount === rule.relatedBankAccount || rule.relatedBankAccount === null;
                               
               if (matchedAllParametersBool && matchedAmountBool && matchedAccountBool) {
