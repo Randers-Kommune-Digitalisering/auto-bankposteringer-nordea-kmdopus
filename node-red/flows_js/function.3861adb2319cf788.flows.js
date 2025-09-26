@@ -77,6 +77,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
       let line = {
           DEB_CRED_IND: posting.debetOrCredit.charAt(0),
           AMT_DOCCUR: amountPrefixed.toFixed(2),
+          VALUE_DATE: bookingDate,
           ITEM_TEXT: posting.text,
           COSTCENTER: posting.accountTertiary || undefined,
           GL_ACCOUNT: artskonto,
