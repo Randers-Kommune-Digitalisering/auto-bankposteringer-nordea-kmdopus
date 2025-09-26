@@ -412,7 +412,11 @@
         <form @submit.prevent="">
             <fieldset>
                 <div class="activeToggle">
-                    <button @click="deleteRule" class="red float-right" :disabled="isDeleting">
+                    <button
+                        @click="deleteRule"
+                        class="red float-right"
+                        :disabled="isDeleting || isNewRule.value"
+                    >
                         <template v-if="awaitingDeleteConfirmation">Bekræft sletning</template>
                         <template v-else><IconDelete /></template>
                     </button>

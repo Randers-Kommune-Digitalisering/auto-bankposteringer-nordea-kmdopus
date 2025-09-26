@@ -95,6 +95,14 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       const postWithCPR = false;
       const cpr = null;
   
+      let relatedBankAccountName = null;
+      if (Bankkonto) {
+          const match = bankAccounts.find(acc => acc.bankAccount === Bankkonto);
+          if (match) {
+              relatedBankAccountName = match.bankAccountName || "Alle";
+          }
+      }
+  
       return {
           reference: Reference || null,
           sender: Afsender || null,
@@ -112,6 +120,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
           tempBool,
           lastUsed,
           relatedBankAccount: Bankkonto || null,
+          relatedBankAccountName,
           postWithCPR,
           cpr
       };

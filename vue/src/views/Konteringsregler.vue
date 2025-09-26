@@ -51,9 +51,10 @@
 
     const keyMap = {
         "id": { "key": "ruleID" },
+        "Kontonavn": { "key": "relatedBankAccountName" },
         "Reference": { "key": "reference" },
         "Afsender": { "key": "sender" }, 
-        "Posteringstype": { "key": "typeDescription" },
+        "Posteringstype": { "key": "typeDescription", "hidden": true },
         "Beløb 1": { "key": "amount1", "hidden": true },
         "Beløb 2": { "key": "amount2", "hidden": true },
         "Artskonto": { "key": "account", "hidden": true },
@@ -132,6 +133,7 @@
                                 (x[keyMap["Beløb 1"].key] != null && x[keyMap["Beløb 1"].key].toLowerCase().includes(keyword)) ||
                                 (x[keyMap["Beløb 2"].key] != null && x[keyMap["Beløb 2"].key].toLowerCase().includes(keyword)) ||
                                 (x[keyMap.Bankkonto.key] != null && x[keyMap.Bankkonto.key].toLowerCase().includes(keyword)) ||
+                                (x[keyMap.Kontonavn.key] != null && x[keyMap.Kontonavn.key].toLowerCase().includes(keyword)) ||
                                 (x[keyMap.Artskonto.key] != null && x[keyMap.Artskonto.key].toLowerCase().includes(keyword)) ||
                                 (x[keyMap["PSP-element"].key] != null && x[keyMap["PSP-element"].key].toLowerCase().includes(keyword)) ||
                                 (x[keyMap.Posteringstekst.key] != null && x[keyMap.Posteringstekst.key].toLowerCase().includes(keyword)) ||
