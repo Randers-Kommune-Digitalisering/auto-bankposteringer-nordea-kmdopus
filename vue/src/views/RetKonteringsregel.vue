@@ -415,7 +415,7 @@
                     <button
                         @click="deleteRule"
                         class="red float-right"
-                        :disabled="isDeleting || isNewRule.value"
+                        :disabled="isDeleting || isNewRule"
                     >
                         <template v-if="awaitingDeleteConfirmation">Bekræft sletning</template>
                         <template v-else><IconDelete /></template>
@@ -424,7 +424,7 @@
                     <button v-if="konteringsregel != null"
                         @click="toggleActiveAndGoBack"
                         :class="isUpdating ? 'blue' : konteringsregel.activeBool ? 'red' : 'green'"
-                        :disabled="konteringsregel.exceptionBool || konteringsregel.tempBool || (!konteringsregel.activeBool && hasValidationErrors)">
+                        :disabled="isNewRule || konteringsregel.exceptionBool || konteringsregel.tempBool || (!konteringsregel.activeBool && hasValidationErrors)">
                         <template v-if="isUpdating">Gemmer ...</template>
                         <template v-else>{{ konteringsregel.activeBool ? 'Deaktivér' : 'Aktivér' }}</template>
                     </button>

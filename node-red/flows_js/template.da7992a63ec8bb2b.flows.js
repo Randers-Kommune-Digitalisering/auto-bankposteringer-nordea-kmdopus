@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS accountingRules (
     lastUsed NVARCHAR(10) NULL,
     ruleID INT PRIMARY KEY AUTO_INCREMENT,
     relatedBankAccount NVARCHAR(31) NULL,
-    relatedBankAccountName NVARCHAR(63) NULL,
+    relatedBankAccountName NVARCHAR(63) DEFAULT 'Alle',
     postWithCPR BOOLEAN DEFAULT FALSE,
     cpr NVARCHAR(10) NULL, 
     FOREIGN KEY (relatedBankAccount) REFERENCES bankAccounts(bankAccount) ON DELETE SET NULL,
