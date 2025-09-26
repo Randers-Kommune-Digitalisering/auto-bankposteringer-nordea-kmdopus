@@ -95,11 +95,11 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       const postWithCPR = false;
       const cpr = null;
   
-      let relatedBankAccountName = null;
+      let relatedBankAccountName = "Alle";
       if (Bankkonto) {
           const match = bankAccounts.find(acc => acc.bankAccount === Bankkonto);
           if (match) {
-              relatedBankAccountName = match.bankAccountName || "Alle";
+              relatedBankAccountName = match.bankAccountName;
           }
       }
   
