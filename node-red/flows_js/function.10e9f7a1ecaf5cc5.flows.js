@@ -24,12 +24,23 @@ const Node = {
 Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   let arr = msg.req.files[0].buffer; // forventer et array af objekter
   let masterObj = global.get("masterData");
+  const bankAccounts = masterObj.bankAccounts || [];
   
   let trimmedArr = arr.map(rule => {
       let trimmedRule = {};
       for (let key in rule) {
           trimmedRule[key.trim()] = rule[key];
       }
+  
+      let relatedBankAccountName = "Alle";
+      if (trimmedRule.relatedBankAccount) {
+          const match = bankAccounts.find(acc => acc.bankAccount === trimmedRule.relatedBankAccount);
+          if (match) {
+              relatedBankAccountName = match.bankAccountName;
+          }
+      }
+      trimmedRule.relatedBankAccountName = relatedBankAccountName;
+  
       return trimmedRule;
   });
   
