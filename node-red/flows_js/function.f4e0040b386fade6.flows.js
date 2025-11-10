@@ -95,10 +95,12 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   function textGeneration(textVariation, message, narrative, counterparty_name) {
       textVariation = textVariation ? textVariation : "";
   
-      if (narrative && narrative.includes('BDP')) {
-          return narrative.substring(narrative.indexOf('BDP'));
-      } else if (narrative && narrative.includes('KSD')) {
-          return narrative.substring(narrative.indexOf('KSD')) + (counterparty_name ? counterparty_name : '');
+      if (message && message.includes('BDP')) {
+          const start = message.indexOf('BDP');
+          return message.substring(start, start + 15);
+      } else if (message && message.includes('KSD')) {
+          const start = message.indexOf('KSD');
+          return message.substring(start, start + 21) + (counterparty_name ? counterparty_name : '');
       }
   
       switch (textVariation.toLowerCase()) {
