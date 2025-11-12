@@ -97,7 +97,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
   
       if (message && message.includes('BDP')) {
           const start = message.indexOf('BDP');
-          return message.substring(start, start + 15);
+          return message.substring(start, start + 18).replace(/\s+/g, '');
       } else if (message && message.includes('KSD')) {
           const start = message.indexOf('KSD');
           return message.substring(start, start + 21) + (counterparty_name ? counterparty_name : '');
