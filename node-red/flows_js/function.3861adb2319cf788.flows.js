@@ -70,6 +70,8 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
           artskonto = artskonto.charAt(0) === '9' ? '90515060' : '29505050';
       }
   
+      posting.text = posting.text || "";
+  
       if (posting.text.length > 50) {
           posting.text = posting.text.substr(0, 50);
       }
