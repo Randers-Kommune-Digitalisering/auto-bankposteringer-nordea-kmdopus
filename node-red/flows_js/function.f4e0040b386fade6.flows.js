@@ -39,11 +39,11 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util) {
       const match = inputString.match(regex);
   
       if (match) {
-          return match[0]; // Returnerer det første match
-      } else {
-          return null;
+          return match[0].replace('-', ''); // fjerner bindestreg
       }
+      return null;
   }
+  
   
   function sumOfParametersGiven(rule) {
       // Count the number of rule parameters where the value property is defined (truthy)
