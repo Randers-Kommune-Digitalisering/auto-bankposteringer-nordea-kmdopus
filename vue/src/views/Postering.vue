@@ -6,8 +6,6 @@
 
     import Content from '@/components/Content.vue'
     import IconTable from '@/components/icons/IconTable.vue'
-    import IconDelete from '@/components/icons/IconDelete.vue'
-    import IconUpload from '@/components/icons/IconUpload.vue'
 
     const isUpdating = ref(false)
     const hasUpdated = ref(false)
@@ -26,6 +24,15 @@
         cpr: null,
         text: null
     });
+
+    function toBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader()
+            reader.readAsDataURL(file)
+            reader.onload = () => resolve(reader.result.split(',')[1]) // kun selve Base64-strengen
+            reader.onerror = error => reject(error)
+        })
+    }
 
     // Fetch posting
     fetch(`/api/postings/${index.value}`)
@@ -80,7 +87,7 @@
         return Object.values(errors.value).some(error => error !== null)
     })
 
-    function updatePosting() {
+    async function updatePosting() {
         validateDependencies(posting.value, errors.value);
         validateCPR(posting.value.cpr, errors.value);
         validateText(posting.value.text, errors.value);
@@ -97,7 +104,11 @@
         if (posting.value.accountTertiary) {
             posting.value.accountTertiary = formatAccountTertiary(posting.value.accountTertiary);
         }
-        
+
+        if (posting.value.attachmentData instanceof File) {
+            posting.value.attachmentData = await toBase64(posting.value.attachmentData)
+        }
+
         isUpdating.value = true
 
         const url = `/api/postings/${posting.value.transactionID}`
