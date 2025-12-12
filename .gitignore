@@ -13,3 +13,4 @@ package-lock.json
 node-red/.flows_cred.json.backup
 node-red/konteringsregler/konteringsregler.json
 secrets/*
+node-red/flows_cred.json

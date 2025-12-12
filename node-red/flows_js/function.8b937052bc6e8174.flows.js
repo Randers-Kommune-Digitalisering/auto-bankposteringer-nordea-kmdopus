@@ -33,27 +33,29 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   const transactions = transactionsObj.list || [];
   const rules = masterDataObj.rules || [];
   const existingTypes = masterDataObj.typeDescriptions || [];
+  const combinedDescriptions = [];
   
   // Hjælpefunktion til at escape '
   function escapeSqlString(str) {
       return str.replace(/'/g, "''");
   }
   
-  // Saml alle type-beskrivelser fra både transactions og rules
-  const combinedDescriptions = [];
-  
   // Fra transactions
-  for (const item of transactions) {
-      if (item.type_description) {
-          combinedDescriptions.push(item.type_description.trim());
+  for (const transaction of transactions) {
+      if (transaction.type_description) {
+          combinedDescriptions.push(transaction.type_description.trim());
       }
   }
   
   // Fra rules
   for (const rule of rules) {
-      if (rule.typeDescription) {
-          combinedDescriptions.push(rule.typeDescription.trim());
-      }
+      const raw = rule.typeDescription;
+  
+      if (typeof raw !== "string") continue;
+          const val = raw.trim();
+      if (!val) continue;
+  
+      combinedDescriptions.push(val);
   }
   
   // Fjern tomme/blanke og lav case-insensitiv dubletfiltrering
@@ -71,7 +73,7 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
       }
   }
   
-  // Sortér alfabetisk (dansk sortering)
+  // Sortér alfabetisk
   distinctTypes.sort((a, b) => a.localeCompare(b, 'da'));
   
   // Hvis vi har fundet nye værdier, brug dem — ellers brug existingTypes
