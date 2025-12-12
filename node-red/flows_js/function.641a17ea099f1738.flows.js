@@ -59,8 +59,10 @@ Node.func = async function (node, msg, RED, context, flow, global, env, util, da
   dates.simpleDate = dayjs().format('DD-MM-YYYY');
   dates.time = dayjs().format('HHmmss');
   
-  // Sæt bookingdato baseret på restart-flag
-  dates.bookingDate = global.get("runs").restart ? global.get("runs").originDate : findBookingDate();
+  // Sæt bookingdato baseret på restar- eller remake-flag
+  dates.bookingDate = (global.get("runs").restart || global.get("runs").remake)
+      ? global.get("runs").originDate
+      : findBookingDate();
   
   global.set("dates", dates);
   return msg;
