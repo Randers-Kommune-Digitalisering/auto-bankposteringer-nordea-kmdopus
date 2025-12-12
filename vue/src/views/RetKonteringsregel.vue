@@ -21,6 +21,15 @@
     const awaitingDeleteConfirmation = ref(false)
     const isDeleting = ref(false)
 
+    function toBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader()
+            reader.readAsDataURL(file)
+            reader.onload = () => resolve(reader.result.split(',')[1]) // kun selve Base64-strengen
+            reader.onerror = error => reject(error)
+        })
+    }
+
     const isNewRule = computed(() => index.value && index.value.startsWith('ny'))
     
     const ruleType = computed(() => {
@@ -303,7 +312,7 @@
         return Object.values(errors.value).some(error => error !== null)
     })
 
-    function updateRule() {
+    async function updateRule() {
         if (!konteringsregel.value.exceptionBool) {
             validateDependencies(konteringsregel.value, errors.value);
             validateText(konteringsregel.value.text, errors.value);
@@ -333,6 +342,10 @@
 
         if (konteringsregel.value.amount2) {
             konteringsregel.value.amount2 = formatAmount(konteringsregel.value.amount2);
+        }
+
+        if (konteringsregel.value.attachmentData instanceof File) {
+            konteringsregel.value.attachmentData = await toBase64(konteringsregel.value.attachmentData)
         }
         
         isUpdating.value = true
