@@ -126,6 +126,7 @@
                 konteringsregel.value = value;
 
                 selectedBankaccount.value = konteringsregel.value.relatedBankAccount
+
                 selectedOperator.value = konteringsregel.value.operator
                 if (!konteringsregel.value.exceptionBool) {
                     validateDependencies(konteringsregel.value, errors.value);
@@ -247,10 +248,17 @@
         if (newVal.length > 0 && selectedBankaccount.value === null) {
             selectedBankaccount.value = newVal[0].value
         }
+        console.log(selectedBankaccount)
     })
 
     watch(selectedBankaccount, (newValue) => {
         konteringsregel.value.relatedBankAccount = newValue
+
+        const match = bankAccountOptions.value.find(
+            o => o.value === newValue
+        )
+
+        konteringsregel.value.relatedBankAccountName = match?.label ?? null
     })
 
     watch(() => konteringsregel.value.cpr, (val) => {
@@ -347,7 +355,7 @@
         if (konteringsregel.value.attachmentData instanceof File) {
             konteringsregel.value.attachmentData = await toBase64(konteringsregel.value.attachmentData)
         }
-        
+
         isUpdating.value = true
         cprMode.value = 'Ingen'
 
