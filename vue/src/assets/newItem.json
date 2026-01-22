@@ -16,6 +16,7 @@
     "lastUsed": "9999-12-31",
     "ruleID": 0,
     "relatedBankAccount": null,
+    "relatedBankAccountName": "Alle",
     "postWithCPR": false,
     "cpr": null
 }
