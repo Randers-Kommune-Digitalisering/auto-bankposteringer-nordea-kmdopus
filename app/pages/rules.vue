@@ -407,7 +407,12 @@ function handleEditRule(row: Row<RuleListDto>) {
 function handleSaved() {
   refreshNuxtData('rules')
   modalOpen.value = false
+  editingRuleId.value = null
 }
+
+watch(modalOpen, (isOpen) => {
+  if (!isOpen) editingRuleId.value = null
+})
 
 async function handleDeleteRule(row: Row<RuleListDto>) {
   const ruleId = row.original.id
@@ -447,10 +452,16 @@ async function handleDeleteRule(row: Row<RuleListDto>) {
         </template>
 
         <template #right>
+          <UButton
+            class="font-bold rounded-full"
+            icon="i-lucide-plus"
+            label="Ny regel"
+            @click="handleAddRule"
+          />
           <RulesRuleModal
             v-model:open="modalOpen"
+            :rule-id="editingRuleId"
             @saved="handleSaved"
-            @click="handleAddRule"
           />
         </template>
       </UDashboardNavbar>

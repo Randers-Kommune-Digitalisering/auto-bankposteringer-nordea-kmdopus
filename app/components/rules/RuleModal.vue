@@ -327,7 +327,7 @@ async function onSubmit(event: FormSubmitEvent<typeof ruleSubmitSchema>) {
 </script>
 
 <template>
-  <UModal v-model:open="open" :title="isEdit ? 'Rediger regel' : 'Ny regel'">
+  <UModal v-model:open="open">
     <template #header>
       <div class="flex items-center justify-between">
         <h2 class="text-lg font-semibold">
@@ -336,14 +336,6 @@ async function onSubmit(event: FormSubmitEvent<typeof ruleSubmitSchema>) {
       </div>
     </template>
 
-    <template #default>
-      <UButton
-        class="font-bold rounded-full"
-        icon="i-lucide-plus"
-        :label="'Ny regel'"
-        @click="open = true"
-      />
-    </template>
     <template #body>
       <div v-if="isLocked" class="bg-yellow-100 dark:bg-yellow-900/30 p-2 mb-4 rounded border border-yellow-400 dark:border-yellow-700">
         Denne regel redigeres i øjeblikket af en anden bruger.

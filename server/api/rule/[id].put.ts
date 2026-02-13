@@ -16,7 +16,7 @@ import {
   kmdAttachment
 } from '~/lib/db/schema/index'
 
-function compileRuleDraftToDb(draft: RuleDraftSchema, newVersion: bigint) {
+function compileRuleDraftToDb(draft: RuleDraftSchema, newVersion: number) {
   const {
     matches,
     relatedBankAccounts,
@@ -117,13 +117,13 @@ export default defineEventHandler(async (event) => {
 
   const newVersion = (existingRule.currentVersionId ?? 0) + 1
 
-  const { ruleData, bankAccountIds, tagIds, conditionRows, accountingParameters, attachments, versionContent } = compileRuleDraftToDb(parsed.data, BigInt(newVersion))
+  const { ruleData, bankAccountIds, tagIds, conditionRows, accountingParameters, attachments, versionContent } = compileRuleDraftToDb(parsed.data, newVersion)
   const validatedDbPayload = createInsertSchema(rule).parse(ruleData)
 
   await db.transaction(async (tx) => {
     const [updatedRule] = await tx.update(rule)
       .set(validatedDbPayload)
-      .where((fields, { eq }) => eq(fields.id, id))
+      .where(eq(rule.id, id))
       .returning()
 
     if (!updatedRule) throw createError({ statusCode: 500, statusMessage: 'Fejl ved opdatering af regel' })
