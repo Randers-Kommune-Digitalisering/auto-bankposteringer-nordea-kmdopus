@@ -1,16 +1,24 @@
-.env
-.env-development
-.npm
-.log
+# Nuxt dev/build outputs
+.output
+.data
+.nuxt
+.nitro
+.cache
+dist
+
+# Node dependencies
 node_modules
-.flows.json.backup
-.config.nodes.json
-.config.nodes.json.backup
-.config.runtime.json
-.config.users.json
-.config.users.json.backup
-package-lock.json
-node-red/.flows_cred.json.backup
-node-red/konteringsregler/konteringsregler.json
-secrets/*
-node-red/flows_cred.json
+
+# Logs
+logs
+*.log
+
+# Misc
+.DS_Store
+.fleet
+.idea
+
+# Local env files
+.env
+.env.*
+!.env.example
