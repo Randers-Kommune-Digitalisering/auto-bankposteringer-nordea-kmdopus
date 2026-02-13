@@ -20,8 +20,8 @@ import {
   matchCategoryColumns,
   matchCategoryEnumValues,
   matchFieldEnumValues,
-} from "~/lib/rules/match-config"
-import type { MatchCategory, MatchField } from "~/lib/rules/match-config"
+} from "../../rules/match-config"
+import type { MatchCategory, MatchField } from "../../rules/match-config"
 
 export const rule = pgTable('rule', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -221,8 +221,8 @@ export type RuleUpdateSchema = z.infer<typeof ruleUpdateSchema>
 export type RuleSelectSchema = z.infer<typeof ruleSelectSchema>
 export type RuleMatchingSelectSchema = z.infer<typeof ruleMatchingSelectSchema>
 
-export { matchCategories, matchCategoryColumns, matchFieldOptionsByCategory } from "~/lib/rules/match-config"
-export type { MatchCategory, MatchField } from "~/lib/rules/match-config"
+export { matchCategories, matchCategoryColumns, matchFieldOptionsByCategory } from "../../rules/match-config"
+export type { MatchCategory, MatchField } from "../../rules/match-config"
 
 export type Rule = {
   id: number
