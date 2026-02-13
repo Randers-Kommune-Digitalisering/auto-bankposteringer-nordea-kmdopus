@@ -7,7 +7,7 @@ import { rule } from "./rule"
 export const ruleVersion = pgTable('rule_version', {
   id: uuid().defaultRandom().primaryKey(),
   ruleId: integer().notNull().references(() => rule.id),
-  version: bigint({ mode: 'number' }).notNull(),
+  version: integer().notNull(),
   content: jsonb().notNull(),
   createdAt: date({ mode: "date" }).defaultNow(),
 })
