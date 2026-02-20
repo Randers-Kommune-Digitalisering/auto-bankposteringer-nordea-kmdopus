@@ -1,35 +1,17 @@
 import { computed, reactive, ref, watch } from 'vue'
 import type { Ref } from 'vue'
-import { z } from 'zod'
-import { cprTypeValues, type CprType } from '~/lib/db/schema'
+import { cprTypeValues, type CprType } from '#shared/manualBooking'
+import {
+	manualBookingFormSchema,
+	type ManualBookingFormState as ManualFormState
+} from '#shared/manualBooking'
 import type { ManualPostingAttachment, OpenTransaction } from '~/types/transactions'
 
-export type AttachmentPayload = {	extensions: string[]
+export type AttachmentPayload = {
+	names: string[]
+	extensions: string[]
 	base64: string[]
 }
-
-export const manualBookingFormSchema = z
-	.object({
-		primaryAccount: z.string().min(1, 'Primær konto er påkrævet'),
-		secondaryAccount: z.string().optional(),
-		tertiaryAccount: z.string().optional(),
-		text: z.string().optional(),
-		cprType: z.enum(cprTypeValues),
-		cprNumber: z.string().optional(),
-		notifyTo: z.string().email('Ugyldig email').optional(),
-		note: z.string().optional()
-	})
-	.superRefine((data, ctx) => {
-		if (data.cprType === 'statisk' && !data.cprNumber?.trim()) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				message: 'CPR-nummer er påkrævet, når CPR-type er statisk',
-				path: ['cprNumber']
-			})
-		}
-	})
-
-export type ManualFormState = z.infer<typeof manualBookingFormSchema>
 
 const defaultState = (): ManualFormState => ({
 	primaryAccount: '',
@@ -60,8 +42,11 @@ export function useManualBookingForm(options: {
 		const result: ManualPostingAttachment[] = []
 		const { names, extensions, base64 } = attachments.value
 		for (let i = 0; i < base64.length; i++) {
-			if (names[i] && extensions[i] && base64[i]) {
-				result.push({ name: names[i], type: extensions[i], data: base64[i] })
+			const name = names[i]
+			const type = extensions[i]
+			const data = base64[i]
+			if (name && type && data) {
+				result.push({ name, type, data })
 			}
 		}
 		return result
