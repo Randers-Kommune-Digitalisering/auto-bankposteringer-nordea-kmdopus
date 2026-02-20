@@ -65,7 +65,8 @@ async function handleBookingProcessed() {
                     <UButton
                       class="font-bold rounded-full"
                       color="primary"
-                      size="md"
+                      variant="solid"
+                      size="xl"
                       trailing-icon="solar:pen-new-round-bold-duotone"
                       @click="openBookingModal(item)"
                     >
