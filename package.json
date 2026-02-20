@@ -7,7 +7,8 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "db:migrate": "drizzle-kit push --config drizzle.config.ts"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.77",
