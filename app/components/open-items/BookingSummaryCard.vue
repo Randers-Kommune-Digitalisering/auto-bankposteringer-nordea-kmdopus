@@ -80,16 +80,23 @@ const sectionEntries = computed(() =>
 <template>
 	<UCard variant="soft" :ui="{ body: 'space-y-5 p-5', footer: 'p-5 pt-0 border-t border-default/60' }">
     <template #header>
+      <!-- Direction -->
       <UBadge
         size="sm"
-        variant="subtle"
+        variant="soft"
         color="primary"
-        class="flex w-max items-center gap-2 text-[11px] font-semibold uppercase tracking-wide"
+        class="flex justify-center text-xs font-semibold uppercase tracking-wide mt-2 mb-6"
       >
-        <UIcon :name="directionIcon" class="h-3.5 w-3.5" />
+        <UIcon :name="directionIcon" class="h-4.5 w-4.5" />
         <span>{{ directionLabel }}</span>
       </UBadge>
-      <div class="flex flex-wrap items-start justify-between gap-4 mt-4">
+      <!-- Amount -->
+      <div class="space-y-1 text-center mt-2 mb-12">
+        <p class="text-xs font-medium uppercase tracking-wide">{{ summary.amount.label }}</p>
+        <p class="text-3xl font-bold">{{ summary.amount.value }}</p>
+      </div>
+      <!-- Metadata -->
+      <div class="flex flex-wrap items-start justify-between gap-4 mt-2">
         <div>
           <p class="text-xs font-medium uppercase tracking-wide">{{ summary.transactionId.label }}</p>
           <p class="text-sm font-bold">{{ summary.transactionId.value }}</p>
@@ -100,14 +107,9 @@ const sectionEntries = computed(() =>
         </div>
       </div>
     </template>
-    <!-- Visning af beløb -->
-    <div class="space-y-1 text-center">
-      <p class="text-xs font-medium uppercase tracking-wide">{{ summary.amount.label }}</p>
-      <p class="text-3xl font-bold">{{ summary.amount.value }}</p>
-    </div>
-		<div class="space-y-4">
+		<div class="space-y-6">
 			<section v-for="section in sectionEntries" :key="section.key" class="space-y-2">
-				<header class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+				<header class="text-xs font-semibold uppercase tracking-wide">
 					{{ section.label }}
 				</header>
 				<div v-if="section.values.length" class="flex flex-wrap gap-2">

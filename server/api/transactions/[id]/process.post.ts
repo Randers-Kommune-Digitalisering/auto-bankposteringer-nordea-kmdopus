@@ -5,11 +5,11 @@ import db from "~/lib/db";
 import {
   account,
   bankingPayload,
-  cprTypeValues,
   transaction,
   transactionProcessing,
 } from "~/lib/db/schema";
 import env from "~/lib/env";
+import { manualBookingPayloadSchema } from "#shared/manualBooking";
 import type { SimpleAccountReportEntry } from "../../../../services/banking/batchFetchTransactions";
 import type { PostingAttachment } from "../../../../services/erp/postingXmlBuilder";
 import {
@@ -21,44 +21,31 @@ import {
   resolvePostingText,
   type PostingTransactionContext,
 } from "../../../../services/matching/postingUtils";
-
-const manualBookingSchema = z
-  .object({
-    primaryAccount: z.string().min(1, "Primær konto er påkrævet"),
-    secondaryAccount: z.string().optional(),
-    tertiaryAccount: z.string().optional(),
-    text: z.string().optional(),
-    cprType: z.enum(cprTypeValues),
-    cprNumber: z.string().optional(),
-    notifyTo: z.string().email("Ugyldig email").optional(),
-    note: z.string().optional(),
-    attachments: z
-      .array(
-        z.object({
-          name: z.string().min(1),
-          type: z.string().min(1),
-          data: z.string().min(1),
-        }),
-      )
-      .optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (data.cprType === "statisk" && !data.cprNumber?.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "CPR-nummer er påkrævet ved statisk CPR",
-        path: ["cprNumber"],
-      });
-    }
-  });
+import type { CprType } from "#shared/manualBooking";
 
 export default defineEventHandler(async (event) => {
-  const transactionId = event.context.params?.id;
-  if (!transactionId) {
+  const transactionIdParam = event.context.params?.id;
+  if (!transactionIdParam) {
     throw createError({ statusCode: 400, statusMessage: "Mangler transaktions-id" });
   }
 
-  const body = manualBookingSchema.parse(await readBody(event));
+  const transactionIdResult = z.string().uuid().safeParse(transactionIdParam);
+  if (!transactionIdResult.success) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Transaktionen kan ikke behandles (ugyldigt id eller mock-data)",
+    });
+  }
+  const transactionId = transactionIdResult.data;
+
+  const body = manualBookingPayloadSchema.parse(await readBody(event));
+
+  if (body.cprType === "statisk" && !normalizeDigits(body.cprNumber)) {
+    throw createError({
+      statusCode: 422,
+      statusMessage: "CPR-nummer er påkrævet, når CPR-type er statisk",
+    });
+  }
 
   const [row] = await db
     .select({
@@ -182,7 +169,7 @@ function sanitizeAccount(value: string): string {
 }
 
 function resolveManualCpr(
-  cprType: (typeof cprTypeValues)[number],
+  cprType: CprType,
   cprNumber: string | null,
   tx: PostingTransactionContext,
 ): string | undefined {
