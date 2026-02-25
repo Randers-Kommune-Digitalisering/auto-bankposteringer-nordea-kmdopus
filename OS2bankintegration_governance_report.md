@@ -1,6 +1,6 @@
 # GUIDE til Governance Report
 
-> Dette er OS2's checkliste der skal benyttes til at belyse niveauet af et OS2 produkt. Er du projektleder, koordinator eller på anden måde ansvarlig for et OS2 produkt? Så lav en kopi af filen og navngiv den efter produktet. F.eks. __OS2produkt_governance_report.md__ Derefter udfylder du checklisten og publisere den til det relevante repository i projektets versionskontrol-system.
+> Dette er OS2's checkliste der skal benyttes til at belyse niveauet af et OS2 produkt.
 >
 > Du udfylder checklisten ved at anvende en af de følgende markeringer, under  🔽 kolonnen:
 >
