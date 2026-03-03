@@ -4,6 +4,7 @@ import BookingSummaryCard from '~/components/open-items/BookingSummaryCard.vue'
 import RulesFileUpload from '~/components/rules/FileUpload.vue'
 import { useManualBookingForm } from '~/composables/useManualBookingForm'
 import type { OpenTransaction, TransactionSummary } from '~/types/transactions'
+import type { ManualBookingFormState as ManualFormState } from '#engine/manual-booking/domain/manualBooking'
 
 const props = defineProps<{
 	open: boolean
@@ -38,10 +39,10 @@ const {
 
 const summary = computed<TransactionSummary | null>(() => transaction.value?.summary ?? null)
 
-async function handleSubmit(event: FormSubmitEvent<typeof manualBookingFormSchema>) {
+async function handleSubmit(event?: FormSubmitEvent<ManualFormState>) {
 	if (!transaction.value) return
 
-	const payload = buildManualBookingPayload(event.data)
+	const payload = buildManualBookingPayload(event?.data ?? formState)
 
 	try {
 		isSubmitting.value = true

@@ -1,4 +1,4 @@
-import type { BookingStatus, CprType } from "~/lib/db/schema";
+import type { BookingStatus, CprType } from "~/lib/db/schema/enums";
 
 export type TransactionSummarySection =
   | {

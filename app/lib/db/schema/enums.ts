@@ -39,3 +39,11 @@ export type ErpSupplier = typeof erpSupplierValues[number]
 export const bookingStatusValues = ['åben', 'bogført', 'undtaget'] as const
 export const bookingStatusEnum = pgEnum('booking_status', bookingStatusValues)
 export type BookingStatus = typeof bookingStatusValues[number]
+
+export const jobStatusValues = ['pending', 'in_progress', 'succeeded', 'failed'] as const
+export const jobStatusEnum = pgEnum('job_status', jobStatusValues)
+export type JobStatus = typeof jobStatusValues[number]
+
+export const outboxStatusValues = ['pending', 'processing', 'sent', 'failed'] as const
+export const outboxStatusEnum = pgEnum('outbox_status', outboxStatusValues)
+export type OutboxStatus = typeof outboxStatusValues[number]

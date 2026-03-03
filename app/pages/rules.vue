@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
 import { upperFirst } from 'scule'
-import type { Row, SortingFn, SortingState } from '@tanstack/table-core'
+import type { Column, Row, SortingFn, SortingState } from '@tanstack/table-core'
 import { getPaginationRowModel } from '@tanstack/table-core'
-import type { RuleListDto } from '~/lib/db/schema/index'
-import { ruleTypeEnum, ruleStatusEnum } from '~/lib/db/schema/index'
+import type { RuleListDto } from '~/lib/db/schema/rule'
+import { ruleTypeEnum, ruleStatusEnum } from '~/lib/db/schema/enums'
 import useFlattenArray from '~/composables/useFlattenArray'
 
 const UButton = resolveComponent('UButton')
@@ -30,7 +30,10 @@ const { data: rules, status } = await useFetch<RuleListDto[]>('/api/rules', {
 })
 
 // Type labels
-const typeLabelMap = Object.fromEntries(Object.values(ruleTypeEnum).map(v => [v, upperFirst(v)]))
+const ruleTypeValues = ruleTypeEnum.enumValues ?? []
+const ruleStatusValues = ruleStatusEnum.enumValues ?? []
+
+const typeLabelMap = Object.fromEntries(ruleTypeValues.map(v => [v, upperFirst(v)]))
 
 // Normaliser data til RuleTableRow
 const rows = computed<RuleListDto[]>(() => {
@@ -354,12 +357,12 @@ const typeFilter = ref('alle')
 
 const statusItems = [
   { label: 'Alle', value: 'alle' },
-  ...Object.values(ruleStatusEnum).map(t => ({ label: upperFirst(t), value: t }))
+  ...ruleStatusValues.map(t => ({ label: upperFirst(t), value: t }))
 ]
 
 const typeItems = [
   { label: 'Alle', value: 'alle' },
-  ...Object.values(ruleTypeEnum).map(t => ({ label: upperFirst(t), value: t }))
+  ...ruleTypeValues.map(t => ({ label: upperFirst(t), value: t }))
 ]
 
 const statusDropdownItems = computed(() =>

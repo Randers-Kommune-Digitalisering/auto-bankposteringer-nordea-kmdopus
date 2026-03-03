@@ -1,6 +1,6 @@
 import { asc } from 'drizzle-orm'
 import { setHeader } from 'h3'
-import { account } from '~/lib/db/schema/index'
+import { account } from '~/lib/db/schema/account'
 import db from '~/lib/db'
 
 export default defineEventHandler(async (event) => {

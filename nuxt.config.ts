@@ -1,6 +1,21 @@
 import "./app/lib/env"
+import { fileURLToPath } from 'node:url'
 
 export default defineNuxtConfig({
+  alias: {
+    '#engine': fileURLToPath(new URL('./engine', import.meta.url)),
+  },
+
+  nitro: {
+    experimental: {
+      tasks: true,
+    },
+    scheduledTasks: {
+      '* * * * *': 'queue-worker',
+      '0 3 * * *': 'bank-transactions-batch',
+    },
+  },
+
   modules: [
     '@nuxt/ui',
     '@nuxt/eslint',

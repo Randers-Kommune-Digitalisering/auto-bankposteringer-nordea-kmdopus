@@ -1,15 +1,23 @@
 <script setup lang="ts">
 import { computed, toRef } from 'vue'
-import type { TransactionSummary, TransactionSummarySection } from '~/types/transactions'
+import type { TransactionSummary } from '~/types/transactions'
 
 const props = defineProps<{ summary: TransactionSummary }>()
 const summary = toRef(props, 'summary')
 
-type SummaryItemsSection = Extract<TransactionSummarySection, { items: Array<{ label: string; value: string }> }>
-type SummaryChipsSection = Extract<TransactionSummarySection, { chips: string[] }>
+type SummaryItemsSection = {
+	key: 'part' | 'transaktionstype'
+	label: string
+	items: Array<{ label: string; value: string }>
+}
 
-const isItemsSection = (section: TransactionSummarySection): section is SummaryItemsSection => 'items' in section
-const isChipsSection = (section: TransactionSummarySection): section is SummaryChipsSection => 'chips' in section
+type SummaryChipsSection = {
+	key: 'fritekst'
+	label: string
+	chips: string[]
+}
+
+type TransactionSummarySection = SummaryItemsSection | SummaryChipsSection
 
 const directionLabel = computed(() => (summary.value.direction === 'credit' ? 'Indbetaling' : 'Udbetaling'))
 const directionIcon = computed(() =>
@@ -17,23 +25,25 @@ const directionIcon = computed(() =>
 )
 
 const partSection = computed<SummaryItemsSection | null>(() => {
-	const section = summary.value.sections.find((entry) => entry.key === 'part')
-	return section && isItemsSection(section) ? section : null
+	const section = (summary.value.sections as TransactionSummarySection[]).find((entry) => entry.key === 'part')
+	return section?.key === 'part' ? section : null
 })
 
 const counterpartLabel = computed(() => partSection.value?.items?.[0]?.value ?? 'Ukendt modpart')
 const hasCounterpart = computed(() => counterpartLabel.value !== 'Ukendt modpart')
 
-const orderedSections = computed(() => {
+type BadgeColor = 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'error' | 'neutral'
+
+const orderedSections = computed<TransactionSummarySection[]>(() => {
 	const order: TransactionSummarySection['key'][] = ['part', 'fritekst', 'transaktionstype']
 	const prioritized = order
-		.map((key) => summary.value.sections.find((section) => section.key === key))
+		.map((key) => (summary.value.sections as TransactionSummarySection[]).find((section) => section.key === key))
 		.filter((section): section is TransactionSummarySection => Boolean(section))
-	const remaining = summary.value.sections.filter((section) => !order.includes(section.key))
+	const remaining = (summary.value.sections as TransactionSummarySection[]).filter((section) => !order.includes(section.key))
 	return [...prioritized, ...remaining]
 })
 
-const sectionColor = (key: TransactionSummarySection['key']) => {
+const sectionColor = (key: TransactionSummarySection['key']): BadgeColor => {
 	switch (key) {
 		case 'fritekst':
 			return 'primary'
@@ -46,35 +56,34 @@ const sectionColor = (key: TransactionSummarySection['key']) => {
 	}
 }
 
-const sectionEntries = computed(() =>
-	orderedSections.value.map((section) => {
-		if (isItemsSection(section)) {
-			return {
-				key: section.key,
-				label: section.label,
-				color: sectionColor(section.key),
-				values: section.items.map((item) => ({
-					value: item.value,
-					hint: item.label,
-				})),
-			}
-		}
-		if (isChipsSection(section)) {
-			return {
-				key: section.key,
-				label: section.label,
-				color: sectionColor(section.key),
-				values: section.chips.map((chip) => ({ value: chip })),
-			}
-		}
+type SectionEntry = {
+	key: TransactionSummarySection['key']
+	label: string
+	color: BadgeColor
+	values: Array<{ value: string; hint?: string }>
+}
+
+function toSectionEntry(section: TransactionSummarySection): SectionEntry {
+	if (section.key === 'fritekst') {
 		return {
 			key: section.key,
 			label: section.label,
 			color: sectionColor(section.key),
-			values: [],
+			values: section.chips.map((chip) => ({ value: chip })),
 		}
-	})
-)
+	}
+	return {
+		key: section.key,
+		label: section.label,
+		color: sectionColor(section.key),
+		values: section.items.map((item) => ({
+			value: item.value,
+			hint: item.label,
+		})),
+	}
+}
+
+const sectionEntries = computed<SectionEntry[]>(() => orderedSections.value.map(toSectionEntry))
 </script>
 
 <template>
@@ -119,7 +128,7 @@ const sectionEntries = computed(() =>
 						variant="soft"
 						:color="section.color"
 						size="lg"
-						:title="entry.hint"
+						:title="entry.hint ?? undefined"
 					>
 						{{ entry.value }}
 					</UBadge>

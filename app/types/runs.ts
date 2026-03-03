@@ -1,10 +1,10 @@
 import type {
-	BookingStatus,
-	DocumentSelectSchema,
-	ErrorSelectSchema,
-	RunSelectSchema,
 	TransactionSelectSchema,
-} from "~/lib/db/schema";
+} from "~/lib/db/schema/transaction";
+import type { DocumentSelectSchema } from "~/lib/db/schema/document";
+import type { ErrorSelectSchema } from "~/lib/db/schema/error";
+import type { BookingStatus } from "~/lib/db/schema/enums";
+import type { RunSelectSchema } from "~/lib/db/schema/run";
 
 type IsoDateString = string;
 

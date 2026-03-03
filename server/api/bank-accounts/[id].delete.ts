@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { createError, defineEventHandler } from 'h3'
 import db from '~/lib/db'
-import { account } from '~/lib/db/schema'
+import { account } from '~/lib/db/schema/account'
 
 export default defineEventHandler(async (event) => {
   const id = event.context.params?.id

@@ -1,6 +1,6 @@
 import { defineEventHandler, readBody, createError } from 'h3'
 import db from '~/lib/db'
-import { account, accountInsertSchema } from '~/lib/db/schema'
+import { account, accountInsertSchema } from '~/lib/db/schema/account'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)

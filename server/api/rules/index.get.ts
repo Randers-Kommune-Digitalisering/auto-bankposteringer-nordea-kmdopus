@@ -1,4 +1,4 @@
-import { ruleListDtoArray, mapRuleToListDto, type RuleListDto } from '~/lib/db/schema'
+import { ruleListDtoArray, mapRuleToListDto, type RuleListDto } from '~/lib/db/schema/rule'
 import db from '~/lib/db'
 
 function reviveDates(rows: any[]): RuleListDto[] {
@@ -23,10 +23,26 @@ export default defineEventHandler(async (event) => {
   setHeader(event, 'Cache-Control', 'private, max-age=60')
 
   const storage = useStorage('rules')
-  const cached = await storage.getItem('rule-list')
+  const cached = await storage.getItem<unknown>('rule-list')
+
+  const maybeParseCached = (value: unknown): RuleListDto[] | null => {
+    if (Array.isArray(value)) return reviveDates(value)
+    if (typeof value === 'string') {
+      try {
+        const parsed = JSON.parse(value)
+        return Array.isArray(parsed) ? reviveDates(parsed) : null
+      } catch {
+        return null
+      }
+    }
+    return null
+  }
 
   if (cached) {
-    return ruleListDtoArray.parse(reviveDates(cached))
+    const revived = maybeParseCached(cached)
+    if (revived) {
+      return ruleListDtoArray.parse(revived)
+    }
   }
 
   const rows = await db.query.rule.findMany({
