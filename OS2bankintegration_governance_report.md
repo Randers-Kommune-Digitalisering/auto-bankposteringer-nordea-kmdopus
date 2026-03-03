@@ -38,8 +38,8 @@ Denne checkliste belyser efterlevelsen af OS2's niveaukrav for produktet.
 | -- | --- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
 | ❌ | F1  | Kildekode udvikles synligt i OS2 repository | Kode ligger pt. i eget repository. Ikke overdraget til OS2 endnu. | sandkasse |
 | ❓ | F2  | Open Source licenskriterier overholdes | Projektet anvender pt. MIT-licens. OS2 standard er MPL 2.0. Endelig afklaring mangler. | sandkasse |
-| ❓ | F3  | Udbudsregler overholdt | Udviklet internt som innovations-/udviklingsprojekt. Kræver juridisk vurdering ved bred implementering. | sandkasse |
-| ❓ | F4  | Sikkerhed er indtænkt | Integration til banker sker via tredjepartsleverandør (Bankintegration) med standardiseret autentificering. ERP-integration sker via SFTP. Adgangsstyring håndteres via fælleskommunal Context Handler. Miljøadskillelse håndteres af driftsleverandør. Der mangler pt. audit trail, revisionsspor og dokumenteret risikovurdering. | sandkasse |
+| ✅ | F3  | Udbudsregler overholdt | Indkøb vurderes under tærskel uden klar grænseoverskridende interesse. | sandkasse |
+| ✅ | F4  | Sikkerhed er indtænkt | Integration til banker sker via web service-snitflader. Credentials krypteres og gemmes i YAML-filer i privat repo. ERP-integration sker via SFTP. Adgangsstyring håndteres via fælleskommunal Context Handler. Miljøadskillelse håndteres af driftsleverandør. Der mangler pt. audit trail, revisionsspor og dokumenteret risikovurdering. | sandkasse |
 | ✅ | F5  | Formål og værdi beskrevet | Udførligt beskrevet i README. | sandkasse |
 | ❌ | F6  | Kode overdraget til OS2 | Ikke sket endnu. | 1 |
 | ❌ | F7  | OS2 dokumentationsskabelon anvendt | Ikke implementeret endnu. | 1 |
@@ -74,7 +74,7 @@ Denne checkliste belyser efterlevelsen af OS2's niveaukrav for produktet.
 | -- | --- | -------------------------------- | ----------------------------------------------------- | ------------- |
 | ❌  | G1  | Oprettet i OS2 portefølje        | Ikke registreret endnu.                               | 1             |
 | ❌  | G2  | Koordination med sekretariat     | Ikke formaliseret endnu.                              | 1             |
-| ✅  | G3  | Projektleder udpeget             | Christian Leonhardt (initiativtager og projektleder). | 1             |
+| ✅  | G3  | Projektleder udpeget             | Christian Leonhardt                                   | 1             |
 | ❌  | G4  | Bestyrelsen orienteret           | Ikke endnu.                                           | 1             |
 | ❌  | G5  | Bestyrelsen har godkendt         | Ikke endnu.                                           | 2             |
 | ❌  | G6  | Styregruppe nedsat               | Ikke endnu.                                           | 2             |
