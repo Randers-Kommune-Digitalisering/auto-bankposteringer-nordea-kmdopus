@@ -5,6 +5,10 @@
     import type { RunListItem, RunListResponse } from '~/types/runs'
     import useFlattenArray from '~/composables/useFlattenArray'
 
+    definePageMeta({
+        path: '/kørsler'
+    })
+
     const { data, status, refresh } = await useFetch<RunListResponse>('/api/runs', {
         key: 'runs'
     })

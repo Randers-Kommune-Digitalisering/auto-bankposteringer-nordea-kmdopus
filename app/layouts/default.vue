@@ -3,6 +3,40 @@ import type { NavigationMenuItem } from '@nuxt/ui'
 
 const open = ref(false)
 
+const route = useRoute()
+
+function normalizePath(path: string): string {
+  const trimmed = path.length > 1 ? path.replace(/\/+$/, '') : path
+  try {
+    return decodeURI(trimmed)
+  } catch {
+    return trimmed
+  }
+}
+
+function findLabelByPath(items: NavigationMenuItem[] | undefined, path: string): string | undefined {
+  const normalizedPath = normalizePath(path)
+
+  for (const item of items ?? []) {
+    const itemPath = typeof item.to === 'string' ? normalizePath(item.to) : undefined
+
+    if (itemPath && itemPath === normalizedPath) {
+      return item.label
+    }
+
+    if (item.children?.length) {
+      const childLabel = findLabelByPath(item.children as NavigationMenuItem[], path)
+      if (childLabel) {
+        return childLabel
+      }
+    }
+
+    if (itemPath && itemPath !== '/' && normalizedPath.startsWith(`${itemPath}/`)) {
+      return item.label
+    }
+  }
+}
+
 const links = [[
   {
     label: 'Dashboard',
@@ -15,7 +49,7 @@ const links = [[
   {
     label: 'Konteringsregler',
     icon: 'solar:notebook-bookmark-bold-duotone',
-    to: '/rules',
+    to: '/konteringsregler',
     onSelect: () => {
       open.value = false
     }
@@ -23,7 +57,7 @@ const links = [[
   {
     label: 'Åbne poster',
     icon: 'solar:inbox-bold-duotone',
-    to: '/open-items',
+    to: '/åbne-poster',
     onSelect: () => {
       open.value = false
     }
@@ -31,42 +65,42 @@ const links = [[
   {
     label: 'Kørsler',
     icon: 'solar:alarm-bold-duotone',
-    to: '/runs',
+    to: '/kørsler',
     onSelect: () => {
       open.value = false
     }
   },
   {
     label: 'Indstillinger',
-    to: '/settings',
+    to: '/indstillinger',
     icon: 'solar:settings-bold-duotone',
     defaultOpen: true,
     type: 'trigger',
     children: [
       {
         label: 'Tags',
-        to: '/settings/ruletags',
+        to: '/indstillinger/tags',
         onSelect: () => {
           open.value = false
         }
       },
       {
         label: 'Bankintegration',
-        to: '/settings/banking',
+        to: '/indstillinger/bank',
         onSelect: () => {
           open.value = false
         }
       },
       {
         label: 'ERP-integration',
-        to: '/settings/erp',
+        to: '/indstillinger/erp',
         onSelect: () => {
           open.value = false
         }
       },
       {
         label: 'Gendannelse',
-        to: '/settings/recovery',
+        to: '/indstillinger/gendan',
         onSelect: () => {
           open.value = false
         }
@@ -74,6 +108,17 @@ const links = [[
     ]
   }
 ]] satisfies NavigationMenuItem[][]
+
+const APP_TITLE = 'FOBI'
+
+const activePageLabel = computed(() => {
+  const allItems = links.flat()
+  return findLabelByPath(allItems, route.path)
+})
+
+useHead(() => ({
+  title: activePageLabel.value ? `${APP_TITLE} · ${activePageLabel.value}` : APP_TITLE
+}))
 </script>
 
 <template>
