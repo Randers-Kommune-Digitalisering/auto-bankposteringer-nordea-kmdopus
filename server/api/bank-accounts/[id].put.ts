@@ -2,7 +2,7 @@ import { defineEventHandler, readBody, createError } from 'h3'
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
 import db from '~/lib/db'
-import { account } from '~/lib/db/schema'
+import { account } from '~/lib/db/schema/account'
 
 const updateSchema = z.object({
   statusAccount: z.number('Statuskonto er påkrævet').int('Skal være et helt tal')

@@ -2,19 +2,18 @@ import { defineEventHandler, readBody, createError } from 'h3'
 import { createInsertSchema } from 'drizzle-zod'
 import { eq } from 'drizzle-orm'
 import db from '~/lib/db'
-import type { RuleDraftSchema } from '~/lib/db/schema'
+import type { RuleDraftSchema } from '~/lib/db/schema/rule'
 import {
   rule,
   ruleBankAccount,
   ruleRuleTag,
-  ruleVersion,
   ruleDraftSchema,
-  RuleVersionInsertSchema,
   mapMatchesToConditionRows,
   ruleBankingCondition,
   kmdAccountingParameters,
   kmdAttachment
-} from '~/lib/db/schema/index'
+} from '~/lib/db/schema/rule'
+import { ruleVersion, type RuleVersionInsertSchema } from '~/lib/db/schema/ruleVersion'
 
 function compileRuleDraftToDb(draft: RuleDraftSchema, newVersion: number) {
   const {

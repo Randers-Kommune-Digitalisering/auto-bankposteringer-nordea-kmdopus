@@ -2,7 +2,37 @@ import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg'
 import env from '../env';
-import * as schema from './schema/index'
+import * as accountSchema from './schema/account'
+import * as bankingSchema from './schema/banking'
+import * as documentSchema from './schema/document'
+import * as enumsSchema from './schema/enums'
+import * as erpSchema from './schema/erp'
+import * as errorSchema from './schema/error'
+import * as jobSchema from './schema/job'
+import * as outboxSchema from './schema/outbox'
+import * as relationsSchema from './schema/relations'
+import * as ruleSchema from './schema/rule'
+import * as ruleTagSchema from './schema/ruleTag'
+import * as ruleVersionSchema from './schema/ruleVersion'
+import * as runSchema from './schema/run'
+import * as transactionSchema from './schema/transaction'
+
+const schema = {
+  ...accountSchema,
+  ...bankingSchema,
+  ...documentSchema,
+  ...enumsSchema,
+  ...erpSchema,
+  ...errorSchema,
+  ...jobSchema,
+  ...outboxSchema,
+  ...relationsSchema,
+  ...ruleSchema,
+  ...ruleTagSchema,
+  ...ruleVersionSchema,
+  ...runSchema,
+  ...transactionSchema,
+} as const
 
 
 const pool = new Pool({

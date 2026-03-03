@@ -1,6 +1,6 @@
 import { defineEventHandler, createError } from 'h3'
 import { eq } from 'drizzle-orm'
-import { mapConditionsToMatches, ruleDraftSchema, rule } from '~/lib/db/schema'
+import { mapConditionsToMatches, ruleDraftSchema, rule } from '~/lib/db/schema/rule'
 import db from '~/lib/db'
 
 function normalizeDbRow(row: any) {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-    import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
+    import { DateFormatter, getLocalTimeZone } from '@internationalized/date'
     import type { TableColumn } from '@nuxt/ui'
-    import type { RunStatus } from '~/lib/db/schema'
+    import type { RunStatus } from '~/lib/db/schema/enums'
     import type { RunListItem, RunListResponse } from '~/types/runs'
     import useFlattenArray from '~/composables/useFlattenArray'
 
@@ -16,33 +16,40 @@
         dateStyle: 'medium'
     })
 
-    // Date range picker state - using CalendarDate
-    const dateRange = ref<{ start?: CalendarDate; end?: CalendarDate }>({})
+    // Date range picker state
+    const dateRange = ref<any>(null)
 
     // Popover state
     const openPopovers = ref<Record<string, string | null>>({})
 
-    const getColorByStatus = (status: RunStatus) => {
-        return {
-            udført: 'success',
-            fejl: 'error',
-            indlæser: 'warning',
-            afventer: 'neutral'
-        }[status]
+    type StatusColor = 'success' | 'error' | 'warning' | 'neutral'
+
+    const getColorByStatus = (status: RunStatus): StatusColor => {
+        switch (status) {
+            case 'udført':
+                return 'success'
+            case 'fejl':
+                return 'error'
+            case 'indlæser':
+                return 'warning'
+            case 'afventer':
+            default:
+                return 'neutral'
+        }
     }
 
     // Get calendar events grouped by date with status colors
     const calendarEvents = computed(() => {
-        const events: Record<string, Array<{ color: string; label: string }>> = {}
+        const events: Record<string, Array<{ color: StatusColor; label: RunStatus }>> = {}
         
         allRows.value.forEach(run => {
-            const dateKey = new Date(run.bookingDate).toISOString().split('T')[0]
-            if (!events[dateKey]) {
-                events[dateKey] = []
-            }
+            const dateKey = new Date(run.bookingDate).toISOString().slice(0, 10)
+            const status = (run.status ?? 'afventer') as RunStatus
+
+            events[dateKey] = events[dateKey] ?? []
             events[dateKey].push({
-                color: getColorByStatus(run.status),
-                label: run.status
+                color: getColorByStatus(status),
+                label: status
             })
         })
 
@@ -51,7 +58,7 @@
 
     // Filter rows based on date range
     const filteredRows = computed<RunListItem[]>(() => {
-        if (!dateRange.value.start || !dateRange.value.end) {
+        if (!dateRange.value?.start || !dateRange.value?.end) {
             return allRows.value
         }
 
@@ -95,7 +102,7 @@
             header: 'Status',
             size: 120,
             cell: ({ row }) => {
-                const status = row.getValue('status') as RunStatus
+                const status = (row.getValue('status') ?? 'afventer') as RunStatus
                 return h(resolveComponent('UBadge'), {
                     color: getColorByStatus(status),
                     class: 'capitalize w-fit',
@@ -113,7 +120,7 @@
                 if (!errors?.length) return null
 
                 const key = `${row.original.id}-error`
-                return h(RunsDataPopover, {
+                return h(resolveComponent('RunsDataPopover'), {
                     type: 'error',
                     run: row.original,
                     open: !!openPopovers.value[key],
@@ -133,7 +140,7 @@
                 if (!txs?.length) return null
 
                 const key = `${row.original.id}-transactions`
-                return h(RunsDataPopover, {
+                return h(resolveComponent('RunsDataPopover'), {
                     type: 'transactions',
                     run: row.original,
                     open: !!openPopovers.value[key],
@@ -153,7 +160,7 @@
                 if (!docs?.length) return null
 
                 const key = `${row.original.id}-docs`
-                return h(RunsDataPopover, {
+                return h(resolveComponent('RunsDataPopover'), {
                     type: 'docs',
                     run: row.original,
                     open: !!openPopovers.value[key],
@@ -193,8 +200,8 @@
                         variant="outline"
                         icon="i-lucide-calendar"
                     >
-                        <template v-if="dateRange.start">
-                            <template v-if="dateRange.end">
+                        <template v-if="dateRange?.start">
+                            <template v-if="dateRange?.end">
                                 {{ df.format(dateRange.start.toDate(getLocalTimeZone())) }} - {{ df.format(dateRange.end.toDate(getLocalTimeZone())) }}
                             </template>
                             <template v-else>
@@ -215,12 +222,12 @@
                                 :number-of-months="2"
                                 range
                             />
-                            <div v-if="dateRange.start && dateRange.end" class="mt-4 flex gap-2">
+                            <div v-if="dateRange?.start && dateRange?.end" class="mt-4 flex gap-2">
                                 <UButton
                                     variant="ghost"
                                     size="sm"
                                     label="Nulstil"
-                                    @click="dateRange = {}"
+                                    @click="dateRange = null"
                                     class="flex-1"
                                 />
                             </div>
@@ -230,7 +237,7 @@
 
                 <!-- Table -->
                 <div>
-                    <div v-if="dateRange.start && dateRange.end" class="text-sm text-muted mb-3">
+                    <div v-if="dateRange?.start && dateRange?.end" class="text-sm text-muted mb-3">
                         {{ rows.length }} kørsler i valgt periode
                     </div>
                     <UEmpty

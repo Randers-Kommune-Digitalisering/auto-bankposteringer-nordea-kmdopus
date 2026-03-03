@@ -29,8 +29,8 @@ const links = [[
     }
   },
   {
-    label: 'Fejlfinding',
-    icon: 'solar:danger-triangle-bold-duotone',
+    label: 'Kørsler',
+    icon: 'solar:alarm-bold-duotone',
     to: '/runs',
     onSelect: () => {
       open.value = false
@@ -43,6 +43,13 @@ const links = [[
     defaultOpen: true,
     type: 'trigger',
     children: [
+      {
+        label: 'Tags',
+        to: '/settings/ruletags',
+        onSelect: () => {
+          open.value = false
+        }
+      },
       {
         label: 'Bankintegration',
         to: '/settings/banking',

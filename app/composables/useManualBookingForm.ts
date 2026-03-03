@@ -1,10 +1,11 @@
 import { computed, reactive, ref, watch } from 'vue'
 import type { Ref } from 'vue'
-import { cprTypeValues, type CprType } from '#shared/manualBooking'
 import {
+	cprTypeValues,
 	manualBookingFormSchema,
+	type CprType,
 	type ManualBookingFormState as ManualFormState
-} from '#shared/manualBooking'
+} from '#engine/manual-booking/domain/manualBooking'
 import type { ManualPostingAttachment, OpenTransaction } from '~/types/transactions'
 
 export type AttachmentPayload = {

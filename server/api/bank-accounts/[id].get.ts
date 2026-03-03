@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm'
-import { account } from '~/lib/db/schema/index'
+import { account } from '~/lib/db/schema/account'
 import db from '~/lib/db'
 import { createError, setHeader } from 'h3'
 

@@ -6,14 +6,14 @@ import {
   ruleRuleTag,
   mapMatchesToConditionRows,
   ruleDraftSchema,
-  ruleVersion,
-  RuleVersionInsertSchema,
   ruleBankingCondition,
   kmdAccountingParameters,
   kmdAttachment
-} from '~/lib/db/schema/index'
-import type { RuleDraftSchema } from '~/lib/db/schema'
+} from '~/lib/db/schema/rule'
+import type { RuleDraftSchema } from '~/lib/db/schema/rule'
+import { ruleVersion, type RuleVersionInsertSchema } from '~/lib/db/schema/ruleVersion'
 import db from '~/lib/db'
+import { logger } from '~/lib/logger'
 
 const version = 1
 
@@ -93,13 +93,18 @@ export function compileRuleDraftToDb(draft: RuleDraftSchema) {
 }
 
 export default defineEventHandler(async (event) => {
+  const log = logger.child({ scope: 'api.rule.post' })
   try {
     const body = await readBody(event)
-    console.log('[rule.post] incoming body', body)
     const draft = ruleDraftSchema.parse(body)
-    console.log('[rule.post] parsed draft', draft)
     const { ruleData, bankAccountIds, tagIds, conditionRows, accountingParameters, attachments, versionContent } = compileRuleDraftToDb(draft)
-    console.log('[rule.post] compiled payload', { ruleData, bankAccountIds, tagIds })
+
+    log.debug('Rule draft parsed', {
+      bankAccountCount: bankAccountIds.length,
+      tagCount: tagIds.length,
+      conditionCount: conditionRows.length,
+      attachmentCount: attachments.length,
+    })
 
     const validatedRule = createInsertSchema(rule).parse(ruleData)
 
@@ -115,14 +120,14 @@ export default defineEventHandler(async (event) => {
         await tx.insert(ruleBankAccount).values(
           bankAccountIds.map(bankAccountId => ({ ruleId: newRuleId, bankAccountId }))
         )
-        console.log('[rule.post] linked bank accounts', bankAccountIds)
+        log.debug('Linked bank accounts', { bankAccountCount: bankAccountIds.length })
       }
 
       if (tagIds.length) {
         await tx.insert(ruleRuleTag).values(
           tagIds.map(ruleTagId => ({ ruleId: newRuleId, ruleTagId }))
         )
-        console.log('[rule.post] linked tags', tagIds)
+        log.debug('Linked tags', { tagCount: tagIds.length })
       }
 
       if (conditionRows.length) {
@@ -155,18 +160,18 @@ export default defineEventHandler(async (event) => {
       }
 
       await tx.insert(ruleVersion).values(versionPayload)
-      console.log('[rule.post] inserted rule version', versionPayload)
+      log.debug('Inserted rule version', { version })
 
       return { ruleId: newRuleId }
     })
 
     const storage = useStorage('rules')
     await storage.removeItem('rule-list')
-    console.log('[rule.post] cache invalidated for rule-list')
+    log.debug('Cache invalidated', { cacheKey: 'rule-list' })
 
     return { success: true, ruleId }
   } catch (error: any) {
-    console.error('[rule.post] error', error)
+    log.error('Error creating rule', { err: error })
     return {
       success: false,
       error: error?.issues ?? error?.message ?? 'Uventet fejl'

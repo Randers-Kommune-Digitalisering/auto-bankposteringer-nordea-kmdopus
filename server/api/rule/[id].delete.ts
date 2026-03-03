@@ -1,7 +1,8 @@
 import { createError, defineEventHandler } from 'h3'
 import { eq } from 'drizzle-orm'
 import db from '~/lib/db'
-import { rule, ruleVersion } from '~/lib/db/schema/index'
+import { rule } from '~/lib/db/schema/rule'
+import { ruleVersion } from '~/lib/db/schema/ruleVersion'
 
 export default defineEventHandler(async (event) => {
   const id = Number(event.context.params?.id)

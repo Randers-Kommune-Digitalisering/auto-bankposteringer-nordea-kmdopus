@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import type { RuleTagSelectSchema } from '~/lib/db/schema'
+import type { RuleTagSelectSchema } from '~/lib/db/schema/ruleTag'
 
 export function useRuleTags() {
   const ruleTags = ref<RuleTagSelectSchema[]>([])

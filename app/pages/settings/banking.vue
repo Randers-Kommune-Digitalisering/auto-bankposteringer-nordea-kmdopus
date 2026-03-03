@@ -2,7 +2,7 @@
 import type { TableColumn } from '@nuxt/ui'
 import type { Row, SortingState } from '@tanstack/table-core'
 import { getPaginationRowModel } from '@tanstack/table-core'
-import type { AccountSelectSchema } from '~/lib/db/schema'
+import type { AccountSelectSchema } from '~/lib/db/schema/account'
 
 interface BankingMetadataResponse {
   serviceProvider: string
