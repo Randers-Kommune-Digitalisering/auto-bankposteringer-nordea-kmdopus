@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { z } from 'zod'
-import type { FormSubmitEvent } from '@nuxt/ui'
-import type { AccountSelectSchema } from '~/lib/db/schema'
+import type { AccountSelectSchema } from '~/lib/db/schema/account'
 
 const props = defineProps<{
   open: boolean
@@ -77,7 +76,7 @@ watch(
   { immediate: true }
 )
 
-async function onSubmit(_event: FormSubmitEvent<FormState>) {
+async function onSubmit() {
   const payload = {
     id: state.id?.trim(),
     statusAccount: Number(state.statusAccount)

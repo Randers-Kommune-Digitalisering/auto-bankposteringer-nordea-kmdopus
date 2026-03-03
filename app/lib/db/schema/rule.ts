@@ -221,9 +221,6 @@ export type RuleUpdateSchema = z.infer<typeof ruleUpdateSchema>
 export type RuleSelectSchema = z.infer<typeof ruleSelectSchema>
 export type RuleMatchingSelectSchema = z.infer<typeof ruleMatchingSelectSchema>
 
-export { matchCategories, matchCategoryColumns, matchFieldOptionsByCategory } from "../../rules/match-config"
-export type { MatchCategory, MatchField } from "../../rules/match-config"
-
 export type Rule = {
   id: number
   type: RuleType

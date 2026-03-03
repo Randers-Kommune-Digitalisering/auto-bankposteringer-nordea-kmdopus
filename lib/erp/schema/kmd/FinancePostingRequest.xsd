@@ -1,0 +1,541 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://kmd.dk/fir/posting/external" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://kmd.dk/fir/posting/external">
+		<xsd:element name="FinancePostingRequest">
+				<xsd:complexType>
+						<xsd:sequence>
+								<xsd:element name="CONTROL_FIELDS" type="CONTROL_FIELDS" />
+								<xsd:element name="POSTING_DOCUMENT" minOccurs="0" maxOccurs="unbounded">
+										<xsd:complexType>
+												<xsd:sequence>
+														<xsd:element name="HEADER" type="HEADER" />
+														<xsd:element name="LINES">
+																<xsd:complexType>
+																		<xsd:sequence>
+																				<xsd:element name="LINE" type="LINE" maxOccurs="unbounded" />
+																		</xsd:sequence>
+																</xsd:complexType>
+														</xsd:element>
+												</xsd:sequence>
+										</xsd:complexType>
+								</xsd:element>
+						</xsd:sequence>
+				</xsd:complexType>
+		</xsd:element>
+		<xsd:complexType name="CONTROL_FIELDS">
+				<xsd:sequence>
+						<xsd:element name="SENDERID">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="10" />
+												<xsd:pattern value="[PQTDU][0-9]{2}CLNT[0-9]{3}" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="RECEIVER">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="10" />
+												<xsd:pattern value="[PQTDU][0-9]{2}CLNT[0-9]{3}" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="FILE_NAME">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="100" />
+												<xsd:pattern value="([zZ][fF][iI][rR])_([kK][mM][dD])_([oO][pP][uU][sS])_([pP][oO][sS][tT][eE][rR][iI][nN][gG][eE][rR])_([iI][nN][dD])_([0-9]){3}_([a-z]|[A-Z]|[0-9]){4}_(20[0-5]{1}[0-9]{1}[-/]?((0[13-9]|1[012])[-/]?(0[1-9]|[12][0-9]|30)|(0[13578]|1[02])[-/]?31|02[-/]?(0[1-9]|1[0-9]|2[0-8]))|([0-9]{2}(([2468][048]|[02468][48])|[13579][26])|([13579][26]|[02468][048]|0[0-9]|1[0-6])00)[-/]?02[-/]?29)_(([0-1][0-9]|20|21|22|23)[0-5][0-9][0-5][0-9]).xml" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="SEND_DATE">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="8" />
+												<xsd:pattern value="(20[0-5]{1}[0-9]{1}[-/]?((0[13-9]|1[012])[-/]?(0[1-9]|[12][0-9]|30)|(0[13578]|1[02])[-/]?31|02[-/]?(0[1-9]|1[0-9]|2[0-8]))|([0-9]{2}(([2468][048]|[02468][48])|[13579][26])|([13579][26]|[02468][048]|0[0-9]|1[0-6])00)[-/]?02[-/]?29)" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="SEND_TIME">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:pattern value="([0-1][0-9]|20|21|22|23)[0-5][0-9][0-5][0-9]" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+				</xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="HEADER">
+				<xsd:sequence>
+						<xsd:element name="NO_DOC_POSITION">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:integer">
+												<xsd:minInclusive value="2" />
+												<xsd:maxInclusive value="99999" />
+											 <xsd:pattern value="\d{0,5}"/>
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="BALANCE_DEBET">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:decimal">
+												<xsd:maxInclusive value="999999999999.99" />
+												<xsd:pattern value="(-?)[0-9 -?]{1,13}[.][0-9]{2}" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="BALANCE_CREDIT">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:decimal">
+												<xsd:maxInclusive value="999999999999.99" />
+												<xsd:pattern value="(-?)[0-9 -?]{1,13}[.][0-9]{2}" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="MUNICIPALITY">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:integer">
+												<xsd:minInclusive value="1" />
+												<xsd:maxInclusive value="999" />
+			 <xsd:pattern value="\d{0,3}"/>
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="COMP_CODE">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:integer">
+												<xsd:minInclusive value="1" />
+												<xsd:maxInclusive value="9999" />
+			 <xsd:pattern value="\d{0,4}"/>
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+ 		<xsd:element name="DOC_TYPE" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="2" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="DOC_DATE">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="8" />
+												<xsd:pattern value="(20[0-5]{1}[0-9]{1}[-/]?((0[13-9]|1[012])[-/]?(0[1-9]|[12][0-9]|30)|(0[13578]|1[02])[-/]?31|02[-/]?(0[1-9]|1[0-9]|2[0-8]))|([0-9]{2}(([2468][048]|[02468][48])|[13579][26])|([13579][26]|[02468][048]|0[0-9]|1[0-6])00)[-/]?02[-/]?29)" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="PSTNG_DATE">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="8" />
+												<xsd:pattern value="(20[0-5]{1}[0-9]{1}[-/]?((0[13-9]|1[012])[-/]?(0[1-9]|[12][0-9]|30)|(0[13578]|1[02])[-/]?31|02[-/]?(0[1-9]|1[0-9]|2[0-8]))|([0-9]{2}(([2468][048]|[02468][48])|[13579][26])|([13579][26]|[02468][048]|0[0-9]|1[0-6])00)[-/]?02[-/]?29)" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="FIS_PERIOD" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:integer">
+												<xsd:minInclusive value="1" />
+												<xsd:maxInclusive value="15" />
+			 <xsd:pattern value="\d{0,2}"/>
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="USERNAME" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="12" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="RECEIV_DOC">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="16" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="HEADER_TXT">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="25" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="CURRENCY" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="5" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="EXCH_RATE" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="9" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="TRANS_DATE" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="8" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="XREF1_HD">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="20" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="XREF2_HD" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="20" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="XBLNR_ALT" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="26" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="FILES" minOccurs="0" maxOccurs="unbounded">
+								<xsd:complexType>
+										<xsd:sequence>
+												<xsd:element name="FILE_NAME" minOccurs="0">
+														<xsd:simpleType>
+																<xsd:restriction base="xsd:string">
+																		<xsd:maxLength value="255" />
+																</xsd:restriction>
+														</xsd:simpleType>
+												</xsd:element>
+												<xsd:element name="FILE_LENGTH" minOccurs="0">
+														<xsd:simpleType>
+																<xsd:restriction base="xsd:integer">
+																		<xsd:minInclusive value="1" />
+																		<xsd:maxInclusive value="9999999999" />
+					 <xsd:pattern value="\d{0,10}"/>
+																</xsd:restriction>
+														</xsd:simpleType>
+												</xsd:element>
+												<xsd:element name="FILE_TYPE" minOccurs="0">
+														<xsd:simpleType>
+																<xsd:restriction base="xsd:string">
+																		<xsd:maxLength value="10" />
+																</xsd:restriction>
+														</xsd:simpleType>
+												</xsd:element>
+												<xsd:element name="FILE" minOccurs="0">
+														<xsd:simpleType>
+																<xsd:restriction base="xsd:base64Binary" />
+														</xsd:simpleType>
+												</xsd:element>
+										</xsd:sequence>
+								</xsd:complexType>
+						</xsd:element>
+				</xsd:sequence>
+		</xsd:complexType>
+		<xsd:complexType name="LINE">
+				<xsd:sequence>
+						<xsd:element name="DEB_CRED_IND">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="1" />
+												<xsd:pattern value="[DK]{1}" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="AMT_DOCCUR">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:decimal">
+												<xsd:maxInclusive value="999999999999.99" />
+												<xsd:pattern value="(-?)[0-9 -?]{1,13}[.][0-9]{2}" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="VALUE_DATE" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="8" />
+												<xsd:pattern value="(20[0-5]{1}[0-9]{1}[-/]?((0[13-9]|1[012])[-/]?(0[1-9]|[12][0-9]|30)|(0[13578]|1[02])[-/]?31|02[-/]?(0[1-9]|1[0-9]|2[0-8]))|([0-9]{2}(([2468][048]|[02468][48])|[13579][26])|([13579][26]|[02468][048]|0[0-9]|1[0-6])00)[-/]?02[-/]?29)" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="ITEM_TEXT" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="50" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="ALLOC_NMBR" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="18" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="COSTCENTER" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="10" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="ORDERID" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="12" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="GL_ACCOUNT">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="10" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="PROFIT_CTR" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="10" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="NETWORK" minOccurs="0">
+								<xsd:simpleType>
+									 <xsd:restriction base="xsd:integer">
+																		<xsd:minInclusive value="0" />
+																		<xsd:maxInclusive value="999999999999" />
+					 <xsd:pattern value="\d{0,12}"/>
+																</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="ACTIVITY" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="4" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="WBS_ELEMENT" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="24" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="PART_PRCTR" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="10" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="REF_KEY_1" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="12" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="REF_KEY_2" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="12" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="REF_KEY_3">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:integer">
+																		<xsd:minInclusive value="0" />
+																		<xsd:maxInclusive value="99999999999999999999" />
+					 <xsd:pattern value="\d{0,20}"/>
+																</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="RES_DOC" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="10" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="RES_ITEM" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="3" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="KIDNO" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="18" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="ACTTYPE" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="6" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="PAYEE_NO_CODE" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:integer">
+												<xsd:minInclusive value="0" />
+												<xsd:maxInclusive value="99" />
+												 <xsd:pattern value="\d{0,2}"/>
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="PAYEE_NO" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:integer">
+												<xsd:minInclusive value="0" />
+												<xsd:maxInclusive value="999999999999999" />
+												 <xsd:pattern value="\d{0,15}"/>
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="SERV_REC_NO_CODE" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:integer">
+												<xsd:minInclusive value="0" />
+												<xsd:maxInclusive value="99" />
+												 <xsd:pattern value="\d{0,2}"/>
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="SERV_REC_NO" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:integer">
+												<xsd:minInclusive value="0" />
+												<xsd:maxInclusive value="999999999999999" />
+												 <xsd:pattern value="\d{0,15}"/>
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="INFORM_DUTY_NO_C" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:integer">
+												<xsd:minInclusive value="0" />
+												<xsd:maxInclusive value="99" />
+												 <xsd:pattern value="\d{0,2}"/>
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="INFORM_DUTY_NO" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:integer">
+												<xsd:minInclusive value="0" />
+												<xsd:maxInclusive value="999999999999999" />
+												 <xsd:pattern value="\d{0,15}"/>
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="INFORM_DUTY_CODE" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="1" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="MAIN_TRANSACTION" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="4" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="SUB_TRANSACTION" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="3" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="ZZCSYSIDN">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="4" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="APPROP_ID" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="10" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="BENEFIT_ID" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="10" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="BENEFIT_VALFROM" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="8" />
+												<xsd:pattern value="(20[0-5]{1}[0-9]{1}[-/]?((0[13-9]|1[012])[-/]?(0[1-9]|[12][0-9]|30)|(0[13578]|1[02])[-/]?31|02[-/]?(0[1-9]|1[0-9]|2[0-8]))|([0-9]{2}(([2468][048]|[02468][48])|[13579][26])|([13579][26]|[02468][048]|0[0-9]|1[0-6])00)[-/]?02[-/]?29)" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="BENEFIT_VALTO" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="8" />
+												<xsd:pattern value="(20[0-5]{1}[0-9]{1}[-/]?((0[13-9]|1[012])[-/]?(0[1-9]|[12][0-9]|30)|(0[13578]|1[02])[-/]?31|02[-/]?(0[1-9]|1[0-9]|2[0-8]))|([0-9]{2}(([2468][048]|[02468][48])|[13579][26])|([13579][26]|[02468][048]|0[0-9]|1[0-6])00)[-/]?02[-/]?29)" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+	<xsd:element name="BENEFIT_QUANT" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="17" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="BENEFIT_UNIT" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="3" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="DISP1" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="10" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="DISP2" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="10" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+						<xsd:element name="DISP3" minOccurs="0">
+								<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+												<xsd:maxLength value="10" />
+										</xsd:restriction>
+								</xsd:simpleType>
+						</xsd:element>
+				</xsd:sequence>
+		</xsd:complexType>
+</xsd:schema>

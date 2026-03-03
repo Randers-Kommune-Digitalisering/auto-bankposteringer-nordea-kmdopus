@@ -1,27 +1,20 @@
-import { eq } from "drizzle-orm";
-import { createError, defineEventHandler, readBody } from "h3";
-import { z } from "zod";
-import db from "~/lib/db";
-import {
-  account,
-  bankingPayload,
-  transaction,
-  transactionProcessing,
-} from "~/lib/db/schema";
-import env from "~/lib/env";
-import { manualBookingPayloadSchema } from "#shared/manualBooking";
-import type { SimpleAccountReportEntry } from "../../../../services/banking/batchFetchTransactions";
-import type { PostingAttachment } from "../../../../services/erp/postingXmlBuilder";
-import {
-  buildPostingCommand,
-  executePostingCommand,
-} from "../../../../services/posting/postingCommand";
+import { eq } from 'drizzle-orm'
+import { createError, defineEventHandler, readBody } from 'h3'
+import { z } from 'zod'
+import db from '~/lib/db'
+import { account } from '~/lib/db/schema/account'
+import { bankingPayload } from '~/lib/db/schema/banking'
+import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
+import env from '~/lib/env'
+import { manualBookingPayloadSchema, type CprType } from '#engine/manual-booking/domain/manualBooking'
+import type { SimpleAccountReportEntry } from '#engine/banking-ingestion/infrastructure/fetchBankTransactions'
+import type { PostingAttachment } from '#engine/posting/domain/posting'
+import { buildPostingCommand, executePostingCommand } from '#engine/posting/application/postingCommand'
 import {
   extractCprFromTransaction,
   resolvePostingText,
   type PostingTransactionContext,
-} from "../../../../services/matching/postingUtils";
-import type { CprType } from "#shared/manualBooking";
+} from '#engine/matching/domain/postingUtils'
 
 export default defineEventHandler(async (event) => {
   const transactionIdParam = event.context.params?.id;

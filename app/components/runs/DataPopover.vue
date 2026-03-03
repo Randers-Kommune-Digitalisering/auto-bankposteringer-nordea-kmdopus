@@ -19,11 +19,14 @@
     const isClient = import.meta.client
 
     const attemptCreateBlobFromContent = (doc: RunListItem['documents'][number]) => {
-        if (doc.content instanceof Blob) {
-            return doc.content
+        const content: any = doc.content
+        if (content instanceof Blob) {
+            return content as Blob
         }
 
         if (typeof doc.content === 'string') {
+            const fallbackMime = doc.mimeType ?? 'application/octet-stream'
+
             try {
                 const normalizedContent = doc.content.includes(',')
                     ? doc.content.split(',').at(-1) ?? ''
@@ -33,9 +36,11 @@
                 for (let i = 0; i < binary.length; i++) {
                     bytes[i] = binary.charCodeAt(i)
                 }
-                return new Blob([bytes], { type: doc.mimeType ?? 'application/octet-stream' })
+                return new Blob([bytes], { type: fallbackMime })
             } catch (error) {
-                console.error('Failed to decode document content', doc.id, error)
+                // Not base64 (or corrupted). Fall back to treating content as plain text.
+                const likelyText = fallbackMime.startsWith('text/') || fallbackMime.includes('xml')
+                return new Blob([doc.content], { type: likelyText ? fallbackMime : 'text/plain' })
             }
         }
 

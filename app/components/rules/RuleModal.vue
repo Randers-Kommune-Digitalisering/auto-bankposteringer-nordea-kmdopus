@@ -2,26 +2,13 @@
 import type { FormSubmitEvent } from '@nuxt/ui'
 import type {
   AccountSelectSchema,
-  RuleDraftSchema,
-  RuleStatus,
-  RuleType,
-  CprType,
-  MatchField,
-  MatchEntry,
-  MatchGate,
-  MatchCategory
-} from '~/lib/db/schema/index'
-import {
-  matchFieldOptionsByCategory,
-  ruleTypeValues,
-  ruleStatusValues,
-  cprTypeValues,
-  matchCategories,
-  matchCategoryColumns,
-  ruleBasicSchema,
-  ruleMatchingSchema,
-  ruleAccountingSchema
-} from '~/lib/db/schema/index'
+} from '~/lib/db/schema/account'
+import type { RuleDraftSchema, MatchEntry, MatchGate } from '~/lib/db/schema/rule'
+import type { RuleStatus, RuleType, CprType } from '~/lib/db/schema/enums'
+import type { MatchField, MatchCategory } from '~/lib/rules/match-config'
+import { ruleTypeValues, ruleStatusValues, cprTypeValues } from '~/lib/db/schema/enums'
+import { matchFieldOptionsByCategory, matchCategories, matchCategoryColumns } from '~/lib/rules/match-config'
+import { ruleBasicSchema, ruleMatchingSchema, ruleAccountingSchema } from '~/lib/db/schema/rule'
 
 const props = defineProps<{
   open?: boolean
@@ -81,11 +68,11 @@ watchEffect(async () => {
 // ---------------
 // Fetch rule tags
 // ---------------
-type RuleTag = { id: string; name: string }
+type RuleTag = { id: string }
 const { data: ruleTagsData } = await useFetch<RuleTag[]>('/api/rule-tags', { key: 'ruletags' })
 const ruleTagOptions = computed(() =>
   (ruleTagsData.value ?? []).map(tag => ({
-    label: tag.name,
+    label: tag.id,
     value: tag.id
   }))
 )
@@ -275,7 +262,7 @@ const handlePrev = () => {
   if (currentStep.value > 0) currentStep.value--
 }
 
-async function onSubmit(event: FormSubmitEvent<typeof ruleSubmitSchema>) { 
+async function onSubmit(_event?: FormSubmitEvent<any>) {
   state.accountingAttachmentName = attachments.value?.names ?? undefined
   state.accountingAttachmentFileExtension = attachments.value?.extensions ?? undefined
   state.accountingAttachmentData = attachments.value?.base64 ?? undefined
