@@ -1,157 +1,81 @@
-# Fællesoffentlig Bankintegration (FOBI)
+# 🚀 Fællesoffentlig Bankintegration (FOBI)
 
-> Én samlet motor til kontering af banktransaktioner i danske kommuner.
+> Leverandøruafhængig bankintegrations- og konteringstjeneste til danske kommuner.
 
 ---
 
 ## 🎯 Formål
 
-FOBI er udviklet for at automatisere og standardisere kontering og bogføring af banktransaktioner i danske kommuner.
+FOBI automatiserer og standardiserer kontering af banktransaktioner.
 
-Projektets kerneformål er at:
+Løsningen samler bankintegration og konteringslogik i én fælles motor, som kan anvendes på tværs af:
 
-- Reducere manuel bogføring
-- Gøre bogføringsopgaven uafhængig af pengeinstitut, kontoplan, økonomisystem og antal bankkonti
-- Samle spredt forretningslogik ét sted
-- Understøtte skalerbar og regelbaseret automatisering
-- Øge datakvalitet og sporbarhed
-
-FOBI er ikke blot et værktøj –  
-det er et forsøg på at gentænke, hvordan bogføringspraksis og betalingsformidling kan struktureres mere intelligent.
+* 🏦 Pengeinstitutter
+* 🧾 Økonomisystemer
+* 📊 Kontoplaner
+* 🏛️ Kommuner
 
 ---
 
-## 🔎 Problemet i dag
+## 🔎 Udfordringen i dag
 
-I mange kommuner:
+Bankbogføring håndteres ofte via:
 
-- Opgaven er delvist automatiseret (f.eks. via RPA)
-- Konteringsregler lever i hoveder, Excel-ark eller lokale praksisser
-- Hver bankintegration håndteres særskilt
-- Debit/kredit-logik skal fortolkes forskelligt fra system til system
+* 🧩 Leverandørspecifikke moduler
+* 🤖 RPA og lokale scripts
+* 🔀 Forskellig praksis fra kommune til kommune
 
-Konsekvensen:
-
-- Parallelle løsninger i kommunerne
-- Duplikeret kompleksitet
-- Risiko for fejlkontering
-- Manglende konsistens
-- Svag mulighed for genbrug og skalering
-
-Kompleksiteten er ikke forretningsmæssig —  
-den er teknisk og strukturel.
+Det skaber unødig kompleksitet, afhængighed og begrænset genbrug.
 
 ---
 
-## 🧠 Løsningen: Samling og Abstraktion
+## 🧠 Løsningen
 
-FOBI samler hele konteringsopgaven i ét system.
+FOBI fungerer som integrationslag mellem bank og økonomisystem og leverer strukturerede, bogføringsklare data.
 
-Systemet:
+Kerneelementer:
 
-- Normaliserer bankdata
-- Abstraherer debit/kredit-logik væk
-- Centraliserer regeldefinition
-- Gør beslutningslogik deterministisk og auditérbar
+* 🔄 Normalisering af bankdata
+* ⚙️ Regelbaseret matchningsmotor
+* ⚖️ Automatisk debit/kredit-håndtering
+* 🔍 Auditérbar og deterministisk beslutningslogik
+* 🗂️ Systemuafhængig datamodel
+* 🔌 Direkte integration til økonomisystem
 
-### Konkret implementerer FOBI:
-
-- En regelbaseret matchningsmotor
-- Strukturerede og eksplicitte matchkriterier
-- Standardiseret og systemuafhængig datamodel
-- Klar separation mellem regeldefinition og eksekvering
-- En beslutningskæde, der kan testes og dokumenteres
-
----
-
-## 🏗 Hvad betyder det i praksis?
-
-FOBI betyder, at man:
-
-- Ikke skal tage særskilt højde for debit og kredit
-- Ikke skal kode særregler pr. bank
-- Ikke skal gentage logik i hvert økonomisystem
-- Ikke skal vedligeholde parallelle automatiseringer
-
-Kompleksiteten samles ét sted.  
-Forretningen får en ensartet og genbrugelig motor.
+Konteringsregler defineres ét sted og kan genbruges.
 
 ---
 
 ## 📈 Værdi
 
-### 1. Operationel effektivitet
-Automatisering reducerer manuel behandling og frigiver ressourcer til kontrol og kvalitetssikring.
+* ⏱️ Reduceret manuel bogføring
+* 📊 Øget datakvalitet og sporbarhed
+* ✅ Færre fejlkonteringer
+* 🔓 Leverandøruafhængighed
+* 🌍 Fundament for fælleskommunal standardisering
 
-### 2. Øget sikkerhed
-Standardiseret og deterministisk logik mindsker risiko for fejl og utilsigtede afvigelser.
+FOBI kan udvides med fx:
 
-### 3. Datakvalitet
-Struktureret kontering skaber et bedre fundament for rapportering, analyse og styring.
-
-### 4. Skalerbarhed
-Én regelmotor kan genbruges på tværs af:
-- Pengeinstitutter
-- Kontoplaner
-- Økonomisystemer
-- Kommuner
-
-### 5. Strategisk perspektiv
-Projektet kan fungere som fundament for en bredere standardisering af betalings- og matchningsprocesser i den offentlige sektor.
+* 💸 Udbetalingskomponenter
+* 🏧 Integration til betalingssystemer
 
 ---
 
-## 🧩 Designprincipper
+## 🛠️ Status
 
-- Stateless applikationslogik
-- Database som sandhedskilde
-- Eksplicit validering og schemas
-- Auditérbar beslutningskæde
-- Tydelig separation mellem domæne og integration
+Løsningen er i drift lokalt med:
 
----
-
-## 🚀 Ambition
-
-FOBI er bygget med henblik på:
-
-- Gradvis udvidelse mod maskinlæring
-- Fællesoffentlig infrastruktur
-- Høj compliance og revisionssikkerhed
-- Teknologisk robusthed og transparens
+* 🔗 Direkte bankintegration
+* 🤖 Fuld automatisering af udvalgte funktionsområder
+* 🖥️ Regelmotor og administrationsinterface
 
 ---
 
-## 🔧 Status
+## 🌱 Perspektiv
 
-Projektet er under aktiv udvikling.
+Mange kommuner betaler årligt for bankbogføringsmoduler eller udvikler egne løsninger.
 
-Fokusområder:
-- Stabil regelmotor
-- Datamodellering
-- API-lag
-- Drift og containerisering
+FOBI viser, at funktionaliteten kan samles i en fælles, genbrugelig tjeneste.
 
----
-
-## 🤝 Bidrag
-
-Projektet er åbent for:
-
-- Faglig sparring
-- Arkitekturkritik
-- Standardiseringsdialog
-- Tværkommunalt samarbejde
-
----
-
-## 🌍 Vision
-
-En fremtid hvor finansielle arbejdsgange i det offentlige er:
-
-- Automatiserede  
-- Standardiserede  
-- Transparente  
-- Sikkert forankrede  
-
-FOBI er et skridt i den retning.
+Spørgsmålet er ikke, om vi kan bygge det.
+Spørgsmålet er, om vi skal gøre det hver for sig – eller sammen.
