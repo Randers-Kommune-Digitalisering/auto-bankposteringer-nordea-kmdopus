@@ -4,6 +4,10 @@ import BookingSummaryCard from '~/components/open-items/BookingSummaryCard.vue'
 import { useOpenTransactions } from '~/composables/useOpenTransactions'
 import type { OpenTransaction } from '~/types/transactions'
 
+definePageMeta({
+  path: '/åbne-poster'
+})
+
 const {
   pending,
   refresh,

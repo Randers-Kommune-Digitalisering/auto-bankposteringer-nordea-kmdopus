@@ -48,7 +48,7 @@ const stats = computed<DashboardStat[]>(() => {
       key: 'rules',
       title: 'Regler',
       icon: 'i-lucide-notebook-pen',
-      to: '/rules',
+      to: '/konteringsregler',
       value: formatInt(kpis.activeRules),
       badge: 'aktive',
       sub: `Ubrugte: ${formatInt(kpis.unusedActiveRules)}`
