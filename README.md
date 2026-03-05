@@ -46,6 +46,61 @@ Konteringsregler defineres ét sted og kan genbruges.
 
 ---
 
+## ❗ Hvorfor ikke kun RPA?
+
+RPA kan automatisere klik og filhåndtering – men bankintegration er mere end det.
+
+RPA:
+
+* Arbejder ovenpå eksisterende systemer i stedet for at være en del af arkitekturen
+* Er ofte sårbar overfor ændringer i skærmbilleder og formater
+* Er vanskeligere at dokumentere og teste systematisk
+* Skaber lokale løsninger frem for fælles standarder
+
+FOBI er designet som en egentlig integrations- og konteringstjeneste – ikke som en automatiseret brugerhandling.
+
+---
+
+## 🏗️ Arkitekturvalg
+
+FOBI er udviklet som selvstændig software frem for low-code flows.
+
+Det sikrer:
+
+* 🔎 Gennemsigtighed i konteringslogik
+* 📚 Dokumentérbar og revisionsvenlig løsning
+* 🔓 Uafhængighed af enkeltleverandører
+* 📈 Forudsigelige driftsomkostninger
+* 🌍 Mulighed for fælleskommunal genbrug
+
+Bankintegration er en del af kommunens økonomiske infrastruktur – ikke blot en administrativ proces.
+
+---
+
+## 🖥️ Én samlet brugerflade
+
+I mange løsninger er opsætning og drift spredt på flere steder:
+
+* Flow-konfiguration i fx RPA/automatiseringsværktøj
+* SFTP-opsætning og filovervågning
+* Indlæsning i økonomisystem
+* Fejl, der skal findes i separate logs eller systemer
+
+Det giver fragmenteret ansvar og øget kompleksitet.
+
+FOBI samler:
+
+* ⚙️ Konfigurationsregler
+* 🚦 Fejl- og afvisningshåndtering
+* 📂 Overblik over ind- og udgående data
+* 🔎 Sporbarhed på den enkelte transaktion
+
+Ét system. Ét overblik. Ét ansvarspunkt.
+
+Det reducerer driftsrisiko og gør løsningen mere robust i hverdagen.
+
+---
+
 ## 📈 Værdi
 
 * ⏱️ Reduceret manuel bogføring
