@@ -1,3 +1,6 @@
+// This file defines the configuration for matching rules, including the available fields and their categories.
+// It also provides utility types and constants for working with these fields in the application.
+
 import type { RuleConditionField } from "~/lib/db/schema/enums";
 
 export type MatchFieldMeta = {
