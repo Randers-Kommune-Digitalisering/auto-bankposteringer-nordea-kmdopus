@@ -2,7 +2,6 @@ import { eq, inArray } from 'drizzle-orm'
 import db from '~/lib/db'
 import env from '~/lib/env'
 import { account } from '~/lib/db/schema/account'
-import { bankingPayload } from '~/lib/db/schema/banking'
 import { rule } from '~/lib/db/schema/rule'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import type {
@@ -17,7 +16,6 @@ import type {
   KmdAttachmentRow,
   RuleConditionRow,
 } from '~/lib/db/schema/rule'
-import type { SimpleAccountReportEntry } from '../../banking-ingestion/infrastructure/fetchBankTransactions'
 import type { PostingAttachment, PostingLineInput } from '../../posting/domain/posting'
 import { buildPostingCommand, type PostingCommand } from '../../posting/application/postingCommand'
 import {
@@ -47,7 +45,31 @@ type MatchableTransaction = {
   statusAccount: string
   bookingDate: Date
   amount: number
-  payload: SimpleAccountReportEntry | null
+  creditDebitIndicator?: string | null
+  ntryRef?: string | null
+  ntryAcctSvcrRef?: string | null
+  txAcctSvcrRef?: string | null
+  refsEndToEndId?: string | null
+  refsInstrId?: string | null
+  refsPmtInfId?: string | null
+  uetr?: string | null
+  entryAdditionalInfo?: string | null
+  txAdditionalInfo?: string | null
+  bkTxCdDomain?: string | null
+  bkTxCdFamily?: string | null
+  bkTxCdSubFamily?: string | null
+  bkTxCdProprietary?: string | null
+  debtorName?: string | null
+  debtorId?: string | null
+  debtorAccountIban?: string | null
+  creditorName?: string | null
+  creditorId?: string | null
+  creditorAccountIban?: string | null
+  ultimateDebtorName?: string | null
+  ultimateCreditorName?: string | null
+  remittanceUstrd?: string[] | null
+  remittanceCreditorReference?: string | null
+  remittanceAdditional?: string[] | null
   processingStatus: BookingStatus | null
   hasProcessingRow: boolean
 }
@@ -166,14 +188,37 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
       accountId: transaction.accountId,
       amount: transaction.amount,
       bookingDate: transaction.bookingDate,
-      payload: bankingPayload.raw,
+      creditDebitIndicator: transaction.creditDebitIndicator,
+      ntryRef: transaction.ntryRef,
+      ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,
+      txAcctSvcrRef: transaction.txAcctSvcrRef,
+      refsEndToEndId: transaction.refsEndToEndId,
+      refsInstrId: transaction.refsInstrId,
+      refsPmtInfId: transaction.refsPmtInfId,
+      uetr: transaction.uetr,
+      entryAdditionalInfo: transaction.entryAdditionalInfo,
+      txAdditionalInfo: transaction.txAdditionalInfo,
+      bkTxCdDomain: transaction.bkTxCdDomain,
+      bkTxCdFamily: transaction.bkTxCdFamily,
+      bkTxCdSubFamily: transaction.bkTxCdSubFamily,
+      bkTxCdProprietary: transaction.bkTxCdProprietary,
+      debtorName: transaction.debtorName,
+      debtorId: transaction.debtorId,
+      debtorAccountIban: transaction.debtorAccountIban,
+      creditorName: transaction.creditorName,
+      creditorId: transaction.creditorId,
+      creditorAccountIban: transaction.creditorAccountIban,
+      ultimateDebtorName: transaction.ultimateDebtorName,
+      ultimateCreditorName: transaction.ultimateCreditorName,
+      remittanceUstrd: transaction.remittanceUstrd,
+      remittanceCreditorReference: transaction.remittanceCreditorReference,
+      remittanceAdditional: transaction.remittanceAdditional,
       processingStatus: transactionProcessing.status,
       processingRule: transactionProcessing.ruleApplied,
       statusAccount: account.statusAccount,
     })
     .from(transaction)
     .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
-    .leftJoin(bankingPayload, eq(transaction.payloadId, bankingPayload.id))
     .leftJoin(account, eq(transaction.accountId, account.id))
     .where(eq(transaction.runId, runId))
 
@@ -190,7 +235,31 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
           ? row.bookingDate
           : new Date(row.bookingDate as string),
       amount: parseAmount(row.amount),
-      payload: row.payload ? (row.payload as SimpleAccountReportEntry) : null,
+      creditDebitIndicator: row.creditDebitIndicator ?? null,
+      ntryRef: row.ntryRef ?? null,
+      ntryAcctSvcrRef: row.ntryAcctSvcrRef ?? null,
+      txAcctSvcrRef: row.txAcctSvcrRef ?? null,
+      refsEndToEndId: row.refsEndToEndId ?? null,
+      refsInstrId: row.refsInstrId ?? null,
+      refsPmtInfId: row.refsPmtInfId ?? null,
+      uetr: row.uetr ?? null,
+      entryAdditionalInfo: row.entryAdditionalInfo ?? null,
+      txAdditionalInfo: row.txAdditionalInfo ?? null,
+      bkTxCdDomain: row.bkTxCdDomain ?? null,
+      bkTxCdFamily: row.bkTxCdFamily ?? null,
+      bkTxCdSubFamily: row.bkTxCdSubFamily ?? null,
+      bkTxCdProprietary: row.bkTxCdProprietary ?? null,
+      debtorName: row.debtorName ?? null,
+      debtorId: row.debtorId ?? null,
+      debtorAccountIban: row.debtorAccountIban ?? null,
+      creditorName: row.creditorName ?? null,
+      creditorId: row.creditorId ?? null,
+      creditorAccountIban: row.creditorAccountIban ?? null,
+      ultimateDebtorName: row.ultimateDebtorName ?? null,
+      ultimateCreditorName: row.ultimateCreditorName ?? null,
+      remittanceUstrd: row.remittanceUstrd ?? null,
+      remittanceCreditorReference: row.remittanceCreditorReference ?? null,
+      remittanceAdditional: row.remittanceAdditional ?? null,
       processingStatus: row.processingStatus ?? null,
       hasProcessingRow: Boolean(row.processingStatus ?? row.processingRule),
     }))
@@ -315,53 +384,57 @@ function extractFieldValue(
   tx: MatchableTransaction,
   field: RuleConditionField,
 ): string | undefined {
-  const payload = tx.payload ?? {}
   switch (field) {
-    case 'id':
-      return payload.id ?? tx.transactionId
-    case 'end_to_end_id':
-      return payload.endToEndId
-    case 'ocr_reference':
-      return payload.ocrReference
-    case 'text':
-      return (
-        payload.text ??
-        payload.primaryReference ??
-        payload.debtorMessage ??
-        payload.creditorMessage
-      )
-    case 'batch':
-      return payload.batch
-    case 'debtor_text':
-      return payload.debtorText
-    case 'debtor_message':
-      return payload.debtorMessage
-    case 'debtors_payment_id':
-      return payload.debtorsPaymentId
-    case 'creditor_text':
-      return payload.creditorText
-    case 'creditor_message':
-      return payload.creditorMessage
-    case 'primary_reference':
-      return payload.primaryReference
-    case 'type':
-      return payload.type
-    case 'tx_code_domain':
-      return payload.transactionCodes?.domain ?? payload.transactionCodes?.Domain
-    case 'tx_code_family':
-      return payload.transactionCodes?.family ?? payload.transactionCodes?.Family
-    case 'tx_code_sub_family':
-      return (
-        payload.transactionCodes?.subFamily ?? payload.transactionCodes?.SubFamily
-      )
-    case 'debtor_name':
-      return payload.debtor?.name
-    case 'debtor_id':
-      return payload.debtor?.id
-    case 'creditor_name':
-      return payload.creditor?.name
-    case 'creditor_id':
-      return payload.creditor?.id
+    case 'ntry_ref':
+      return tx.ntryRef ?? undefined
+    case 'ntry_acct_svcr_ref':
+      return tx.ntryAcctSvcrRef ?? undefined
+    case 'tx_acct_svcr_ref':
+      return tx.txAcctSvcrRef ?? undefined
+    case 'refs_end_to_end_id':
+      return tx.refsEndToEndId ?? undefined
+    case 'refs_instr_id':
+      return tx.refsInstrId ?? undefined
+    case 'refs_pmt_inf_id':
+      return tx.refsPmtInfId ?? undefined
+    case 'uetr':
+      return tx.uetr ?? undefined
+    case 'dbtr_name':
+      return tx.debtorName ?? undefined
+    case 'dbtr_id':
+      return tx.debtorId ?? undefined
+    case 'dbtr_acct_iban':
+      return tx.debtorAccountIban ?? undefined
+    case 'cdtr_name':
+      return tx.creditorName ?? undefined
+    case 'cdtr_id':
+      return tx.creditorId ?? undefined
+    case 'cdtr_acct_iban':
+      return tx.creditorAccountIban ?? undefined
+    case 'ultmt_dbtr_name':
+      return tx.ultimateDebtorName ?? undefined
+    case 'ultmt_cdtr_name':
+      return tx.ultimateCreditorName ?? undefined
+    case 'bk_tx_cd_domain':
+      return tx.bkTxCdDomain ?? undefined
+    case 'bk_tx_cd_family':
+      return tx.bkTxCdFamily ?? undefined
+    case 'bk_tx_cd_sub_family':
+      return tx.bkTxCdSubFamily ?? undefined
+    case 'bk_tx_cd_proprietary':
+      return tx.bkTxCdProprietary ?? undefined
+    case 'cdt_dbt_ind':
+      return tx.creditDebitIndicator ?? undefined
+    case 'entry_additional_info':
+      return tx.entryAdditionalInfo ?? undefined
+    case 'tx_additional_info':
+      return tx.txAdditionalInfo ?? undefined
+    case 'rmt_ustrd':
+      return tx.remittanceUstrd?.filter(Boolean).join(' ') || undefined
+    case 'rmt_cdtr_ref':
+      return tx.remittanceCreditorReference ?? undefined
+    case 'rmt_addtl':
+      return tx.remittanceAdditional?.filter(Boolean).join(' ') || undefined
     default:
       return undefined
   }

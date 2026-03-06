@@ -1,11 +1,20 @@
-import type { SimpleAccountReportEntry } from '../../banking-ingestion/infrastructure/fetchBankTransactions'
 import type { PostingAttachment, PostingLineInput } from '../../posting/domain/posting'
 
 export type PostingTransactionContext = {
   transactionId: string
   amount: number
   statusAccount: string
-  payload: SimpleAccountReportEntry | null
+
+  // CAMT.053 party + remittance fields used for posting text/counterparty
+  debtorName?: string | null
+  debtorId?: string | null
+  creditorName?: string | null
+  creditorId?: string | null
+  entryAdditionalInfo?: string | null
+  txAdditionalInfo?: string | null
+  remittanceUstrd?: string[] | null
+  remittanceCreditorReference?: string | null
+  remittanceAdditional?: string[] | null
 }
 
 export function buildPostingLines(options: {
@@ -44,8 +53,13 @@ export function resolvePostingText(
   textTemplate: string | null | undefined,
   tx: PostingTransactionContext,
 ): string {
-  const payload = tx.payload
-  const message = payload?.debtorMessage || payload?.creditorMessage || payload?.text || ''
+  const message =
+    tx.entryAdditionalInfo ||
+    tx.txAdditionalInfo ||
+    tx.remittanceCreditorReference ||
+    tx.remittanceUstrd?.find(Boolean) ||
+    tx.remittanceAdditional?.find(Boolean) ||
+    ''
 
   if (message.includes('BDP')) {
     const start = message.indexOf('BDP')
@@ -61,43 +75,34 @@ export function resolvePostingText(
   }
 
   if (!textTemplate) {
-    return payload?.text ?? payload?.primaryReference ?? tx.transactionId
+    return message || tx.transactionId
   }
 
   const normalized = textTemplate.trim().toLowerCase()
   if (normalized === 'tekst fra bank') {
-    return payload?.text ?? payload?.primaryReference ?? tx.transactionId
+    return message || tx.transactionId
   }
 
   if (normalized === 'afsender fra bank') {
-    return resolveCounterpartyName(tx) ?? payload?.text ?? tx.transactionId
+    return (resolveCounterpartyName(tx) ?? message) || tx.transactionId
   }
 
   return textTemplate
 }
 
 export function resolveCounterpartyName(tx: PostingTransactionContext): string | undefined {
-  const payload = tx.payload
-  if (!payload) {
-    return undefined
-  }
-
   const isOutgoing = tx.amount < 0
   if (isOutgoing) {
     return (
-      payload.creditor?.name ??
-      payload.creditorText ??
-      payload.creditorMessage ??
-      payload.creditor?.id ??
+      tx.creditorName ??
+      tx.creditorId ??
       undefined
     )
   }
 
   return (
-    payload.debtor?.name ??
-    payload.debtorText ??
-    payload.debtorMessage ??
-    payload.debtor?.id ??
+    tx.debtorName ??
+    tx.debtorId ??
     undefined
   )
 }
@@ -106,18 +111,12 @@ const CPR_REGEX =
   /(((0[1-9]|[12][0-9]|3[01])(0[13578]|10|12)(\d{2}))|(([0][1-9]|[12][0-9]|30)(0[469]|11)(\d{2}))|((0[1-9]|1[0-9]|2[0-8])(02)(\d{2}))|((29)(02)(00))|((29)(02)([2468][048]))|((29)(02)([13579][26])))[-]*\d{4}/gm
 
 export function extractCprFromTransaction(tx: PostingTransactionContext): string | undefined {
-  const payload = tx.payload
-  if (!payload) {
-    return undefined
-  }
-
   const haystacks = [
-    payload.text,
-    payload.primaryReference,
-    payload.debtorMessage,
-    payload.creditorMessage,
-    payload.debtorText,
-    payload.creditorText,
+    tx.entryAdditionalInfo,
+    tx.txAdditionalInfo,
+    tx.remittanceCreditorReference,
+    ...(tx.remittanceUstrd ?? []),
+    ...(tx.remittanceAdditional ?? []),
   ].filter(Boolean) as string[]
 
   for (const value of haystacks) {

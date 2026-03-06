@@ -1,5 +1,5 @@
 {
-  "id": "3bcae401-8f65-4b92-96eb-cfe8ee7cd2c8",
+  "id": "52ae13c3-f6ea-4d71-9442-5e513934ecdc",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -399,6 +399,81 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.banking_adapter_cursor": {
+      "name": "banking_adapter_cursor",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "adapter_key": {
+          "name": "adapter_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cursor": {
+          "name": "cursor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "banking_adapter_cursor_account_id_account_id_fk": {
+          "name": "banking_adapter_cursor_account_id_account_id_fk",
+          "tableFrom": "banking_adapter_cursor",
+          "tableTo": "account",
+          "columnsFrom": [
+            "account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "banking_adapter_cursor_account_adapter_unique": {
+          "name": "banking_adapter_cursor_account_adapter_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "account_id",
+            "adapter_key"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.document": {
       "name": "document",
       "schema": "",
@@ -603,6 +678,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
@@ -623,6 +705,238 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.job": {
+      "name": "job",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "job_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "run_id": {
+          "name": "run_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payload": {
+          "name": "payload",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attempts": {
+          "name": "attempts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "max_attempts": {
+          "name": "max_attempts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 10
+        },
+        "run_at": {
+          "name": "run_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "locked_at": {
+          "name": "locked_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "locked_by": {
+          "name": "locked_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_error": {
+          "name": "last_error",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "job_run_id_run_id_fk": {
+          "name": "job_run_id_run_id_fk",
+          "tableFrom": "job",
+          "tableTo": "run",
+          "columnsFrom": [
+            "run_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.outbox": {
+      "name": "outbox",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "topic": {
+          "name": "topic",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "outbox_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "run_id": {
+          "name": "run_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dedupe_key": {
+          "name": "dedupe_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payload": {
+          "name": "payload",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attempts": {
+          "name": "attempts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "next_attempt_at": {
+          "name": "next_attempt_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "locked_at": {
+          "name": "locked_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "locked_by": {
+          "name": "locked_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_error": {
+          "name": "last_error",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "processed_at": {
+          "name": "processed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "outbox_run_id_run_id_fk": {
+          "name": "outbox_run_id_run_id_fk",
+          "tableFrom": "outbox",
+          "tableTo": "run",
+          "columnsFrom": [
+            "run_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "outbox_dedupe_key_unique": {
+          "name": "outbox_dedupe_key_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "dedupe_key"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -1087,7 +1401,7 @@
         },
         "version": {
           "name": "version",
-          "type": "bigint",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
@@ -1160,6 +1474,269 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.banking_document": {
+      "name": "banking_document",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "format": {
+          "name": "format",
+          "type": "banking_document_format",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "filename": {
+          "name": "filename",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content_hash": {
+          "name": "content_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "received_at": {
+          "name": "received_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "message_id": {
+          "name": "message_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "banking_document_account_id_account_id_fk": {
+          "name": "banking_document_account_id_account_id_fk",
+          "tableFrom": "banking_document",
+          "tableTo": "account",
+          "columnsFrom": [
+            "account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "banking_document_content_hash_unique": {
+          "name": "banking_document_content_hash_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "content_hash"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.banking_statement": {
+      "name": "banking_statement",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "document_id": {
+          "name": "document_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "statement_id": {
+          "name": "statement_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "electronic_seq_no": {
+          "name": "electronic_seq_no",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "legal_seq_no": {
+          "name": "legal_seq_no",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "statement_created_at": {
+          "name": "statement_created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "iban": {
+          "name": "iban",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner_name": {
+          "name": "owner_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "servicer_bic": {
+          "name": "servicer_bic",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "from_date": {
+          "name": "from_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "to_date": {
+          "name": "to_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "banking_statement_document_id_banking_document_id_fk": {
+          "name": "banking_statement_document_id_banking_document_id_fk",
+          "tableFrom": "banking_statement",
+          "tableTo": "banking_document",
+          "columnsFrom": [
+            "document_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.banking_statement_balance": {
+      "name": "banking_statement_balance",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "statement_id": {
+          "name": "statement_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type_code": {
+          "name": "type_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "credit_debit_indicator": {
+          "name": "credit_debit_indicator",
+          "type": "credit_debit_indicator",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "balance_date": {
+          "name": "balance_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "banking_statement_balance_statement_id_banking_statement_id_fk": {
+          "name": "banking_statement_balance_statement_id_banking_statement_id_fk",
+          "tableFrom": "banking_statement_balance",
+          "tableTo": "banking_statement",
+          "columnsFrom": [
+            "statement_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.transaction": {
       "name": "transaction",
       "schema": "",
@@ -1177,15 +1754,21 @@
           "primaryKey": false,
           "notNull": true
         },
-        "payload_id": {
-          "name": "payload_id",
+        "account": {
+          "name": "account",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "statement_id": {
+          "name": "statement_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
-        "account": {
-          "name": "account",
-          "type": "text",
+        "entry_index": {
+          "name": "entry_index",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
@@ -1195,11 +1778,180 @@
           "primaryKey": false,
           "notNull": true
         },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "credit_debit_indicator": {
+          "name": "credit_debit_indicator",
+          "type": "credit_debit_indicator",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "booking_date": {
           "name": "booking_date",
           "type": "date",
           "primaryKey": false,
           "notNull": true
+        },
+        "value_date": {
+          "name": "value_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ntry_ref": {
+          "name": "ntry_ref",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ntry_acct_svcr_ref": {
+          "name": "ntry_acct_svcr_ref",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "entry_additional_info": {
+          "name": "entry_additional_info",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tx_acct_svcr_ref": {
+          "name": "tx_acct_svcr_ref",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "refs_end_to_end_id": {
+          "name": "refs_end_to_end_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "refs_instr_id": {
+          "name": "refs_instr_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "refs_pmt_inf_id": {
+          "name": "refs_pmt_inf_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "uetr": {
+          "name": "uetr",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tx_additional_info": {
+          "name": "tx_additional_info",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bk_tx_cd_domain": {
+          "name": "bk_tx_cd_domain",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bk_tx_cd_family": {
+          "name": "bk_tx_cd_family",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bk_tx_cd_sub_family": {
+          "name": "bk_tx_cd_sub_family",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bk_tx_cd_proprietary": {
+          "name": "bk_tx_cd_proprietary",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dbtr_name": {
+          "name": "dbtr_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dbtr_id": {
+          "name": "dbtr_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dbtr_acct_iban": {
+          "name": "dbtr_acct_iban",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cdtr_name": {
+          "name": "cdtr_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cdtr_id": {
+          "name": "cdtr_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cdtr_acct_iban": {
+          "name": "cdtr_acct_iban",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ultmt_dbtr_name": {
+          "name": "ultmt_dbtr_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ultmt_cdtr_name": {
+          "name": "ultmt_cdtr_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rmt_ustrd": {
+          "name": "rmt_ustrd",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rmt_cdtr_ref": {
+          "name": "rmt_cdtr_ref",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rmt_addtl": {
+          "name": "rmt_addtl",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -1217,12 +1969,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "transaction_payload_id_banking_payload_id_fk": {
-          "name": "transaction_payload_id_banking_payload_id_fk",
+        "transaction_account_account_id_fk": {
+          "name": "transaction_account_account_id_fk",
           "tableFrom": "transaction",
-          "tableTo": "banking_payload",
+          "tableTo": "account",
           "columnsFrom": [
-            "payload_id"
+            "account"
           ],
           "columnsTo": [
             "id"
@@ -1230,12 +1982,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "transaction_account_account_id_fk": {
-          "name": "transaction_account_account_id_fk",
+        "transaction_statement_id_banking_statement_id_fk": {
+          "name": "transaction_statement_id_banking_statement_id_fk",
           "tableFrom": "transaction",
-          "tableTo": "account",
+          "tableTo": "banking_statement",
           "columnsFrom": [
-            "account"
+            "statement_id"
           ],
           "columnsTo": [
             "id"
@@ -1323,6 +2075,14 @@
     }
   },
   "enums": {
+    "public.banking_document_format": {
+      "name": "banking_document_format",
+      "schema": "public",
+      "values": [
+        "camt053",
+        "unknown"
+      ]
+    },
     "public.booking_status": {
       "name": "booking_status",
       "schema": "public",
@@ -1341,6 +2101,14 @@
         "dynamisk"
       ]
     },
+    "public.credit_debit_indicator": {
+      "name": "credit_debit_indicator",
+      "schema": "public",
+      "values": [
+        "CRDT",
+        "DBIT"
+      ]
+    },
     "public.document_type": {
       "name": "document_type",
       "schema": "public",
@@ -1357,29 +2125,55 @@
         "andet"
       ]
     },
+    "public.job_status": {
+      "name": "job_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "in_progress",
+        "succeeded",
+        "failed"
+      ]
+    },
+    "public.outbox_status": {
+      "name": "outbox_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "processing",
+        "sent",
+        "failed"
+      ]
+    },
     "public.rule_condition_field": {
       "name": "rule_condition_field",
       "schema": "public",
       "values": [
-        "id",
-        "end_to_end_id",
-        "ocr_reference",
-        "text",
-        "batch",
-        "debtor_text",
-        "debtor_message",
-        "debtors_payment_id",
-        "creditor_text",
-        "creditor_message",
-        "primary_reference",
-        "type",
-        "tx_code_domain",
-        "tx_code_family",
-        "tx_code_sub_family",
-        "debtor_name",
-        "debtor_id",
-        "creditor_name",
-        "creditor_id"
+        "ntry_ref",
+        "ntry_acct_svcr_ref",
+        "tx_acct_svcr_ref",
+        "refs_end_to_end_id",
+        "refs_instr_id",
+        "refs_pmt_inf_id",
+        "uetr",
+        "dbtr_name",
+        "dbtr_id",
+        "dbtr_acct_iban",
+        "cdtr_name",
+        "cdtr_id",
+        "cdtr_acct_iban",
+        "ultmt_dbtr_name",
+        "ultmt_cdtr_name",
+        "bk_tx_cd_domain",
+        "bk_tx_cd_family",
+        "bk_tx_cd_sub_family",
+        "bk_tx_cd_proprietary",
+        "cdt_dbt_ind",
+        "entry_additional_info",
+        "tx_additional_info",
+        "rmt_ustrd",
+        "rmt_cdtr_ref",
+        "rmt_addtl"
       ]
     },
     "public.rule_condition_operator": {

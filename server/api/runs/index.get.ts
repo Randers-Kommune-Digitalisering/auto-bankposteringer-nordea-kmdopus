@@ -2,7 +2,6 @@ import { desc, eq, inArray } from "drizzle-orm";
 import { setHeader } from "h3";
 import db from "~/lib/db";
 import { account } from "~/lib/db/schema/account";
-import { bankingPayload } from "~/lib/db/schema/banking";
 import { document } from "~/lib/db/schema/document";
 import { errorLog } from "~/lib/db/schema/error";
 import { run } from "~/lib/db/schema/run";
@@ -14,7 +13,6 @@ import type {
   RunListResponse,
   TransactionListItem,
 } from "~/types/runs";
-import type { SimpleAccountReportEntry } from "#engine/banking-ingestion/infrastructure/fetchBankTransactions";
 
 const pdfBase64 =
   "JVBERi0xLjQKJcTl8uXrp/Og0MTGCjEgMCBvYmoKPDwvVHlwZS9DYXRhbG9nL1BhZ2VzIDIgMCBSPj4KZW5kb2JqCjIgMCBvYmoKPDwvVHlwZS9QYWdlcy9Db3VudCAxL0tpZHNbMyAwIFJdPj4KZW5kb2JqCjMgMCBvYmoKPDwvVHlwZS9QYWdlL1BhcmVudCAyIDAgUi9NZWRpYUJveFswIDAgMjAwIDIwMF0vQ29udGVudHMgNCAwIFIvUmVzb3VyY2VzPDwvRm9udDw8L0YxIDUgMCBSPj4+Pj4+PgplbmRvYmoKNCAwIG9iago8PC9MZW5ndGggNDQ+PnN0cmVhbQpCVCAvRjEgMTIgVGYgNTAgMTUwIFRkIChNb2NrIFBERikgVGoKRVQKZW5kc3RyZWFtCmVuZG9iago1IDAgb2JqCjw8L1R5cGUvRm9udC9TdWJ0eXBlL1R5cGUxL0Jhc2VGb250L0hlbHZldGljYT4+CmVuZG9iagp4cmVmCjAgNgowMDAwMDAwMDAwIDY1NTM1IGYKMDAwMDAwMDA5MCAwMDAwMCBuCjAwMDAwMDAxNTMgMDAwMDAgbgowMDAwMDAwMjQwIDAwMDAwIG4KMDAwMDAwMDM0MCAwMDAwMCBuCjAwMDAwMDA0MjAgMDAwMDAgbgplbmR4cmVmCjQ5MQolJUVPRgo=";
@@ -90,7 +88,6 @@ const mockRuns: RunListResponse = [
       {
         id: "0000954427",
         runId: runWithDocsId,
-        payloadId: null,
         accountId: "DK20005908764988-DKK",
         amount: "-4588.42",
         bookingDate: "2025-09-13",
@@ -104,7 +101,6 @@ const mockRuns: RunListResponse = [
       {
         id: "0000954425",
         runId: runWithDocsId,
-        payloadId: null,
         accountId: "DK20009042714507-DKK",
         amount: "5038.75",
         bookingDate: "2025-09-13",
@@ -118,7 +114,6 @@ const mockRuns: RunListResponse = [
       {
         id: "0000954419",
         runId: runWithDocsId,
-        payloadId: null,
         accountId: "DK20005908764988-DKK",
         amount: "315.00",
         bookingDate: "2025-09-13",
@@ -239,47 +234,68 @@ function inferMimeType(fileExtension: string | null | undefined, filename?: stri
   return "application/octet-stream";
 }
 
-function resolveTransactionType(payload: SimpleAccountReportEntry | null): string | null {
-  if (!payload) {
-    return null;
-  }
-  // Matches the heuristics used in /api/transactions.
-  return (
-    (payload as any).type ??
-    (payload as any).transactionCodes?.type ??
-    (payload as any).transactionCodes?.domain ??
-    (payload as any).transactionCodes?.Domain ??
-    null
-  );
+type TransactionRow = {
+  bkTxCdProprietary: string | null;
+  bkTxCdDomain: string | null;
+  bkTxCdFamily: string | null;
+  bkTxCdSubFamily: string | null;
 }
 
-function resolveCounterpart(amount: number, payload: SimpleAccountReportEntry | null): string | null {
-  if (!payload) {
-    return null;
+function resolveTransactionType(row: TransactionRow): string | null {
+  if (row.bkTxCdProprietary && row.bkTxCdProprietary.trim().length) {
+    return row.bkTxCdProprietary.trim()
   }
+
+  const parts = [row.bkTxCdDomain, row.bkTxCdFamily, row.bkTxCdSubFamily]
+    .map((value) => (value ? value.trim() : ''))
+    .filter(Boolean)
+
+  return parts.length ? parts.join('/') : null
+}
+
+type TransactionPartyRow = {
+  debtorName: string | null;
+  debtorId: string | null;
+  ultimateDebtorName: string | null;
+  creditorName: string | null;
+  creditorId: string | null;
+  ultimateCreditorName: string | null;
+}
+
+function resolveCounterpart(amount: number, row: TransactionPartyRow): string | null {
   const isOutgoing = amount < 0;
   if (isOutgoing) {
     return (
-      (payload as any).creditor?.name ??
-      (payload as any).creditorText ??
-      (payload as any).creditorMessage ??
-      (payload as any).creditor?.id ??
+      row.creditorName ??
+      row.ultimateCreditorName ??
+      row.creditorId ??
       null
     );
   }
   return (
-    (payload as any).debtor?.name ??
-    (payload as any).debtorText ??
-    (payload as any).debtorMessage ??
-    (payload as any).debtor?.id ??
+    row.debtorName ??
+    row.ultimateDebtorName ??
+    row.debtorId ??
     null
   );
 }
 
-function buildReferences(payload: SimpleAccountReportEntry | null): string[] {
-  if (!payload) {
-    return [];
-  }
+type TransactionReferenceRow = {
+  ntryRef: string | null;
+  ntryAcctSvcrRef: string | null;
+  txAcctSvcrRef: string | null;
+  refsEndToEndId: string | null;
+  refsInstrId: string | null;
+  refsPmtInfId: string | null;
+  uetr: string | null;
+  entryAdditionalInfo: string | null;
+  txAdditionalInfo: string | null;
+  remittanceUstrd: string[] | null;
+  remittanceCreditorReference: string | null;
+  remittanceAdditional: string[] | null;
+}
+
+function buildReferences(row: TransactionReferenceRow): string[] {
   const refs = new Set<string>();
   const maybeAdd = (value?: string | null) => {
     if (value && value.trim().length) {
@@ -287,17 +303,22 @@ function buildReferences(payload: SimpleAccountReportEntry | null): string[] {
     }
   };
 
-  maybeAdd((payload as any).primaryReference);
-  maybeAdd((payload as any).debtorMessage);
-  maybeAdd((payload as any).debtorText);
-  maybeAdd((payload as any).creditorMessage);
-  maybeAdd((payload as any).creditorText);
-  maybeAdd((payload as any).ocrReference);
-  maybeAdd((payload as any).debtorsPaymentId);
-  maybeAdd((payload as any).batch);
+  maybeAdd(row.ntryRef)
+  maybeAdd(row.ntryAcctSvcrRef)
+  maybeAdd(row.txAcctSvcrRef)
+  maybeAdd(row.refsEndToEndId)
+  maybeAdd(row.refsInstrId)
+  maybeAdd(row.refsPmtInfId)
+  maybeAdd(row.uetr)
+  maybeAdd(row.entryAdditionalInfo)
+  maybeAdd(row.txAdditionalInfo)
+  maybeAdd(row.remittanceCreditorReference)
 
-  if (Array.isArray((payload as any).references)) {
-    (payload as any).references.forEach((entry: unknown) => maybeAdd(String(entry)));
+  if (Array.isArray(row.remittanceUstrd)) {
+    row.remittanceUstrd.forEach((value) => maybeAdd(value))
+  }
+  if (Array.isArray(row.remittanceAdditional)) {
+    row.remittanceAdditional.forEach((value) => maybeAdd(value))
   }
 
   return Array.from(refs);
@@ -321,14 +342,34 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
       .select({
         id: transaction.id,
         runId: transaction.runId,
-        payloadId: transaction.payloadId,
         accountId: transaction.accountId,
         amount: transaction.amount,
         bookingDate: transaction.bookingDate,
         bankAccountLabel: account.name,
         status: transactionProcessing.status,
         ruleApplied: transactionProcessing.ruleApplied,
-        payload: bankingPayload.raw,
+        bkTxCdDomain: transaction.bkTxCdDomain,
+        bkTxCdFamily: transaction.bkTxCdFamily,
+        bkTxCdSubFamily: transaction.bkTxCdSubFamily,
+        bkTxCdProprietary: transaction.bkTxCdProprietary,
+        ntryRef: transaction.ntryRef,
+        ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,
+        txAcctSvcrRef: transaction.txAcctSvcrRef,
+        refsEndToEndId: transaction.refsEndToEndId,
+        refsInstrId: transaction.refsInstrId,
+        refsPmtInfId: transaction.refsPmtInfId,
+        uetr: transaction.uetr,
+        entryAdditionalInfo: transaction.entryAdditionalInfo,
+        txAdditionalInfo: transaction.txAdditionalInfo,
+        remittanceUstrd: transaction.remittanceUstrd,
+        remittanceCreditorReference: transaction.remittanceCreditorReference,
+        remittanceAdditional: transaction.remittanceAdditional,
+        debtorName: transaction.debtorName,
+        debtorId: transaction.debtorId,
+        ultimateDebtorName: transaction.ultimateDebtorName,
+        creditorName: transaction.creditorName,
+        creditorId: transaction.creditorId,
+        ultimateCreditorName: transaction.ultimateCreditorName,
       })
       .from(transaction)
       .leftJoin(
@@ -336,7 +377,6 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
         eq(transactionProcessing.transactionId, transaction.id),
       )
       .leftJoin(account, eq(transaction.accountId, account.id))
-      .leftJoin(bankingPayload, eq(transaction.payloadId, bankingPayload.id))
       .where(inArray(transaction.runId, runIds)),
     db
       .select({
@@ -370,21 +410,19 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
     const list = transactionsByRun.get(row.runId) ?? [];
 
     const amount = parseNumeric(row.amount);
-    const rawPayload = (row.payload ?? null) as SimpleAccountReportEntry | null;
 
     list.push({
       id: row.id,
       runId: row.runId,
-      payloadId: row.payloadId,
       accountId: row.accountId,
       amount: row.amount,
       bookingDate: formatDate(row.bookingDate),
       bankAccountLabel: row.bankAccountLabel,
       status: row.status,
       ruleApplied: row.ruleApplied,
-      transactionType: resolveTransactionType(rawPayload) ?? null,
-      counterpart: resolveCounterpart(amount, rawPayload),
-      references: buildReferences(rawPayload),
+      transactionType: resolveTransactionType(row) ?? null,
+      counterpart: resolveCounterpart(amount, row),
+      references: buildReferences(row),
     });
     transactionsByRun.set(row.runId, list);
   });
