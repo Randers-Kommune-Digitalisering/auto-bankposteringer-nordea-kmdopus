@@ -1,10 +1,53 @@
 import { pgEnum } from "drizzle-orm/pg-core";
 
+export const bankingDocumentFormatValues = ['camt053', 'unknown'] as const
+export const bankingDocumentFormatEnum = pgEnum('banking_document_format', bankingDocumentFormatValues)
+export type BankingDocumentFormat = typeof bankingDocumentFormatValues[number]
+
+export const creditDebitIndicatorValues = ['CRDT', 'DBIT'] as const
+export const creditDebitIndicatorEnum = pgEnum('credit_debit_indicator', creditDebitIndicatorValues)
+export type CreditDebitIndicator = typeof creditDebitIndicatorValues[number]
+
 export const ruleConditionOperatorValues = ['eq', 'neq', 'like', 'ilike', 'gt', 'gte', 'lt', 'lte', 'in'] as const
 export const ruleConditionOperatorEnum = pgEnum('rule_condition_operator', ruleConditionOperatorValues)
 export type RuleConditionOperator = typeof ruleConditionOperatorValues[number]
 
-export const ruleConditionFieldValues = ['id', 'end_to_end_id', 'ocr_reference', 'text', 'batch', 'debtor_text', 'debtor_message', 'debtors_payment_id', 'creditor_text', 'creditor_message', 'primary_reference', 'type', 'tx_code_domain', 'tx_code_family', 'tx_code_sub_family', 'debtor_name', 'debtor_id', 'creditor_name', 'creditor_id'] as const
+// NOTE: This enum is intentionally CAMT.053-specific.
+// It is used both in DB (rule_banking_condition.field) and in the UI match catalog.
+export const ruleConditionFieldValues = [
+	// References (ISO20022: Refs)
+	'ntry_ref',
+	'ntry_acct_svcr_ref',
+	'tx_acct_svcr_ref',
+	'refs_end_to_end_id',
+	'refs_instr_id',
+	'refs_pmt_inf_id',
+	'uetr',
+
+	// Parties (ISO20022: RltdPties)
+	'dbtr_name',
+	'dbtr_id',
+	'dbtr_acct_iban',
+	'cdtr_name',
+	'cdtr_id',
+	'cdtr_acct_iban',
+	'ultmt_dbtr_name',
+	'ultmt_cdtr_name',
+
+	// Transaction type / classification (ISO20022: BkTxCd)
+	'bk_tx_cd_domain',
+	'bk_tx_cd_family',
+	'bk_tx_cd_sub_family',
+	'bk_tx_cd_proprietary',
+	'cdt_dbt_ind',
+
+	// Text / remittance
+	'entry_additional_info',
+	'tx_additional_info',
+	'rmt_ustrd',
+	'rmt_cdtr_ref',
+	'rmt_addtl',
+] as const
 export const ruleConditionFieldEnum = pgEnum('rule_condition_field', ruleConditionFieldValues)
 export type RuleConditionField = typeof ruleConditionFieldValues[number]
 

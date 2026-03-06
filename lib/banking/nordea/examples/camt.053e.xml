@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Document xsi:schemaLocation="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02 camt.053.001.02.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
-	-<BkToCstmrStmt>
-		-<GrpHdr>
+	<BkToCstmrStmt>
+		<GrpHdr>
 			<MsgId>XML99102020092503073121916759394803</MsgId>
 			<CreDtTm>2020-09-25T03:07:31.219Z</CreDtTm>
-			-<MsgRcpt>
-				-<Id>
-					-<OrgId>
-						-<Othr>
+			<MsgRcpt>
+				<Id>
+					<OrgId>
+						<Othr>
 							<Id>1122334455</Id>
-							-<SchmeNm>
+							<SchmeNm>
 								<Cd>CUST</Cd>
 							</SchmeNm>
 						</Othr>
-						-<Othr>
+						<Othr>
 							<Id>NDEAPROD</Id>
-							-<SchmeNm>
+							<SchmeNm>
 								<Cd>BANK</Cd>
 							</SchmeNm>
 						</Othr>
@@ -23,107 +23,107 @@
 				</Id>
 			</MsgRcpt>
 		</GrpHdr>
-		-<Stmt>
+		<Stmt>
 			<Id>2020-09-25-030731-DKK8496</Id>
 			<ElctrncSeqNb>64</ElctrncSeqNb>
 			<LglSeqNb>64</LglSeqNb>
 			<CreDtTm>2020-09-25T03:07:31.219Z</CreDtTm>
-			-<Acct>
-				-<Id>
+			<Acct>
+				<Id>
 					<IBAN>DK0320009876543210</IBAN>
 				</Id>
 				<Ccy>DKK</Ccy>
-				-<Ownr>
+				<Ownr>
 					<Nm>TEST COMPANY</Nm>
 				</Ownr>
-				-<Svcr>
-					-<FinInstnId>
+				<Svcr>
+					<FinInstnId>
 						<BIC>NDEADKKK</BIC>
-						-<PstlAdr>
+						<PstlAdr>
 							<Ctry>DK</Ctry>
 						</PstlAdr>
 					</FinInstnId>
 				</Svcr>
 			</Acct>
-			-<Bal>
-				-<Tp>
-					-<CdOrPrtry>
+			<Bal>
+				<Tp>
+					<CdOrPrtry>
 						<Cd>OPBD</Cd>
 					</CdOrPrtry>
 				</Tp>
 				<Amt Ccy="DKK">80259.13</Amt>
 				<CdtDbtInd>CRDT</CdtDbtInd>
-				-<Dt>
+				<Dt>
 					<Dt>2020-09-24</Dt>
 				</Dt>
 			</Bal>
-			-<Bal>
-				-<Tp>
-					-<CdOrPrtry>
+			<Bal>
+				<Tp>
+					<CdOrPrtry>
 						<Cd>CLBD</Cd>
 					</CdOrPrtry>
 				</Tp>
 				<Amt Ccy="DKK">42583.21</Amt>
 				<CdtDbtInd>CRDT</CdtDbtInd>
-				-<Dt>
+				<Dt>
 					<Dt>2020-09-24</Dt>
 				</Dt>
 			</Bal>
-			-<Bal>
-				-<Tp>
-					-<CdOrPrtry>
+			<Bal>
+				<Tp>
+					<CdOrPrtry>
 						<Cd>CLAV</Cd>
 					</CdOrPrtry>
 				</Tp>
 				<Amt Ccy="DKK">42583.21</Amt>
 				<CdtDbtInd>CRDT</CdtDbtInd>
-				-<Dt>
+				<Dt>
 					<Dt>2020-09-24</Dt>
 				</Dt>
 			</Bal>
-			-<Ntry>
+			<Ntry>
 				<NtryRef>1</NtryRef>
 				<Amt Ccy="DKK">100.00</Amt>
 				<CdtDbtInd>CRDT</CdtDbtInd>
 				<Sts>BOOK</Sts>
-				-<BookgDt>
+				<BookgDt>
 					<Dt>2020-09-24</Dt>
 				</BookgDt>
-				-<ValDt>
+				<ValDt>
 					<Dt>2020-09-24</Dt>
 				</ValDt>
 				<AcctSvcrRef>3896981720268</AcctSvcrRef>
-				-<BkTxCd>
-					-<Domn>
+				<BkTxCd>
+					<Domn>
 						<Cd>PMNT</Cd>
-						-<Fmly>
+						<Fmly>
 							<Cd>RCDT</Cd>
 							<SubFmlyCd>DMCT</SubFmlyCd>
 						</Fmly>
 					</Domn>
 				</BkTxCd>
-				-<NtryDtls>
-					-<TxDtls>
-						-<Refs>
+				<NtryDtls>
+					<TxDtls>
+						<Refs>
 							<AcctSvcrRef>6110273894</AcctSvcrRef>
 						</Refs>
-						-<AmtDtls>
-							-<TxAmt>
+						<AmtDtls>
+							<TxAmt>
 								<Amt Ccy="DKK">100.00</Amt>
 							</TxAmt>
 						</AmtDtls>
-						-<BkTxCd>
-							-<Domn>
+						<BkTxCd>
+							<Domn>
 								<Cd>PMNT</Cd>
-								-<Fmly>
+								<Fmly>
 									<Cd>RCDT</Cd>
 									<SubFmlyCd>DMCT</SubFmlyCd>
 								</Fmly>
 							</Domn>
 						</BkTxCd>
-						-<RltdPties>
-							-<Dbtr>
-								-<PstlAdr>
+						<RltdPties>
+							<Dbtr>
+								<PstlAdr>
 									<AdrLine>PAYERS NAME AND ADDRESS 1</AdrLine>
 									<AdrLine>PAYERS NAME AND ADDRESS 2</AdrLine>
 									<AdrLine>PAYERS NAME AND ADDRESS 3</AdrLine>
@@ -131,7 +131,7 @@
 								</PstlAdr>
 							</Dbtr>
 						</RltdPties>
-						-<RmtInf>
+						<RmtInf>
 							<Ustrd>REMITTANCE INFO LINE 01</Ustrd>
 							<Ustrd>REMITTANCE INFO LINE 02</Ustrd>
 							<Ustrd>REMITTANCE INFO LINE 03</Ustrd>
@@ -147,65 +147,65 @@
 				</NtryDtls>
 				<AddtlNtryInf>502:REFERENCE:Overførsel;802:REFERENCE:CNDKDKDKK60006;821:ADVICE REFERENCE:03896981720268;555:FILE INFORMATION:24092020 6110273894</AddtlNtryInf>
 			</Ntry>
-			-<Ntry>
+			<Ntry>
 				<NtryRef>2</NtryRef>
 				<Amt Ccy="DKK">200.00</Amt>
 				<CdtDbtInd>CRDT</CdtDbtInd>
 				<Sts>BOOK</Sts>
-				-<BookgDt>
+				<BookgDt>
 					<Dt>2020-09-24</Dt>
 				</BookgDt>
-				-<ValDt>
+				<ValDt>
 					<Dt>2020-09-24</Dt>
 				</ValDt>
-				-<BkTxCd>
-					-<Domn>
+				<BkTxCd>
+					<Domn>
 						<Cd>PMNT</Cd>
-						-<Fmly>
+						<Fmly>
 							<Cd>RCDT</Cd>
 							<SubFmlyCd>VCOM</SubFmlyCd>
 						</Fmly>
 					</Domn>
 				</BkTxCd>
-				-<NtryDtls>
-					-<TxDtls>
-						-<Refs>
+				<NtryDtls>
+					<TxDtls>
+						<Refs>
 							<AcctSvcrRef>2149202009236109891174</AcctSvcrRef>
 						</Refs>
-						-<AmtDtls>
-							-<TxAmt>
+						<AmtDtls>
+							<TxAmt>
 								<Amt Ccy="DKK">200.00</Amt>
 							</TxAmt>
 						</AmtDtls>
-						-<BkTxCd>
-							-<Domn>
+						<BkTxCd>
+							<Domn>
 								<Cd>PMNT</Cd>
-								-<Fmly>
+								<Fmly>
 									<Cd>RCDT</Cd>
 									<SubFmlyCd>VCOM</SubFmlyCd>
 								</Fmly>
 							</Domn>
 						</BkTxCd>
-						-<RltdPties>
-							-<CdtrAcct>
-								-<Id>
-									-<Othr>
+						<RltdPties>
+							<CdtrAcct>
+								<Id>
+									<Othr>
 										<Id>82424016</Id>
-										-<SchmeNm>
+										<SchmeNm>
 											<Prtry>OCR</Prtry>
 										</SchmeNm>
 									</Othr>
 								</Id>
 							</CdtrAcct>
 						</RltdPties>
-						-<RmtInf>
-							-<Strd>
-								-<RfrdDocAmt>
+						<RmtInf>
+							<Strd>
+								<RfrdDocAmt>
 									<RmtdAmt Ccy="DKK">200.00</RmtdAmt>
 								</RfrdDocAmt>
-								-<CdtrRefInf>
-									-<Tp>
-										-<CdOrPrtry>
+								<CdtrRefInf>
+									<Tp>
+										<CdOrPrtry>
 											<Cd>SCOR</Cd>
 										</CdOrPrtry>
 									</Tp>
@@ -217,50 +217,50 @@
 				</NtryDtls>
 				<AddtlNtryInf>26:DEBTOR NUMBER:20211041;501:REFERENCE:120200924000001289</AddtlNtryInf>
 			</Ntry>
-			-<Ntry>
+			<Ntry>
 				<NtryRef>3</NtryRef>
 				<Amt Ccy="DKK">300.00</Amt>
 				<CdtDbtInd>CRDT</CdtDbtInd>
 				<Sts>BOOK</Sts>
-				-<BookgDt>
+				<BookgDt>
 					<Dt>2020-09-24</Dt>
 				</BookgDt>
-				-<ValDt>
+				<ValDt>
 					<Dt>2020-09-24</Dt>
 				</ValDt>
 				<AcctSvcrRef>3895197120268</AcctSvcrRef>
-				-<BkTxCd>
-					-<Domn>
+				<BkTxCd>
+					<Domn>
 						<Cd>PMNT</Cd>
-						-<Fmly>
+						<Fmly>
 							<Cd>RCDT</Cd>
 							<SubFmlyCd>DMCT</SubFmlyCd>
 						</Fmly>
 					</Domn>
 				</BkTxCd>
-				-<NtryDtls>
-					-<TxDtls>
-						-<Refs>
+				<NtryDtls>
+					<TxDtls>
+						<Refs>
 							<AcctSvcrRef>2110197550</AcctSvcrRef>
 							<EndToEndId>DK_DOM_DK_to_DK-12_3</EndToEndId>
 						</Refs>
-						-<AmtDtls>
-							-<TxAmt>
+						<AmtDtls>
+							<TxAmt>
 								<Amt Ccy="DKK">300.00</Amt>
 							</TxAmt>
 						</AmtDtls>
-						-<BkTxCd>
-							-<Domn>
+						<BkTxCd>
+							<Domn>
 								<Cd>PMNT</Cd>
-								-<Fmly>
+								<Fmly>
 									<Cd>RCDT</Cd>
 									<SubFmlyCd>DMCT</SubFmlyCd>
 								</Fmly>
 							</Domn>
 						</BkTxCd>
-						-<RltdPties>
-							-<Dbtr>
-								-<PstlAdr>
+						<RltdPties>
+							<Dbtr>
+								<PstlAdr>
 									<AdrLine>PAYERS NAME AND ADDRESS 1</AdrLine>
 									<AdrLine>PAYERS NAME AND ADDRESS 2</AdrLine>
 									<AdrLine>PAYERS NAME AND ADDRESS 3</AdrLine>
@@ -268,14 +268,14 @@
 								</PstlAdr>
 							</Dbtr>
 						</RltdPties>
-						-<RmtInf>
-							-<Strd>
-								-<RfrdDocAmt>
+						<RmtInf>
+							<Strd>
+								<RfrdDocAmt>
 									<RmtdAmt Ccy="DKK">300.00</RmtdAmt>
 								</RfrdDocAmt>
-								-<CdtrRefInf>
-									-<Tp>
-										-<CdOrPrtry>
+								<CdtrRefInf>
+									<Tp>
+										<CdOrPrtry>
 											<Cd>SCOR</Cd>
 										</CdOrPrtry>
 										<Issr>ISO</Issr>
@@ -288,69 +288,69 @@
 				</NtryDtls>
 				<AddtlNtryInf>502:REFERENCE:KREDITORREFERENCE;804:NOTICE NUMBER:03895197120268;555:FILE INFORMATION:24092020 2110197550</AddtlNtryInf>
 			</Ntry>
-			-<Ntry>
+			<Ntry>
 				<NtryRef>4</NtryRef>
 				<Amt Ccy="DKK">400.00</Amt>
 				<CdtDbtInd>CRDT</CdtDbtInd>
 				<Sts>BOOK</Sts>
-				-<BookgDt>
+				<BookgDt>
 					<Dt>2020-09-24</Dt>
 				</BookgDt>
-				-<ValDt>
+				<ValDt>
 					<Dt>2020-09-24</Dt>
 				</ValDt>
 				<AcctSvcrRef>K88889999-2309</AcctSvcrRef>
-				-<BkTxCd>
-					-<Domn>
+				<BkTxCd>
+					<Domn>
 						<Cd>PMNT</Cd>
-						-<Fmly>
+						<Fmly>
 							<Cd>RCDT</Cd>
 							<SubFmlyCd>VCOM</SubFmlyCd>
 						</Fmly>
 					</Domn>
 				</BkTxCd>
-				-<NtryDtls>
-					-<Btch>
+				<NtryDtls>
+					<Btch>
 						<NbOfTxs>2</NbOfTxs>
 					</Btch>
-					-<TxDtls>
-						-<Refs>
+					<TxDtls>
+						<Refs>
 							<AcctSvcrRef>2149202009244110197552</AcctSvcrRef>
 						</Refs>
-						-<AmtDtls>
-							-<TxAmt>
+						<AmtDtls>
+							<TxAmt>
 								<Amt Ccy="DKK">150.00</Amt>
 							</TxAmt>
 						</AmtDtls>
-						-<BkTxCd>
-							-<Domn>
+						<BkTxCd>
+							<Domn>
 								<Cd>PMNT</Cd>
-								-<Fmly>
+								<Fmly>
 									<Cd>RCDT</Cd>
 									<SubFmlyCd>VCOM</SubFmlyCd>
 								</Fmly>
 							</Domn>
 						</BkTxCd>
-						-<RltdPties>
-							-<CdtrAcct>
-								-<Id>
-									-<Othr>
+						<RltdPties>
+							<CdtrAcct>
+								<Id>
+									<Othr>
 										<Id>88889999</Id>
-										-<SchmeNm>
+										<SchmeNm>
 											<Prtry>OCR</Prtry>
 										</SchmeNm>
 									</Othr>
 								</Id>
 							</CdtrAcct>
 						</RltdPties>
-						-<RmtInf>
-							-<Strd>
-								-<RfrdDocAmt>
+						<RmtInf>
+							<Strd>
+								<RfrdDocAmt>
 									<RmtdAmt Ccy="DKK">150.00</RmtdAmt>
 								</RfrdDocAmt>
-								-<CdtrRefInf>
-									-<Tp>
-										-<CdOrPrtry>
+								<CdtrRefInf>
+									<Tp>
+										<CdOrPrtry>
 											<Cd>SCOR</Cd>
 										</CdOrPrtry>
 									</Tp>
@@ -359,44 +359,44 @@
 							</Strd>
 						</RmtInf>
 					</TxDtls>
-					-<TxDtls>
-						-<Refs>
+					<TxDtls>
+						<Refs>
 							<AcctSvcrRef>2149202009243110197551</AcctSvcrRef>
 						</Refs>
-						-<AmtDtls>
-							-<TxAmt>
+						<AmtDtls>
+							<TxAmt>
 								<Amt Ccy="DKK">250.00</Amt>
 							</TxAmt>
 						</AmtDtls>
-						-<BkTxCd>
-							-<Domn>
+						<BkTxCd>
+							<Domn>
 								<Cd>PMNT</Cd>
-								-<Fmly>
+								<Fmly>
 									<Cd>RCDT</Cd>
 									<SubFmlyCd>VCOM</SubFmlyCd>
 								</Fmly>
 							</Domn>
 						</BkTxCd>
-						-<RltdPties>
-							-<CdtrAcct>
-								-<Id>
-									-<Othr>
+						<RltdPties>
+							<CdtrAcct>
+								<Id>
+									<Othr>
 										<Id>88889999</Id>
-										-<SchmeNm>
+										<SchmeNm>
 											<Prtry>OCR</Prtry>
 										</SchmeNm>
 									</Othr>
 								</Id>
 							</CdtrAcct>
 						</RltdPties>
-						-<RmtInf>
-							-<Strd>
-								-<RfrdDocAmt>
+						<RmtInf>
+							<Strd>
+								<RfrdDocAmt>
 									<RmtdAmt Ccy="DKK">250.00</RmtdAmt>
 								</RfrdDocAmt>
-								-<CdtrRefInf>
-									-<Tp>
-										-<CdOrPrtry>
+								<CdtrRefInf>
+									<Tp>
+										<CdOrPrtry>
 											<Cd>SCOR</Cd>
 										</CdOrPrtry>
 									</Tp>
@@ -408,150 +408,150 @@
 				</NtryDtls>
 				<AddtlNtryInf>502:REFERENCE:K 88889999-23.09;501:REFERENCE:120200925000002880</AddtlNtryInf>
 			</Ntry>
-			-<Ntry>
+			<Ntry>
 				<NtryRef>5</NtryRef>
 				<Amt Ccy="DKK">66962.50</Amt>
 				<CdtDbtInd>DBIT</CdtDbtInd>
 				<Sts>BOOK</Sts>
-				-<BookgDt>
+				<BookgDt>
 					<Dt>2020-09-24</Dt>
 				</BookgDt>
-				-<ValDt>
+				<ValDt>
 					<Dt>2020-09-24</Dt>
 				</ValDt>
-				-<BkTxCd>
-					-<Domn>
+				<BkTxCd>
+					<Domn>
 						<Cd>PMNT</Cd>
-						-<Fmly>
+						<Fmly>
 							<Cd>NTAV</Cd>
 							<SubFmlyCd>NTAV</SubFmlyCd>
 						</Fmly>
 					</Domn>
 				</BkTxCd>
-				-<NtryDtls>
-					-<Btch>
+				<NtryDtls>
+					<Btch>
 						<MsgId>ABC-001668-20201201101640</MsgId>
 						<PmtInfId>0ABC-001668SUPP020201201-01</PmtInfId>
 						<NbOfTxs>2</NbOfTxs>
 					</Btch>
-					-<TxDtls>
-						-<Refs>
+					<TxDtls>
+						<Refs>
 							<AcctSvcrRef>6127256724</AcctSvcrRef>
 							<EndToEndId>1004916-5637222635-00</EndToEndId>
 						</Refs>
-						-<AmtDtls>
-							-<TxAmt>
+						<AmtDtls>
+							<TxAmt>
 								<Amt Ccy="DKK">40177.50</Amt>
-								-<CcyXchg>
+								<CcyXchg>
 									<SrcCcy>DKK</SrcCcy>
 									<TrgtCcy>DKK</TrgtCcy>
 									<XchgRate>0.000000</XchgRate>
 								</CcyXchg>
 							</TxAmt>
 						</AmtDtls>
-						-<BkTxCd>
-							-<Domn>
+						<BkTxCd>
+							<Domn>
 								<Cd>PMNT</Cd>
-								-<Fmly>
+								<Fmly>
 									<Cd>ICDT</Cd>
 									<SubFmlyCd>DMCT</SubFmlyCd>
 								</Fmly>
 							</Domn>
 						</BkTxCd>
-						-<RltdPties>
-							-<Cdtr>
+						<RltdPties>
+							<Cdtr>
 								<Nm>CREDITOR NAME</Nm>
-								-<PstlAdr>
+								<PstlAdr>
 									<Ctry>DK</Ctry>
 									<AdrLine>STREET NAME 18 1411 COPENHAGEN DENMARK</AdrLine>
 								</PstlAdr>
 							</Cdtr>
-							-<CdtrAcct>
-								-<Id>
-									-<Othr>
+							<CdtrAcct>
+								<Id>
+									<Othr>
 										<Id>21490810494433</Id>
-										-<SchmeNm>
+										<SchmeNm>
 											<Cd>BBAN</Cd>
 										</SchmeNm>
 									</Othr>
 								</Id>
 							</CdtrAcct>
 						</RltdPties>
-						-<RltdAgts>
-							-<DbtrAgt>
-								-<FinInstnId>
+						<RltdAgts>
+							<DbtrAgt>
+								<FinInstnId>
 									<BIC>NDEADKKK</BIC>
-									-<PstlAdr>
+									<PstlAdr>
 										<Ctry>DK</Ctry>
 									</PstlAdr>
 								</FinInstnId>
 							</DbtrAgt>
 						</RltdAgts>
-						-<RmtInf>
+						<RmtInf>
 							<Ustrd>REMITTANCE INFO</Ustrd>
 						</RmtInf>
 					</TxDtls>
-					-<TxDtls>
-						-<Refs>
+					<TxDtls>
+						<Refs>
 							<AcctSvcrRef>5127256723</AcctSvcrRef>
 							<EndToEndId>1004915-5637222634-00</EndToEndId>
 						</Refs>
-						-<AmtDtls>
-							-<TxAmt>
+						<AmtDtls>
+							<TxAmt>
 								<Amt Ccy="DKK">26785.00</Amt>
-								-<CcyXchg>
+								<CcyXchg>
 									<SrcCcy>DKK</SrcCcy>
 									<TrgtCcy>DKK</TrgtCcy>
 									<XchgRate>0.000000</XchgRate>
 								</CcyXchg>
 							</TxAmt>
 						</AmtDtls>
-						-<BkTxCd>
-							-<Domn>
+						<BkTxCd>
+							<Domn>
 								<Cd>PMNT</Cd>
-								-<Fmly>
+								<Fmly>
 									<Cd>ICDT</Cd>
 									<SubFmlyCd>DMCT</SubFmlyCd>
 								</Fmly>
 							</Domn>
 						</BkTxCd>
-						-<RltdPties>
-							-<Cdtr>
+						<RltdPties>
+							<Cdtr>
 								<Nm>CREDITOR NAME</Nm>
-								-<PstlAdr>
+								<PstlAdr>
 									<Ctry>DK</Ctry>
 									<AdrLine>STREET NAME 18 1411 COPENHAGEN DENMARK</AdrLine>
 								</PstlAdr>
 							</Cdtr>
-							-<CdtrAcct>
-								-<Id>
-									-<Othr>
+							<CdtrAcct>
+								<Id>
+									<Othr>
 										<Id>21490810494433</Id>
-										-<SchmeNm>
+										<SchmeNm>
 											<Cd>BBAN</Cd>
 										</SchmeNm>
 									</Othr>
 								</Id>
 							</CdtrAcct>
 						</RltdPties>
-						-<RltdAgts>
-							-<DbtrAgt>
-								-<FinInstnId>
+						<RltdAgts>
+							<DbtrAgt>
+								<FinInstnId>
 									<BIC>NDEADKKK</BIC>
-									-<PstlAdr>
+									<PstlAdr>
 										<Ctry>DK</Ctry>
 									</PstlAdr>
 								</FinInstnId>
 							</DbtrAgt>
 						</RltdAgts>
-						-<RmtInf>
+						<RmtInf>
 							<Ustrd>Fak 209655464</Ustrd>
 						</RmtInf>
 					</TxDtls>
 				</NtryDtls>
 				<AddtlNtryInf>500:REFERENCE:0ABC-001668SUPP02020;196:ID.:388260530627;528:SUMMARY ITEM:012766221</AddtlNtryInf>
 			</Ntry>
-			-<Ntry>
+			<Ntry>
 				<NtryRef>6</NtryRef>
 				<Amt Ccy="DKK">28286.58</Amt>
 				<CdtDbtInd>CRDT</CdtDbtInd>

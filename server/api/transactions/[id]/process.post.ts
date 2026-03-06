@@ -3,11 +3,9 @@ import { createError, defineEventHandler, readBody } from 'h3'
 import { z } from 'zod'
 import db from '~/lib/db'
 import { account } from '~/lib/db/schema/account'
-import { bankingPayload } from '~/lib/db/schema/banking'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import env from '~/lib/env'
 import { manualBookingPayloadSchema, type CprType } from '#engine/manual-booking/domain/manualBooking'
-import type { SimpleAccountReportEntry } from '#engine/banking-ingestion/infrastructure/fetchBankTransactions'
 import type { PostingAttachment } from '#engine/posting/domain/posting'
 import { buildPostingCommand, executePostingCommand } from '#engine/posting/application/postingCommand'
 import {
@@ -48,14 +46,21 @@ export default defineEventHandler(async (event) => {
       amount: transaction.amount,
       accountId: transaction.accountId,
       statusAccount: account.statusAccount,
-      payload: bankingPayload.raw,
+      debtorName: transaction.debtorName,
+      debtorId: transaction.debtorId,
+      creditorName: transaction.creditorName,
+      creditorId: transaction.creditorId,
+      entryAdditionalInfo: transaction.entryAdditionalInfo,
+      txAdditionalInfo: transaction.txAdditionalInfo,
+      remittanceUstrd: transaction.remittanceUstrd,
+      remittanceCreditorReference: transaction.remittanceCreditorReference,
+      remittanceAdditional: transaction.remittanceAdditional,
       processingStatus: transactionProcessing.status,
       processingId: transactionProcessing.transactionId,
     })
     .from(transaction)
     .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
     .leftJoin(account, eq(transaction.accountId, account.id))
-    .leftJoin(bankingPayload, eq(transaction.payloadId, bankingPayload.id))
     .where(eq(transaction.id, transactionId))
     .limit(1);
 
@@ -69,13 +74,20 @@ export default defineEventHandler(async (event) => {
 
   const amount = parseNumeric(row.amount);
   const statusAccount = row.statusAccount ? String(row.statusAccount) : env.ERP_ERROR_ACCOUNT;
-  const payload = (row.payload ?? null) as SimpleAccountReportEntry | null;
 
   const txContext: PostingTransactionContext = {
     transactionId: row.id,
     amount,
     statusAccount,
-    payload,
+    debtorName: row.debtorName,
+    debtorId: row.debtorId,
+    creditorName: row.creditorName,
+    creditorId: row.creditorId,
+    entryAdditionalInfo: row.entryAdditionalInfo,
+    txAdditionalInfo: row.txAdditionalInfo,
+    remittanceUstrd: row.remittanceUstrd,
+    remittanceCreditorReference: row.remittanceCreditorReference,
+    remittanceAdditional: row.remittanceAdditional,
   };
 
   const postingText = resolvePostingText(normalizeOptionalString(body.text) ?? undefined, txContext);

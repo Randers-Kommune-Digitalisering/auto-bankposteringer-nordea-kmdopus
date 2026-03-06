@@ -1,39 +1,44 @@
 /**
  * Port: Bankcentral-adapter.
  *
- * Intention:
- * - Understøt flere bankcentraler direkte (uden en normaliserings-leverandør).
- * - Hent typisk CAMT.053 (XML) og normalisér til en intern, deterministisk model.
- *
- * Bemærk: Dette er kun et scaffold. Den nuværende integration ligger stadig i
- * `engine/banking-ingestion/infrastructure/fetchBankTransactions.ts`.
+ * This port is intentionally narrow and stable:
+ * - The adapter fetches raw source documents (typically CAMT.053 XML).
+ * - Ingestion/parsing/normalization stays in the application layer
+ *   (e.g. ingestCamt053Document) for deterministic behavior.
+ * - Cursor/state must be persisted in DB (runtime remains stateless).
  */
 
 export type BankAdapterKey = string
 
-export type NormalizedBankTransaction = {
-  externalId: string
-  accountExternalId: string
-  bookingDate: string // YYYY-MM-DD
-  valueDate?: string // YYYY-MM-DD
-  amount: number
-  currency?: string
-  text?: string
-  endToEndId?: string
-  ocrReference?: string
-  debtorName?: string
-  debtorId?: string
-  creditorName?: string
-  creditorId?: string
-  raw?: unknown
+export type BankDocumentFormat = 'camt053' | 'unknown'
+
+export type BankCursor = {
+  /** Opaque cursor serialized for storage in DB. */
+  value: string
+}
+
+export type FetchedBankDocument = {
+  format: BankDocumentFormat
+  filename?: string | null
+  content: string
+
+  /** Optional adapter-provided timestamps (otherwise derived from document content). */
+  receivedAt?: Date | null
+}
+
+export type FetchBankDocumentsInput = {
+  accountId: string
+  cursor: BankCursor | null
+  limit?: number
+}
+
+export type FetchBankDocumentsOutput = {
+  documents: FetchedBankDocument[]
+  nextCursor: BankCursor | null
 }
 
 export interface BankAdapter {
   key: BankAdapterKey
 
-  /**
-   * Fetch and normalize transactions since the last cursor known in DB.
-   * Cursor handling should be persisted in DB (stateless runtime).
-   */
-  fetchNormalizedTransactions(): Promise<NormalizedBankTransaction[]>
+  fetchDocuments(input: FetchBankDocumentsInput): Promise<FetchBankDocumentsOutput>
 }
