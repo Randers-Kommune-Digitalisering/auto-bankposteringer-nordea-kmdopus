@@ -1,6 +1,3 @@
-import type {
-	TransactionSelectSchema,
-} from "~/lib/db/schema/transaction";
 import type { DocumentSelectSchema } from "~/lib/db/schema/document";
 import type { ErrorSelectSchema } from "~/lib/db/schema/error";
 import type { BookingStatus } from "~/lib/db/schema/enums";
@@ -8,7 +5,11 @@ import type { RunSelectSchema } from "~/lib/db/schema/run";
 
 type IsoDateString = string;
 
-export type TransactionListItem = Omit<TransactionSelectSchema, "bookingDate"> & {
+export type TransactionListItem = {
+	id: string;
+	runId: string;
+	accountId: string | null;
+	amount: string;
 	bookingDate: IsoDateString;
 	bankAccountLabel?: string | null;
 	counterpart?: string | null;

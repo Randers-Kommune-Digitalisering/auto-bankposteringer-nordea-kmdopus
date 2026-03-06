@@ -1,3 +1,5 @@
+[![Tests](https://github.com/Randers-Kommune-Digitalisering/auto-bankposteringer-nordea-kmdopus/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/Randers-Kommune-Digitalisering/auto-bankposteringer-nordea-kmdopus/actions/workflows/tests.yml)
+
 # 🚀 Fællesoffentlig Bankintegration (FOBI)
 
 > Leverandøruafhængig bankintegrations- og konteringstjeneste til danske kommuner.

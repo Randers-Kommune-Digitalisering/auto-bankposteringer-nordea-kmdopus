@@ -15,7 +15,9 @@ import * as ruleSchema from './schema/rule'
 import * as ruleTagSchema from './schema/ruleTag'
 import * as ruleVersionSchema from './schema/ruleVersion'
 import * as runSchema from './schema/run'
+import * as statementSchema from './schema/statement'
 import * as transactionSchema from './schema/transaction'
+import * as bankingAdapterCursorSchema from './schema/bankingAdapterCursor'
 
 const schema = {
   ...accountSchema,
@@ -31,7 +33,9 @@ const schema = {
   ...ruleTagSchema,
   ...ruleVersionSchema,
   ...runSchema,
+  ...statementSchema,
   ...transactionSchema,
+  ...bankingAdapterCursorSchema,
 } as const
 
 

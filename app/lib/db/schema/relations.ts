@@ -13,8 +13,15 @@ import {
   bankingTxCode,
   bankingParty,
 } from "./banking";
+import { bankingDocument, bankingStatement, bankingStatementBalance } from "./statement";
+import { bankingAdapterCursor } from "./bankingAdapterCursor";
 import { erpRequest, erpResponse } from "./erp";
 import { errorLog } from "./error";
+
+export const accountRelations = relations(account, ({ many }) => ({
+  rules: many(ruleBankAccount),
+  adapterCursors: many(bankingAdapterCursor),
+}));
 
 export const ruleRelations = relations(rule, ({ many, one }) => ({
   bankAccounts: many(ruleBankAccount),
@@ -89,7 +96,8 @@ export const erpResponseRelations = relations(erpResponse, ({ one }) => ({
 
 export const transactionRelations = relations(transaction, ({ one }) => ({
   run: one(run, { fields: [transaction.runId], references: [run.id] }),
-  payload: one(bankingPayload, { fields: [transaction.payloadId], references: [bankingPayload.id] }),
+  account: one(account, { fields: [transaction.accountId], references: [account.id] }),
+  statement: one(bankingStatement, { fields: [transaction.statementId], references: [bankingStatement.id] }),
   processing: one(transactionProcessing, { fields: [transaction.id], references: [transactionProcessing.transactionId] }),
 }));
 
@@ -102,7 +110,6 @@ export const bankingPayloadRelations = relations(bankingPayload, ({ many }) => (
   references: many(bankingReference),
   txCodes: many(bankingTxCode),
   parties: many(bankingParty),
-  transactions: many(transaction),
 }));
 
 export const bankingReferenceRelations = relations(bankingReference, ({ one }) => ({
@@ -115,6 +122,27 @@ export const bankingTxCodeRelations = relations(bankingTxCode, ({ one }) => ({
 
 export const bankingPartyRelations = relations(bankingParty, ({ one }) => ({
   payload: one(bankingPayload, { fields: [bankingParty.payloadId], references: [bankingPayload.id] }),
+}));
+
+export const bankingDocumentRelations = relations(bankingDocument, ({ many, one }) => ({
+  account: one(account, { fields: [bankingDocument.accountId], references: [account.id] }),
+  statements: many(bankingStatement),
+}));
+
+export const bankingStatementRelations = relations(bankingStatement, ({ many, one }) => ({
+  document: one(bankingDocument, { fields: [bankingStatement.documentId], references: [bankingDocument.id] }),
+  balances: many(bankingStatementBalance),
+}));
+
+export const bankingStatementBalanceRelations = relations(bankingStatementBalance, ({ one }) => ({
+  statement: one(bankingStatement, { fields: [bankingStatementBalance.statementId], references: [bankingStatement.id] }),
+}));
+
+export const bankingAdapterCursorRelations = relations(bankingAdapterCursor, ({ one }) => ({
+  account: one(account, {
+    fields: [bankingAdapterCursor.accountId],
+    references: [account.id],
+  }),
 }));
 
 export const errorRelations = relations(errorLog, ({ one }) => ({
