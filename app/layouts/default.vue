@@ -106,9 +106,31 @@ const links = [[
           open.value = false
         }
       },
+    ]
+  },
+  {
+    label: 'Fejlhåndtering',
+    to: '/fejlhaandtering',
+    icon: 'solar:shield-warning-bold-duotone',
+    type: 'trigger',
+    children: [
       {
-        label: 'Gendannelse',
-        to: '/indstillinger/gendan',
+        label: 'Rollback af regler',
+        to: '/fejlhaandtering/regler',
+        onSelect: () => {
+          open.value = false
+        }
+      },
+      {
+        label: 'Kø og genkørsel',
+        to: '/fejlhaandtering/koe',
+        onSelect: () => {
+          open.value = false
+        }
+      },
+      {
+        label: 'ERP-afvisninger',
+        to: '/fejlhaandtering/erp',
         onSelect: () => {
           open.value = false
         }
