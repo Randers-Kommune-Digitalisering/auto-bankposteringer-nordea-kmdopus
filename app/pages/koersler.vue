@@ -1,13 +1,9 @@
 <script setup lang="ts">
-    import { DateFormatter, getLocalTimeZone } from '@internationalized/date'
+    import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date'
     import type { TableColumn } from '@nuxt/ui'
     import type { RunStatus } from '~/lib/db/schema/enums'
     import type { RunListItem, RunListResponse } from '~/types/runs'
     import useFlattenArray from '~/composables/useFlattenArray'
-
-    definePageMeta({
-        path: '/kørsler'
-    })
 
     const { data, status, refresh } = await useFetch<RunListResponse>('/api/runs', {
         key: 'runs'
@@ -21,7 +17,14 @@
     })
 
     // Date range picker state
-    const dateRange = ref<any>(null)
+    const endDefault = today(getLocalTimeZone())
+    const startDefault = endDefault.subtract({ days: 29 })
+    const defaultRange = {
+        start: startDefault,
+        end: endDefault
+    }
+
+    const dateRange = ref<any>(defaultRange)
 
     // Popover state
     const openPopovers = ref<Record<string, string | null>>({})
@@ -135,21 +138,21 @@
             }
         },
         {
-            id: 'transactions',
-            header: 'Transaktioner',
+            id: 'erpResponses',
+            header: 'Bilagsnumre',
             size: 120,
             enableSorting: false,
             cell: ({ row }) => {
-                const txs = row.original.transactions
-                if (!txs?.length) return null
+                const erpResponses = row.original.erpResponses
+                if (!erpResponses?.length) return null
 
-                const key = `${row.original.id}-transactions`
+                const key = `${row.original.id}-erpResponses`
                 return h(resolveComponent('RunsDataPopover'), {
-                    type: 'transactions',
+                    type: 'erpResponses',
                     run: row.original,
                     open: !!openPopovers.value[key],
                     'onUpdate:open': (val: boolean) => {
-                        openPopovers.value[key] = val ? 'transactions' : null
+                        openPopovers.value[key] = val ? 'erpResponses' : null
                     }
                 })
             }
@@ -231,7 +234,7 @@
                                     variant="ghost"
                                     size="sm"
                                     label="Nulstil"
-                                    @click="dateRange = null"
+                                    @click="dateRange = defaultRange"
                                     class="flex-1"
                                 />
                             </div>

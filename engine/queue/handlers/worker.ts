@@ -136,13 +136,13 @@ async function claimOutbox(): Promise<{ id: string; topic: string; payload: any 
 
 async function handleJob(type: string, payload: any): Promise<void> {
   if (type === 'banking.ingest') {
-    const { runTransactionBatch } = await import('../../banking-ingestion/application/runTransactionBatch')
+    const { runTransactionBatch } = await import('../../banking-ingestion/handlers/runTransactionBatch')
     await runTransactionBatch()
     return
   }
 
   if (type === 'erp.ingestResponses') {
-    const { ingestErpResponses } = await import('../../erp-integration/application/ingestErpResponses')
+    const { ingestErpResponses } = await import('../../erp-integration/handlers/ingestErpResponses')
     await ingestErpResponses({
       limit: payload?.limit,
       deleteAfterPickup: payload?.deleteAfterPickup,

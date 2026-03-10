@@ -1,7 +1,7 @@
 import { defineTask } from 'nitropack/runtime'
 import { logger } from '~/lib/logger'
-import { enqueueJob } from '#engine/queue/application/enqueueJob'
-import { runWorker } from '#engine/queue/application/worker'
+import { enqueueJob } from '#engine/queue/handlers/enqueueJob'
+import { runWorker } from '#engine/queue/handlers/worker'
 
 export default defineTask({
   meta: {

@@ -1,7 +1,7 @@
 import crypto from 'node:crypto'
 import { Builder } from 'xml2js'
 import { erpIntegrationMetadata, type ErpIntegrationMetadata } from '~/lib/env'
-import type { PostingAttachment, PostingLineInput } from '../../../posting/domain/posting'
+import type { PostingAttachment, PostingLineInput } from '../../../../posting/domain/posting'
 
 const builder = new Builder({
   xmldec: { version: '1.0', encoding: 'UTF-8' },

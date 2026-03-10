@@ -8,7 +8,7 @@ import { account } from '../../app/lib/db/schema/account'
 import { run } from '../../app/lib/db/schema/run'
 import { bankingDocument, bankingStatement, bankingStatementBalance } from '../../app/lib/db/schema/statement'
 import { transaction } from '../../app/lib/db/schema/transaction'
-import { ingestCamt053Document } from '../../engine/banking-ingestion/application/ingestCamt053Document'
+import { ingestCamt053Document } from '../../engine/banking-ingestion/handlers/ingestCamt053Document'
 
 async function main() {
   const accountId = 'SMOKE-ACCOUNT'

@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { eq, sql } from 'drizzle-orm'
 
-import { ingestCamt053Document } from '../../engine/banking-ingestion/application/ingestCamt053Document'
+import { ingestCamt053Document } from '../../engine/banking-ingestion/handlers/ingestCamt053Document'
 
 function isDatabaseReachableError(err: unknown): boolean {
   const message = String((err as any)?.message ?? err)

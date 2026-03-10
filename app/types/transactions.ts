@@ -1,4 +1,4 @@
-import type { BookingStatus, CprType } from "~/lib/db/schema/enums";
+import type { BookingStatus, CprType, CreditDebitIndicator } from "~/lib/db/schema/enums";
 
 export type TransactionSummarySection =
   | {
@@ -64,4 +64,53 @@ export type ManualBookingPayload = {
   notifyTo?: string | null;
   note?: string | null;
   attachments?: ManualPostingAttachment[];
+};
+
+export type StatementTransaction = {
+  id: string;
+  runId: string;
+  accountId: string | null;
+  bankAccountName: string | null;
+
+  statementId: string | null;
+  entryIndex: number | null;
+
+  amount: string;
+  currency: string | null;
+  creditDebitIndicator: CreditDebitIndicator | null;
+  status: string | null;
+  bookingDate: string;
+  valueDate: string | null;
+
+  ntryRef: string | null;
+  ntryAcctSvcrRef: string | null;
+  entryAdditionalInfo: string | null;
+
+  txAcctSvcrRef: string | null;
+  refsEndToEndId: string | null;
+  refsInstrId: string | null;
+  refsPmtInfId: string | null;
+  uetr: string | null;
+  txAdditionalInfo: string | null;
+
+  bkTxCdDomain: string | null;
+  bkTxCdFamily: string | null;
+  bkTxCdSubFamily: string | null;
+  bkTxCdProprietary: string | null;
+
+  debtorName: string | null;
+  debtorId: string | null;
+  debtorAccountIban: string | null;
+  creditorName: string | null;
+  creditorId: string | null;
+  creditorAccountIban: string | null;
+  ultimateDebtorName: string | null;
+  ultimateCreditorName: string | null;
+
+  remittanceUstrd: string[] | null;
+  remittanceCreditorReference: string | null;
+  remittanceAdditional: string[] | null;
+
+  processingStatus: BookingStatus | null;
+  ruleApplied: number | null;
 };
