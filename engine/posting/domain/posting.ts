@@ -5,6 +5,11 @@ export interface PostingAttachment {
 }
 
 export interface PostingLineInput {
+  /**
+   * Internal linkage for audit/recovery.
+   * Not part of the ERP payload; adapters should ignore unknown fields.
+   */
+  transactionId?: string
   amount: number | string
   debetOrCredit: 'Debet' | 'Kredit'
   account: string

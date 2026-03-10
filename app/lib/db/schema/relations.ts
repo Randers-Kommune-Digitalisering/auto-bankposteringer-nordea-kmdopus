@@ -15,7 +15,7 @@ import {
 } from "./banking";
 import { bankingDocument, bankingStatement, bankingStatementBalance } from "./statement";
 import { bankingAdapterCursor } from "./bankingAdapterCursor";
-import { erpRequest, erpResponse } from "./erp";
+import { erpRequest, erpResponse, erpRequestLine } from "./erp";
 import { errorLog } from "./error";
 
 export const accountRelations = relations(account, ({ many }) => ({
@@ -79,11 +79,23 @@ export const bankingResponseRelations = relations(BankingResponse, ({ one }) => 
   }),
 }));
 
-export const erpRequestRelations = relations(erpRequest, ({ one }) => ({
+export const erpRequestRelations = relations(erpRequest, ({ one, many }) => ({
   response: one(erpResponse),
+  lines: many(erpRequestLine),
   run: one(run, {
     fields: [erpRequest.runId],
     references: [run.id],
+  }),
+}));
+
+export const erpRequestLineRelations = relations(erpRequestLine, ({ one }) => ({
+  request: one(erpRequest, {
+    fields: [erpRequestLine.requestId],
+    references: [erpRequest.id],
+  }),
+  transaction: one(transaction, {
+    fields: [erpRequestLine.transactionId],
+    references: [transaction.id],
   }),
 }));
 

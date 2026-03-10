@@ -1,5 +1,5 @@
 {
-  "id": "52ae13c3-f6ea-4d71-9442-5e513934ecdc",
+  "id": "01d5b75b-114f-4f7f-bcc5-b67e6a28da5b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -579,6 +579,72 @@
         }
       },
       "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.erp_request_line": {
+      "name": "erp_request_line",
+      "schema": "",
+      "columns": {
+        "request_id": {
+          "name": "request_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "line_no": {
+          "name": "line_no",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "transaction_id": {
+          "name": "transaction_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "erp_request_line_request_id_erp_request_id_fk": {
+          "name": "erp_request_line_request_id_erp_request_id_fk",
+          "tableFrom": "erp_request_line",
+          "tableTo": "erp_request",
+          "columnsFrom": [
+            "request_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "erp_request_line_transaction_id_transaction_id_fk": {
+          "name": "erp_request_line_transaction_id_transaction_id_fk",
+          "tableFrom": "erp_request_line",
+          "tableTo": "transaction",
+          "columnsFrom": [
+            "transaction_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "erp_request_line_request_id_line_no_pk": {
+          "name": "erp_request_line_request_id_line_no_pk",
+          "columns": [
+            "request_id",
+            "line_no"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},

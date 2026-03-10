@@ -29,6 +29,7 @@ export function buildPostingLines(options: {
   const amountAbs = Math.abs(options.transaction.amount)
   const isIncoming = options.transaction.amount >= 0
   const statusLine: PostingLineInput = {
+    transactionId: options.transaction.transactionId,
     account: options.transaction.statusAccount,
     debetOrCredit: isIncoming ? 'Debet' : 'Kredit',
     amount: amountAbs,
@@ -36,6 +37,7 @@ export function buildPostingLines(options: {
   }
 
   const landingLine: PostingLineInput = {
+    transactionId: options.transaction.transactionId,
     account: options.landingAccount,
     accountSecondary: options.landingSecondary,
     accountTertiary: options.landingTertiary,
