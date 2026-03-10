@@ -56,6 +56,28 @@ const stringArraySortingFn: SortingFn<RuleListDto> = (rowA, rowB, columnId) => {
   return compareStrings(normalizeArrayValue(valueA), normalizeArrayValue(valueB))
 }
 
+const columnVisibilityLabelById: Record<string, string> = {
+  id: 'ID',
+  ruleTags: 'Tags',
+  Stamdata: 'Stamdata',
+  'matching.references': 'Fritekst',
+  'matching.counterparties': 'Part',
+  'matching.classification': 'Transaktionstype',
+  Datoer: 'Datoer'
+}
+
+function getColumnVisibilityLabel(column: any) {
+  const id = String(column?.id ?? '')
+
+  const mapped = columnVisibilityLabelById[id]
+  if (mapped) return mapped
+
+  const header = column?.columnDef?.header
+  if (typeof header === 'string' && header.trim().length) return header
+
+  return upperFirst(id)
+}
+
 function getHeader(column: Column<RuleListDto>, label: string) {
   const isSorted = column.getIsSorted()
 
@@ -513,7 +535,7 @@ async function handleDeleteRule(row: Row<RuleListDto>) {
                 ?.getAllColumns()
                 .filter((column: any) => column.getCanHide())
                 .map((column: any) => ({
-                  label: upperFirst(column.id),
+                  label: getColumnVisibilityLabel(column),
                   type: 'checkbox' as const,
                   checked: column.getIsVisible(),
                   onUpdateChecked(checked: boolean) {

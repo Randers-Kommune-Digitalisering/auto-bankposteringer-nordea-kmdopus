@@ -17,7 +17,7 @@ import type {
   RuleConditionRow,
 } from '~/lib/db/schema/rule'
 import type { PostingAttachment, PostingLineInput } from '../../posting/domain/posting'
-import { buildPostingCommand, type PostingCommand } from '../../posting/application/postingCommand'
+import { buildPostingCommand, type PostingCommand } from '../../posting/handlers/postingCommand'
 import {
   extractCprFromTransaction,
   resolveCounterpartyName,

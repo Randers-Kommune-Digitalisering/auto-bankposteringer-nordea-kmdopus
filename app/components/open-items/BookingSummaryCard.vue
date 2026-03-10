@@ -129,6 +129,7 @@ const sectionEntries = computed<SectionEntry[]>(() => orderedSections.value.map(
 						:color="section.color"
 						size="lg"
 						:title="entry.hint ?? undefined"
+						class="max-w-full min-w-0 whitespace-normal break-all"
 					>
 						{{ entry.value }}
 					</UBadge>

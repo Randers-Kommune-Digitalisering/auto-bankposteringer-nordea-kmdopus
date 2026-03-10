@@ -9,6 +9,7 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "db:migrate": "drizzle-kit push --config drizzle.config.ts",
+    "db:seed:dev": "tsx scripts/db/seed-dev.ts",
     "test": "vitest run",
     "test:unit": "vitest run --dir tests/unit",
     "test:integration": "vitest run --dir tests/integration"

@@ -1,6 +1,6 @@
 import { erpIntegrationMetadata } from '~/lib/env'
 import type { ErpAdapter } from './ports/erpAdapter'
-import { kmdErpAdapter } from './adapters/kmd/kmdErpAdapter'
+import { kmdErpAdapter } from './infrastructure/adapters/kmd/kmdErpAdapter'
 
 export function getActiveErpSupplierKey(): string {
   return (erpIntegrationMetadata.erpSupplier ?? '').trim() || 'kmd'

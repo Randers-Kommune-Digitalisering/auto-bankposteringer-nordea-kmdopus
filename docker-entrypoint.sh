@@ -2,10 +2,20 @@
 set -e
 
 if [ "$NODE_ENV" = "production" ]; then
-  echo "Running database migrations..."
+  echo "Running database migrations (production)..."
   pnpm db:migrate
 else
-  echo "Skipping migrations (NODE_ENV=$NODE_ENV)"
+  if [ "${DB_MIGRATE_ON_START:-}" = "1" ]; then
+    echo "Running database migrations (dev)..."
+    pnpm db:migrate
+  else
+    echo "Skipping migrations (NODE_ENV=$NODE_ENV)"
+  fi
+
+  if [ "${SEED_DEV_DATA:-}" = "1" ]; then
+    echo "Seeding dev database..."
+    pnpm db:seed:dev
+  fi
 fi
 
 exec "$@"
