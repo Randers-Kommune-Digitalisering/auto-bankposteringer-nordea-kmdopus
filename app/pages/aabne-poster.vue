@@ -4,10 +4,6 @@ import BookingSummaryCard from '~/components/open-items/BookingSummaryCard.vue'
 import { useOpenTransactions } from '~/composables/useOpenTransactions'
 import type { OpenTransaction } from '~/types/transactions'
 
-definePageMeta({
-  path: '/åbne-poster'
-})
-
 const {
   pending,
   refresh,
@@ -61,8 +57,8 @@ async function handleBookingProcessed() {
           <template #description>
             {{ items.length }} {{ items.length === 1 ? 'transaktion' : 'transaktioner' }}
           </template>
-          <UPageColumns>
-            <div v-for="item in items" :key="item.id" class="w-full">
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div v-for="item in items" :key="item.id" class="w-full min-w-0">
               <BookingSummaryCard :summary="item.summary">
                 <template #footer>
                   <div class="flex justify-center mt-4">
@@ -80,7 +76,7 @@ async function handleBookingProcessed() {
                 </template>
               </BookingSummaryCard>
             </div>
-          </UPageColumns>
+          </div>
         </UPageSection>
       </template>
     </template>

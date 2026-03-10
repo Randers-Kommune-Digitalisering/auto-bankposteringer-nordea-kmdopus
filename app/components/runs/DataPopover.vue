@@ -3,7 +3,7 @@
     import type { RunListItem } from '~/types/runs'
 
     interface Props {
-        type: 'error' | 'transactions' | 'docs'
+        type: 'error' | 'docs' | 'erpResponses'
         run: RunListItem
         open: boolean
     }
@@ -81,25 +81,14 @@
         }, {})
     }
 
-    const groupTransactionsByAccount = (txs: RunListItem['transactions']) => {
-        return txs.reduce((acc: Record<string, RunListItem['transactions']>, tx) => {
-            const account = tx.bankAccountLabel || tx.accountId || 'Ukendt konto'
-            if (!acc[account]) {
-                acc[account] = []
-            }
-            acc[account].push(tx)
-            return acc
-        }, {})
-    }
-
     const getTitle = () => {
         switch (props.type) {
             case 'error':
                 return `Fejl (${props.run.errors?.length || 0})`
-            case 'transactions':
-                return `Transaktioner (${props.run.transactions?.length || 0})`
             case 'docs':
                 return `Dokumenter (${props.run.documents?.length || 0})`
+            case 'erpResponses':
+                return `Bilagsnumre (${props.run.erpResponses?.length || 0})`
         }
     }
 
@@ -107,10 +96,10 @@
         switch (props.type) {
             case 'error':
                 return 'i-lucide-alert-circle'
-            case 'transactions':
-                return 'i-lucide-list'
             case 'docs':
                 return 'i-lucide-file'
+            case 'erpResponses':
+                return 'i-lucide-receipt'
         }
     }
 
@@ -118,9 +107,9 @@
         switch (props.type) {
             case 'error':
                 return 'error'
-            case 'transactions':
-                return 'neutral'
             case 'docs':
+                return 'neutral'
+            case 'erpResponses':
                 return 'neutral'
         }
     }
@@ -129,10 +118,10 @@
         switch (props.type) {
             case 'error':
                 return props.run.errors?.length || 0
-            case 'transactions':
-                return props.run.transactions?.length || 0
             case 'docs':
                 return props.run.documents?.length || 0
+            case 'erpResponses':
+                return props.run.erpResponses?.length || 0
         }
     }
 </script>
@@ -164,30 +153,6 @@
                     </ul>
                 </template>
 
-                <!-- Transactions Content -->
-                <template v-if="type === 'transactions' && run.transactions">
-                    <div class="space-y-3">
-                        <template v-for="(txs, account) in groupTransactionsByAccount(run.transactions)" :key="account">
-                            <div>
-                                <h4 class="font-medium text-sm mb-2 capitalize">{{ account }}</h4>
-                                <div class="space-y-2">
-                                    <div
-                                        v-for="tx in txs"
-                                        :key="tx.id"
-                                        class="text-sm p-2 bg-elevated/50 rounded border border-default"
-                                    >
-                                        <div class="font-medium">{{ tx.id }}</div>
-                                        <div class="text-muted text-sm">{{ tx.counterpart ?? tx.references?.[0] ?? '-' }}</div>
-                                        <div class="font-medium">
-                                            {{ Number(tx.amount).toLocaleString('da-DK', { style: 'currency', currency: 'DKK' }) }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                </template>
-
                 <!-- Documents Content -->
                 <template v-if="type === 'docs' && run.documents">
                     <div class="space-y-3">
@@ -214,6 +179,15 @@
                             </div>
                         </template>
                     </div>
+                </template>
+
+                <!-- ERP Responses Content (Bilagsnumre) -->
+                <template v-if="type === 'erpResponses' && run.erpResponses">
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li v-for="resp in run.erpResponses" :key="resp.id" class="text-sm">
+                            <span class="font-medium">{{ resp.id }}</span>
+                        </li>
+                    </ul>
                 </template>
             </div>
         </template>

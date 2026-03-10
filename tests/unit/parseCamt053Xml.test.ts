@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { parseCamt053Xml } from '../../engine/banking-ingestion/application/camt053/parseCamt053Xml'
+import { parseCamt053Xml } from '../../engine/banking-ingestion/handlers/camt053/parseCamt053Xml'
 
 describe('parseCamt053Xml (Nordea example)', () => {
   it('parses statements, balances, and transactions deterministically', async () => {

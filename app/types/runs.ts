@@ -23,6 +23,10 @@ export type DocumentListItem = DocumentSelectSchema & {
 	mimeType?: string | null;
 };
 
+export type ErpResponseListItem = {
+	id: string;
+};
+
 export type ErrorListItem = ErrorSelectSchema & {
 	message?: string | null;
 };
@@ -32,6 +36,7 @@ export type RunListItem = Omit<RunSelectSchema, "bookingDate"> & {
 	transactions: TransactionListItem[];
 	documents: DocumentListItem[];
 	errors: ErrorListItem[];
+	erpResponses: ErpResponseListItem[];
 };
 
 export type RunListResponse = RunListItem[];

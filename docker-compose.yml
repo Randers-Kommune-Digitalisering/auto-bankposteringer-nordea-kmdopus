@@ -6,10 +6,16 @@ services:
     container_name: nuxt_app
     ports:
       - "3000:3000"
+    entrypoint: ["sh", "./docker-entrypoint.sh"]
+    command: ["pnpm", "dev"]
     volumes:
       - .:/app:cached
     env_file:
       - .env
+    environment:
+      NODE_ENV: development
+      DB_MIGRATE_ON_START: "1"
+      SEED_DEV_DATA: "1"
     depends_on:
       - db
 

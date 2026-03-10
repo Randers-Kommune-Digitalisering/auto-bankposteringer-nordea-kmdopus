@@ -38,30 +38,31 @@ const payload = computed(() => data.value)
 					<UDashboardSidebarCollapse />
 				</template>
 				<template #trailing>
-					<div class="flex items-center gap-2">
-						<DashboardDateRangePicker v-model="dateRange" :reset-value="defaultRange" />
-						<UButton
-							icon="i-lucide-refresh-cw"
-							label="Opdater"
-							variant="ghost"
-							:loading="status === 'pending'"
-							@click="refresh()"
-						/>
-					</div>
+					<UButton
+						icon="i-lucide-refresh-cw"
+						label="Opdater"
+						variant="ghost"
+						:loading="status === 'pending'"
+						@click="refresh()"
+					/>
 				</template>
 			</UDashboardNavbar>
 		</template>
 
 		<template #body>
-      <DashboardKpis v-if="payload" :kpis="payload.kpis" />
+			<div class="space-y-4">
+				<DashboardDateRangePicker v-model="dateRange" :reset-value="defaultRange" />
 
-      <DashboardAutomationChart
-        v-if="payload"
-        :series="payload.automationSeries"
-        title="Automatiseringsgrad (matches / transaktioner)"
-      />
+				<DashboardKpis v-if="payload" :kpis="payload.kpis" />
 
-      <DashboardLatestRuns v-if="payload" :runs="payload.latestRuns" />
+				<DashboardAutomationChart
+					v-if="payload"
+					:series="payload.automationSeries"
+					title="Automatiseringsgrad (matches / transaktioner)"
+				/>
+
+				<DashboardLatestRuns v-if="payload" :runs="payload.latestRuns" />
+			</div>
 		</template>
 	</UDashboardPanel>
 </template>

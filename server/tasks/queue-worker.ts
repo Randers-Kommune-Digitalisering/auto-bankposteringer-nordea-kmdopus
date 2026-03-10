@@ -1,5 +1,5 @@
 import { defineTask } from 'nitropack/runtime'
-import { runWorker } from '#engine/queue/application/worker'
+import { runWorker } from '#engine/queue/handlers/worker'
 import { logger } from '~/lib/logger'
 
 export default defineTask({

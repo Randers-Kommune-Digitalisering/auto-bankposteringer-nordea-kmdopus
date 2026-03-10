@@ -13,8 +13,15 @@ Mål:
 
 Strukturprincip:
 - `domain/`: typer + deterministisk logik (ingen IO)
-- `application/`: use-cases / commands (orkestrering)
-- `infrastructure/`: adapters til DB/SFTP/HTTP/mail
+- `handlers/`: orkestrering (commands/"use-cases")
+- `ports/`: interfaces + DTOs (kontrakter som `handlers/` afhænger af)
+- `infrastructure/`: IO-implementeringer (DB/HTTP/SFTP/mail)
+
+Navngivning:
+- `handlers/` er *ikke* HTTP-route handlers. Det er applikationslagets use-case handlers
+	(fx “ingest X”, “match Y”, “submit posting”).
+- `infrastructure/adapters/` bruges når vi har flere konkrete implementeringer af en port
+	(fx ERP leverandører som KMD).
 
 I første iteration er modulerne tynde wrappers omkring eksisterende kode i `services/`.
 Refactor kan gradvist flytte logik ind i modulerne uden at ændre API-kontrakter.

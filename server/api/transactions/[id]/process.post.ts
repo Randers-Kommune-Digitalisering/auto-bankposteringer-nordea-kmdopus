@@ -7,7 +7,7 @@ import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import env from '~/lib/env'
 import { manualBookingPayloadSchema, type CprType } from '#engine/manual-booking/domain/manualBooking'
 import type { PostingAttachment } from '#engine/posting/domain/posting'
-import { buildPostingCommand, executePostingCommand } from '#engine/posting/application/postingCommand'
+import { buildPostingCommand, executePostingCommand } from '#engine/posting/handlers/postingCommand'
 import {
   extractCprFromTransaction,
   resolvePostingText,

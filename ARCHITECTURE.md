@@ -38,7 +38,7 @@ flowchart LR
     SettingsAPI[/api/settings]
   end
 
-  subgraph Engine[Engine (domain + application)]
+  subgraph Engine[Engine (domain + handlers)]
     Fetch[Bank adapter fetch\n(fetchDocuments)]
     Ingest[CAMT ingest\n(ingestCamt053Document)]
     Match[Matching service]

@@ -1,5 +1,5 @@
-import type { ErpAdapter } from '../../ports/erpAdapter'
-import type { PostingLineInput } from '../../../posting/domain/posting'
+import type { ErpAdapter } from '../../../ports/erpAdapter'
+import type { PostingLineInput } from '../../../../posting/domain/posting'
 import { buildErpPostingXml, type BuildPostingXmlOptions } from './postingXmlBuilder'
 import { ErpSftpClient, type RemoteFile } from './sftpClient'
 

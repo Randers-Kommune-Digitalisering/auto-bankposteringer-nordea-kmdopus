@@ -57,7 +57,15 @@ const links = [[
   {
     label: 'Åbne poster',
     icon: 'solar:inbox-bold-duotone',
-    to: '/åbne-poster',
+    to: '/aabne-poster',
+    onSelect: () => {
+      open.value = false
+    }
+  },
+  {
+    label: 'Kontoudtog',
+    icon: 'solar:card-transfer-bold-duotone',
+    to: '/kontoudtog',
     onSelect: () => {
       open.value = false
     }
@@ -65,7 +73,7 @@ const links = [[
   {
     label: 'Kørsler',
     icon: 'solar:alarm-bold-duotone',
-    to: '/kørsler',
+    to: '/koersler',
     onSelect: () => {
       open.value = false
     }
