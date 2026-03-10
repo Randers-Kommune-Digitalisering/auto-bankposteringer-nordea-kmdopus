@@ -96,6 +96,13 @@ CREATE TABLE "erp_request" (
 	"payload" text
 );
 --> statement-breakpoint
+CREATE TABLE "erp_request_line" (
+	"request_id" text NOT NULL,
+	"line_no" integer NOT NULL,
+	"transaction_id" uuid,
+	CONSTRAINT "erp_request_line_request_id_line_no_pk" PRIMARY KEY("request_id","line_no")
+);
+--> statement-breakpoint
 CREATE TABLE "erp_response" (
 	"id" text PRIMARY KEY NOT NULL,
 	"request_id" text,
@@ -311,6 +318,8 @@ ALTER TABLE "banking_tx_code" ADD CONSTRAINT "banking_tx_code_payload_id_banking
 ALTER TABLE "banking_adapter_cursor" ADD CONSTRAINT "banking_adapter_cursor_account_id_account_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."account"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "document" ADD CONSTRAINT "document_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "erp_request" ADD CONSTRAINT "erp_request_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "erp_request_line" ADD CONSTRAINT "erp_request_line_request_id_erp_request_id_fk" FOREIGN KEY ("request_id") REFERENCES "public"."erp_request"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "erp_request_line" ADD CONSTRAINT "erp_request_line_transaction_id_transaction_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."transaction"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "erp_response" ADD CONSTRAINT "erp_response_request_id_erp_request_id_fk" FOREIGN KEY ("request_id") REFERENCES "public"."erp_request"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "error" ADD CONSTRAINT "error_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "job" ADD CONSTRAINT "job_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint

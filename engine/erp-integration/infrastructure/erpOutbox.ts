@@ -1,7 +1,7 @@
 import crypto from 'node:crypto'
 import { eq } from 'drizzle-orm'
 import db from '~/lib/db'
-import { erpRequest } from '~/lib/db/schema/erp'
+import { erpRequest, erpRequestLine } from '~/lib/db/schema/erp'
 import { outbox } from '~/lib/db/schema/outbox'
 import { logger } from '~/lib/logger'
 import type { PostingLineInput } from '../../posting/domain/posting'
@@ -41,6 +41,17 @@ export async function submitErpPostingViaOutbox(
     await trx
       .insert(erpRequest)
       .values({ id: requestId, runId: input.runId, payload: built.payload })
+      .onConflictDoNothing()
+
+    await trx
+      .insert(erpRequestLine)
+      .values(
+        input.postings.map((posting, index) => ({
+          requestId,
+          lineNo: index + 1,
+          transactionId: posting.transactionId ?? null,
+        })),
+      )
       .onConflictDoNothing()
 
     const [row] = await trx
