@@ -1,5 +1,5 @@
 {
-  "id": "01d5b75b-114f-4f7f-bcc5-b67e6a28da5b",
+  "id": "5b99a307-b951-43da-941b-28d872b4bfb2",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1007,8 +1007,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.kmd_accounting_parameters": {
-      "name": "kmd_accounting_parameters",
+    "public.erp_accounting_dimension_definition": {
+      "name": "erp_accounting_dimension_definition",
       "schema": "",
       "columns": {
         "id": {
@@ -1018,78 +1018,166 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "rule_id": {
-          "name": "rule_id",
-          "type": "integer",
+        "erp_supplier": {
+          "name": "erp_supplier",
+          "type": "erp_supplier",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "primary_account": {
-          "name": "primary_account",
+        "key": {
+          "name": "key",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "secondary_account": {
-          "name": "secondary_account",
+        "erp_target": {
+          "name": "erp_target",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "tertiary_account": {
-          "name": "tertiary_account",
+        "sort_order": {
+          "name": "sort_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "required": {
+          "name": "required",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "erp_accounting_dimension_definition_supplier_key_unique": {
+          "name": "erp_accounting_dimension_definition_supplier_key_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "erp_supplier",
+            "key"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.rule": {
+      "name": "rule",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "rule_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "last_used": {
+          "name": "last_used",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "locked_at": {
+          "name": "locked_at",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "locked_by": {
+          "name": "locked_by",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "booking_text": {
-          "name": "booking_text",
-          "type": "text",
+        "current_version_id": {
+          "name": "current_version_id",
+          "type": "bigint",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "cpr_type": {
-          "name": "cpr_type",
-          "type": "cpr_type",
+        "erp_supplier": {
+          "name": "erp_supplier",
+          "type": "erp_supplier",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rule_type": {
+          "name": "rule_type",
+          "type": "rule_type",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
-        "cpr_number": {
-          "name": "cpr_number",
-          "type": "text",
+        "rule_status": {
+          "name": "rule_status",
+          "type": "rule_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
-        "notify_to": {
-          "name": "notify_to",
-          "type": "text",
+        "amount_min": {
+          "name": "amount_min",
+          "type": "numeric",
           "primaryKey": false,
           "notNull": false
         },
-        "note": {
-          "name": "note",
-          "type": "text",
+        "amount_max": {
+          "name": "amount_max",
+          "type": "numeric",
           "primaryKey": false,
           "notNull": false
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "kmd_accounting_parameters_rule_id_rule_id_fk": {
-          "name": "kmd_accounting_parameters_rule_id_rule_id_fk",
-          "tableFrom": "kmd_accounting_parameters",
-          "tableTo": "rule",
-          "columnsFrom": [
-            "rule_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -1154,94 +1242,137 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.rule": {
-      "name": "rule",
+    "public.rule_accounting_dimension_value": {
+      "name": "rule_accounting_dimension_value",
+      "schema": "",
+      "columns": {
+        "rule_id": {
+          "name": "rule_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "definition_id": {
+          "name": "definition_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "rule_accounting_dimension_value_rule_id_rule_id_fk": {
+          "name": "rule_accounting_dimension_value_rule_id_rule_id_fk",
+          "tableFrom": "rule_accounting_dimension_value",
+          "tableTo": "rule",
+          "columnsFrom": [
+            "rule_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "rule_accounting_dimension_value_definition_id_erp_accounting_dimension_definition_id_fk": {
+          "name": "rule_accounting_dimension_value_definition_id_erp_accounting_dimension_definition_id_fk",
+          "tableFrom": "rule_accounting_dimension_value",
+          "tableTo": "erp_accounting_dimension_definition",
+          "columnsFrom": [
+            "definition_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "rule_accounting_dimension_value_rule_id_definition_id_pk": {
+          "name": "rule_accounting_dimension_value_rule_id_definition_id_pk",
+          "columns": [
+            "rule_id",
+            "definition_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.kmd_accounting_parameters": {
+      "name": "kmd_accounting_parameters",
       "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "uuid",
           "primaryKey": true,
           "notNull": true,
-          "identity": {
-            "type": "always",
-            "name": "rule_id_seq",
-            "schema": "public",
-            "increment": "1",
-            "startWith": "1",
-            "minValue": "1",
-            "maxValue": "2147483647",
-            "cache": "1",
-            "cycle": false
-          }
+          "default": "gen_random_uuid()"
         },
-        "last_used": {
-          "name": "last_used",
-          "type": "date",
+        "rule_id": {
+          "name": "rule_id",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
-        "created_at": {
-          "name": "created_at",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        },
-        "locked_at": {
-          "name": "locked_at",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "locked_by": {
-          "name": "locked_by",
+        "booking_text": {
+          "name": "booking_text",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "current_version_id": {
-          "name": "current_version_id",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "rule_type": {
-          "name": "rule_type",
-          "type": "rule_type",
+        "cpr_type": {
+          "name": "cpr_type",
+          "type": "cpr_type",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false
         },
-        "rule_status": {
-          "name": "rule_status",
-          "type": "rule_status",
-          "typeSchema": "public",
+        "cpr_number": {
+          "name": "cpr_number",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "amount_min": {
-          "name": "amount_min",
-          "type": "numeric",
+        "notify_to": {
+          "name": "notify_to",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "amount_max": {
-          "name": "amount_max",
-          "type": "numeric",
+        "note": {
+          "name": "note",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "kmd_accounting_parameters_rule_id_rule_id_fk": {
+          "name": "kmd_accounting_parameters_rule_id_rule_id_fk",
+          "tableFrom": "kmd_accounting_parameters",
+          "tableTo": "rule",
+          "columnsFrom": [
+            "rule_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -1424,6 +1555,46 @@
           ]
         }
       },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.tenant_configuration": {
+      "name": "tenant_configuration",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "active_erp_supplier": {
+          "name": "active_erp_supplier",
+          "type": "erp_supplier",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},

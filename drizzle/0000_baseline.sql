@@ -153,25 +153,16 @@ CREATE TABLE "outbox" (
 	CONSTRAINT "outbox_dedupe_key_unique" UNIQUE("dedupe_key")
 );
 --> statement-breakpoint
-CREATE TABLE "kmd_accounting_parameters" (
+CREATE TABLE "erp_accounting_dimension_definition" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"rule_id" integer,
-	"primary_account" text NOT NULL,
-	"secondary_account" text,
-	"tertiary_account" text,
-	"booking_text" text,
-	"cpr_type" "cpr_type",
-	"cpr_number" text,
-	"notify_to" text,
-	"note" text
-);
---> statement-breakpoint
-CREATE TABLE "kmd_attachment" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"parameter_id" uuid NOT NULL,
-	"name" text NOT NULL,
-	"file_extension" text NOT NULL,
-	"data" text NOT NULL
+	"erp_supplier" "erp_supplier" NOT NULL,
+	"key" text NOT NULL,
+	"erp_target" text,
+	"sort_order" integer DEFAULT 0 NOT NULL,
+	"required" boolean DEFAULT false NOT NULL,
+	"created_at" date DEFAULT now(),
+	"updated_at" date DEFAULT now(),
+	CONSTRAINT "erp_accounting_dimension_definition_supplier_key_unique" UNIQUE("erp_supplier","key")
 );
 --> statement-breakpoint
 CREATE TABLE "rule" (
@@ -182,10 +173,36 @@ CREATE TABLE "rule" (
 	"locked_at" date,
 	"locked_by" text,
 	"current_version_id" bigint NOT NULL,
+	"erp_supplier" "erp_supplier" NOT NULL,
 	"rule_type" "rule_type",
 	"rule_status" "rule_status",
 	"amount_min" numeric,
 	"amount_max" numeric
+);
+--> statement-breakpoint
+CREATE TABLE "kmd_attachment" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"parameter_id" uuid NOT NULL,
+	"name" text NOT NULL,
+	"file_extension" text NOT NULL,
+	"data" text NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "rule_accounting_dimension_value" (
+	"rule_id" integer NOT NULL,
+	"definition_id" uuid NOT NULL,
+	"value" text NOT NULL,
+	CONSTRAINT "rule_accounting_dimension_value_rule_id_definition_id_pk" PRIMARY KEY("rule_id","definition_id")
+);
+--> statement-breakpoint
+CREATE TABLE "kmd_accounting_parameters" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"rule_id" integer,
+	"booking_text" text,
+	"cpr_type" "cpr_type",
+	"cpr_number" text,
+	"notify_to" text,
+	"note" text
 );
 --> statement-breakpoint
 CREATE TABLE "rule_bank_account" (
@@ -206,6 +223,13 @@ CREATE TABLE "rule_rule_tag" (
 	"rule_id" integer NOT NULL,
 	"rule_tag_id" text NOT NULL,
 	CONSTRAINT "rule_rule_tag_rule_id_rule_tag_id_pk" PRIMARY KEY("rule_id","rule_tag_id")
+);
+--> statement-breakpoint
+CREATE TABLE "tenant_configuration" (
+	"id" integer PRIMARY KEY NOT NULL,
+	"active_erp_supplier" "erp_supplier" NOT NULL,
+	"created_at" date DEFAULT now(),
+	"updated_at" date DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE "rule_tag" (
@@ -324,8 +348,10 @@ ALTER TABLE "erp_response" ADD CONSTRAINT "erp_response_request_id_erp_request_i
 ALTER TABLE "error" ADD CONSTRAINT "error_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "job" ADD CONSTRAINT "job_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "outbox" ADD CONSTRAINT "outbox_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "kmd_accounting_parameters" ADD CONSTRAINT "kmd_accounting_parameters_rule_id_rule_id_fk" FOREIGN KEY ("rule_id") REFERENCES "public"."rule"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "kmd_attachment" ADD CONSTRAINT "kmd_attachment_parameter_id_kmd_accounting_parameters_id_fk" FOREIGN KEY ("parameter_id") REFERENCES "public"."kmd_accounting_parameters"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "rule_accounting_dimension_value" ADD CONSTRAINT "rule_accounting_dimension_value_rule_id_rule_id_fk" FOREIGN KEY ("rule_id") REFERENCES "public"."rule"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "rule_accounting_dimension_value" ADD CONSTRAINT "rule_accounting_dimension_value_definition_id_erp_accounting_dimension_definition_id_fk" FOREIGN KEY ("definition_id") REFERENCES "public"."erp_accounting_dimension_definition"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "kmd_accounting_parameters" ADD CONSTRAINT "kmd_accounting_parameters_rule_id_rule_id_fk" FOREIGN KEY ("rule_id") REFERENCES "public"."rule"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "rule_bank_account" ADD CONSTRAINT "rule_bank_account_rule_id_rule_id_fk" FOREIGN KEY ("rule_id") REFERENCES "public"."rule"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "rule_bank_account" ADD CONSTRAINT "rule_bank_account_bank_account_id_account_id_fk" FOREIGN KEY ("bank_account_id") REFERENCES "public"."account"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "rule_banking_condition" ADD CONSTRAINT "rule_banking_condition_rule_id_rule_id_fk" FOREIGN KEY ("rule_id") REFERENCES "public"."rule"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

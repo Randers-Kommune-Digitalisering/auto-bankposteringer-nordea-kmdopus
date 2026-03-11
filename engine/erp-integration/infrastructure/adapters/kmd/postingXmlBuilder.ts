@@ -1,6 +1,7 @@
 import crypto from 'node:crypto'
 import { Builder } from 'xml2js'
 import { erpIntegrationMetadata, type ErpIntegrationMetadata } from '~/lib/env'
+import type { DimensionKeyByTarget } from '../../../ports/erpAdapter'
 import type { PostingAttachment, PostingLineInput } from '../../../../posting/domain/posting'
 
 const builder = new Builder({
@@ -17,6 +18,7 @@ export interface BuildPostingXmlOptions {
   isProduction?: boolean
   nonProductionMunicipalityCode?: string
   nonProductionEnvironmentCode?: string
+  dimensionKeyByTarget?: DimensionKeyByTarget
 }
 
 export interface PostingXmlResult {
@@ -63,11 +65,21 @@ export function buildErpPostingXml(postings: PostingLineInput[], options: BuildP
       creditSum += amountInOre
     }
 
-    let secondaryAccount = posting.accountSecondary
-    let glAccount = String(posting.account)
+    const glAccountKey = options.dimensionKeyByTarget?.glAccount ?? 'artskonto'
+    const costCenterKey = options.dimensionKeyByTarget?.costCenter ?? 'omkostningssted'
+    const wbsElementKey = options.dimensionKeyByTarget?.wbsElement ?? 'psp-element'
+
+    const glAccountValue = posting.dimensions?.[glAccountKey]
+    if (!glAccountValue) {
+      throw new Error(`Mangler påkrævet konteringsdimension: ${glAccountKey} (target=glAccount)`) 
+    }
+
+    let glAccount = String(glAccountValue)
+    let wbsElement = posting.dimensions?.[wbsElementKey]
+    const costCenter = posting.dimensions?.[costCenterKey]
 
     if (!isProduction) {
-      secondaryAccount = posting.accountSecondary ? 'XG-9999999990-00001' : undefined
+      wbsElement = wbsElement ? 'XG-9999999990-00001' : undefined
       glAccount = glAccount.startsWith('9') ? '90515060' : '29505050'
     }
 
@@ -81,8 +93,8 @@ export function buildErpPostingXml(postings: PostingLineInput[], options: BuildP
       ZZCSYSIDN: metadata.integrationId,
     }
 
-    if (posting.accountTertiary) line.COSTCENTER = posting.accountTertiary
-    if (secondaryAccount) line.WBS_ELEMENT = secondaryAccount
+    if (costCenter) line.COSTCENTER = costCenter
+    if (wbsElement) line.WBS_ELEMENT = wbsElement
 
     if (posting.cpr) {
       line.SERV_REC_NO_CODE = '02'

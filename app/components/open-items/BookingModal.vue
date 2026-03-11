@@ -29,6 +29,8 @@ const isSubmitting = ref(false)
 const {
 	manualBookingFormSchema,
 	formState,
+	accountingDimensionDefinitions,
+	accountingDimensionValues,
 	cprTypeOptions,
 	handleAttachmentUpdate,
 	buildManualBookingPayload
@@ -87,15 +89,15 @@ async function handleSubmit(event?: FormSubmitEvent<ManualFormState>) {
 						@submit="handleSubmit"
 					>
 						<div class="grid gap-4 md:grid-cols-2">
-							<UFormField label="Primær konto" name="primaryAccount" required>
-								<UInput v-model="formState.primaryAccount" placeholder="Artskonto" />
-							</UFormField>
-							<UFormField label="Sekundær konto" name="secondaryAccount">
-								<UInput v-model="formState.secondaryAccount" placeholder="PSP-element" />
-							</UFormField>
-							<UFormField label="Tertiær konto" name="tertiaryAccount">
-								<UInput v-model="formState.tertiaryAccount" placeholder="Omkostningssted" />
-							</UFormField>
+								<UFormField
+									v-for="def in accountingDimensionDefinitions"
+									:key="def.id"
+									:label="def.key"
+									name="dimensions"
+									:required="def.required"
+								>
+									<UInput v-model="accountingDimensionValues[def.key]" :placeholder="def.key" />
+								</UFormField>
 							<UFormField label="Posteringstekst" name="text">
 								<UInput v-model="formState.text" placeholder="Tekst fra bank" />
 							</UFormField>

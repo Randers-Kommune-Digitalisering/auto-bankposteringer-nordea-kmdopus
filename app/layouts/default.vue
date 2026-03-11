@@ -115,7 +115,7 @@ const links = [[
     type: 'trigger',
     children: [
       {
-        label: 'Rollback af regler',
+        label: 'Regeladministration',
         to: '/fejlhaandtering/regler',
         onSelect: () => {
           open.value = false

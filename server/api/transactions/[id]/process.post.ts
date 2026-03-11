@@ -13,6 +13,11 @@ import {
   resolvePostingText,
   type PostingTransactionContext,
 } from '#engine/matching/domain/postingUtils'
+import {
+  getActiveErpSupplier,
+  listAccountingDimensionDefinitions,
+  normalizeDimensionInput,
+} from '~~/server/utils/accountingDimensions'
 
 export default defineEventHandler(async (event) => {
   const transactionIdParam = event.context.params?.id;
@@ -75,10 +80,18 @@ export default defineEventHandler(async (event) => {
   const amount = parseNumeric(row.amount);
   const statusAccount = row.statusAccount ? String(row.statusAccount) : env.ERP_ERROR_ACCOUNT;
 
+  const supplier = await getActiveErpSupplier()
+  const definitions = await listAccountingDimensionDefinitions(supplier)
+  const normalizedDimensions = normalizeDimensionInput(body.dimensions)
+  validateDimensionsAgainstDefinitions(normalizedDimensions, definitions)
+  const landingDimensions = Object.fromEntries(
+    normalizedDimensions.map((d) => [d.key, d.value]),
+  )
+
   const txContext: PostingTransactionContext = {
     transactionId: row.id,
     amount,
-    statusAccount,
+    statusDimensions: { artskonto: statusAccount },
     debtorName: row.debtorName,
     debtorId: row.debtorId,
     creditorName: row.creditorName,
@@ -101,9 +114,7 @@ export default defineEventHandler(async (event) => {
 
   const command = buildPostingCommand({
     transaction: txContext,
-    landingAccount: sanitizeAccount(body.primaryAccount),
-    landingSecondary: normalizeOptionalString(body.secondaryAccount) ?? undefined,
-    landingTertiary: normalizeOptionalString(body.tertiaryAccount) ?? undefined,
+    landingDimensions,
     text: postingText,
     cpr: resolvedCpr,
     attachments: attachments.length ? attachments : undefined,
@@ -165,12 +176,27 @@ function normalizeDigits(value?: string | null): string | null {
   return digits.length ? digits : null;
 }
 
-function sanitizeAccount(value: string): string {
-  const trimmed = value.trim();
-  if (!trimmed) {
-    throw createError({ statusCode: 422, statusMessage: "Primær konto er påkrævet" });
+function validateDimensionsAgainstDefinitions(
+  dimensions: Array<{ key: string; value: string }>,
+  definitions: Array<{ key: string; required: boolean }>,
+) {
+  const allowedKeys = new Set(definitions.map((d) => d.key))
+  for (const d of dimensions) {
+    if (!allowedKeys.has(d.key)) {
+      throw createError({
+        statusCode: 422,
+        statusMessage: `Ukendt konteringsdimension for ERP: ${d.key}`,
+      })
+    }
   }
-  return trimmed;
+  for (const def of definitions) {
+    if (def.required && !dimensions.some((d) => d.key === def.key)) {
+      throw createError({
+        statusCode: 422,
+        statusMessage: `Manglende påkrævet konteringsdimension: ${def.key}`,
+      })
+    }
+  }
 }
 
 function resolveManualCpr(

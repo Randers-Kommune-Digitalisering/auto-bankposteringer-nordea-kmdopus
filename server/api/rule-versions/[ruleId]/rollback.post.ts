@@ -3,15 +3,25 @@ import { and, eq, max } from 'drizzle-orm'
 import { z } from 'zod'
 import db from '~/lib/db'
 import {
-  kmdAccountingParameters,
-  kmdAttachment,
+  erpAccountingDimensionDefinition,
+  ruleAccountingParameters,
+  ruleAccountingAttachment,
   mapMatchesToConditionRows,
   rule,
+  ruleAccountingDimensionValue,
   ruleBankAccount,
   ruleBankingCondition,
   ruleRuleTag,
 } from '~/lib/db/schema/rule'
 import { ruleVersion, type RuleVersionInsertSchema } from '~/lib/db/schema/ruleVersion'
+import { resolveDimensionValueRows, type AccountingDimensionDefinition } from '~~/server/utils/accountingDimensions'
+
+type CprType = 'ingen' | 'statisk' | 'dynamisk'
+
+function normalizeCprType(value: unknown): CprType | null {
+  if (value === 'ingen' || value === 'statisk' || value === 'dynamisk') return value
+  return null
+}
 
 const requestSchema = z.object({
   version: z.number().int().positive(),
@@ -34,7 +44,12 @@ const versionContentSchema = z
     matches: z.array(z.any()).optional().default([]),
     accounting: z
       .object({
-        primaryAccount: z.string().min(1),
+        dimensions: z.array(z.object({
+          key: z.string().min(1),
+          value: z.string().min(1),
+        })).optional().default([]),
+        // Legacy fields (pre-dimensions refactor)
+        primaryAccount: z.string().optional().nullable(),
         secondaryAccount: z.string().optional().nullable(),
         tertiaryAccount: z.string().optional().nullable(),
         bookingText: z.string().optional().nullable(),
@@ -73,6 +88,7 @@ export default defineEventHandler(async (event) => {
     columns: {
       id: true,
       currentVersionId: true,
+      erpSupplier: true,
     },
   })
 
@@ -162,36 +178,71 @@ export default defineEventHandler(async (event) => {
       await tx.insert(ruleBankingCondition).values(conditionRows.map((condition) => ({ ...condition, ruleId })))
     }
 
-    const accountingParameters = {
-      primaryAccount: String(accounting.primaryAccount ?? ''),
-      secondaryAccount: accounting.secondaryAccount ?? null,
-      tertiaryAccount: accounting.tertiaryAccount ?? null,
+    // Replace dynamic accounting dimensions
+    await tx.delete(ruleAccountingDimensionValue).where(eq(ruleAccountingDimensionValue.ruleId, ruleId))
+
+    const definitions: AccountingDimensionDefinition[] = await tx
+      .select({
+        id: erpAccountingDimensionDefinition.id,
+        key: erpAccountingDimensionDefinition.key,
+        required: erpAccountingDimensionDefinition.required,
+        sortOrder: erpAccountingDimensionDefinition.sortOrder,
+        erpTarget: erpAccountingDimensionDefinition.erpTarget,
+      })
+      .from(erpAccountingDimensionDefinition)
+      .where(eq(erpAccountingDimensionDefinition.erpSupplier, existingRule.erpSupplier as any))
+
+    const legacyFallbackDimensions = (!accounting.dimensions?.length && existingRule.erpSupplier === 'kmd')
+      ? [
+          accounting.primaryAccount ? { key: 'artskonto', value: String(accounting.primaryAccount) } : null,
+          accounting.secondaryAccount ? { key: 'omkostningssted', value: String(accounting.secondaryAccount) } : null,
+          accounting.tertiaryAccount ? { key: 'psp-element', value: String(accounting.tertiaryAccount) } : null,
+        ].filter(Boolean) as any
+      : accounting.dimensions
+
+    const dimensionRows = resolveDimensionValueRows({
+      ruleId,
+      dimensions: legacyFallbackDimensions,
+      definitions,
+    })
+
+    if (dimensionRows.length) {
+      await tx.insert(ruleAccountingDimensionValue).values(dimensionRows)
+    }
+
+    const accountingParameters: {
+      bookingText: string | null
+      cprType: CprType | null
+      cprNumber: string | null
+      notifyTo: string | null
+      note: string | null
+    } = {
       bookingText: accounting.bookingText ?? null,
-      cprType: accounting.cprType ?? null,
+      cprType: normalizeCprType(accounting.cprType),
       cprNumber: accounting.cprNumber ?? null,
       notifyTo: accounting.notifyTo ?? null,
       note: accounting.note ?? null,
     }
 
     const [existingParameters] = await tx
-      .update(kmdAccountingParameters)
+      .update(ruleAccountingParameters)
       .set(accountingParameters)
-      .where(eq(kmdAccountingParameters.ruleId, ruleId))
-      .returning({ id: kmdAccountingParameters.id })
+      .where(eq(ruleAccountingParameters.ruleId, ruleId))
+      .returning({ id: ruleAccountingParameters.id })
 
     let parameterId = existingParameters?.id
     if (!parameterId) {
       const [created] = await tx
-        .insert(kmdAccountingParameters)
+        .insert(ruleAccountingParameters)
         .values({ ...accountingParameters, ruleId })
-        .returning({ id: kmdAccountingParameters.id })
+        .returning({ id: ruleAccountingParameters.id })
       parameterId = created?.id
     }
 
     if (parameterId) {
-      await tx.delete(kmdAttachment).where(eq(kmdAttachment.parameterId, parameterId))
+      await tx.delete(ruleAccountingAttachment).where(eq(ruleAccountingAttachment.parameterId, parameterId))
       if (attachments.length) {
-        await tx.insert(kmdAttachment).values(
+        await tx.insert(ruleAccountingAttachment).values(
           attachments.map((attachment: any) => ({
             parameterId,
             name: String(attachment.name),

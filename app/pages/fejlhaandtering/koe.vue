@@ -171,7 +171,7 @@ async function enqueue(type: 'banking.ingest' | 'erp.ingestResponses') {
           />
           <UButton
             icon="i-lucide-plus"
-            label="Opret banking.ingest job"
+            label='Hent bankdata'
             color="neutral"
             variant="soft"
             :loading="enqueuing === 'banking.ingest'"
@@ -179,7 +179,7 @@ async function enqueue(type: 'banking.ingest' | 'erp.ingestResponses') {
           />
           <UButton
             icon="i-lucide-plus"
-            label="Opret erp.ingestResponses job"
+            label='Hent svar fra ERP'
             color="neutral"
             variant="soft"
             :loading="enqueuing === 'erp.ingestResponses'"
@@ -187,7 +187,7 @@ async function enqueue(type: 'banking.ingest' | 'erp.ingestResponses') {
           />
         </div>
 
-        <div class="grid gap-6 lg:grid-cols-2 mt-6">
+        <div class="grid gap-6 mt-6">
           <div>
             <div class="flex items-center justify-between mb-2">
               <div class="font-medium">Fejlede jobs</div>

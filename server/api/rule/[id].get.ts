@@ -1,6 +1,7 @@
 import { defineEventHandler, createError } from 'h3'
 import { eq } from 'drizzle-orm'
 import { mapConditionsToMatches, ruleDraftSchema, rule } from '~/lib/db/schema/rule'
+import { mapDimensionRowsToDto } from '~~/server/utils/accountingDimensions'
 import db from '~/lib/db'
 
 function normalizeDbRow(row: any) {
@@ -36,6 +37,18 @@ export default defineEventHandler(async (event) => {
           }
         },
         conditions: true,
+        accountingDimensions: {
+          with: {
+            definition: {
+              columns: {
+                key: true,
+              }
+            }
+          },
+          columns: {
+            value: true,
+          }
+        },
         accountingParameters: {
           with: {
             attachments: true
@@ -68,7 +81,7 @@ export default defineEventHandler(async (event) => {
     // --------------------------
     // Byg draft objekt
     // --------------------------
-    const { accountingParameters, conditions, ...rest } = dbRule
+    const { accountingParameters, conditions, accountingDimensions, ...rest } = dbRule
     const normalizedRule = normalizeDbRow(rest)
     const relatedBankAccounts = dbRule.bankAccounts?.map(acc => acc.bankAccountId).filter(Boolean) ?? []
     const ruleTags = dbRule.tags?.map(tag => tag.ruleTagId).filter(Boolean) ?? []
@@ -79,6 +92,7 @@ export default defineEventHandler(async (event) => {
     delete (normalizedRule as any).accountingParameters
 
     const matches = mapConditionsToMatches(conditions ?? [])
+    const dimensions = mapDimensionRowsToDto((accountingDimensions ?? []) as any)
     const attachments = accountingParameters?.attachments ?? []
     const attachmentNames = attachments.map(att => att.name)
     const attachmentExtensions = attachments.map(att => att.fileExtension)
@@ -88,9 +102,7 @@ export default defineEventHandler(async (event) => {
       relatedBankAccounts,
       ruleTags,
       matches,
-      accountingPrimaryAccount: accountingParameters?.primaryAccount ?? '',
-      accountingSecondaryAccount: accountingParameters?.secondaryAccount ?? undefined,
-      accountingTertiaryAccount: accountingParameters?.tertiaryAccount ?? undefined,
+      accountingDimensions: dimensions.length ? dimensions : undefined,
       accountingText: accountingParameters?.bookingText ?? undefined,
       accountingCprType: accountingParameters?.cprType ?? 'ingen',
       accountingCprNumber: accountingParameters?.cprNumber ?? undefined,

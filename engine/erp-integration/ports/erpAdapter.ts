@@ -2,10 +2,17 @@ import type { PostingLineInput } from '../../posting/domain/posting'
 
 export type ErpSupplierKey = string
 
+// Abstract targets that ERP adapters can map to.
+// Example (KMD): GL_ACCOUNT, COSTCENTER, WBS_ELEMENT.
+export type ErpPostingDimensionTarget = 'glAccount' | 'costCenter' | 'wbsElement'
+
+export type DimensionKeyByTarget = Partial<Record<ErpPostingDimensionTarget, string>>
+
 export type BuildErpRequestInput = {
   runId: string
   bookingDate: Date | string
   postings: PostingLineInput[]
+  dimensionKeyByTarget?: DimensionKeyByTarget
 }
 
 export type BuiltErpRequest = {

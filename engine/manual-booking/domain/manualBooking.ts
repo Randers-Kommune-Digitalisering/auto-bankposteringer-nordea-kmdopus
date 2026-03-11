@@ -9,10 +9,13 @@ const attachmentSchema = z.object({
   data: z.string().min(1),
 })
 
+const accountingDimensionSchema = z.object({
+  key: z.string().min(1),
+  value: z.string().min(1),
+})
+
 const baseManualBookingShape = {
-  primaryAccount: z.string().min(1, 'Primær konto er påkrævet'),
-  secondaryAccount: z.string().optional(),
-  tertiaryAccount: z.string().optional(),
+  dimensions: z.array(accountingDimensionSchema).optional(),
   text: z.string().optional(),
   cprType: z.enum(cprTypeValues),
   cprNumber: z.string().optional(),

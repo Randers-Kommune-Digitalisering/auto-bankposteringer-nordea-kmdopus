@@ -37,6 +37,82 @@ const steps = [
   { id: 'accounting', title: 'Kontering', description: 'Angiv oplysninger relevant for bogføringen' }
 ]
 
+// -----------------------
+// State (declared early)
+// -----------------------
+type RuleDraftUiState = Omit<RuleDraftSchema, 'matches' | 'currentVersionId'> & {
+  matches?: MatchEntry[]
+}
+
+function createEmptyDraft(): RuleDraftUiState {
+  return {
+    type: 'standard' as RuleType,
+    status: 'aktiv' as RuleStatus,
+    lockedAt: undefined,
+    relatedBankAccounts: [],
+    matchAmountMin: undefined,
+    matchAmountMax: undefined,
+    accountingDimensions: [],
+    accountingText: undefined,
+    accountingCprType: 'ingen' as CprType,
+    accountingCprNumber: undefined,
+    accountingNotifyTo: undefined,
+    accountingNote: undefined,
+    accountingAttachmentName: undefined,
+    accountingAttachmentFileExtension: undefined,
+    accountingAttachmentData: undefined,
+    ruleTags: undefined,
+  }
+}
+
+const state = reactive<RuleDraftUiState>(createEmptyDraft())
+
+// ---------------------
+// Match object handlers
+// ---------------------
+const matches = ref<MatchEntry[]>([])
+
+// ----------------------
+// Accounting dimensions
+// ----------------------
+type AccountingDimensionDefinition = {
+  id: string
+  key: string
+  required: boolean
+  sortOrder: number
+}
+
+type AccountingDimensionsResponse = {
+  erpSupplier: string
+  dimensions: AccountingDimensionDefinition[]
+}
+
+const { data: accountingDimensionConfig } = await useFetch<AccountingDimensionsResponse>(
+  '/api/settings/accounting-dimensions',
+  { key: 'accounting-dimensions' },
+)
+
+const accountingDimensionDefinitions = computed<AccountingDimensionDefinition[]>(
+  () => accountingDimensionConfig.value?.dimensions ?? [],
+)
+
+const accountingDimensionValues = reactive<Record<string, string>>({})
+
+function syncAccountingDimensionsToState() {
+  state.accountingDimensions = Object.entries(accountingDimensionValues)
+    .map(([key, value]) => ({ key, value: value.trim() }))
+    .filter(entry => entry.value.length > 0)
+}
+
+watchEffect(() => {
+  for (const def of accountingDimensionDefinitions.value) {
+    if (accountingDimensionValues[def.key] == null) {
+      accountingDimensionValues[def.key] = ''
+    }
+  }
+  syncAccountingDimensionsToState()
+})
+
 // --------------------
 // Load rule if editing
 // --------------------
@@ -53,6 +129,17 @@ function hydrateDraft(rule: RuleDraftSchema & { matches?: MatchEntry[] }) {
     ...rule,
     matches: undefined
   })
+
+  for (const key of Object.keys(accountingDimensionValues)) {
+    delete accountingDimensionValues[key]
+  }
+  for (const def of accountingDimensionDefinitions.value) {
+    accountingDimensionValues[def.key] = ''
+  }
+  for (const dim of rule.accountingDimensions ?? []) {
+    accountingDimensionValues[dim.key] = dim.value
+  }
+  syncAccountingDimensionsToState()
 
   matches.value = rule.matches ?? []
 }
@@ -76,11 +163,6 @@ const ruleTagOptions = computed(() =>
     value: tag.id
   }))
 )
-
-// ---------------------
-// Match object handlers
-// ---------------------
-const matches = ref<MatchEntry[]>([])
 
 function initCategoryRecord<T>(
   initial: () => T
@@ -158,40 +240,17 @@ const handleAttachmentUpdate = (value: AttachmentPayload | null) => {
 }
 
 // -----------------------
-// State & schema creation
+// Schema creation
 // -----------------------
-type RuleDraftUiState = Omit<RuleDraftSchema, 'matches' | 'currentVersionId'> & {
-  matches?: MatchEntry[]
-}
-
-function createEmptyDraft(): RuleDraftUiState {
-  return {
-    type: 'standard' as RuleType,
-    status: 'aktiv' as RuleStatus,
-    lockedAt: undefined,
-    relatedBankAccounts: [],
-    matchAmountMin: undefined,
-    matchAmountMax: undefined,
-    accountingPrimaryAccount: '',
-    accountingSecondaryAccount: undefined,
-    accountingTertiaryAccount: undefined,
-    accountingText: undefined,
-    accountingCprType: 'ingen' as CprType,
-    accountingCprNumber: undefined,
-    accountingNotifyTo: undefined,
-    accountingNote: undefined,
-    accountingAttachmentName: undefined,
-    accountingAttachmentFileExtension: undefined,
-    accountingAttachmentData: undefined,
-    ruleTags: undefined
-  }
-}
-
-const state = reactive<RuleDraftUiState>(createEmptyDraft())
-
 function resetForm() {
   Object.assign(state, createEmptyDraft())
   matches.value = []
+  for (const key of Object.keys(accountingDimensionValues)) {
+    delete accountingDimensionValues[key]
+  }
+  for (const def of accountingDimensionDefinitions.value) {
+    accountingDimensionValues[def.key] = ''
+  }
   currentStep.value = 0
 }
 
@@ -266,6 +325,8 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
   state.accountingAttachmentName = attachments.value?.names ?? undefined
   state.accountingAttachmentFileExtension = attachments.value?.extensions ?? undefined
   state.accountingAttachmentData = attachments.value?.base64 ?? undefined
+
+  syncAccountingDimensionsToState()
 
   const payload = {
     ...state,
@@ -511,14 +572,18 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
             <!-- ACCOUNTING STEP -->
             <template v-if="item.id === 'accounting'">
               <div class="grid grid-cols-1 gap-4 mt-6 mb-6 w-full max-w-full">
-                <UFormField label="Primær konto" name="accountingPrimaryAccount" required>
-                  <UInput v-model="state.accountingPrimaryAccount" class="w-full" placeholder="Artskonto i Opus" />
-                </UFormField>
-                <UFormField label="Sekundær konto" name="accountingSecondaryAccount">
-                  <UInput v-model="state.accountingSecondaryAccount" class="w-full" placeholder="PSP-element i Opus" />
-                </UFormField>
-                <UFormField label="Tertiær konto" name="accountingTertiaryAccount">
-                  <UInput v-model="state.accountingTertiaryAccount" class="w-full" placeholder="Omkostningssted i Opus" />
+                <UFormField
+                  v-for="def in accountingDimensionDefinitions"
+                  :key="def.id"
+                  :label="def.key"
+                  name="accountingDimensions"
+                  :required="def.required"
+                >
+                  <UInput
+                    v-model="accountingDimensionValues[def.key]"
+                    class="w-full"
+                    :placeholder="def.key"
+                  />
                 </UFormField>
                 <UFormField label="Posteringstekst" name="accountingText">
                   <UInput v-model="state.accountingText" class="w-full" placeholder="Valgfri" />

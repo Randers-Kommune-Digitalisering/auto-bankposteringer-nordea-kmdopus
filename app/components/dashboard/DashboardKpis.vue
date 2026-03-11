@@ -41,7 +41,7 @@ const stats = computed<DashboardStat[]>(() => {
       key: 'open-items',
       title: 'Åbne poster',
       icon: 'i-lucide-inbox',
-      to: '/open-items',
+      to: '/aabne-poster',
       value: formatInt(kpis.openTransactions)
     },
     {
@@ -57,7 +57,7 @@ const stats = computed<DashboardStat[]>(() => {
       key: 'errors',
       title: 'Fejl',
       icon: 'i-lucide-triangle-alert',
-      to: '/runs',
+      to: '/koersler',
       value: formatInt(kpis.errorCount),
       badge: 'fejl',
       sub: `Kørsler: ${formatInt(kpis.failedRuns)}`

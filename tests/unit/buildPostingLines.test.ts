@@ -10,9 +10,9 @@ describe('buildPostingLines', () => {
       transaction: {
         transactionId: txId,
         amount: 123.45,
-        statusAccount: '95999999',
+        statusDimensions: { artskonto: '95999999' },
       },
-      landingAccount: '12345678',
+      landingDimensions: { artskonto: '12345678' },
       text: 'Test',
     })
 

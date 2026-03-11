@@ -8,9 +8,18 @@ interface ErpMetadataResponse {
   compCode: string
   integrationId: string
   integrationFileNameMask: string
-  primaryAccountLabel: string
-  secondaryAccountLabel: string
-  tertiaryAccountLabel: string
+}
+
+type AccountingDimensionDefinition = {
+  id: string
+  key: string
+  required: boolean
+  sortOrder: number
+}
+
+type AccountingDimensionsResponse = {
+  erpSupplier: string
+  dimensions: AccountingDimensionDefinition[]
 }
 
 const { data: erpMetadata } = await useFetch<ErpMetadataResponse>(
@@ -26,11 +35,16 @@ const { data: erpMetadata } = await useFetch<ErpMetadataResponse>(
       compCode: '',
       integrationId: '',
       integrationFileNameMask: '',
-      primaryAccountLabel: '',
-      secondaryAccountLabel: '',
-      tertiaryAccountLabel: ''
     })
   }
+)
+
+const { data: accountingDimensions } = await useFetch<AccountingDimensionsResponse>(
+  '/api/settings/accounting-dimensions',
+  {
+    key: 'accounting-dimensions-settings',
+    default: () => ({ erpSupplier: '', dimensions: [] }),
+  },
 )
 
 const metadataFields = computed(() => [
@@ -42,10 +56,15 @@ const metadataFields = computed(() => [
   { label: 'Comp kode', value: erpMetadata.value?.compCode ?? '—' },
   { label: 'Integration ID', value: erpMetadata.value?.integrationId ?? '—' },
   { label: 'Filnavn-mask', value: erpMetadata.value?.integrationFileNameMask ?? '—' },
-  { label: 'Primær konto label', value: erpMetadata.value?.primaryAccountLabel ?? '—' },
-  { label: 'Sekundær konto label', value: erpMetadata.value?.secondaryAccountLabel ?? '—' },
-  { label: 'Tertiær konto label', value: erpMetadata.value?.tertiaryAccountLabel ?? '—' }
 ])
+
+const dimensionFields = computed(() => {
+  const dims = accountingDimensions.value?.dimensions ?? []
+  return dims.map((d) => ({
+    label: `Konteringsdimension: ${d.key}`,
+    value: d.required ? 'Påkrævet' : 'Valgfri',
+  }))
+})
 </script>
 
 <template>
@@ -67,6 +86,27 @@ const metadataFields = computed(() => [
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div
             v-for="field in metadataFields"
+            :key="field.label"
+            class="flex flex-col gap-1"
+          >
+            <span class="text-xs font-semibold text-muted">{{ field.label }}</span>
+            <UInput
+              :model-value="field.value"
+              readonly
+              class="font-mono text-sm"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section class="space-y-3 mt-8">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-muted">Konteringsdimensioner</p>
+          <p class="text-sm text-muted">Hentes dynamisk fra databasen for aktiv ERP leverandør.</p>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div
+            v-for="field in dimensionFields"
             :key="field.label"
             class="flex flex-col gap-1"
           >
