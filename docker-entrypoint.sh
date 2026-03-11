@@ -4,7 +4,14 @@ set -e
 if [ "$NODE_ENV" = "production" ]; then
   echo "Running database migrations (production)..."
   pnpm db:migrate
+  echo "Seeding system configuration (production)..."
+  pnpm db:seed:system
 else
+  if [ "${DB_RESET_ON_START:-}" = "1" ]; then
+    echo "Resetting public schema (dev)..."
+    pnpm db:reset:public
+  fi
+
   if [ "${DB_MIGRATE_ON_START:-}" = "1" ]; then
     echo "Running database migrations (dev)..."
     pnpm db:migrate

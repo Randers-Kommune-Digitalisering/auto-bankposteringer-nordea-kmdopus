@@ -3,7 +3,7 @@ import type { PostingAttachment, PostingLineInput } from '../../posting/domain/p
 export type PostingTransactionContext = {
   transactionId: string
   amount: number
-  statusAccount: string
+  statusDimensions: Record<string, string>
 
   // CAMT.053 party + remittance fields used for posting text/counterparty
   debtorName?: string | null
@@ -19,9 +19,7 @@ export type PostingTransactionContext = {
 
 export function buildPostingLines(options: {
   transaction: PostingTransactionContext
-  landingAccount: string
-  landingSecondary?: string
-  landingTertiary?: string
+  landingDimensions: Record<string, string>
   text: string
   cpr?: string
   attachments?: PostingAttachment[]
@@ -30,7 +28,7 @@ export function buildPostingLines(options: {
   const isIncoming = options.transaction.amount >= 0
   const statusLine: PostingLineInput = {
     transactionId: options.transaction.transactionId,
-    account: options.transaction.statusAccount,
+    dimensions: options.transaction.statusDimensions,
     debetOrCredit: isIncoming ? 'Debet' : 'Kredit',
     amount: amountAbs,
     text: truncate(options.text),
@@ -38,9 +36,7 @@ export function buildPostingLines(options: {
 
   const landingLine: PostingLineInput = {
     transactionId: options.transaction.transactionId,
-    account: options.landingAccount,
-    accountSecondary: options.landingSecondary,
-    accountTertiary: options.landingTertiary,
+    dimensions: options.landingDimensions,
     debetOrCredit: isIncoming ? 'Kredit' : 'Debet',
     amount: amountAbs,
     text: truncate(options.text),

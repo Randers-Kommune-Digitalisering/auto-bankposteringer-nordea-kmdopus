@@ -12,9 +12,7 @@ export interface PostingLineInput {
   transactionId?: string
   amount: number | string
   debetOrCredit: 'Debet' | 'Kredit'
-  account: string
-  accountSecondary?: string
-  accountTertiary?: string
+  dimensions: Record<string, string>
   text?: string
   cpr?: string
   attachmentName?: string

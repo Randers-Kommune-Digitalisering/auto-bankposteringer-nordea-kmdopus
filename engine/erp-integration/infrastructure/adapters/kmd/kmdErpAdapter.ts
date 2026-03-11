@@ -1,4 +1,4 @@
-import type { ErpAdapter } from '../../../ports/erpAdapter'
+import type { BuildErpRequestInput, ErpAdapter } from '../../../ports/erpAdapter'
 import type { PostingLineInput } from '../../../../posting/domain/posting'
 import { buildErpPostingXml, type BuildPostingXmlOptions } from './postingXmlBuilder'
 import { ErpSftpClient, type RemoteFile } from './sftpClient'
@@ -21,10 +21,11 @@ export function createKmdErpAdapter(options: {
   return {
     supplier: 'kmd',
 
-    buildRequest(input: { runId: string; bookingDate: Date | string; postings: PostingLineInput[] }) {
+    buildRequest(input: BuildErpRequestInput) {
       const xmlOptions: BuildPostingXmlOptions = {
         bookingDate: input.bookingDate,
         runUid: input.runId,
+        dimensionKeyByTarget: input.dimensionKeyByTarget,
         ...options.xmlOptions,
       }
 

@@ -19,9 +19,17 @@ This repo is a stateless financial integration engine:
 - `banking_statement_balance`: statement balances (OPBD/CLBD/CLAV, etc.)
 - `transaction`: normalized entry/tx details (Refs, Parties, BkTxCd, remittance)
 - `rule` + `rule_banking_condition`: deterministic matching rules (CAMT-keyed)
+- `erp_accounting_dimension_definition`: supplier-scoped definition of accounting dimensions (domain key, required/optional, ordering)
+- `rule_accounting_dimension_value`: per-rule values for accounting dimensions (normalized; no hardcoded primary/secondary/tertiary)
 - `transaction_processing`: processing status / rule-applied locking
 - `banking_adapter_cursor`: opaque cursor per (account, adapter) for incremental fetching
 - `run`: batch execution unit (audit/logging)
+
+### Accounting dimensions (ERP)
+
+Accounting dimensions are configured in the database. The engine/UI treat dimensions as domain keys (e.g. `artskonto`, `omkostningssted`, `psp-element`) and persist values per rule.
+
+ERP adapters may need to map these domain keys into ERP-specific fields (e.g. GL account, cost center, WBS). That mapping is also data-driven via `erpTarget` on `erp_accounting_dimension_definition`, so adapters do not hardcode which domain key corresponds to which ERP field.
 
 ## System diagram
 
@@ -31,11 +39,11 @@ flowchart LR
     Pages[Pages/Components]
   end
 
-  subgraph API[Nitro server/api]
-    RunsAPI[/api/runs]
-    TxAPI[/api/transactions]
-    RulesAPI[/api/rules]
-    SettingsAPI[/api/settings]
+  subgraph API["Nitro server/api"]
+    RunsAPI["/api/runs"]
+    TxAPI["/api/transactions"]
+    RulesAPI["/api/rules"]
+    SettingsAPI["/api/settings"]
   end
 
   subgraph Engine[Engine (domain + handlers)]
@@ -86,3 +94,4 @@ If you feel the system is getting "too many things":
 - Keep adapters dumb: transport + auth + returning raw documents.
 - Keep ingestion deterministic and central: document hash + canonical tables.
 - Keep matching/posting free of vendor logic: only use canonical CAMT columns.
+- Keep ERP accounting dimensions data-driven: definitions + ERP-target mapping live in the database, not in code or `.env`.

@@ -10,19 +10,19 @@ import {
   ruleDraftSchema,
   mapMatchesToConditionRows,
   ruleBankingCondition,
-  kmdAccountingParameters,
-  kmdAttachment
+  ruleAccountingParameters,
+  ruleAccountingAttachment,
+  ruleAccountingDimensionValue
 } from '~/lib/db/schema/rule'
 import { ruleVersion, type RuleVersionInsertSchema } from '~/lib/db/schema/ruleVersion'
+import { getActiveErpSupplier, listAccountingDimensionDefinitions, resolveDimensionValueRows } from '~~/server/utils/accountingDimensions'
 
-function compileRuleDraftToDb(draft: RuleDraftSchema, newVersion: number) {
+function compileRuleDraftToDb(draft: RuleDraftSchema, newVersion: number, erpSupplier: string) {
   const {
     matches,
     relatedBankAccounts,
     ruleTags,
-    accountingPrimaryAccount,
-    accountingSecondaryAccount,
-    accountingTertiaryAccount,
+    accountingDimensions,
     accountingText,
     accountingCprType,
     accountingCprNumber,
@@ -39,7 +39,8 @@ function compileRuleDraftToDb(draft: RuleDraftSchema, newVersion: number) {
   const conditionRows = mapMatchesToConditionRows(matches ?? [])
   const ruleData = {
     ...rest,
-    currentVersionId: newVersion
+    currentVersionId: newVersion,
+    erpSupplier,
   }
 
   const attachments: Array<{ name: string; fileExtension: string; data: string }> = []
@@ -60,9 +61,6 @@ function compileRuleDraftToDb(draft: RuleDraftSchema, newVersion: number) {
   }
 
   const accountingParameters = {
-    primaryAccount: accountingPrimaryAccount,
-    secondaryAccount: accountingSecondaryAccount,
-    tertiaryAccount: accountingTertiaryAccount,
     bookingText: accountingText,
     cprType: accountingCprType,
     cprNumber: accountingCprNumber,
@@ -84,6 +82,7 @@ function compileRuleDraftToDb(draft: RuleDraftSchema, newVersion: number) {
       matches: matches ?? [],
       accounting: {
         ...accountingParameters,
+        dimensions: accountingDimensions ?? [],
         attachments
       }
     }
@@ -116,7 +115,14 @@ export default defineEventHandler(async (event) => {
 
   const newVersion = (existingRule.currentVersionId ?? 0) + 1
 
-  const { ruleData, bankAccountIds, tagIds, conditionRows, accountingParameters, attachments, versionContent } = compileRuleDraftToDb(parsed.data, newVersion)
+  const activeSupplier = await getActiveErpSupplier()
+  if (existingRule.erpSupplier !== activeSupplier) {
+    throw createError({ statusCode: 500, statusMessage: `ERP supplier mismatch (policy A): db=${existingRule.erpSupplier} active=${activeSupplier}` })
+  }
+
+  const dimensionDefinitions = await listAccountingDimensionDefinitions(activeSupplier)
+
+  const { ruleData, bankAccountIds, tagIds, conditionRows, accountingParameters, attachments, versionContent } = compileRuleDraftToDb(parsed.data, newVersion, existingRule.erpSupplier)
   const validatedDbPayload = createInsertSchema(rule).parse(ruleData)
 
   await db.transaction(async (tx) => {
@@ -148,23 +154,34 @@ export default defineEventHandler(async (event) => {
       )
     }
 
-    const [existingParameters] = await tx.update(kmdAccountingParameters)
+    // Replace dynamic accounting dimensions
+    await tx.delete(ruleAccountingDimensionValue).where(eq(ruleAccountingDimensionValue.ruleId, id))
+    const dimensionRows = resolveDimensionValueRows({
+      ruleId: id,
+      dimensions: parsed.data.accountingDimensions,
+      definitions: dimensionDefinitions,
+    })
+    if (dimensionRows.length) {
+      await tx.insert(ruleAccountingDimensionValue).values(dimensionRows)
+    }
+
+    const [existingParameters] = await tx.update(ruleAccountingParameters)
       .set(accountingParameters)
-      .where(eq(kmdAccountingParameters.ruleId, id))
+      .where(eq(ruleAccountingParameters.ruleId, id))
       .returning()
 
     let parameterId = existingParameters?.id
     if (!parameterId) {
-      const [createdParameters] = await tx.insert(kmdAccountingParameters)
+      const [createdParameters] = await tx.insert(ruleAccountingParameters)
         .values({ ...accountingParameters, ruleId: id })
         .returning()
       parameterId = createdParameters?.id ?? undefined
     }
 
     if (parameterId) {
-      await tx.delete(kmdAttachment).where(eq(kmdAttachment.parameterId, parameterId))
+      await tx.delete(ruleAccountingAttachment).where(eq(ruleAccountingAttachment.parameterId, parameterId))
       if (attachments.length) {
-        await tx.insert(kmdAttachment).values(
+        await tx.insert(ruleAccountingAttachment).values(
           attachments.map(attachment => ({
             ...attachment,
             parameterId,

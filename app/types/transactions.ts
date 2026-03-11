@@ -55,9 +55,7 @@ export type ManualPostingAttachment = {
 };
 
 export type ManualBookingPayload = {
-  primaryAccount: string;
-  secondaryAccount?: string | null;
-  tertiaryAccount?: string | null;
+  dimensions?: Array<{ key: string; value: string }>;
   text?: string | null;
   cprType: CprType;
   cprNumber?: string | null;

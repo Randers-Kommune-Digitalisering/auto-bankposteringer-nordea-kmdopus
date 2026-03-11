@@ -12,8 +12,7 @@ import type {
   RuleType,
 } from '~/lib/db/schema/enums'
 import type {
-  KmdAccountingParametersRow,
-  KmdAttachmentRow,
+  RuleAccountingAttachmentRow,
   RuleConditionRow,
 } from '~/lib/db/schema/rule'
 import type { PostingAttachment, PostingLineInput } from '../../posting/domain/posting'
@@ -42,7 +41,7 @@ type MatchableTransaction = {
   transactionId: string
   runId: string
   accountId: string
-  statusAccount: string
+  statusDimensions: Record<string, string>
   bookingDate: Date
   amount: number
   creditDebitIndicator?: string | null
@@ -85,9 +84,17 @@ type HydratedRule = {
   accounting?: RuleAccounting
 }
 
-type RuleAccounting = KmdAccountingParametersRow & {
-  attachments: KmdAttachmentRow[]
+type RuleAccounting = {
+  dimensions: Record<string, string>
+  bookingText?: string | null
+  cprType?: string | null
+  cprNumber?: string | null
+  notifyTo?: string | null
+  note?: string | null
+  attachments: RuleAccountingAttachmentRow[]
 }
+
+const STATUS_ACCOUNT_DIMENSION_KEY = 'artskonto'
 
 type MatchOutcome =
   | { kind: 'exception'; rule: HydratedRule }
@@ -225,11 +232,13 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
   return rows
     .filter(row => row.transactionId && row.runId && row.accountId)
     .filter(row => !row.processingStatus || row.processingStatus === 'åben')
-    .map(row => ({
+    .map(row => {
+      const statusAccount = row.statusAccount ? String(row.statusAccount) : env.ERP_ERROR_ACCOUNT
+      return {
       transactionId: row.transactionId!,
       runId: row.runId!,
       accountId: row.accountId!,
-      statusAccount: row.statusAccount ? String(row.statusAccount) : env.ERP_ERROR_ACCOUNT,
+      statusDimensions: { [STATUS_ACCOUNT_DIMENSION_KEY]: statusAccount },
       bookingDate:
         row.bookingDate instanceof Date
           ? row.bookingDate
@@ -262,7 +271,8 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
       remittanceAdditional: row.remittanceAdditional ?? null,
       processingStatus: row.processingStatus ?? null,
       hasProcessingRow: Boolean(row.processingStatus ?? row.processingRule),
-    }))
+      }
+    })
 }
 
 async function fetchActiveRules(accountIds: string[]): Promise<HydratedRule[]> {
@@ -276,6 +286,7 @@ async function fetchActiveRules(accountIds: string[]): Promise<HydratedRule[]> {
     with: {
       bankAccounts: true,
       conditions: true,
+      accountingDimensions: { with: { definition: true } },
       accountingParameters: { with: { attachments: true } },
     },
   })
@@ -291,12 +302,29 @@ async function fetchActiveRules(accountIds: string[]): Promise<HydratedRule[]> {
       amountMin: parseNullableNumeric(row.matchAmountMin),
       amountMax: parseNullableNumeric(row.matchAmountMax),
       conditions: row.conditions ?? [],
-      accounting: row.accountingParameters
-        ? {
-            ...row.accountingParameters,
-            attachments: row.accountingParameters.attachments ?? [],
-          }
-        : undefined,
+      accounting: (() => {
+        const parameters = row.accountingParameters
+        if (!parameters) {
+          return undefined
+        }
+
+        const dimensions: Record<string, string> = {}
+        for (const entry of row.accountingDimensions ?? []) {
+          const key = entry.definition?.key
+          if (!key) continue
+          dimensions[key] = entry.value
+        }
+
+        return {
+          dimensions,
+          bookingText: parameters.bookingText ?? null,
+          cprType: parameters.cprType ?? null,
+          cprNumber: parameters.cprNumber ?? null,
+          notifyTo: parameters.notifyTo ?? null,
+          note: parameters.note ?? null,
+          attachments: parameters.attachments ?? [],
+        }
+      })(),
     }))
 }
 
@@ -349,9 +377,7 @@ function evaluateTransaction(tx: MatchableTransaction, rules: HydratedRule[]): M
     const postingText = resolvePostingText(accounting.bookingText, tx)
     const command = buildPostingCommand({
       transaction: tx,
-      landingAccount: accounting.primaryAccount,
-      landingSecondary: accounting.secondaryAccount ?? undefined,
-      landingTertiary: accounting.tertiaryAccount ?? undefined,
+      landingDimensions: accounting.dimensions,
       text: postingText,
       cpr,
       attachments: mapAttachments(accounting.attachments),
@@ -363,7 +389,7 @@ function evaluateTransaction(tx: MatchableTransaction, rules: HydratedRule[]): M
 
   const fallbackCommand = buildPostingCommand({
     transaction: tx,
-    landingAccount: env.ERP_ERROR_ACCOUNT,
+    landingDimensions: { [STATUS_ACCOUNT_DIMENSION_KEY]: env.ERP_ERROR_ACCOUNT },
     text: resolvePostingText(undefined, tx),
   })
 
@@ -500,7 +526,7 @@ function amountMatches(amount: number, min?: number, max?: number): boolean {
   return true
 }
 
-function mapAttachments(rows: KmdAttachmentRow[] = []): PostingAttachment[] {
+function mapAttachments(rows: RuleAccountingAttachmentRow[] = []): PostingAttachment[] {
   return rows.map(row => ({
     name: row.name,
     type: row.fileExtension,
@@ -532,21 +558,30 @@ function buildNotification(
   const counterpart = resolveCounterpartyName(tx) ?? 'modpart'
   const amountFormatted = formatAmount(tx.amount)
 
+  const dimensions = formatDimensions(accounting.dimensions)
+
   const lines = [
     `Din indbetaling på ${amountFormatted} kr. fra ${counterpart} er modtaget og er blevet bogført med nedenstående kontering:`,
     '',
-    accounting.primaryAccount,
+    ...dimensions,
   ]
-
-  if (accounting.secondaryAccount) {
-    lines.push('', accounting.secondaryAccount)
-  }
 
   return {
     to: recipient,
     subject: NOTIFICATION_SUBJECT,
     body: lines.join('\n'),
   }
+}
+
+function formatDimensions(dimensions: Record<string, string>): string[] {
+  const entries = Object.entries(dimensions)
+  entries.sort(([a], [b]) => {
+    if (a === STATUS_ACCOUNT_DIMENSION_KEY && b !== STATUS_ACCOUNT_DIMENSION_KEY) return -1
+    if (b === STATUS_ACCOUNT_DIMENSION_KEY && a !== STATUS_ACCOUNT_DIMENSION_KEY) return 1
+    return a.localeCompare(b)
+  })
+
+  return entries.map(([key, value]) => `${key}: ${value}`)
 }
 
 function parseAmount(value: unknown): number {

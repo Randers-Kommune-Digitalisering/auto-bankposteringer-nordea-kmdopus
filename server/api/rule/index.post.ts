@@ -7,13 +7,15 @@ import {
   mapMatchesToConditionRows,
   ruleDraftSchema,
   ruleBankingCondition,
-  kmdAccountingParameters,
-  kmdAttachment
+  ruleAccountingParameters,
+  ruleAccountingAttachment,
+  ruleAccountingDimensionValue
 } from '~/lib/db/schema/rule'
 import type { RuleDraftSchema } from '~/lib/db/schema/rule'
 import { ruleVersion, type RuleVersionInsertSchema } from '~/lib/db/schema/ruleVersion'
 import db from '~/lib/db'
 import { logger } from '~/lib/logger'
+import { getActiveErpSupplier, listAccountingDimensionDefinitions, resolveDimensionValueRows } from '~~/server/utils/accountingDimensions'
 
 const version = 1
 
@@ -22,9 +24,7 @@ export function compileRuleDraftToDb(draft: RuleDraftSchema) {
     matches,
     relatedBankAccounts,
     ruleTags,
-    accountingPrimaryAccount,
-    accountingSecondaryAccount,
-    accountingTertiaryAccount,
+    accountingDimensions,
     accountingText,
     accountingCprType,
     accountingCprNumber,
@@ -62,9 +62,6 @@ export function compileRuleDraftToDb(draft: RuleDraftSchema) {
   }
 
   const accountingParameters = {
-    primaryAccount: accountingPrimaryAccount,
-    secondaryAccount: accountingSecondaryAccount,
-    tertiaryAccount: accountingTertiaryAccount,
     bookingText: accountingText,
     cprType: accountingCprType,
     cprNumber: accountingCprNumber,
@@ -86,6 +83,7 @@ export function compileRuleDraftToDb(draft: RuleDraftSchema) {
       matches: matches ?? [],
       accounting: {
         ...accountingParameters,
+        dimensions: accountingDimensions ?? [],
         attachments
       }
     }
@@ -95,6 +93,9 @@ export function compileRuleDraftToDb(draft: RuleDraftSchema) {
 export default defineEventHandler(async (event) => {
   const log = logger.child({ scope: 'api.rule.post' })
   try {
+    const activeSupplier = await getActiveErpSupplier()
+    const dimensionDefinitions = await listAccountingDimensionDefinitions(activeSupplier)
+
     const body = await readBody(event)
     const draft = ruleDraftSchema.parse(body)
     const { ruleData, bankAccountIds, tagIds, conditionRows, accountingParameters, attachments, versionContent } = compileRuleDraftToDb(draft)
@@ -106,7 +107,10 @@ export default defineEventHandler(async (event) => {
       attachmentCount: attachments.length,
     })
 
-    const validatedRule = createInsertSchema(rule).parse(ruleData)
+    const validatedRule = createInsertSchema(rule).parse({
+      ...ruleData,
+      erpSupplier: activeSupplier,
+    })
 
     const { ruleId } = await db.transaction(async (tx) => {
       const insertedRule = await tx.insert(rule).values(validatedRule).returning()
@@ -139,13 +143,24 @@ export default defineEventHandler(async (event) => {
         )
       }
 
-      const [parameterRow] = await tx.insert(kmdAccountingParameters).values({
+      // Persist dynamic accounting dimensions
+      const dimensionRows = resolveDimensionValueRows({
+        ruleId: newRuleId,
+        dimensions: draft.accountingDimensions,
+        definitions: dimensionDefinitions,
+      })
+
+      if (dimensionRows.length) {
+        await tx.insert(ruleAccountingDimensionValue).values(dimensionRows)
+      }
+
+      const [parameterRow] = await tx.insert(ruleAccountingParameters).values({
         ...accountingParameters,
         ruleId: newRuleId,
       }).returning()
 
       if (parameterRow?.id && attachments.length) {
-        await tx.insert(kmdAttachment).values(
+        await tx.insert(ruleAccountingAttachment).values(
           attachments.map(attachment => ({
             ...attachment,
             parameterId: parameterRow.id,
