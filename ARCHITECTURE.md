@@ -47,8 +47,8 @@ flowchart LR
   end
 
   subgraph Engine["Engine (domain + handlers)"]
-    Fetch[Bank adapter fetch\n(fetchDocuments)]
-    Ingest[CAMT ingest\n(ingestCamt053Document)]
+    Fetch["Bank adapter fetch<br/>(fetchDocuments)"]
+    Ingest["CAMT ingest<br/>(ingestCamt053Document)"]
     Match[Matching service]
     Post[Posting command]
     ERP[ERP adapter]
