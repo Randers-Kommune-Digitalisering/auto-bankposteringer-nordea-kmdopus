@@ -1,11 +1,12 @@
 import { z } from "zod"
-import { pgTable, text, date, numeric, integer, uuid, primaryKey, bigint } from "drizzle-orm/pg-core"
+import { pgTable, text, date, numeric, integer, uuid, primaryKey, bigint, boolean, unique } from "drizzle-orm/pg-core"
 import { createUpdateSchema, createSelectSchema } from "drizzle-zod"
 import type { RuleType, RuleStatus, RuleConditionOperator } from "./enums"
 import {
   ruleTypeEnum,
   ruleStatusEnum,
   cprTypeEnum,
+  erpSupplierEnum,
   ruleTypeValues,
   ruleStatusValues,
   cprTypeValues,
@@ -31,11 +32,46 @@ export const rule = pgTable('rule', {
   lockedAt: date('locked_at', { mode: "date" }),
   lockedBy: text('locked_by'),
   currentVersionId: bigint('current_version_id', { mode: 'number' }).notNull(),
+  erpSupplier: erpSupplierEnum('erp_supplier').notNull(),
   type: ruleTypeEnum('rule_type'),
   status: ruleStatusEnum('rule_status'),
   matchAmountMin: numeric('amount_min'),
   matchAmountMax: numeric('amount_max'),
 })
+
+// Singleton configuration row for the tenant/deployment.
+// Policy A: seeded once from env; mismatch should fail fast.
+export const tenantConfiguration = pgTable('tenant_configuration', {
+  id: integer('id').primaryKey(),
+  activeErpSupplier: erpSupplierEnum('active_erp_supplier').notNull(),
+  createdAt: date('created_at', { mode: 'date' }).defaultNow(),
+  updatedAt: date('updated_at', { mode: 'date' }).defaultNow().$onUpdate(() => new Date()),
+})
+
+// Accounting dimensions are defined per ERP supplier and referenced by rules.
+// Note: We intentionally store only domain keys (e.g. 'artskonto') and not human labels.
+export const erpAccountingDimensionDefinition = pgTable('erp_accounting_dimension_definition', {
+  id: uuid().defaultRandom().primaryKey(),
+  erpSupplier: erpSupplierEnum('erp_supplier').notNull(),
+  key: text('key').notNull(),
+  // Optional mapping to an ERP-specific target field (adapter-driven).
+  // Example (KMD): glAccount, costCenter, wbsElement.
+  erpTarget: text('erp_target'),
+  sortOrder: integer('sort_order').notNull().default(0),
+  required: boolean('required').notNull().default(false),
+  createdAt: date('created_at', { mode: 'date' }).defaultNow(),
+  updatedAt: date('updated_at', { mode: 'date' }).defaultNow().$onUpdate(() => new Date()),
+}, (t) => ({
+  supplierKeyUnique: unique('erp_accounting_dimension_definition_supplier_key_unique').on(t.erpSupplier, t.key),
+}))
+
+export const ruleAccountingDimensionValue = pgTable('rule_accounting_dimension_value', {
+  ruleId: integer('rule_id').notNull().references(() => rule.id, { onDelete: 'cascade' }),
+  definitionId: uuid('definition_id').notNull().references(() => erpAccountingDimensionDefinition.id, { onDelete: 'cascade' }),
+  value: text('value').notNull(),
+}, (table) => ([
+  primaryKey({ columns: [table.ruleId, table.definitionId] })
+]))
 
 export const ruleBankAccount = pgTable('rule_bank_account', {
   ruleId: integer('rule_id').notNull().references(() => rule.id, { onDelete: 'cascade' }),
@@ -59,12 +95,9 @@ export const ruleBankingCondition = pgTable('rule_banking_condition', {
   value: text('value').notNull(),
 })
 
-export const kmdAccountingParameters = pgTable('kmd_accounting_parameters', {
+export const ruleAccountingParameters = pgTable('kmd_accounting_parameters', {
   id: uuid().defaultRandom().primaryKey(),
   ruleId: integer('rule_id').references(() => rule.id, { onDelete: 'cascade' }),
-  primaryAccount: text('primary_account').notNull(),
-  secondaryAccount: text('secondary_account'),
-  tertiaryAccount: text('tertiary_account'),
   bookingText: text('booking_text'),
   cprType: cprTypeEnum('cpr_type'),
   cprNumber: text('cpr_number'),
@@ -72,9 +105,9 @@ export const kmdAccountingParameters = pgTable('kmd_accounting_parameters', {
   note: text('note'),
 })
 
-export const kmdAttachment = pgTable('kmd_attachment', {
+export const ruleAccountingAttachment = pgTable('kmd_attachment', {
   id: uuid().defaultRandom().primaryKey(),
-  parameterId: uuid('parameter_id').notNull().references(() => kmdAccountingParameters.id, { onDelete: 'cascade' }),
+  parameterId: uuid('parameter_id').notNull().references(() => ruleAccountingParameters.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   fileExtension: text('file_extension').notNull(),
   data: text('data').notNull(),
@@ -92,8 +125,11 @@ export type MatchGate = 'OG' | 'ELLER'
 export type MatchEntry = z.infer<typeof matchEntrySchema>
 export type RuleConditionRow = typeof ruleBankingCondition.$inferSelect
 export type RuleConditionInsert = Omit<typeof ruleBankingCondition.$inferInsert, 'id' | 'ruleId'>
-export type KmdAccountingParametersRow = typeof kmdAccountingParameters.$inferSelect
-export type KmdAttachmentRow = typeof kmdAttachment.$inferSelect
+export type RuleAccountingParametersRow = typeof ruleAccountingParameters.$inferSelect
+export type RuleAccountingAttachmentRow = typeof ruleAccountingAttachment.$inferSelect
+export type TenantConfigurationRow = typeof tenantConfiguration.$inferSelect
+export type ErpAccountingDimensionDefinitionRow = typeof erpAccountingDimensionDefinition.$inferSelect
+export type RuleAccountingDimensionValueRow = typeof ruleAccountingDimensionValue.$inferSelect
 
 export function mapMatchesToConditionRows(matches: MatchEntry[]): RuleConditionInsert[] {
   return matches.flatMap((entry) => {
@@ -153,9 +189,10 @@ export const ruleDraftSchema = z.object({
   matches: z.array(matchEntrySchema).optional(),
   matchAmountMin: z.number().optional(),
   matchAmountMax: z.number().optional(),
-  accountingPrimaryAccount: z.string().min(1, "Primær konto er påkrævet"),
-  accountingSecondaryAccount: z.string().optional(),
-  accountingTertiaryAccount: z.string().optional(),
+  accountingDimensions: z.array(z.object({
+    key: z.string().min(1),
+    value: z.string().min(1),
+  })).optional(),
   accountingText: z.string().optional(),
   accountingCprType: z.enum(cprTypeValues),
   accountingCprNumber: z.string().optional(),
@@ -190,9 +227,10 @@ export const ruleMatchingSchema = z.object({
 )
 
 export const ruleAccountingSchema = z.object({
-  accountingPrimaryAccount: z.string().min(1, "Primær konto er påkrævet"),
-  accountingSecondaryAccount: z.string().optional(),
-  accountingTertiaryAccount: z.string().optional(),
+  accountingDimensions: z.array(z.object({
+    key: z.string().min(1),
+    value: z.string().min(1),
+  })).optional(),
   accountingText: z.string().optional(),
   accountingCprType: z.enum(cprTypeValues),
   accountingCprNumber: z.string().optional(),

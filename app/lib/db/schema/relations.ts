@@ -1,5 +1,14 @@
 import { relations } from "drizzle-orm";
-import { rule, ruleBankAccount, ruleRuleTag, ruleBankingCondition, kmdAccountingParameters, kmdAttachment } from "./rule";
+import {
+  rule,
+  ruleBankAccount,
+  ruleRuleTag,
+  ruleBankingCondition,
+  ruleAccountingParameters,
+  ruleAccountingAttachment,
+  erpAccountingDimensionDefinition,
+  ruleAccountingDimensionValue,
+} from "./rule";
 import { ruleTag } from "./ruleTag";
 import { document } from "./document";
 import { transaction, transactionProcessing } from "./transaction";
@@ -27,9 +36,10 @@ export const ruleRelations = relations(rule, ({ many, one }) => ({
   bankAccounts: many(ruleBankAccount),
   tags: many(ruleRuleTag),
   conditions: many(ruleBankingCondition),
-  accountingParameters: one(kmdAccountingParameters, {
+  accountingDimensions: many(ruleAccountingDimensionValue),
+  accountingParameters: one(ruleAccountingParameters, {
     fields: [rule.id],
-    references: [kmdAccountingParameters.ruleId],
+    references: [ruleAccountingParameters.ruleId],
   }),
 }));
 
@@ -47,13 +57,21 @@ export const ruleBankingConditionRelations = relations(ruleBankingCondition, ({ 
   rule: one(rule, { fields: [ruleBankingCondition.ruleId], references: [rule.id] }),
 }));
 
-export const kmdAccountingParametersRelations = relations(kmdAccountingParameters, ({ one, many }) => ({
-  rule: one(rule, { fields: [kmdAccountingParameters.ruleId], references: [rule.id] }),
-  attachments: many(kmdAttachment),
+export const ruleAccountingParametersRelations = relations(ruleAccountingParameters, ({ one, many }) => ({
+  rule: one(rule, { fields: [ruleAccountingParameters.ruleId], references: [rule.id] }),
+  attachments: many(ruleAccountingAttachment),
 }));
 
-export const kmdAttachmentRelations = relations(kmdAttachment, ({ one }) => ({
-  parameters: one(kmdAccountingParameters, { fields: [kmdAttachment.parameterId], references: [kmdAccountingParameters.id] }),
+export const ruleAccountingAttachmentRelations = relations(ruleAccountingAttachment, ({ one }) => ({
+  parameters: one(ruleAccountingParameters, { fields: [ruleAccountingAttachment.parameterId], references: [ruleAccountingParameters.id] }),
+}));
+
+export const ruleAccountingDimensionValueRelations = relations(ruleAccountingDimensionValue, ({ one }) => ({
+  rule: one(rule, { fields: [ruleAccountingDimensionValue.ruleId], references: [rule.id] }),
+  definition: one(erpAccountingDimensionDefinition, {
+    fields: [ruleAccountingDimensionValue.definitionId],
+    references: [erpAccountingDimensionDefinition.id],
+  }),
 }));
 
 export const runRelations = relations(run, ({ many }) => ({

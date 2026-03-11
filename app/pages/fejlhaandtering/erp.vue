@@ -1,6 +1,17 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
 
+type FailedErpRequestListItem = {
+  requestId: string
+  runId: string
+  responseId: string
+  statusText: string
+}
+
+type FailedErpRequestsResponse = {
+  items: FailedErpRequestListItem[]
+}
+
 type ErpRequestDetails = {
   requestId: string
   runId: string
@@ -35,6 +46,15 @@ type ErpRequestLinesResponse = {
 
 const toast = useToast()
 const UCheckbox = resolveComponent('UCheckbox')
+const UButton = resolveComponent('UButton')
+
+const { data: failedList, pending: failedPending, refresh: refreshFailed } = await useFetch<FailedErpRequestsResponse>(
+  '/api/fejlhaandtering/erp-requests/failed',
+  {
+    key: 'failed-erp-requests',
+    default: () => ({ items: [] }),
+  },
+)
 
 const erpRequestId = ref('')
 const erpLoading = ref(false)
@@ -101,38 +121,26 @@ async function loadErpRequest() {
   }
 }
 
-async function saveErpPayload() {
+async function resendErpRequest() {
   if (!erpDetails.value) return
   const payload = erpPayloadDraft.value
   if (!payload.trim().length) {
     toast.add({ title: 'Payload kan ikke være tom', color: 'error' })
     return
   }
-
   erpLoading.value = true
   try {
-    await $fetch(`/api/fejlhaandtering/erp-requests/${encodeURIComponent(erpDetails.value.requestId)}`, {
-      method: 'PUT',
-      body: { payload },
-    })
-    toast.add({ title: 'Payload gemt' })
+    const res = (await $fetch(
+      `/api/fejlhaandtering/erp-requests/${encodeURIComponent(erpDetails.value.requestId)}/resend`,
+      {
+        method: 'POST',
+        body: { payload },
+      },
+    )) as { success: boolean; requestId: string; sourceRequestId: string }
+    toast.add({ title: 'Ny ERP-request oprettet', description: res.requestId })
+    erpRequestId.value = res.requestId
     await loadErpRequest()
-  } catch (error) {
-    console.error('Gem payload fejlede', error)
-    toast.add({ title: 'Kunne ikke gemme payload', color: 'error' })
-  } finally {
-    erpLoading.value = false
-  }
-}
-
-async function resendErpRequest() {
-  if (!erpDetails.value) return
-  erpLoading.value = true
-  try {
-    await $fetch(`/api/fejlhaandtering/erp-requests/${encodeURIComponent(erpDetails.value.requestId)}/resend`, {
-      method: 'POST',
-    })
-    toast.add({ title: 'Sat til genafsendelse' })
+    await refreshFailed()
   } catch (error) {
     console.error('Resend fejlede', error)
     toast.add({ title: 'Kunne ikke genafsende', color: 'error' })
@@ -140,6 +148,35 @@ async function resendErpRequest() {
     erpLoading.value = false
   }
 }
+
+const failedColumns: TableColumn<FailedErpRequestListItem>[] = [
+  { accessorKey: 'requestId', header: 'Request', cell: ({ row }) => row.original.requestId },
+  { accessorKey: 'runId', header: 'Run', size: 240, cell: ({ row }) => row.original.runId },
+  { accessorKey: 'statusText', header: 'Status', cell: ({ row }) => row.original.statusText },
+  {
+    id: 'open',
+    header: '',
+    enableSorting: false,
+    size: 110,
+    cell: ({ row }) => {
+      const requestId = row.original.requestId
+      return h(
+        UButton,
+        {
+          size: 'sm',
+          color: 'primary',
+          variant: 'soft',
+          disabled: failedPending.value || erpLoading.value,
+          onClick: async () => {
+            erpRequestId.value = requestId
+            await loadErpRequest()
+          },
+        },
+        () => 'Åbn',
+      )
+    },
+  },
+]
 
 const reopeningLines = ref(false)
 async function reopenSelectedLines() {
@@ -157,17 +194,20 @@ async function reopenSelectedLines() {
 
   reopeningLines.value = true
   try {
-    const res = await $fetch<{
+    const res = (await $fetch(
+      `/api/fejlhaandtering/erp-requests/${encodeURIComponent(erpDetails.value.requestId)}/reopen`,
+      {
+        method: 'POST',
+        body: { lineNos },
+      },
+    )) as {
       success: boolean
       reopened: number
       eligibleTransactions: number
       missingLineNos: number[]
       unmappedLineNos: number[]
       skippedNotBooked: number
-    }>(`/api/fejlhaandtering/erp-requests/${encodeURIComponent(erpDetails.value.requestId)}/reopen`, {
-      method: 'POST',
-      body: { lineNos },
-    })
+    }
     toast.add({
       title: 'Genåbning udført',
       description: `Genåbnede ${res.reopened}/${res.eligibleTransactions} transaktion(er).`,
@@ -251,10 +291,9 @@ async function reopenBookedTransactions() {
 
   reopening.value = true
   try {
-    const res = await $fetch<{ success: boolean; reopened: number }>(
-      `/api/fejlhaandtering/runs/${encodeURIComponent(runId)}/reopen`,
-      { method: 'POST' },
-    )
+    const res = (await $fetch(`/api/fejlhaandtering/runs/${encodeURIComponent(runId)}/reopen`, {
+      method: 'POST',
+    })) as { success: boolean; reopened: number }
     toast.add({ title: 'Genåbnet', description: `${res.reopened} transaktion(er)` })
   } catch (error) {
     console.error('Reopen fejlede', error)
@@ -272,6 +311,16 @@ async function reopenBookedTransactions() {
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
+        <template #right>
+          <UButton
+            icon="i-lucide-refresh-cw"
+            variant="ghost"
+            color="neutral"
+            label="Opdatér"
+            :loading="failedPending"
+            @click="refreshFailed"
+          />
+        </template>
       </UDashboardNavbar>
     </template>
 
@@ -280,28 +329,67 @@ async function reopenBookedTransactions() {
         <UCard>
           <template #header>
             <div class="flex flex-col gap-1">
-              <div class="font-medium">Redigér og genfremsend ERP-request</div>
+              <div class="font-medium">Afviste ERP-svar</div>
               <div class="text-sm text-muted">
-                Vi gemmer ERP request/response payloads. Her kan du rette rå payload og forsøge igen.
+                Her vises ERP-requests hvor vi har modtaget et negativt udfald. Åbn en request for at se/redigere payload og genfremsende som en ny request.
               </div>
             </div>
           </template>
 
-          <div class="grid gap-4 lg:grid-cols-2">
-            <div class="space-y-4">
-              <div class="flex gap-2">
-                <UInput v-model="erpRequestId" placeholder="ERP requestId (filnavn)" class="flex-1" />
-                <UButton
-                  icon="i-lucide-search"
-                  label="Hent"
-                  color="neutral"
-                  variant="soft"
-                  :loading="erpLoading"
-                  @click="loadErpRequest"
-                />
-              </div>
+          <div class="flex items-center justify-between mb-2">
+            <div class="text-sm text-muted">Seneste 50</div>
+            <UBadge color="neutral" variant="subtle">{{ (failedList?.items?.length ?? 0) }}</UBadge>
+          </div>
 
-              <div v-if="erpDetails" class="space-y-2">
+          <UEmpty
+            v-if="!failedList?.items?.length"
+            icon="i-lucide-check"
+            title="Ingen afviste ERP-svar"
+            description="Der er ingen ERP responses med negativ status i databasen."
+            class="border border-dashed border-default rounded-lg"
+          />
+
+          <UTable
+            v-else
+            :data="failedList.items"
+            :columns="failedColumns"
+            :loading="failedPending"
+            :ui="{
+              base: 'border-separate border-spacing-0',
+              thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
+              tbody: '[&>tr]:last:[&>td]:border-b-0',
+              th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
+              td: 'border-b border-default',
+              separator: 'h-0'
+            }"
+          />
+        </UCard>
+
+        <UCard>
+          <template #header>
+            <div class="flex flex-col gap-1">
+              <div class="font-medium">Redigér og genfremsend ERP-request</div>
+              <div class="text-sm text-muted">
+                Redigering her opretter en ny ERP-request ved genfremsendelse (originalen ændres ikke).
+              </div>
+            </div>
+          </template>
+
+          <UEmpty
+            v-if="!erpDetails"
+            icon="i-lucide-file-text"
+            title="Vælg en ERP request"
+            description="Åbn en request fra listen ovenfor for at se payload, linjer og genfremsende."
+            class="border border-dashed border-default rounded-lg"
+          />
+
+          <div v-else class="grid gap-4 lg:grid-cols-2">
+            <div class="space-y-4">
+              <div class="space-y-2">
+                <div class="text-sm">
+                  <span class="text-muted">Request:</span>
+                  <span class="font-mono">{{ erpDetails.requestId }}</span>
+                </div>
                 <div class="text-sm">
                   <span class="text-muted">Run:</span>
                   <span class="font-mono">{{ erpDetails.runId }}</span>
@@ -321,23 +409,14 @@ async function reopenBookedTransactions() {
                   v-model="erpPayloadDraft"
                   :rows="12"
                   placeholder="Indsæt/redigér request payload..."
-                  :disabled="!erpDetails || erpLoading"
+                  :disabled="erpLoading"
                 />
               </UFormField>
 
               <div class="flex flex-wrap gap-2">
                 <UButton
-                  icon="i-lucide-save"
-                  label="Gem payload"
-                  color="neutral"
-                  variant="soft"
-                  :disabled="!erpDetails"
-                  :loading="erpLoading"
-                  @click="saveErpPayload"
-                />
-                <UButton
                   icon="i-lucide-send"
-                  label="Genfremsend til ERP"
+                  label="Genfremsend til ERP (ny request)"
                   color="primary"
                   variant="soft"
                   :disabled="!erpDetails"
@@ -357,7 +436,7 @@ async function reopenBookedTransactions() {
                 Du kan nu se den persisted kobling mellem ERP requestId → postering(lineNo) → transactionId og genåbne udvalgte bogførte transaktioner.
               </UAlert>
 
-              <div v-if="erpDetails" class="space-y-2">
+              <div class="space-y-2">
                 <div class="flex items-center justify-between">
                   <div class="font-medium">Posteringslinjer i request</div>
                   <UButton

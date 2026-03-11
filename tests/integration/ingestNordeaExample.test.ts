@@ -107,10 +107,28 @@ describe('ingestCamt053Document (integration)', () => {
     expect(result2.insertedBalances).toBe(0)
     expect(result2.insertedTransactions).toBe(0)
 
-    const [{ c: docCountRaw }] = await db.select({ c: sql`count(*)` }).from(bankingDocument)
-    const [{ c: stmtCountRaw }] = await db.select({ c: sql`count(*)` }).from(bankingStatement)
-    const [{ c: balCountRaw }] = await db.select({ c: sql`count(*)` }).from(bankingStatementBalance)
-    const [{ c: txCountRaw }] = await db.select({ c: sql`count(*)` }).from(transaction)
+    const [{ c: docCountRaw }] = await db
+      .select({ c: sql`count(*)` })
+      .from(bankingDocument)
+      .where(eq(bankingDocument.accountId, accountId))
+
+    const [{ c: stmtCountRaw }] = await db
+      .select({ c: sql`count(*)` })
+      .from(bankingStatement)
+      .innerJoin(bankingDocument, eq(bankingStatement.documentId, bankingDocument.id))
+      .where(eq(bankingDocument.accountId, accountId))
+
+    const [{ c: balCountRaw }] = await db
+      .select({ c: sql`count(*)` })
+      .from(bankingStatementBalance)
+      .innerJoin(bankingStatement, eq(bankingStatementBalance.statementId, bankingStatement.id))
+      .innerJoin(bankingDocument, eq(bankingStatement.documentId, bankingDocument.id))
+      .where(eq(bankingDocument.accountId, accountId))
+
+    const [{ c: txCountRaw }] = await db
+      .select({ c: sql`count(*)` })
+      .from(transaction)
+      .where(eq(transaction.accountId, accountId))
 
     expect(Number(docCountRaw)).toBe(1)
     expect(Number(stmtCountRaw)).toBe(1)
@@ -118,7 +136,11 @@ describe('ingestCamt053Document (integration)', () => {
     expect(Number(txCountRaw)).toBe(8)
 
     // Sanity: document should be linked to the correct account.
-    const docs = await db.select({ accountId: bankingDocument.accountId }).from(bankingDocument).limit(1)
+    const docs = await db
+      .select({ accountId: bankingDocument.accountId })
+      .from(bankingDocument)
+      .where(eq(bankingDocument.accountId, accountId))
+      .limit(1)
     expect(docs[0]?.accountId).toBe(accountId)
 
     // Sanity: the second run exists but did not insert more docs.

@@ -1,6 +1,7 @@
 // Checks whether all required environment variables are set before starting the application
 import { z } from "zod";
 import tryParseEnv from "./try-parse-env";
+import { erpSupplierValues } from "./db/schema/enums";
 
 const EnvSchema = z.object({
   POSTGRES_USER: z.string(),
@@ -14,7 +15,7 @@ const EnvSchema = z.object({
   BANKING_SERVICE_PROVIDER: z.string(),
   BANKING_SERVICE_PROVIDER_ID: z.string(),
   BANKING_PASSCODE: z.string(),
-  ERP_SUPPLIER: z.string(),
+  ERP_SUPPLIER: z.enum(erpSupplierValues),
   ERP_ERROR_ACCOUNT: z.string(),
   ERP_ACTIVE_INTEGRATION: z.enum(["true", "false"]).transform((value) => value === "true"),
   ERP_PROD_ENVIRONMENT: z.string(),
@@ -22,9 +23,6 @@ const EnvSchema = z.object({
   ERP_COMP_CODE: z.string(),
   ERP_INTEGRATION_ID: z.string(),
   ERP_INTEGRATION_FILENAME_MASK: z.string(),
-  ERP_PRIMARY_ACCOUNT_LABEL: z.string(),
-  ERP_SECONDARY_ACCOUNT_LABEL: z.string(),
-  ERP_TERTIARY_ACCOUNT_LABEL: z.string(),
   SFTP_URL: z.string(),
   SFTP_USERNAME: z.string(),
   SFTP_PASSWORD: z.string(),
@@ -52,9 +50,6 @@ export const erpIntegrationMetadata = {
   compCode: parsedEnv.ERP_COMP_CODE,
   integrationId: parsedEnv.ERP_INTEGRATION_ID,
   integrationFileNameMask: parsedEnv.ERP_INTEGRATION_FILENAME_MASK,
-  primaryAccountLabel: parsedEnv.ERP_PRIMARY_ACCOUNT_LABEL,
-  secondaryAccountLabel: parsedEnv.ERP_SECONDARY_ACCOUNT_LABEL,
-  tertiaryAccountLabel: parsedEnv.ERP_TERTIARY_ACCOUNT_LABEL,
 };
 
 export type BankingIntegrationMetadata = typeof bankingIntegrationMetadata;

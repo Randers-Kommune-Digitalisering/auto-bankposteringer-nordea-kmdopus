@@ -4,8 +4,28 @@ import db from '~/lib/db'
 import { erpRequest, erpRequestLine } from '~/lib/db/schema/erp'
 import { outbox } from '~/lib/db/schema/outbox'
 import { logger } from '~/lib/logger'
+import { erpAccountingDimensionDefinition } from '~/lib/db/schema/rule'
 import type { PostingLineInput } from '../../posting/domain/posting'
 import { getErpAdapter } from '../registry'
+
+async function loadDimensionKeyByTarget(erpSupplier: string): Promise<Record<string, string>> {
+  const rows = await db
+    .select({
+      key: erpAccountingDimensionDefinition.key,
+      erpTarget: erpAccountingDimensionDefinition.erpTarget,
+    })
+    .from(erpAccountingDimensionDefinition)
+    .where(eq(erpAccountingDimensionDefinition.erpSupplier, erpSupplier as any))
+
+  const mapping: Record<string, string> = {}
+  for (const row of rows) {
+    const target = row.erpTarget ? String(row.erpTarget).trim() : ''
+    const key = row.key ? String(row.key).trim() : ''
+    if (!target || !key) continue
+    mapping[target] = key
+  }
+  return mapping
+}
 
 export type SubmitErpPostingOutboxInput = {
   runId: string
@@ -27,10 +47,13 @@ export async function submitErpPostingViaOutbox(
   const log = logger.child({ scope: 'erp.submitErpPostingViaOutbox', runId: input.runId })
   const adapter = getErpAdapter(input.erpSupplier)
 
+  const dimensionKeyByTarget = await loadDimensionKeyByTarget(adapter.supplier)
+
   const built = adapter.buildRequest({
     runId: input.runId,
     bookingDate: input.bookingDate,
     postings: input.postings,
+    dimensionKeyByTarget,
   })
 
   const requestId = built.requestId
