@@ -35,7 +35,7 @@ ERP adapters may need to map these domain keys into ERP-specific fields (e.g. GL
 
 ```mermaid
 flowchart LR
-  subgraph UI[Nuxt UI]
+  subgraph UI["Nuxt UI"]
     Pages[Pages/Components]
   end
 
@@ -46,7 +46,7 @@ flowchart LR
     SettingsAPI["/api/settings"]
   end
 
-  subgraph Engine[Engine (domain + handlers)]
+  subgraph Engine["Engine (domain + handlers)"]
     Fetch[Bank adapter fetch\n(fetchDocuments)]
     Ingest[CAMT ingest\n(ingestCamt053Document)]
     Match[Matching service]
@@ -54,7 +54,7 @@ flowchart LR
     ERP[ERP adapter]
   end
 
-  subgraph DB[PostgreSQL]
+  subgraph DB["PostgreSQL"]
     Doc[(banking_document)]
     Stmt[(banking_statement)]
     Bal[(banking_statement_balance)]
