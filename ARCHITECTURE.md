@@ -35,58 +35,62 @@ ERP adapters may need to map these domain keys into ERP-specific fields (e.g. GL
 
 ```mermaid
 flowchart LR
+  %% External systems
+  BankCentral["Bank central / bank provider"]
+  ERPSys["ERP (vendor-specific)"]
+
+  %% Core pipeline (engine)
+  subgraph Engine["Engine (domain + handlers)"]
+    direction LR
+    Fetch["Bank adapter fetch<br/>(fetchDocuments)"]
+    Ingest["CAMT ingest<br/>(ingestCamt053Document)"]
+    Match["Matching service"]
+    Post["Posting command"]
+    ERP["ERP adapter"]
+  end
+
+  BankCentral <-->|"bank transport (API/SFTP/...)<br/>statements (e.g. CAMT.053)"| Fetch
+  Fetch -->|raw documents| Ingest
+  Ingest --> Match
+  Match --> Post
+  Post --> ERP
+  ERP -->|"ERP transport (API/SFTP/...)"| ERPSys
+  ERPSys -.->|"receipt/status (optional)"| ERP
+
+  %% Application surfaces
   subgraph UI["Nuxt UI"]
     Pages[Pages/Components]
   end
 
   subgraph API["Nitro server/api"]
-    RunsAPI["/api/runs"]
-    TxAPI["/api/transactions"]
-    RulesAPI["/api/rules"]
-    SettingsAPI["/api/settings"]
-  end
-
-  subgraph Engine["Engine (domain + handlers)"]
-    Fetch["Bank adapter fetch<br/>(fetchDocuments)"]
-    Ingest["CAMT ingest<br/>(ingestCamt053Document)"]
-    Match[Matching service]
-    Post[Posting command]
-    ERP[ERP adapter]
+    ApiRoutes["API routes<br/>(runs, transactions, rules, settings, ...)"]
   end
 
   subgraph DB["PostgreSQL"]
     Doc[(banking_document)]
-    Stmt[(banking_statement)]
-    Bal[(banking_statement_balance)]
-    Tx[(transaction)]
-    Rule[(rule + conditions)]
-    Cursor[(banking_adapter_cursor)]
-    Run[(run)]
+    Canon["canonical CAMT tables<br/>(statements, balances, transactions)"]
+    Rules["rules + dimension values"]
+    Ops["runs + processing + cursors"]
   end
 
-  Pages --> API
-  RunsAPI --> DB
-  TxAPI --> DB
-  RulesAPI --> DB
-  SettingsAPI --> DB
+  Pages --> ApiRoutes
+  ApiRoutes --> Canon
+  ApiRoutes --> Rules
+  ApiRoutes --> Ops
 
-  Fetch -->|raw XML| Ingest
-  Ingest --> Doc
-  Ingest --> Stmt
-  Ingest --> Bal
-  Ingest --> Tx
+  Ingest -->|persist raw| Doc
+  Ingest -->|normalize| Canon
+  Canon --> Match
+  Rules --> Match
 
-  Fetch --> Cursor
-  Cursor --> Fetch
-
-  Tx --> Match
-  Rule --> Match
-  Match --> Post
-  Post --> ERP
-  ERP --> DB
-
-  Run --> Ingest
+  Fetch -.->|cursor| Ops
+  Ingest -.->|audit/status| Ops
+  ERP -->|persist outcomes| Ops
 ```
+
+Communication with external bank systems and ERP systems is intentionally shown in generic terms.
+Concrete protocols and delivery mechanisms (e.g. REST APIs, file exchange, SFTP, vendor SDKs) are an adapter concern and may vary by provider.
+The domain flow (ingest → match → post) stays deterministic and vendor-agnostic regardless of transport.
 
 ## Notes on complexity
 
