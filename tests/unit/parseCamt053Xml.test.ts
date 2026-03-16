@@ -7,7 +7,7 @@ describe('parseCamt053Xml (Nordea example)', () => {
   it('parses statements, balances, and transactions deterministically', async () => {
     const examplePath = join(
       process.cwd(),
-      'lib',
+      'resources',
       'banking',
       'nordea',
       'examples',
@@ -39,7 +39,7 @@ describe('parseCamt053Xml (Nordea example)', () => {
   it('extracts structured creditor reference (SCOR) when present', async () => {
     const examplePath = join(
       process.cwd(),
-      'lib',
+      'resources',
       'banking',
       'nordea',
       'examples',

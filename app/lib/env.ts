@@ -4,6 +4,7 @@ import tryParseEnv from "./try-parse-env";
 import { erpSupplierValues } from "./db/schema/enums";
 
 const EnvSchema = z.object({
+  APP_ROLE: z.enum(["web", "scheduler", "worker"]).optional().default("web"),
   POSTGRES_USER: z.string(),
   POSTGRES_PASSWORD: z.string(),
   POSTGRES_DB: z.string(),

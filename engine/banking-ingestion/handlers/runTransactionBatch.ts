@@ -26,7 +26,7 @@ export async function runTransactionBatch(): Promise<{ runId: string; insertedCo
   // This is intentionally deterministic and idempotent via banking_document.content_hash.
   const examplePath = join(
     process.cwd(),
-    'lib',
+    'resources',
     'banking',
     'nordea',
     'examples',
