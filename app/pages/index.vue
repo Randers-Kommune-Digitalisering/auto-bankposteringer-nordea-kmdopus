@@ -37,11 +37,12 @@ const payload = computed(() => data.value)
 				<template #leading>
 					<UDashboardSidebarCollapse />
 				</template>
-				<template #trailing>
+				<template #right>
 					<UButton
 						icon="i-lucide-refresh-cw"
 						label="Opdater"
 						variant="ghost"
+						color="primary"
 						:loading="status === 'pending'"
 						@click="refresh()"
 					/>

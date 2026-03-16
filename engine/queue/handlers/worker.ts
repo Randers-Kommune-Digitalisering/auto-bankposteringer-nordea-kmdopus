@@ -47,7 +47,7 @@ async function processJobs(limit: number, allowedTypes?: string[]): Promise<numb
 
     const log = logger.child({ scope: 'worker.job', jobId: claimed.id, jobType: claimed.type })
     try {
-      await handleJob(claimed.type, claimed.payload)
+      await handleJob(claimed.type, claimed.payload, { runId: claimed.runId ?? undefined })
       await db.execute(sql`
         update job
         set status = 'succeeded', locked_at = null, locked_by = null, updated_at = now(), last_error = null
@@ -88,7 +88,7 @@ function pgTextArrayLiteral(values: string[]): string {
   return `array[${items}]::text[]`
 }
 
-async function claimJob(allowedTypes?: string[]): Promise<{ id: string; type: string; payload: any } | null> {
+async function claimJob(allowedTypes?: string[]): Promise<{ id: string; type: string; payload: any; runId: string | null } | null> {
   const allowed = sanitizeAllowedJobTypes(allowedTypes)
   const typeFilter = allowed ? sql.raw(`and type = any(${pgTextArrayLiteral(allowed)})`) : sql.raw('')
 
@@ -106,12 +106,12 @@ async function claimJob(allowedTypes?: string[]): Promise<{ id: string; type: st
     set status = 'in_progress', locked_at = now(), locked_by = ${workerId}, updated_at = now()
     from next_job
     where job.id = next_job.id
-    returning job.id, job.type, job.payload
+    returning job.id, job.type, job.payload, job.run_id
   `)
 
   const row = (result.rows?.[0] ?? null) as any
   if (!row?.id) return null
-  return { id: String(row.id), type: String(row.type), payload: row.payload }
+  return { id: String(row.id), type: String(row.type), payload: row.payload, runId: row.run_id ? String(row.run_id) : null }
 }
 
 async function processOutbox(limit: number): Promise<number> {
@@ -171,10 +171,10 @@ async function claimOutbox(): Promise<{ id: string; topic: string; payload: any 
   return { id: String(row.id), topic: String(row.topic), payload: row.payload }
 }
 
-async function handleJob(type: string, payload: any): Promise<void> {
+async function handleJob(type: string, payload: any, context: { runId?: string } = {}): Promise<void> {
   if (type === 'banking.ingest') {
     const { runTransactionBatch } = await import('../../banking-ingestion/handlers/runTransactionBatch')
-    await runTransactionBatch()
+    await runTransactionBatch({ runId: context.runId ?? (payload?.runId ? String(payload.runId) : undefined) })
     return
   }
 

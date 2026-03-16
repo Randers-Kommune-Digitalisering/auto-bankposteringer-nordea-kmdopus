@@ -110,7 +110,7 @@ const sectionEntries = computed<SectionEntry[]>(() => orderedSections.value.map(
           <p class="text-xs font-medium uppercase tracking-wide">{{ summary.transactionId.label }}</p>
           <p class="text-sm font-bold">{{ summary.transactionId.value }}</p>
         </div>
-        <div class="text-right">
+        <div>
           <p class="text-xs font-medium uppercase tracking-wide">{{ summary.bookingDate.label }}</p>
           <p class="text-sm font-bold">{{ summary.bookingDate.value }}</p>
         </div>

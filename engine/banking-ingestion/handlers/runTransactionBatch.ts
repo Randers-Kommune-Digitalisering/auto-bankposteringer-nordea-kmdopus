@@ -9,16 +9,22 @@ import { getAdapterCursor, setAdapterCursor } from './bankAdapterCursorStore'
 import { LocalFileBankAdapter } from '../infrastructure/localFileBankAdapter'
 import { ingestCamt053Document } from './ingestCamt053Document'
 
-export async function runTransactionBatch(): Promise<{ runId: string; insertedCount: number }> {
+export async function runTransactionBatch(options: { runId?: string; bookingDate?: Date } = {}): Promise<{ runId: string; insertedCount: number }> {
   const log = logger.child({ scope: 'banking.runTransactionBatch' })
 
-  const runId = crypto.randomUUID()
-  const now = new Date()
+  const runId = options.runId ?? crypto.randomUUID()
+  const bookingDate = options.bookingDate ?? new Date()
 
   const accounts = await db.select().from(account).orderBy(account.id).limit(1)
   const selectedAccount = accounts[0] ?? null
   if (!selectedAccount) {
-    await db.insert(run).values({ id: runId, bookingDate: now, status: 'udført' })
+    await db
+      .insert(run)
+      .values({ id: runId, bookingDate, status: 'udført' })
+      .onConflictDoUpdate({
+        target: run.id,
+        set: { bookingDate, status: 'udført' },
+      })
     return { runId, insertedCount: 0 }
   }
 
@@ -51,7 +57,13 @@ export async function runTransactionBatch(): Promise<{ runId: string; insertedCo
   })
 
   const result = await db.transaction(async (trx) => {
-    await trx.insert(run).values({ id: runId, bookingDate: now, status: 'indlæser' })
+    await trx
+      .insert(run)
+      .values({ id: runId, bookingDate, status: 'indlæser' })
+      .onConflictDoUpdate({
+        target: run.id,
+        set: { bookingDate, status: 'indlæser' },
+      })
 
     let insertedStatements = 0
     let insertedBalances = 0

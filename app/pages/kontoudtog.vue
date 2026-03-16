@@ -46,6 +46,59 @@ const rows = computed<StatementTransaction[]>(() => {
   })
 })
 
+type CsvColumn = { header: string; value: (row: StatementTransaction) => string | number | null | undefined }
+
+function escapeCsvValue(value: unknown): string {
+  if (value === null || value === undefined) return ''
+  const str = String(value)
+  const needsQuotes = /["\n\r;]/.test(str)
+  const escaped = str.replace(/"/g, '""')
+  return needsQuotes ? `"${escaped}"` : escaped
+}
+
+function toCsv(rows: StatementTransaction[], columns: CsvColumn[]): string {
+  const delimiter = ';'
+  const headerLine = columns.map((c) => escapeCsvValue(c.header)).join(delimiter)
+  const lines = rows.map((row) => columns.map((c) => escapeCsvValue(c.value(row))).join(delimiter))
+  return [headerLine, ...lines].join('\n')
+}
+
+function downloadStatementCsv(): void {
+  if (!process.client) return
+  if (!rows.value.length) return
+
+  const columns: CsvColumn[] = [
+    { header: 'Bogføringsdato', value: (r) => r.bookingDate },
+    { header: 'Kontonavn', value: (r) => r.bankAccountName ?? '' },
+    { header: 'Konto-id', value: (r) => r.accountId },
+    { header: 'Beløb', value: (r) => r.amount },
+    { header: 'Valuta', value: (r) => r.currency ?? 'DKK' },
+    { header: 'Kredit/debet', value: (r) => r.creditDebitIndicator },
+    { header: 'Modpart', value: (r) => resolveCounterpart(r) ?? '' },
+    { header: 'Fritekst', value: (r) => buildFreeText(r).join(' · ') },
+    { header: 'Transaktionstype', value: (r) => resolveTransactionType(r) ?? '' },
+    { header: 'Transaktions-id', value: (r) => r.id },
+    { header: 'Kørsel', value: (r) => r.runId },
+    { header: 'Status', value: (r) => r.status ?? '' },
+    { header: 'Behandlingsstatus', value: (r) => r.processingStatus ?? '' },
+    { header: 'Regel-id', value: (r) => r.ruleApplied ?? '' }
+  ]
+
+  const csv = toCsv(rows.value, columns)
+  const bom = '\ufeff'
+  const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+
+  const fileName = `kontoudtog_${start.value}_${end.value}.csv`
+  const link = document.createElement('a')
+  link.href = url
+  link.download = fileName
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
+}
+
 function resolveTransactionType(row: StatementTransaction): string | null {
   if (row.bkTxCdProprietary && row.bkTxCdProprietary.trim().length) {
     return row.bkTxCdProprietary.trim()
@@ -311,14 +364,25 @@ const tableUi = {
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
-        <template #trailing>
-          <UButton
-            icon="i-lucide-refresh-cw"
-            label="Opdater"
-            variant="ghost"
-            :loading="status === 'pending'"
-            @click="refresh()"
-          />
+        <template #right>
+          <div class="flex items-center gap-2">
+            <UButton
+              icon="i-lucide-download"
+              label="Download CSV"
+              variant="ghost"
+              color="primary"
+              :disabled="!rows.length || status === 'pending'"
+              @click="downloadStatementCsv()"
+            />
+            <UButton
+              icon="i-lucide-refresh-cw"
+              label="Opdater"
+              variant="ghost"
+              color="primary"
+              :loading="status === 'pending'"
+              @click="refresh()"
+            />
+          </div>
         </template>
       </UDashboardNavbar>
     </template>

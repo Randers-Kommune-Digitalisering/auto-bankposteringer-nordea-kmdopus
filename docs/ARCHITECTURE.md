@@ -150,6 +150,7 @@ The same container image is deployed in different roles via `APP_ROLE`.
   - Purpose: scheduled tasks / cron
   - Replicas: 1 (avoid duplicate scheduling)
   - Behavior: **enqueue-only** (it schedules jobs; it does not process the queue)
+  - Note: scheduled ingestion creates a `run` row up front and enqueues a `banking.ingest` job with `job.runId` set, so troubleshooting/recovery can be done per run.
 - `APP_ROLE=worker`
   - Purpose: queue + outbox processing
   - Replicas: 1+ (scale independently based on throughput)

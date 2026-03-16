@@ -6,6 +6,7 @@ const bodySchema = z.object({
   type: z.string().min(1),
   payload: z.unknown().optional(),
   runAt: z.string().datetime().optional(),
+  runId: z.string().uuid().optional(),
 })
 
 export default defineEventHandler(async (event) => {
@@ -21,6 +22,13 @@ export default defineEventHandler(async (event) => {
   }
 
   const runAt = body.runAt ? new Date(body.runAt) : undefined
-  const id = await enqueueJob(body.type, body.payload ?? {}, runAt ? { runAt } : {})
+  const id = await enqueueJob(
+    body.type,
+    body.payload ?? {},
+    {
+      ...(runAt ? { runAt } : {}),
+      ...(body.runId ? { runId: body.runId } : {}),
+    },
+  )
   return { success: true, id }
 })

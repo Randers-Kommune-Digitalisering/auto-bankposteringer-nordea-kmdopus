@@ -123,8 +123,8 @@ const versionColumns: TableColumn<RuleVersionItem>[] = [
           <UButton
             icon="i-lucide-refresh-cw"
             variant="ghost"
-            color="neutral"
-            label="Opdatér"
+            color="primary"
+            label="Opdater"
             :loading="rulesPending || versionsLoading"
             @click="() => { refreshRules(); loadRuleVersions(); }"
           />

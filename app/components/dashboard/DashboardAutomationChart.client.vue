@@ -16,7 +16,7 @@ const props = defineProps<{
 
 const width = 860
 const height = 240
-const padding = { top: 16, right: 16, bottom: 24, left: 32 }
+const padding = { top: 16, right: 16, bottom: 30, left: 32 }
 
 const points = computed(() => {
   const series = props.series
@@ -176,14 +176,14 @@ const tooltip = computed(() => {
           />
         </g>
 
-        <g class="text-muted" fill="currentColor" fill-opacity="0.7">
+        <g class="text-muted" fill="currentColor" fill-opacity="0.55">
           <text
             v-for="i in tickIndices"
             :key="`label-${i}`"
             :x="points[i]?.x"
             :y="height - 10"
             text-anchor="middle"
-            class="text-[11px]"
+            class="text-[10px] leading-none"
           >
             {{ (i === 0 || i === points.length - 1) ? '' : (series[i]?.date ? formatShortDate(series[i].date) : '') }}
           </text>
