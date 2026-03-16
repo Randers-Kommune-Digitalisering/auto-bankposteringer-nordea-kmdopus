@@ -45,6 +45,18 @@
         }
     }
 
+    const getChipColorByDate = (date: Date): StatusColor | undefined => {
+        const dateKey = date.toISOString().slice(0, 10)
+        const events = calendarEvents.value[dateKey] ?? []
+        if (!events.length) return undefined
+
+        const colors = new Set(events.map((e) => e.color))
+        if (colors.has('error')) return 'error'
+        if (colors.has('warning')) return 'warning'
+        if (colors.has('success')) return 'success'
+        return 'neutral'
+    }
+
     // Get calendar events grouped by date with status colors
     const calendarEvents = computed(() => {
         const events: Record<string, Array<{ color: StatusColor; label: RunStatus }>> = {}
@@ -187,11 +199,12 @@
                 <template #leading>
                     <UDashboardSidebarCollapse />
                 </template>
-                <template #trailing>
+                <template #right>
                     <UButton
                         icon="i-lucide-refresh-cw"
                         label="Opdater"
                         variant="ghost"
+                        color="primary"
                         :loading="status === 'pending'"
                         @click="refresh()"
                     />
@@ -224,11 +237,21 @@
                         <div class="p-4">
                             <UCalendar
                                 v-model="dateRange"
-                                :events="calendarEvents"
+                                variant="subtle"
                                 class="p-2"
                                 :number-of-months="2"
                                 range
-                            />
+                            >
+                                <template #day="{ day }">
+                                    <UChip
+                                        :show="!!getChipColorByDate(day.toDate('UTC'))"
+                                        :color="getChipColorByDate(day.toDate('UTC'))"
+                                        size="lg"
+                                    >
+                                        {{ day.day }}
+                                    </UChip>
+                                </template>
+                            </UCalendar>
                             <div v-if="dateRange?.start && dateRange?.end" class="mt-4 flex gap-2">
                                 <UButton
                                     variant="ghost"

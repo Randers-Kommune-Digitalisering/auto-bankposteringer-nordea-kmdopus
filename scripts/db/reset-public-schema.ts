@@ -6,6 +6,10 @@ async function main() {
   const client = new Client({ connectionString: env.DATABASE_URL })
   await client.connect()
 
+  // Drizzle-kit stores migration state in a separate schema by default.
+  // If we only drop `public`, drizzle will think migrations already ran,
+  // and the domain tables won't be recreated.
+  await client.query('drop schema if exists drizzle cascade;')
   await client.query('drop schema if exists public cascade;')
   await client.query('create schema public;')
 

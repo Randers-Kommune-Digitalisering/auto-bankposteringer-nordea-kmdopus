@@ -72,7 +72,7 @@ const columns: TableColumn<DashboardLatestRun>[] = [
     <template #header>
       <div class="flex items-center justify-between">
         <div class="font-medium">Seneste kørsler</div>
-        <UButton to="/koersler" variant="ghost" size="sm" icon="i-lucide-arrow-right" label="Se alle" />
+        <UButton to="/koersler" variant="ghost" icon="i-lucide-arrow-right" label="Se alle" />
       </div>
     </template>
 
