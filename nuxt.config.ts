@@ -11,7 +11,6 @@ export default defineNuxtConfig({
       tasks: true,
     },
     scheduledTasks: {
-      '* * * * *': 'queue-worker',
       '0 3 * * *': 'bank-transactions-batch',
     },
   },

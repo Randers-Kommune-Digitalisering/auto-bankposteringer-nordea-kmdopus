@@ -67,7 +67,7 @@ describe('ingestCamt053Document (integration)', () => {
 
     const examplePath = join(
       process.cwd(),
-      'lib',
+      'resources',
       'banking',
       'nordea',
       'examples',

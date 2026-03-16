@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg'
-import env from '../env';
+import dbEnv from '../env-database';
 import * as accountSchema from './schema/account'
 import * as bankingSchema from './schema/banking'
 import * as documentSchema from './schema/document'
@@ -39,8 +39,8 @@ const schema = {
 } as const
 
 
-const pool = new Pool({
-  connectionString: env.DATABASE_URL
+export const pool = new Pool({
+  connectionString: dbEnv.DATABASE_URL
 })
 
 const db = drizzle(pool, { schema })

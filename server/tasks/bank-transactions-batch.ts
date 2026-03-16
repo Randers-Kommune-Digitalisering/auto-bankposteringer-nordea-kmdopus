@@ -1,22 +1,30 @@
 import { defineTask } from 'nitropack/runtime'
 import { logger } from '~/lib/logger'
 import { enqueueJob } from '#engine/queue/handlers/enqueueJob'
-import { runWorker } from '#engine/queue/handlers/worker'
+import { withPgAdvisoryLock } from '~/lib/db/advisoryLock'
+import { allowRoleGatedWork } from '../utils/appRole'
 
 export default defineTask({
   meta: {
     name: 'bank-transactions-batch',
-    description: 'Enqueue bank ingestion og kør worker (batch)',
+    description: 'Enqueue bank ingestion (batch)',
   },
   async run({ payload }) {
+    if (!allowRoleGatedWork('scheduler')) return { result: { skipped: true } }
+
     const log = logger.child({ scope: 'task.bank-transactions-batch' })
 
-    log.info('Starter bank-transaktion batch', { scheduledTime: payload?.scheduledTime })
-    const jobId = await enqueueJob('banking.ingest', {})
-    const workerResult = await runWorker({ maxJobs: 5, maxOutbox: 25 })
+    const locked = await withPgAdvisoryLock('task:bank-transactions-batch', async () => {
+      log.info('Starter bank-transaktion batch', { scheduledTime: payload?.scheduledTime })
+      const jobId = await enqueueJob('banking.ingest', {})
+      log.info('Batch queued', { jobId, scheduledTime: payload?.scheduledTime })
+    })
 
-    log.info('Batch queued', { jobId, worker: workerResult, scheduledTime: payload?.scheduledTime })
+    if (!locked.acquired) {
+      log.info('Batch skipped (lock not acquired)', { scheduledTime: payload?.scheduledTime })
+      return { result: { skipped: true } }
+    }
 
-    return { result: { jobId, worker: workerResult } }
+    return { result: { skipped: false } }
   },
 })

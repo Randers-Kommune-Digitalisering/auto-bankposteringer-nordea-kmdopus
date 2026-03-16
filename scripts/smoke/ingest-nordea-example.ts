@@ -33,7 +33,7 @@ async function main() {
 
   const examplePath = join(
     process.cwd(),
-    'lib',
+    'resources',
     'banking',
     'nordea',
     'examples',

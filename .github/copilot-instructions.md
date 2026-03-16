@@ -22,3 +22,7 @@ When generating code:
 - Keep business logic outside UI components.
 - Avoid coupling domain logic to a specific ERP.
 - Favor long-term maintainability over convenience.
+
+// This instruction ensures that any changes to the system's architecture or design are consistently documented.
+// By updating the ARCHITECTURE.md file whenever modifications occur, the project maintains accurate and up-to-date architectural documentation.
+When the architecture or design is changed, update the ARCHITECTURE.md markdown-file to reflect the new design.
