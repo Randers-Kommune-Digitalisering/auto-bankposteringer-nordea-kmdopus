@@ -1,6 +1,8 @@
 import 'dotenv/config'
 import dns from 'node:dns/promises'
 import { eq } from 'drizzle-orm'
+import { z } from 'zod'
+import tryParseEnv from '../../app/lib/try-parse-env'
 
 async function normalizeDatabaseUrlForLocalScripts() {
   const raw = process.env.DATABASE_URL
@@ -24,12 +26,18 @@ async function normalizeDatabaseUrlForLocalScripts() {
 await normalizeDatabaseUrlForLocalScripts()
 
 const { default: db } = await import('../../app/lib/db')
-const { default: env } = await import('../../app/lib/env')
 
 import { erpAccountingDimensionDefinition, tenantConfiguration } from '../../app/lib/db/schema/rule'
 import type { ErpSupplier } from '../../app/lib/db/schema/enums'
 
 const TENANT_CONFIG_ID = 1
+
+const SeedEnvSchema = z.object({
+  ERP_SUPPLIER: z.string(),
+})
+
+tryParseEnv(SeedEnvSchema)
+const seedEnv = SeedEnvSchema.parse(process.env)
 
 type SeedDimension = {
   supplier: ErpSupplier
@@ -86,7 +94,7 @@ async function ensureDimensionDefinitions() {
 }
 
 async function main() {
-  const desiredSupplier = env.ERP_SUPPLIER as ErpSupplier
+  const desiredSupplier = seedEnv.ERP_SUPPLIER as ErpSupplier
   await ensureTenantConfiguration(desiredSupplier)
   await ensureDimensionDefinitions()
   // eslint-disable-next-line no-console
