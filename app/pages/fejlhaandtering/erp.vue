@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
+import { prettyPrintXml } from '~/lib/prettyPrintXml'
 
 type FailedErpRequestListItem = {
   requestId: string
@@ -56,6 +57,13 @@ const { data: failedList, pending: failedPending, refresh: refreshFailed } = awa
   },
 )
 
+async function refreshAll() {
+  await refreshFailed()
+  if (erpDetails.value?.requestId) {
+    await loadErpRequest()
+  }
+}
+
 const erpRequestId = ref('')
 const erpLoading = ref(false)
 const erpDetails = ref<ErpRequestDetails | null>(null)
@@ -64,6 +72,31 @@ const erpPayloadDraft = ref('')
 const erpLinesLoading = ref(false)
 const erpLines = ref<ErpRequestLinesResponse | null>(null)
 const selectedLineNos = ref<Record<number, boolean>>({})
+
+function formatErpPayloadXml() {
+  const raw = erpPayloadDraft.value
+  if (!raw.trim()) return
+
+  if (!raw.trimStart().startsWith('<')) {
+    toast.add({
+      title: 'Payload ligner ikke XML',
+      description: 'Formatér XML virker kun når payload starter med "<".',
+      color: 'neutral',
+    })
+    return
+  }
+
+  try {
+    erpPayloadDraft.value = prettyPrintXml(raw)
+  } catch (error) {
+    console.error('Kunne ikke formatere XML', error)
+    toast.add({
+      title: 'Kunne ikke formatere XML',
+      description: 'Kontrollér at payload er gyldig XML.',
+      color: 'error',
+    })
+  }
+}
 
 const selectedLineNoList = computed(() =>
   Object.entries(selectedLineNos.value)
@@ -130,13 +163,11 @@ async function resendErpRequest() {
   }
   erpLoading.value = true
   try {
-    const res = (await $fetch(
-      `/api/fejlhaandtering/erp-requests/${encodeURIComponent(erpDetails.value.requestId)}/resend`,
-      {
-        method: 'POST',
-        body: { payload },
-      },
-    )) as { success: boolean; requestId: string; sourceRequestId: string }
+    const url = `/api/fejlhaandtering/erp-requests/${encodeURIComponent(erpDetails.value.requestId)}/resend` as any
+    const res = await $fetch<{ success: boolean; requestId: string; sourceRequestId: string }>(url, {
+      method: 'POST',
+      body: { payload },
+    })
     toast.add({ title: 'Ny ERP-request oprettet', description: res.requestId })
     erpRequestId.value = res.requestId
     await loadErpRequest()
@@ -315,10 +346,10 @@ async function reopenBookedTransactions() {
           <UButton
             icon="i-lucide-refresh-cw"
             variant="ghost"
-            color="neutral"
-            label="Opdatér"
-            :loading="failedPending"
-            @click="refreshFailed"
+            color="primary"
+            label="Opdater"
+            :loading="failedPending || erpLoading || erpLinesLoading"
+            @click="refreshAll"
           />
         </template>
       </UDashboardNavbar>
@@ -332,6 +363,7 @@ async function reopenBookedTransactions() {
               <div class="font-medium">Afviste ERP-svar</div>
               <div class="text-sm text-muted">
                 Her vises ERP-requests hvor vi har modtaget et negativt udfald. Åbn en request for at se/redigere payload og genfremsende som en ny request.
+                Hvis et svar mangler helt (outbox/request uden kvittering), så brug <NuxtLink to="/fejlhaandtering/koe" class="underline">Kø og genkørsel</NuxtLink>.
               </div>
             </div>
           </template>
@@ -383,34 +415,49 @@ async function reopenBookedTransactions() {
             class="border border-dashed border-default rounded-lg"
           />
 
-          <div v-else class="grid gap-4 lg:grid-cols-2">
-            <div class="space-y-4">
+          <div v-else class="grid gap-4 lg:grid-cols-2 lg:items-stretch">
+            <div class="flex h-full min-h-0 flex-col gap-4">
               <div class="space-y-2">
                 <div class="text-sm">
-                  <span class="text-muted">Request:</span>
+                  <span class="text-muted">Request: </span>
                   <span class="font-mono">{{ erpDetails.requestId }}</span>
                 </div>
                 <div class="text-sm">
-                  <span class="text-muted">Run:</span>
+                  <span class="text-muted">Run: </span>
                   <span class="font-mono">{{ erpDetails.runId }}</span>
                 </div>
                 <div class="text-sm" v-if="erpDetails.response">
-                  <span class="text-muted">Response:</span>
+                  <span class="text-muted">Bilag: </span>
                   <span class="font-mono">{{ erpDetails.response.id }}</span>
                 </div>
                 <div class="text-sm" v-if="erpDetails.response?.statusText">
-                  <span class="text-muted">Status:</span>
+                  <span class="text-muted">Status: </span>
                   <span>{{ erpDetails.response.statusText }}</span>
                 </div>
               </div>
 
-              <UFormField label="Request payload (rå tekst/XML)">
-                <UTextarea
-                  v-model="erpPayloadDraft"
-                  :rows="12"
-                  placeholder="Indsæt/redigér request payload..."
-                  :disabled="erpLoading"
-                />
+              <UFormField label="Request payload (rå tekst/XML)" class="flex min-h-0 flex-1 flex-col">
+                <div class="flex min-h-0 flex-1 flex-col gap-2">
+                  <div class="flex justify-end">
+                    <UButton
+                      icon="i-lucide-wand-sparkles"
+                      label="Formatér XML"
+                      color="neutral"
+                      variant="ghost"
+                      size="sm"
+                      :disabled="erpLoading || !erpPayloadDraft.trim().length"
+                      @click="formatErpPayloadXml"
+                    />
+                  </div>
+
+                  <UTextarea
+                    v-model="erpPayloadDraft"
+                    :rows="16"
+                    placeholder="Indsæt/redigér request payload..."
+                    :disabled="erpLoading"
+                    class="h-full min-h-80 font-mono"
+                  />
+                </div>
               </UFormField>
 
               <div class="flex flex-wrap gap-2">
@@ -426,7 +473,7 @@ async function reopenBookedTransactions() {
               </div>
             </div>
 
-            <div class="space-y-4">
+            <div class="flex h-full min-h-0 flex-col gap-4">
               <UAlert
                 color="neutral"
                 variant="soft"
@@ -439,14 +486,6 @@ async function reopenBookedTransactions() {
               <div class="space-y-2">
                 <div class="flex items-center justify-between">
                   <div class="font-medium">Posteringslinjer i request</div>
-                  <UButton
-                    icon="i-lucide-refresh-cw"
-                    label="Opdatér"
-                    color="neutral"
-                    variant="ghost"
-                    :loading="erpLinesLoading"
-                    @click="loadErpLines(erpDetails.requestId)"
-                  />
                 </div>
 
                 <UTable

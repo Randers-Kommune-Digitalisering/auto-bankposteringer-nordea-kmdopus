@@ -1,8 +1,11 @@
 import { defineTask } from 'nitropack/runtime'
+import crypto from 'node:crypto'
 import { logger } from '~/lib/logger'
 import { enqueueJob } from '#engine/queue/handlers/enqueueJob'
 import { withPgAdvisoryLock } from '~/lib/db/advisoryLock'
 import { allowRoleGatedWork } from '../utils/appRole'
+import db from '~/lib/db'
+import { run } from '~/lib/db/schema/run'
 
 export default defineTask({
   meta: {
@@ -16,8 +19,14 @@ export default defineTask({
 
     const locked = await withPgAdvisoryLock('task:bank-transactions-batch', async () => {
       log.info('Starter bank-transaktion batch', { scheduledTime: payload?.scheduledTime })
-      const jobId = await enqueueJob('banking.ingest', {})
-      log.info('Batch queued', { jobId, scheduledTime: payload?.scheduledTime })
+
+      const bookingDate = payload?.scheduledTime ? new Date(payload.scheduledTime) : new Date()
+      const runId = crypto.randomUUID()
+
+      await db.insert(run).values({ id: runId, bookingDate, status: 'afventer' })
+
+      const jobId = await enqueueJob('banking.ingest', {}, { runId })
+      log.info('Batch queued', { jobId, runId, scheduledTime: payload?.scheduledTime })
     })
 
     if (!locked.acquired) {

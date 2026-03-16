@@ -15,13 +15,27 @@ type DashboardStat = {
   to?: string
   value: string
   badge?: string
+  color?: "primary" | "secondary" | "success" | "info" | "warning" | "error" | "neutral"
   sub?: string
 }
 
-const cardUi = {
+const leadingColorClassesByColor: Record<NonNullable<DashboardStat['color']>, string> = {
+  primary: 'bg-primary/10 ring-primary/25',
+  secondary: 'bg-secondary/10 ring-secondary/25',
+  success: 'bg-success/10 ring-success/25',
+  info: 'bg-info/10 ring-info/25',
+  warning: 'bg-warning/10 ring-warning/25',
+  error: 'bg-error/10 ring-error/25',
+  neutral: 'bg-neutral/10 ring-neutral/25'
+}
+
+const leadingColorClasses = (color?: DashboardStat['color']) => leadingColorClassesByColor[color ?? 'primary']
+
+const leadingBaseClass = 'p-2.5 rounded-full ring ring-inset flex-col'
+
+const cardUiBase = {
   container: 'gap-y-1.5',
   wrapper: 'items-start',
-  leading: 'p-2.5 rounded-full bg-primary/10 ring ring-inset ring-primary/25 flex-col',
   title: 'font-normal text-muted text-xs uppercase'
 } as const
 
@@ -50,7 +64,7 @@ const stats = computed<DashboardStat[]>(() => {
       icon: 'i-lucide-notebook-pen',
       to: '/konteringsregler',
       value: formatInt(kpis.activeRules),
-      badge: 'aktive',
+      badge: 'Aktive',
       sub: `Ubrugte: ${formatInt(kpis.unusedActiveRules)}`
     },
     {
@@ -59,7 +73,8 @@ const stats = computed<DashboardStat[]>(() => {
       icon: 'i-lucide-triangle-alert',
       to: '/koersler',
       value: formatInt(kpis.errorCount),
-      badge: 'fejl',
+      badge: 'Fejl',
+      color: 'error',
       sub: `Kørsler: ${formatInt(kpis.failedRuns)}`
     }
   ]
@@ -75,7 +90,7 @@ const stats = computed<DashboardStat[]>(() => {
       :title="stat.title"
       :to="stat.to"
       variant="subtle"
-      :ui="cardUi"  
+      :ui="{ ...cardUiBase, leading: `${leadingBaseClass} ${leadingColorClasses(stat.color)}` }"
       class="lg:rounded-none first:rounded-l-lg last:rounded-r-lg hover:z-1"
     >
       <div class="flex items-center gap-2">
@@ -83,7 +98,7 @@ const stats = computed<DashboardStat[]>(() => {
           {{ stat.value }}
         </span>
 
-        <UBadge v-if="stat.badge" variant="subtle" class="text-xs">
+        <UBadge v-if="stat.badge" variant="subtle" class="text-xs" :color="stat.color">
           {{ stat.badge }}
         </UBadge>
       </div>
@@ -91,6 +106,7 @@ const stats = computed<DashboardStat[]>(() => {
       <div v-if="stat.sub" class="text-sm text-muted">
         {{ stat.sub }}
       </div>
+      <div v-else class="text-sm text-muted" aria-hidden="true">&nbsp;</div>
     </UPageCard>
   </UPageGrid>
 </template>
