@@ -27,8 +27,8 @@ const EnvSchema = z.object({
   SFTP_URL: z.string(),
   SFTP_USERNAME: z.string(),
   SFTP_PASSWORD: z.string(),
-  SFTP_SEND_DIR: z.string(),
-  SFTP_RECEIVE_DIR: z.string(),
+  SFTP_REQUEST_DIR: z.string(),
+  SFTP_RESPONSE_DIR: z.string(),
 });
 
 export type EnvSchema = z.infer<typeof EnvSchema>;

@@ -6,7 +6,13 @@ import {
   ruleAccountingDimensionValue,
   tenantConfiguration,
 } from '~/lib/db/schema/rule'
+import {
+  erpAccountingDimensionConstraint,
+  erpAccountingDimensionConstraintMember,
+  type AccountingDimensionConstraintKind,
+} from '~/lib/db/schema/accountingDimensionConstraint'
 import type { ErpSupplier } from '~/lib/db/schema/enums'
+import { validateAccountingDimensionConstraints } from '~~/engine/erp-integration/domain/accountingDimensionConstraints'
 
 const TENANT_CONFIG_ID = 1
 
@@ -28,6 +34,13 @@ export type AccountingDimensionDefinition = {
   erpTarget: string | null
 }
 
+export type AccountingDimensionConstraint = {
+  id: string
+  ifKey: string
+  kind: AccountingDimensionConstraintKind
+  members: string[]
+}
+
 export async function listAccountingDimensionDefinitions(supplier: ErpSupplier): Promise<AccountingDimensionDefinition[]> {
   const rows = await db
     .select({
@@ -41,6 +54,37 @@ export async function listAccountingDimensionDefinitions(supplier: ErpSupplier):
     .where(eq(erpAccountingDimensionDefinition.erpSupplier, supplier))
 
   return rows.sort((a, b) => (a.sortOrder - b.sortOrder) || a.key.localeCompare(b.key))
+}
+
+export async function listAccountingDimensionConstraints(supplier: ErpSupplier): Promise<AccountingDimensionConstraint[]> {
+  const rows = await db
+    .select({
+      id: erpAccountingDimensionConstraint.id,
+      ifKey: erpAccountingDimensionConstraint.ifKey,
+      kind: erpAccountingDimensionConstraint.kind,
+      memberKey: erpAccountingDimensionConstraintMember.key,
+    })
+    .from(erpAccountingDimensionConstraint)
+    .leftJoin(
+      erpAccountingDimensionConstraintMember,
+      eq(erpAccountingDimensionConstraintMember.constraintId, erpAccountingDimensionConstraint.id),
+    )
+    .where(eq(erpAccountingDimensionConstraint.erpSupplier, supplier))
+
+  const byId = new Map<string, AccountingDimensionConstraint>()
+  for (const r of rows) {
+    const id = r.id
+    if (!byId.has(id)) {
+      byId.set(id, { id, ifKey: r.ifKey, kind: r.kind, members: [] })
+    }
+    if (r.memberKey) {
+      byId.get(id)!.members.push(r.memberKey)
+    }
+  }
+
+  return Array.from(byId.values())
+    .map((c) => ({ ...c, members: c.members.sort((a, b) => a.localeCompare(b)) }))
+    .sort((a, b) => (a.ifKey.localeCompare(b.ifKey) || a.kind.localeCompare(b.kind)))
 }
 
 export type AccountingDimensionInput = { key: string; value: string }
@@ -65,6 +109,7 @@ export function resolveDimensionValueRows(options: {
   ruleId: number
   dimensions?: AccountingDimensionInput[]
   definitions: AccountingDimensionDefinition[]
+  constraints?: AccountingDimensionConstraint[]
 }): Array<typeof ruleAccountingDimensionValue.$inferInsert> {
   const input = normalizeDimensionInput(options.dimensions)
   const byKey = new Map(options.definitions.map((d) => [d.key, d]))
@@ -80,6 +125,8 @@ export function resolveDimensionValueRows(options: {
       throw new Error(`Manglende påkrævet konteringsdimension: ${def.key}`)
     }
   }
+
+  validateAccountingDimensionConstraints(new Set(input.map((d) => d.key)), options.constraints)
 
   return input.map((d) => ({
     ruleId: options.ruleId,

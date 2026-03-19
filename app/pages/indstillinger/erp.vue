@@ -20,6 +20,12 @@ type AccountingDimensionDefinition = {
 type AccountingDimensionsResponse = {
   erpSupplier: string
   dimensions: AccountingDimensionDefinition[]
+  constraints: Array<{
+    id: string
+    ifKey: string
+    kind: string
+    members: string[]
+  }>
 }
 
 const { data: erpMetadata } = await useFetch<ErpMetadataResponse>(
@@ -43,7 +49,7 @@ const { data: accountingDimensions } = await useFetch<AccountingDimensionsRespon
   '/api/settings/accounting-dimensions',
   {
     key: 'accounting-dimensions-settings',
-    default: () => ({ erpSupplier: '', dimensions: [] }),
+    default: () => ({ erpSupplier: '', dimensions: [], constraints: [] }),
   },
 )
 
@@ -64,6 +70,24 @@ const dimensionFields = computed(() => {
     label: `Konteringsdimension: ${d.key}`,
     value: d.required ? 'Påkrævet' : 'Valgfri',
   }))
+})
+
+const constraintFields = computed(() => {
+  const constraints = accountingDimensions.value?.constraints ?? []
+
+  return constraints.map((c) => {
+    const members = (c.members ?? []).join(' / ')
+    const prefix = c.kind === 'requires_any_of'
+      ? 'skal mindst én af'
+      : c.kind === 'requires_exactly_one_of'
+        ? 'skal præcist én af'
+        : 'skal også'
+
+    return {
+      label: `Regel: ${c.ifKey}`,
+      value: `Når '${c.ifKey}' er udfyldt, ${prefix} [${members}] være udfyldt`,
+    }
+  })
 })
 </script>
 
@@ -107,6 +131,27 @@ const dimensionFields = computed(() => {
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div
             v-for="field in dimensionFields"
+            :key="field.label"
+            class="flex flex-col gap-1"
+          >
+            <span class="text-xs font-semibold text-muted">{{ field.label }}</span>
+            <UInput
+              :model-value="field.value"
+              readonly
+              class="font-mono text-sm"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section class="space-y-3 mt-8">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-muted">Konteringsregler</p>
+          <p class="text-sm text-muted">Afhængigheder mellem dimensioner (bruges til validering i UI, import og API).</p>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
+          <div
+            v-for="field in constraintFields"
             :key="field.label"
             class="flex flex-col gap-1"
           >

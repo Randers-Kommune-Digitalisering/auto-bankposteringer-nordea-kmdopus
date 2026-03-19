@@ -59,7 +59,7 @@ export function createKmdErpAdapter(options: {
         remotePath: file.path,
       }))
 
-      if (ingestOptions.deleteAfterPickup ?? true) {
+      if (ingestOptions.deleteAfterPickup ?? false) {
         for (const file of files) {
           await sftp.deleteRemoteFile(file.path)
           deleted += 1

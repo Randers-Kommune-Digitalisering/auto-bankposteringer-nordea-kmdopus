@@ -86,6 +86,13 @@ const links = [[
     type: 'trigger',
     children: [
       {
+        label: 'Regeladministration',
+        to: '/indstillinger/regler',
+        onSelect: () => {
+          open.value = false
+        }
+      },
+      {
         label: 'Tags',
         to: '/indstillinger/tags',
         onSelect: () => {
@@ -114,13 +121,6 @@ const links = [[
     icon: 'solar:shield-warning-bold-duotone',
     type: 'trigger',
     children: [
-      {
-        label: 'Regeladministration',
-        to: '/fejlhaandtering/regler',
-        onSelect: () => {
-          open.value = false
-        }
-      },
       {
         label: 'Kø og genkørsel',
         to: '/fejlhaandtering/koe',

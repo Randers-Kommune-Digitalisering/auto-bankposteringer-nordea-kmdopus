@@ -1,3 +1,4 @@
+CREATE TYPE "public"."accounting_dimension_constraint_kind" AS ENUM('requires_any_of', 'requires_all_of', 'requires_exactly_one_of');--> statement-breakpoint
 CREATE TYPE "public"."banking_document_format" AS ENUM('camt053', 'unknown');--> statement-breakpoint
 CREATE TYPE "public"."booking_status" AS ENUM('åben', 'bogført', 'undtaget');--> statement-breakpoint
 CREATE TYPE "public"."cpr_type" AS ENUM('ingen', 'statisk', 'dynamisk');--> statement-breakpoint
@@ -16,6 +17,22 @@ CREATE TABLE "account" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text,
 	"status_account" integer NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "erp_accounting_dimension_constraint" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"erp_supplier" "erp_supplier" NOT NULL,
+	"if_key" text NOT NULL,
+	"kind" "accounting_dimension_constraint_kind" NOT NULL,
+	"created_at" date DEFAULT now(),
+	"updated_at" date DEFAULT now(),
+	CONSTRAINT "erp_accounting_dimension_constraint_supplier_if_kind_unique" UNIQUE("erp_supplier","if_key","kind")
+);
+--> statement-breakpoint
+CREATE TABLE "erp_accounting_dimension_constraint_member" (
+	"constraint_id" uuid NOT NULL,
+	"key" text NOT NULL,
+	CONSTRAINT "erp_accounting_dimension_constraint_member_constraint_id_key_pk" PRIMARY KEY("constraint_id","key")
 );
 --> statement-breakpoint
 CREATE TABLE "banking_request" (
@@ -334,6 +351,7 @@ CREATE TABLE "transaction_processing" (
 	"locked_by" text
 );
 --> statement-breakpoint
+ALTER TABLE "erp_accounting_dimension_constraint_member" ADD CONSTRAINT "erp_accounting_dimension_constraint_member_constraint_id_erp_accounting_dimension_constraint_id_fk" FOREIGN KEY ("constraint_id") REFERENCES "public"."erp_accounting_dimension_constraint"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "banking_request" ADD CONSTRAINT "banking_request_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "banking_response" ADD CONSTRAINT "banking_response_request_id_banking_request_id_fk" FOREIGN KEY ("request_id") REFERENCES "public"."banking_request"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "banking_party" ADD CONSTRAINT "banking_party_payload_id_banking_payload_id_fk" FOREIGN KEY ("payload_id") REFERENCES "public"."banking_payload"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
