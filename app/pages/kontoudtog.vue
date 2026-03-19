@@ -8,6 +8,7 @@ import useFlattenArray from '~/composables/useFlattenArray'
 const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
 const UPopover = resolveComponent('UPopover')
+const UInput = resolveComponent('UInput')
 
 definePageMeta({
   path: '/kontoudtog'
@@ -22,6 +23,15 @@ const defaultRange = {
 }
 
 const dateRange = ref<any>(defaultRange)
+const globalFilterValue = ref('')
+
+type StatementTableRef = {
+  tableApi?: {
+    getFilteredRowModel: () => { rows: unknown[] }
+  }
+}
+
+const table = ref<StatementTableRef | null>(null)
 
 const start = computed(() => {
   const v = dateRange.value?.start ?? startDefault
@@ -44,6 +54,10 @@ const rows = computed<StatementTransaction[]>(() => {
   return [...allRows.value].sort((a, b) => {
     return new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime()
   })
+})
+
+const filteredRowCount = computed<number>(() => {
+  return table.value?.tableApi?.getFilteredRowModel().rows.length ?? rows.value.length
 })
 
 type CsvColumn = { header: string; value: (row: StatementTransaction) => string | number | null | undefined }
@@ -239,6 +253,36 @@ const formatAmount = (row: StatementTransaction): string => {
 
 const columns: TableColumn<StatementTransaction>[] = [
   {
+    id: 'search_flat',
+    accessorFn: (row) => {
+      const parts: Array<string | number | null | undefined> = [
+        row.bookingDate,
+        row.valueDate,
+        row.bankAccountName,
+        row.accountId,
+        row.amount,
+        row.currency,
+        row.creditDebitIndicator,
+        resolveCounterpart(row),
+        resolveTransactionType(row),
+        buildFreeText(row).join(' '),
+        row.id,
+        row.runId,
+        row.status,
+        row.processingStatus,
+        row.ruleApplied
+      ]
+
+      return parts
+        .filter((v) => v !== null && v !== undefined)
+        .map((v) => String(v))
+        .join(' ')
+    },
+    enableHiding: false,
+    enableSorting: false,
+    cell: () => undefined
+  },
+  {
     accessorKey: 'bookingDate',
     header: 'Dato',
     size: 120,
@@ -346,6 +390,10 @@ const columns: TableColumn<StatementTransaction>[] = [
   }
 ]
 
+const columnVisibility = ref({
+  search_flat: false
+})
+
 const tableUi = {
   base: 'border-separate border-spacing-0',
   thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
@@ -389,10 +437,21 @@ const tableUi = {
 
     <template #body>
       <div class="space-y-4">
-        <DashboardDateRangePicker v-model="dateRange" :reset-value="defaultRange" />
+        <div>
+          <DashboardDateRangePicker v-model="dateRange" :reset-value="defaultRange" />
+        </div>
+
+        <div class="mt-2">
+          <UInput
+            v-model="globalFilterValue"
+            class="max-w-sm"
+            icon="solar:magnifer-bold-duotone"
+            placeholder="Søg i kontoudtog..."
+          />
+        </div>
 
         <div v-if="dateRange?.start && dateRange?.end" class="text-sm text-muted">
-          {{ rows.length }} transaktioner i valgt periode
+          {{ filteredRowCount }} transaktioner i valgt periode
         </div>
 
         <UEmpty
@@ -410,7 +469,10 @@ const tableUi = {
         </UEmpty>
 
         <UTable
+          ref="table"
           v-else
+          v-model:global-filter="globalFilterValue"
+          v-model:column-visibility="columnVisibility"
           :data="rows"
           :columns="columns"
           :loading="status === 'pending'"
