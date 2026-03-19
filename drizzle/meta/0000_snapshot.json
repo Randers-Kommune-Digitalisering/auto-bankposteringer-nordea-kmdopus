@@ -1,5 +1,5 @@
 {
-  "id": "9048399b-6cb8-4a41-b473-ab103e1b6b44",
+  "id": "094a5703-9d82-4641-b702-41ffb558b177",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -30,6 +30,117 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.erp_accounting_dimension_constraint": {
+      "name": "erp_accounting_dimension_constraint",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "erp_supplier": {
+          "name": "erp_supplier",
+          "type": "erp_supplier",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "if_key": {
+          "name": "if_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kind": {
+          "name": "kind",
+          "type": "accounting_dimension_constraint_kind",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "erp_accounting_dimension_constraint_supplier_if_kind_unique": {
+          "name": "erp_accounting_dimension_constraint_supplier_if_kind_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "erp_supplier",
+            "if_key",
+            "kind"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.erp_accounting_dimension_constraint_member": {
+      "name": "erp_accounting_dimension_constraint_member",
+      "schema": "",
+      "columns": {
+        "constraint_id": {
+          "name": "constraint_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "erp_accounting_dimension_constraint_member_constraint_id_erp_accounting_dimension_constraint_id_fk": {
+          "name": "erp_accounting_dimension_constraint_member_constraint_id_erp_accounting_dimension_constraint_id_fk",
+          "tableFrom": "erp_accounting_dimension_constraint_member",
+          "tableTo": "erp_accounting_dimension_constraint",
+          "columnsFrom": [
+            "constraint_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "erp_accounting_dimension_constraint_member_constraint_id_key_pk": {
+          "name": "erp_accounting_dimension_constraint_member_constraint_id_key_pk",
+          "columns": [
+            "constraint_id",
+            "key"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -2312,6 +2423,15 @@
     }
   },
   "enums": {
+    "public.accounting_dimension_constraint_kind": {
+      "name": "accounting_dimension_constraint_kind",
+      "schema": "public",
+      "values": [
+        "requires_any_of",
+        "requires_all_of",
+        "requires_exactly_one_of"
+      ]
+    },
     "public.banking_document_format": {
       "name": "banking_document_format",
       "schema": "public",

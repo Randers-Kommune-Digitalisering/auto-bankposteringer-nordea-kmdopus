@@ -14,7 +14,7 @@ import {
   ruleRuleTag,
 } from '~/lib/db/schema/rule'
 import { ruleVersion, type RuleVersionInsertSchema } from '~/lib/db/schema/ruleVersion'
-import { resolveDimensionValueRows, type AccountingDimensionDefinition } from '~~/server/utils/accountingDimensions'
+import { listAccountingDimensionConstraints, resolveDimensionValueRows, type AccountingDimensionDefinition } from '~~/server/utils/accountingDimensions'
 
 type CprType = 'ingen' | 'statisk' | 'dynamisk'
 
@@ -111,6 +111,8 @@ export default defineEventHandler(async (event) => {
 
   const parsedContent = versionContentSchema.parse(target.content)
 
+  const dimensionConstraints = await listAccountingDimensionConstraints(existingRule.erpSupplier as any)
+
   const [{ latestVersion }] = await db
     .select({ latestVersion: max(ruleVersion.version) })
     .from(ruleVersion)
@@ -204,6 +206,7 @@ export default defineEventHandler(async (event) => {
       ruleId,
       dimensions: legacyFallbackDimensions,
       definitions,
+      constraints: dimensionConstraints,
     })
 
     if (dimensionRows.length) {

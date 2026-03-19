@@ -15,7 +15,7 @@ import {
   ruleAccountingDimensionValue
 } from '~/lib/db/schema/rule'
 import { ruleVersion, type RuleVersionInsertSchema } from '~/lib/db/schema/ruleVersion'
-import { getActiveErpSupplier, listAccountingDimensionDefinitions, resolveDimensionValueRows } from '~~/server/utils/accountingDimensions'
+import { getActiveErpSupplier, listAccountingDimensionConstraints, listAccountingDimensionDefinitions, resolveDimensionValueRows } from '~~/server/utils/accountingDimensions'
 
 function compileRuleDraftToDb(draft: RuleDraftSchema, newVersion: number, erpSupplier: string) {
   const {
@@ -121,6 +121,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const dimensionDefinitions = await listAccountingDimensionDefinitions(activeSupplier)
+  const dimensionConstraints = await listAccountingDimensionConstraints(activeSupplier)
 
   const { ruleData, bankAccountIds, tagIds, conditionRows, accountingParameters, attachments, versionContent } = compileRuleDraftToDb(parsed.data, newVersion, existingRule.erpSupplier)
   const validatedDbPayload = createInsertSchema(rule).parse(ruleData)
@@ -160,6 +161,7 @@ export default defineEventHandler(async (event) => {
       ruleId: id,
       dimensions: parsed.data.accountingDimensions,
       definitions: dimensionDefinitions,
+      constraints: dimensionConstraints,
     })
     if (dimensionRows.length) {
       await tx.insert(ruleAccountingDimensionValue).values(dimensionRows)

@@ -7,8 +7,8 @@ export interface SftpConnectionOptions {
   port: number
   username: string
   password: string
-  sendDir: string
-  receiveDir: string
+  requestDir: string
+  responseDir: string
 }
 
 export interface UploadFileOptions {
@@ -30,8 +30,8 @@ const defaultOptions: SftpConnectionOptions = {
   port: 22,
   username: env.SFTP_USERNAME,
   password: env.SFTP_PASSWORD,
-  sendDir: env.SFTP_SEND_DIR,
-  receiveDir: env.SFTP_RECEIVE_DIR,
+  requestDir: env.SFTP_REQUEST_DIR,
+  responseDir: env.SFTP_RESPONSE_DIR,
 }
 
 export class ErpSftpClient {
@@ -42,7 +42,7 @@ export class ErpSftpClient {
   }
 
   async uploadFile(options: UploadFileOptions): Promise<string> {
-    const remoteDir = options.remoteDir ?? this.options.sendDir
+    const remoteDir = options.remoteDir ?? this.options.requestDir
     const remotePath = buildRemotePath(remoteDir, options.filename)
 
     await this.withClient(async client => {
@@ -61,7 +61,7 @@ export class ErpSftpClient {
   async fetchResponseFiles(limit?: number): Promise<RemoteFile[]> {
     const files: RemoteFile[] = []
     await this.withClient(async client => {
-      const entries = await client.list(this.options.receiveDir)
+      const entries = await client.list(this.options.responseDir)
       const limitedEntries = typeof limit === 'number' ? entries.slice(0, limit) : entries
 
       for (const entry of limitedEntries) {
@@ -69,7 +69,7 @@ export class ErpSftpClient {
           continue
         }
 
-        const remotePath = buildRemotePath(this.options.receiveDir, entry.name)
+        const remotePath = buildRemotePath(this.options.responseDir, entry.name)
         const contents = await client.get(remotePath)
         files.push({
           path: remotePath,
@@ -93,9 +93,10 @@ export class ErpSftpClient {
   private async withClient<T>(handler: (client: SftpClient) => Promise<T>): Promise<T> {
     const client = new SftpClient()
     try {
+      const normalized = normalizeHostPort(this.options.host, this.options.port)
       await client.connect({
-        host: this.options.host,
-        port: this.options.port,
+        host: normalized.host,
+        port: normalized.port,
         username: this.options.username,
         password: this.options.password,
       })
@@ -104,6 +105,40 @@ export class ErpSftpClient {
       await client.end().catch(() => undefined)
     }
   }
+}
+
+function normalizeHostPort(rawHost: string, fallbackPort: number): { host: string; port: number } {
+  const host = rawHost.trim()
+  if (!host) {
+    return { host, port: fallbackPort }
+  }
+
+  if (host.includes('://')) {
+    try {
+      const url = new URL(host)
+      const portFromUrl = url.port ? Number.parseInt(url.port, 10) : undefined
+      return {
+        host: url.hostname,
+        port:
+          typeof portFromUrl === 'number' && Number.isFinite(portFromUrl)
+            ? portFromUrl
+            : fallbackPort,
+      }
+    } catch {
+      // fall through
+    }
+  }
+
+  const hostPortMatch = /^(?<hostname>[^:]+):(?<port>\d+)$/.exec(host)
+  if (hostPortMatch?.groups?.hostname && hostPortMatch.groups.port) {
+    const parsedPort = Number.parseInt(hostPortMatch.groups.port, 10)
+    return {
+      host: hostPortMatch.groups.hostname,
+      port: Number.isFinite(parsedPort) ? parsedPort : fallbackPort,
+    }
+  }
+
+  return { host, port: fallbackPort }
 }
 
 function buildRemotePath(dir: string, file: string): string {
