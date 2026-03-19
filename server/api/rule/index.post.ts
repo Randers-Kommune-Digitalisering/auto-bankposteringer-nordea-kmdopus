@@ -15,7 +15,7 @@ import type { RuleDraftSchema } from '~/lib/db/schema/rule'
 import { ruleVersion, type RuleVersionInsertSchema } from '~/lib/db/schema/ruleVersion'
 import db from '~/lib/db'
 import { logger } from '~/lib/logger'
-import { getActiveErpSupplier, listAccountingDimensionDefinitions, resolveDimensionValueRows } from '~~/server/utils/accountingDimensions'
+import { getActiveErpSupplier, listAccountingDimensionConstraints, listAccountingDimensionDefinitions, resolveDimensionValueRows } from '~~/server/utils/accountingDimensions'
 
 const version = 1
 
@@ -95,6 +95,7 @@ export default defineEventHandler(async (event) => {
   try {
     const activeSupplier = await getActiveErpSupplier()
     const dimensionDefinitions = await listAccountingDimensionDefinitions(activeSupplier)
+    const dimensionConstraints = await listAccountingDimensionConstraints(activeSupplier)
 
     const body = await readBody(event)
     const draft = ruleDraftSchema.parse(body)
@@ -148,6 +149,7 @@ export default defineEventHandler(async (event) => {
         ruleId: newRuleId,
         dimensions: draft.accountingDimensions,
         definitions: dimensionDefinitions,
+        constraints: dimensionConstraints,
       })
 
       if (dimensionRows.length) {

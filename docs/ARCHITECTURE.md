@@ -20,6 +20,7 @@ This repo is a stateless financial integration engine:
 - `transaction`: normalized entry/tx details (Refs, Parties, BkTxCd, remittance)
 - `rule` + `rule_banking_condition`: deterministic matching rules (CAMT-keyed)
 - `erp_accounting_dimension_definition`: supplier-scoped definition of accounting dimensions (domain key, required/optional, ordering)
+- `erp_accounting_dimension_constraint` + `erp_accounting_dimension_constraint_member`: supplier-scoped dependency rules between dimensions (used for deterministic validation across UI/API/import)
 - `rule_accounting_dimension_value`: per-rule values for accounting dimensions (normalized; no hardcoded primary/secondary/tertiary)
 - `transaction_processing`: processing status / rule-applied locking
 - `banking_adapter_cursor`: opaque cursor per (account, adapter) for incremental fetching
@@ -30,6 +31,12 @@ This repo is a stateless financial integration engine:
 Accounting dimensions are configured in the database. The engine/UI treat dimensions as domain keys (e.g. `artskonto`, `omkostningssted`, `psp-element`) and persist values per rule.
 
 ERP adapters may need to map these domain keys into ERP-specific fields (e.g. GL account, cost center, WBS). That mapping is also data-driven via `erpTarget` on `erp_accounting_dimension_definition`, so adapters do not hardcode which domain key corresponds to which ERP field.
+
+#### Defaults vs runtime state
+
+- Runtime validation always uses **database state** (`erp_accounting_dimension_definition` + constraints) to stay deterministic and auditable.
+- Canonical **default** definitions/constraints shipped with the codebase live in `engine/erp-integration/domain/accountingDimensionDefaults.ts`.
+- `pnpm db:seed:system` bootstraps those defaults into Postgres **idempotently** (it inserts missing rows and never wipes existing configuration).
 
 ## System diagram
 
@@ -111,14 +118,19 @@ The app can run in multiple operational “roles” using the same container ima
 To keep deployments simple and reproducible, scheduling and DB setup are controlled via explicit env toggles:
 
 - `APP_ROLE`: selects the operational role (`web`, `scheduler`, `worker`).
-- `ENABLE_SCHEDULED_TASKS`: gates execution of scheduled tasks at runtime.
+- `ENABLE_SCHEDULED_TASKS`: legacy fallback (only used when `APP_ROLE` is unset) to allow role-gated tasks to do work.
 - `DB_MIGRATE_ON_START` and `DB_SEED_SYSTEM_ON_START`: control whether the container entrypoint runs migrations and system seeding.
 
 ### Runtime toggles (what they do)
 
-- `ENABLE_SCHEDULED_TASKS`:
-  - `"1"`: scheduled tasks are allowed to do work
-  - anything else: scheduled tasks return `skipped` (no background work)
+- `APP_ROLE`:
+  - `web`: UI/API only (safe to scale; must not do background work)
+  - `scheduler`: enqueue-only scheduled work
+  - `worker`: continuously drains jobs/outbox
+- `ENABLE_SCHEDULED_TASKS` (legacy fallback):
+  - Only used when `APP_ROLE` is unset
+  - `"1"`: role-gated tasks may do work
+  - anything else: role-gated tasks return `skipped`
 - `DB_MIGRATE_ON_START`:
   - `"1"`: run `pnpm db:migrate` on container start
   - anything else: skip migrations
@@ -126,7 +138,7 @@ To keep deployments simple and reproducible, scheduling and DB setup are control
   - `"1"`: run `pnpm db:seed:system` on container start
   - anything else: skip system seed
 
-Recommended practice is to run migrations/seeding as a separate, explicit “run once” step per release (rather than at every pod start) to avoid race conditions in multi-replica setups.
+Recommended practice is to run migrations/seeding as a separate, explicit “run once” step per rollout **per database** (rather than at every pod start). If you deploy multiple Helm releases (web/scheduler/worker) pointing at the same Postgres database, you still run migrations/seed once for that shared database.
 
 ## Runbook (production)
 
@@ -195,7 +207,7 @@ This enables two worker deployments:
 - `DATABASE_URL`: Postgres connection string (scoped per namespace/customer)
 - Integration secrets (scoped per namespace/customer): bank, SFTP, ERP, OIDC
 
-### Recommended deployment flow (per release)
+### Recommended deployment flow (per rollout)
 
 1) Run DB migrations + system seed once (Job/pipeline step)
 2) Roll out `web` deployment
@@ -206,7 +218,7 @@ This enables two worker deployments:
 
 Recommended strategy:
 
-- Run migrations + system seed **once per release** as a dedicated “run once” step.
+- Run migrations + system seed **once per rollout per database** as a dedicated “run once” step.
 - Do not run migrations automatically on every pod start in `web`/`scheduler`/`worker`.
 
 Run-once step (interface):
@@ -251,7 +263,8 @@ This avoids cross-tenant data concerns inside the application and keeps the doma
 
 ### Minimal Helm values examples (web vs scheduler)
 
-Many operators run the same chart/image in two roles (two Helm releases or two deployments), differing only by env + replica count.
+Many operators run the same chart/image as multiple releases (or multiple deployments) per customer, differing only by env + replica count.
+In the recommended setup, `APP_ROLE` is the source of truth; `ENABLE_SCHEDULED_TASKS` can be omitted.
 
 Example overrides:
 
@@ -264,8 +277,6 @@ openid:
     env:
       APP_ROLE:
         value: "web"
-      ENABLE_SCHEDULED_TASKS:
-        value: "0"
       DB_MIGRATE_ON_START:
         value: "0"
       DB_SEED_SYSTEM_ON_START:
@@ -281,8 +292,6 @@ openid:
     env:
       APP_ROLE:
         value: "scheduler"
-      ENABLE_SCHEDULED_TASKS:
-        value: "1"
       DB_MIGRATE_ON_START:
         value: "0"
       DB_SEED_SYSTEM_ON_START:

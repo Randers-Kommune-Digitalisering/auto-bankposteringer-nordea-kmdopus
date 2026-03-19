@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import dns from 'node:dns/promises'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { z } from 'zod'
 import tryParseEnv from '../../app/lib/try-parse-env'
 
@@ -28,7 +28,9 @@ await normalizeDatabaseUrlForLocalScripts()
 const { default: db } = await import('../../app/lib/db')
 
 import { erpAccountingDimensionDefinition, tenantConfiguration } from '../../app/lib/db/schema/rule'
+import { erpAccountingDimensionConstraint, erpAccountingDimensionConstraintMember } from '../../app/lib/db/schema/accountingDimensionConstraint'
 import type { ErpSupplier } from '../../app/lib/db/schema/enums'
+import { defaultAccountingDimensionConstraints, defaultAccountingDimensionDefinitions } from '../../engine/erp-integration/domain/accountingDimensionDefaults'
 
 const TENANT_CONFIG_ID = 1
 
@@ -38,20 +40,6 @@ const SeedEnvSchema = z.object({
 
 tryParseEnv(SeedEnvSchema)
 const seedEnv = SeedEnvSchema.parse(process.env)
-
-type SeedDimension = {
-  supplier: ErpSupplier
-  key: string
-  sortOrder: number
-  required: boolean
-  erpTarget?: string
-}
-
-const seedDimensions: SeedDimension[] = [
-  { supplier: 'kmd', key: 'artskonto', sortOrder: 1, required: true, erpTarget: 'glAccount' },
-  { supplier: 'kmd', key: 'omkostningssted', sortOrder: 2, required: false, erpTarget: 'costCenter' },
-  { supplier: 'kmd', key: 'psp-element', sortOrder: 3, required: false, erpTarget: 'wbsElement' },
-]
 
 async function ensureTenantConfiguration(desiredSupplier: ErpSupplier) {
   const [existing] = await db
@@ -77,7 +65,7 @@ async function ensureTenantConfiguration(desiredSupplier: ErpSupplier) {
 
 async function ensureDimensionDefinitions() {
   // Seed definitions idempotently.
-  for (const dim of seedDimensions) {
+  for (const dim of defaultAccountingDimensionDefinitions) {
     await db
       .insert(erpAccountingDimensionDefinition)
       .values({
@@ -93,10 +81,54 @@ async function ensureDimensionDefinitions() {
   }
 }
 
+async function ensureDimensionConstraints() {
+  for (const c of defaultAccountingDimensionConstraints) {
+    await db
+      .insert(erpAccountingDimensionConstraint)
+      .values({
+        erpSupplier: c.supplier,
+        ifKey: c.ifKey,
+        kind: c.kind,
+      })
+      .onConflictDoNothing({
+        target: [
+          erpAccountingDimensionConstraint.erpSupplier,
+          erpAccountingDimensionConstraint.ifKey,
+          erpAccountingDimensionConstraint.kind,
+        ],
+      })
+
+    const [constraint] = await db
+      .select({ id: erpAccountingDimensionConstraint.id })
+      .from(erpAccountingDimensionConstraint)
+      .where(and(
+        eq(erpAccountingDimensionConstraint.erpSupplier, c.supplier),
+        eq(erpAccountingDimensionConstraint.ifKey, c.ifKey),
+        eq(erpAccountingDimensionConstraint.kind, c.kind),
+      ))
+      .limit(1)
+
+    if (!constraint?.id) continue
+
+    for (const key of c.members) {
+      await db
+        .insert(erpAccountingDimensionConstraintMember)
+        .values({ constraintId: constraint.id, key })
+        .onConflictDoNothing({
+          target: [
+            erpAccountingDimensionConstraintMember.constraintId,
+            erpAccountingDimensionConstraintMember.key,
+          ],
+        })
+    }
+  }
+}
+
 async function main() {
   const desiredSupplier = seedEnv.ERP_SUPPLIER as ErpSupplier
   await ensureTenantConfiguration(desiredSupplier)
   await ensureDimensionDefinitions()
+  await ensureDimensionConstraints()
   // eslint-disable-next-line no-console
   console.log('[seed-system] ok')
 }
