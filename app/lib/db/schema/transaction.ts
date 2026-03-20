@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { pgTable, uuid, text, numeric, date, integer } from "drizzle-orm/pg-core"
+import { pgTable, uuid, text, numeric, date, integer, unique } from "drizzle-orm/pg-core"
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod"
 import { account } from "./account"
 import { run } from "./run"
@@ -15,6 +15,7 @@ export const transaction = pgTable('transaction', {
   // Source linkage (CAMT.053: Document -> Statement -> Entry)
   statementId: uuid('statement_id').references(() => bankingStatement.id),
   entryIndex: integer('entry_index'),
+  entrySubIndex: integer('entry_sub_index'),
 
   // Entry core
   amount: numeric('amount').notNull(),
@@ -57,7 +58,9 @@ export const transaction = pgTable('transaction', {
   remittanceUstrd: text('rmt_ustrd').array(),
   remittanceCreditorReference: text('rmt_cdtr_ref'),
   remittanceAdditional: text('rmt_addtl').array(),
-})
+}, (t) => ({
+  statementEntryUnique: unique('transaction_statement_entry_unique').on(t.statementId, t.entryIndex, t.entrySubIndex),
+}))
 
 export const transactionSelectSchema = createSelectSchema(transaction)
 export const transactionInsertSchema = createInsertSchema(transaction)
