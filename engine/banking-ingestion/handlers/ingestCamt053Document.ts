@@ -111,6 +111,7 @@ export async function ingestCamt053Document(
         accountId: input.accountId,
         statementId: statementRowId,
         entryIndex: tx.entryIndex,
+        entrySubIndex: tx.entrySubIndex,
         amount: tx.amount,
         currency: tx.currency,
         creditDebitIndicator: (tx.creditDebitIndicator ?? null) as any,

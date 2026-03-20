@@ -311,6 +311,7 @@ CREATE TABLE "transaction" (
 	"account" text,
 	"statement_id" uuid,
 	"entry_index" integer,
+	"entry_sub_index" integer,
 	"amount" numeric NOT NULL,
 	"currency" text,
 	"credit_debit_indicator" "credit_debit_indicator",
@@ -340,7 +341,8 @@ CREATE TABLE "transaction" (
 	"ultmt_cdtr_name" text,
 	"rmt_ustrd" text[],
 	"rmt_cdtr_ref" text,
-	"rmt_addtl" text[]
+	"rmt_addtl" text[],
+	CONSTRAINT "transaction_statement_entry_unique" UNIQUE("statement_id","entry_index","entry_sub_index")
 );
 --> statement-breakpoint
 CREATE TABLE "transaction_processing" (

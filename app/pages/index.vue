@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { getLocalTimeZone, today } from '@internationalized/date'
+import { today } from '@internationalized/date'
 import type { DashboardResponse } from '~/types/dashboard'
+import { DEFAULT_TIME_ZONE } from '~/lib/timeZone'
 
-const endDefault = today(getLocalTimeZone())
+const timeZone = DEFAULT_TIME_ZONE
+
+const endDefault = today(timeZone)
 const startDefault = endDefault.subtract({ days: 29 })
 
 const defaultRange = {
@@ -14,12 +17,12 @@ const dateRange = ref<any>(defaultRange)
 
 const start = computed(() => {
 	const v = dateRange.value?.start ?? startDefault
-	return v.toDate(getLocalTimeZone()).toISOString().slice(0, 10)
+	return v.toDate(timeZone).toISOString().slice(0, 10)
 })
 
 const end = computed(() => {
 	const v = dateRange.value?.end ?? endDefault
-	return v.toDate(getLocalTimeZone()).toISOString().slice(0, 10)
+	return v.toDate(timeZone).toISOString().slice(0, 10)
 })
 
 const { data, status, refresh } = await useFetch<DashboardResponse>('/api/dashboard', {
@@ -52,7 +55,7 @@ const payload = computed(() => data.value)
 
 		<template #body>
 			<div class="space-y-4">
-				<DashboardDateRangePicker v-model="dateRange" :reset-value="defaultRange" />
+				<DashboardDateRangePicker v-model="dateRange" :reset-value="defaultRange" :time-zone="timeZone" />
 
 				<DashboardKpis v-if="payload" :kpis="payload.kpis" />
 

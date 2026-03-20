@@ -1,20 +1,26 @@
 <script setup lang="ts">
 import { h } from 'vue'
-import { getLocalTimeZone, today } from '@internationalized/date'
+import { today } from '@internationalized/date'
 import type { TableColumn } from '@nuxt/ui'
 import type { StatementTransaction } from '~/types/transactions'
 import useFlattenArray from '~/composables/useFlattenArray'
+import { DEFAULT_TIME_ZONE } from '~/lib/timeZone'
 
 const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
 const UPopover = resolveComponent('UPopover')
 const UInput = resolveComponent('UInput')
+const USelectMenu = resolveComponent('USelectMenu')
 
 definePageMeta({
   path: '/kontoudtog'
 })
 
-const endDefault = today(getLocalTimeZone())
+// Use a fixed timezone to keep SSR + client hydration deterministic.
+// (Node SSR often runs in UTC while the browser is local time.)
+const timeZone = DEFAULT_TIME_ZONE
+
+const endDefault = today(timeZone)
 const startDefault = endDefault.subtract({ days: 29 })
 
 const defaultRange = {
@@ -25,40 +31,91 @@ const defaultRange = {
 const dateRange = ref<any>(defaultRange)
 const globalFilterValue = ref('')
 
-type StatementTableRef = {
-  tableApi?: {
-    getFilteredRowModel: () => { rows: unknown[] }
-  }
-}
+type BankAccount = { id: string; name: string | null }
 
-const table = ref<StatementTableRef | null>(null)
+// Source of truth: selected account IDs (strings)
+const selectedAccountIds = ref<string[]>([])
+
+const { data: bankAccountsData, status: bankAccountsStatus } = await useFetch<BankAccount[]>(
+  '/api/bank-accounts',
+  {
+    key: 'bank-accounts'
+  }
+)
+
+const bankAccountOptions = computed(() => {
+  const accounts = useFlattenArray<BankAccount>(bankAccountsData)
+  return accounts.map((a) => ({ value: a.id, label: a.name ?? a.id }))
+})
 
 const start = computed(() => {
   const v = dateRange.value?.start ?? startDefault
-  return v.toDate(getLocalTimeZone()).toISOString().slice(0, 10)
+  return v.toDate(timeZone).toISOString().slice(0, 10)
 })
 
 const end = computed(() => {
   const v = dateRange.value?.end ?? endDefault
-  return v.toDate(getLocalTimeZone()).toISOString().slice(0, 10)
+  return v.toDate(timeZone).toISOString().slice(0, 10)
 })
 
 const { data, status, refresh } = await useFetch<StatementTransaction[]>('/api/transactions/statement', {
+  // Key intentionally excludes accountIds so fast toggles don't create multiple keys.
+  // This allows `dedupe: 'cancel'` to cancel in-flight requests and prevents "1 tick behind".
   key: computed(() => `statement:${start.value}:${end.value}`),
-  query: computed(() => ({ start: start.value, end: end.value }))
+  query: computed(() => ({
+    start: start.value,
+    end: end.value,
+    // Always pass primitive IDs as a comma-separated string to avoid query serialization pitfalls.
+    accountIds: selectedAccountIds.value.length ? selectedAccountIds.value.join(',') : undefined
+  })),
+  watch: [start, end, selectedAccountIds],
+  // Avoid "1 tick behind" behavior caused by out-of-order responses when filters change quickly.
+  dedupe: 'cancel',
+  default: () => ([]),
 })
 
-const allRows = computed<StatementTransaction[]>(() => useFlattenArray<StatementTransaction>(data))
+const fetchedRows = computed<StatementTransaction[]>(() => useFlattenArray<StatementTransaction>(data))
 
-const rows = computed<StatementTransaction[]>(() => {
-  return [...allRows.value].sort((a, b) => {
-    return new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime()
-  })
+function normalizeSearchText(value: string): string {
+  return value.trim().toLowerCase()
+}
+
+const visibleRows = computed<StatementTransaction[]>(() => {
+  const q = normalizeSearchText(globalFilterValue.value)
+  if (!q.length) return fetchedRows.value.slice()
+
+  return fetchedRows.value
+    .filter((row) => {
+      const parts: Array<string | number | null | undefined> = [
+        row.bookingDate,
+        row.valueDate,
+        row.bankAccountName,
+        row.accountId,
+        row.amount,
+        row.runningBalance,
+        row.currency,
+        row.creditDebitIndicator,
+        resolveCounterpart(row),
+        resolveTransactionType(row),
+        buildFreeText(row).join(' '),
+        row.id,
+        row.runId,
+        row.status,
+        row.processingStatus,
+        row.ruleApplied
+      ]
+
+      const haystack = parts
+        .filter((v) => v !== null && v !== undefined)
+        .map((v) => String(v).toLowerCase())
+        .join(' ')
+
+      return haystack.includes(q)
+    })
+    .slice()
 })
 
-const filteredRowCount = computed<number>(() => {
-  return table.value?.tableApi?.getFilteredRowModel().rows.length ?? rows.value.length
-})
+const visibleRowCount = computed<number>(() => visibleRows.value.length)
 
 type CsvColumn = { header: string; value: (row: StatementTransaction) => string | number | null | undefined }
 
@@ -79,13 +136,14 @@ function toCsv(rows: StatementTransaction[], columns: CsvColumn[]): string {
 
 function downloadStatementCsv(): void {
   if (!process.client) return
-  if (!rows.value.length) return
+  if (!visibleRows.value.length) return
 
   const columns: CsvColumn[] = [
     { header: 'Bogføringsdato', value: (r) => r.bookingDate },
     { header: 'Kontonavn', value: (r) => r.bankAccountName ?? '' },
     { header: 'Konto-id', value: (r) => r.accountId },
     { header: 'Beløb', value: (r) => r.amount },
+    { header: 'Saldo', value: (r) => r.runningBalance ?? '' },
     { header: 'Valuta', value: (r) => r.currency ?? 'DKK' },
     { header: 'Kredit/debet', value: (r) => r.creditDebitIndicator },
     { header: 'Modpart', value: (r) => resolveCounterpart(r) ?? '' },
@@ -98,7 +156,7 @@ function downloadStatementCsv(): void {
     { header: 'Regel-id', value: (r) => r.ruleApplied ?? '' }
   ]
 
-  const csv = toCsv(rows.value, columns)
+  const csv = toCsv(visibleRows.value, columns)
   const bom = '\ufeff'
   const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8' })
   const url = URL.createObjectURL(blob)
@@ -198,6 +256,7 @@ function buildDetails(row: StatementTransaction): DetailEntry[] {
   add('Kontonavn', row.bankAccountName)
 
   add('Beløb', row.amount)
+  add('Saldo', row.runningBalance)
   add('Valuta', row.currency)
   add('Kredit/debet', row.creditDebitIndicator)
   add('Status', row.status)
@@ -206,6 +265,7 @@ function buildDetails(row: StatementTransaction): DetailEntry[] {
 
   add('Statement-id', row.statementId)
   add('Entry index', row.entryIndex)
+  add('Entry sub index', row.entrySubIndex)
 
   add('NtryRef', row.ntryRef)
   add('NtryAcctSvcrRef', row.ntryAcctSvcrRef)
@@ -242,13 +302,18 @@ function buildDetails(row: StatementTransaction): DetailEntry[] {
   return details
 }
 
-const formatAmount = (row: StatementTransaction): string => {
-  const currency = row.currency ?? 'DKK'
-  const n = Number(String(row.amount).replace(/,/g, '.'))
+function formatMoney(amount: string | number | null | undefined, currency: string | null | undefined): string {
+  const ccy = currency ?? 'DKK'
+  if (amount === null || amount === undefined) return `-`
+  const n = Number(String(amount).replace(/,/g, '.'))
   if (Number.isFinite(n)) {
-    return n.toLocaleString('da-DK', { style: 'currency', currency })
+    return n.toLocaleString('da-DK', { style: 'currency', currency: ccy })
   }
-  return `${row.amount} ${currency}`
+  return `${amount} ${ccy}`
+}
+
+const formatAmount = (row: StatementTransaction): string => {
+  return formatMoney(row.amount, row.currency)
 }
 
 const columns: TableColumn<StatementTransaction>[] = [
@@ -261,6 +326,7 @@ const columns: TableColumn<StatementTransaction>[] = [
         row.bankAccountName,
         row.accountId,
         row.amount,
+        row.runningBalance,
         row.currency,
         row.creditDebitIndicator,
         resolveCounterpart(row),
@@ -308,6 +374,17 @@ const columns: TableColumn<StatementTransaction>[] = [
     size: 140,
     cell: ({ row }) => {
       return h('span', { class: 'font-medium' }, formatAmount(row.original))
+    }
+  },
+  {
+    id: 'runningBalance',
+    header: 'Saldo',
+    size: 160,
+    cell: ({ row }) => {
+      const value = row.original.runningBalance
+      if (!value) return '-'
+
+      return h('span', { class: 'font-medium' }, formatMoney(value, row.original.currency))
     }
   },
   {
@@ -419,7 +496,7 @@ const tableUi = {
               label="Download CSV"
               variant="ghost"
               color="primary"
-              :disabled="!rows.length || status === 'pending'"
+              :disabled="!visibleRows.length || status === 'pending'"
               @click="downloadStatementCsv()"
             />
             <UButton
@@ -438,12 +515,28 @@ const tableUi = {
     <template #body>
       <div class="space-y-4">
         <div>
-          <DashboardDateRangePicker v-model="dateRange" :reset-value="defaultRange" />
+          <DashboardDateRangePicker v-model="dateRange" :reset-value="defaultRange" :time-zone="timeZone" />
+        </div>
+
+        <div class="max-w-md">
+          <UFormField label="Konti">
+            <USelectMenu
+              v-model="selectedAccountIds"
+              :items="bankAccountOptions"
+              multiple
+              valueKey="value"
+              labelKey="label"
+              placeholder="Alle konti"
+              :loading="bankAccountsStatus === 'pending'"
+              class="w-full"
+            />
+          </UFormField>
         </div>
 
         <div class="mt-2">
           <UInput
             v-model="globalFilterValue"
+            name="search"
             class="max-w-sm"
             icon="solar:magnifer-bold-duotone"
             placeholder="Søg i kontoudtog..."
@@ -451,14 +544,16 @@ const tableUi = {
         </div>
 
         <div v-if="dateRange?.start && dateRange?.end" class="text-sm text-muted">
-          {{ filteredRowCount }} transaktioner i valgt periode
+          {{ visibleRowCount }} transaktioner i valgt periode
         </div>
 
         <UEmpty
-          v-if="!rows.length && status !== 'pending'"
+          v-if="!visibleRows.length && status !== 'pending'"
           icon="i-lucide-archive"
-          title="Ingen transaktioner"
-          description="Der er ingen transaktioner i den valgte periode endnu."
+          :title="fetchedRows.length ? 'Ingen resultater' : 'Ingen transaktioner'"
+          :description="fetchedRows.length
+            ? 'Ingen transaktioner matcher den valgte søgning/konto i perioden.'
+            : 'Der er ingen transaktioner i den valgte periode endnu.'"
           class="border border-dashed border-default rounded-lg"
         >
           <template #actions>
@@ -469,11 +564,9 @@ const tableUi = {
         </UEmpty>
 
         <UTable
-          ref="table"
           v-else
-          v-model:global-filter="globalFilterValue"
           v-model:column-visibility="columnVisibility"
-          :data="rows"
+          :data="visibleRows"
           :columns="columns"
           :loading="status === 'pending'"
           :ui="tableUi"
