@@ -72,6 +72,7 @@ export type StatementTransaction = {
 
   statementId: string | null;
   entryIndex: number | null;
+  entrySubIndex: number | null;
 
   amount: string;
   currency: string | null;
@@ -111,4 +112,8 @@ export type StatementTransaction = {
 
   processingStatus: BookingStatus | null;
   ruleApplied: number | null;
+
+  // Deterministic running balance computed from statement opening balance + entry order.
+  // Present when statementId/entryIndex and OPBD balance exists.
+  runningBalance: string | null;
 };

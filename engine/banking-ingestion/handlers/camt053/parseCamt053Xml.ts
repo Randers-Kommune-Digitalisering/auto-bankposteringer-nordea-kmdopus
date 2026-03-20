@@ -31,6 +31,7 @@ export type Camt053ParsedBalance = {
 
 export type Camt053ParsedTransaction = {
   entryIndex: number
+  entrySubIndex: number
   amount: string
   currency: string | null
   creditDebitIndicator: string | null
@@ -145,7 +146,8 @@ export function parseCamt053Xml(xml: string): Camt053ParsedDocument {
       const txDetails = asArray<any>(entry?.NtryDtls?.TxDtls)
       const rows = txDetails.length ? txDetails : [null]
 
-      for (const tx of rows) {
+        for (const [txIndexZero, tx] of rows.entries()) {
+          const entrySubIndex = txIndexZero + 1
         const txRefs = tx?.Refs
         const txRmtInf = tx?.RmtInf
         const txRltdPties = tx?.RltdPties
@@ -183,6 +185,7 @@ export function parseCamt053Xml(xml: string): Camt053ParsedDocument {
 
         transactions.push({
           entryIndex,
+          entrySubIndex,
           amount: txAmount,
           currency: txCurrency,
           creditDebitIndicator,

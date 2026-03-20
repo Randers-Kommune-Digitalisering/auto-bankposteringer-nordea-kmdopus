@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { DateFormatter, getLocalTimeZone } from '@internationalized/date'
+import { DateFormatter } from '@internationalized/date'
+import { DEFAULT_TIME_ZONE } from '~/lib/timeZone'
 
 const props = defineProps<{
   modelValue: any
   resetValue?: any
+  timeZone?: string
 }>()
 
 const emit = defineEmits<{
@@ -11,6 +13,8 @@ const emit = defineEmits<{
 }>()
 
 const df = new DateFormatter('da-DK', { dateStyle: 'medium' })
+
+const timeZone = computed(() => props.timeZone ?? DEFAULT_TIME_ZONE)
 
 const value = computed<any>({
   get: () => props.modelValue,
@@ -21,8 +25,8 @@ const calendarEvents = computed(() => ({}))
 
 const label = computed(() => {
   if (!value.value?.start) return 'Vælg periode'
-  if (!value.value?.end) return df.format(value.value.start.toDate(getLocalTimeZone()))
-  return `${df.format(value.value.start.toDate(getLocalTimeZone()))} - ${df.format(value.value.end.toDate(getLocalTimeZone()))}`
+  if (!value.value?.end) return df.format(value.value.start.toDate(timeZone.value))
+  return `${df.format(value.value.start.toDate(timeZone.value))} - ${df.format(value.value.end.toDate(timeZone.value))}`
 })
 </script>
 
