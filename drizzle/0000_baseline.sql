@@ -153,6 +153,41 @@ CREATE TABLE "job" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "manual_booking_draft" (
+	"transaction_id" uuid PRIMARY KEY NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"text" text,
+	"cpr_type" "cpr_type" NOT NULL,
+	"cpr_number" text,
+	"notify_to" text,
+	"note" text
+);
+--> statement-breakpoint
+CREATE TABLE "manual_booking_draft_attachment" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"transaction_id" uuid NOT NULL,
+	"sort_order" integer NOT NULL,
+	"name" text NOT NULL,
+	"type" text NOT NULL,
+	"data" text NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "manual_booking_draft_line" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"transaction_id" uuid NOT NULL,
+	"sort_order" integer NOT NULL,
+	"amount" numeric NOT NULL,
+	"text" text
+);
+--> statement-breakpoint
+CREATE TABLE "manual_booking_draft_line_dimension" (
+	"line_id" uuid NOT NULL,
+	"key" text NOT NULL,
+	"value" text NOT NULL,
+	CONSTRAINT "manual_booking_draft_line_dimension_line_id_key_pk" PRIMARY KEY("line_id","key")
+);
+--> statement-breakpoint
 CREATE TABLE "outbox" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"topic" text NOT NULL,
@@ -367,6 +402,10 @@ ALTER TABLE "erp_request_line" ADD CONSTRAINT "erp_request_line_transaction_id_t
 ALTER TABLE "erp_response" ADD CONSTRAINT "erp_response_request_id_erp_request_id_fk" FOREIGN KEY ("request_id") REFERENCES "public"."erp_request"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "error" ADD CONSTRAINT "error_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "job" ADD CONSTRAINT "job_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "manual_booking_draft" ADD CONSTRAINT "manual_booking_draft_transaction_id_transaction_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."transaction"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "manual_booking_draft_attachment" ADD CONSTRAINT "manual_booking_draft_attachment_transaction_id_manual_booking_draft_transaction_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."manual_booking_draft"("transaction_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "manual_booking_draft_line" ADD CONSTRAINT "manual_booking_draft_line_transaction_id_manual_booking_draft_transaction_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."manual_booking_draft"("transaction_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "manual_booking_draft_line_dimension" ADD CONSTRAINT "manual_booking_draft_line_dimension_line_id_manual_booking_draft_line_id_fk" FOREIGN KEY ("line_id") REFERENCES "public"."manual_booking_draft_line"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "outbox" ADD CONSTRAINT "outbox_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "kmd_attachment" ADD CONSTRAINT "kmd_attachment_parameter_id_kmd_accounting_parameters_id_fk" FOREIGN KEY ("parameter_id") REFERENCES "public"."kmd_accounting_parameters"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "rule_accounting_dimension_value" ADD CONSTRAINT "rule_accounting_dimension_value_rule_id_rule_id_fk" FOREIGN KEY ("rule_id") REFERENCES "public"."rule"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

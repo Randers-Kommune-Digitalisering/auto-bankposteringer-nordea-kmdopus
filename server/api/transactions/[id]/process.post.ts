@@ -1,9 +1,15 @@
-import { eq } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
 import { createError, defineEventHandler, readBody } from 'h3'
 import { z } from 'zod'
 import db from '~/lib/db'
 import { account } from '~/lib/db/schema/account'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
+import {
+  manualBookingDraft,
+  manualBookingDraftAttachment,
+  manualBookingDraftLine,
+  manualBookingDraftLineDimension,
+} from '~/lib/db/schema/manualBookingDraft'
 import env from '~/lib/env'
 import { manualBookingPayloadSchema, type CprType } from '#engine/manual-booking/domain/manualBooking'
 import type { PostingAttachment } from '#engine/posting/domain/posting'
@@ -80,14 +86,6 @@ export default defineEventHandler(async (event) => {
   const amount = parseNumeric(row.amount);
   const statusAccount = row.statusAccount ? String(row.statusAccount) : env.ERP_ERROR_ACCOUNT;
 
-  const supplier = await getActiveErpSupplier()
-  const definitions = await listAccountingDimensionDefinitions(supplier)
-  const normalizedDimensions = normalizeDimensionInput(body.dimensions)
-  validateDimensionsAgainstDefinitions(normalizedDimensions, definitions)
-  const landingDimensions = Object.fromEntries(
-    normalizedDimensions.map((d) => [d.key, d.value]),
-  )
-
   const txContext: PostingTransactionContext = {
     transactionId: row.id,
     amount,
@@ -103,7 +101,21 @@ export default defineEventHandler(async (event) => {
     remittanceAdditional: row.remittanceAdditional,
   };
 
-  const postingText = resolvePostingText(normalizeOptionalString(body.text) ?? undefined, txContext);
+  const supplier = await getActiveErpSupplier()
+  const definitions = await listAccountingDimensionDefinitions(supplier)
+  const defaultTextTemplate = normalizeOptionalString(body.text) ?? undefined
+  const landingLines = body.lines.map((line) => {
+    const normalizedDimensions = normalizeDimensionInput(line.dimensions)
+    validateDimensionsAgainstDefinitions(normalizedDimensions, definitions)
+    const dimensions = Object.fromEntries(normalizedDimensions.map((d) => [d.key, d.value]))
+    return {
+      amount: Number(line.amount),
+      dimensions,
+      text: resolvePostingText(normalizeOptionalString(line.text) ?? defaultTextTemplate, txContext),
+    }
+  })
+
+  const postingText = resolvePostingText(defaultTextTemplate, txContext);
   const attachments = (body.attachments ?? []).map<PostingAttachment>((attachment) => ({
     name: attachment.name,
     type: attachment.type,
@@ -112,9 +124,11 @@ export default defineEventHandler(async (event) => {
 
   const resolvedCpr = resolveManualCpr(body.cprType, normalizeDigits(body.cprNumber), txContext);
 
+  validateLineAmounts(landingLines, amount)
+
   const command = buildPostingCommand({
     transaction: txContext,
-    landingDimensions,
+    landingLines,
     text: postingText,
     cpr: resolvedCpr,
     attachments: attachments.length ? attachments : undefined,
@@ -139,6 +153,8 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  await clearManualBookingDraft(row.id)
+
   return {
     success: true,
     requestId: submission.requestId,
@@ -147,6 +163,26 @@ export default defineEventHandler(async (event) => {
     lineCount: submission.lineCount,
   };
 });
+
+async function clearManualBookingDraft(transactionId: string) {
+  await db.transaction(async (trx) => {
+    const lines = await trx
+      .select({ id: manualBookingDraftLine.id })
+      .from(manualBookingDraftLine)
+      .where(eq(manualBookingDraftLine.transactionId, transactionId))
+
+    const lineIds = lines.map((l) => l.id)
+    if (lineIds.length) {
+      await trx
+        .delete(manualBookingDraftLineDimension)
+        .where(inArray(manualBookingDraftLineDimension.lineId, lineIds))
+    }
+
+    await trx.delete(manualBookingDraftAttachment).where(eq(manualBookingDraftAttachment.transactionId, transactionId))
+    await trx.delete(manualBookingDraftLine).where(eq(manualBookingDraftLine.transactionId, transactionId))
+    await trx.delete(manualBookingDraft).where(eq(manualBookingDraft.transactionId, transactionId))
+  })
+}
 
 function parseNumeric(value: unknown): number {
   if (typeof value === "number") {
@@ -194,6 +230,41 @@ function validateDimensionsAgainstDefinitions(
       throw createError({
         statusCode: 422,
         statusMessage: `Manglende påkrævet konteringsdimension: ${def.key}`,
+      })
+    }
+  }
+}
+
+function validateLineAmounts(
+  landingLines: Array<{ amount: number; dimensions: Record<string, string> }>,
+  transactionAmount: number,
+) {
+  if (!landingLines.length) {
+    throw createError({ statusCode: 422, statusMessage: 'Der skal være mindst én konteringslinje' })
+  }
+
+  const amountAbs = Math.abs(transactionAmount)
+  const sum = landingLines.reduce((acc, line) => acc + Math.abs(line.amount || 0), 0)
+  const rounded = (value: number) => Math.round(value * 100) / 100
+
+  if (rounded(sum) !== rounded(amountAbs)) {
+    throw createError({
+      statusCode: 422,
+      statusMessage: `Beløb på konteringslinjer (${rounded(sum)}) matcher ikke transaktionsbeløb (${rounded(amountAbs)})`,
+    })
+  }
+
+  for (const [index, line] of landingLines.entries()) {
+    if (!Number.isFinite(line.amount) || Math.abs(line.amount) <= 0) {
+      throw createError({
+        statusCode: 422,
+        statusMessage: `Ugyldigt beløb på linje ${index + 1}`,
+      })
+    }
+    if (!Object.keys(line.dimensions).length) {
+      throw createError({
+        statusCode: 422,
+        statusMessage: `Linje ${index + 1} mangler konteringsdimensioner`,
       })
     }
   }

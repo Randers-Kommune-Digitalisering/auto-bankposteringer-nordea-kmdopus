@@ -14,8 +14,14 @@ const accountingDimensionSchema = z.object({
   value: z.string().min(1),
 })
 
-const baseManualBookingShape = {
+const bookingLineSchema = z.object({
+  amount: z.number().finite(),
   dimensions: z.array(accountingDimensionSchema).optional(),
+  text: z.string().optional(),
+})
+
+const baseManualBookingShape = {
+  lines: z.array(bookingLineSchema).min(1),
   text: z.string().optional(),
   cprType: z.enum(cprTypeValues),
   cprNumber: z.string().optional(),

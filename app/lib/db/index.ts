@@ -18,6 +18,7 @@ import * as runSchema from './schema/run'
 import * as statementSchema from './schema/statement'
 import * as transactionSchema from './schema/transaction'
 import * as bankingAdapterCursorSchema from './schema/bankingAdapterCursor'
+import * as manualBookingDraftSchema from './schema/manualBookingDraft'
 
 const schema = {
   ...accountSchema,
@@ -36,6 +37,7 @@ const schema = {
   ...statementSchema,
   ...transactionSchema,
   ...bankingAdapterCursorSchema,
+  ...manualBookingDraftSchema,
 } as const
 
 
