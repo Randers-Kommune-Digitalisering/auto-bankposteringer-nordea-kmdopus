@@ -20,7 +20,7 @@ This repo is a stateless financial integration engine:
 - `transaction`: normalized entry/tx details (Refs, Parties, BkTxCd, remittance)
 - `rule` + `rule_banking_condition`: deterministic matching rules (CAMT-keyed)
 - `erp_accounting_dimension_definition`: supplier-scoped definition of accounting dimensions (domain key, required/optional, ordering)
-- `erp_accounting_dimension_constraint` + `erp_accounting_dimension_constraint_member`: supplier-scoped dependency rules between dimensions (used for deterministic validation across UI/API/import)
+- `erp_accounting_dimension_constraint` + `erp_accounting_dimension_constraint_member`: supplier-scoped dependency rules between dimensions (used for deterministic validation across UI/API/import). Constraints may be conditional on the triggering dimension value via regex (e.g. different rules for `artskonto` prefixes).
 - `rule_accounting_dimension_value`: per-rule values for accounting dimensions (normalized; no hardcoded primary/secondary/tertiary)
 - `transaction_processing`: processing status / rule-applied locking
 - `manual_booking_draft` (+ lines/dimensions/attachments): user-edited draft state for open transactions (supports saving notes and multi-line manual postings without sending to ERP)
@@ -38,6 +38,17 @@ ERP adapters may need to map these domain keys into ERP-specific fields (e.g. GL
 - Runtime validation always uses **database state** (`erp_accounting_dimension_definition` + constraints) to stay deterministic and auditable.
 - Canonical **default** definitions/constraints shipped with the codebase live in `engine/erp-integration/domain/accountingDimensionDefaults.ts`.
 - `pnpm db:seed:system` bootstraps those defaults into Postgres **idempotently** (it inserts missing rows and never wipes existing configuration).
+
+#### Constraint semantics
+
+Constraints are evaluated deterministically based on the *filled* dimension values.
+
+- `requires_any_of`: if `ifKey` is filled, at least one member key must also be filled.
+- `requires_all_of`: if `ifKey` is filled, all member keys must also be filled.
+- `requires_exactly_one_of`: if `ifKey` is filled, exactly one member key must also be filled.
+- `forbids_any_of`: if `ifKey` is filled, none of the member keys may be filled.
+
+Constraints can be restricted to specific value patterns for the triggering dimension using an optional regex (e.g. “when `artskonto` starts with S or 9”).
 
 ## System diagram
 

@@ -1,4 +1,4 @@
-CREATE TYPE "public"."accounting_dimension_constraint_kind" AS ENUM('requires_any_of', 'requires_all_of', 'requires_exactly_one_of');--> statement-breakpoint
+CREATE TYPE "public"."accounting_dimension_constraint_kind" AS ENUM('requires_any_of', 'requires_all_of', 'requires_exactly_one_of', 'forbids_any_of');--> statement-breakpoint
 CREATE TYPE "public"."banking_document_format" AS ENUM('camt053', 'unknown');--> statement-breakpoint
 CREATE TYPE "public"."booking_status" AS ENUM('åben', 'bogført', 'undtaget');--> statement-breakpoint
 CREATE TYPE "public"."cpr_type" AS ENUM('ingen', 'statisk', 'dynamisk');--> statement-breakpoint
@@ -24,9 +24,10 @@ CREATE TABLE "erp_accounting_dimension_constraint" (
 	"erp_supplier" "erp_supplier" NOT NULL,
 	"if_key" text NOT NULL,
 	"kind" "accounting_dimension_constraint_kind" NOT NULL,
+	"if_value_regex" text,
 	"created_at" date DEFAULT now(),
 	"updated_at" date DEFAULT now(),
-	CONSTRAINT "erp_accounting_dimension_constraint_supplier_if_kind_unique" UNIQUE("erp_supplier","if_key","kind")
+	CONSTRAINT "erp_accounting_dimension_constraint_supplier_if_kind_unique" UNIQUE("erp_supplier","if_key","kind","if_value_regex")
 );
 --> statement-breakpoint
 CREATE TABLE "erp_accounting_dimension_constraint_member" (
@@ -209,6 +210,8 @@ CREATE TABLE "erp_accounting_dimension_definition" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"erp_supplier" "erp_supplier" NOT NULL,
 	"key" text NOT NULL,
+	"value_regex" text,
+	"value_regex_flags" text,
 	"erp_target" text,
 	"sort_order" integer DEFAULT 0 NOT NULL,
 	"required" boolean DEFAULT false NOT NULL,
@@ -224,6 +227,8 @@ CREATE TABLE "rule" (
 	"updated_at" date DEFAULT now(),
 	"locked_at" date,
 	"locked_by" text,
+	"active_from" date,
+	"active_to" date,
 	"current_version_id" bigint NOT NULL,
 	"erp_supplier" "erp_supplier" NOT NULL,
 	"rule_type" "rule_type",

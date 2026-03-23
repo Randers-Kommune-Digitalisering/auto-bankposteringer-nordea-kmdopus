@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import dns from 'node:dns/promises'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, isNull } from 'drizzle-orm'
 import { z } from 'zod'
 import tryParseEnv from '../../app/lib/try-parse-env'
 
@@ -71,6 +71,8 @@ async function ensureDimensionDefinitions() {
       .values({
         erpSupplier: dim.supplier,
         key: dim.key,
+        valueRegex: dim.valueRegex,
+        valueRegexFlags: dim.valueRegexFlags,
         erpTarget: dim.erpTarget,
         sortOrder: dim.sortOrder,
         required: dim.required,
@@ -89,12 +91,14 @@ async function ensureDimensionConstraints() {
         erpSupplier: c.supplier,
         ifKey: c.ifKey,
         kind: c.kind,
+        ifValueRegex: c.ifValueRegex ?? null,
       })
       .onConflictDoNothing({
         target: [
           erpAccountingDimensionConstraint.erpSupplier,
           erpAccountingDimensionConstraint.ifKey,
           erpAccountingDimensionConstraint.kind,
+          erpAccountingDimensionConstraint.ifValueRegex,
         ],
       })
 
@@ -105,6 +109,7 @@ async function ensureDimensionConstraints() {
         eq(erpAccountingDimensionConstraint.erpSupplier, c.supplier),
         eq(erpAccountingDimensionConstraint.ifKey, c.ifKey),
         eq(erpAccountingDimensionConstraint.kind, c.kind),
+        c.ifValueRegex ? eq(erpAccountingDimensionConstraint.ifValueRegex, c.ifValueRegex) : isNull(erpAccountingDimensionConstraint.ifValueRegex),
       ))
       .limit(1)
 
