@@ -31,6 +31,8 @@ export const rule = pgTable('rule', {
   updatedAt: date('updated_at', { mode: "date" }).defaultNow().$onUpdate(() => new Date()),
   lockedAt: date('locked_at', { mode: "date" }),
   lockedBy: text('locked_by'),
+  activeFrom: date('active_from', { mode: 'date' }),
+  activeTo: date('active_to', { mode: 'date' }),
   currentVersionId: bigint('current_version_id', { mode: 'number' }).notNull(),
   erpSupplier: erpSupplierEnum('erp_supplier').notNull(),
   type: ruleTypeEnum('rule_type'),
@@ -54,6 +56,8 @@ export const erpAccountingDimensionDefinition = pgTable('erp_accounting_dimensio
   id: uuid().defaultRandom().primaryKey(),
   erpSupplier: erpSupplierEnum('erp_supplier').notNull(),
   key: text('key').notNull(),
+  valueRegex: text('value_regex'),
+  valueRegexFlags: text('value_regex_flags'),
   // Optional mapping to an ERP-specific target field (adapter-driven).
   // Example (KMD): glAccount, costCenter, wbsElement.
   erpTarget: text('erp_target'),
@@ -185,6 +189,8 @@ export const ruleDraftSchema = z.object({
   type: z.enum(ruleTypeValues),
   status: z.enum(ruleStatusValues),
   lockedAt: z.date().optional(),
+  activeFrom: z.coerce.date().optional(),
+  activeTo: z.coerce.date().optional(),
   relatedBankAccounts: z.array(z.string()).min(1, "Vælg mindst én bankkonto"),
   matches: z.array(matchEntrySchema).optional(),
   matchAmountMin: z.number().optional(),
@@ -202,14 +208,45 @@ export const ruleDraftSchema = z.object({
   accountingAttachmentFileExtension: z.array(z.string()).optional(),
   accountingAttachmentData: z.array(z.string()).optional(),
   ruleTags: z.array(z.string()).optional(),
-})
+}).refine(
+  (data) => {
+    // Either both are set, or neither.
+    if ((data.activeFrom && !data.activeTo) || (!data.activeFrom && data.activeTo)) {
+      return false
+    }
+    if (data.activeFrom && data.activeTo) {
+      return data.activeFrom <= data.activeTo
+    }
+    return true
+  },
+  {
+    message: 'Ugyldig aktiv-periode (angiv både start og slut, og slutdato må ikke være før startdato)',
+    path: ['activeTo'],
+  },
+)
 
 export const ruleBasicSchema = z.object({
   type: z.enum(ruleTypeValues),
   status: z.enum(ruleStatusValues),
+  activeFrom: z.coerce.date().optional(),
+  activeTo: z.coerce.date().optional(),
   relatedBankAccounts: z.array(z.string()).min(1, "Vælg mindst én bankkonto"),
   ruleTags: z.array(z.string()).optional(),
-})
+}).refine(
+  (data) => {
+    if ((data.activeFrom && !data.activeTo) || (!data.activeFrom && data.activeTo)) {
+      return false
+    }
+    if (data.activeFrom && data.activeTo) {
+      return data.activeFrom <= data.activeTo
+    }
+    return true
+  },
+  {
+    message: 'Ugyldig aktiv-periode (angiv både start og slut, og slutdato må ikke være før startdato)',
+    path: ['activeTo'],
+  },
+)
 
 export const ruleMatchingSchema = z.object({
   matches: z.array(matchEntrySchema).optional(),
@@ -269,6 +306,8 @@ export type Rule = {
   matchAmountMax?: number
   lockedAt?: Date
   lockedBy?: string
+  activeFrom?: Date
+  activeTo?: Date
   currentVersionId: number
   lastUsed?: Date
   createdAt: Date

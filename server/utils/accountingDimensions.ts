@@ -6,6 +6,7 @@ import {
   ruleAccountingDimensionValue,
   tenantConfiguration,
 } from '~/lib/db/schema/rule'
+import { accountingDimensionFormatHint } from '~/lib/presenters/accountingDimensionFormatHints'
 import {
   erpAccountingDimensionConstraint,
   erpAccountingDimensionConstraintMember,
@@ -32,6 +33,8 @@ export type AccountingDimensionDefinition = {
   required: boolean
   sortOrder: number
   erpTarget: string | null
+  valueRegex: string | null
+  valueRegexFlags: string | null
 }
 
 export type AccountingDimensionConstraint = {
@@ -39,6 +42,7 @@ export type AccountingDimensionConstraint = {
   ifKey: string
   kind: AccountingDimensionConstraintKind
   members: string[]
+  ifValueRegex: string | null
 }
 
 export async function listAccountingDimensionDefinitions(supplier: ErpSupplier): Promise<AccountingDimensionDefinition[]> {
@@ -49,6 +53,8 @@ export async function listAccountingDimensionDefinitions(supplier: ErpSupplier):
       required: erpAccountingDimensionDefinition.required,
       sortOrder: erpAccountingDimensionDefinition.sortOrder,
       erpTarget: erpAccountingDimensionDefinition.erpTarget,
+      valueRegex: erpAccountingDimensionDefinition.valueRegex,
+      valueRegexFlags: erpAccountingDimensionDefinition.valueRegexFlags,
     })
     .from(erpAccountingDimensionDefinition)
     .where(eq(erpAccountingDimensionDefinition.erpSupplier, supplier))
@@ -62,6 +68,7 @@ export async function listAccountingDimensionConstraints(supplier: ErpSupplier):
       id: erpAccountingDimensionConstraint.id,
       ifKey: erpAccountingDimensionConstraint.ifKey,
       kind: erpAccountingDimensionConstraint.kind,
+      ifValueRegex: erpAccountingDimensionConstraint.ifValueRegex,
       memberKey: erpAccountingDimensionConstraintMember.key,
     })
     .from(erpAccountingDimensionConstraint)
@@ -75,7 +82,7 @@ export async function listAccountingDimensionConstraints(supplier: ErpSupplier):
   for (const r of rows) {
     const id = r.id
     if (!byId.has(id)) {
-      byId.set(id, { id, ifKey: r.ifKey, kind: r.kind, members: [] })
+      byId.set(id, { id, ifKey: r.ifKey, kind: r.kind, ifValueRegex: r.ifValueRegex ?? null, members: [] })
     }
     if (r.memberKey) {
       byId.get(id)!.members.push(r.memberKey)
@@ -126,7 +133,32 @@ export function resolveDimensionValueRows(options: {
     }
   }
 
-  validateAccountingDimensionConstraints(new Set(input.map((d) => d.key)), options.constraints)
+  // Validate value formats using data-driven regex per definition.
+  for (const d of input) {
+    const def = byKey.get(d.key)
+    if (!def) continue
+    if (!def.valueRegex) continue
+
+    const flags = def.valueRegexFlags ?? ''
+    let re: RegExp
+    try {
+      re = new RegExp(def.valueRegex, flags)
+    } catch {
+      throw new Error(`Ugyldig regex for konteringsdimension '${def.key}': ${def.valueRegex}`)
+    }
+
+    if (!re.test(d.value)) {
+      const hint = accountingDimensionFormatHint(def.key)
+      throw new Error(
+        `Ugyldigt format for konteringsdimension '${def.key}'` + (hint ? ` (${hint})` : ''),
+      )
+    }
+  }
+
+  validateAccountingDimensionConstraints(
+    new Map(input.map((d) => [d.key, d.value])),
+    options.constraints,
+  )
 
   return input.map((d) => ({
     ruleId: options.ruleId,

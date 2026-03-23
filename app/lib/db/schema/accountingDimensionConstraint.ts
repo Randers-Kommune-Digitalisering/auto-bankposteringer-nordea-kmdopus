@@ -5,6 +5,7 @@ export const accountingDimensionConstraintKindValues = [
   'requires_any_of',
   'requires_all_of',
   'requires_exactly_one_of',
+  'forbids_any_of',
 ] as const
 
 export const accountingDimensionConstraintKindEnum = pgEnum(
@@ -19,10 +20,16 @@ export const erpAccountingDimensionConstraint = pgTable('erp_accounting_dimensio
   erpSupplier: erpSupplierEnum('erp_supplier').notNull(),
   ifKey: text('if_key').notNull(),
   kind: accountingDimensionConstraintKindEnum('kind').notNull(),
+  ifValueRegex: text('if_value_regex'),
   createdAt: date('created_at', { mode: 'date' }).defaultNow(),
   updatedAt: date('updated_at', { mode: 'date' }).defaultNow().$onUpdate(() => new Date()),
 }, (t) => ({
-  supplierIfKindUnique: unique('erp_accounting_dimension_constraint_supplier_if_kind_unique').on(t.erpSupplier, t.ifKey, t.kind),
+  supplierIfKindUnique: unique('erp_accounting_dimension_constraint_supplier_if_kind_unique').on(
+    t.erpSupplier,
+    t.ifKey,
+    t.kind,
+    t.ifValueRegex,
+  ),
 }))
 
 export const erpAccountingDimensionConstraintMember = pgTable('erp_accounting_dimension_constraint_member', {

@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { eq, sql } from 'drizzle-orm'
+import { and, eq, isNull, sql } from 'drizzle-orm'
 import crypto from 'node:crypto'
 import dns from 'node:dns/promises'
 
@@ -37,6 +37,7 @@ import { outbox } from '../../app/lib/db/schema/outbox'
 import { run } from '../../app/lib/db/schema/run'
 import {
   erpAccountingDimensionDefinition,
+  // constraints are seeded in dev to ensure rule creation validates correctly
   ruleAccountingAttachment,
   ruleAccountingParameters,
   rule,
@@ -46,9 +47,11 @@ import {
   ruleRuleTag,
   tenantConfiguration,
 } from '../../app/lib/db/schema/rule'
+import { erpAccountingDimensionConstraint, erpAccountingDimensionConstraintMember } from '../../app/lib/db/schema/accountingDimensionConstraint'
 import type { ErpSupplier } from '../../app/lib/db/schema/enums'
 import { ruleTag } from '../../app/lib/db/schema/ruleTag'
 import { ruleVersion } from '../../app/lib/db/schema/ruleVersion'
+import { defaultAccountingDimensionConstraints, defaultAccountingDimensionDefinitions } from '../../engine/erp-integration/domain/accountingDimensionDefaults'
 import {
   bankingDocument,
   bankingStatement,
@@ -176,12 +179,7 @@ async function ensureDimensionDefinitions(tx: any) {
   // Seed known dimensions for KMD. Other suppliers must add their own seed logic.
   if (erpSupplier !== 'kmd') return
 
-  const dims = [
-    { key: 'artskonto', sortOrder: 1, required: true, erpTarget: 'glAccount' },
-    { key: 'omkostningssted', sortOrder: 2, required: false, erpTarget: 'costCenter' },
-    { key: 'psp-element', sortOrder: 3, required: false, erpTarget: 'wbsElement' },
-  ] as const
-
+  const dims = defaultAccountingDimensionDefinitions.filter(d => d.supplier === erpSupplier)
   for (const d of dims) {
     await tx
       .insert(erpAccountingDimensionDefinition)
@@ -191,10 +189,61 @@ async function ensureDimensionDefinitions(tx: any) {
         erpTarget: d.erpTarget,
         sortOrder: d.sortOrder,
         required: d.required,
+        valueRegex: d.valueRegex,
+        valueRegexFlags: d.valueRegexFlags,
       })
       .onConflictDoNothing({
         target: [erpAccountingDimensionDefinition.erpSupplier, erpAccountingDimensionDefinition.key],
       })
+  }
+}
+
+async function ensureDimensionConstraints(tx: any) {
+  if (erpSupplier !== 'kmd') return
+
+  const constraints = defaultAccountingDimensionConstraints.filter(c => c.supplier === erpSupplier)
+  for (const c of constraints) {
+    await tx
+      .insert(erpAccountingDimensionConstraint)
+      .values({
+        erpSupplier,
+        ifKey: c.ifKey,
+        kind: c.kind,
+        ifValueRegex: c.ifValueRegex ?? null,
+      })
+      .onConflictDoNothing({
+        target: [
+          erpAccountingDimensionConstraint.erpSupplier,
+          erpAccountingDimensionConstraint.ifKey,
+          erpAccountingDimensionConstraint.kind,
+          erpAccountingDimensionConstraint.ifValueRegex,
+        ],
+      })
+
+    const [row] = await tx
+      .select({ id: erpAccountingDimensionConstraint.id })
+      .from(erpAccountingDimensionConstraint)
+      .where(and(
+        eq(erpAccountingDimensionConstraint.erpSupplier, erpSupplier),
+        eq(erpAccountingDimensionConstraint.ifKey, c.ifKey),
+        eq(erpAccountingDimensionConstraint.kind, c.kind),
+        c.ifValueRegex ? eq(erpAccountingDimensionConstraint.ifValueRegex, c.ifValueRegex) : isNull(erpAccountingDimensionConstraint.ifValueRegex),
+      ))
+      .limit(1)
+
+    if (!row?.id) continue
+
+    for (const key of c.members) {
+      await tx
+        .insert(erpAccountingDimensionConstraintMember)
+        .values({ constraintId: row.id, key })
+        .onConflictDoNothing({
+          target: [
+            erpAccountingDimensionConstraintMember.constraintId,
+            erpAccountingDimensionConstraintMember.key,
+          ],
+        })
+    }
   }
 }
 
@@ -283,6 +332,7 @@ async function main() {
 
     await ensureTenantConfiguration(tx)
     await ensureDimensionDefinitions(tx)
+    await ensureDimensionConstraints(tx)
 
     const seedRuleId = await ensureRuleId(tx)
 
