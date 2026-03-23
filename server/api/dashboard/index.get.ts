@@ -11,7 +11,30 @@ import type { DashboardResponse } from '~/types/dashboard'
 const querySchema = z.object({
   start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   end: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  accountIds: z.string().optional(),
+  accounts: z.string().optional(),
 })
+
+function parseStringArrayParam(value: unknown): string[] {
+  if (value == null) return []
+  if (Array.isArray(value)) {
+    return value
+      .flatMap((v) => (typeof v === 'string' ? v.split(',') : []))
+      .map((v) => v.trim())
+      .filter(Boolean)
+  }
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map((v) => v.trim())
+      .filter(Boolean)
+  }
+  return []
+}
+
+function accountInSql(accountIds: string[]) {
+  return sql`(${sql.join(accountIds.map((id) => sql`${id}`), sql`, `)})`
+}
 
 function formatDate(value: Date): string {
   return value.toISOString().slice(0, 10)
@@ -61,6 +84,13 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
   const rawQuery = getQuery(event)
   const parsedQuery = querySchema.parse(rawQuery)
 
+  const accountIds = parseStringArrayParam(
+    (rawQuery as any).accountIds ??
+      (rawQuery as any)['accountIds[]'] ??
+      (rawQuery as any).accounts ??
+      (rawQuery as any)['accounts[]'],
+  )
+
   const today = new Date()
   const defaultEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate())
   const defaultStart = new Date(defaultEnd)
@@ -74,6 +104,11 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
 
   const dateKeys = buildDateRange(startDate, endDate)
 
+  const txAccountFilter = accountIds.length ? inArray(transaction.accountId, accountIds) : null
+  const runAccountExists = accountIds.length
+    ? sql`exists (select 1 from "transaction" t where t.run_id = ${run.id} and t.account in ${accountInSql(accountIds)})`
+    : null
+
   const [seriesRows, openTxRows, ruleRows, runFailureRows, errorRows, latestRuns] = await Promise.all([
     db
       .select({
@@ -84,7 +119,11 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
       })
       .from(transaction)
       .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
-      .where(and(gte(transaction.bookingDate, startDate), lte(transaction.bookingDate, endDate)))
+      .where(and(
+        gte(transaction.bookingDate, startDate),
+        lte(transaction.bookingDate, endDate),
+        ...(txAccountFilter ? [txAccountFilter] : []),
+      ))
       .groupBy(transaction.bookingDate)
       .orderBy(asc(transaction.bookingDate)),
 
@@ -94,7 +133,10 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
       })
       .from(transaction)
       .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
-      .where(or(isNull(transactionProcessing.status), eq(transactionProcessing.status, 'åben'))),
+      .where(and(
+        or(isNull(transactionProcessing.status), eq(transactionProcessing.status, 'åben')),
+        ...(txAccountFilter ? [txAccountFilter] : []),
+      )),
 
     db
       .select({
@@ -112,24 +154,47 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
         failedRuns: sql<number>`count(*)::int`,
       })
       .from(run)
-      .where(and(eq(run.status, 'fejl'), gte(run.bookingDate, startDate), lte(run.bookingDate, endDate))),
+      .where(and(
+        eq(run.status, 'fejl'),
+        gte(run.bookingDate, startDate),
+        lte(run.bookingDate, endDate),
+        ...(runAccountExists ? [runAccountExists] : []),
+      )),
 
     db
       .select({
         errorCount: sql<number>`count(*)::int`,
       })
       .from(errorLog)
-      .where(sql`date(${errorLog.createdAt}) between ${start} and ${end}`),
+      .where(and(
+        sql`date(${errorLog.createdAt}) between ${start} and ${end}`,
+        ...(accountIds.length
+          ? [sql`${errorLog.runId} in (select distinct t.run_id from "transaction" t where t.account in ${accountInSql(accountIds)})`]
+          : []),
+      )),
 
-    db
-      .select({
-        id: run.id,
-        bookingDate: run.bookingDate,
-        status: run.status,
-      })
-      .from(run)
-      .orderBy(desc(run.bookingDate))
-      .limit(10),
+    accountIds.length
+      ? db
+          .select({
+            id: run.id,
+            bookingDate: run.bookingDate,
+            status: run.status,
+          })
+          .from(run)
+          .innerJoin(transaction, eq(transaction.runId, run.id))
+          .where(inArray(transaction.accountId, accountIds))
+          .groupBy(run.id, run.bookingDate, run.status)
+          .orderBy(desc(run.bookingDate))
+          .limit(10)
+      : db
+          .select({
+            id: run.id,
+            bookingDate: run.bookingDate,
+            status: run.status,
+          })
+          .from(run)
+          .orderBy(desc(run.bookingDate))
+          .limit(10),
   ])
 
   const runIds = latestRuns.map((entry) => entry.id)
@@ -141,7 +206,10 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
             transactionsCount: sql<number>`count(*)::int`,
           })
           .from(transaction)
-          .where(inArray(transaction.runId, runIds))
+          .where(and(
+            inArray(transaction.runId, runIds),
+            ...(txAccountFilter ? [txAccountFilter] : []),
+          ))
           .groupBy(transaction.runId),
 
         db

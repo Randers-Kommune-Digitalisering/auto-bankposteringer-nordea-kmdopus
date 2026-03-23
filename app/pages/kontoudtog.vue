@@ -31,22 +31,8 @@ const defaultRange = {
 const dateRange = ref<any>(defaultRange)
 const globalFilterValue = ref('')
 
-type BankAccount = { id: string; name: string | null }
-
 // Source of truth: selected account IDs (strings)
 const selectedAccountIds = ref<string[]>([])
-
-const { data: bankAccountsData, status: bankAccountsStatus } = await useFetch<BankAccount[]>(
-  '/api/bank-accounts',
-  {
-    key: 'bank-accounts'
-  }
-)
-
-const bankAccountOptions = computed(() => {
-  const accounts = useFlattenArray<BankAccount>(bankAccountsData)
-  return accounts.map((a) => ({ value: a.id, label: a.name ?? a.id }))
-})
 
 const start = computed(() => {
   const v = dateRange.value?.start ?? startDefault
@@ -514,34 +500,15 @@ const tableUi = {
 
     <template #body>
       <div class="space-y-4">
-        <div>
-          <DashboardDateRangePicker v-model="dateRange" :reset-value="defaultRange" :time-zone="timeZone" />
-        </div>
-
-        <div class="max-w-md">
-          <UFormField label="Konti">
-            <USelectMenu
-              v-model="selectedAccountIds"
-              :items="bankAccountOptions"
-              multiple
-              valueKey="value"
-              labelKey="label"
-              placeholder="Alle konti"
-              :loading="bankAccountsStatus === 'pending'"
-              class="w-full"
-            />
-          </UFormField>
-        </div>
-
-        <div class="mt-2">
-          <UInput
-            v-model="globalFilterValue"
-            name="search"
-            class="max-w-sm"
-            icon="solar:magnifer-bold-duotone"
-            placeholder="Søg i kontoudtog..."
-          />
-        </div>
+        <FiltersRow
+          v-model:date-range="dateRange"
+          :reset-date-range="defaultRange"
+          :time-zone="timeZone"
+          v-model:account-ids="selectedAccountIds"
+          v-model:search="globalFilterValue"
+          :show-search="true"
+          search-placeholder="Søg i kontoudtog..."
+        />
 
         <div v-if="dateRange?.start && dateRange?.end" class="text-sm text-muted">
           {{ visibleRowCount }} transaktioner i valgt periode
