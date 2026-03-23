@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
+import { parseDate, today } from '@internationalized/date'
+import { nextTick, watch } from 'vue'
 import type {
   AccountSelectSchema,
 } from '~/lib/db/schema/account'
@@ -9,6 +11,8 @@ import type { MatchField, MatchCategory } from '~/lib/rules/match-config'
 import { ruleTypeValues, ruleStatusValues, cprTypeValues } from '~/lib/db/schema/enums'
 import { matchFieldOptionsByCategory, matchCategories, matchCategoryColumns } from '~/lib/rules/match-config'
 import { ruleBasicSchema, ruleMatchingSchema, ruleAccountingSchema } from '~/lib/db/schema/rule'
+import { DEFAULT_TIME_ZONE } from '~/lib/timeZone'
+import { accountingDimensionFormatHint } from '~/lib/presenters/accountingDimensionFormatHints'
 
 const props = defineProps<{
   open?: boolean
@@ -22,14 +26,96 @@ const emit = defineEmits<{
   (e: 'saved'): void
 }>()
 
+// -----------------------
+// Unsaved changes handling
+// -----------------------
+type RuleSnapshot = {
+  type: RuleType
+  status: RuleStatus
+  activeFrom?: string
+  activeTo?: string
+  relatedBankAccounts: string[]
+  ruleTags?: string[]
+  matchAmountMin?: number
+  matchAmountMax?: number
+  matches: MatchEntry[]
+  accountingDimensions: Array<{ key: string; value: string }>
+  accountingText?: string
+  accountingCprType: CprType
+  accountingCprNumber?: string
+  accountingNotifyTo?: string
+  accountingNote?: string
+  attachments?: {
+    names: string[]
+    extensions: string[]
+    base64: string[]
+  } | null
+}
+
+const savedSnapshot = ref<string | null>(null)
+const bypassUnsavedPromptOnce = ref(false)
+
+function normalizeDateOnly(value: unknown): string | undefined {
+  if (!value) return undefined
+  const d = value instanceof Date ? value : new Date(String(value))
+  if (Number.isNaN(d.getTime())) return undefined
+  return d.toISOString().slice(0, 10)
+}
+
+function buildRuleSnapshot(): RuleSnapshot {
+  return {
+    type: state.type as RuleType,
+    status: state.status as RuleStatus,
+    activeFrom: normalizeDateOnly(state.activeFrom as any),
+    activeTo: normalizeDateOnly(state.activeTo as any),
+    relatedBankAccounts: (state.relatedBankAccounts ?? []).slice().sort(),
+    ruleTags: (state.ruleTags ?? []).slice().sort(),
+    matchAmountMin: state.matchAmountMin,
+    matchAmountMax: state.matchAmountMax,
+    matches: (matches.value ?? []).map(m => ({ ...m, fields: m.fields?.slice() })),
+    accountingDimensions: (state.accountingDimensions ?? [])
+      .slice()
+      .map(d => ({ key: d.key, value: d.value }))
+      .sort((a, b) => a.key.localeCompare(b.key)),
+    accountingText: state.accountingText,
+    accountingCprType: state.accountingCprType as CprType,
+    accountingCprNumber: state.accountingCprNumber,
+    accountingNotifyTo: state.accountingNotifyTo,
+    accountingNote: state.accountingNote,
+    attachments: attachments.value,
+  }
+}
+
+const currentSnapshot = computed(() => JSON.stringify(buildRuleSnapshot()))
+
+const hasUnsavedChanges = computed(() => {
+  if (!open.value) return false
+  if (!savedSnapshot.value) return false
+  return savedSnapshot.value !== currentSnapshot.value
+})
+
 const open = computed({
   get: () => props.open ?? false,
-  set: v => emit('update:open', v)
+  set: (value: boolean) => {
+    const wasOpen = props.open ?? false
+    if (!value && wasOpen && hasUnsavedChanges.value && !bypassUnsavedPromptOnce.value) {
+      if (process.client) {
+        const ok = window.confirm(
+          'Du har ændringer, som ikke er gemt\n\nVil du lukke uden at gemme?',
+        )
+        if (!ok) return
+      }
+    }
+    bypassUnsavedPromptOnce.value = false
+    emit('update:open', value)
+  },
 })
 
 const currentStep = ref(0)
 const toast = useToast()
 const formRef = ref<any>()
+
+const timeZone = DEFAULT_TIME_ZONE
 
 const steps = [
   { id: 'basic', title: 'Basis', description: 'Vælg type, status og bankkonto' },
@@ -49,6 +135,8 @@ function createEmptyDraft(): RuleDraftUiState {
     type: 'standard' as RuleType,
     status: 'aktiv' as RuleStatus,
     lockedAt: undefined,
+    activeFrom: undefined,
+    activeTo: undefined,
     relatedBankAccounts: [],
     matchAmountMin: undefined,
     matchAmountMax: undefined,
@@ -67,6 +155,62 @@ function createEmptyDraft(): RuleDraftUiState {
 
 const state = reactive<RuleDraftUiState>(createEmptyDraft())
 
+// -------------------------
+// Active period (date range)
+// -------------------------
+type TimeLimitMode = 'Ikke tidsbegrænset' | 'Tidsbegrænset'
+
+const shouldShowTimeLimit = computed(() => state.type === 'standard' && state.status === 'aktiv')
+
+const timeLimitMode = ref<TimeLimitMode>('Ikke tidsbegrænset')
+
+const timeLimitOptions = [
+  { label: 'Nej', value: 'Ikke tidsbegrænset' },
+  { label: 'Ja', value: 'Tidsbegrænset' },
+]
+
+const activePeriodRange = ref<any>(null)
+
+function normalizeDateToNoon(d: Date) {
+  d.setHours(12, 0, 0, 0)
+  return d
+}
+
+function dateToCalendarDateValue(d: Date): any {
+  // We store DATEs; using ISO date avoids timezone surprises.
+  return parseDate(d.toISOString().slice(0, 10))
+}
+
+watchEffect(() => {
+  // If time limitation is not applicable, always clear
+  if (!shouldShowTimeLimit.value) {
+    timeLimitMode.value = 'Ikke tidsbegrænset'
+    activePeriodRange.value = null
+    state.activeFrom = undefined
+    state.activeTo = undefined
+    return
+  }
+
+  // Mode -> state
+  if (timeLimitMode.value === 'Ikke tidsbegrænset') {
+    activePeriodRange.value = null
+    state.activeFrom = undefined
+    state.activeTo = undefined
+    return
+  }
+
+  // Ensure the picker has a default range when enabling
+  if (!activePeriodRange.value?.start || !activePeriodRange.value?.end) {
+    const endDefault = today(timeZone)
+    activePeriodRange.value = { start: endDefault, end: endDefault }
+  }
+
+  if (activePeriodRange.value?.start && activePeriodRange.value?.end) {
+    state.activeFrom = normalizeDateToNoon(activePeriodRange.value.start.toDate(timeZone))
+    state.activeTo = normalizeDateToNoon(activePeriodRange.value.end.toDate(timeZone))
+  }
+})
+
 // ---------------------
 // Match object handlers
 // ---------------------
@@ -80,11 +224,22 @@ type AccountingDimensionDefinition = {
   key: string
   required: boolean
   sortOrder: number
+  valueRegex?: string | null
+  valueRegexFlags?: string | null
+}
+
+type AccountingDimensionConstraint = {
+  id: string
+  ifKey: string
+  kind: 'requires_any_of' | 'requires_all_of' | 'requires_exactly_one_of' | 'forbids_any_of'
+  members: string[]
+  ifValueRegex?: string | null
 }
 
 type AccountingDimensionsResponse = {
   erpSupplier: string
   dimensions: AccountingDimensionDefinition[]
+  constraints: AccountingDimensionConstraint[]
 }
 
 const { data: accountingDimensionConfig } = await useFetch<AccountingDimensionsResponse>(
@@ -95,6 +250,16 @@ const { data: accountingDimensionConfig } = await useFetch<AccountingDimensionsR
 const accountingDimensionDefinitions = computed<AccountingDimensionDefinition[]>(
   () => accountingDimensionConfig.value?.dimensions ?? [],
 )
+
+const accountingDimensionConstraints = computed<AccountingDimensionConstraint[]>(
+  () => accountingDimensionConfig.value?.constraints ?? [],
+)
+
+const dimensionLabel = (key: string) => key.charAt(0).toUpperCase() + key.slice(1)
+
+function constraintLabel(key: string) {
+  return dimensionLabel(key)
+}
 
 const accountingDimensionValues = reactive<Record<string, string>>({})
 
@@ -124,11 +289,49 @@ const isLocked = computed(() => {
   return now - lockTime < 5 * 60 * 1000
 })
 
+watch(
+  () => open.value,
+  async (isOpen) => {
+    if (!isOpen) {
+      savedSnapshot.value = null
+      bypassUnsavedPromptOnce.value = false
+      return
+    }
+
+    // When opening in create mode, the current in-memory state might be stale.
+    if (!props.ruleId) {
+      resetForm()
+    }
+
+    await nextTick()
+    savedSnapshot.value = currentSnapshot.value
+  },
+)
+
 function hydrateDraft(rule: RuleDraftSchema & { matches?: MatchEntry[] }) {
   Object.assign(state, {
     ...rule,
     matches: undefined
   })
+
+  // Normalize date fields from API (may come back as strings)
+  if (state.activeFrom && !(state.activeFrom instanceof Date)) {
+    state.activeFrom = new Date(state.activeFrom as any)
+  }
+  if (state.activeTo && !(state.activeTo instanceof Date)) {
+    state.activeTo = new Date(state.activeTo as any)
+  }
+
+  if (state.type === 'standard' && state.status === 'aktiv' && state.activeFrom && state.activeTo) {
+    timeLimitMode.value = 'Tidsbegrænset'
+    activePeriodRange.value = {
+      start: dateToCalendarDateValue(normalizeDateToNoon(new Date(state.activeFrom as any))),
+      end: dateToCalendarDateValue(normalizeDateToNoon(new Date(state.activeTo as any))),
+    }
+  } else {
+    timeLimitMode.value = 'Ikke tidsbegrænset'
+    activePeriodRange.value = null
+  }
 
   for (const key of Object.keys(accountingDimensionValues)) {
     delete accountingDimensionValues[key]
@@ -142,6 +345,12 @@ function hydrateDraft(rule: RuleDraftSchema & { matches?: MatchEntry[] }) {
   syncAccountingDimensionsToState()
 
   matches.value = rule.matches ?? []
+
+  if (open.value) {
+    void nextTick().then(() => {
+      savedSnapshot.value = currentSnapshot.value
+    })
+  }
 }
 
 watchEffect(async () => {
@@ -245,6 +454,8 @@ const handleAttachmentUpdate = (value: AttachmentPayload | null) => {
 function resetForm() {
   Object.assign(state, createEmptyDraft())
   matches.value = []
+  timeLimitMode.value = 'Ikke tidsbegrænset'
+  activePeriodRange.value = null
   for (const key of Object.keys(accountingDimensionValues)) {
     delete accountingDimensionValues[key]
   }
@@ -261,16 +472,171 @@ const stepSchema = computed(() => {
     case 1:
       return ruleMatchingSchema
     case 2:
-      return ruleAccountingSchema
+      return ruleAccountingSchemaWithUiValidation.value
     default:
       return ruleBasicSchema
   }
 })
 
-const ruleSubmitSchema =
+const ruleAccountingSchemaWithUiValidation = computed(() =>
+  ruleAccountingSchema.superRefine((data, ctx) => {
+    const defs = accountingDimensionDefinitions.value
+    if (!defs.length) return
+
+    const dimensions = data.accountingDimensions ?? []
+
+    const defByKey = new Map(defs.map(d => [d.key, d] as const))
+
+    // Format validation per dimension (data-driven)
+    for (const d of dimensions) {
+      const def = defByKey.get(d.key)
+      if (!def?.valueRegex) continue
+      const flags = def.valueRegexFlags ?? ''
+      try {
+        const re = new RegExp(def.valueRegex, flags)
+        if (!re.test(String(d.value ?? '').trim())) {
+          const hint = accountingDimensionFormatHint(def.key)
+          ctx.addIssue({
+            code: 'custom',
+            message: `${dimensionLabel(def.key)} har ugyldigt format` + (hint ? ` (${hint})` : ''),
+            path: ['accountingDimensions', def.key],
+          })
+        }
+      } catch {
+        ctx.addIssue({
+          code: 'custom',
+          message: `Ugyldig regex for konteringsdimension '${def.key}': ${def.valueRegex}`,
+          path: ['accountingDimensions', def.key],
+        })
+      }
+    }
+
+    for (const def of defs) {
+      if (!def.required) continue
+      const hasValue = dimensions.some((d) => d.key === def.key && String(d.value ?? '').trim().length > 0)
+      if (!hasValue) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `${dimensionLabel(def.key)} er påkrævet`,
+          path: ['accountingDimensions', def.key],
+        })
+      }
+    }
+
+    // ERP dimension constraints (same semantics as backend)
+    const valueByKey = new Map(
+      dimensions
+        .map((d) => [d.key, String(d.value ?? '').trim()] as const)
+        .filter(([, v]) => v.length > 0),
+    )
+    const keys = new Set(valueByKey.keys())
+    const constraintsByIfKey = new Map<string, AccountingDimensionConstraint[]>()
+    for (const c of accountingDimensionConstraints.value) {
+      const bucket = constraintsByIfKey.get(c.ifKey) ?? []
+      bucket.push(c)
+      constraintsByIfKey.set(c.ifKey, bucket)
+    }
+
+    for (const [ifKey, group] of constraintsByIfKey.entries()) {
+      if (!keys.has(ifKey)) continue
+
+      const v = valueByKey.get(ifKey) ?? ''
+
+      const regexConstraints = group.filter(c => (c.ifValueRegex ?? null) != null)
+      let matchingRegex: AccountingDimensionConstraint[] = []
+
+      for (const c of regexConstraints) {
+        try {
+          const re = new RegExp(c.ifValueRegex as string)
+          if (re.test(v)) matchingRegex.push(c)
+        } catch {
+          ctx.addIssue({
+            code: 'custom',
+            message: `Ugyldig regex i konteringsconstraint: ${c.ifValueRegex}`,
+            path: ['accountingDimensions', ifKey],
+          })
+          matchingRegex = []
+          break
+        }
+      }
+
+      const applicable = matchingRegex.length
+        ? matchingRegex
+        : group.filter(c => (c.ifValueRegex ?? null) == null)
+
+      for (const c of applicable) {
+
+        if (c.kind === 'requires_any_of') {
+          const ok = c.members.some(m => keys.has(m))
+          if (!ok) {
+            for (const member of c.members) {
+              ctx.addIssue({
+                code: 'custom',
+                message: `Udfyld mindst én af: ${c.members.map(constraintLabel).join(' / ')} (når ${constraintLabel(c.ifKey)} er udfyldt)`,
+                path: ['accountingDimensions', member],
+              })
+            }
+          }
+          continue
+        }
+
+        if (c.kind === 'requires_all_of') {
+          const missing = c.members.filter(m => !keys.has(m))
+          if (missing.length) {
+            for (const member of missing) {
+              ctx.addIssue({
+                code: 'custom',
+                message: `Udfyld også ${constraintLabel(member)} (når ${constraintLabel(c.ifKey)} er udfyldt)`,
+                path: ['accountingDimensions', member],
+              })
+            }
+          }
+          continue
+        }
+
+        if (c.kind === 'requires_exactly_one_of') {
+          const present = c.members.filter(m => keys.has(m))
+          if (present.length === 0) {
+            for (const member of c.members) {
+              ctx.addIssue({
+                code: 'custom',
+                message: `Udfyld enten ${constraintLabel(c.members[0] ?? '')} eller ${constraintLabel(c.members[1] ?? '')} (ikke begge)`,
+                path: ['accountingDimensions', member],
+              })
+            }
+          } else if (present.length > 1) {
+            for (const member of present) {
+              ctx.addIssue({
+                code: 'custom',
+                message: `Udfyld kun ét af felterne: ${c.members.map(constraintLabel).join(' / ')}`,
+                path: ['accountingDimensions', member],
+              })
+            }
+          }
+        }
+
+        if (c.kind === 'forbids_any_of') {
+          const present = c.members.filter(m => keys.has(m))
+          if (present.length) {
+            for (const member of present) {
+              ctx.addIssue({
+                code: 'custom',
+                message: `${constraintLabel(member)} må ikke udfyldes sammen med ${constraintLabel(c.ifKey)}`,
+                path: ['accountingDimensions', member],
+              })
+            }
+          }
+        }
+      }
+    }
+  }),
+)
+
+const ruleSubmitSchema = computed(() =>
   ruleBasicSchema
     .and(ruleMatchingSchema)
-    .and(ruleAccountingSchema)
+    .and(ruleAccountingSchemaWithUiValidation.value),
+)
 
 // ------------------------------------------
 // Options to USelect og USelectMenu elements
@@ -333,7 +699,7 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
     matches: matches.value,
   }
 
-  const result = ruleSubmitSchema.safeParse(payload)
+  const result = ruleSubmitSchema.value.safeParse(payload)
   if (!result.success) {
     console.error(result.error)
     return
@@ -348,15 +714,18 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
         method: 'PUT',
         body: payload
       })
-      toast.add({ title: 'Regel opdateret', description: 'Reglen er blevet opdateret.' })
+      toast.add({ title: 'Regel opdateret', description: 'Reglen er blevet opdateret' })
     } else {
       // POST til /api/rule
       await $fetch<RuleDraftSchema>('/api/rule', {
         method: 'POST',
         body: payload
       })
-      toast.add({ title: 'Regel oprettet', description: 'Den nye regel er blevet oprettet.' })
+      toast.add({ title: 'Regel oprettet', description: 'Den nye regel er blevet oprettet' })
     }
+
+    // Close without prompting, then reset.
+    bypassUnsavedPromptOnce.value = true
     open.value = false
     emit('saved')
 
@@ -364,10 +733,11 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
     currentStep.value = 0
     matches.value = []
     resetForm()
+    savedSnapshot.value = null
   } catch (error) {
     toast.add({ 
       title: 'Fejl', 
-      description: isEdit.value ? 'Fejl ved opdatering.' : 'Fejl ved oprettelse.',
+      description: isEdit.value ? 'Fejl ved opdatering' : 'Fejl ved oprettelse',
       color: 'error'
     })
   }
@@ -395,78 +765,109 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
 
             <!-- BASIC STEP -->
             <template v-if="item.id === 'basic'">
-              <div class="grid grid-cols-1 gap-4 mt-6 mb-6 w-full max-w-full">
-                <UFormField label="Regeltype" name="type" required>
-                  <USelect
-                    v-model="state.type as RuleType"
-                    :items="typeOptions"
-                    labelKey="label"
-                    valueKey="value"
-                    placeholder="Vælg regeltype"
-                    class="w-full"
-                  />
-                </UFormField>
-                <UFormField label="Status" name="status" required>
-                  <USelect
-                    v-model="state.status as RuleStatus"
-                    :items="statusOptions"
-                    labelKey="label"
-                    valueKey="value"
-                    placeholder="Vælg status"
-                    class="w-full"
-                  />
-                </UFormField>
-                <UFormField label="Bankkonto" name="relatedBankAccounts" required>
-                  <UInputMenu
-                    v-model="state.relatedBankAccounts"
-                    :items="accountOptions"
-                    multiple
-                    labelKey="label"
-                    valueKey="value"
-                    placeholder="Vælg bankkonto"
-                    class="w-full"
-                  />
-                </UFormField>
-                <UFormField label="Tags" name="ruleTags">
-                  <UInputMenu
-                    v-model="state.ruleTags"
-                    :items="ruleTagOptions"
-                    multiple
-                    labelKey="label"
-                    valueKey="value"
-                    placeholder="Vælg tags"
-                    class="w-full"
-                  />
-                </UFormField>
-              </div>
+              <UCard variant="soft" :ui="{ body: 'space-y-4 p-4' }" class="w-full mt-6 mb-6">
+                <div class="grid grid-cols-1 gap-4 w-full max-w-full">
+                  <UFormField label="Regeltype" name="type" required>
+                    <USelect
+                      v-model="state.type as RuleType"
+                      :items="typeOptions"
+                      labelKey="label"
+                      valueKey="value"
+                      placeholder="Vælg regeltype"
+                      class="w-full"
+                    />
+                  </UFormField>
+                  <UFormField label="Status" name="status" required>
+                    <USelect
+                      v-model="state.status as RuleStatus"
+                      :items="statusOptions"
+                      labelKey="label"
+                      valueKey="value"
+                      placeholder="Vælg status"
+                      class="w-full"
+                    />
+                  </UFormField>
+
+                  <template v-if="shouldShowTimeLimit">
+                    <UFormField label="Tidsbegrænsning" name="activeTo">
+                      <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 space-y-3">
+                        <div>
+                          <p class="text-xs font-medium uppercase text-gray-600 dark:text-gray-400 mb-2">Begræns aktiv periode?</p>
+                          <URadioGroup
+                            v-model="timeLimitMode"
+                            :items="timeLimitOptions"
+                          />
+                        </div>
+
+                        <div v-if="timeLimitMode === 'Tidsbegrænset'" class="pt-2 border-t border-gray-200 dark:border-gray-700">
+                          <p class="text-xs font-medium uppercase text-gray-600 dark:text-gray-400 mb-2">Periode</p>
+                          <FiltersDateRangePicker
+                            v-model="activePeriodRange"
+                            :reset-value="null"
+                            :time-zone="timeZone"
+                          />
+                          <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                            Reglen gælder i den valgte periode og bliver automatisk sat til inaktiv efter sidste dag.
+                          </p>
+                        </div>
+                      </div>
+                    </UFormField>
+                  </template>
+
+                  <UFormField label="Bankkonto" name="relatedBankAccounts" required>
+                    <UInputMenu
+                      v-model="state.relatedBankAccounts"
+                      :items="accountOptions"
+                      multiple
+                      labelKey="label"
+                      valueKey="value"
+                      placeholder="Vælg bankkonto"
+                      class="w-full"
+                    />
+                  </UFormField>
+                  <UFormField label="Tags" name="ruleTags">
+                    <UInputMenu
+                      v-model="state.ruleTags"
+                      :items="ruleTagOptions"
+                      multiple
+                      labelKey="label"
+                      valueKey="value"
+                      placeholder="Vælg tags"
+                      class="w-full"
+                    />
+                  </UFormField>
+                </div>
+              </UCard>
             </template>
 
             <!-- MATCH STEP -->
             <template v-if="item.id === 'match'">
-              <!-- Beløbsgrænser -->
-              <div class="flex gap-4 mt-6 mb-6">
-                <UFormField label="Minimumsbeløb" name="matchAmountMin">
-                  <UInputNumber
-                    v-model="state.matchAmountMin"
-                    placeholder="DKK"
-                    :min="0"
-                    currency="DKK"
-                    currencyDisplay="symbol"
-                    class="min-w-fit"
-                  />
-                </UFormField>
-                <UFormField label="Maksimumsbeløb" name="matchAmountMax">
-                  <UInputNumber
-                    v-model="state.matchAmountMax"
-                    placeholder="DKK"
-                    :min="0"
-                    currency="DKK"
-                    currencyDisplay="symbol"
-                    class="min-w-fit"
-                  />
-                </UFormField>
-              </div>
-              <div class="space-y-6">
+              <UCard variant="soft" :ui="{ body: 'space-y-6 p-4' }" class="w-full mt-6 mb-6">
+                <!-- Beløbsgrænser -->
+                <div class="flex gap-4">
+                  <UFormField label="Minimumsbeløb" name="matchAmountMin">
+                    <UInputNumber
+                      v-model="state.matchAmountMin"
+                      placeholder="DKK"
+                      :min="0"
+                      currency="DKK"
+                      currencyDisplay="symbol"
+                      class="min-w-fit"
+                    />
+                  </UFormField>
+                  <UFormField label="Maksimumsbeløb" name="matchAmountMax">
+                    <UInputNumber
+                      v-model="state.matchAmountMax"
+                      placeholder="DKK"
+                      :min="0"
+                      currency="DKK"
+                      currencyDisplay="symbol"
+                      class="min-w-fit"
+                    />
+                  </UFormField>
+                </div>
+
+                <div class="space-y-6">
                 <div
                   v-for="category in matchCategories"
                   :key="category"
@@ -566,62 +967,65 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                     </div>
                   </div>
                 </div>
-              </div>
+                </div>
+              </UCard>
             </template>
 
             <!-- ACCOUNTING STEP -->
             <template v-if="item.id === 'accounting'">
-              <div class="grid grid-cols-1 gap-4 mt-6 mb-6 w-full max-w-full">
-                <UFormField
-                  v-for="def in accountingDimensionDefinitions"
-                  :key="def.id"
-                  :label="def.key"
-                  name="accountingDimensions"
-                  :required="def.required"
-                >
-                  <UInput
-                    v-model="accountingDimensionValues[def.key]"
-                    class="w-full"
-                    :placeholder="def.key"
-                  />
-                </UFormField>
-                <UFormField label="Posteringstekst" name="accountingText">
-                  <UInput v-model="state.accountingText" class="w-full" placeholder="Valgfri" />
-                </UFormField>
-                <div class="grid grid-cols-2 gap-4 mt-6 mb-6">
-                  <UFormField label="CPR-type" name="accountingCprType">
-                    <USelectMenu
-                      v-model="state.accountingCprType as CprType"
-                      :items="cprTypeOptions"
-                      labelKey="label"
-                      valueKey="value"
-                      placeholder="Vælg CPR-type"
-                      class="w-full"
-                    />
-                  </UFormField>
-                  <UFormField label="CPR-nummer" name="accountingCprNumber">
+              <UCard variant="soft" :ui="{ body: 'space-y-4 p-4' }" class="w-full mt-6 mb-6">
+                <div class="grid grid-cols-1 gap-4 w-full max-w-full">
+                  <UFormField
+                    v-for="def in accountingDimensionDefinitions"
+                    :key="def.id"
+                    :label="dimensionLabel(def.key)"
+                    :name="`accountingDimensions.${def.key}`"
+                    :required="def.required"
+                  >
                     <UInput
-                      v-model="state.accountingCprNumber"
+                      v-model="accountingDimensionValues[def.key]"
                       class="w-full"
-                      :disabled="state.accountingCprType !== 'statisk'"
+                      :placeholder="dimensionLabel(def.key)"
                     />
                   </UFormField>
+                  <UFormField label="Posteringstekst" name="accountingText">
+                    <UInput v-model="state.accountingText" class="w-full" placeholder="Valgfri" />
+                  </UFormField>
+                  <div class="grid grid-cols-2 gap-4 mt-2">
+                    <UFormField label="CPR-type" name="accountingCprType">
+                      <USelectMenu
+                        v-model="state.accountingCprType as CprType"
+                        :items="cprTypeOptions"
+                        labelKey="label"
+                        valueKey="value"
+                        placeholder="Vælg CPR-type"
+                        class="w-full"
+                      />
+                    </UFormField>
+                    <UFormField label="CPR-nummer" name="accountingCprNumber">
+                      <UInput
+                        v-model="state.accountingCprNumber"
+                        class="w-full"
+                        :disabled="state.accountingCprType !== 'statisk'"
+                      />
+                    </UFormField>
+                  </div>
+                  <UFormField label="Notifikation til" name="accountingNotifyTo">
+                    <UInput
+                      v-model="state.accountingNotifyTo"
+                      type="email"
+                      class="w-full"
+                      placeholder="f.eks. csl@randers.dk"
+                    />
+                  </UFormField>
+                  <UFormField label="Noter" name="accountingNote">
+                    <UTextarea v-model="state.accountingNote" class="w-full" placeholder="Valgfri notering" />
+                  </UFormField>
+                  <div>
+                    <RulesFileUpload @update="handleAttachmentUpdate" />
+                  </div>
                 </div>
-                <UFormField label="Notifikation til" name="accountingNotifyTo" class="mb-6">
-                  <UInput
-                    v-model="state.accountingNotifyTo"
-                    type="email"
-                    class="w-full"
-                    placeholder="f.eks. csl@randers.dk"
-                  />
-                </UFormField>
-                <UFormField label="Noter" name="accountingNote">
-                  <UTextarea v-model="state.accountingNote" class="w-full" placeholder="Valgfri notering" />
-                </UFormField>
-                <div>
-                  <RulesFileUpload @update="handleAttachmentUpdate" />
-                </div>
-              </div>
+              </UCard>
             </template>
           </template>
         </UStepper>

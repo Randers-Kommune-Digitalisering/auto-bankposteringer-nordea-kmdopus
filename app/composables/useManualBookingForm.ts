@@ -7,17 +7,29 @@ import {
 	type ManualBookingFormState as ManualFormState
 } from '#engine/manual-booking/domain/manualBooking'
 import type { ManualPostingAttachment, OpenTransaction } from '~/types/transactions'
+import { accountingDimensionFormatHint } from '~/lib/presenters/accountingDimensionFormatHints'
+
+type AccountingDimensionConstraint = {
+	id: string
+	ifKey: string
+	kind: 'requires_any_of' | 'requires_all_of' | 'requires_exactly_one_of' | 'forbids_any_of'
+	members: string[]
+	ifValueRegex?: string | null
+}
 
 type AccountingDimensionDefinition = {
 	id: string
 	key: string
 	required: boolean
 	sortOrder: number
+	valueRegex?: string | null
+	valueRegexFlags?: string | null
 }
 
 type AccountingDimensionsResponse = {
 	erpSupplier: string
 	dimensions: AccountingDimensionDefinition[]
+	constraints: AccountingDimensionConstraint[]
 }
 
 export type AttachmentPayload = {
@@ -61,6 +73,10 @@ export function useManualBookingForm(options: {
 
 	const accountingDimensionDefinitions = computed<AccountingDimensionDefinition[]>(
 		() => accountingDimensionConfig.value?.dimensions ?? [],
+	)
+
+	const accountingDimensionConstraints = computed<AccountingDimensionConstraint[]>(
+		() => accountingDimensionConfig.value?.constraints ?? [],
 	)
 
 	const dimensionValuesByLine = reactive<Array<Record<string, string>>>([])
@@ -121,14 +137,43 @@ export function useManualBookingForm(options: {
 
 	const toDisplayLabel = (key: string) => key.charAt(0).toUpperCase() + key.slice(1)
 
+	const constraintLabel = (key: string) => toDisplayLabel(key)
+
 	const manualBookingFormSchema = computed(() =>
 		baseManualBookingFormSchema.superRefine((data, ctx) => {
 			const defs = accountingDimensionDefinitions.value
 			if (!defs.length) return
+			const defByKey = new Map(defs.map(d => [d.key, d] as const))
 
 			for (let lineIndex = 0; lineIndex < (data.lines?.length ?? 0); lineIndex++) {
 				const line = data.lines?.[lineIndex]
 				const dimensions = line?.dimensions ?? []
+
+				// Format validation per dimension (data-driven)
+				for (const d of dimensions) {
+					const def = defByKey.get(d.key)
+					if (!def?.valueRegex) continue
+					const flags = def.valueRegexFlags ?? ''
+					try {
+						const re = new RegExp(def.valueRegex, flags)
+						if (!re.test(String(d.value ?? '').trim())) {
+							ctx.addIssue({
+								code: 'custom',
+								message: `${toDisplayLabel(def.key)} har ugyldigt format` + (() => {
+									const hint = accountingDimensionFormatHint(def.key)
+									return hint ? ` (${hint})` : ''
+								})(),
+								path: ['lines', lineIndex, 'dimensions', def.key],
+							})
+						}
+					} catch {
+						ctx.addIssue({
+							code: 'custom',
+							message: `Ugyldig regex for konteringsdimension '${def.key}': ${def.valueRegex}`,
+							path: ['lines', lineIndex, 'dimensions', def.key],
+						})
+					}
+				}
 				for (const def of defs) {
 					if (!def.required) continue
 					const hasValue = dimensions.some((d) => d.key === def.key && String(d.value ?? '').trim().length > 0)
@@ -138,6 +183,112 @@ export function useManualBookingForm(options: {
 							message: `${toDisplayLabel(def.key)} er påkrævet`,
 							path: ['lines', lineIndex, 'dimensions', def.key],
 						})
+					}
+				}
+
+				// ERP dimension constraints (same semantics as backend)
+				const valueByKey = new Map(
+					dimensions
+						.map((d) => [d.key, String(d.value ?? '').trim()] as const)
+						.filter(([, v]) => v.length > 0),
+				)
+				const keys = new Set(valueByKey.keys())
+				const constraintsByIfKey = new Map<string, AccountingDimensionConstraint[]>()
+				for (const c of accountingDimensionConstraints.value) {
+					const bucket = constraintsByIfKey.get(c.ifKey) ?? []
+					bucket.push(c)
+					constraintsByIfKey.set(c.ifKey, bucket)
+				}
+
+				for (const [ifKey, group] of constraintsByIfKey.entries()) {
+					if (!keys.has(ifKey)) continue
+
+					const v = valueByKey.get(ifKey) ?? ''
+					const regexConstraints = group.filter(c => (c.ifValueRegex ?? null) != null)
+					let matchingRegex: AccountingDimensionConstraint[] = []
+
+					for (const c of regexConstraints) {
+						try {
+							const re = new RegExp(c.ifValueRegex as string)
+							if (re.test(v)) matchingRegex.push(c)
+						} catch {
+							ctx.addIssue({
+								code: 'custom',
+								message: `Ugyldig regex i konteringsconstraint: ${c.ifValueRegex}`,
+								path: ['lines', lineIndex, 'dimensions', ifKey],
+							})
+							matchingRegex = []
+							break
+						}
+					}
+
+					const applicable = matchingRegex.length
+						? matchingRegex
+						: group.filter(c => (c.ifValueRegex ?? null) == null)
+
+					for (const c of applicable) {
+
+						if (c.kind === 'requires_any_of') {
+						const ok = c.members.some(m => keys.has(m))
+						if (!ok) {
+								for (const member of c.members) {
+									ctx.addIssue({
+										code: 'custom',
+										message: `Udfyld mindst én af: ${c.members.map(constraintLabel).join(' / ')} (når ${constraintLabel(c.ifKey)} er udfyldt)`,
+										path: ['lines', lineIndex, 'dimensions', member],
+									})
+								}
+						}
+							continue
+						}
+
+						if (c.kind === 'requires_all_of') {
+						const missing = c.members.filter(m => !keys.has(m))
+						if (missing.length) {
+								for (const member of missing) {
+									ctx.addIssue({
+										code: 'custom',
+										message: `Udfyld også ${constraintLabel(member)} (når ${constraintLabel(c.ifKey)} er udfyldt)`,
+										path: ['lines', lineIndex, 'dimensions', member],
+									})
+								}
+						}
+							continue
+						}
+
+						if (c.kind === 'requires_exactly_one_of') {
+						const present = c.members.filter(m => keys.has(m))
+						if (present.length === 0) {
+								for (const member of c.members) {
+									ctx.addIssue({
+										code: 'custom',
+										message: `Udfyld enten ${constraintLabel(c.members[0] ?? '')} eller ${constraintLabel(c.members[1] ?? '')} (ikke begge)`,
+										path: ['lines', lineIndex, 'dimensions', member],
+									})
+								}
+						} else if (present.length > 1) {
+								for (const member of present) {
+									ctx.addIssue({
+										code: 'custom',
+										message: `Udfyld kun ét af felterne: ${c.members.map(constraintLabel).join(' / ')}`,
+										path: ['lines', lineIndex, 'dimensions', member],
+									})
+								}
+						}
+						}
+
+						if (c.kind === 'forbids_any_of') {
+						const present = c.members.filter(m => keys.has(m))
+						if (present.length) {
+								for (const member of present) {
+									ctx.addIssue({
+										code: 'custom',
+										message: `${constraintLabel(member)} må ikke udfyldes sammen med ${constraintLabel(c.ifKey)}`,
+										path: ['lines', lineIndex, 'dimensions', member],
+									})
+								}
+						}
+						}
 					}
 				}
 			}

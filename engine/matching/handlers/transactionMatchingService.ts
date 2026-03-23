@@ -1,4 +1,4 @@
-import { eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray, isNotNull, lte } from 'drizzle-orm'
 import db from '~/lib/db'
 import env from '~/lib/env'
 import { account } from '~/lib/db/schema/account'
@@ -115,8 +115,15 @@ const RULE_TYPE_PRIORITY: Record<RuleType, number> = {
 const NOTIFICATION_SUBJECT = 'Indbetaling modtaget og bogført'
 
 export async function matchTransactionsForRun(runId: string): Promise<MatchSummary> {
+  const now = new Date()
+  // Use noon to avoid DST edge-cases when comparing DATE columns.
+  const todayLocal = new Date(now)
+  todayLocal.setHours(12, 0, 0, 0)
+
   const transactions = await fetchMatchableTransactions(runId)
   if (!transactions.length) {
+    // Still expire time-limited rules even if there are no matchable transactions.
+    await expireTimeLimitedRules(todayLocal)
     return {
       postings: [],
       notifications: [],
@@ -140,7 +147,6 @@ export async function matchTransactionsForRun(runId: string): Promise<MatchSumma
 
   const matchedRuleIds = new Set<number>()
   const oneOffRuleIds = new Set<number>()
-  const now = new Date()
 
   await db.transaction(async trx => {
     for (const trxItem of transactions) {
@@ -182,9 +188,23 @@ export async function matchTransactionsForRun(runId: string): Promise<MatchSumma
         .set({ status: 'inaktiv' })
         .where(inArray(rule.id, Array.from(oneOffRuleIds)))
     }
+
+    // Expire time-limited rules whose period ends today (or earlier).
+    await expireTimeLimitedRules(todayLocal, trx)
   })
 
   return summary
+}
+
+async function expireTimeLimitedRules(todayLocal: Date, executor: Pick<typeof db, 'update'> = db): Promise<void> {
+  await executor
+    .update(rule)
+    .set({ status: 'inaktiv' })
+    .where(and(
+      eq(rule.status, 'aktiv'),
+      isNotNull(rule.activeTo),
+      lte(rule.activeTo, todayLocal),
+    ))
 }
 
 async function fetchMatchableTransactions(runId: string): Promise<MatchableTransaction[]> {
@@ -280,9 +300,19 @@ async function fetchActiveRules(accountIds: string[]): Promise<HydratedRule[]> {
     return []
   }
 
+  const now = new Date()
+  const todayLocal = new Date(now)
+  todayLocal.setHours(12, 0, 0, 0)
+
   const accountIdSet = new Set(accountIds)
   const rows = await db.query.rule.findMany({
-    where: (rules, { eq }) => eq(rules.status, 'aktiv'),
+    where: (rules, { and, eq, gte, isNull, lte, or }) => and(
+      eq(rules.status, 'aktiv'),
+      // activeFrom: null OR <= today
+      or(isNull(rules.activeFrom), lte(rules.activeFrom, todayLocal)),
+      // activeTo: null OR >= today
+      or(isNull(rules.activeTo), gte(rules.activeTo, todayLocal)),
+    ),
     with: {
       bankAccounts: true,
       conditions: true,
