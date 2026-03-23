@@ -14,7 +14,8 @@
     "db:seed:dev": "tsx scripts/db/seed-dev.ts",
     "test": "vitest run",
     "test:unit": "vitest run --dir tests/unit",
-    "test:integration": "vitest run --dir tests/integration"
+    "test:integration": "vitest run --dir tests/integration",
+    "banking:nordea:schemas": "tsx scripts/banking/nordea/download-secure-envelope-schemas.ts"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.77",
@@ -26,6 +27,7 @@
     "@vee-validate/nuxt": "^4.15.1",
     "@vee-validate/zod": "^4.15.1",
     "@vueuse/nuxt": "^14.1.0",
+    "@xmldom/xmldom": "^0.8.11",
     "dotenv": "^17.2.3",
     "drizzle-kit": "^0.31.7",
     "drizzle-orm": "^0.44.7",
@@ -41,6 +43,7 @@
     "typescript": "^5.9.3",
     "vue": "^3.5.25",
     "vue-router": "^4.6.3",
+    "xml-crypto": "^6.1.2",
     "xml2js": "^0.6.2",
     "zod": "^4.1.13"
   },
