@@ -19,13 +19,16 @@ export type PostingTransactionContext = {
 
 export function buildPostingLines(options: {
   transaction: PostingTransactionContext
-  landingDimensions: Record<string, string>
   text: string
   cpr?: string
   attachments?: PostingAttachment[]
-}): PostingLineInput[] {
+} & (
+  | { landingDimensions: Record<string, string> }
+  | { landingLines: Array<{ dimensions: Record<string, string>; amount: number; text?: string; cpr?: string }> }
+)): PostingLineInput[] {
   const amountAbs = Math.abs(options.transaction.amount)
   const isIncoming = options.transaction.amount >= 0
+
   const statusLine: PostingLineInput = {
     transactionId: options.transaction.transactionId,
     dimensions: options.transaction.statusDimensions,
@@ -34,17 +37,25 @@ export function buildPostingLines(options: {
     text: truncate(options.text),
   }
 
-  const landingLine: PostingLineInput = {
-    transactionId: options.transaction.transactionId,
-    dimensions: options.landingDimensions,
-    debetOrCredit: isIncoming ? 'Kredit' : 'Debet',
-    amount: amountAbs,
-    text: truncate(options.text),
-    cpr: options.cpr,
-    attachments: options.attachments?.length ? options.attachments : undefined,
-  }
+  const landingDefinitions =
+    'landingLines' in options
+      ? options.landingLines
+      : [{ dimensions: options.landingDimensions, amount: amountAbs }]
 
-  return [statusLine, landingLine]
+  const landingLines: PostingLineInput[] = landingDefinitions.map((line, index) => ({
+    transactionId: options.transaction.transactionId,
+    dimensions: line.dimensions,
+    debetOrCredit: isIncoming ? 'Kredit' : 'Debet',
+    amount: Math.abs(line.amount),
+    text: truncate(line.text ?? options.text),
+    cpr: line.cpr ?? options.cpr,
+    attachments:
+      index === 0 && options.attachments?.length
+        ? options.attachments
+        : undefined,
+  }))
+
+  return [statusLine, ...landingLines]
 }
 
 export function resolvePostingText(

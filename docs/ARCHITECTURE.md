@@ -23,6 +23,7 @@ This repo is a stateless financial integration engine:
 - `erp_accounting_dimension_constraint` + `erp_accounting_dimension_constraint_member`: supplier-scoped dependency rules between dimensions (used for deterministic validation across UI/API/import)
 - `rule_accounting_dimension_value`: per-rule values for accounting dimensions (normalized; no hardcoded primary/secondary/tertiary)
 - `transaction_processing`: processing status / rule-applied locking
+- `manual_booking_draft` (+ lines/dimensions/attachments): user-edited draft state for open transactions (supports saving notes and multi-line manual postings without sending to ERP)
 - `banking_adapter_cursor`: opaque cursor per (account, adapter) for incremental fetching
 - `run`: batch execution unit (audit/logging)
 

@@ -4,11 +4,13 @@ import { buildPostingLines, type PostingTransactionContext } from '../../matchin
 
 export type PostingCommandDefinition = {
   transaction: PostingTransactionContext
-  landingDimensions: Record<string, string>
   text: string
   cpr?: string
   attachments?: PostingAttachment[]
-}
+} & (
+  | { landingDimensions: Record<string, string> }
+  | { landingLines: Array<{ dimensions: Record<string, string>; amount: number; text?: string; cpr?: string }> }
+)
 
 export type PostingCommand = PostingCommandDefinition & {
   postings: PostingLineInput[]

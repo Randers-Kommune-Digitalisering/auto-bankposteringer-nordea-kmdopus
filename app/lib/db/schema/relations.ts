@@ -12,6 +12,7 @@ import {
 import { ruleTag } from "./ruleTag";
 import { document } from "./document";
 import { transaction, transactionProcessing } from "./transaction";
+import { manualBookingDraft } from "./manualBookingDraft";
 import { run } from "./run";
 import { account } from "./account";
 import {
@@ -129,6 +130,7 @@ export const transactionRelations = relations(transaction, ({ one }) => ({
   account: one(account, { fields: [transaction.accountId], references: [account.id] }),
   statement: one(bankingStatement, { fields: [transaction.statementId], references: [bankingStatement.id] }),
   processing: one(transactionProcessing, { fields: [transaction.id], references: [transactionProcessing.transactionId] }),
+  manualBookingDraft: one(manualBookingDraft, { fields: [transaction.id], references: [manualBookingDraft.transactionId] }),
 }));
 
 export const transactionProcessingRelations = relations(transactionProcessing, ({ one }) => ({

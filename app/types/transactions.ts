@@ -55,7 +55,11 @@ export type ManualPostingAttachment = {
 };
 
 export type ManualBookingPayload = {
-  dimensions?: Array<{ key: string; value: string }>;
+  lines: Array<{
+    amount: number;
+    dimensions?: Array<{ key: string; value: string }>;
+    text?: string | null;
+  }>;
   text?: string | null;
   cprType: CprType;
   cprNumber?: string | null;
