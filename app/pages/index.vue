@@ -15,6 +15,8 @@ const defaultRange = {
 
 const dateRange = ref<any>(defaultRange)
 
+const selectedAccountIds = ref<string[]>([])
+
 const start = computed(() => {
 	const v = dateRange.value?.start ?? startDefault
 	return v.toDate(timeZone).toISOString().slice(0, 10)
@@ -27,7 +29,13 @@ const end = computed(() => {
 
 const { data, status, refresh } = await useFetch<DashboardResponse>('/api/dashboard', {
 	key: computed(() => `dashboard:${start.value}:${end.value}`),
-	query: computed(() => ({ start: start.value, end: end.value })),
+	query: computed(() => ({
+		start: start.value,
+		end: end.value,
+		accountIds: selectedAccountIds.value.length ? selectedAccountIds.value.join(',') : undefined,
+	})),
+	watch: [start, end, selectedAccountIds],
+	dedupe: 'cancel',
 })
 
 const payload = computed(() => data.value)
@@ -55,7 +63,12 @@ const payload = computed(() => data.value)
 
 		<template #body>
 			<div class="space-y-4">
-				<DashboardDateRangePicker v-model="dateRange" :reset-value="defaultRange" :time-zone="timeZone" />
+				<FiltersRow
+					v-model:date-range="dateRange"
+					:reset-date-range="defaultRange"
+					:time-zone="timeZone"
+					v-model:account-ids="selectedAccountIds"
+				/>
 
 				<DashboardKpis v-if="payload" :kpis="payload.kpis" />
 

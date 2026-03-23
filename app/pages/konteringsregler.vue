@@ -23,6 +23,11 @@ const editingRuleId = ref<number | null>(null)
 const globalFilterValue = ref('')
 const deletingRuleId = ref<number | null>(null)
 
+const selectedAccountIds = ref<string[]>([])
+
+const statusFilter = ref('alle')
+const typeFilter = ref('alle')
+
 // API calls
 const { data: rules, status } = await useFetch<RuleListDto[]>('/api/rules', {
   key: 'rules',
@@ -35,14 +40,46 @@ const ruleStatusValues = ruleStatusEnum.enumValues ?? []
 
 const typeLabelMap = Object.fromEntries(ruleTypeValues.map(v => [v, upperFirst(v)]))
 
-// Normaliser data til RuleTableRow
-const rows = computed<RuleListDto[]>(() => {
-  const flatRules = useFlattenArray<RuleListDto>(rules.value || [])
+const fetchedRows = computed<RuleListDto[]>(() => useFlattenArray<RuleListDto>(rules))
 
-  return flatRules.map(rule => ({
-    ...rule,
-    bankAccountIds: rule.relatedBankAccounts || []
-  }))
+function normalizeSearchText(value: string): string {
+  return value.trim().toLowerCase()
+}
+
+const visibleRows = computed<RuleListDto[]>(() => {
+  const q = normalizeSearchText(globalFilterValue.value)
+
+  return fetchedRows.value
+    .filter((rule) => {
+      if (statusFilter.value !== 'alle' && rule.status !== statusFilter.value) return false
+      if (typeFilter.value !== 'alle' && rule.type !== typeFilter.value) return false
+
+      if (selectedAccountIds.value.length) {
+        const hasMatch = (rule.relatedBankAccounts || []).some((id) => selectedAccountIds.value.includes(id))
+        if (!hasMatch) return false
+      }
+
+      if (!q.length) return true
+
+      const parts: Array<string | number | null | undefined> = [
+        rule.id,
+        rule.type,
+        rule.status,
+        ...(rule.relatedBankAccounts || []),
+        ...(rule.ruleTags || []),
+        ...(rule.matching?.references || []),
+        ...(rule.matching?.counterparties || []),
+        ...(rule.matching?.classification || []),
+      ]
+
+      const haystack = parts
+        .filter((v) => v !== null && v !== undefined)
+        .map((v) => String(v).toLowerCase())
+        .join(' ')
+
+      return haystack.includes(q)
+    })
+    .slice()
 })
 
 const compareStrings = (a?: string | null, b?: string | null) =>
@@ -164,10 +201,6 @@ const columnVisibility = ref({
   status: false,
   type: false,
   relatedBankAccounts: false,
-  references_flat: false,
-  counterparties_flat: false,
-  classification_flat: false,
-  ruleTags_flat: false
 })
 
 const columns: TableColumn<RuleListDto>[] = [
@@ -317,34 +350,6 @@ const columns: TableColumn<RuleListDto>[] = [
       ])
     }
   },
-  { // Match-felter til filtrering
-    id: 'references_flat',
-    accessorFn: row => row.matching.references.join(' '),
-    enableHiding: false,
-    enableSorting: false,
-    cell: () => undefined
-  },
-  { // Hidden matching columns to make them searchable
-    id: 'counterparties_flat',
-    accessorFn: row => row.matching.counterparties.join(' '),
-    enableHiding: false,
-    enableSorting: false,
-    cell: () => undefined
-  },
-  {
-    id: 'classification_flat',
-    accessorFn: row => row.matching.classification.join(' '),
-    enableHiding: false,
-    enableSorting: false,
-    cell: () => undefined
-  },
-  {
-    id: 'ruleTags_flat',
-    accessorFn: row => row.ruleTags?.join(' ') ?? '',
-    enableHiding: false,
-    enableSorting: false,
-    cell: () => undefined
-  },
   { // Handlinger
     id: 'actions',
     enableHiding: false,
@@ -373,9 +378,6 @@ const columns: TableColumn<RuleListDto>[] = [
     }
   }
 ]
-
-const statusFilter = ref('alle')
-const typeFilter = ref('alle')
 
 const statusItems = [
   { label: 'Alle', value: 'alle' },
@@ -406,16 +408,6 @@ const typeDropdownItems = computed(() =>
     }
   }))
 )
-
-function bindEnumFilter(columnId: string, filterRef: Ref<string>) {
-  watch(filterRef, val => {
-    const col = table.value?.tableApi?.getColumn(columnId)
-    col?.setFilterValue(val === 'alle' ? undefined : val)
-  })
-}
-
-bindEnumFilter('status', statusFilter)
-bindEnumFilter('type', typeFilter)
 
 const pagination = ref({ pageIndex: 0, pageSize: 20 })
 
@@ -494,12 +486,20 @@ async function handleDeleteRule(row: Row<RuleListDto>) {
 
     <template #body>
       <div class="flex flex-wrap items-center justify-between gap-1.5">
-        <UInput
-          v-model="globalFilterValue"
-          class="max-w-sm"
-          icon="solar:magnifer-bold-duotone"
-          placeholder="Søg efter en regel..."
-        />
+        <div class="flex flex-wrap items-center gap-2">
+          <UInput
+            v-model="globalFilterValue"
+            class="max-w-sm"
+            color="primary"
+            variant="subtle"
+            icon="solar:magnifer-bold-duotone"
+            placeholder="Søg efter en regel..."
+          />
+
+          <div class="min-w-64">
+            <FiltersBankAccountPicker v-model="selectedAccountIds" placeholder="Alle konti" class="min-w-64" />
+          </div>
+        </div>
 
         <div class="flex flex-wrap items-center gap-1.5">
           <!-- Filtrering på status -->
@@ -560,7 +560,6 @@ async function handleDeleteRule(row: Row<RuleListDto>) {
 
       <UTable
         ref="table"
-        v-model:global-filter="globalFilterValue"
         v-model:column-visibility="columnVisibility"
         v-model:pagination="pagination"
         v-model:sorting="sorting"
@@ -568,7 +567,7 @@ async function handleDeleteRule(row: Row<RuleListDto>) {
           getPaginationRowModel: getPaginationRowModel()
         }"
         class="shrink-0"
-        :data="rows"
+        :data="visibleRows"
         :columns="columns"
         :loading="status === 'pending'"
         :ui="{

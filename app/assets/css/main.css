@@ -16,3 +16,31 @@
   --color-green-900: #0A5331;
   --color-green-950: #052E16;
 }
+
+@layer base {
+  /*
+    Nuxt UI text colors are driven by CSS variables:
+    --ui-text, --ui-text-muted, --ui-text-dimmed, --ui-text-toned, --ui-text-highlighted, --ui-text-inverted
+    These map into Tailwind utilities like text-default/text-muted/text-dimmed.
+
+    We override them centrally (and dynamically per color mode) to increase contrast
+    without hardcoding per-component classes.
+  */
+  :root {
+    --ui-text: var(--ui-color-neutral-800);
+    --ui-text-highlighted: var(--ui-color-neutral-900);
+    --ui-text-toned: var(--ui-color-neutral-700);
+    --ui-text-muted: var(--ui-color-neutral-600);
+    --ui-text-dimmed: var(--ui-color-neutral-500);
+    --ui-text-inverted: var(--ui-color-neutral-50);
+  }
+
+  .dark {
+    --ui-text: var(--ui-color-neutral-200);
+    --ui-text-highlighted: var(--ui-color-neutral-100);
+    --ui-text-toned: var(--ui-color-neutral-300);
+    --ui-text-muted: var(--ui-color-neutral-400);
+    --ui-text-dimmed: var(--ui-color-neutral-500);
+    --ui-text-inverted: var(--ui-color-neutral-950);
+  }
+}
