@@ -1,9 +1,10 @@
 <script setup lang="ts">
-    import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date'
+    import { DateFormatter, today } from '@internationalized/date'
     import type { TableColumn } from '@nuxt/ui'
     import type { RunStatus } from '~/lib/db/schema/enums'
     import type { RunListItem, RunListResponse } from '~/types/runs'
     import useFlattenArray from '~/composables/useFlattenArray'
+    import { DEFAULT_TIME_ZONE } from '~/lib/timeZone'
 
     const { data, status, refresh } = await useFetch<RunListResponse>('/api/runs', {
         key: 'runs'
@@ -16,8 +17,10 @@
         dateStyle: 'medium'
     })
 
+    const timeZone = DEFAULT_TIME_ZONE
+
     // Date range picker state
-    const endDefault = today(getLocalTimeZone())
+    const endDefault = today(timeZone)
     const startDefault = endDefault.subtract({ days: 29 })
     const defaultRange = {
         start: startDefault,
@@ -25,6 +28,8 @@
     }
 
     const dateRange = ref<any>(defaultRange)
+
+    const selectedAccountIds = ref<string[]>([])
 
     // Popover state
     const openPopovers = ref<Record<string, string | null>>({})
@@ -81,8 +86,8 @@
             return allRows.value
         }
 
-        const start = dateRange.value.start.toDate(getLocalTimeZone())
-        const end = dateRange.value.end.toDate(getLocalTimeZone())
+        const start = dateRange.value.start.toDate(timeZone)
+        const end = dateRange.value.end.toDate(timeZone)
         start.setHours(0, 0, 0, 0)
         end.setHours(23, 59, 59, 999)
 
@@ -92,8 +97,16 @@
         })
     })
 
+    const accountFilteredRows = computed<RunListItem[]>(() => {
+        if (!selectedAccountIds.value.length) return filteredRows.value
+
+        return filteredRows.value.filter((run) => {
+            return (run.transactions ?? []).some((tx) => tx.accountId && selectedAccountIds.value.includes(tx.accountId))
+        })
+    })
+
     const rows = computed<RunListItem[]>(() => {
-        return [...filteredRows.value].sort((a, b) => {
+        return [...accountFilteredRows.value].sort((a, b) => {
             return new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime()
         })
     })
@@ -214,56 +227,62 @@
 
         <template #body>
             <div class="space-y-4">
-                <!-- Date Range Picker -->
-                <UPopover :popper="{ placement: 'bottom-start' }">
-                    <UButton
-                        variant="outline"
-                        icon="i-lucide-calendar"
-                    >
-                        <template v-if="dateRange?.start">
-                            <template v-if="dateRange?.end">
-                                {{ df.format(dateRange.start.toDate(getLocalTimeZone())) }} - {{ df.format(dateRange.end.toDate(getLocalTimeZone())) }}
-                            </template>
-                            <template v-else>
-                                {{ df.format(dateRange.start.toDate(getLocalTimeZone())) }}
-                            </template>
-                        </template>
-                        <template v-else>
-                            Vælg periode
-                        </template>
-                    </UButton>
-
-                    <template #content>
-                        <div class="p-4">
-                            <UCalendar
-                                v-model="dateRange"
-                                variant="subtle"
-                                class="p-2"
-                                :number-of-months="2"
-                                range
+                <FiltersRow
+                    v-model:account-ids="selectedAccountIds"
+                >
+                    <template #date>
+                        <!-- Date Range Picker -->
+                        <UPopover :popper="{ placement: 'bottom-start' }">
+                            <UButton
+                                variant="outline"
+                                icon="i-lucide-calendar"
                             >
-                                <template #day="{ day }">
-                                    <UChip
-                                        :show="!!getChipColorByDate(day.toDate('UTC'))"
-                                        :color="getChipColorByDate(day.toDate('UTC'))"
-                                        size="lg"
-                                    >
-                                        {{ day.day }}
-                                    </UChip>
+                                <template v-if="dateRange?.start">
+                                    <template v-if="dateRange?.end">
+                                        {{ df.format(dateRange.start.toDate(timeZone)) }} - {{ df.format(dateRange.end.toDate(timeZone)) }}
+                                    </template>
+                                    <template v-else>
+                                        {{ df.format(dateRange.start.toDate(timeZone)) }}
+                                    </template>
                                 </template>
-                            </UCalendar>
-                            <div v-if="dateRange?.start && dateRange?.end" class="mt-4 flex gap-2">
-                                <UButton
-                                    variant="ghost"
-                                    size="sm"
-                                    label="Nulstil"
-                                    @click="dateRange = defaultRange"
-                                    class="flex-1"
-                                />
-                            </div>
-                        </div>
+                                <template v-else>
+                                    Vælg periode
+                                </template>
+                            </UButton>
+
+                            <template #content>
+                                <div class="p-4">
+                                    <UCalendar
+                                        v-model="dateRange"
+                                        variant="subtle"
+                                        class="p-2"
+                                        :number-of-months="2"
+                                        range
+                                    >
+                                        <template #day="{ day }">
+                                            <UChip
+                                                :show="!!getChipColorByDate(day.toDate('UTC'))"
+                                                :color="getChipColorByDate(day.toDate('UTC'))"
+                                                size="lg"
+                                            >
+                                                {{ day.day }}
+                                            </UChip>
+                                        </template>
+                                    </UCalendar>
+                                    <div v-if="dateRange?.start && dateRange?.end" class="mt-4 flex gap-2">
+                                        <UButton
+                                            variant="ghost"
+                                            size="sm"
+                                            label="Nulstil"
+                                            @click="dateRange = defaultRange"
+                                            class="flex-1"
+                                        />
+                                    </div>
+                                </div>
+                            </template>
+                        </UPopover>
                     </template>
-                </UPopover>
+                </FiltersRow>
 
                 <!-- Table -->
                 <div>
