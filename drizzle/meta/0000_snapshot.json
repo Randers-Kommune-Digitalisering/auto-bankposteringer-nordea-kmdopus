@@ -1,5 +1,5 @@
 {
-  "id": "69d1cfaf-c2fc-4ea9-b480-d2d06f74d377",
+  "id": "d2c838af-052c-4f6a-af16-0140e16cf0da",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -19,6 +19,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "provider": {
+          "name": "provider",
+          "type": "bank_provider",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
         },
         "status_account": {
           "name": "status_account",
@@ -66,6 +73,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "if_value_regex": {
+          "name": "if_value_regex",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "date",
@@ -91,7 +104,8 @@
           "columns": [
             "erp_supplier",
             "if_key",
-            "kind"
+            "kind",
+            "if_value_regex"
           ]
         }
       },
@@ -577,6 +591,123 @@
           "nullsNotDistinct": false,
           "columns": [
             "account_id",
+            "adapter_key"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.banking_agreement": {
+      "name": "banking_agreement",
+      "schema": "",
+      "columns": {
+        "provider": {
+          "name": "provider",
+          "type": "bank_provider",
+          "typeSchema": "public",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "enabled": {
+          "name": "enabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.banking_agreement_cursor": {
+      "name": "banking_agreement_cursor",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "provider": {
+          "name": "provider",
+          "type": "bank_provider",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "adapter_key": {
+          "name": "adapter_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cursor": {
+          "name": "cursor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "banking_agreement_cursor_provider_banking_agreement_provider_fk": {
+          "name": "banking_agreement_cursor_provider_banking_agreement_provider_fk",
+          "tableFrom": "banking_agreement_cursor",
+          "tableTo": "banking_agreement",
+          "columnsFrom": [
+            "provider"
+          ],
+          "columnsTo": [
+            "provider"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "banking_agreement_cursor_provider_adapter_unique": {
+          "name": "banking_agreement_cursor_provider_adapter_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "provider",
             "adapter_key"
           ]
         }
@@ -1395,6 +1526,18 @@
           "primaryKey": false,
           "notNull": true
         },
+        "value_regex": {
+          "name": "value_regex",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "value_regex_flags": {
+          "name": "value_regex_flags",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "erp_target": {
           "name": "erp_target",
           "type": "text",
@@ -1497,6 +1640,18 @@
         "locked_by": {
           "name": "locked_by",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "active_from": {
+          "name": "active_from",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "active_to": {
+          "name": "active_to",
+          "type": "date",
           "primaryKey": false,
           "notNull": false
         },
@@ -2692,13 +2847,23 @@
     }
   },
   "enums": {
+    "public.bank_provider": {
+      "name": "bank_provider",
+      "schema": "public",
+      "values": [
+        "danskebank",
+        "nordea",
+        "bankconnect"
+      ]
+    },
     "public.accounting_dimension_constraint_kind": {
       "name": "accounting_dimension_constraint_kind",
       "schema": "public",
       "values": [
         "requires_any_of",
         "requires_all_of",
-        "requires_exactly_one_of"
+        "requires_exactly_one_of",
+        "forbids_any_of"
       ]
     },
     "public.banking_document_format": {

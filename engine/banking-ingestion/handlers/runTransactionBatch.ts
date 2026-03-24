@@ -1,13 +1,17 @@
 import crypto from 'node:crypto'
 import { join } from 'node:path'
-import { eq } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 import db from '~/lib/db'
-import { account } from '~/lib/db/schema/account'
 import { run } from '~/lib/db/schema/run'
 import { logger } from '~/lib/logger'
-import { getAdapterCursor, setAdapterCursor } from './bankAdapterCursorStore'
 import { LocalFileBankAdapter } from '../infrastructure/localFileBankAdapter'
+import { DanskeBankEdiWebServicesAdapter } from '../infrastructure/danskebank/danskeBankEdiWebServicesAdapter'
+import { loadDanskeBankEdiEnvConfig } from '../infrastructure/danskebank/danskeBankEdiEnvConfig'
+import { loadDanskeBankEnvSecrets } from '../infrastructure/danskebank/danskeBankEnvSecrets'
 import { ingestCamt053Document } from './ingestCamt053Document'
+import { bankingAgreement } from '~/lib/db/schema/bankingAgreement'
+import type { BankProvider } from '~/lib/db/schema/bankingAgreement'
+import { getAgreementCursor, setAgreementCursor } from './bankingAgreementCursorStore'
 
 export async function runTransactionBatch(options: { runId?: string; bookingDate?: Date } = {}): Promise<{ runId: string; insertedCount: number }> {
   const log = logger.child({ scope: 'banking.runTransactionBatch' })
@@ -15,18 +19,11 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
   const runId = options.runId ?? crypto.randomUUID()
   const bookingDate = options.bookingDate ?? new Date()
 
-  const accounts = await db.select().from(account).orderBy(account.id).limit(1)
-  const selectedAccount = accounts[0] ?? null
-  if (!selectedAccount) {
-    await db
-      .insert(run)
-      .values({ id: runId, bookingDate, status: 'udført' })
-      .onConflictDoUpdate({
-        target: run.id,
-        set: { bookingDate, status: 'udført' },
-      })
-    return { runId, insertedCount: 0 }
-  }
+  const agreements = await db
+    .select()
+    .from(bankingAgreement)
+    .where(eq(bankingAgreement.enabled, true))
+    .orderBy(asc(bankingAgreement.provider))
 
   // Temporary: ingest the bundled Nordea CAMT.053 example.
   // This is intentionally deterministic and idempotent via banking_document.content_hash.
@@ -39,24 +36,18 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
     'camt.053e.xml',
   )
 
-  const adapter = new LocalFileBankAdapter({
-    key: 'nordea-example-file',
-    filePath: examplePath,
-    filename: 'camt.053e.xml',
-  })
+  const adapterKeyOverride = process.env.BANK_ADAPTER
 
-  const persistedCursor = await getAdapterCursor(db as any, {
-    accountId: selectedAccount.id,
-    adapterKey: adapter.key,
-  })
-
-  const fetched = await adapter.fetchDocuments({
-    accountId: selectedAccount.id,
-    cursor: persistedCursor,
-    limit: 1,
-  })
+  const runs = agreements.length
+    ? agreements.map((a) => ({ provider: a.provider as BankProvider }))
+    : [{ provider: 'nordea' as const }]
 
   const result = await db.transaction(async (trx) => {
+    // Ensure agreement rows exist for any provider we might persist cursor for.
+    await trx
+      .insert(bankingAgreement)
+      .values(runs.map((r) => ({ provider: r.provider, enabled: false })))
+      .onConflictDoNothing({ target: bankingAgreement.provider })
     await trx
       .insert(run)
       .values({ id: runId, bookingDate, status: 'indlæser' })
@@ -70,33 +61,93 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
     let insertedTransactions = 0
     let deduplicated = false
 
-    for (const doc of fetched.documents) {
-      if (doc.format !== 'camt053') {
-        continue
-      }
+    for (const r of runs) {
+      const adapter = (() => {
+        if (adapterKeyOverride === 'danskebank-edi-ws' || (!adapterKeyOverride && r.provider === 'danskebank')) {
+          const cfg = loadDanskeBankEdiEnvConfig()
+          const secrets = loadDanskeBankEnvSecrets()
 
-      const ingestResult = await ingestCamt053Document(trx as any, {
-        runId,
-        accountId: selectedAccount.id,
-        filename: doc.filename ?? null,
-        xml: doc.content,
+          return new DanskeBankEdiWebServicesAdapter({
+            ediEndpointUrl: cfg.DANSKE_BANK_EDI_ENDPOINT_URL,
+            pkiEndpointUrl: cfg.DANSKE_BANK_PKI_ENDPOINT_URL,
+            senderId: cfg.DANSKE_BANK_EDI_SENDER_ID,
+            receiverId: cfg.DANSKE_BANK_EDI_RECEIVER_ID,
+            userAgent: cfg.DANSKE_BANK_EDI_USER_AGENT,
+            language: cfg.DANSKE_BANK_EDI_LANGUAGE,
+            customerId: cfg.DANSKE_BANK_CUSTOMER_ID,
+            signerId: cfg.DANSKE_BANK_SIGNER_ID,
+            softwareId: cfg.DANSKE_BANK_SOFTWARE_ID,
+            environment: cfg.DANSKE_BANK_ENVIRONMENT,
+            pkiSenderId: cfg.DANSKE_BANK_PKI_SENDER_ID,
+            pkiCustomerId: cfg.DANSKE_BANK_PKI_CUSTOMER_ID,
+            pkiInterfaceVersion: cfg.DANSKE_BANK_PKI_INTERFACE_VERSION,
+            pkiBankRootCertificateSerialNo: cfg.DANSKE_BANK_PKI_BANK_ROOT_CERT_SERIAL,
+            applicationRequestPrivateKeyPem: secrets.applicationRequestPrivateKeyPem,
+            applicationRequestCertificatePem: secrets.applicationRequestCertificatePem,
+            trustedBankSigningCertFingerprintSha256Hex: secrets.trustedSigningCertificateFingerprintSha256Hex,
+            mtlsClientCertificatePem: secrets.mtlsClientCertificatePem,
+            mtlsClientPrivateKeyPem: secrets.mtlsClientPrivateKeyPem,
+            httpTimeoutMs: 30_000,
+          })
+        }
+
+        if (adapterKeyOverride === 'local-file' || (!agreements.length && !adapterKeyOverride && r.provider === 'nordea')) {
+          return new LocalFileBankAdapter({
+            key: 'nordea-example-file',
+            filePath: examplePath,
+            filename: 'camt.053e.xml',
+          })
+        }
+
+        if (!adapterKeyOverride && r.provider === 'nordea') {
+          throw new Error('Nordea adapter er ikke implementeret endnu (enable ikke nordea-aftalen endnu)')
+        }
+
+        if (!adapterKeyOverride && r.provider === 'bankconnect') {
+          throw new Error('BankConnect adapter er ikke implementeret endnu')
+        }
+
+        throw new Error(`Ingen adapter implementeret for provider=${r.provider}`)
+      })()
+
+      const persistedCursor = await getAgreementCursor(trx as any, {
+        provider: r.provider,
+        adapterKey: adapter.key,
       })
 
-      insertedStatements += ingestResult.insertedStatements
-      insertedBalances += ingestResult.insertedBalances
-      insertedTransactions += ingestResult.insertedTransactions
-      deduplicated = deduplicated || ingestResult.deduplicated
+      const fetched = await adapter.fetchDocuments({
+        // accountId is not used for agreement-scoped adapters; keep stable for tracing.
+        accountId: `provider:${r.provider}`,
+        cursor: persistedCursor,
+        limit: 25,
+      })
+
+      for (const doc of fetched.documents) {
+        if (doc.format !== 'camt053') continue
+
+        const ingestResult = await ingestCamt053Document(trx as any, {
+          runId,
+          provider: r.provider,
+          filename: doc.filename ?? null,
+          xml: doc.content,
+        })
+
+        insertedStatements += ingestResult.insertedStatements
+        insertedBalances += ingestResult.insertedBalances
+        insertedTransactions += ingestResult.insertedTransactions
+        deduplicated = deduplicated || ingestResult.deduplicated
+      }
+
+      if (fetched.nextCursor) {
+        await setAgreementCursor(trx as any, {
+          provider: r.provider,
+          adapterKey: adapter.key,
+          cursor: fetched.nextCursor,
+        })
+      }
     }
 
     await trx.update(run).set({ status: 'udført' }).where(eq(run.id, runId))
-
-    if (fetched.nextCursor) {
-      await setAdapterCursor(trx as any, {
-        accountId: selectedAccount.id,
-        adapterKey: adapter.key,
-        cursor: fetched.nextCursor,
-      })
-    }
 
     return {
       insertedStatements,
@@ -108,7 +159,6 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
 
   log.info('CAMT.053 dokument indlæst', {
     runId,
-    accountId: selectedAccount.id,
     insertedStatements: result.insertedStatements,
     insertedBalances: result.insertedBalances,
     insertedTransactions: result.insertedTransactions,

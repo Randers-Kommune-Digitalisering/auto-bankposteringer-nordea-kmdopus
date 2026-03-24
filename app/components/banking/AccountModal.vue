@@ -23,32 +23,39 @@ const toast = useToast()
 
 const baseSchema = z.object({
   id: z.string().min(1, 'Bankkonto-id er påkrævet'),
+  provider: z.enum(['danskebank', 'nordea', 'bankconnect'], { message: 'Vælg bankudbyder' }),
   statusAccount: z.preprocess((value) => {
     if (typeof value === 'string' && value.trim() !== '') return Number(value)
     return value
   }, z.number('Statuskonto er påkrævet').int('Skal være et helt tal'))
 })
 
-const updateSchema = baseSchema.omit({ id: true })
+const updateSchema = baseSchema
+  .pick({ statusAccount: true })
+  .extend({ provider: baseSchema.shape.provider.optional() })
 const formSchema = computed(() => (isEdit.value ? updateSchema : baseSchema))
 
 type FormState = {
   id: string | undefined
+  provider: 'danskebank' | 'nordea' | 'bankconnect' | undefined
   statusAccount: string | undefined
 }
 
 const state = reactive<FormState>({
   id: undefined,
+  provider: undefined,
   statusAccount: undefined
 })
 
 function resetForm() {
   state.id = undefined
+  state.provider = undefined
   state.statusAccount = undefined
 }
 
 function hydrateDraft(account: AccountSelectSchema) {
   state.id = account.id
+  state.provider = account.provider
   state.statusAccount = String(account.statusAccount)
 }
 
@@ -79,6 +86,7 @@ watch(
 async function onSubmit() {
   const payload = {
     id: state.id?.trim(),
+    provider: state.provider,
     statusAccount: Number(state.statusAccount)
   }
 
@@ -136,6 +144,22 @@ async function onSubmit() {
               v-model="state.id"
               :disabled="isEdit"
               placeholder="fx DK5000400440116243-DKK"
+              class="w-full"
+            />
+          </UFormField>
+
+          <UFormField label="Bankudbyder" name="provider" required>
+            <USelect
+              v-model="state.provider"
+              :disabled="isEdit"
+              :items="[
+                { label: 'Danske Bank', value: 'danskebank' },
+                { label: 'Nordea', value: 'nordea' },
+                { label: 'Bank Connect', value: 'bankconnect' }
+              ]"
+              labelKey="label"
+              valueKey="value"
+              placeholder="Vælg bankudbyder"
               class="w-full"
             />
           </UFormField>
