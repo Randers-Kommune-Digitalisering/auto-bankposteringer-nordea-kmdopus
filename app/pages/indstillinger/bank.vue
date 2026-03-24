@@ -10,6 +10,11 @@ interface BankingMetadataResponse {
   passcode: string
 }
 
+type BankingAgreement = {
+  provider: 'danskebank' | 'nordea' | 'bankconnect'
+  enabled: boolean
+}
+
 const BANK_ACCOUNTS_QUERY_KEY = 'bank-accounts' as const
 
 const toast = useToast()
@@ -44,6 +49,28 @@ const { data: bankingMetadata } = await useFetch<BankingMetadataResponse>(
     })
   }
 )
+
+const { data: agreements, refresh: refreshAgreements } = await useFetch<BankingAgreement[]>(
+  '/api/banking-agreements',
+  {
+    key: 'banking-agreements',
+    default: () => [],
+  }
+)
+
+const providerLabel = (p: BankingAgreement['provider']) => {
+  if (p === 'danskebank') return 'Danske Bank'
+  if (p === 'nordea') return 'Nordea'
+  return 'Bank Connect'
+}
+
+async function toggleAgreement(provider: BankingAgreement['provider'], enabled: boolean) {
+  await $fetch(`/api/banking-agreements/${provider}`, {
+    method: 'PUT',
+    body: { enabled },
+  })
+  await refreshAgreements()
+}
 
 const bankingMetadataFields = computed(() => [
   { label: 'Service Provider', value: bankingMetadata.value?.serviceProvider ?? '—' },
@@ -95,14 +122,6 @@ function getRowItems(row: Row<AccountSelectSchema>) {
       label: 'Rediger bankkonto',
       icon: 'solar:ruler-cross-pen-bold-duotone',
       onSelect() { handleEditAccount(row) }
-    },
-    { type: 'separator' },
-    {
-      label: 'Slet bankkonto',
-      icon: 'solar:trash-bin-trash-bold-duotone',
-      color: 'error',
-      disabled: deletingAccountId.value === row.original.id,
-      onSelect() { handleDeleteAccount(row) }
     }
   ]
 }
@@ -113,6 +132,12 @@ const columns: TableColumn<AccountSelectSchema>[] = [
     id: 'id',
     header: createSortableHeader('Bankkonto'),
     enableSorting: true
+  },
+  { // provider
+    accessorKey: 'provider',
+    id: 'provider',
+    header: createSortableHeader('Udbyder'),
+    enableSorting: true,
   },
   { // statusAccount
     accessorKey: 'statusAccount',
@@ -152,8 +177,7 @@ const columns: TableColumn<AccountSelectSchema>[] = [
 const pagination = ref({ pageIndex: 0, pageSize: 20 })
 
 function handleAddAccount() {
-  editingAccountId.value = null
-  modalOpen.value = true
+  // Manual account creation is intentionally disabled.
 }
 
 function handleEditAccount(row: Row<AccountSelectSchema>) {
@@ -168,6 +192,9 @@ async function handleSaved() {
 }
 
 async function handleDeleteAccount(row: Row<AccountSelectSchema>) {
+  // Discovered accounts are managed by ingestion and should not be deleted from UI.
+  void row
+  return
   const accountId = row.original.id
   deletingAccountId.value = accountId
 
@@ -205,12 +232,7 @@ async function handleDeleteAccount(row: Row<AccountSelectSchema>) {
         </template>
 
         <template #right>
-          <UButton
-            class="font-bold rounded-full"
-            icon="i-lucide-plus"
-            :label="'Ny bankkonto'"
-            @click="handleAddAccount"
-          />
+          <div />
         </template>
       </UDashboardNavbar>
     </template>
@@ -233,6 +255,34 @@ async function handleDeleteAccount(row: Row<AccountSelectSchema>) {
               readonly
               class="font-mono text-sm"
             />
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-8 space-y-3">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-muted">Aftaler</p>
+          <p class="text-sm text-muted">Aktivér de bankudbydere I har aftale med. Konti oprettes automatisk ved indlæsning af CAMT.053.</p>
+        </div>
+
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div
+            v-for="a in agreements"
+            :key="a.provider"
+            class="flex items-center justify-between gap-3 rounded-md border border-default p-3"
+          >
+            <div>
+              <div class="text-sm font-semibold">{{ providerLabel(a.provider) }}</div>
+              <div class="text-xs text-muted">{{ a.enabled ? 'Aktiv' : 'Inaktiv' }}</div>
+            </div>
+            <UButton
+              size="sm"
+              :variant="a.enabled ? 'soft' : 'solid'"
+              :color="a.enabled ? 'neutral' : 'primary'"
+              @click="toggleAgreement(a.provider, !a.enabled)"
+            >
+              {{ a.enabled ? 'Deaktiver' : 'Aktiver' }}
+            </UButton>
           </div>
         </div>
       </section>

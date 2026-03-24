@@ -58,6 +58,7 @@ import {
   bankingStatementBalance,
 } from '../../app/lib/db/schema/statement'
 import { transaction, transactionProcessing } from '../../app/lib/db/schema/transaction'
+import { bankingAgreement } from '../../app/lib/db/schema/bankingAgreement'
 
 const SEED_KEY_RUN_ID = '11111111-1111-4111-8111-111111111111'
 
@@ -303,6 +304,8 @@ async function main() {
       await tx.execute(
         sql.raw(`
           truncate table
+            "banking_agreement_cursor",
+            "banking_agreement",
             "erp_response",
             "erp_request_line",
             "erp_request",
@@ -337,11 +340,20 @@ async function main() {
     const seedRuleId = await ensureRuleId(tx)
 
     await tx
+      .insert(bankingAgreement)
+      .values([
+        { provider: 'danskebank', enabled: false },
+        { provider: 'nordea', enabled: false },
+        { provider: 'bankconnect', enabled: false },
+      ])
+      .onConflictDoNothing({ target: bankingAgreement.provider })
+
+    await tx
       .insert(account)
       .values([
-        { id: 'DK20005908764988-DKK', name: 'Hovedkonto', statusAccount: 9999 },
-        { id: 'DK20009042714507-DKK', name: 'Kreditorkonto', statusAccount: 9999 },
-        { id: 'DK50004004401162-DKK', name: 'Udbetalinger', statusAccount: 9999 },
+        { id: 'DK20005908764988-DKK', name: 'Hovedkonto', provider: 'nordea', statusAccount: 9999 },
+        { id: 'DK20009042714507-DKK', name: 'Kreditorkonto', provider: 'nordea', statusAccount: 9999 },
+        { id: 'DK50004004401162-DKK', name: 'Udbetalinger', provider: 'nordea', statusAccount: 9999 },
       ])
       .onConflictDoNothing({ target: account.id })
 

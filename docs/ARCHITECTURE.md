@@ -12,6 +12,42 @@ This repo is a stateless financial integration engine:
 3) Match transactions against deterministic rules
 4) Generate ERP posting payloads and execute ERP integration
 
+## Bank adapters (transport)
+
+Bank ingestion integrates via the narrow port `BankAdapter.fetchDocuments`.
+
+Some bank providers use the “BXD Secure Envelope” (`ApplicationRequest`/`ApplicationResponse`) schema (namespace `http://bxd.fi/xmldata/`) combined with XML Digital Signatures.
+Shared helpers live in:
+
+- engine/banking-ingestion/infrastructure/bxd/secureEnvelope.ts
+- engine/banking-ingestion/infrastructure/bxd/xmlDsig.ts
+
+Provider-specific adapters then add protocol/security concerns on top (SOAP, mTLS, message-level encryption, etc.).
+For Danske Bank Web Services, the published WSDL shows that EDIWS carries `ApplicationRequest`/`ApplicationResponse` as `base64Binary`, and examples indicate message-level encryption/signing.
+
+Operational detail (PKIWS v2.9): PKIWS `RequestHeader.Environment` uses `customertest` for test-mode and `production` for production; and `RequestId` is limited to 10 characters.
+
+Operational detail (EDIWS v5.0): EDIWS validates a SOAP-level XMLDSig signature and rejects SOAP packets older than ~5 minutes; and Danske Bank does not support HTTP `Transfer-Encoding: chunked`. Data sent to the bank is required to be encrypted at the ApplicationRequest level; error responses may be unencrypted.
+
+### Selecting an adapter (dev)
+
+The batch ingestion handler currently selects a bank adapter by env for development:
+
+- Set `BANK_ADAPTER=danskebank-edi-ws` to use Danske Bank EDIWS
+- Set `BANK_ADAPTER=local-file` to force the deterministic local CAMT.053 file adapter
+
+Danske Bank EDIWS needs additional env (IDs + signing material). See:
+
+- engine/banking-ingestion/infrastructure/danskebank/danskeBankEdiEnvConfig.ts
+- engine/banking-ingestion/infrastructure/danskebank/danskeBankEnvSecrets.ts
+
+### Agreements and account discovery
+
+Bank Web Services are typically agreement-scoped (provider/customer credentials determine which files are accessible).
+The system models this explicitly via `banking_agreement` (one per provider) and fetches documents per enabled provider.
+
+Bank accounts are not manually created by end users. Instead, accounts are discovered from ingested CAMT.053 statements and upserted deterministically using the statement's IBAN + currency (e.g. `DKxxxxxxxxxxxxxx-DKK`).
+
 ## Key concepts (domain)
 
 - `banking_document`: raw source content (e.g. CAMT.053 XML) + hash (idempotency)
@@ -24,7 +60,7 @@ This repo is a stateless financial integration engine:
 - `rule_accounting_dimension_value`: per-rule values for accounting dimensions (normalized; no hardcoded primary/secondary/tertiary)
 - `transaction_processing`: processing status / rule-applied locking
 - `manual_booking_draft` (+ lines/dimensions/attachments): user-edited draft state for open transactions (supports saving notes and multi-line manual postings without sending to ERP)
-- `banking_adapter_cursor`: opaque cursor per (account, adapter) for incremental fetching
+- `banking_agreement_cursor`: opaque cursor per (provider agreement, adapter) for incremental fetching
 - `run`: batch execution unit (audit/logging)
 
 ### Accounting dimensions (ERP)

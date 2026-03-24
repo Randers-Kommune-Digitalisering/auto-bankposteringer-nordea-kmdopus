@@ -5,7 +5,8 @@ import db from '~/lib/db'
 import { account } from '~/lib/db/schema/account'
 
 const updateSchema = z.object({
-  statusAccount: z.number('Statuskonto er påkrævet').int('Skal være et helt tal')
+  name: z.string().min(1).optional(),
+  statusAccount: z.number('Statuskonto er påkrævet').int('Skal være et helt tal'),
 })
 
 export default defineEventHandler(async (event) => {

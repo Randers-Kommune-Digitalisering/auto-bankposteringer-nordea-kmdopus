@@ -1,5 +1,6 @@
 import crypto from 'node:crypto'
 import { eq } from 'drizzle-orm'
+import { account } from '../../../app/lib/db/schema/account'
 import {
   bankingDocument,
   bankingStatement,
@@ -8,16 +9,55 @@ import {
 import { transaction } from '../../../app/lib/db/schema/transaction'
 import { parseCamt053Xml } from './camt053/parseCamt053Xml'
 
+type BankProvider = 'danskebank' | 'nordea' | 'bankconnect'
+
 type DbClient = {
   select: any
   insert: any
+  update: any
 }
 
 type IngestCamt053DocumentInput = {
   runId: string
-  accountId: string
+  provider: BankProvider
   filename?: string | null
   xml: string
+}
+
+function accountIdFromStatement(stmt: { iban?: string | null; currency?: string | null }): string | null {
+  const iban = (stmt.iban ?? '').trim()
+  const ccy = (stmt.currency ?? '').trim()
+  if (!iban || !ccy) return null
+  return `${iban}-${ccy}`
+}
+
+async function ensureAccountExists(
+  db: DbClient,
+  input: { id: string; provider: BankProvider; name?: string | null; statusAccount: number },
+): Promise<void> {
+  await db
+    .insert(account)
+    .values({
+      id: input.id,
+      provider: input.provider,
+      name: input.name ?? null,
+      statusAccount: input.statusAccount,
+    })
+    .onConflictDoNothing({ target: account.id })
+
+  const rows = await db
+    .select({ provider: account.provider })
+    .from(account)
+    .where(eq(account.id, input.id))
+    .limit(1)
+
+  const row = rows[0] ?? null
+  if (!row) return
+  if (String(row.provider) !== input.provider) {
+    throw new Error(
+      `CAMT.053 ingestion: derived account id ${input.id} already exists with provider=${row.provider}; got provider=${input.provider}`,
+    )
+  }
 }
 
 export async function ingestCamt053Document(
@@ -56,7 +96,7 @@ export async function ingestCamt053Document(
   const insertedDocument = await db
     .insert(bankingDocument)
     .values({
-      accountId: input.accountId,
+      accountId: null,
       format: 'camt053',
       filename: input.filename ?? null,
       content: xml,
@@ -72,7 +112,21 @@ export async function ingestCamt053Document(
   let insertedBalances = 0
   let insertedTransactions = 0
 
+  const defaultStatusAccount = 9999
+
   for (const stmt of parsed.statements) {
+    const derivedAccountId = accountIdFromStatement(stmt)
+    if (!derivedAccountId) {
+      throw new Error('CAMT.053 ingestion: could not derive account id (missing IBAN/currency in statement)')
+    }
+
+    await ensureAccountExists(db, {
+      id: derivedAccountId,
+      provider: input.provider,
+      name: stmt.ownerName ?? null,
+      statusAccount: defaultStatusAccount,
+    })
+
     const statementInsert = await db
       .insert(bankingStatement)
       .values({
@@ -108,7 +162,7 @@ export async function ingestCamt053Document(
     for (const tx of stmt.transactions) {
       await db.insert(transaction).values({
         runId: input.runId,
-        accountId: input.accountId,
+        accountId: derivedAccountId,
         statementId: statementRowId,
         entryIndex: tx.entryIndex,
         entrySubIndex: tx.entrySubIndex,
