@@ -1,3 +1,4 @@
+CREATE TYPE "public"."bank_provider" AS ENUM('danskebank', 'nordea', 'bankconnect');--> statement-breakpoint
 CREATE TYPE "public"."accounting_dimension_constraint_kind" AS ENUM('requires_any_of', 'requires_all_of', 'requires_exactly_one_of', 'forbids_any_of');--> statement-breakpoint
 CREATE TYPE "public"."banking_document_format" AS ENUM('camt053', 'unknown');--> statement-breakpoint
 CREATE TYPE "public"."booking_status" AS ENUM('åben', 'bogført', 'undtaget');--> statement-breakpoint
@@ -16,6 +17,7 @@ CREATE TYPE "public"."run_status" AS ENUM('afventer', 'indlæser', 'udført', 'f
 CREATE TABLE "account" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text,
+	"provider" "bank_provider" NOT NULL,
 	"status_account" integer NOT NULL
 );
 --> statement-breakpoint
@@ -97,6 +99,23 @@ CREATE TABLE "banking_adapter_cursor" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "banking_adapter_cursor_account_adapter_unique" UNIQUE("account_id","adapter_key")
+);
+--> statement-breakpoint
+CREATE TABLE "banking_agreement" (
+	"provider" "bank_provider" PRIMARY KEY NOT NULL,
+	"enabled" boolean DEFAULT false NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "banking_agreement_cursor" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"provider" "bank_provider" NOT NULL,
+	"adapter_key" text NOT NULL,
+	"cursor" text NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "banking_agreement_cursor_provider_adapter_unique" UNIQUE("provider","adapter_key")
 );
 --> statement-breakpoint
 CREATE TABLE "document" (
@@ -400,6 +419,7 @@ ALTER TABLE "banking_party" ADD CONSTRAINT "banking_party_payload_id_banking_pay
 ALTER TABLE "banking_reference" ADD CONSTRAINT "banking_reference_payload_id_banking_payload_id_fk" FOREIGN KEY ("payload_id") REFERENCES "public"."banking_payload"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "banking_tx_code" ADD CONSTRAINT "banking_tx_code_payload_id_banking_payload_id_fk" FOREIGN KEY ("payload_id") REFERENCES "public"."banking_payload"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "banking_adapter_cursor" ADD CONSTRAINT "banking_adapter_cursor_account_id_account_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."account"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "banking_agreement_cursor" ADD CONSTRAINT "banking_agreement_cursor_provider_banking_agreement_provider_fk" FOREIGN KEY ("provider") REFERENCES "public"."banking_agreement"("provider") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "document" ADD CONSTRAINT "document_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "erp_request" ADD CONSTRAINT "erp_request_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "erp_request_line" ADD CONSTRAINT "erp_request_line_request_id_erp_request_id_fk" FOREIGN KEY ("request_id") REFERENCES "public"."erp_request"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

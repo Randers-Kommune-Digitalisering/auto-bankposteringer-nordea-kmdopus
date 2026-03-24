@@ -24,6 +24,7 @@ async function main() {
     await db.insert(account).values({
       id: accountId,
       name: 'Smoke test account',
+      provider: 'nordea',
       statusAccount: 95999999,
     })
   }
@@ -44,7 +45,7 @@ async function main() {
   const ingestResult = await db.transaction(async (trx) => {
     return ingestCamt053Document(trx as any, {
       runId,
-      accountId,
+      provider: 'nordea',
       filename: 'camt.053e.xml',
       xml,
     })
