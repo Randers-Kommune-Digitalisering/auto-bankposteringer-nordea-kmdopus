@@ -29,11 +29,14 @@ Operational detail (PKIWS v2.9): PKIWS `RequestHeader.Environment` uses `custome
 
 Operational detail (EDIWS v5.0): EDIWS validates a SOAP-level XMLDSig signature and rejects SOAP packets older than ~5 minutes; and Danske Bank does not support HTTP `Transfer-Encoding: chunked`. Data sent to the bank is required to be encrypted at the ApplicationRequest level; error responses may be unencrypted.
 
+Operational detail (Nordea CA Web Services): Nordea requires WS-Security `Timestamp` and a SOAP-level XMLDSig signature over the SOAP Body. For account statements we default to the Corporate Access file type `NDAREXXMLO` (CAMT.053 extended).
+
 ### Selecting an adapter (dev)
 
 The batch ingestion handler currently selects a bank adapter by env for development:
 
 - Set `BANK_ADAPTER=danskebank-edi-ws` to use Danske Bank EDIWS
+- Set `BANK_ADAPTER=nordea-corporate-access-ws` to use Nordea Corporate Access Web Services
 - Set `BANK_ADAPTER=local-file` to force the deterministic local CAMT.053 file adapter
 
 Danske Bank EDIWS needs additional env (IDs + signing material). See:

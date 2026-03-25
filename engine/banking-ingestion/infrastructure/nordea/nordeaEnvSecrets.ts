@@ -19,6 +19,12 @@ const schema = z
 
     /** Optional pinning for Nordea's response signing cert (SHA-256 fingerprint hex, lowercase/uppercase ok). */
     NORDEA_TRUSTED_SIGNING_CERT_SHA256: z.string().length(64).optional(),
+
+    // Optional mTLS client certificate/key (if TLS-layer client auth is required).
+    NORDEA_MTLS_CLIENT_PRIVATE_KEY_PEM: z.string().min(1).optional(),
+    NORDEA_MTLS_CLIENT_CERTIFICATE_PEM: z.string().min(1).optional(),
+    NORDEA_MTLS_CLIENT_PRIVATE_KEY_PEM_B64: z.string().min(1).optional(),
+    NORDEA_MTLS_CLIENT_CERTIFICATE_PEM_B64: z.string().min(1).optional(),
   })
   .superRefine((val, ctx) => {
     const hasKey = Boolean(val.NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM || val.NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM_B64)
@@ -60,7 +66,17 @@ export function loadNordeaEnvSecrets(env: NodeJS.ProcessEnv = process.env): Nord
       parsed.NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM_B64,
     ),
     NORDEA_TRUSTED_SIGNING_CERT_SHA256: parsed.NORDEA_TRUSTED_SIGNING_CERT_SHA256,
+    NORDEA_MTLS_CLIENT_PRIVATE_KEY_PEM: decodeMaybeB64(
+      parsed.NORDEA_MTLS_CLIENT_PRIVATE_KEY_PEM,
+      parsed.NORDEA_MTLS_CLIENT_PRIVATE_KEY_PEM_B64,
+    ) || undefined,
+    NORDEA_MTLS_CLIENT_CERTIFICATE_PEM: decodeMaybeB64(
+      parsed.NORDEA_MTLS_CLIENT_CERTIFICATE_PEM,
+      parsed.NORDEA_MTLS_CLIENT_CERTIFICATE_PEM_B64,
+    ) || undefined,
     NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM_B64: parsed.NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM_B64,
     NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM_B64: parsed.NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM_B64,
+    NORDEA_MTLS_CLIENT_PRIVATE_KEY_PEM_B64: parsed.NORDEA_MTLS_CLIENT_PRIVATE_KEY_PEM_B64,
+    NORDEA_MTLS_CLIENT_CERTIFICATE_PEM_B64: parsed.NORDEA_MTLS_CLIENT_CERTIFICATE_PEM_B64,
   }
 }
