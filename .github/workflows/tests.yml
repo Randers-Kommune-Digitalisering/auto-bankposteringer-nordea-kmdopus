@@ -1,0 +1,74 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: pass
+          POSTGRES_DB: mydb
+        options: >-
+          --health-cmd "pg_isready -U root -d mydb"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      # DB
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: mydb
+      DATABASE_URL: postgres://root:pass@localhost:5432/mydb
+
+      # Dummy values to satisfy strict env parsing during CLI/test imports
+      ERP_SUPPLIER: kmd
+      ERP_ERROR_ACCOUNT: "95999999"
+      ERP_ACTIVE_INTEGRATION: "false"
+      ERP_PROD_ENVIRONMENT: P04
+      ERP_MUNICIPALITY_CODE: "730"
+      ERP_COMP_CODE: "0020"
+      ERP_INTEGRATION_ID: TEST
+      ERP_INTEGRATION_FILENAME_MASK: TEST.xml
+      ERP_PRIMARY_ACCOUNT_LABEL: Artskonto
+      ERP_SECONDARY_ACCOUNT_LABEL: Omkostningssted
+      ERP_TERTIARY_ACCOUNT_LABEL: PSP-element
+
+      SFTP_URL: sftp://example.invalid
+      SFTP_USERNAME: dummy
+      SFTP_PASSWORD: dummy
+      SFTP_REQUEST_DIR: /data/output/
+      SFTP_RESPONSE_DIR: /fra-randers/
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply DB schema (Drizzle)
+        run: pnpm db:migrate
+
+      - name: Unit tests
+        run: pnpm test:unit
+
+      - name: Integration tests
+        run: pnpm test:integration

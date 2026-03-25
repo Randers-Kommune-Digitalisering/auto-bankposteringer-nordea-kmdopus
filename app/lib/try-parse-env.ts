@@ -1,10 +1,9 @@
 // Formats the error message when required environment variables are missing
-import type { ZodObject, ZodRawShape } from "zod";
-
+import type { ZodTypeAny } from "zod";
 import { ZodError } from "zod";
 
-export default function tryParseEnv<T extends ZodRawShape>(
-  EnvSchema: ZodObject<T>,
+export default function tryParseEnv(
+  EnvSchema: ZodTypeAny,
   buildEnv: Record<string, string | undefined> = process.env,
 ) {
   try {
@@ -14,7 +13,8 @@ export default function tryParseEnv<T extends ZodRawShape>(
     if (error instanceof ZodError) {
       let message = "Missing required values in .env:\n";
       error.issues.forEach((issue) => {
-        message += `${String(issue.path[0])}\n`;
+        const key = issue.path.length ? issue.path.map(String).join('.') : '(root)'
+        message += `${key}\n`;
       });
       const e = new Error(message);
       e.stack = "";

@@ -4,15 +4,14 @@ import type { Row, SortingState } from '@tanstack/table-core'
 import { getPaginationRowModel } from '@tanstack/table-core'
 import type { AccountSelectSchema } from '~/lib/db/schema/account'
 
-interface BankingMetadataResponse {
-  serviceProvider: string
-  servicerProviderId: string
-  passcode: string
-}
-
 type BankingAgreement = {
   provider: 'danskebank' | 'nordea' | 'bankconnect'
   enabled: boolean
+  readiness?:
+    | { status: 'ready' }
+    | { status: 'not_configured'; message: string }
+    | { status: 'missing_env'; message: string; missingKeys: string[] }
+    | { status: 'not_implemented'; message: string }
 }
 
 const BANK_ACCOUNTS_QUERY_KEY = 'bank-accounts' as const
@@ -38,17 +37,6 @@ const { data: accounts, pending, refresh: refreshBankAccounts } = await useFetch
   }
 )
 
-const { data: bankingMetadata } = await useFetch<BankingMetadataResponse>(
-  '/api/settings/banking-metadata',
-  {
-    key: 'banking-metadata',
-    default: () => ({
-      serviceProvider: '',
-      servicerProviderId: '',
-      passcode: ''
-    })
-  }
-)
 
 const { data: agreements, refresh: refreshAgreements } = await useFetch<BankingAgreement[]>(
   '/api/banking-agreements',
@@ -65,18 +53,33 @@ const providerLabel = (p: BankingAgreement['provider']) => {
 }
 
 async function toggleAgreement(provider: BankingAgreement['provider'], enabled: boolean) {
-  await $fetch(`/api/banking-agreements/${provider}`, {
-    method: 'PUT',
-    body: { enabled },
-  })
-  await refreshAgreements()
+  try {
+    await $fetch(`/api/banking-agreements/${provider}`, {
+      method: 'PUT',
+      body: { enabled },
+    })
+    await refreshAgreements()
+  } catch (err: any) {
+    toast.add({
+      title: 'Kan ikke aktivere aftale',
+      description: String(err?.data?.statusMessage ?? err?.statusMessage ?? err?.message ?? err),
+      color: 'error',
+    })
+  }
 }
 
-const bankingMetadataFields = computed(() => [
-  { label: 'Service Provider', value: bankingMetadata.value?.serviceProvider ?? '—' },
-  { label: 'Servicer Provider ID', value: bankingMetadata.value?.servicerProviderId ?? '—' },
-  { label: 'Passcode', value: bankingMetadata.value?.passcode ?? '—' }
-])
+const readinessText = (a: BankingAgreement) => {
+  const r = a.readiness
+  if (!r) return '—'
+  if (r.status === 'ready') return 'Klar'
+  if (r.status === 'not_implemented') return 'Ikke implementeret'
+  if (r.status === 'not_configured') return 'Ikke konfigureret'
+  if (r.status === 'missing_env') {
+    const keys = r.missingKeys?.length ? r.missingKeys.slice(0, 4).join(', ') : ''
+    return keys ? `Mangler: ${keys}` : 'Mangler env'
+  }
+  return '—'
+}
 
 const refreshAccounts = async () => {
   refreshingAccounts.value = true
@@ -238,27 +241,6 @@ async function handleDeleteAccount(row: Row<AccountSelectSchema>) {
     </template>
 
     <template #body>
-      <section class="mb-6 space-y-3">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-wide text-muted">Bank metadata</p>
-          <p class="text-sm text-muted">Værdierne kommer fra din .env fil og er kun til læsning.</p>
-        </div>
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div
-            v-for="field in bankingMetadataFields"
-            :key="field.label"
-            class="flex flex-col gap-1"
-          >
-            <span class="text-xs font-semibold text-muted">{{ field.label }}</span>
-            <UInput
-              :model-value="field.value"
-              readonly
-              class="font-mono text-sm"
-            />
-          </div>
-        </div>
-      </section>
-
       <section class="mb-8 space-y-3">
         <div>
           <p class="text-xs font-semibold uppercase tracking-wide text-muted">Aftaler</p>
@@ -273,7 +255,9 @@ async function handleDeleteAccount(row: Row<AccountSelectSchema>) {
           >
             <div>
               <div class="text-sm font-semibold">{{ providerLabel(a.provider) }}</div>
-              <div class="text-xs text-muted">{{ a.enabled ? 'Aktiv' : 'Inaktiv' }}</div>
+              <div class="text-xs text-muted">
+                {{ a.enabled ? 'Aktiv' : 'Inaktiv' }} • {{ readinessText(a) }}
+              </div>
             </div>
             <UButton
               size="sm"
