@@ -13,14 +13,6 @@ setIfMissing('POSTGRES_DB', 'mydb')
 // Locally you can run `docker compose up -d db` and use localhost.
 setIfMissing('DATABASE_URL', 'postgres://root:pass@localhost:5432/mydb')
 
-setIfMissing('BANKING_CLIENT_ID', 'dummy')
-setIfMissing('BANKING_CLIENT_SECRET', 'dummy')
-setIfMissing('BANKING_EIDASPRIVATEKEY', 'dummy')
-setIfMissing('BANKING_AGREEMENT_ID', 'dummy')
-setIfMissing('BANKING_SERVICE_PROVIDER', 'Dummy Municipality')
-setIfMissing('BANKING_SERVICE_PROVIDER_ID', 'dummy')
-setIfMissing('BANKING_PASSCODE', 'dummy')
-
 setIfMissing('ERP_SUPPLIER', 'kmd')
 setIfMissing('ERP_ERROR_ACCOUNT', '95999999')
 setIfMissing('ERP_ACTIVE_INTEGRATION', 'false')

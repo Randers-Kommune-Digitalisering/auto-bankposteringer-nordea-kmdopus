@@ -2,17 +2,16 @@
 import { z } from "zod";
 import tryParseEnv from "./try-parse-env";
 import { erpSupplierValues } from "./db/schema/enums";
+import { IngestionEnvSchema } from "./env-ingestion";
 
-const EnvSchema = z.object({
+const commonSchema = z.object({
   APP_ROLE: z.enum(["web", "scheduler", "worker"]).optional().default("web"),
-  POSTGRES_USER: z.string(),
-  POSTGRES_PASSWORD: z.string(),
-  POSTGRES_DB: z.string(),
+  // These are primarily for docker-compose / local dev.
+  POSTGRES_USER: z.string().optional(),
+  POSTGRES_PASSWORD: z.string().optional(),
+  POSTGRES_DB: z.string().optional(),
   DATABASE_URL: z.string(),
-  BANKING_CLIENT_ID: z.string(),
-  BANKING_CLIENT_SECRET: z.string(),
-  BANKING_EIDASPRIVATEKEY: z.string(),
-  BANKING_AGREEMENT_ID: z.string(),
+
   ERP_SUPPLIER: z.enum(erpSupplierValues),
   ERP_ERROR_ACCOUNT: z.string(),
   ERP_ACTIVE_INTEGRATION: z.enum(["true", "false"]).transform((value) => value === "true"),
@@ -21,6 +20,21 @@ const EnvSchema = z.object({
   ERP_COMP_CODE: z.string(),
   ERP_INTEGRATION_ID: z.string(),
   ERP_INTEGRATION_FILENAME_MASK: z.string(),
+
+  // SFTP is required only for roles that actually communicate with the ERP via SFTP.
+  SFTP_URL: z.string().optional(),
+  SFTP_USERNAME: z.string().optional(),
+  SFTP_PASSWORD: z.string().optional(),
+  SFTP_REQUEST_DIR: z.string().optional(),
+  SFTP_RESPONSE_DIR: z.string().optional(),
+});
+
+const webSchema = commonSchema.extend({
+  APP_ROLE: z.literal("web"),
+});
+
+const workerSchema = commonSchema.extend({
+  APP_ROLE: z.literal("worker"),
   SFTP_URL: z.string(),
   SFTP_USERNAME: z.string(),
   SFTP_PASSWORD: z.string(),
@@ -28,16 +42,18 @@ const EnvSchema = z.object({
   SFTP_RESPONSE_DIR: z.string(),
 });
 
+const schedulerSchema = commonSchema.extend({
+  APP_ROLE: z.literal("scheduler"),
+});
+
+const EnvSchema = z.union([webSchema, workerSchema, schedulerSchema]);
+
 export type EnvSchema = z.infer<typeof EnvSchema>;
 
-tryParseEnv(EnvSchema);
-const parsedEnv = EnvSchema.parse(process.env);
-
-export const bankingIntegrationMetadata = {
-  serviceProvider: parsedEnv.BANKING_SERVICE_PROVIDER,
-  servicerProviderId: parsedEnv.BANKING_SERVICE_PROVIDER_ID,
-  passcode: parsedEnv.BANKING_PASSCODE,
-};
+tryParseEnv(EnvSchema, { ...process.env, APP_ROLE: process.env.APP_ROLE ?? "web" });
+// Only validates ingestion env when a provider is being configured.
+tryParseEnv(IngestionEnvSchema);
+const parsedEnv = EnvSchema.parse({ ...process.env, APP_ROLE: process.env.APP_ROLE ?? "web" });
 
 export const erpIntegrationMetadata = {
   erpSupplier: parsedEnv.ERP_SUPPLIER,
@@ -50,7 +66,6 @@ export const erpIntegrationMetadata = {
   integrationFileNameMask: parsedEnv.ERP_INTEGRATION_FILENAME_MASK,
 };
 
-export type BankingIntegrationMetadata = typeof bankingIntegrationMetadata;
 export type ErpIntegrationMetadata = typeof erpIntegrationMetadata;
 
 export default parsedEnv;

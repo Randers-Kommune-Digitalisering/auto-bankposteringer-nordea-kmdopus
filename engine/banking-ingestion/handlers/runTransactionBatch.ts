@@ -8,6 +8,9 @@ import { LocalFileBankAdapter } from '../infrastructure/localFileBankAdapter'
 import { DanskeBankEdiWebServicesAdapter } from '../infrastructure/danskebank/danskeBankEdiWebServicesAdapter'
 import { loadDanskeBankEdiEnvConfig } from '../infrastructure/danskebank/danskeBankEdiEnvConfig'
 import { loadDanskeBankEnvSecrets } from '../infrastructure/danskebank/danskeBankEnvSecrets'
+import { NordeaCorporateAccessWebServicesAdapter } from '../infrastructure/nordea/nordeaCorporateAccessWebServicesAdapter'
+import { loadNordeaCorporateAccessEnvConfig } from '../infrastructure/nordea/nordeaCorporateAccessEnvConfig'
+import { loadNordeaEnvSecrets } from '../infrastructure/nordea/nordeaEnvSecrets'
 import { ingestCamt053Document } from './ingestCamt053Document'
 import { bankingAgreement } from '~/lib/db/schema/bankingAgreement'
 import type { BankProvider } from '~/lib/db/schema/bankingAgreement'
@@ -99,8 +102,29 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
           })
         }
 
-        if (!adapterKeyOverride && r.provider === 'nordea') {
-          throw new Error('Nordea adapter er ikke implementeret endnu (enable ikke nordea-aftalen endnu)')
+        if (adapterKeyOverride === 'nordea-corporate-access-ws' || (!adapterKeyOverride && r.provider === 'nordea')) {
+          const cfg = loadNordeaCorporateAccessEnvConfig()
+          const secrets = loadNordeaEnvSecrets()
+
+          return new NordeaCorporateAccessWebServicesAdapter({
+            endpointUrl: cfg.NORDEA_CA_WS_ENDPOINT_URL,
+            senderId: cfg.NORDEA_CA_WS_SENDER_ID,
+            receiverId: cfg.NORDEA_CA_WS_RECEIVER_ID,
+            userAgent: cfg.NORDEA_CA_WS_USER_AGENT,
+            language: cfg.NORDEA_CA_WS_LANGUAGE,
+            customerId: cfg.NORDEA_CA_CUSTOMER_ID,
+            signerId: cfg.NORDEA_CA_SIGNER_ID,
+            softwareId: cfg.NORDEA_CA_SOFTWARE_ID,
+            environment: cfg.NORDEA_CA_ENVIRONMENT,
+            statementFileType: cfg.NORDEA_CA_STATEMENT_FILE_TYPE,
+            requestCompressed: cfg.NORDEA_CA_REQUEST_COMPRESSED === '1',
+            applicationRequestPrivateKeyPem: secrets.NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM,
+            applicationRequestCertificatePem: secrets.NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM,
+            trustedNordeaCertificateFingerprintSha256Hex: secrets.NORDEA_TRUSTED_SIGNING_CERT_SHA256,
+            mtlsClientCertificatePem: secrets.NORDEA_MTLS_CLIENT_CERTIFICATE_PEM ?? secrets.NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM,
+            mtlsClientPrivateKeyPem: secrets.NORDEA_MTLS_CLIENT_PRIVATE_KEY_PEM ?? secrets.NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM,
+            timeoutMs: 30_000,
+          })
         }
 
         if (!adapterKeyOverride && r.provider === 'bankconnect') {
