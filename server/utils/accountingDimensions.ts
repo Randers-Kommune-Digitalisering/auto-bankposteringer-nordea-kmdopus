@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
 import db from '~/lib/db'
-import env from '~/lib/env'
+import env from '~/lib/env/env'
 import {
   erpAccountingDimensionDefinition,
   ruleAccountingDimensionValue,

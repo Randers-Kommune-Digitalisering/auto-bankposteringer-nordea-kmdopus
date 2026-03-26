@@ -1,4 +1,4 @@
-import "./app/lib/env"
+import "./app/lib/env/env"
 import { fileURLToPath } from 'node:url'
 
 export default defineNuxtConfig({

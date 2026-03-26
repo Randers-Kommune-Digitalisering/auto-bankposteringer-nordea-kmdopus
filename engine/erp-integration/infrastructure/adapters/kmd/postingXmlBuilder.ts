@@ -1,6 +1,6 @@
 import crypto from 'node:crypto'
 import { Builder } from 'xml2js'
-import { erpIntegrationMetadata, type ErpIntegrationMetadata } from '~/lib/env'
+import { erpIntegrationMetadata, type ErpIntegrationMetadata } from '~/lib/env/env'
 import type { DimensionKeyByTarget } from '../../../ports/erpAdapter'
 import type { PostingAttachment, PostingLineInput } from '../../../../posting/domain/posting'
 

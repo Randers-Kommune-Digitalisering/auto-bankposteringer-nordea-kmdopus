@@ -1,5 +1,5 @@
 import { defineNitroPlugin } from 'nitropack/runtime'
-import env from '~/lib/env'
+import env from '~/lib/env/env'
 import { logger } from '~/lib/logger'
 import { runWorker } from '#engine/queue/handlers/worker'
 

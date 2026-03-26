@@ -1,6 +1,9 @@
 <script lang="ts" setup>
 import type { NavigationMenuItem } from '@nuxt/ui'
 
+import { useAuthz } from '~/composables/useAuthz'
+import type { AppRole } from '~/composables/useAuthz'
+
 const open = ref(false)
 
 const route = useRoute()
@@ -139,6 +142,41 @@ const links = [[
   }
 ]] satisfies NavigationMenuItem[][]
 
+const { loaded, refresh, hasAny } = useAuthz()
+if (!loaded.value) {
+  refresh()
+}
+
+const visibilityRules: Array<{ to: string; roles: AppRole[] }> = [
+  { to: '/konteringsregler', roles: ['rule_admin'] },
+  { to: '/aabne-poster', roles: ['bookkeeping'] },
+  { to: '/kontoudtog', roles: ['bookkeeping', 'sys_admin', 'rule_admin'] },
+  { to: '/koersler', roles: ['bookkeeping', 'sys_admin'] },
+  { to: '/indstillinger', roles: ['sys_admin', 'rule_admin'] },
+  { to: '/fejlhaandtering', roles: ['sys_admin'] },
+]
+
+function isVisible(item: NavigationMenuItem): boolean {
+  const to = typeof item.to === 'string' ? item.to : undefined
+  if (!to) return true
+  const rule = visibilityRules.find(r => r.to === to)
+  if (!rule) return true
+  return hasAny(rule.roles)
+}
+
+const visibleLinks = computed(() => {
+  const group = links[0] ?? []
+  return group
+    .filter(isVisible)
+    .map((item) => {
+      if (item.children?.length) {
+        const children = (item.children as NavigationMenuItem[]).filter(isVisible)
+        return { ...item, children }
+      }
+      return item
+    })
+})
+
 const APP_TITLE = 'FOBI'
 
 const activePageLabel = computed(() => {
@@ -174,7 +212,7 @@ useHead(() => ({
         <!-- Primær navigation -->
         <UNavigationMenu
           :collapsed="collapsed"
-          :items="links[0]"
+          :items="visibleLinks"
           :ui="{ 
             linkLeadingIcon: 'size-6',
             childLinkIcon: 'size-6'

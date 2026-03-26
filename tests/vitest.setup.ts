@@ -1,5 +1,5 @@
 // Ensure strict env parsing doesn't block tests.
-// The app validates required variables at import time (app/lib/env.ts).
+// The app validates required variables at import time (app/lib/env/env.ts).
 
 function setIfMissing(key: string, value: string) {
   if (!process.env[key]) process.env[key] = value
