@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { eq } from 'drizzle-orm'
 import db from '~/lib/db'
 import { account } from '~/lib/db/schema/account'
+import { requireRoles } from '~~/server/auth/keycloakAuth'
 
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
@@ -10,6 +11,7 @@ const updateSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
+  await requireRoles(event, ['write'])
   const id = event.context.params?.id
   if (!id) {
     throw createError({ statusCode: 400, statusMessage: 'Manglende konto-id' })

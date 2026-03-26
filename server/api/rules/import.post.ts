@@ -29,6 +29,7 @@ import {
   resolveDimensionValueRows,
 } from '~~/server/utils/accountingDimensions'
 import { compileRuleDraftToDb } from '~~/server/utils/rules/compileRuleDraftToDb'
+import { requireRoles } from '~~/server/auth/keycloakAuth'
 
 const version = 1
 
@@ -203,6 +204,7 @@ function buildMatches(row: any, operator: string): MatchEntry[] | undefined {
 }
 
 export default defineEventHandler(async (event): Promise<ImportResponse> => {
+  await requireRoles(event, ['write'])
   const log = logger.child({ scope: 'api.rules.import' })
   const query = getQuery(event)
   const queryDryRun = query.dryRun === '1' || query.dryRun === 'true'

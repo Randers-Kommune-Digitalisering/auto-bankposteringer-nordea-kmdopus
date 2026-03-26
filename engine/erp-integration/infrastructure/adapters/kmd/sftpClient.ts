@@ -1,6 +1,6 @@
 import path from 'node:path'
 import SftpClient from 'ssh2-sftp-client'
-import env from '~/lib/env'
+import env from '~/lib/env/env'
 
 export interface SftpConnectionOptions {
   host: string

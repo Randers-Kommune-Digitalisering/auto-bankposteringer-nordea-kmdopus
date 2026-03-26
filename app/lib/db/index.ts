@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg'
-import dbEnv from '../env-database';
+import dbEnv from '../env/env-database';
 import * as accountSchema from './schema/account'
 import * as bankingSchema from './schema/banking'
 import * as documentSchema from './schema/document'

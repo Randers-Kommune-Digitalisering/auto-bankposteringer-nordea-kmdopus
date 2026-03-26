@@ -16,6 +16,7 @@ import {
 } from '~/lib/db/schema/rule'
 import { ruleVersion, type RuleVersionInsertSchema } from '~/lib/db/schema/ruleVersion'
 import { getActiveErpSupplier, listAccountingDimensionConstraints, listAccountingDimensionDefinitions, resolveDimensionValueRows } from '~~/server/utils/accountingDimensions'
+import { requireRoles } from '~~/server/auth/keycloakAuth'
 
 function compileRuleDraftToDb(draft: RuleDraftSchema, newVersion: number, erpSupplier: string) {
   const {
@@ -90,6 +91,7 @@ function compileRuleDraftToDb(draft: RuleDraftSchema, newVersion: number, erpSup
 }
 
 export default defineEventHandler(async (event) => {
+  await requireRoles(event, ['write'])
   const id = Number(event.context.params?.id)
   if (!id) throw createError({ statusCode: 400, statusMessage: 'Missing rule id' })
 

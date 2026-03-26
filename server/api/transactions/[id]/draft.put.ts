@@ -11,8 +11,10 @@ import {
   manualBookingDraftLineDimension,
 } from '~/lib/db/schema/manualBookingDraft'
 import { manualBookingPayloadSchema } from '#engine/manual-booking/domain/manualBooking'
+import { requireRoles } from '~~/server/auth/keycloakAuth'
 
 export default defineEventHandler(async (event) => {
+  await requireRoles(event, ['write'])
   const transactionIdParam = event.context.params?.id
   if (!transactionIdParam) {
     throw createError({ statusCode: 400, statusMessage: 'Mangler transaktions-id' })

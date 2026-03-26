@@ -1,4 +1,4 @@
-import { erpIntegrationMetadata } from '~/lib/env'
+import { erpIntegrationMetadata } from '~/lib/env/env'
 import type { ErpAdapter } from './ports/erpAdapter'
 import { kmdErpAdapter } from './infrastructure/adapters/kmd/kmdErpAdapter'
 

@@ -10,7 +10,7 @@ import {
   manualBookingDraftLine,
   manualBookingDraftLineDimension,
 } from '~/lib/db/schema/manualBookingDraft'
-import env from '~/lib/env'
+import env from '~/lib/env/env'
 import { manualBookingPayloadSchema, type CprType } from '#engine/manual-booking/domain/manualBooking'
 import type { PostingAttachment } from '#engine/posting/domain/posting'
 import { buildPostingCommand, executePostingCommand } from '#engine/posting/handlers/postingCommand'
@@ -24,8 +24,10 @@ import {
   listAccountingDimensionDefinitions,
   normalizeDimensionInput,
 } from '~~/server/utils/accountingDimensions'
+import { requireRoles } from '~~/server/auth/keycloakAuth'
 
 export default defineEventHandler(async (event) => {
+  await requireRoles(event, ['write'])
   const transactionIdParam = event.context.params?.id;
   if (!transactionIdParam) {
     throw createError({ statusCode: 400, statusMessage: "Mangler transaktions-id" });
