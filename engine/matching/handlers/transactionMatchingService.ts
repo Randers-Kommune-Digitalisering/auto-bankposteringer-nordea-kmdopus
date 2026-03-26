@@ -1,6 +1,6 @@
 import { and, eq, inArray, isNotNull, lte } from 'drizzle-orm'
 import db from '~/lib/db'
-import env from '~/lib/env'
+import env from '~/lib/env/env'
 import { account } from '~/lib/db/schema/account'
 import { rule } from '~/lib/db/schema/rule'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'

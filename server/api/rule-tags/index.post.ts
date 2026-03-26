@@ -1,12 +1,14 @@
 import { createError, defineEventHandler, readBody } from 'h3'
 import db from '~/lib/db'
 import { ruleTag, ruleTagInsertSchema } from '~/lib/db/schema/ruleTag'
+import { requireRoles } from '~~/server/auth/keycloakAuth'
 
 function getPgErrorCode(error: any): string | undefined {
   return error?.code ?? error?.cause?.code ?? error?.cause?.cause?.code
 }
 
 export default defineEventHandler(async (event) => {
+  await requireRoles(event, ['write'])
   const body = await readBody(event)
 
   let payload

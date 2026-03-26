@@ -3,8 +3,10 @@ import { eq } from 'drizzle-orm'
 import db from '~/lib/db'
 import { rule } from '~/lib/db/schema/rule'
 import { ruleVersion } from '~/lib/db/schema/ruleVersion'
+import { requireRoles } from '~~/server/auth/keycloakAuth'
 
 export default defineEventHandler(async (event) => {
+  await requireRoles(event, ['write'])
   const id = Number(event.context.params?.id)
   if (!id) {
     throw createError({ statusCode: 400, statusMessage: 'Missing rule id' })

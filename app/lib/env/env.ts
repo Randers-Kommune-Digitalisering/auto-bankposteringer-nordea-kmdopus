@@ -1,7 +1,7 @@
 // Checks whether all required environment variables are set before starting the application
 import { z } from "zod";
 import tryParseEnv from "./try-parse-env";
-import { erpSupplierValues } from "./db/schema/enums";
+import { erpSupplierValues } from "../db/schema/enums";
 import { IngestionEnvSchema } from "./env-ingestion";
 
 const commonSchema = z.object({
@@ -20,6 +20,19 @@ const commonSchema = z.object({
   ERP_COMP_CODE: z.string(),
   ERP_INTEGRATION_ID: z.string(),
   ERP_INTEGRATION_FILENAME_MASK: z.string(),
+
+  // Keycloak / OpenID Connect (for access control)
+  KEYCLOAK_AUTH_URL: z.string().optional(),
+  KEYCLOAK_REALM: z.string().optional().default('randers-kommune'),
+  KEYCLOAK_CLIENT_ID: z.string().optional(),
+  // Optional: expected audience override. Defaults to KEYCLOAK_CLIENT_ID.
+  KEYCLOAK_AUDIENCE: z.string().optional(),
+  // Optional: cookie name for access token if provided by an upstream auth proxy.
+  KEYCLOAK_ACCESS_TOKEN_COOKIE: z.string().optional(),
+
+  // Dev convenience: bypass auth entirely in local dev.
+  // Keep stateless: this only changes runtime behavior based on env.
+  DEV_AUTH_BYPASS: z.enum(['true', 'false']).optional().default('false').transform(v => v === 'true'),
 
   // SFTP is required only for roles that actually communicate with the ERP via SFTP.
   SFTP_URL: z.string().optional(),
