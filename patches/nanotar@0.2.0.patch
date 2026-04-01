@@ -1,0 +1,91 @@
+diff --git a/dist/index.cjs b/dist/index.cjs
+index b93a9daced476e9d801cdcd4f22f94d96df4adfc..bc025bc092c413f7c33776997df13a733129ec93 100644
+--- a/dist/index.cjs
++++ b/dist/index.cjs
+@@ -2,6 +2,25 @@
+ 
+ const TAR_TYPE_FILE = 0;
+ const TAR_TYPE_DIR = 5;
++function _isUnsafeTarPath(name) {
++  const normalized = String(name).replace(/\\/g, "/");
++  if (normalized.startsWith("/")) return true;
++  if (/^[A-Za-z]:\//.test(normalized)) return true;
++  const parts = normalized.split("/");
++  let depth = 0;
++  for (const part of parts) {
++    if (!part || part === ".") continue;
++    if (part === "..") depth -= 1;
++    else depth += 1;
++    if (depth < 0) return true;
++  }
++  return false;
++}
++function _assertSafeTarPath(name) {
++  if (_isUnsafeTarPath(name)) {
++    throw new Error(`Unsafe tar entry path: ${name}`);
++  }
++}
+ function parseTar(data, opts) {
+   const buffer = data.buffer || data;
+   const files = [];
+@@ -11,6 +30,7 @@ function parseTar(data, opts) {
+     if (name.length === 0) {
+       break;
+     }
++    _assertSafeTarPath(name);
+     const mode = _readString(buffer, offset + 100, 8).trim();
+     const uid = Number.parseInt(_readString(buffer, offset + 108, 8));
+     const gid = Number.parseInt(_readString(buffer, offset + 116, 8));
+@@ -105,6 +125,7 @@ function createTar(files, opts = {}) {
+   let offset = 0;
+   for (const file of _files) {
+     const isDir = !file.data;
++    _assertSafeTarPath(file.name);
+     _writeString(buffer, file.name, offset, 100);
+     const mode = file.attrs?.mode ?? opts.attrs?.mode ?? (isDir ? "775" : "664");
+     _writeString(buffer, _leftPad(mode, 7), offset + 100, 8);
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 35029276c0ceefb39f19b1287da95c829e6108ef..ce4f5808e816adeec0532c01dcc2f582c08bee29 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -1,5 +1,24 @@
+ const TAR_TYPE_FILE = 0;
+ const TAR_TYPE_DIR = 5;
++function _isUnsafeTarPath(name) {
++  const normalized = String(name).replace(/\\/g, "/");
++  if (normalized.startsWith("/")) return true;
++  if (/^[A-Za-z]:\//.test(normalized)) return true;
++  const parts = normalized.split("/");
++  let depth = 0;
++  for (const part of parts) {
++    if (!part || part === ".") continue;
++    if (part === "..") depth -= 1;
++    else depth += 1;
++    if (depth < 0) return true;
++  }
++  return false;
++}
++function _assertSafeTarPath(name) {
++  if (_isUnsafeTarPath(name)) {
++    throw new Error(`Unsafe tar entry path: ${name}`);
++  }
++}
+ function parseTar(data, opts) {
+   const buffer = data.buffer || data;
+   const files = [];
+@@ -9,6 +28,7 @@ function parseTar(data, opts) {
+     if (name.length === 0) {
+       break;
+     }
++    _assertSafeTarPath(name);
+     const mode = _readString(buffer, offset + 100, 8).trim();
+     const uid = Number.parseInt(_readString(buffer, offset + 108, 8));
+     const gid = Number.parseInt(_readString(buffer, offset + 116, 8));
+@@ -103,6 +123,7 @@ function createTar(files, opts = {}) {
+   let offset = 0;
+   for (const file of _files) {
+     const isDir = !file.data;
++    _assertSafeTarPath(file.name);
+     _writeString(buffer, file.name, offset, 100);
+     const mode = file.attrs?.mode ?? opts.attrs?.mode ?? (isDir ? "775" : "664");
+     _writeString(buffer, _leftPad(mode, 7), offset + 100, 8);

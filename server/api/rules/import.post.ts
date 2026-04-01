@@ -203,7 +203,7 @@ function buildMatches(row: any, operator: string): MatchEntry[] | undefined {
   return matches.length ? matches : undefined
 }
 
-export default defineEventHandler(async (event): Promise<ImportResponse> => {
+export default defineEventHandler(async (event) => {
   await requireRoles(event, ['write'])
   const log = logger.child({ scope: 'api.rules.import' })
   const query = getQuery(event)

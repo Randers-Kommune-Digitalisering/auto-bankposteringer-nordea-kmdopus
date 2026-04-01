@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { Client } from 'pg'
-import env from '../../app/lib/env'
+import env from '../../app/lib/env/env'
 
 async function main() {
   const client = new Client({ connectionString: env.DATABASE_URL })

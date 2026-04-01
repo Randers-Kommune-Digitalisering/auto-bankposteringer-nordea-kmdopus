@@ -208,6 +208,12 @@ CREATE TABLE "manual_booking_draft_line_dimension" (
 	CONSTRAINT "manual_booking_draft_line_dimension_line_id_key_pk" PRIMARY KEY("line_id","key")
 );
 --> statement-breakpoint
+CREATE TABLE "notification_settings" (
+	"id" text PRIMARY KEY NOT NULL,
+	"mail_template" text NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "outbox" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"topic" text NOT NULL,
