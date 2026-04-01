@@ -56,7 +56,7 @@ const ruleOptions = computed(() =>
   })),
 )
 
-const selectedRuleId = ref<number | null>(null)
+const selectedRuleId = ref<number | undefined>(undefined)
 const versionsLoading = ref(false)
 const versionsData = ref<RuleVersionsResponse | null>(null)
 
@@ -138,17 +138,16 @@ const versionColumns: TableColumn<RuleVersionItem>[] = [
 // -------------------
 // Bulk import (CSV)
 // -------------------
-const csvFiles = ref<File[] | null>(null)
+const csvFiles = ref<File | null>(null)
 const csvText = ref<string | null>(null)
 const importLoading = ref(false)
 const validateLoading = ref(false)
 const lastValidation = ref<RuleImportResponse | null>(null)
 
-watch(csvFiles, async (files) => {
+watch(csvFiles, async (file) => {
   lastValidation.value = null
   csvText.value = null
-  if (!files?.length) return
-  const file = files[0]!
+  if (!file) return
   csvText.value = await file.text()
 })
 
@@ -250,31 +249,72 @@ const errorPreview = computed(() => {
       <div class="grid gap-6">
         <UCard>
           <template #header>
-            <div class="flex items-center justify-between gap-4">
+            <div class="flex items-start justify-between gap-4">
               <div>
                 <div class="font-medium">Masseindlæsning af regler (CSV)</div>
-                <div class="text-sm text-muted space-y-1">
-                  <p>Download en skabelon, udfyld og upload.</p>
-                  <p>Anbefalet multiværdi-separator er <span class="font-mono">&amp;</span>.</p>
-                  <p>Skabelonen indeholder ERP-specifikke dimensionkolonner (<span class="font-mono">dim_*</span>).</p>
-                  <p>Avanceret skabelon tilføjer også feltspecifikke match-kolonner (<span class="font-mono">field_*</span>).</p>
+                <div class="text-sm text-muted space-y-3 max-w-2xl">
+                  <p>Download skabelon, udfyld og upload. Eksport giver en CSV, der kan uploades igen (roundtrip).</p>
+
+                  <details class="rounded-md border border-default bg-elevated/25 p-3">
+                    <summary class="cursor-pointer select-none font-medium text-foreground">Multiværdier (flere værdier i én celle)</summary>
+                    <div class="mt-2 space-y-2">
+                      <ul class="list-disc pl-5 space-y-1">
+                        <li>Brug <span class="font-mono">&amp;</span> til flere værdier: <span class="font-mono">a &amp; b &amp; c</span> (anbefalet).</li>
+                        <li><span class="font-mono">,</span> og <span class="font-mono">|</span> accepteres også (legacy), men vi anbefaler <span class="font-mono">&amp;</span>.</li>
+                        <li>Escape separatorer inde i en værdi: <span class="font-mono">\&amp;</span>, <span class="font-mono">\,</span>, <span class="font-mono">\|</span>.</li>
+                        <li>Literal backslash: skriv <span class="font-mono">\\</span>.</li>
+                      </ul>
+                    </div>
+                  </details>
+
+                  <details class="rounded-md border border-default bg-elevated/25 p-3">
+                    <summary class="cursor-pointer select-none font-medium text-foreground">Operatorer (eq, ilike, …)</summary>
+                    <div class="mt-2 space-y-2">
+                      <ul class="list-disc pl-5 space-y-1">
+                        <li><span class="font-mono">eq</span> = eksakt match (standard).</li>
+                        <li><span class="font-mono">ilike</span> = “indeholder” (case-insensitive).</li>
+                        <li><span class="font-mono">matchOperator</span> bruges som standard for <span class="font-mono">matchReferences</span>/<span class="font-mono">matchCounterparties</span>/<span class="font-mono">matchClassification</span>.</li>
+                        <li>I avancerede <span class="font-mono">field_*</span>-kolonner kan du vælge operator pr. værdi med prefix: <span class="font-mono">eq:123</span>, <span class="font-mono">ilike:randers</span> (osv.).</li>
+                      </ul>
+                    </div>
+                  </details>
+
+                  <details class="rounded-md border border-default bg-elevated/25 p-3">
+                    <summary class="cursor-pointer select-none font-medium text-foreground">Skabeloner og eksport</summary>
+                    <div class="mt-2 space-y-2">
+                      <ul class="list-disc pl-5 space-y-1">
+                        <li>CSV bruger semikolon (<span class="font-mono">;</span>) som kolonne-separator.</li>
+                        <li><span class="font-mono">dim_*</span> er ERP-dimensioner (fx <span class="font-mono">dim_artskonto</span>).</li>
+                        <li>Udvidet skabelon tilføjer <span class="font-mono">field_*</span> for feltspecifik matching.</li>
+                        <li>Eksport bruger udvidet format, så <span class="font-mono">matchReferences</span>/<span class="font-mono">matchCounterparties</span>/<span class="font-mono">matchClassification</span> kan godt være tomme selv om reglen matcher.</li>
+                      </ul>
+                    </div>
+                  </details>
                 </div>
               </div>
-              <div class="flex items-center gap-2">
+              <div class="flex flex-col items-stretch gap-2 min-w-64">
                 <UButton
-                  icon="i-lucide-download"
+                  icon="solar:clipboard-list-bold-duotone"
                   color="neutral"
                   variant="soft"
-                  label="Download skabelon"
+                  label="Skabelon"
                   to="/api/rules/template"
                   target="_blank"
                 />
                 <UButton
-                  icon="i-lucide-download"
+                  icon="solar:clipboard-list-bold-duotone"
                   color="neutral"
-                  variant="outline"
-                  label="Download avanceret"
+                  variant="soft"
+                  label="Udvidet skabelon"
                   to="/api/rules/template?variant=advanced"
+                  target="_blank"
+                />
+                <UButton
+                  icon="i-lucide-download"
+                  color="primary"
+                  variant="soft"
+                  label="Download alle regler"
+                  to="/api/rules/export?variant=advanced"
                   target="_blank"
                 />
               </div>

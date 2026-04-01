@@ -123,6 +123,42 @@ export const matchEntrySchema = z.object({
   fields: z.array(z.enum(matchFieldEnumValues)).optional(),
   operator: z.enum(ruleConditionOperatorValues).default('eq').optional(),
   gate: z.enum(['OG', 'ELLER']).default('ELLER')
+}).superRefine((data, ctx) => {
+  const operator = data.operator ?? 'eq'
+  if (operator !== 'regex') return
+
+  const allowedCategories = ['Fritekst', 'Part'] as const
+  if (!allowedCategories.includes(data.category as (typeof allowedCategories)[number])) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['operator'],
+      message: 'Regex-match er kun understøttet for Fritekst og Modpart',
+    })
+    return
+  }
+
+  const pattern = String(data.value ?? '')
+  if (pattern.length > 512) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['value'],
+      message: 'Regex-mønstret er for langt (maks 512 tegn)',
+    })
+    return
+  }
+
+  try {
+    // Note: patterns are stored as-is; matching uses normalized transaction values.
+    // We validate here to ensure rules can be saved/imported safely.
+    // eslint-disable-next-line no-new
+    new RegExp(pattern)
+  } catch {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['value'],
+      message: 'Ugyldig regex-mønster',
+    })
+  }
 })
 
 export type MatchGate = 'OG' | 'ELLER'

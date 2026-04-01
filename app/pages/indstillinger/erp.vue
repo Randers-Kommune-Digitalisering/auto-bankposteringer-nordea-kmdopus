@@ -105,7 +105,7 @@ const constraintFields = computed(() => {
       <section class="space-y-3">
         <div>
           <p class="text-xs font-semibold uppercase tracking-wide text-muted">ERP metadata</p>
-          <p class="text-sm text-muted">Alle værdier er hentet fra din .env fil og kan ikke redigeres i UI'et.</p>
+          <p class="text-sm text-muted">Alle værdier er gemt som miljøvariabler og kan ikke redigeres her.</p>
         </div>
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div
