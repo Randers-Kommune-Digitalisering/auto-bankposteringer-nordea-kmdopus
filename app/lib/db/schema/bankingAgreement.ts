@@ -1,11 +1,16 @@
 import { z } from 'zod'
-import { pgTable, boolean, timestamp } from 'drizzle-orm/pg-core'
+import { pgEnum, pgTable, boolean, timestamp } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
 
 import { bankProvider } from './account'
 
 export const bankProviderValues = ['danskebank', 'nordea', 'bankconnect'] as const
 export type BankProvider = (typeof bankProviderValues)[number]
+
+export const bankChannelValues = ['iso20022', 'rest'] as const
+export type BankChannel = (typeof bankChannelValues)[number]
+
+export const bankChannel = pgEnum('bank_channel', bankChannelValues)
 
 /**
  * Provider-level banking agreement configuration.
@@ -16,6 +21,7 @@ export type BankProvider = (typeof bankProviderValues)[number]
 export const bankingAgreement = pgTable('banking_agreement', {
   provider: bankProvider('provider').primaryKey(),
   enabled: boolean('enabled').notNull().default(false),
+  channel: bankChannel('channel').notNull().default('iso20022'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })

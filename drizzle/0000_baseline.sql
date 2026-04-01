@@ -1,4 +1,5 @@
 CREATE TYPE "public"."bank_provider" AS ENUM('danskebank', 'nordea', 'bankconnect');--> statement-breakpoint
+CREATE TYPE "public"."bank_channel" AS ENUM('iso20022', 'rest');--> statement-breakpoint
 CREATE TYPE "public"."accounting_dimension_constraint_kind" AS ENUM('requires_any_of', 'requires_all_of', 'requires_exactly_one_of', 'forbids_any_of');--> statement-breakpoint
 CREATE TYPE "public"."banking_document_format" AS ENUM('camt053', 'unknown');--> statement-breakpoint
 CREATE TYPE "public"."booking_status" AS ENUM('åben', 'bogført', 'undtaget');--> statement-breakpoint
@@ -104,9 +105,20 @@ CREATE TABLE "banking_adapter_cursor" (
 CREATE TABLE "banking_agreement" (
 	"provider" "bank_provider" PRIMARY KEY NOT NULL,
 	"enabled" boolean DEFAULT false NOT NULL,
+	"channel" "bank_channel" DEFAULT 'iso20022' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
+--> statement-breakpoint
+CREATE TABLE "banking_agreement_account_allowlist" (
+	"provider" "bank_provider" NOT NULL,
+	"iban" text NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "banking_agreement_account_allowlist_provider_iban_pk" PRIMARY KEY("provider","iban")
+);
+--> statement-breakpoint
+ALTER TABLE "banking_agreement_account_allowlist" ADD CONSTRAINT "banking_agreement_account_allowlist_provider_fk" FOREIGN KEY ("provider") REFERENCES "public"."banking_agreement"("provider") ON DELETE cascade ON UPDATE no action;
 --> statement-breakpoint
 CREATE TABLE "banking_agreement_cursor" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
