@@ -12,6 +12,7 @@ export default defineNuxtConfig({
     },
     scheduledTasks: {
       '0 3 * * *': 'bank-transactions-batch',
+      '30 3 * * *': 'db-cleanup-batch',
     },
   },
 
