@@ -302,7 +302,7 @@ const errorPreview = computed(() => {
                   target="_blank"
                 />
                 <UButton
-                  icon="solar:clipboard-list-bold-duotone"
+                  icon="solar:clipboard-add-bold-duotone"
                   color="neutral"
                   variant="soft"
                   label="Udvidet skabelon"
