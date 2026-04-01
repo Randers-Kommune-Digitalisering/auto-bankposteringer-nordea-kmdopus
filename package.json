@@ -16,6 +16,8 @@
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
     "smoke:smtp": "tsx scripts/smoke/smtp-send.ts",
+    "smoke:sftp": "tsx scripts/smoke/sftp-probe.ts",
+    "smoke:erp:pipeline": "APP_ROLE=worker tsx --tsconfig tsconfig.scripts.json scripts/smoke/erp-sftp-pipeline.ts",
     "banking:nordea:schemas": "tsx scripts/banking/nordea/download-secure-envelope-schemas.ts"
   },
   "dependencies": {

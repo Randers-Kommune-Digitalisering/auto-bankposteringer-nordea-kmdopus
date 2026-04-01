@@ -229,11 +229,18 @@ function buildFileName(
   docDate: string,
   docTime: string,
 ): string {
+  // Support both the newer {token} style and the legacy KMD mask style
+  // used historically in municipal configurations.
   return mask
     .replaceAll('{integrationId}', integrationId)
     .replaceAll('{municipalityCode}', municipalityCode)
     .replaceAll('{docDate}', docDate)
     .replaceAll('{docTime}', docTime)
+    // Legacy tokens (example: ZFIR_..._IND_xxx_zzzz_yyyymmdd_hhmmss.xml)
+    .replaceAll('xxx', integrationId)
+    .replaceAll('zzzz', municipalityCode)
+    .replaceAll('yyyymmdd', docDate)
+    .replaceAll('hhmmss', docTime)
 }
 
 function normalizeAttachments(posting: PostingLineInput): PostingAttachment[] {
