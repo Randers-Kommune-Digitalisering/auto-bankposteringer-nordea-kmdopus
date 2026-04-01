@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import { defineConfig } from 'drizzle-kit'
 import { z } from 'zod'
-import tryParseEnv from './app/lib/try-parse-env'
+import tryParseEnv from './app/lib/env/try-parse-env'
 
 const DrizzleEnvSchema = z.object({
   DATABASE_URL: z.string(),

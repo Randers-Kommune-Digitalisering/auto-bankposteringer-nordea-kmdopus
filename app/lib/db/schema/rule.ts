@@ -225,6 +225,26 @@ export const ruleDraftSchema = z.object({
   },
 )
 
+  .superRefine((data, ctx) => {
+    const raw = (data.accountingNotifyTo ?? '').trim()
+    if (!raw) return
+
+    const domain = (process.env.SMTP_ALLOWED_RECIPIENT_DOMAIN ?? process.env.SMTP_DOMAIN ?? '')
+      .trim()
+      .toLowerCase()
+    if (!domain) return
+
+    const at = raw.lastIndexOf('@')
+    const recipientDomain = at >= 0 ? raw.slice(at + 1).toLowerCase() : ''
+    if (recipientDomain !== domain) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['accountingNotifyTo'],
+        message: `Email skal være inden for domænet ${domain}`,
+      })
+    }
+  })
+
 export const ruleBasicSchema = z.object({
   type: z.enum(ruleTypeValues),
   status: z.enum(ruleStatusValues),
@@ -276,6 +296,24 @@ export const ruleAccountingSchema = z.object({
   accountingAttachmentName: z.array(z.string()).optional(),
   accountingAttachmentFileExtension: z.array(z.string()).optional(),
   accountingAttachmentData: z.array(z.string()).optional(),
+}).superRefine((data, ctx) => {
+  const raw = (data.accountingNotifyTo ?? '').trim()
+  if (!raw) return
+
+  const domain = (process.env.SMTP_ALLOWED_RECIPIENT_DOMAIN ?? process.env.SMTP_DOMAIN ?? '')
+    .trim()
+    .toLowerCase()
+  if (!domain) return
+
+  const at = raw.lastIndexOf('@')
+  const recipientDomain = at >= 0 ? raw.slice(at + 1).toLowerCase() : ''
+  if (recipientDomain !== domain) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['accountingNotifyTo'],
+      message: `Email skal være inden for domænet ${domain}`,
+    })
+  }
 })
 
 export const ruleSelectSchema = createSelectSchema(rule)

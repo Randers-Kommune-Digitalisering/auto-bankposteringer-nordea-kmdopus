@@ -22,6 +22,7 @@ import {
   resolveCounterpartyName,
   resolvePostingText,
 } from '../domain/postingUtils'
+import { renderNotificationTemplate, getDefaultNotificationTemplate } from '../../notifications/domain/notificationTemplate'
 
 export interface MatchingNotification {
   to: string
@@ -37,7 +38,7 @@ export interface MatchSummary {
   unmatchedTransactions: number
 }
 
-type MatchableTransaction = {
+export type MatchableTransaction = {
   transactionId: string
   runId: string
   accountId: string
@@ -84,7 +85,7 @@ type HydratedRule = {
   accounting?: RuleAccounting
 }
 
-type RuleAccounting = {
+export type RuleAccounting = {
   dimensions: Record<string, string>
   bookingText?: string | null
   cprType?: string | null
@@ -585,33 +586,41 @@ function buildNotification(
     return undefined
   }
 
-  const counterpart = resolveCounterpartyName(tx) ?? 'modpart'
+  const counterpart = resolveCounterpartyName(tx)
+    ?? tx.debtorName
+    ?? tx.creditorName
+    ?? tx.ultimateDebtorName
+    ?? tx.ultimateCreditorName
+    ?? 'modpart'
   const amountFormatted = formatAmount(tx.amount)
 
-  const dimensions = formatDimensions(accounting.dimensions)
+  const postingText = resolvePostingText(tx, accounting)
 
-  const lines = [
-    `Din indbetaling på ${amountFormatted} kr. fra ${counterpart} er modtaget og er blevet bogført med nedenstående kontering:`,
-    '',
-    ...dimensions,
-  ]
+  const bookingDateFormatted = tx.bookingDate
+    ? new Date(tx.bookingDate).toLocaleDateString('da-DK')
+    : ''
+
+  const body = renderNotificationTemplate(getDefaultNotificationTemplate(), {
+    tx: tx as any,
+    accounting: accounting as any,
+    counterpartName: counterpart,
+    amountFormatted,
+    bookingDateFormatted,
+    postingText,
+    dimensions: Object.entries(accounting.dimensions)
+      .sort(([a], [b]) => {
+        if (a === STATUS_ACCOUNT_DIMENSION_KEY && b !== STATUS_ACCOUNT_DIMENSION_KEY) return -1
+        if (b === STATUS_ACCOUNT_DIMENSION_KEY && a !== STATUS_ACCOUNT_DIMENSION_KEY) return 1
+        return a.localeCompare(b)
+      })
+      .map(([key, value]) => ({ key, value })),
+  })
 
   return {
     to: recipient,
     subject: NOTIFICATION_SUBJECT,
-    body: lines.join('\n'),
+    body,
   }
-}
-
-function formatDimensions(dimensions: Record<string, string>): string[] {
-  const entries = Object.entries(dimensions)
-  entries.sort(([a], [b]) => {
-    if (a === STATUS_ACCOUNT_DIMENSION_KEY && b !== STATUS_ACCOUNT_DIMENSION_KEY) return -1
-    if (b === STATUS_ACCOUNT_DIMENSION_KEY && a !== STATUS_ACCOUNT_DIMENSION_KEY) return 1
-    return a.localeCompare(b)
-  })
-
-  return entries.map(([key, value]) => `${key}: ${value}`)
 }
 
 function parseAmount(value: unknown): number {

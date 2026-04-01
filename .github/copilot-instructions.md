@@ -17,6 +17,11 @@ Technology stack (ordered by importance):
 - Drizzle ORM (pg-core)
 - Zod for boundary validation
 
+Security hygiene (financial infrastructure):
+- Regularly run vulnerability audits for dependencies, especially after dependency/lockfile changes and before merging.
+- Prefer `pnpm audit --prod --audit-level=high` to assess runtime risk, and use `pnpm audit` as needed to include dev tooling.
+- Treat `critical` findings as a priority to remediate or explicitly accept with justification.
+
 When generating code:
 - Prefer explicit domain modeling.
 - Keep business logic outside UI components.
