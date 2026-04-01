@@ -122,48 +122,6 @@ const constraintFields = computed(() => {
           </div>
         </div>
       </section>
-
-      <section class="space-y-3 mt-8">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-wide text-muted">Konteringsdimensioner</p>
-          <p class="text-sm text-muted">Hentes dynamisk fra databasen for aktiv ERP leverandør.</p>
-        </div>
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div
-            v-for="field in dimensionFields"
-            :key="field.label"
-            class="flex flex-col gap-1"
-          >
-            <span class="text-xs font-semibold text-muted">{{ field.label }}</span>
-            <UInput
-              :model-value="field.value"
-              readonly
-              class="font-mono text-sm"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section class="space-y-3 mt-8">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-wide text-muted">Konteringsregler</p>
-          <p class="text-sm text-muted">Afhængigheder mellem dimensioner (bruges til validering i UI, import og API).</p>
-        </div>
-        <div class="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
-          <div
-            v-for="field in constraintFields"
-            :key="field.label"
-            class="flex flex-col gap-1"
-          >
-            <span class="text-xs font-semibold text-muted">{{ field.label }}</span>
-            <UInput
-              :model-value="field.value"
-              readonly
-              class="font-mono text-sm"
-            />
-          </div>
-        </div>
-      </section>
     </template>
   </UDashboardPanel>
 </template>

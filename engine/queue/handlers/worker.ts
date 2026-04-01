@@ -45,17 +45,19 @@ async function processJobs(limit: number, allowedTypes?: string[]): Promise<numb
     const claimed = await claimJob(allowedTypes)
     if (!claimed) return processed
 
-    const log = logger.child({ scope: 'worker.job', jobId: claimed.id, jobType: claimed.type })
+    const log = logger.child({ scope: 'worker.job', jobId: claimed.id, jobType: claimed.type, runId: claimed.runId ?? undefined })
     try {
+      log.info('worker.job.start')
       await handleJob(claimed.type, claimed.payload, { runId: claimed.runId ?? undefined })
       await db.execute(sql`
         update job
         set status = 'succeeded', locked_at = null, locked_by = null, updated_at = now(), last_error = null
         where id = ${claimed.id}
       `)
+      log.info('worker.job.succeeded')
       processed += 1
     } catch (err) {
-      log.error('Job fejlede', { err })
+      log.error('worker.job.failed', { err })
       await db.execute(sql`
         update job
         set
@@ -122,6 +124,7 @@ async function processOutbox(limit: number): Promise<number> {
 
     const log = logger.child({ scope: 'worker.outbox', outboxId: claimed.id, topic: claimed.topic })
     try {
+      log.info('worker.outbox.start')
       const result = await handleOutbox(claimed.topic, claimed.payload)
       await db.execute(sql`
         update outbox
@@ -129,9 +132,10 @@ async function processOutbox(limit: number): Promise<number> {
             payload = ${JSON.stringify({ ...claimed.payload, result })}::jsonb
         where id = ${claimed.id}
       `)
+      log.info('worker.outbox.sent')
       processed += 1
     } catch (err) {
-      log.error('Outbox fejlede', { err })
+      log.error('worker.outbox.failed', { err })
       await db.execute(sql`
         update outbox
         set
@@ -173,8 +177,8 @@ async function claimOutbox(): Promise<{ id: string; topic: string; payload: any 
 
 async function handleJob(type: string, payload: any, context: { runId?: string } = {}): Promise<void> {
   if (type === 'banking.ingest') {
-    const { runTransactionBatch } = await import('../../banking-ingestion/handlers/runTransactionBatch')
-    await runTransactionBatch({ runId: context.runId ?? (payload?.runId ? String(payload.runId) : undefined) })
+    const { runBankIngestionAndPosting } = await import('../../banking-ingestion/handlers/runBankIngestionAndPosting')
+    await runBankIngestionAndPosting({ runId: context.runId ?? (payload?.runId ? String(payload.runId) : undefined) })
     return
   }
 
@@ -200,6 +204,28 @@ async function handleOutbox(topic: string, payload: any): Promise<any> {
 
     const { uploadErpRequestPayload } = await import('../../erp-integration/infrastructure/erpOutbox')
     return await uploadErpRequestPayload({ requestId, erpSupplier: payload?.erpSupplier })
+  }
+
+  if (topic === 'notifications.mail') {
+    const to = payload?.to
+    const subject = payload?.subject
+    const body = payload?.body
+    if (!to || typeof to !== 'string') throw new Error('Outbox payload mangler to')
+    if (!subject || typeof subject !== 'string') throw new Error('Outbox payload mangler subject')
+    if (body == null || typeof body !== 'string') throw new Error('Outbox payload mangler body')
+
+    const { sendSmtpMail } = await import('../../notifications/infrastructure/smtpClient')
+    const { smtpNotificationConfig } = await import('~/lib/env/env')
+
+    return await sendSmtpMail(
+      {
+        host: smtpNotificationConfig.host,
+        allowedRecipientDomain: smtpNotificationConfig.allowedRecipientDomain,
+        port: smtpNotificationConfig.port,
+        senderAddress: smtpNotificationConfig.senderAddress,
+      },
+      { to, subject, body },
+    )
   }
 
   throw new Error(`Ukendt outbox-topic: ${topic}`)

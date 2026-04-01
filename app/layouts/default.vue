@@ -116,6 +116,13 @@ const links = [[
           open.value = false
         }
       },
+      {
+        label: 'Notifikation',
+        to: '/indstillinger/notifikation',
+        onSelect: () => {
+          open.value = false
+        }
+      },
     ]
   },
   {

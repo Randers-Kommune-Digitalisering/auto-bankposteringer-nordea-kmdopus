@@ -11,7 +11,7 @@ export function useAuthz() {
 
   async function refresh() {
     try {
-      const res = await $fetch<RolesResponse>('/api/roles')
+      const res = await $fetch<RolesResponse>('/api/auth').catch(() => $fetch<RolesResponse>('/api/roles'))
       roles.value = (Array.isArray(res.roles) ? res.roles : []) as AppRole[]
       username.value = res.username ?? null
       loaded.value = true
