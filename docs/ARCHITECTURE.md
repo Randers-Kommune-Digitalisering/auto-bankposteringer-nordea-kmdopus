@@ -32,9 +32,17 @@ Operational detail (EDIWS v5.0): EDIWS validates a SOAP-level XMLDSig signature 
 
 Operational detail (Nordea CA Web Services): Nordea requires WS-Security `Timestamp` and a SOAP-level XMLDSig signature over the SOAP Body. For account statements we default to the Corporate Access file type `NDAREXXMLO` (CAMT.053 extended).
 
+### Selecting an adapter (runtime)
+
+At runtime the batch ingestion handler selects a bank adapter **deterministically from persisted database state**:
+
+- For each enabled provider (`banking_agreement.enabled=true`), we read `banking_agreement.channel`.
+- `channel=iso20022` routes to the current ISO 20022 (camt.053) adapters.
+- `channel=rest` is reserved for provider REST APIs (to be implemented per provider).
+
 ### Selecting an adapter (dev)
 
-The batch ingestion handler currently selects a bank adapter by env for development:
+For development and smoke testing, an explicit env override can force a specific adapter regardless of database configuration:
 
 - Set `BANK_ADAPTER=danskebank-edi-ws` to use Danske Bank EDIWS
 - Set `BANK_ADAPTER=nordea-corporate-access-ws` to use Nordea Corporate Access Web Services
@@ -49,6 +57,12 @@ Danske Bank EDIWS needs additional env (IDs + signing material). See:
 
 Bank Web Services are typically agreement-scoped (provider/customer credentials determine which files are accessible).
 The system models this explicitly via `banking_agreement` (one per provider) and fetches documents per enabled provider.
+
+Note: `banking_agreement.channel` allows each installation/tenant to choose whether a provider is contacted via ISO 20022 or a REST API.
+
+For API-based channels (e.g. Nordea Premium API), the system may require an explicit, provider-level allowlist of which accounts are permitted to be fetched.
+This is modeled as `banking_agreement_account_allowlist` and stores IBANs per provider.
+The allowlist is **not** modeled per channel; it is provider-scoped configuration that the selected adapter may choose to enforce.
 
 Bank accounts are not manually created by end users. Instead, accounts are discovered from ingested CAMT.053 statements and upserted deterministically using the statement's IBAN + currency (e.g. `DKxxxxxxxxxxxxxx-DKK`).
 

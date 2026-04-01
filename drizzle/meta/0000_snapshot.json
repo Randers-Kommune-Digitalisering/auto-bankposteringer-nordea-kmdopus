@@ -617,6 +617,14 @@
           "notNull": true,
           "default": false
         },
+        "channel": {
+          "name": "channel",
+          "type": "bank_channel",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'iso20022'"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -635,6 +643,68 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.banking_agreement_account_allowlist": {
+      "name": "banking_agreement_account_allowlist",
+      "schema": "",
+      "columns": {
+        "provider": {
+          "name": "provider",
+          "type": "bank_provider",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "iban": {
+          "name": "iban",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "banking_agreement_account_allowlist_provider_fk": {
+          "name": "banking_agreement_account_allowlist_provider_fk",
+          "tableFrom": "banking_agreement_account_allowlist",
+          "tableTo": "banking_agreement",
+          "columnsFrom": [
+            "provider"
+          ],
+          "columnsTo": [
+            "provider"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "banking_agreement_account_allowlist_provider_iban_pk": {
+          "name": "banking_agreement_account_allowlist_provider_iban_pk",
+          "columns": [
+            "provider",
+            "iban"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -2886,6 +2956,14 @@
         "danskebank",
         "nordea",
         "bankconnect"
+      ]
+    },
+    "public.bank_channel": {
+      "name": "bank_channel",
+      "schema": "public",
+      "values": [
+        "iso20022",
+        "rest"
       ]
     },
     "public.accounting_dimension_constraint_kind": {
