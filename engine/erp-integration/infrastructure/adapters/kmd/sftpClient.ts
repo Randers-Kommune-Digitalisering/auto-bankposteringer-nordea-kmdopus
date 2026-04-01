@@ -1,6 +1,7 @@
 import path from 'node:path'
 import SftpClient from 'ssh2-sftp-client'
 import env from '~/lib/env/env'
+import { logger } from '~/lib/logger'
 
 export interface SftpConnectionOptions {
   host: string
@@ -36,6 +37,7 @@ const defaultOptions: SftpConnectionOptions = {
 
 export class ErpSftpClient {
   private readonly options: SftpConnectionOptions
+  private readonly log = logger.child({ scope: 'erp.sftp' })
 
   constructor(options: Partial<SftpConnectionOptions> = {}) {
     this.options = { ...defaultOptions, ...options }
@@ -45,6 +47,19 @@ export class ErpSftpClient {
     const remoteDir = options.remoteDir ?? this.options.requestDir
     const remotePath = buildRemotePath(remoteDir, options.filename)
 
+    const bytes =
+      typeof options.content === 'string'
+        ? Buffer.byteLength(options.content, 'utf-8')
+        : options.content.byteLength
+
+    this.log.info('SFTP upload start', {
+      remotePath,
+      remoteDir,
+      filename: options.filename,
+      bytes,
+    })
+
+    const startedAt = Date.now()
     await this.withClient(async client => {
       await ensureDir(client, remoteDir)
       await client.put(
@@ -55,14 +70,29 @@ export class ErpSftpClient {
       )
     })
 
+    this.log.info('SFTP upload done', { remotePath, ms: Date.now() - startedAt })
+
     return remotePath
   }
 
   async fetchResponseFiles(limit?: number): Promise<RemoteFile[]> {
     const files: RemoteFile[] = []
+    const startedAt = Date.now()
+
+    this.log.info('SFTP fetch responses start', {
+      responseDir: this.options.responseDir,
+      limit,
+    })
+
     await this.withClient(async client => {
       const entries = await client.list(this.options.responseDir)
       const limitedEntries = typeof limit === 'number' ? entries.slice(0, limit) : entries
+
+      this.log.debug('SFTP response dir listed', {
+        responseDir: this.options.responseDir,
+        entries: entries.length,
+        picked: limitedEntries.length,
+      })
 
       for (const entry of limitedEntries) {
         if (entry.type !== '-' || !entry.name) {
@@ -70,6 +100,7 @@ export class ErpSftpClient {
         }
 
         const remotePath = buildRemotePath(this.options.responseDir, entry.name)
+        this.log.debug('SFTP download start', { remotePath, size: entry.size ?? 0 })
         const contents = await client.get(remotePath)
         files.push({
           path: remotePath,
@@ -83,24 +114,53 @@ export class ErpSftpClient {
       }
     })
 
+    this.log.info('SFTP fetch responses done', {
+      responseDir: this.options.responseDir,
+      files: files.length,
+      ms: Date.now() - startedAt,
+    })
+
     return files
   }
 
   async deleteRemoteFile(remotePath: string): Promise<void> {
+    const startedAt = Date.now()
+    this.log.info('SFTP delete start', { remotePath })
     await this.withClient(client => client.delete(remotePath))
+    this.log.info('SFTP delete done', { remotePath, ms: Date.now() - startedAt })
   }
 
   private async withClient<T>(handler: (client: SftpClient) => Promise<T>): Promise<T> {
     const client = new SftpClient()
     try {
       const normalized = normalizeHostPort(this.options.host, this.options.port)
+
+      this.log.debug('SFTP connect start', {
+        host: normalized.host,
+        port: normalized.port,
+        username: this.options.username,
+        requestDir: this.options.requestDir,
+        responseDir: this.options.responseDir,
+      })
+
+      const connectStartedAt = Date.now()
       await client.connect({
         host: normalized.host,
         port: normalized.port,
         username: this.options.username,
         password: this.options.password,
       })
+
+      this.log.debug('SFTP connect done', {
+        host: normalized.host,
+        port: normalized.port,
+        ms: Date.now() - connectStartedAt,
+      })
+
       return await handler(client)
+    } catch (error: unknown) {
+      this.log.error('SFTP operation failed', { error })
+      throw error
     } finally {
       await client.end().catch(() => undefined)
     }

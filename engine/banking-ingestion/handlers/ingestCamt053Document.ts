@@ -1,5 +1,6 @@
 import crypto from 'node:crypto'
 import { eq } from 'drizzle-orm'
+import { logger } from '~/lib/logger'
 import { account } from '../../../app/lib/db/schema/account'
 import {
   bankingDocument,
@@ -70,8 +71,21 @@ export async function ingestCamt053Document(
   insertedTransactions: number
   deduplicated: boolean
 }> {
+  const log = logger.child({
+    scope: 'banking.ingestCamt053Document',
+    runId: input.runId,
+    provider: input.provider,
+  })
+
+  const startedAt = Date.now()
   const xml = input.xml
   const contentHash = crypto.createHash('sha256').update(xml, 'utf8').digest('hex')
+
+  log.info('CAMT.053 ingest start', {
+    filename: input.filename ?? null,
+    contentHashPrefix: contentHash.slice(0, 12),
+    bytes: Buffer.byteLength(xml, 'utf8'),
+  })
 
   const existing = await db
     .select({ id: bankingDocument.id })
@@ -80,6 +94,10 @@ export async function ingestCamt053Document(
     .limit(1)
 
   if (existing.length) {
+    log.info('CAMT.053 ingest deduplicated', {
+      documentId: existing[0]!.id,
+      ms: Date.now() - startedAt,
+    })
     return {
       documentId: existing[0]!.id,
       insertedStatements: 0,
@@ -92,6 +110,12 @@ export async function ingestCamt053Document(
   const parsed = parseCamt053Xml(xml)
   const messageId = parsed.messageId
   const createdAt = parsed.createdAt
+
+  log.debug('CAMT.053 parsed', {
+    messageId: messageId ?? null,
+    createdAt: createdAt ?? null,
+    statements: parsed.statements.length,
+  })
 
   const insertedDocument = await db
     .insert(bankingDocument)
@@ -200,6 +224,14 @@ export async function ingestCamt053Document(
       insertedTransactions += 1
     }
   }
+
+  log.info('CAMT.053 ingest done', {
+    documentId,
+    insertedStatements,
+    insertedBalances,
+    insertedTransactions,
+    ms: Date.now() - startedAt,
+  })
 
   return {
     documentId,

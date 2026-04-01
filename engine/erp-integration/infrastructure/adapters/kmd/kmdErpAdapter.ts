@@ -2,6 +2,7 @@ import type { BuildErpRequestInput, ErpAdapter } from '../../../ports/erpAdapter
 import type { PostingLineInput } from '../../../../posting/domain/posting'
 import { buildErpPostingXml, type BuildPostingXmlOptions } from './postingXmlBuilder'
 import { ErpSftpClient, type RemoteFile } from './sftpClient'
+import { logger } from '~/lib/logger'
 
 function tryResolveRequestIdFromFilename(file: RemoteFile): string | undefined {
   const name = file.name.trim()
@@ -17,6 +18,7 @@ export function createKmdErpAdapter(options: {
   xmlOptions?: Partial<BuildPostingXmlOptions>
 } = {}): ErpAdapter {
   const sftp = options.sftpClient ?? new ErpSftpClient()
+  const log = logger.child({ scope: 'erp.kmdAdapter' })
 
   return {
     supplier: 'kmd',
@@ -41,11 +43,17 @@ export function createKmdErpAdapter(options: {
     },
 
     async uploadRequestPayload(input: { filename: string; content: string }) {
+      log.info('ERP request upload (KMD) start', { filename: input.filename })
       const remotePath = await sftp.uploadFile({ filename: input.filename, content: input.content })
+      log.info('ERP request upload (KMD) done', { filename: input.filename, remotePath })
       return { remotePath }
     },
 
     async ingestResponses(ingestOptions = {}) {
+      log.info('ERP response ingest (KMD) start', {
+        limit: ingestOptions.limit,
+        deleteAfterPickup: ingestOptions.deleteAfterPickup ?? false,
+      })
       const files = await sftp.fetchResponseFiles(ingestOptions.limit)
       let deleted = 0
 
@@ -65,6 +73,8 @@ export function createKmdErpAdapter(options: {
           deleted += 1
         }
       }
+
+      log.info('ERP response ingest (KMD) done', { files: files.length, deletedRemoteFiles: deleted })
 
       return { responses, deletedRemoteFiles: deleted }
     },

@@ -1,0 +1,10 @@
+services:
+  sftp:
+    image: atmoz/sftp:alpine
+    container_name: sftp_dev
+    ports:
+      - "2223:22"
+    # Creates user "test" with password "pass" and two directories inside the chroot:
+    #   /test-from-randers
+    #   /test-to-randers
+    command: "test:pass:1001:100:test-from-randers,test-to-randers"

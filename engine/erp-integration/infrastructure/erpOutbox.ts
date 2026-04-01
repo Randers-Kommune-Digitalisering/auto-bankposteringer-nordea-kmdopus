@@ -159,6 +159,10 @@ export async function uploadErpRequestPayload(options: {
   requestId: string
   erpSupplier?: string
 }): Promise<{ requestId: string; remotePath: string }> {
+  const log = logger.child({ scope: 'erp.uploadErpRequestPayload', requestId: options.requestId })
+
+  log.info('ERP upload start', { erpSupplier: options.erpSupplier })
+
   const [row] = await db
     .select({ id: erpRequest.id, payload: erpRequest.payload })
     .from(erpRequest)
@@ -170,7 +174,12 @@ export async function uploadErpRequestPayload(options: {
   }
 
   const adapter = getErpAdapter(options.erpSupplier)
-  const { remotePath } = await adapter.uploadRequestPayload({ filename: row.id, content: row.payload })
-
-  return { requestId: row.id, remotePath }
+  try {
+    const { remotePath } = await adapter.uploadRequestPayload({ filename: row.id, content: row.payload })
+    log.info('ERP upload done', { remotePath })
+    return { requestId: row.id, remotePath }
+  } catch (error: unknown) {
+    log.error('ERP upload failed', { error })
+    throw error
+  }
 }
