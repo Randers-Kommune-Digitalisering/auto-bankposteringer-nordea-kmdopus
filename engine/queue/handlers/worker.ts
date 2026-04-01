@@ -76,7 +76,7 @@ async function processJobs(limit: number, allowedTypes?: string[]): Promise<numb
   return processed
 }
 
-const knownJobTypes = ['banking.ingest', 'erp.ingestResponses'] as const
+const knownJobTypes = ['banking.ingest', 'erp.ingestResponses', 'ops.dbCleanup'] as const
 type KnownJobType = (typeof knownJobTypes)[number]
 
 function sanitizeAllowedJobTypes(input?: string[]): KnownJobType[] | undefined {
@@ -189,6 +189,12 @@ async function handleJob(type: string, payload: any, context: { runId?: string }
       deleteAfterPickup: payload?.deleteAfterPickup,
       erpSupplier: payload?.erpSupplier,
     })
+    return
+  }
+
+  if (type === 'ops.dbCleanup') {
+    const { runDbCleanup } = await import('../../ops/handlers/dbCleanup')
+    await runDbCleanup()
     return
   }
 

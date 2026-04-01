@@ -282,6 +282,9 @@ The same container image is deployed in different roles via `APP_ROLE`.
   - Replicas: 1 (avoid duplicate scheduling)
   - Behavior: **enqueue-only** (it schedules jobs; it does not process the queue)
   - Note: scheduled ingestion creates a `run` row up front and enqueues a `banking.ingest` job with `job.runId` set, so troubleshooting/recovery can be done per run.
+  - Scheduled tasks (Nitro `scheduledTasks`) currently include:
+    - `bank-transactions-batch` (enqueues `banking.ingest`)
+    - `db-cleanup-batch` (enqueues `ops.dbCleanup`)
 - `APP_ROLE=worker`
   - Purpose: queue + outbox processing
   - Replicas: 1+ (scale independently based on throughput)
@@ -301,6 +304,11 @@ First iteration (no schema changes): workers can be started with a profile using
 - `WORKER_PROFILE=all` (default): process both jobs and outbox
 - `WORKER_PROFILE=cpu`: process CPU-heavy jobs only (e.g. `banking.ingest`), no outbox
 - `WORKER_PROFILE=io`: process I/O-heavy work (outbox + `erp.ingestResponses`)
+
+Data retention (sensitive/history cleanup):
+
+- The worker job `ops.dbCleanup` deletes non-domain history/payload tables older than the configured retention period.
+- Configure retention via env: `DATA_RETENTION_DAYS` (default: 90).
 
 Optional tuning (applies to all profiles):
 
