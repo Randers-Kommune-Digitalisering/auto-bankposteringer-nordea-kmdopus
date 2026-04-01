@@ -8,7 +8,7 @@ export const creditDebitIndicatorValues = ['CRDT', 'DBIT'] as const
 export const creditDebitIndicatorEnum = pgEnum('credit_debit_indicator', creditDebitIndicatorValues)
 export type CreditDebitIndicator = typeof creditDebitIndicatorValues[number]
 
-export const ruleConditionOperatorValues = ['eq', 'neq', 'like', 'ilike', 'gt', 'gte', 'lt', 'lte', 'in'] as const
+export const ruleConditionOperatorValues = ['eq', 'neq', 'like', 'ilike', 'regex', 'gt', 'gte', 'lt', 'lte', 'in'] as const
 export const ruleConditionOperatorEnum = pgEnum('rule_condition_operator', ruleConditionOperatorValues)
 export type RuleConditionOperator = typeof ruleConditionOperatorValues[number]
 

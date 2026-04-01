@@ -399,6 +399,37 @@ const matchModes = reactive(
   initCategoryRecord<'Alle felter' | 'Vælg felter'>(() => 'Alle felter')
 )
 
+type MatchOperatorUi = 'eq' | 'ilike' | 'regex'
+
+const matchOperators = reactive(
+  initCategoryRecord<MatchOperatorUi>(() => 'eq')
+)
+
+const matchOperatorItemsByCategory = computed(() => {
+  const base = [
+    { label: 'Eksakt', value: 'eq' as const },
+    { label: 'Indeholder', value: 'ilike' as const },
+  ]
+  const withRegex = [
+    ...base,
+    { label: 'Regex', value: 'regex' as const },
+  ]
+
+  const record = {} as Record<MatchCategory, Array<{ label: string; value: MatchOperatorUi }>>
+  for (const category of matchCategories) {
+    record[category] = (category === 'Fritekst' || category === 'Part')
+      ? withRegex
+      : base
+  }
+  return record
+})
+
+function matchOperatorLabel(value?: string | null): string {
+  if (value === 'ilike') return 'Indeholder'
+  if (value === 'regex') return 'Regex'
+  return 'Eksakt'
+}
+
 const addMatchEntry = (category: MatchCategory, mode: 'Alle felter' | 'Vælg felter') => {
   const value = matchInputs[category].trim()
   if (!value) return
@@ -413,6 +444,7 @@ const addMatchEntry = (category: MatchCategory, mode: 'Alle felter' | 'Vælg fel
   const entry: MatchEntry = {
     category,
     value,
+    operator: matchOperators[category],
     gate: matchCategoryGates[category],
     ...(mode === 'Vælg felter' && selectedColumns[category].length > 0 ? { fields: selectedColumns[category] } : {})
   }
@@ -881,6 +913,13 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                   <!-- Input og knap -->
                   <template v-if="matchModes[category] === 'Alle felter'">
                     <div class="flex gap-2 mb-4">
+                      <USelectMenu
+                        v-model="matchOperators[category]"
+                        :items="matchOperatorItemsByCategory[category]"
+                        class="min-w-fit"
+                        labelKey="label"
+                        valueKey="value"
+                      />
                       <UInput
                         v-model="matchInputs[category]"
                         :placeholder="`Søg i ${category.toLowerCase()}`"
@@ -896,6 +935,13 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
 
                   <template v-else>
                     <div class="flex gap-2 mb-4">
+                      <USelectMenu
+                        v-model="matchOperators[category]"
+                        :items="matchOperatorItemsByCategory[category]"
+                        class="min-w-fit"
+                        labelKey="label"
+                        valueKey="value"
+                      />
                       <UInput
                         v-model="matchInputs[category]"
                         :placeholder="`Værdi for ${selectedColumns[category].length > 0 ? selectedColumns[category].join(', ') : 'valgte felter'}`"
@@ -958,6 +1004,7 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                       >
                         <div class="text-xs">
                           <div class="font-semibold">{{ entry.value }}</div>
+                          <div class="text-gray-600 dark:text-gray-400">{{ matchOperatorLabel(entry.operator) }}</div>
                           <div v-if="entry.fields" class="text-gray-600 dark:text-gray-400">
                             {{ entry.fields.join(', ') }}
                           </div>

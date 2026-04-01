@@ -514,6 +514,17 @@ function compareValues(
       return actual.includes(expected.trim())
     case 'ilike':
       return normalizedActual.includes(normalizedExpected)
+    case 'regex': {
+      const pattern = expected.trim()
+      if (!pattern.length) return false
+      try {
+        return new RegExp(pattern).test(normalizedActual)
+      } catch {
+        // Invalid patterns should be blocked at rule creation/import.
+        // Returning false keeps matching deterministic and prevents run crashes.
+        return false
+      }
+    }
     case 'in': {
       const tokens = normalizedExpected
         .split(/[,;]+/)

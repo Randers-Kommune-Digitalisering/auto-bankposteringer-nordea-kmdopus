@@ -88,6 +88,48 @@ function splitMultiValueCell(value: unknown): string[] {
   return out
 }
 
+function isRegexAllowedForField(fieldKey: string): boolean {
+  const category = (fieldToCategory as any)[fieldKey] as string | undefined
+  return category === 'Fritekst' || category === 'Part'
+}
+
+function parseAdvancedFieldToken(
+  token: string,
+  defaultOperator: string,
+  fieldKey: string,
+): { operator: string; value: string } {
+  const raw = token.trim()
+  if (!raw.length) return { operator: defaultOperator, value: '' }
+
+  const idx = raw.indexOf(':')
+  if (idx > 0) {
+    const prefix = raw.slice(0, idx).trim().toLowerCase()
+    const rest = raw.slice(idx + 1).trim()
+
+    if ((ruleConditionOperatorValues as readonly string[]).includes(prefix)) {
+      if (!rest.length) {
+        throw new Error(`Match-værdi mangler efter "${prefix}:"`)
+      }
+
+      if (prefix === 'regex') {
+        if (!isRegexAllowedForField(fieldKey)) {
+          throw new Error('Regex er kun understøttet for felter i Fritekst og Modpart')
+        }
+        try {
+          // eslint-disable-next-line no-new
+          new RegExp(rest)
+        } catch {
+          throw new Error(`Ugyldig regex-mønster: ${rest}`)
+        }
+      }
+
+      return { operator: prefix, value: rest }
+    }
+  }
+
+  return { operator: defaultOperator, value: raw }
+}
+
 function toOptionalString(value: unknown): string | undefined {
   if (value == null) return undefined
   const s = String(value).trim()
@@ -190,11 +232,13 @@ function buildMatches(row: any, operator: string): MatchEntry[] | undefined {
     if (!category) continue
 
     for (const v of values) {
+      const parsed = parseAdvancedFieldToken(v, operator, String(fieldKey))
+      if (!parsed.value.length) continue
       matches.push({
         category,
-        value: v,
+        value: parsed.value,
         fields: [fieldKey as any],
-        operator: operator as any,
+        operator: parsed.operator as any,
         gate: 'ELLER',
       })
     }
@@ -247,6 +291,15 @@ export default defineEventHandler(async (event) => {
       const operator = operatorCell ?? 'eq'
       if (operatorCell && !ruleConditionOperatorValues.includes(operatorCell as any)) {
         errors.push({ row: rowNumber, field: 'matchOperator', message: `Ugyldig operator: ${operatorCell}` })
+        continue
+      }
+
+      if (operatorCell === 'regex') {
+        errors.push({
+          row: rowNumber,
+          field: 'matchOperator',
+          message: 'Regex er kun tilladt i avanceret skabelon i field_* kolonner (brug "regex:<mønster>" i cellen)',
+        })
         continue
       }
 

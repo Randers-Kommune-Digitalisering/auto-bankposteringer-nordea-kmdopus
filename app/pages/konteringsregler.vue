@@ -182,13 +182,22 @@ function getRowItems(row: Row<RuleListDto>) {
   return [
     { type: 'label', label: 'Handlinger' },
     {
-      label: 'Rediger regel',
+      label: 'Rediger',
       icon: 'solar:ruler-cross-pen-bold-duotone',
       onSelect() { handleEditRule(row) }
     },
+    {
+      label: 'Download',
+      icon: 'solar:download-bold-duotone',
+      onSelect() {
+        if (process.client) {
+          window.open(`/api/rule/${row.original.id}/export?variant=advanced`, '_blank')
+        }
+      }
+    },
     { type: 'separator' },
     {
-      label: 'Slet regel',
+      label: 'Slet',
       icon: 'solar:trash-bin-trash-bold-duotone',
       color: 'error',
       disabled: deletingRuleId.value === row.original.id,
