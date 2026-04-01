@@ -58,7 +58,7 @@ Bank accounts are not manually created by end users. Instead, accounts are disco
 - `banking_statement`: statement header/account info extracted from document
 - `banking_statement_balance`: statement balances (OPBD/CLBD/CLAV, etc.)
 - `transaction`: normalized entry/tx details (Refs, Parties, BkTxCd, remittance)
-- `rule` + `rule_banking_condition`: deterministic matching rules (CAMT-keyed)
+- `rule` + `rule_banking_condition`: deterministic matching rules (CAMT-keyed). Conditions include an explicit operator (e.g. `eq`, `ilike`, `regex`). Regex is only allowed for selected text/counterparty fields and is validated on input/import.
 - `erp_accounting_dimension_definition`: supplier-scoped definition of accounting dimensions (domain key, required/optional, ordering)
 - `erp_accounting_dimension_constraint` + `erp_accounting_dimension_constraint_member`: supplier-scoped dependency rules between dimensions (used for deterministic validation across UI/API/import). Constraints may be conditional on the triggering dimension value via regex (e.g. different rules for `artskonto` prefixes).
 - `rule_accounting_dimension_value`: per-rule values for accounting dimensions (normalized; no hardcoded primary/secondary/tertiary)
