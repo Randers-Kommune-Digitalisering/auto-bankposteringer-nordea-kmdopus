@@ -47,6 +47,10 @@ const baseCommonSchema = z.object({
   // Keep stateless: this only changes runtime behavior based on env.
   DEV_AUTH_BYPASS: z.enum(['true', 'false']).optional().default('false').transform(v => v === 'true'),
 
+  // Retention policy for deleting sensitive/history tables.
+  // Default is 90 days if unset.
+  DATA_RETENTION_DAYS: z.coerce.number().int().min(1).max(3650).default(90),
+
   // SFTP is required only for roles that actually communicate with the ERP via SFTP.
   SFTP_URL: z.string().optional(),
   SFTP_USERNAME: z.string().optional(),

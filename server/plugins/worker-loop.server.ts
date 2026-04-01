@@ -50,7 +50,7 @@ export default defineNitroPlugin((nitroApp) => {
 
   const workerOptionsBase =
     profile === 'cpu'
-      ? { maxJobs: 25, maxOutbox: 0, processOutbox: false, jobTypes: ['banking.ingest'] }
+      ? { maxJobs: 25, maxOutbox: 0, processOutbox: false, jobTypes: ['banking.ingest', 'ops.dbCleanup'] }
       : profile === 'io'
         ? { maxJobs: 10, maxOutbox: 100, processJobs: true, processOutbox: true, jobTypes: ['erp.ingestResponses'] }
         : { maxJobs: 25, maxOutbox: 100, processJobs: true, processOutbox: true }
