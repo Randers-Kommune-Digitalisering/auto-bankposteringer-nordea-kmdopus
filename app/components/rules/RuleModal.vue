@@ -242,9 +242,17 @@ type AccountingDimensionsResponse = {
   constraints: AccountingDimensionConstraint[]
 }
 
-const { data: accountingDimensionConfig } = await useFetch<AccountingDimensionsResponse>(
+const {
+  data: accountingDimensionConfig,
+  pending: accountingDimensionPending,
+  error: accountingDimensionError,
+} = await useFetch<AccountingDimensionsResponse>(
   '/api/settings/accounting-dimensions',
   { key: 'accounting-dimensions' },
+)
+
+const isAccountingDimensionConfigReady = computed(() =>
+  !accountingDimensionPending.value && !accountingDimensionError.value,
 )
 
 const accountingDimensionDefinitions = computed<AccountingDimensionDefinition[]>(
@@ -709,6 +717,17 @@ const matchCategoryOptions = matchFieldOptionsByCategory
 // Step validation
 // ---------------
 const handleNext = async () => {
+  if (currentStep.value === 1 && !isAccountingDimensionConfigReady.value) {
+    toast.add({
+      title: 'Kan ikke fortsætte',
+      description: accountingDimensionError.value
+        ? 'Konteringsdimensioner kunne ikke indlæses'
+        : 'Konteringsdimensioner indlæses stadig…',
+      color: 'error',
+    })
+    return
+  }
+
   const valid = await formRef.value.validate({ schema: stepSchema.value })
   if (!valid) return
 
@@ -720,6 +739,17 @@ const handlePrev = () => {
 }
 
 async function onSubmit(_event?: FormSubmitEvent<any>) {
+  if (!isAccountingDimensionConfigReady.value) {
+    toast.add({
+      title: 'Kan ikke gemme endnu',
+      description: accountingDimensionError.value
+        ? 'Konteringsdimensioner kunne ikke indlæses'
+        : 'Konteringsdimensioner indlæses stadig…',
+      color: 'error',
+    })
+    return
+  }
+
   state.accountingAttachmentName = attachments.value?.names ?? undefined
   state.accountingAttachmentFileExtension = attachments.value?.extensions ?? undefined
   state.accountingAttachmentData = attachments.value?.base64 ?? undefined
@@ -739,20 +769,47 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
 
   console.log('Submitting form with payload:', payload)
 
+  function apiErrorToString(error: unknown): string {
+    if (!error) return 'Uventet fejl'
+    if (typeof error === 'string') return error
+    if (typeof error === 'object') {
+      const anyErr = error as any
+      if (Array.isArray(anyErr.issues)) {
+        const msgs = anyErr.issues.map((i: any) => i?.message).filter(Boolean)
+        if (msgs.length) return msgs.join('; ')
+      }
+      if (typeof anyErr.message === 'string' && anyErr.message.trim()) return anyErr.message
+      try {
+        return JSON.stringify(anyErr)
+      } catch {
+        return 'Uventet fejl'
+      }
+    }
+    return String(error)
+  }
+
   try {
     if (isEdit.value && props.ruleId) {
       // PUT til /api/rule/{id}
-      await $fetch<RuleDraftSchema>(`/api/rule/${props.ruleId}`, {
+      const response = await $fetch<{ success: boolean; error?: unknown }>(`/api/rule/${props.ruleId}`, {
         method: 'PUT',
         body: payload
       })
+
+      if (!response?.success) {
+        throw new Error(apiErrorToString(response?.error))
+      }
       toast.add({ title: 'Regel opdateret', description: 'Reglen er blevet opdateret' })
     } else {
       // POST til /api/rule
-      await $fetch<RuleDraftSchema>('/api/rule', {
+      const response = await $fetch<{ success: boolean; error?: unknown }>(`/api/rule`, {
         method: 'POST',
         body: payload
       })
+
+      if (!response?.success) {
+        throw new Error(apiErrorToString(response?.error))
+      }
       toast.add({ title: 'Regel oprettet', description: 'Den nye regel er blevet oprettet' })
     }
 
@@ -767,9 +824,10 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
     resetForm()
     savedSnapshot.value = null
   } catch (error) {
+    const message = apiErrorToString((error as any)?.data?.message ?? (error as any)?.message ?? error)
     toast.add({ 
       title: 'Fejl', 
-      description: isEdit.value ? 'Fejl ved opdatering' : 'Fejl ved oprettelse',
+      description: message || (isEdit.value ? 'Fejl ved opdatering' : 'Fejl ved oprettelse'),
       color: 'error'
     })
   }
@@ -789,6 +847,14 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
     <template #body>
       <div v-if="isLocked" class="bg-yellow-100 dark:bg-yellow-900/30 p-2 mb-4 rounded border border-yellow-400 dark:border-yellow-700">
         Denne regel redigeres i øjeblikket af en anden bruger.
+      </div>
+
+      <div
+        v-if="(state.accountingNote ?? '').trim().length > 0"
+        class="mb-4 rounded-md border border-default bg-default px-3 py-2 text-sm border-l-4 border-l-primary/60"
+      >
+        <span class="font-semibold text-default">Noter:</span>
+        <span class="ml-2 text-muted whitespace-pre-wrap">{{ state.accountingNote }}</span>
       </div>
       <UForm ref="formRef" :schema="stepSchema" :state="state" @submit="onSubmit" :disabled="isLocked">
         <UStepper v-model="currentStep" :items="steps" class="mb-6">
@@ -1040,7 +1106,7 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                   <UFormField name="accountingText">
                     <UiFloatingLabelInput v-model="state.accountingText" class="w-full" label="Posteringstekst" color="neutral" />
                   </UFormField>
-                  <div class="grid grid-cols-2 gap-4 mt-2">
+                  <div class="grid grid-cols-2 gap-4 mt-2 items-end">
                     <UFormField label="CPR-type" name="accountingCprType">
                       <USelectMenu
                         v-model="state.accountingCprType as CprType"

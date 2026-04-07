@@ -23,6 +23,7 @@ import {
   resolvePostingText,
 } from '../domain/postingUtils'
 import { renderNotificationTemplate, getDefaultNotificationTemplate } from '../../notifications/domain/notificationTemplate'
+import { amountMatchesAbsolute, compareRulesBySpecificity } from '../domain/rulePrioritization'
 
 export interface MatchingNotification {
   to: string
@@ -106,12 +107,6 @@ type MatchOutcome =
       notification?: MatchingNotification
     }
   | { kind: 'unmatched'; command: PostingCommand }
-
-const RULE_TYPE_PRIORITY: Record<RuleType, number> = {
-  undtagelse: 0,
-  engangs: 1,
-  standard: 2,
-}
 
 const NOTIFICATION_SUBJECT = 'Indbetaling modtaget og bogført'
 
@@ -371,11 +366,7 @@ function groupRulesByAccount(rules: HydratedRule[]): Map<string, HydratedRule[]>
   }
 
   for (const bucket of byAccount.values()) {
-    bucket.sort((a, b) => {
-      const typeDiff = RULE_TYPE_PRIORITY[a.type] - RULE_TYPE_PRIORITY[b.type]
-      if (typeDiff !== 0) return typeDiff
-      return a.id - b.id
-    })
+    bucket.sort(compareRulesBySpecificity)
   }
 
   return byAccount
@@ -383,7 +374,7 @@ function groupRulesByAccount(rules: HydratedRule[]): Map<string, HydratedRule[]>
 
 function evaluateTransaction(tx: MatchableTransaction, rules: HydratedRule[]): MatchOutcome {
   for (const candidate of rules) {
-    if (!amountMatches(tx.amount, candidate.amountMin, candidate.amountMax)) {
+    if (!amountMatchesAbsolute(tx.amount, candidate.amountMin, candidate.amountMax)) {
       continue
     }
 
@@ -556,16 +547,6 @@ function compareNumeric(
     return false
   }
   return comparator(actualNumber, expectedNumber)
-}
-
-function amountMatches(amount: number, min?: number, max?: number): boolean {
-  if (min != null && amount < min) {
-    return false
-  }
-  if (max != null && amount > max) {
-    return false
-  }
-  return true
 }
 
 function mapAttachments(rows: RuleAccountingAttachmentRow[] = []): PostingAttachment[] {
