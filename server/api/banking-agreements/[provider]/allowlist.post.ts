@@ -12,6 +12,7 @@ function normalizeIban(input: string): string {
 
 const bodySchema = z.object({
   iban: z.string().min(1),
+  name: z.string().trim().min(1).max(80).optional(),
 })
 
 const ibanSchema = z
@@ -33,6 +34,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const iban = normalizeIban(parsed.data.iban)
+  const name = typeof parsed.data.name === 'string' && parsed.data.name.trim().length ? parsed.data.name.trim() : null
   const valid = ibanSchema.safeParse(iban)
   if (!valid.success) {
     throw createError({ statusCode: 400, statusMessage: valid.error.issues[0]?.message ?? 'Ugyldig IBAN' })
@@ -40,8 +42,11 @@ export default defineEventHandler(async (event) => {
 
   await db
     .insert(bankingAgreementAccountAllowlist)
-    .values({ provider: provider as any, iban, updatedAt: new Date() } as any)
-    .onConflictDoNothing({ target: [bankingAgreementAccountAllowlist.provider, bankingAgreementAccountAllowlist.iban] })
+    .values({ provider: provider as any, iban, name, updatedAt: new Date() } as any)
+    .onConflictDoUpdate({
+      target: [bankingAgreementAccountAllowlist.provider, bankingAgreementAccountAllowlist.iban],
+      set: { name, updatedAt: new Date() } as any,
+    })
 
   const rows = await db
     .select()

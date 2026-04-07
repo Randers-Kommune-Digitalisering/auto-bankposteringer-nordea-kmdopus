@@ -1,14 +1,17 @@
 <script setup lang="ts">
+import { z } from 'zod'
 import type { TableColumn } from '@nuxt/ui'
 import type { Row, SortingState } from '@tanstack/table-core'
 import { getPaginationRowModel } from '@tanstack/table-core'
 import type { AccountSelectSchema } from '~/lib/db/schema/account'
 
+type AllowlistAccount = { iban: string; name: string | null }
+
 type BankingAgreement = {
   provider: 'danskebank' | 'nordea' | 'bankconnect'
   enabled: boolean
   channel: 'iso20022' | 'rest'
-  allowlistIbans?: string[]
+  allowlistAccounts?: AllowlistAccount[]
   readiness?: 
     | {
         status: 'ready'
@@ -81,10 +84,31 @@ const sorting = ref<SortingState>([])
 const envModalOpen = ref(false)
 const envModalProvider = ref<BankingAgreement['provider'] | null>(null)
 
-const allowlistDraftIbanByProvider = reactive<Record<BankingAgreement['provider'], string>>({
-  danskebank: '',
-  nordea: '',
-  bankconnect: '',
+const allowlistDraftByProvider = reactive<Record<BankingAgreement['provider'], { iban: string; name: string }>>({
+  danskebank: { iban: '', name: '' },
+  nordea: { iban: '', name: '' },
+  bankconnect: { iban: '', name: '' },
+})
+
+const allowlistErrorsByProvider = reactive<
+  Record<BankingAgreement['provider'], { iban?: string; name?: string }>
+>({
+  danskebank: {},
+  nordea: {},
+  bankconnect: {},
+})
+
+function normalizeIban(input: string): string {
+  return input.replace(/\s+/g, '').toUpperCase()
+}
+
+const allowlistSchema = z.object({
+  iban: z
+    .string()
+    .min(1, 'IBAN er påkrævet')
+    .transform((v) => normalizeIban(v))
+    .refine((v) => /^[A-Z]{2}[0-9A-Z]{13,32}$/.test(v), 'Ugyldig IBAN'),
+  name: z.string().trim().max(80, 'Kaldenavn er for langt').optional(),
 })
 
 const { data: accounts, pending, refresh: refreshBankAccounts } = await useFetch<AccountSelectSchema[]>(
@@ -193,15 +217,31 @@ async function activateSelectedAgreement() {
 }
 
 async function addAllowlistIban(provider: BankingAgreement['provider']) {
-  const draft = allowlistDraftIbanByProvider[provider]
-  const iban = String(draft ?? '').trim()
-  if (!iban) return
+  allowlistErrorsByProvider[provider] = {}
+
+  const draft = allowlistDraftByProvider[provider]
+  const parsed = allowlistSchema.safeParse({ iban: draft.iban, name: draft.name })
+  if (!parsed.success) {
+    const nextErrors: { iban?: string; name?: string } = {}
+    for (const issue of parsed.error.issues) {
+      const key = issue.path?.[0]
+      if (key === 'iban') nextErrors.iban = issue.message
+      if (key === 'name') nextErrors.name = issue.message
+    }
+    allowlistErrorsByProvider[provider] = nextErrors
+    return
+  }
+
+  const iban = parsed.data.iban
+  const name = parsed.data.name?.trim() ? parsed.data.name.trim() : undefined
+
   try {
     await $fetch(`/api/banking-agreements/${provider}/allowlist`, {
       method: 'POST',
-      body: { iban },
+      body: { iban, name },
     })
-    allowlistDraftIbanByProvider[provider] = ''
+    allowlistDraftByProvider[provider].iban = ''
+    allowlistDraftByProvider[provider].name = ''
     await refreshAgreements()
   } catch (err: any) {
     toast.add({
@@ -241,10 +281,10 @@ const rows = computed(() => [...(accounts.value ?? [])])
 const createSortableHeader = (label: string) => ({ column }: { column: any }) => {
   const sortingState = column.getIsSorted?.()
   const iconName = sortingState === 'asc'
-    ? 'i-lucide-arrow-up'
+    ? 'solar:alt-arrow-up-bold-duotone'
     : sortingState === 'desc'
-      ? 'i-lucide-arrow-down'
-      : 'i-lucide-arrow-up-down'
+      ? 'solar:alt-arrow-down-bold-duotone'
+      : 'solar:sort-vertical-bold-duotone'
 
   return h(
     'button',
@@ -280,13 +320,30 @@ const columns: TableColumn<AccountSelectSchema>[] = [
     accessorKey: 'id',
     id: 'id',
     header: createSortableHeader('Bankkonto'),
-    enableSorting: true
+    enableSorting: true,
+    cell: ({ row }) => {
+      const v = String(row.original.id ?? '')
+      return h('span', { class: 'font-mono text-xs' }, v.toUpperCase())
+    }
+  },
+  { // name
+    accessorKey: 'name',
+    id: 'name',
+    header: createSortableHeader('Kaldenavn'),
+    enableSorting: true,
   },
   { // provider
     accessorKey: 'provider',
     id: 'provider',
     header: createSortableHeader('Udbyder'),
     enableSorting: true,
+    cell: ({ row }) => {
+      const p = row.original.provider as any
+      if (p === 'danskebank') return 'Danske Bank'
+      if (p === 'nordea') return 'Nordea'
+      if (p === 'bankconnect') return 'Bank Connect'
+      return String(p ?? '')
+    }
   },
   { // statusAccount
     accessorKey: 'statusAccount',
@@ -312,7 +369,7 @@ const columns: TableColumn<AccountSelectSchema>[] = [
           },
           () =>
             h(UButton, {
-              icon: 'i-lucide-ellipsis-vertical',
+              icon: 'solar:menu-dots-bold-duotone',
               color: 'neutral',
               variant: 'ghost',
               class: 'ml-auto'
@@ -411,7 +468,7 @@ async function handleDeleteAccount(row: Row<AccountSelectSchema>) {
                 size="xs"
                 color="neutral"
                 variant="ghost"
-                icon="i-lucide-settings-2"
+                icon="solar:settings-bold-duotone"
                 :disabled="a.enabled"
                 @click="openEnvModal(a.provider)"
               />
@@ -449,21 +506,22 @@ async function handleDeleteAccount(row: Row<AccountSelectSchema>) {
                 Angiv IBAN(s) som må hentes via API. Dette er pr. udbyder (ikke pr. kanal).
               </div>
 
-              <div v-if="(a.allowlistIbans?.length ?? 0)" class="flex flex-wrap gap-1.5">
+              <div v-if="(a.allowlistAccounts?.length ?? 0)" class="flex flex-wrap gap-1.5">
                 <UBadge
-                  v-for="iban in a.allowlistIbans"
-                  :key="iban"
+                  v-for="entry in a.allowlistAccounts"
+                  :key="entry.iban"
                   color="neutral"
                   variant="subtle"
                   class="gap-1"
                 >
-                  <span class="font-mono text-[11px]">{{ iban }}</span>
+                  <span v-if="entry.name" class="text-[11px] font-medium">{{ entry.name }}</span>
+                  <span class="font-mono text-[11px]" :class="entry.name ? 'text-muted' : ''">{{ entry.iban }}</span>
                   <UButton
                     size="xs"
                     color="neutral"
                     variant="ghost"
-                    icon="i-lucide-x"
-                    @click="removeAllowlistIban(a.provider, iban)"
+                    icon="solar:close-circle-bold-duotone"
+                    @click="removeAllowlistIban(a.provider, entry.iban)"
                   />
                 </UBadge>
               </div>
@@ -471,20 +529,41 @@ async function handleDeleteAccount(row: Row<AccountSelectSchema>) {
                 Ingen konti tilføjet endnu.
               </div>
 
-              <div class="flex items-center gap-2">
-                <UInput
-                  v-model="allowlistDraftIbanByProvider[a.provider]"
-                  placeholder="Tilføj IBAN…"
-                  class="flex-1"
-                />
-                <UButton
-                  size="sm"
-                  color="neutral"
-                  variant="soft"
-                  @click="addAllowlistIban(a.provider)"
-                >
-                  Tilføj
-                </UButton>
+              <div class="space-y-2">
+                <UFormField :error="allowlistErrorsByProvider[a.provider]?.iban">
+                  <UiFloatingLabelInput
+                    v-model="allowlistDraftByProvider[a.provider].iban"
+                    label="IBAN"
+                    size="sm"
+                    :color="allowlistErrorsByProvider[a.provider]?.iban ? 'error' : 'neutral'"
+                    class="w-full"
+                  />
+                </UFormField>
+
+                <div class="flex items-start gap-2">
+                  <UFormField
+                    class="flex-1"
+                    :error="allowlistErrorsByProvider[a.provider]?.name"
+                  >
+                    <UiFloatingLabelInput
+                      v-model="allowlistDraftByProvider[a.provider].name"
+                      label="Kaldenavn"
+                      size="sm"
+                      :color="allowlistErrorsByProvider[a.provider]?.name ? 'error' : 'neutral'"
+                      class="w-full"
+                    />
+                  </UFormField>
+
+                  <UButton
+                    size="sm"
+                    color="neutral"
+                    variant="soft"
+                    class="whitespace-nowrap self-end"
+                    @click="addAllowlistIban(a.provider)"
+                  >
+                    Tilføj
+                  </UButton>
+                </div>
               </div>
             </div>
           </div>
@@ -492,11 +571,12 @@ async function handleDeleteAccount(row: Row<AccountSelectSchema>) {
       </section>
 
       <div class="flex flex-wrap items-center justify-between gap-1.5">
-        <UInput
+        <UiFloatingLabelInput
           v-model="globalFilterValue"
           class="max-w-sm"
           icon="solar:magnifer-bold-duotone"
-          placeholder="Søg efter en bankkonto..."
+          label="Søg efter en bankkonto..."
+          color="neutral"
         />
       </div>
 
@@ -557,7 +637,7 @@ async function handleDeleteAccount(row: Row<AccountSelectSchema>) {
               </div>
 
               <UButton
-                icon="i-lucide-refresh-cw"
+                icon="solar:refresh-bold-duotone"
                 color="neutral"
                 variant="ghost"
                 @click="refreshAgreements()"

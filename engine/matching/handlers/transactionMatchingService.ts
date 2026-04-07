@@ -605,7 +605,7 @@ function buildNotification(
     ?? 'modpart'
   const amountFormatted = formatAmount(tx.amount)
 
-  const postingText = resolvePostingText(tx, accounting)
+  const postingText = resolvePostingText(accounting.bookingText, tx)
 
   const bookingDateFormatted = tx.bookingDate
     ? new Date(tx.bookingDate).toLocaleDateString('da-DK')

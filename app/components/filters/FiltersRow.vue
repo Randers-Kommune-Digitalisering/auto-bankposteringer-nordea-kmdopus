@@ -60,15 +60,15 @@ const searchModel = computed<string>({
         />
       </div>
 
-      <UInput
+      <UiFloatingLabelInput
         v-if="showSearch"
         v-model="searchModel"
         class="max-w-sm"
         color="primary"
         variant="outline"
         :ui="{ base: 'ring-primary/50 text-primary focus-visible:ring-primary' }"
-        icon="solar:magnifer-bold-duotone"
-        :placeholder="searchPlaceholder"
+        trailing-icon="solar:magnifer-bold-duotone"
+        :label="searchPlaceholder"
       />
     </div>
 

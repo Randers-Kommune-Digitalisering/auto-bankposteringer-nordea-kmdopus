@@ -3,6 +3,7 @@ import type { TableColumn } from '@nuxt/ui'
 import type { Row, SortingState } from '@tanstack/table-core'
 import { getPaginationRowModel } from '@tanstack/table-core'
 import type { RuleTagSelectSchema } from '~/lib/db/schema/ruleTag'
+import { capitalizeFirst } from '~/lib/text/capitalizeFirst'
 
 const RULE_TAGS_QUERY_KEY = 'rule-tags' as const
 
@@ -41,10 +42,10 @@ const rows = computed(() => [...(ruleTags.value ?? [])])
 const createSortableHeader = (label: string) => ({ column }: { column: any }) => {
 	const sortingState = column.getIsSorted?.()
 	const iconName = sortingState === 'asc'
-		? 'i-lucide-arrow-up'
+		? 'solar:alt-arrow-up-bold-duotone'
 		: sortingState === 'desc'
-			? 'i-lucide-arrow-down'
-			: 'i-lucide-arrow-up-down'
+			? 'solar:alt-arrow-down-bold-duotone'
+			: 'solar:sort-vertical-bold-duotone'
 
 	return h(
 		'button',
@@ -90,7 +91,7 @@ async function handleDeleteTag(row: Row<RuleTagSelectSchema>) {
 
 		toast.add({
 			title: 'Tag slettet',
-			description: `${tagId} er blevet fjernet.`
+			description: `${capitalizeFirst(tagId)} er blevet fjernet.`
 		})
 
 		ruleTags.value = (ruleTags.value ?? []).filter((t) => t.id !== tagId)
@@ -131,7 +132,8 @@ const columns: TableColumn<RuleTagSelectSchema>[] = [
 		accessorKey: 'id',
 		id: 'id',
 		header: createSortableHeader('Tag'),
-		enableSorting: true
+		enableSorting: true,
+		cell: ({ row }) => h('span', capitalizeFirst(row.original.id))
 	},
 	{
 		id: 'actions',
@@ -149,7 +151,7 @@ const columns: TableColumn<RuleTagSelectSchema>[] = [
 					},
 					() =>
 						h(UButton, {
-							icon: 'i-lucide-ellipsis-vertical',
+							icon: 'solar:menu-dots-bold-duotone',
 							color: 'neutral',
 							variant: 'ghost',
 							class: 'ml-auto'
@@ -174,7 +176,7 @@ const pagination = ref({ pageIndex: 0, pageSize: 20 })
 				<template #right>
 					<UButton
 						class="font-bold rounded-full"
-						icon="i-lucide-plus"
+						icon="solar:tag-bold-duotone"
 						:label="'Nyt tag'"
 						@click="handleAddTag"
 					/>
@@ -184,11 +186,12 @@ const pagination = ref({ pageIndex: 0, pageSize: 20 })
 
 		<template #body>
 			<div class="flex flex-wrap items-center justify-between gap-1.5">
-				<UInput
+				<UiFloatingLabelInput
 					v-model="globalFilterValue"
 					class="max-w-sm"
 					icon="solar:magnifer-bold-duotone"
-					placeholder="Søg efter et tag..."
+					label="Søg efter et tag..."
+					color="neutral"
 				/>
 			</div>
 

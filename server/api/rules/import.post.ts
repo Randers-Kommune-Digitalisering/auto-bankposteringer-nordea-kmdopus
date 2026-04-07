@@ -1,7 +1,7 @@
 import { defineEventHandler, readBody, getQuery } from 'h3'
 import Papa from 'papaparse'
 import { createInsertSchema } from 'drizzle-zod'
-import { inArray } from 'drizzle-orm'
+import { inArray, sql } from 'drizzle-orm'
 
 import db from '~/lib/db'
 import { logger } from '~/lib/logger'
@@ -29,6 +29,7 @@ import {
   resolveDimensionValueRows,
 } from '~~/server/utils/accountingDimensions'
 import { compileRuleDraftToDb } from '~~/server/utils/rules/compileRuleDraftToDb'
+import { normalizeRuleTagIds } from '~~/server/utils/ruleTags/resolveRuleTagIds'
 import { requireRoles } from '~~/server/auth/keycloakAuth'
 
 const version = 1
@@ -366,7 +367,7 @@ export default defineEventHandler(async (event) => {
 
   // DB-backed validation
   const allAccountIds = Array.from(new Set(drafts.flatMap(d => d.draft.relatedBankAccounts)))
-  const allTagIds = Array.from(new Set(drafts.flatMap(d => d.draft.ruleTags ?? [])))
+  const allTagIds = normalizeRuleTagIds(drafts.flatMap(d => d.draft.ruleTags ?? []))
 
   const activeSupplier = await getActiveErpSupplier()
   const dimensionDefinitions = await listAccountingDimensionDefinitions(activeSupplier)
@@ -378,9 +379,18 @@ export default defineEventHandler(async (event) => {
   const existingAccountSet = new Set(existingAccounts.map(a => a.id))
 
   const existingTags = allTagIds.length
-    ? await db.select({ id: ruleTag.id }).from(ruleTag).where(inArray(ruleTag.id, allTagIds))
+    ? await db
+      .select({ id: ruleTag.id })
+      .from(ruleTag)
+      .where(
+        sql`lower(${ruleTag.id}) IN (${sql.join(
+          allTagIds.map((id) => sql`${id.toLocaleLowerCase('da-DK')}`),
+          sql`, `,
+        )})`,
+      )
     : []
-  const existingTagSet = new Set(existingTags.map(t => t.id))
+  const existingTagLowerSet = new Set(existingTags.map(t => String(t.id).toLocaleLowerCase('da-DK')))
+  const existingTagLowerToId = new Map(existingTags.map(t => [String(t.id).toLocaleLowerCase('da-DK'), String(t.id)]))
 
   for (const entry of drafts) {
     const rowNumber = entry.rowNumber
@@ -392,10 +402,9 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    for (const tagId of draft.ruleTags ?? []) {
-      if (!existingTagSet.has(tagId)) {
+    for (const tagId of normalizeRuleTagIds(draft.ruleTags ?? [])) {
+      if (!existingTagLowerSet.has(tagId.toLocaleLowerCase('da-DK')))
         errors.push({ row: rowNumber, field: 'ruleTags', message: `Ukendt tag: ${tagId}` })
-      }
     }
 
     try {
@@ -442,8 +451,9 @@ export default defineEventHandler(async (event) => {
       }
 
       if (tagIds.length) {
+        const resolvedTagIds = tagIds.map((id) => existingTagLowerToId.get(id.toLocaleLowerCase('da-DK')) ?? id)
         await tx.insert(ruleRuleTag).values(
-          tagIds.map(ruleTagId => ({ ruleId: newRuleId, ruleTagId }))
+          resolvedTagIds.map(ruleTagId => ({ ruleId: newRuleId, ruleTagId }))
         )
       }
 
@@ -484,7 +494,10 @@ export default defineEventHandler(async (event) => {
       const versionPayload: RuleVersionInsertSchema = {
         ruleId: newRuleId,
         version,
-        content: versionContent,
+        content: {
+          ...versionContent,
+          ruleTags: tagIds.map((id) => existingTagLowerToId.get(id.toLocaleLowerCase('da-DK')) ?? id),
+        },
       }
 
       await tx.insert(ruleVersion).values(versionPayload)

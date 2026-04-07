@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { isValidCprStrict } from '~/lib/text/cpr'
 
 export const cprTypeValues = ['ingen', 'statisk', 'dynamisk'] as const
 export type CprType = (typeof cprTypeValues)[number]
@@ -24,7 +25,10 @@ const baseManualBookingShape = {
   lines: z.array(bookingLineSchema).min(1),
   text: z.string().optional(),
   cprType: z.enum(cprTypeValues),
-  cprNumber: z.string().optional(),
+  cprNumber: z.preprocess(
+    value => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+    z.string().optional(),
+  ),
   notifyTo: z.preprocess(
     value => (typeof value === 'string' && value.trim() === '' ? undefined : value),
     z.string().email('Ugyldig email').optional(),
@@ -32,11 +36,31 @@ const baseManualBookingShape = {
   note: z.string().optional(),
 } satisfies z.ZodRawShape
 
-export const manualBookingFormSchema = z.object(baseManualBookingShape)
+export const manualBookingFormSchema = z.object(baseManualBookingShape).superRefine((data, ctx) => {
+  if (!data.cprNumber) return
+
+  if (!isValidCprStrict(String(data.cprNumber))) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['cprNumber'],
+      message: 'CPR skal matche formatet DDMMÅÅXXXX',
+    })
+  }
+})
 
 export const manualBookingPayloadSchema = z.object({
   ...baseManualBookingShape,
   attachments: z.array(attachmentSchema).optional(),
+}).superRefine((data, ctx) => {
+  if (!data.cprNumber) return
+
+  if (!isValidCprStrict(String(data.cprNumber))) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['cprNumber'],
+      message: 'CPR skal matche formatet DDMMÅÅXXXX',
+    })
+  }
 })
 
 export type ManualBookingFormState = z.infer<typeof manualBookingFormSchema>

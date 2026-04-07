@@ -23,6 +23,7 @@ import {
   matchFieldEnumValues,
 } from "../../rules/match-config"
 import type { MatchCategory, MatchField } from "../../rules/match-config"
+import { isValidCprStrict } from "../../text/cpr"
 
 export const rule = pgTable('rule', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -237,7 +238,10 @@ export const ruleDraftSchema = z.object({
   })).optional(),
   accountingText: z.string().optional(),
   accountingCprType: z.enum(cprTypeValues),
-  accountingCprNumber: z.string().optional(),
+  accountingCprNumber: z.preprocess(
+    value => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+    z.string().optional(),
+  ),
   accountingNotifyTo: z.string().email("Ugyldig email").optional().or(z.literal("")),
   accountingNote: z.string().optional(),
   accountingAttachmentName: z.array(z.string()).optional(),
@@ -262,6 +266,14 @@ export const ruleDraftSchema = z.object({
 )
 
   .superRefine((data, ctx) => {
+    if (data.accountingCprNumber && !isValidCprStrict(String(data.accountingCprNumber))) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['accountingCprNumber'],
+        message: 'CPR skal matche formatet DDMMÅÅXXXX',
+      })
+    }
+
     const raw = (data.accountingNotifyTo ?? '').trim()
     if (!raw) return
 
@@ -326,13 +338,24 @@ export const ruleAccountingSchema = z.object({
   })).optional(),
   accountingText: z.string().optional(),
   accountingCprType: z.enum(cprTypeValues),
-  accountingCprNumber: z.string().optional(),
+  accountingCprNumber: z.preprocess(
+    value => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+    z.string().optional(),
+  ),
   accountingNotifyTo: z.string().email("Ugyldig email").optional().or(z.literal("")),
   accountingNote: z.string().optional(),
   accountingAttachmentName: z.array(z.string()).optional(),
   accountingAttachmentFileExtension: z.array(z.string()).optional(),
   accountingAttachmentData: z.array(z.string()).optional(),
 }).superRefine((data, ctx) => {
+  if (data.accountingCprNumber && !isValidCprStrict(String(data.accountingCprNumber))) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['accountingCprNumber'],
+      message: 'CPR skal matche formatet DDMMÅÅXXXX',
+    })
+  }
+
   const raw = (data.accountingNotifyTo ?? '').trim()
   if (!raw) return
 

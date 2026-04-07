@@ -920,13 +920,14 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                         labelKey="label"
                         valueKey="value"
                       />
-                      <UInput
+                      <UiFloatingLabelInput
                         v-model="matchInputs[category]"
-                        :placeholder="`Søg i ${category.toLowerCase()}`"
+                        :label="`Søg i ${category.toLowerCase()}`"
+                        color="neutral"
                         class="flex-1"
                       />
                       <UButton
-                        icon="i-lucide-plus"
+                        icon="solar:add-circle-bold-duotone"
                         color="primary"
                         @click="() => addMatchEntry(category, 'Alle felter')"
                       />
@@ -942,13 +943,14 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                         labelKey="label"
                         valueKey="value"
                       />
-                      <UInput
+                      <UiFloatingLabelInput
                         v-model="matchInputs[category]"
-                        :placeholder="`Værdi for ${selectedColumns[category].length > 0 ? selectedColumns[category].join(', ') : 'valgte felter'}`"
+                        :label="`Værdi for ${selectedColumns[category].length > 0 ? selectedColumns[category].join(', ') : 'valgte felter'}`"
+                        color="neutral"
                         class="flex-1"
                       />
                       <UButton
-                        icon="i-lucide-plus"
+                        icon="solar:add-circle-bold-duotone"
                         color="primary"
                         @click="() => addMatchEntry(category, 'Vælg felter')"
                         :disabled="selectedColumns[category].length === 0"
@@ -1009,7 +1011,7 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                             {{ entry.fields.join(', ') }}
                           </div>
                         </div>
-                        <UIcon name="i-lucide-x" class="ml-2 w-3 h-3" />
+                        <UIcon name="solar:close-circle-bold-duotone" class="ml-2 w-3 h-3" />
                       </UBadge>
                     </div>
                   </div>
@@ -1025,18 +1027,18 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                   <UFormField
                     v-for="def in accountingDimensionDefinitions"
                     :key="def.id"
-                    :label="dimensionLabel(def.key)"
                     :name="`accountingDimensions.${def.key}`"
                     :required="def.required"
                   >
-                    <UInput
+                    <UiFloatingLabelInput
                       v-model="accountingDimensionValues[def.key]"
                       class="w-full"
-                      :placeholder="dimensionLabel(def.key)"
+                      :label="dimensionLabel(def.key)"
+                      color="neutral"
                     />
                   </UFormField>
-                  <UFormField label="Posteringstekst" name="accountingText">
-                    <UInput v-model="state.accountingText" class="w-full" placeholder="Valgfri" />
+                  <UFormField name="accountingText">
+                    <UiFloatingLabelInput v-model="state.accountingText" class="w-full" label="Posteringstekst" color="neutral" />
                   </UFormField>
                   <div class="grid grid-cols-2 gap-4 mt-2">
                     <UFormField label="CPR-type" name="accountingCprType">
@@ -1049,20 +1051,23 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                         class="w-full"
                       />
                     </UFormField>
-                    <UFormField label="CPR-nummer" name="accountingCprNumber">
-                      <UInput
+                    <UFormField name="accountingCprNumber">
+                      <UiFloatingLabelInput
                         v-model="state.accountingCprNumber"
                         class="w-full"
+                        label="CPR-nummer"
+                        color="neutral"
                         :disabled="state.accountingCprType !== 'statisk'"
                       />
                     </UFormField>
                   </div>
-                  <UFormField label="Notifikation til" name="accountingNotifyTo">
-                    <UInput
+                  <UFormField name="accountingNotifyTo">
+                    <UiFloatingLabelInput
                       v-model="state.accountingNotifyTo"
                       type="email"
                       class="w-full"
-                      placeholder="f.eks. csl@randers.dk"
+                      label="Notifikation til"
+                      color="neutral"
                     />
                   </UFormField>
                   <UFormField label="Noter" name="accountingNote">

@@ -50,7 +50,7 @@ const payload = computed(() => data.value)
 				</template>
 				<template #right>
 					<UButton
-						icon="i-lucide-refresh-cw"
+						icon="solar:refresh-bold-duotone"
 						label="Opdater"
 						variant="ghost"
 						color="primary"

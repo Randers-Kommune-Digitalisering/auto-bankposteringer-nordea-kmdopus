@@ -227,7 +227,7 @@ async function handleSaveDraft() {
 							<UButton
 								color="primary"
 								variant="soft"
-								icon="i-lucide-plus"
+								icon="solar:add-circle-bold-duotone"
 								@click="addLine"
 							>
 								Tilføj linje
@@ -238,7 +238,7 @@ async function handleSaveDraft() {
 							v-if="hasSumMismatch"
 							color="error"
 							variant="soft"
-							icon="i-lucide-alert-triangle"
+							icon="solar:danger-triangle-bold-duotone"
 							class="text-xs"
 							:title="sumAlertTitle"
 							:description="sumAlertDescription"
@@ -260,7 +260,7 @@ async function handleSaveDraft() {
 										v-if="formState.lines.length > 1"
 										color="neutral"
 										variant="soft"
-										icon="i-lucide-trash-2"
+										icon="solar:trash-bin-trash-bold-duotone"
 										@click="removeLine(lineIndex)"
 									>
 										Fjern
@@ -279,8 +279,8 @@ async function handleSaveDraft() {
 										/>
 									</UFormField>
 
-									<UFormField label="Posteringstekst" :name="`lines.${lineIndex}.text`">
-										<UInput v-model="line.text" placeholder="Tekst fra bank" class="w-full" />
+									<UFormField :name="`lines.${lineIndex}.text`">
+										<UiFloatingLabelInput v-model="line.text" label="Posteringstekst" color="neutral" class="w-full" />
 									</UFormField>
 								</div>
 
@@ -293,10 +293,11 @@ async function handleSaveDraft() {
 										:name="`lines.${lineIndex}.dimensions.${def.key}`"
 										:required="def.required"
 									>
-										<UInput
+										<UiFloatingLabelInput
 											:model-value="dimensionValuesByLine[lineIndex]?.[def.key] ?? ''"
 											@update:model-value="(value) => { if (!dimensionValuesByLine[lineIndex]) dimensionValuesByLine[lineIndex] = {}; dimensionValuesByLine[lineIndex][def.key] = String(value ?? '') }"
-											:placeholder="dimensionLabel(def.key)"
+											:label="dimensionLabel(def.key)"
+											color="neutral"
 											class="w-full"
 										/>
 									</UFormField>
@@ -316,9 +317,11 @@ async function handleSaveDraft() {
 										class="w-full"
 									/>
 								</UFormField>
-								<UFormField label="CPR-nummer" name="cprNumber">
-									<UInput
+								<UFormField name="cprNumber">
+									<UiFloatingLabelInput
 										v-model="formState.cprNumber"
+										label="CPR-nummer"
+										color="neutral"
 										:disabled="formState.cprType !== 'statisk'"
 										class="w-full"
 									/>
@@ -337,11 +340,12 @@ async function handleSaveDraft() {
 								/>
 							</UFormField>
 
-							<UFormField label="Notifikation sendes til" name="notifyTo">
-								<UInput
+							<UFormField name="notifyTo">
+								<UiFloatingLabelInput
 									v-model="formState.notifyTo"
+									label="Notifikation sendes til"
 									type="email"
-									placeholder="f.eks. bogholderi@kommune.dk"
+									color="neutral"
 									class="w-full"
 								/>
 							</UFormField>
@@ -353,7 +357,7 @@ async function handleSaveDraft() {
 							<UButton
 								variant="soft"
 								color="primary"
-								icon="i-lucide-save"
+								icon="solar:diskette-bold-duotone"
 								:loading="isSavingDraft"
 								:disabled="isSubmitting || isSavingDraft || hasSumMismatch"
 								@click="handleSaveDraft"
@@ -363,7 +367,7 @@ async function handleSaveDraft() {
 							<UButton
 								type="submit"
 								color="primary"
-								icon="i-lucide-send"
+								icon="solar:plain-bold-duotone"
 								:loading="isSubmitting"
 								:disabled="isSubmitting || isSavingDraft || hasSumMismatch"
 							>

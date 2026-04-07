@@ -430,9 +430,9 @@ const columns: TableColumn<StatementTransaction>[] = [
         {
           default: () =>
             h(UButton, {
-              icon: 'i-lucide-info',
+              icon: 'solar:document-bold-duotone',
               label: 'Vis',
-              variant: 'outline',
+              variant: 'soft',
               size: 'xs',
               color: 'neutral'
             }),
@@ -478,7 +478,7 @@ const tableUi = {
         <template #right>
           <div class="flex items-center gap-2">
             <UButton
-              icon="i-lucide-download"
+              icon="solar:download-bold-duotone"
               label="Download CSV"
               variant="ghost"
               color="primary"
@@ -486,7 +486,7 @@ const tableUi = {
               @click="downloadStatementCsv()"
             />
             <UButton
-              icon="i-lucide-refresh-cw"
+              icon="solar:refresh-bold-duotone"
               label="Opdater"
               variant="ghost"
               color="primary"
@@ -516,7 +516,7 @@ const tableUi = {
 
         <UEmpty
           v-if="!visibleRows.length && status !== 'pending'"
-          icon="i-lucide-archive"
+          icon="solar:archive-bold-duotone"
           :title="fetchedRows.length ? 'Ingen resultater' : 'Ingen transaktioner'"
           :description="fetchedRows.length
             ? 'Ingen transaktioner matcher den valgte søgning/konto i perioden.'

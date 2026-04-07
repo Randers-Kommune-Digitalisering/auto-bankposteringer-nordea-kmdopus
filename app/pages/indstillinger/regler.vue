@@ -234,7 +234,7 @@ const errorPreview = computed(() => {
 
         <template #right>
           <UButton
-            icon="i-lucide-refresh-cw"
+            icon="solar:refresh-bold-duotone"
             variant="ghost"
             color="primary"
             label="Opdater"
@@ -310,7 +310,7 @@ const errorPreview = computed(() => {
                   target="_blank"
                 />
                 <UButton
-                  icon="i-lucide-download"
+                  icon="solar:download-bold-duotone"
                   color="primary"
                   variant="soft"
                   label="Download alle regler"
@@ -324,7 +324,7 @@ const errorPreview = computed(() => {
           <div class="grid gap-4">
             <UFileUpload
               v-model="csvFiles"
-              icon="i-lucide-upload"
+              icon="solar:upload-bold-duotone"
               label="Upload CSV"
               description=".csv"
               layout="list"
@@ -335,7 +335,7 @@ const errorPreview = computed(() => {
 
             <div class="flex flex-wrap gap-2">
               <UButton
-                icon="i-lucide-check"
+                icon="solar:shield-check-bold-duotone"
                 label="Kontrollér fil"
                 color="primary"
                 variant="soft"
@@ -344,7 +344,7 @@ const errorPreview = computed(() => {
                 @click="validateCsv"
               />
               <UButton
-                icon="i-lucide-database"
+                icon="solar:database-bold-duotone"
                 label="Importér"
                 color="primary"
                 :disabled="!validatedOk || hasErrors"
@@ -423,7 +423,7 @@ const errorPreview = computed(() => {
             <div class="flex items-end">
               <UButton
                 class="w-full"
-                icon="i-lucide-list"
+                icon="solar:list-bold-duotone"
                 label="Hent versioner"
                 color="neutral"
                 variant="soft"
@@ -436,7 +436,7 @@ const errorPreview = computed(() => {
 
           <UEmpty
             v-if="selectedRuleId && !versionsLoading && (!versionsData || !versionsData.versions.length)"
-            icon="i-lucide-archive"
+            icon="solar:archive-bold-duotone"
             title="Ingen versionshistorik"
             description="Der blev ikke fundet nogen rule_versions for den valgte regel."
             class="border border-dashed border-default rounded-lg mt-4"

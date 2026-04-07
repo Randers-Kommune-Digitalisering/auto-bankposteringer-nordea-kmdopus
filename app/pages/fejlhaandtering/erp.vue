@@ -344,7 +344,7 @@ async function reopenBookedTransactions() {
         </template>
         <template #right>
           <UButton
-            icon="i-lucide-refresh-cw"
+            icon="solar:refresh-bold-duotone"
             variant="ghost"
             color="primary"
             label="Opdater"
@@ -375,7 +375,7 @@ async function reopenBookedTransactions() {
 
           <UEmpty
             v-if="!failedList?.items?.length"
-            icon="i-lucide-check"
+            icon="solar:check-circle-bold-duotone"
             title="Ingen afviste ERP-svar"
             description="Der er ingen ERP responses med negativ status i databasen."
             class="border border-dashed border-default rounded-lg"
@@ -409,7 +409,7 @@ async function reopenBookedTransactions() {
 
           <UEmpty
             v-if="!erpDetails"
-            icon="i-lucide-file-text"
+            icon="solar:document-text-bold-duotone"
             title="Vælg en ERP request"
             description="Åbn en request fra listen ovenfor for at se payload, linjer og genfremsende."
             class="border border-dashed border-default rounded-lg"
@@ -440,7 +440,7 @@ async function reopenBookedTransactions() {
                 <div class="flex min-h-0 flex-1 flex-col gap-2">
                   <div class="flex justify-end">
                     <UButton
-                      icon="i-lucide-wand-sparkles"
+                      icon="solar:magic-stick-3-bold-duotone"
                       label="Formatér XML"
                       color="neutral"
                       variant="ghost"
@@ -462,7 +462,7 @@ async function reopenBookedTransactions() {
 
               <div class="flex flex-wrap gap-2">
                 <UButton
-                  icon="i-lucide-send"
+                  icon="solar:plain-bold-duotone"
                   label="Genfremsend til ERP (ny request)"
                   color="primary"
                   variant="soft"
@@ -477,7 +477,7 @@ async function reopenBookedTransactions() {
               <UAlert
                 color="neutral"
                 variant="soft"
-                icon="i-lucide-info"
+                icon="solar:info-circle-bold-duotone"
                 class="text-sm"
               >
                 Du kan nu se den persisted kobling mellem ERP requestId → postering(lineNo) → transactionId og genåbne udvalgte bogførte transaktioner.
@@ -504,7 +504,7 @@ async function reopenBookedTransactions() {
                 />
                 <UEmpty
                   v-else
-                  icon="i-lucide-list"
+                  icon="solar:list-bold-duotone"
                   title="Ingen linjer"
                   description="Der blev ikke fundet linjer for dette request."
                   class="border border-dashed border-default rounded-lg"
@@ -512,7 +512,7 @@ async function reopenBookedTransactions() {
 
                 <div class="flex flex-wrap gap-2">
                   <UButton
-                    icon="i-lucide-undo-2"
+                    icon="solar:undo-left-bold-duotone"
                     label="Genåbn valgte transaktioner"
                     color="warning"
                     variant="soft"
@@ -538,11 +538,11 @@ async function reopenBookedTransactions() {
           </template>
 
           <div class="flex flex-wrap items-end gap-2">
-            <UFormField label="runId" class="min-w-80">
-              <UInput v-model="reopenRunId" placeholder="runId (uuid)" />
+            <UFormField class="min-w-80">
+              <UiFloatingLabelInput v-model="reopenRunId" label="runId (uuid)" color="neutral" />
             </UFormField>
             <UButton
-              icon="i-lucide-undo-2"
+              icon="solar:undo-left-bold-duotone"
               label="Sæt bogførte tilbage til åbne poster"
               color="warning"
               variant="soft"
