@@ -11,10 +11,10 @@ Core principles:
 - Avoid hidden state, implicit logic, or denormalized shortcuts.
 
 Technology stack (ordered by importance):
-- Nuxt 4
+- Nuxt 4 (including Nuxt UI library)
 - PostgreSQL
-- TypeScript (strict mode)
 - Drizzle ORM (pg-core)
+- TypeScript (strict mode)
 - Zod for boundary validation
 
 Security hygiene (financial infrastructure):
@@ -23,6 +23,8 @@ Security hygiene (financial infrastructure):
 - Treat `critical` findings as a priority to remediate or explicitly accept with justification.
 
 When generating code:
+- Be skeptical of new functionality, challenge assumptions and ask clarifying questions.
+- When creating UI components, make sure to mainly utilize Nuxt UI components and patterns, and avoid introducing new dependencies or complex custom components.
 - Prefer explicit domain modeling.
 - Keep business logic outside UI components.
 - Avoid coupling domain logic to a specific ERP.
@@ -33,6 +35,4 @@ Database migrations policy:
 - When the database schema changes, we will delete everything in `drizzle/` and generate a new single baseline migration.
 - Your code changes should assume that workflow (i.e. update schema code, but do not create new migration files).
 
-// This instruction ensures that any changes to the system's architecture or design are consistently documented.
-// By updating the ARCHITECTURE.md file whenever modifications occur, the project maintains accurate and up-to-date architectural documentation.
 When the architecture or design is changed, update the ARCHITECTURE.md markdown-file to reflect the new design.

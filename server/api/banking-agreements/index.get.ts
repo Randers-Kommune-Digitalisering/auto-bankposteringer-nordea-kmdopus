@@ -240,12 +240,13 @@ export default defineEventHandler(async () => {
     .from(bankingAgreementAccountAllowlist)
     .orderBy(asc(bankingAgreementAccountAllowlist.provider), asc(bankingAgreementAccountAllowlist.iban))
 
-  const allowlistByProvider = new Map<string, string[]>()
+  const allowlistByProvider = new Map<string, Array<{ iban: string; name: string | null }>>()
   for (const row of allowlistRows) {
     const provider = String((row as any).provider)
     const iban = String((row as any).iban)
+    const name = (row as any).name === null || typeof (row as any).name === 'undefined' ? null : String((row as any).name)
     const existing = allowlistByProvider.get(provider) ?? []
-    existing.push(iban)
+    existing.push({ iban, name })
     allowlistByProvider.set(provider, existing)
   }
 
@@ -253,7 +254,7 @@ export default defineEventHandler(async () => {
     const providerKey = String(a.provider)
     return {
       ...a,
-      allowlistIbans: allowlistByProvider.get(providerKey) ?? [],
+      allowlistAccounts: allowlistByProvider.get(providerKey) ?? [],
       readiness: computeProviderReadiness(providerKey, String(a.channel ?? 'iso20022')),
     }
   })

@@ -351,9 +351,9 @@ async function main() {
     await tx
       .insert(account)
       .values([
-        { id: 'DK20005908764988-DKK', name: 'Hovedkonto', provider: 'nordea', statusAccount: 9999 },
-        { id: 'DK20009042714507-DKK', name: 'Kreditorkonto', provider: 'nordea', statusAccount: 9999 },
-        { id: 'DK50004004401162-DKK', name: 'Udbetalinger', provider: 'nordea', statusAccount: 9999 },
+        { id: 'DK20005908764988-DKK', name: 'Hovedkonto', provider: 'nordea', statusAccount: 90540000 },
+        { id: 'DK20009042714507-DKK', name: 'Kreditorkonto', provider: 'nordea', statusAccount: 90540098 },
+        { id: 'DK50004004401162-DKK', name: 'Udbetalinger', provider: 'nordea', statusAccount: 90540099 },
       ])
       .onConflictDoNothing({ target: account.id })
 

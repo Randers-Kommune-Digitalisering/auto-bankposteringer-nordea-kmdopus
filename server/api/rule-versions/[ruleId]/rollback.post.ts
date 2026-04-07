@@ -15,6 +15,7 @@ import {
 } from '~/lib/db/schema/rule'
 import { ruleVersion, type RuleVersionInsertSchema } from '~/lib/db/schema/ruleVersion'
 import { listAccountingDimensionConstraints, resolveDimensionValueRows, type AccountingDimensionDefinition } from '~~/server/utils/accountingDimensions'
+import { normalizeRuleTagIds, resolveRuleTagIds } from '~~/server/utils/ruleTags/resolveRuleTagIds'
 
 type CprType = 'ingen' | 'statisk' | 'dynamisk'
 
@@ -121,7 +122,7 @@ export default defineEventHandler(async (event) => {
   const newVersion = Number(latestVersion ?? existingRule.currentVersionId ?? 0) + 1
 
   const bankAccountIds = Array.from(new Set(parsedContent.relatedBankAccounts ?? []))
-  const tagIds = Array.from(new Set(parsedContent.ruleTags ?? []))
+  const tagIds = normalizeRuleTagIds(parsedContent.ruleTags ?? [])
   const conditionRows = mapMatchesToConditionRows((parsedContent.matches as any[]) ?? [])
 
   const amountMin = normalizeNumeric(parsedContent.matchAmountMin)
@@ -130,23 +131,32 @@ export default defineEventHandler(async (event) => {
   const accounting = parsedContent.accounting ?? ({} as any)
   const attachments = Array.isArray(accounting.attachments) ? accounting.attachments : []
 
-  const versionPayload: RuleVersionInsertSchema = {
-    ruleId,
-    version: newVersion,
-    content: {
-      ...parsedContent,
-      currentVersionId: newVersion,
-      relatedBankAccounts: bankAccountIds,
-      ruleTags: tagIds,
-      matches: (parsedContent.matches as any[]) ?? [],
-      accounting: {
-        ...accounting,
-        attachments,
-      },
-    },
-  }
-
   await db.transaction(async (tx) => {
+    let resolvedTagIds: string[] = []
+    if (tagIds.length) {
+      const resolved = await resolveRuleTagIds(tx, tagIds)
+      if (resolved.unknownTagIds.length) {
+        throw createError({ statusCode: 400, statusMessage: `Ukendt tag: ${resolved.unknownTagIds.join(', ')}` })
+      }
+      resolvedTagIds = resolved.resolvedTagIds
+    }
+
+    const versionPayload: RuleVersionInsertSchema = {
+      ruleId,
+      version: newVersion,
+      content: {
+        ...parsedContent,
+        currentVersionId: newVersion,
+        relatedBankAccounts: bankAccountIds,
+        ruleTags: resolvedTagIds,
+        matches: (parsedContent.matches as any[]) ?? [],
+        accounting: {
+          ...accounting,
+          attachments,
+        },
+      },
+    }
+
     const [updatedRule] = await tx
       .update(rule)
       .set({
@@ -171,8 +181,8 @@ export default defineEventHandler(async (event) => {
     }
 
     await tx.delete(ruleRuleTag).where(eq(ruleRuleTag.ruleId, ruleId))
-    if (tagIds.length) {
-      await tx.insert(ruleRuleTag).values(tagIds.map((ruleTagId) => ({ ruleId, ruleTagId })))
+    if (resolvedTagIds.length) {
+      await tx.insert(ruleRuleTag).values(resolvedTagIds.map((ruleTagId) => ({ ruleId, ruleTagId })))
     }
 
     await tx.delete(ruleBankingCondition).where(eq(ruleBankingCondition.ruleId, ruleId))

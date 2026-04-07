@@ -95,11 +95,11 @@
     const getIcon = () => {
         switch (props.type) {
             case 'error':
-                return 'i-lucide-alert-circle'
+                return 'solar:shield-warning-bold-duotone'
             case 'docs':
-                return 'i-lucide-file'
+                return 'solar:file-bold-duotone'
             case 'erpResponses':
-                return 'i-lucide-receipt'
+                return 'solar:hashtag-square-bold-duotone'
         }
     }
 
@@ -132,7 +132,7 @@
             :icon="getIcon()"
             :label="`${getCount()}`"
             :color="getColor()"
-            variant="outline"
+            variant="soft"
             size="xs"
         />
 

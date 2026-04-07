@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { z } from 'zod'
 import type { RuleTagSelectSchema } from '~/lib/db/schema/ruleTag'
+import { capitalizeFirst } from '~/lib/text/capitalizeFirst'
 
 const props = defineProps<{
   open: boolean
@@ -48,8 +49,15 @@ function resetForm() {
 }
 
 function hydrateDraft(tag: RuleTagSelectSchema) {
-  state.id = tag.id
-  state.newId = tag.id
+  // Display as capitalized even if legacy data is not.
+  const normalized = capitalizeFirst(tag.id)
+  state.id = normalized
+  state.newId = normalized
+}
+
+function normalizeStateField(value: string | undefined): string | undefined {
+  const normalized = capitalizeFirst(value ?? '')
+  return normalized || undefined
 }
 
 watch(
@@ -77,8 +85,8 @@ watch(
 )
 
 async function onSubmit() {
-  const id = state.id?.trim()
-  const newId = state.newId?.trim()
+  const id = normalizeStateField(state.id)
+  const newId = normalizeStateField(state.newId)
 
   if (isEdit.value) {
     const result = renameSchema.safeParse({ id, newId })
@@ -95,7 +103,7 @@ async function onSubmit() {
 
       toast.add({
         title: 'Tag opdateret',
-        description: `${props.tagId} er opdateret.`
+        description: `${capitalizeFirst(props.tagId ?? '')} er opdateret.`
       })
 
       open.value = false
@@ -126,7 +134,7 @@ async function onSubmit() {
 
     toast.add({
       title: 'Tag oprettet',
-      description: `${result.data.id} er oprettet.`
+      description: `${capitalizeFirst(result.data.id)} er oprettet.`
     })
 
     open.value = false
@@ -147,28 +155,30 @@ async function onSubmit() {
     <template #header>
       <div class="flex items-center justify-between">
         <h2 class="text-lg font-semibold">
-          {{ isEdit ? `Rediger tag ${props.tagId}` : 'Nyt tag' }}
+          {{ isEdit ? `Rediger tag ${capitalizeFirst(props.tagId ?? '')}` : 'Nyt tag' }}
         </h2>
       </div>
     </template>
 
     <template #body>
       <UForm :schema="formSchema" :state="state" @submit="onSubmit">
-        <div class="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 space-y-4">
-          <UFormField label="Tag" name="id" required>
-            <UInput
+        <div class="mt-4 p-4 rounded-md border border-default space-y-4">
+          <UFormField name="id" required>
+            <UiFloatingLabelInput
               v-model="state.id"
               :disabled="isEdit"
-              placeholder="fx Indløsningaftale"
+              label="Tag"
               class="w-full"
+              @blur="state.id = normalizeStateField(state.id)"
             />
           </UFormField>
 
-          <UFormField v-if="isEdit" label="Nyt tag" name="newId" required>
-            <UInput
+          <UFormField v-if="isEdit" name="newId" required>
+            <UiFloatingLabelInput
               v-model="state.newId"
-              placeholder="fx Indløsningaftale"
+              label="Nyt tag"
               class="w-full"
+              @blur="state.newId = normalizeStateField(state.newId)"
             />
           </UFormField>
         </div>

@@ -18,6 +18,7 @@ export const bankingAgreementAccountAllowlist = pgTable(
       .notNull()
       .references(() => bankingAgreement.provider, { onDelete: 'cascade' }),
     iban: text('iban').notNull(),
+    name: text('name'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

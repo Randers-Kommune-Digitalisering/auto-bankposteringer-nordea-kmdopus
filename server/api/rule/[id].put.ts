@@ -3,6 +3,7 @@ import { createInsertSchema } from 'drizzle-zod'
 import { eq } from 'drizzle-orm'
 import db from '~/lib/db'
 import type { RuleDraftSchema } from '~/lib/db/schema/rule'
+import { normalizeRuleTagIds, resolveRuleTagIds } from '~~/server/utils/ruleTags/resolveRuleTagIds'
 import {
   rule,
   ruleBankAccount,
@@ -36,7 +37,7 @@ function compileRuleDraftToDb(draft: RuleDraftSchema, newVersion: number, erpSup
   } = draft
 
   const bankAccountIds = Array.from(new Set(relatedBankAccounts))
-  const tagIds = Array.from(new Set(ruleTags ?? []))
+  const tagIds = normalizeRuleTagIds(ruleTags)
   const conditionRows = mapMatchesToConditionRows(matches ?? [])
   const ruleData = {
     ...rest,
@@ -144,9 +145,16 @@ export default defineEventHandler(async (event) => {
     }
 
     await tx.delete(ruleRuleTag).where(eq(ruleRuleTag.ruleId, id))
+    let resolvedTagIds: string[] = []
     if (tagIds.length) {
+      const resolved = await resolveRuleTagIds(tx, tagIds)
+      if (resolved.unknownTagIds.length) {
+        throw createError({ statusCode: 400, statusMessage: `Ukendt tag: ${resolved.unknownTagIds.join(', ')}` })
+      }
+      resolvedTagIds = resolved.resolvedTagIds
+
       await tx.insert(ruleRuleTag).values(
-        tagIds.map(ruleTagId => ({ ruleId: id, ruleTagId }))
+        resolvedTagIds.map(ruleTagId => ({ ruleId: id, ruleTagId }))
       )
     }
 
@@ -197,7 +205,10 @@ export default defineEventHandler(async (event) => {
     const versionPayload: RuleVersionInsertSchema = {
       ruleId: id,
       version: Number(newVersion),
-      content: versionContent
+      content: {
+        ...versionContent,
+        ruleTags: resolvedTagIds,
+      }
     }
 
     await tx.insert(ruleVersion).values(versionPayload)
