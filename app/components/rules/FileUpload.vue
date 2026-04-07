@@ -73,7 +73,7 @@ watch(files, async (newFiles) => {
     <template #actions="{ open }">
       <UButton
         label="Vælg filer"
-        icon="solar:upload-bold-duotone"
+        icon="solar:pin-bold-duotone"
         color="neutral"
         variant="outline"
         @click="open()"

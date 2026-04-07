@@ -104,7 +104,21 @@ export async function requireAuth(event: H3Event): Promise<AuthContext> {
 export async function requireRoles(event: H3Event, requiredRoles: string[]): Promise<AuthContext> {
   const ctx = await requireAuth(event)
   if (!requiredRoles.length) return ctx
-  const hasAny = requiredRoles.some(r => ctx.roles.includes(r))
+
+  // Backwards-compatible role aliases.
+  // Many endpoints historically used 'write' as a capability, while the app
+  // actually models roles like 'bookkeeping' / 'rule_admin' / 'sys_admin'.
+  const roleAliases: Record<string, string[]> = {
+    write: ['bookkeeping', 'rule_admin', 'sys_admin'],
+  }
+
+  const expandedRequired = new Set<string>()
+  for (const r of requiredRoles) {
+    expandedRequired.add(r)
+    for (const alias of (roleAliases[r] ?? [])) expandedRequired.add(alias)
+  }
+
+  const hasAny = Array.from(expandedRequired).some(r => ctx.roles.includes(r))
   if (!hasAny) {
     throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
   }

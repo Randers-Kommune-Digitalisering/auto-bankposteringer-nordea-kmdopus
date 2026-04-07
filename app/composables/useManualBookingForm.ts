@@ -66,9 +66,17 @@ export function useManualBookingForm(options: {
 	const formState = reactive<ManualFormState>(defaultState(options.transaction.value?.amount))
 	const attachments = ref<AttachmentPayload | null>(null)
 
-	const { data: accountingDimensionConfig } = useFetch<AccountingDimensionsResponse>(
+	const {
+		data: accountingDimensionConfig,
+		pending: accountingDimensionPending,
+		error: accountingDimensionError,
+	} = useFetch<AccountingDimensionsResponse>(
 		'/api/settings/accounting-dimensions',
 		{ key: 'accounting-dimensions' },
+	)
+
+	const isAccountingDimensionConfigReady = computed(() =>
+		!accountingDimensionPending.value && !accountingDimensionError.value,
 	)
 
 	const accountingDimensionDefinitions = computed<AccountingDimensionDefinition[]>(
@@ -427,6 +435,9 @@ export function useManualBookingForm(options: {
 		formState,
 		accountingDimensionDefinitions,
 		dimensionValuesByLine,
+		accountingDimensionPending,
+		accountingDimensionError,
+		isAccountingDimensionConfigReady,
 		cprTypeOptions,
 		attachmentList,
 		transactionAmountAbs,

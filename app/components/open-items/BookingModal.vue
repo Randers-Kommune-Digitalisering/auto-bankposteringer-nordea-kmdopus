@@ -65,6 +65,9 @@ const {
 	formState,
 	accountingDimensionDefinitions,
 	dimensionValuesByLine,
+	accountingDimensionPending,
+	accountingDimensionError,
+	isAccountingDimensionConfigReady,
 	cprTypeOptions,
 	transactionAmountAbs,
 	totalLinesAmount,
@@ -136,6 +139,16 @@ watch(
 
 async function handleSubmit(event?: FormSubmitEvent<ManualFormState>) {
 	if (!transaction.value) return
+	if (!isAccountingDimensionConfigReady.value) {
+		toast.add({
+			title: 'Kan ikke sende endnu',
+			description: accountingDimensionError.value
+				? 'Konteringsdimensioner kunne ikke indlæses'
+				: 'Konteringsdimensioner indlæses stadig…',
+			color: 'error',
+		})
+		return
+	}
 
 	const payload = buildManualBookingPayload(event?.data ?? formState)
 
@@ -166,6 +179,16 @@ async function handleSubmit(event?: FormSubmitEvent<ManualFormState>) {
 
 async function handleSaveDraft() {
 	if (!transaction.value) return
+	if (!isAccountingDimensionConfigReady.value) {
+		toast.add({
+			title: 'Kan ikke gemme endnu',
+			description: accountingDimensionError.value
+				? 'Konteringsdimensioner kunne ikke indlæses'
+				: 'Konteringsdimensioner indlæses stadig…',
+			color: 'error',
+		})
+		return
+	}
 	const payload = buildManualBookingPayload(formState)
 	try {
 		isSavingDraft.value = true
@@ -199,6 +222,21 @@ async function handleSaveDraft() {
 				Vælg en transaktion for at starte behandlingen
 			</div>
 			<div v-else class="space-y-4">
+				<div
+					v-if="(formState.note ?? '').trim().length > 0"
+					class="rounded-md border border-default bg-default px-3 py-2 text-sm border-l-4 border-l-primary/60"
+				>
+					<span class="font-semibold text-default">Noter:</span>
+					<span class="ml-2 text-muted whitespace-pre-wrap">{{ formState.note }}</span>
+				</div>
+
+				<UAlert
+					v-if="accountingDimensionError"
+					variant="soft"
+					color="error"
+					title="Konteringsdimensioner"
+					description="Kunne ikke indlæse konteringsdimensioner. Prøv at genindlæse siden."
+				/>
 				<BookingSummaryCard v-if="summary" :summary="summary" />
 
 				<div v-if="isLoadingDraft" class="flex justify-center py-2">
@@ -267,7 +305,7 @@ async function handleSaveDraft() {
 									</UButton>
 								</div>
 
-								<div class="grid gap-4 md:grid-cols-2">
+								<div class="grid gap-4 md:grid-cols-2 items-end">
 									<UFormField :label="'Beløb'" :name="`lines.${lineIndex}.amount`" required>
 										<UInputNumber
 											v-model="line.amount"
@@ -284,12 +322,11 @@ async function handleSaveDraft() {
 									</UFormField>
 								</div>
 
-								<div class="grid gap-4 md:grid-cols-2">
+								<div class="grid gap-4 md:grid-cols-2 items-end">
 
 									<UFormField
 										v-for="def in accountingDimensionDefinitions"
 										:key="def.id + '-' + lineIndex"
-										:label="dimensionLabel(def.key)"
 										:name="`lines.${lineIndex}.dimensions.${def.key}`"
 										:required="def.required"
 									>
@@ -306,7 +343,7 @@ async function handleSaveDraft() {
 						</div>
 
 						<UCard variant="soft" :ui="{ body: 'space-y-4 p-4' }" class="w-full">
-							<div class="grid gap-4 md:grid-cols-2">
+							<div class="grid gap-4 md:grid-cols-2 items-end">
 								<UFormField label="CPR-type" name="cprType">
 									<USelectMenu
 										v-model="formState.cprType"
@@ -359,7 +396,7 @@ async function handleSaveDraft() {
 								color="primary"
 								icon="solar:diskette-bold-duotone"
 								:loading="isSavingDraft"
-								:disabled="isSubmitting || isSavingDraft || hasSumMismatch"
+								:disabled="isSubmitting || isSavingDraft || hasSumMismatch || accountingDimensionPending || !!accountingDimensionError"
 								@click="handleSaveDraft"
 							>
 								Gem
@@ -369,7 +406,7 @@ async function handleSaveDraft() {
 								color="primary"
 								icon="solar:plain-bold-duotone"
 								:loading="isSubmitting"
-								:disabled="isSubmitting || isSavingDraft || hasSumMismatch"
+								:disabled="isSubmitting || isSavingDraft || hasSumMismatch || accountingDimensionPending || !!accountingDimensionError"
 							>
 								Send til ERP
 							</UButton>
