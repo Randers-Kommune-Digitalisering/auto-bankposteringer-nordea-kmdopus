@@ -21,7 +21,7 @@ type TransactionSummarySection = SummaryItemsSection | SummaryChipsSection
 
 const directionLabel = computed(() => (summary.value.direction === 'credit' ? 'Indbetaling' : 'Udbetaling'))
 const directionIcon = computed(() =>
-	summary.value.direction === 'credit' ? 'i-lucide-arrow-down-left' : 'i-lucide-arrow-up-right'
+	summary.value.direction === 'credit' ? 'solar:arrow-to-down-left-bold-duotone' : 'solar:arrow-to-top-right-bold-duotone'
 )
 
 const partSection = computed<SummaryItemsSection | null>(() => {
@@ -134,7 +134,7 @@ const sectionEntries = computed<SectionEntry[]>(() => orderedSections.value.map(
 						{{ entry.value }}
 					</UBadge>
 				</div>
-				<UAlert v-else color="neutral" variant="soft" icon="i-lucide-align-left" class="text-xs">
+				<UAlert v-else color="neutral" variant="soft" icon="solar:align-left-bold-duotone" class="text-xs">
 					Ingen data i denne kategori
 				</UAlert>
 			</section>

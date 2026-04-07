@@ -214,7 +214,7 @@
                 </template>
                 <template #right>
                     <UButton
-                        icon="i-lucide-refresh-cw"
+                        icon="solar:refresh-bold-duotone"
                         label="Opdater"
                         variant="ghost"
                         color="primary"
@@ -235,7 +235,7 @@
                         <UPopover :popper="{ placement: 'bottom-start' }">
                             <UButton
                                 variant="outline"
-                                icon="i-lucide-calendar"
+                                icon="solar:calendar-bold-duotone"
                             >
                                 <template v-if="dateRange?.start">
                                     <template v-if="dateRange?.end">
@@ -291,7 +291,7 @@
                     </div>
                     <UEmpty
                         v-if="!rows.length && status !== 'pending'"
-                        icon="i-lucide-archive"
+                        icon="solar:archive-bold-duotone"
                         title="Ingen kørsler"
                         description="Der er ingen kørsler i den valgte periode endnu."
                         class="border border-dashed border-default rounded-lg"

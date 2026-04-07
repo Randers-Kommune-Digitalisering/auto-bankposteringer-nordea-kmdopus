@@ -32,7 +32,7 @@ const label = computed(() => {
 
 <template>
   <UPopover :popper="{ placement: 'bottom-start' }">
-    <UButton variant="outline" icon="i-lucide-calendar">
+    <UButton variant="outline" icon="solar:calendar-bold-duotone">
       {{ label }}
     </UButton>
 

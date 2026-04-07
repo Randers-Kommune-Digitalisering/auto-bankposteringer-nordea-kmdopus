@@ -17,6 +17,7 @@ import db from '~/lib/db'
 import { logger } from '~/lib/logger'
 import { getActiveErpSupplier, listAccountingDimensionConstraints, listAccountingDimensionDefinitions, resolveDimensionValueRows } from '~~/server/utils/accountingDimensions'
 import { requireRoles } from '~~/server/auth/keycloakAuth'
+import { normalizeRuleTagIds, resolveRuleTagIds } from '~~/server/utils/ruleTags/resolveRuleTagIds'
 
 const version = 1
 
@@ -39,7 +40,7 @@ export function compileRuleDraftToDb(draft: RuleDraftSchema) {
 
   const conditionRows = mapMatchesToConditionRows(matches ?? [])
   const bankAccountIds = Array.from(new Set(relatedBankAccounts))
-  const tagIds = Array.from(new Set(ruleTags ?? []))
+  const tagIds = normalizeRuleTagIds(ruleTags)
   const ruleData = {
     ...rest,
     currentVersionId: version
@@ -130,11 +131,18 @@ export default defineEventHandler(async (event) => {
         log.debug('Linked bank accounts', { bankAccountCount: bankAccountIds.length })
       }
 
+      let resolvedTagIds: string[] = []
       if (tagIds.length) {
+        const resolved = await resolveRuleTagIds(tx, tagIds)
+        if (resolved.unknownTagIds.length) {
+          throw createError({ statusCode: 400, statusMessage: `Ukendt tag: ${resolved.unknownTagIds.join(', ')}` })
+        }
+        resolvedTagIds = resolved.resolvedTagIds
+
         await tx.insert(ruleRuleTag).values(
-          tagIds.map(ruleTagId => ({ ruleId: newRuleId, ruleTagId }))
+          resolvedTagIds.map(ruleTagId => ({ ruleId: newRuleId, ruleTagId }))
         )
-        log.debug('Linked tags', { tagCount: tagIds.length })
+        log.debug('Linked tags', { tagCount: resolvedTagIds.length })
       }
 
       if (conditionRows.length) {
@@ -175,7 +183,10 @@ export default defineEventHandler(async (event) => {
       const versionPayload: RuleVersionInsertSchema = {
         ruleId: newRuleId,
         version,
-        content: versionContent
+        content: {
+          ...versionContent,
+          ruleTags: resolvedTagIds,
+        },
       }
 
       await tx.insert(ruleVersion).values(versionPayload)

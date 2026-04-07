@@ -113,6 +113,7 @@ CREATE TABLE "banking_agreement" (
 CREATE TABLE "banking_agreement_account_allowlist" (
 	"provider" "bank_provider" NOT NULL,
 	"iban" text NOT NULL,
+	"name" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "banking_agreement_account_allowlist_provider_iban_pk" PRIMARY KEY("provider","iban")

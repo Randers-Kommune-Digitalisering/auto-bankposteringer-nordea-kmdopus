@@ -1,5 +1,6 @@
 import type { RuleDraftSchema } from '~/lib/db/schema/rule'
 import { mapMatchesToConditionRows } from '~/lib/db/schema/rule'
+import { normalizeRuleTagIds } from '~~/server/utils/ruleTags/resolveRuleTagIds'
 
 const version = 1
 
@@ -22,7 +23,7 @@ export function compileRuleDraftToDb(draft: RuleDraftSchema) {
 
   const conditionRows = mapMatchesToConditionRows(matches ?? [])
   const bankAccountIds = Array.from(new Set(relatedBankAccounts))
-  const tagIds = Array.from(new Set(ruleTags ?? []))
+  const tagIds = normalizeRuleTagIds(ruleTags)
   const ruleData = {
     ...rest,
     currentVersionId: version,

@@ -1,9 +1,10 @@
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { createError, defineEventHandler, readBody } from 'h3'
 import { z } from 'zod'
 import db from '~/lib/db'
 import { ruleTag } from '~/lib/db/schema/ruleTag'
 import { ruleRuleTag } from '~/lib/db/schema/rule'
+import { capitalizeFirst } from '~/lib/text/capitalizeFirst'
 import { requireRoles } from '~~/server/auth/keycloakAuth'
 
 function getPgErrorCode(error: any): string | undefined {
@@ -30,7 +31,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: error?.message ?? 'Ugyldigt input' })
   }
 
-  const newId = payload.id.trim()
+  const newId = capitalizeFirst(payload.id)
   if (!newId) {
     throw createError({ statusCode: 400, statusMessage: 'Ruletag-id er påkrævet' })
   }
@@ -46,6 +47,14 @@ export default defineEventHandler(async (event) => {
       })
       if (!existingOld) {
         throw createError({ statusCode: 404, statusMessage: 'Ruletag ikke fundet' })
+      }
+
+      // Avoid creating duplicates that differ only by casing.
+      const existingNewCaseInsensitive = await tx.query.ruleTag.findFirst({
+        where: (fields) => sql`lower(${fields.id}) = lower(${newId})`
+      })
+      if (existingNewCaseInsensitive && existingNewCaseInsensitive.id !== oldId && existingNewCaseInsensitive.id !== newId) {
+        throw createError({ statusCode: 409, statusMessage: 'Ruletag findes allerede' })
       }
 
       const existingNew = await tx.query.ruleTag.findFirst({

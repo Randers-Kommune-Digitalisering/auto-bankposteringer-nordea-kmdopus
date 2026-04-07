@@ -23,6 +23,7 @@ const toast = useToast()
 
 const baseSchema = z.object({
   id: z.string().min(1, 'Bankkonto-id er påkrævet'),
+  name: z.string().trim().max(80, 'Kaldenavn er for langt').optional(),
   provider: z.enum(['danskebank', 'nordea', 'bankconnect'], { message: 'Vælg bankudbyder' }),
   statusAccount: z.preprocess((value) => {
     if (typeof value === 'string' && value.trim() !== '') return Number(value)
@@ -31,30 +32,34 @@ const baseSchema = z.object({
 })
 
 const updateSchema = baseSchema
-  .pick({ statusAccount: true })
+  .pick({ statusAccount: true, name: true })
   .extend({ provider: baseSchema.shape.provider.optional() })
 const formSchema = computed(() => (isEdit.value ? updateSchema : baseSchema))
 
 type FormState = {
   id: string | undefined
+  name: string | undefined
   provider: 'danskebank' | 'nordea' | 'bankconnect' | undefined
   statusAccount: string | undefined
 }
 
 const state = reactive<FormState>({
   id: undefined,
+  name: undefined,
   provider: undefined,
   statusAccount: undefined
 })
 
 function resetForm() {
   state.id = undefined
+  state.name = undefined
   state.provider = undefined
   state.statusAccount = undefined
 }
 
 function hydrateDraft(account: AccountSelectSchema) {
   state.id = account.id
+  state.name = account.name ?? undefined
   state.provider = account.provider
   state.statusAccount = String(account.statusAccount)
 }
@@ -86,6 +91,7 @@ watch(
 async function onSubmit() {
   const payload = {
     id: state.id?.trim(),
+    name: state.name?.trim() || undefined,
     provider: state.provider,
     statusAccount: Number(state.statusAccount)
   }
@@ -100,7 +106,7 @@ async function onSubmit() {
     if (isEdit.value && props.accountId) {
       await $fetch(`/api/bank-accounts/${props.accountId}`, {
         method: 'PUT',
-        body: { statusAccount: payload.statusAccount }
+        body: { statusAccount: payload.statusAccount, name: payload.name }
       })
       toast.add({ title: 'Bankkonto opdateret', description: `${props.accountId} er opdateret.` })
     } else {
@@ -137,16 +143,8 @@ async function onSubmit() {
     <template #body>
       <UForm :schema="formSchema" :state="state" @submit="onSubmit">
         <div
-          class="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 space-y-4"
+          class="mt-4 p-4 rounded-md border border-default space-y-4"
         >
-          <UFormField label="Bankkonto" name="id" required>
-            <UInput
-              v-model="state.id"
-              :disabled="isEdit"
-              placeholder="fx DK5000400440116243-DKK"
-              class="w-full"
-            />
-          </UFormField>
 
           <UFormField label="Bankudbyder" name="provider" required>
             <USelect
@@ -164,10 +162,32 @@ async function onSubmit() {
             />
           </UFormField>
 
-          <UFormField label="Statuskonto" name="statusAccount" required>
-            <UInput
+          <UFormField name="id" required>
+            <UiFloatingLabelInput
+              v-model="state.id"
+              :disabled="isEdit"
+              label="Bankkonto"
+              required
+              color="neutral"
+              class="w-full"
+            />
+          </UFormField>
+
+          <UFormField name="name">
+            <UiFloatingLabelInput
+              v-model="state.name"
+              label="Kaldenavn"
+              color="neutral"
+              class="w-full"
+            />
+          </UFormField>
+
+          <UFormField name="statusAccount" required>
+            <UiFloatingLabelInput
               v-model="state.statusAccount"
-              placeholder="Angiv statuskonto"
+              label="Statuskonto"
+              required
+              color="neutral"
               type="number"
               :format-options="{
                 maximumFractionDigits: 0,

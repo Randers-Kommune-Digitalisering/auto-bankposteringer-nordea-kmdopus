@@ -62,7 +62,7 @@ watch(files, async (newFiles) => {
 <template>
   <UFileUpload
     v-model="files"
-    icon="i-lucide-paperclip"
+    icon="solar:paperclip-bold-duotone"
     label="Vedhæft bilag"
     description="PDF, Excel, billeder m.m."
     layout="list"
@@ -73,7 +73,7 @@ watch(files, async (newFiles) => {
     <template #actions="{ open }">
       <UButton
         label="Vælg filer"
-        icon="i-lucide-upload"
+        icon="solar:upload-bold-duotone"
         color="neutral"
         variant="outline"
         @click="open()"

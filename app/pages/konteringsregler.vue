@@ -129,7 +129,7 @@ function getHeader(column: Column<RuleListDto>, label: string) {
         {
           label: 'Sortér stigende',
           type: 'checkbox',
-          icon: 'i-lucide-arrow-up-narrow-wide',
+              icon: 'solar:sort-from-bottom-to-top-bold-duotone',
           checked: isSorted === 'asc',
           onSelect: () => {
             if (isSorted === 'asc') {
@@ -141,7 +141,7 @@ function getHeader(column: Column<RuleListDto>, label: string) {
         },
         {
           label: 'Sortér faldende',
-          icon: 'i-lucide-arrow-down-wide-narrow',
+              icon: 'solar:sort-from-top-to-bottom-bold-duotone',
           type: 'checkbox',
           checked: isSorted === 'desc',
           onSelect: () => {
@@ -161,9 +161,9 @@ function getHeader(column: Column<RuleListDto>, label: string) {
         label,
         icon: isSorted
           ? isSorted === 'asc'
-            ? 'i-lucide-arrow-up-narrow-wide'
-            : 'i-lucide-arrow-down-wide-narrow'
-          : 'i-lucide-arrow-up-down',
+                ? 'solar:sort-from-bottom-to-top-bold-duotone'
+                : 'solar:sort-from-top-to-bottom-bold-duotone'
+              : 'solar:sort-vertical-bold-duotone',
         class: '-mx-2.5 data-[state=open]:bg-elevated',
         'aria-label': `Sortér efter ${isSorted === 'asc' ? 'faldende' : 'stigende'}`
       })
@@ -377,7 +377,7 @@ const columns: TableColumn<RuleListDto>[] = [
           },
           () =>
             h(UButton, {
-              icon: 'i-lucide-ellipsis-vertical',
+              icon: 'solar:menu-dots-bold-duotone',
               color: 'neutral',
               variant: 'ghost',
               class: 'ml-auto'
@@ -480,7 +480,7 @@ async function handleDeleteRule(row: Row<RuleListDto>) {
         <template #right>
           <UButton
             class="font-bold rounded-full"
-            icon="i-lucide-plus"
+            icon="solar:notes-bold-duotone"
             label="Ny regel"
             @click="handleAddRule"
           />
@@ -494,78 +494,71 @@ async function handleDeleteRule(row: Row<RuleListDto>) {
     </template>
 
     <template #body>
-      <div class="flex flex-wrap items-center justify-between gap-1.5">
-        <div class="flex flex-wrap items-center gap-2">
-          <UInput
-            v-model="globalFilterValue"
-            class="max-w-sm"
-            color="primary"
-            variant="subtle"
-            icon="solar:magnifer-bold-duotone"
-            placeholder="Søg efter en regel..."
-          />
+      <FiltersRow
+        v-model:account-ids="selectedAccountIds"
+        v-model:search="globalFilterValue"
+        :show-search="true"
+        search-placeholder="Søg efter en regel..."
+        account-placeholder="Alle konti"
+      >
+        <template #date>
+          <div class="flex flex-wrap items-center gap-1.5 justify-end">
+            <!-- Filtrering på status -->
+            <UDropdownMenu
+              :items="statusDropdownItems"
+              :content="{ align: 'start' }"
+            >
+              <UButton
+                :label="`Status: ${statusItems.find(i => i.value === statusFilter)?.label}`"
+                color="neutral"
+                variant="outline"
+                trailing-icon="solar:double-alt-arrow-down-bold-duotone"
+              />
+            </UDropdownMenu>
 
-          <div class="min-w-64">
-            <FiltersBankAccountPicker v-model="selectedAccountIds" placeholder="Alle konti" class="min-w-64" />
+            <!-- Filtrering på type -->
+            <UDropdownMenu
+              :items="typeDropdownItems"
+              :content="{ align: 'start' }"
+            >
+              <UButton
+                :label="`Type: ${typeItems.find(i => i.value === typeFilter)?.label}`"
+                color="neutral"
+                variant="outline"
+                trailing-icon="solar:double-alt-arrow-down-bold-duotone"
+              />
+            </UDropdownMenu>
+
+            <!-- Tilføj/fjern kolonner i visningen -->
+            <UDropdownMenu
+              :items="
+                table?.tableApi
+                  ?.getAllColumns()
+                  .filter((column: any) => column.getCanHide())
+                  .map((column: any) => ({
+                    label: getColumnVisibilityLabel(column),
+                    type: 'checkbox' as const,
+                    checked: column.getIsVisible(),
+                    onUpdateChecked(checked: boolean) {
+                      table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
+                    },
+                    onSelect(e?: Event) {
+                      e?.preventDefault()
+                    }
+                  }))
+              "
+              :content="{ align: 'end' }"
+            >
+              <UButton
+                label="Vis kolonner"
+                color="neutral"
+                variant="outline"
+                trailing-icon="solar:settings-bold-duotone"
+              />
+            </UDropdownMenu>
           </div>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-1.5">
-          <!-- Filtrering på status -->
-          <UDropdownMenu
-            :items="statusDropdownItems"
-            :content="{ align: 'start' }"
-          >
-            <UButton
-              :label="`Status: ${statusItems.find(i => i.value === statusFilter)?.label}`"
-              color="neutral"
-              variant="outline"
-              trailing-icon="i-lucide-chevron-down"
-            />
-          </UDropdownMenu>
-
-          <!-- Filtrering på type -->
-          <UDropdownMenu 
-            :items="typeDropdownItems"
-            :content="{ align: 'start' }"
-          >
-            <UButton
-              :label="`Type: ${typeItems.find(i => i.value === typeFilter)?.label}`"
-              color="neutral"
-              variant="outline"
-              trailing-icon="i-lucide-chevron-down"
-            />
-          </UDropdownMenu>
-
-          <!-- Tilføj/fjern kolonner i visningen -->
-          <UDropdownMenu
-            :items="
-              table?.tableApi
-                ?.getAllColumns()
-                .filter((column: any) => column.getCanHide())
-                .map((column: any) => ({
-                  label: getColumnVisibilityLabel(column),
-                  type: 'checkbox' as const,
-                  checked: column.getIsVisible(),
-                  onUpdateChecked(checked: boolean) {
-                    table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
-                  },
-                  onSelect(e?: Event) {
-                    e?.preventDefault()
-                  }
-                }))
-            "
-            :content="{ align: 'end' }"
-          >
-            <UButton
-              label="Vis kolonner"
-              color="neutral"
-              variant="outline"
-              trailing-icon="i-lucide-settings-2"
-            />
-          </UDropdownMenu>
-        </div>
-      </div>
+        </template>
+      </FiltersRow>
 
       <UTable
         ref="table"

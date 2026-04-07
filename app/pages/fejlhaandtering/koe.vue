@@ -488,7 +488,7 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
         </template>
         <template #right>
           <UButton
-            icon="i-lucide-refresh-cw"
+            icon="solar:refresh-bold-duotone"
             variant="ghost"
             color="primary"
             label="Opdater"
@@ -505,7 +505,7 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
           <div class="min-w-0">
             <UFormField label="Periode">
               <UPopover :popper="{ placement: 'bottom-start' }">
-                <UButton variant="outline" icon="i-lucide-calendar" :loading="runsPending" class="w-full md:w-auto">
+                <UButton variant="outline" icon="solar:calendar-bold-duotone" :loading="runsPending" class="w-full md:w-auto">
                   <template v-if="dateRange?.start">
                     <template v-if="dateRange?.end">
                       {{ df.format(dateRange.start.toDate(getLocalTimeZone())) }} - {{ df.format(dateRange.end.toDate(getLocalTimeZone())) }}
@@ -616,7 +616,7 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
             </div>
             <div class="flex items-center gap-2">
               <UButton
-                icon="i-lucide-download"
+                icon="solar:download-bold-duotone"
                 label="Poll ERP-svar nu"
                 color="neutral"
                 variant="soft"
@@ -636,7 +636,7 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
 
               <UEmpty
                 v-if="!runJobsLoading && !(runJobs?.jobs?.length)"
-                icon="i-lucide-archive"
+                icon="solar:archive-bold-duotone"
                 title="Ingen jobs"
                 description="Der er ingen jobs knyttet til den valgte kørsel."
                 class="border border-dashed border-default rounded-lg"
@@ -666,7 +666,7 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
 
               <UEmpty
                 v-if="!runErpLoading && !(runErp?.outbox?.length)"
-                icon="i-lucide-inbox"
+                icon="solar:inbox-bold-duotone"
                 title="Ingen ERP outbox items"
                 description="Der er ingen outbox items for den valgte kørsel."
                 class="border border-dashed border-default rounded-lg"
@@ -692,7 +692,7 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
 
         <div class="flex flex-wrap items-center gap-2 mt-4">
           <UButton
-            icon="i-lucide-play"
+            icon="solar:play-bold-duotone"
             label="Kør worker nu"
             color="primary"
             variant="soft"
@@ -700,7 +700,7 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
             @click="runWorkerNow"
           />
           <UButton
-            icon="i-lucide-plus"
+            icon="solar:download-bold-duotone"
             label='Hent bankdata'
             color="neutral"
             variant="soft"

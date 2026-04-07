@@ -46,7 +46,7 @@ const stats = computed<DashboardStat[]>(() => {
     {
       key: 'automation',
       title: 'Automatisering',
-      icon: 'i-lucide-wand-2',
+      icon: 'solar:magic-stick-2-bold-duotone',
       value: formatPct(kpis.automationRatePercent),
       badge: `${formatInt(kpis.matchedTransactions)} / ${formatInt(kpis.totalTransactions)}`,
       sub: `Auto: ${formatInt(kpis.autoBookedTransactions)}`
@@ -54,14 +54,14 @@ const stats = computed<DashboardStat[]>(() => {
     {
       key: 'open-items',
       title: 'Åbne poster',
-      icon: 'i-lucide-inbox',
+      icon: 'solar:inbox-bold-duotone',
       to: '/aabne-poster',
       value: formatInt(kpis.openTransactions)
     },
     {
       key: 'rules',
       title: 'Regler',
-      icon: 'i-lucide-notebook-pen',
+      icon: 'solar:notebook-bookmark-bold-duotone',
       to: '/konteringsregler',
       value: formatInt(kpis.activeRules),
       badge: 'Aktive',
@@ -70,7 +70,7 @@ const stats = computed<DashboardStat[]>(() => {
     {
       key: 'errors',
       title: 'Fejl',
-      icon: 'i-lucide-triangle-alert',
+      icon: 'solar:shield-warning-bold-duotone',
       to: '/koersler',
       value: formatInt(kpis.errorCount),
       badge: 'Fejl',

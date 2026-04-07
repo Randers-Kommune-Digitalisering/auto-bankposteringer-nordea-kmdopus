@@ -113,10 +113,11 @@ const constraintFields = computed(() => {
             :key="field.label"
             class="flex flex-col gap-1"
           >
-            <span class="text-xs font-semibold text-muted">{{ field.label }}</span>
-            <UInput
+            <UiFloatingLabelInput
               :model-value="field.value"
+              :label="field.label"
               readonly
+              color="neutral"
               class="font-mono text-sm"
             />
           </div>

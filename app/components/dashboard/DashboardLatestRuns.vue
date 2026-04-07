@@ -72,13 +72,13 @@ const columns: TableColumn<DashboardLatestRun>[] = [
     <template #header>
       <div class="flex items-center justify-between">
         <div class="font-medium">Seneste kørsler</div>
-        <UButton to="/koersler" variant="ghost" icon="i-lucide-arrow-right" label="Se alle" />
+        <UButton to="/koersler" variant="ghost" icon="solar:alt-arrow-right-bold-duotone" label="Se alle" />
       </div>
     </template>
 
     <UEmpty
       v-if="!runs.length"
-      icon="i-lucide-archive"
+      icon="solar:archive-bold-duotone"
       title="Ingen kørsler"
       description="Der er ingen kørsler endnu."
       class="border border-dashed border-default rounded-lg"
