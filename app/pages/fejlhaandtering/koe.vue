@@ -39,6 +39,7 @@ type RunJobsContextResponse = {
 
 const toast = useToast()
 const UButton = resolveComponent('UButton')
+const route = useRoute()
 
 const { data: runsData, pending: runsPending, refresh: refreshRuns } = await useFetch<RunListResponse>('/api/runs', {
   key: 'runs-for-recovery-queue',
@@ -79,6 +80,14 @@ const runOptions = computed(() =>
 
 const selectedRunIds = ref<string[]>([])
 const selectedSingleRunId = computed(() => (selectedRunIds.value.length === 1 ? selectedRunIds.value[0] : undefined))
+
+function parseQueryRunIds(): string[] {
+  const q: any = route.query
+  const raw = q.runIds ?? q.runId
+  if (Array.isArray(raw)) return raw.flatMap((v) => String(v).split(',').map((s) => s.trim()).filter(Boolean))
+  if (typeof raw === 'string') return raw.split(',').map((s) => s.trim()).filter(Boolean)
+  return []
+}
 
 const runErpLoading = ref(false)
 const runErp = ref<RunOutboxContextResponse | null>(null)
@@ -131,6 +140,23 @@ async function refreshPageData() {
 watch(selectedRunIds, async () => {
   await loadRunErp()
 }, { deep: true })
+
+watch(
+  () => [allRuns.value.length, route.query.runId, route.query.runIds] as const,
+  async () => {
+    const fromQuery = parseQueryRunIds()
+    if (!fromQuery.length) return
+    if (!allRuns.value.length) return
+
+    const available = new Set(allRuns.value.map((r) => r.id))
+    const next = fromQuery.filter((id) => available.has(id))
+    if (!next.length) return
+    if (next.join(',') === selectedRunIds.value.join(',')) return
+
+    selectedRunIds.value = next
+  },
+  { immediate: true },
+)
 
 // Calendar events (chip events) based on runs in selected period
 type StatusColor = 'success' | 'error' | 'warning' | 'neutral'
@@ -202,6 +228,36 @@ function outboxStatusColor(status: string): 'success' | 'error' | 'warning' | 'n
   }
 }
 
+function outboxStatusLabel(status: string): string {
+  switch (status) {
+    case 'sent':
+      return 'Afsendt'
+    case 'failed':
+      return 'Fejlet'
+    case 'processing':
+      return 'Sender'
+    case 'pending':
+      return 'Afventer'
+    default:
+      return status || '—'
+  }
+}
+
+function jobStatusLabel(status: string): string {
+  switch (status) {
+    case 'succeeded':
+      return 'OK'
+    case 'failed':
+      return 'Fejl'
+    case 'in_progress':
+      return 'Kører'
+    case 'pending':
+      return 'Afventer'
+    default:
+      return status || '—'
+  }
+}
+
 function directionLabelFromJobType(type: string): 'Ind' | 'Ud' {
   if (type === 'banking.ingest') return 'Ind'
   if (type === 'erp.ingestResponses') return 'Ind'
@@ -228,13 +284,13 @@ async function runWorkerNow() {
       { method: 'POST', body: { maxJobs: 25, maxOutbox: 50 } },
     )
     toast.add({
-      title: 'Worker kørt',
-      description: `Jobs: ${res.jobs}, outbox: ${res.outbox}`,
+      title: 'Behandling kørt',
+      description: `Behandling: ${res.jobs}, afleveringer: ${res.outbox}`,
     })
     await refreshPageData()
   } catch (error) {
     console.error('Worker fejlede', error)
-    toast.add({ title: 'Worker fejlede', color: 'error' })
+    toast.add({ title: 'Behandling fejlede', color: 'error' })
   } finally {
     runningWorker.value = false
   }
@@ -260,11 +316,11 @@ async function enqueue(type: 'banking.ingest' | 'erp.ingestResponses') {
         ...(selectedSingleRunId.value ? { runId: selectedSingleRunId.value } : {}),
       },
     })
-    toast.add({ title: 'Job oprettet', description: type })
+    toast.add({ title: 'Opgave oprettet', description: type })
     await refreshPageData()
   } catch (error) {
     console.error('Enqueue fejlede', error)
-    toast.add({ title: 'Kunne ikke oprette job', color: 'error' })
+    toast.add({ title: 'Kunne ikke oprette opgave', color: 'error' })
   } finally {
     enqueuing.value = null
   }
@@ -283,7 +339,7 @@ const runOutboxColumns: TableColumn<RunOutboxContextResponse['outbox'][number]>[
     size: 210,
     cell: ({ row }) => String(row.original.runId ?? '—'),
   },
-  { accessorKey: 'topic', header: 'Topic', size: 220 },
+  { accessorKey: 'topic', header: 'Afleveringstype', size: 220 },
   {
     accessorKey: 'status',
     header: 'Status',
@@ -293,7 +349,7 @@ const runOutboxColumns: TableColumn<RunOutboxContextResponse['outbox'][number]>[
       return h(
         resolveComponent('UBadge'),
         { color: outboxStatusColor(status), variant: 'subtle', class: 'w-fit' },
-        () => status,
+        () => outboxStatusLabel(status),
       )
     },
   },
@@ -432,7 +488,7 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
             : status === 'in_progress'
               ? 'warning'
               : 'neutral'
-      return h(resolveComponent('UBadge'), { color, variant: 'subtle', class: 'w-fit' }, () => status)
+      return h(resolveComponent('UBadge'), { color, variant: 'subtle', class: 'w-fit' }, () => jobStatusLabel(status))
     },
   },
   {
@@ -574,10 +630,10 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
             <div class="flex flex-col gap-1">
               <div class="font-medium">Fejlhåndtering og genkørsel</div>
               <div class="text-sm text-muted">
-                Genkørsel sker ved at sætte jobs/outbox tilbage til “pending” og lade worker håndtere retry.
+                Genkørsel sker ved at sætte behandling/afleveringer tilbage til “Afventer” og lade systemet håndtere genforsøg.
               </div>
               <div class="text-sm text-muted">
-                I normal drift kører scheduler/worker automatisk (se deployment-roller via <span class="font-mono">APP_ROLE</span>).
+                I normal drift kører behandlingen automatisk (se deployment-roller via <span class="font-mono">APP_ROLE</span>).
                 Knapperne herunder er derfor manuelle recovery/debug-handtag.
               </div>
 
@@ -585,16 +641,16 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
                 <div class="font-medium text-default">Hvornår giver det mening?</div>
                 <ul class="list-disc pl-5 space-y-1 mt-1">
                   <li>
-                    <span class="font-medium text-default">Fejlede outbox items</span> (typisk ERP upload): tryk “Genkør” på den konkrete outbox-række.
+                    <span class="font-medium text-default">Fejlede ERP-afleveringer</span>: tryk “Genkør” på den konkrete aflevering.
                   </li>
                   <li>
-                    <span class="font-medium text-default">Fejlede jobs</span>: tryk “Genkør” på den konkrete job-række.
+                    <span class="font-medium text-default">Fejlede behandlingsopgaver</span>: tryk “Genkør” på den konkrete række.
                   </li>
                   <li>
-                    <span class="font-medium text-default">Scheduler har ikke oprettet dagens job</span> (manglende kørsel): brug “Nød: Opret job …” for at få arbejdet i gang igen.
+                    <span class="font-medium text-default">Dagens behandling er ikke startet</span>: brug nød-knapperne til at få arbejdet i gang igen.
                   </li>
                   <li>
-                    <span class="font-medium text-default">Worker er stoppet / hænger</span>: “Kør worker nu” kan dræne noget af køen, men i drift bør worker køre kontinuerligt.
+                    <span class="font-medium text-default">Behandling er stoppet / hænger</span>: “Kør behandling nu” kan dræne noget af køen, men i drift bør den køre kontinuerligt.
                   </li>
                 </ul>
                 <div class="mt-2">
@@ -609,10 +665,10 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex flex-wrap items-center gap-2">
               <UBadge color="neutral" variant="subtle">Valgte kørsler: {{ selectedRunIds.length }}</UBadge>
-              <UBadge :color="outboxStatusColor('failed')" variant="subtle">Outbox failed: {{ outboxStatusCounts.failed }}</UBadge>
-              <UBadge :color="outboxStatusColor('pending')" variant="subtle">pending: {{ outboxStatusCounts.pending }}</UBadge>
-              <UBadge :color="outboxStatusColor('processing')" variant="subtle">processing: {{ outboxStatusCounts.processing }}</UBadge>
-              <UBadge :color="outboxStatusColor('sent')" variant="subtle">sent: {{ outboxStatusCounts.sent }}</UBadge>
+              <UBadge :color="outboxStatusColor('failed')" variant="subtle">Fejlede afleveringer: {{ outboxStatusCounts.failed }}</UBadge>
+              <UBadge :color="outboxStatusColor('pending')" variant="subtle">Afventer: {{ outboxStatusCounts.pending }}</UBadge>
+              <UBadge :color="outboxStatusColor('processing')" variant="subtle">Sender: {{ outboxStatusCounts.processing }}</UBadge>
+              <UBadge :color="outboxStatusColor('sent')" variant="subtle">Afsendt: {{ outboxStatusCounts.sent }}</UBadge>
             </div>
             <div class="flex items-center gap-2">
               <UButton
@@ -630,7 +686,7 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
           <div class="grid gap-6 mt-4 lg:grid-cols-2">
             <div>
               <div class="flex items-center justify-between mb-2">
-                <div class="font-medium">Jobs (kørsel)</div>
+                    <div class="font-medium">Behandling (kørsel)</div>
                 <UBadge color="neutral" variant="subtle">{{ runJobs?.jobs?.length ?? 0 }}</UBadge>
               </div>
 
@@ -660,15 +716,15 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
 
             <div>
               <div class="flex items-center justify-between mb-2">
-                <div class="font-medium">Outbox (kørsel)</div>
+                    <div class="font-medium">ERP-afleveringer (kørsel)</div>
                 <UBadge color="neutral" variant="subtle">{{ runErp?.outbox?.length ?? 0 }}</UBadge>
               </div>
 
               <UEmpty
                 v-if="!runErpLoading && !(runErp?.outbox?.length)"
                 icon="solar:inbox-bold-duotone"
-                title="Ingen ERP outbox items"
-                description="Der er ingen outbox items for den valgte kørsel."
+                    title="Ingen ERP-afleveringer"
+                    description="Der er ingen ERP-afleveringer for den valgte kørsel."
                 class="border border-dashed border-default rounded-lg"
               />
 
@@ -693,7 +749,7 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
         <div class="flex flex-wrap items-center gap-2 mt-4">
           <UButton
             icon="solar:play-bold-duotone"
-            label="Kør worker nu"
+            label="Kør behandling nu"
             color="primary"
             variant="soft"
             :loading="runningWorker"

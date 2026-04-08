@@ -48,6 +48,7 @@ type ErpRequestLinesResponse = {
 const toast = useToast()
 const UCheckbox = resolveComponent('UCheckbox')
 const UButton = resolveComponent('UButton')
+const route = useRoute()
 
 const { data: failedList, pending: failedPending, refresh: refreshFailed } = await useFetch<FailedErpRequestsResponse>(
   '/api/fejlhaandtering/erp-requests/failed',
@@ -153,6 +154,19 @@ async function loadErpRequest() {
     erpLoading.value = false
   }
 }
+
+watch(
+  () => route.query.requestId,
+  async (requestId) => {
+    if (!requestId) return
+    const id = Array.isArray(requestId) ? String(requestId[0] ?? '') : String(requestId)
+    if (!id.trim()) return
+    if (erpRequestId.value.trim() === id.trim()) return
+    erpRequestId.value = id.trim()
+    await loadErpRequest()
+  },
+  { immediate: true },
+)
 
 async function resendErpRequest() {
   if (!erpDetails.value) return

@@ -34,6 +34,14 @@
     // Popover state
     const openPopovers = ref<Record<string, string | null>>({})
 
+    const runModalOpen = ref(false)
+    const selectedRun = ref<RunListItem | null>(null)
+
+    function openRun(run: RunListItem) {
+        selectedRun.value = run
+        runModalOpen.value = true
+    }
+
     type StatusColor = 'success' | 'error' | 'warning' | 'neutral'
 
     const getColorByStatus = (status: RunStatus): StatusColor => {
@@ -117,6 +125,20 @@
     }
 
     const columns: TableColumn<RunListItem>[] = [
+        {
+            id: 'openRun',
+            header: '',
+            size: 86,
+            enableSorting: false,
+            cell: ({ row }) => {
+                return h(resolveComponent('UButton'), {
+                    size: 'xs',
+                    color: 'primary',
+                    variant: 'soft',
+                    onClick: () => openRun(row.original)
+                }, () => 'Åbn')
+            }
+        },
         {
             accessorKey: 'bookingDate',
             header: 'Dato',
@@ -320,6 +342,8 @@
                     />
                 </div>
             </div>
+
+            <RunsRunTimelineModal v-model:open="runModalOpen" :run="selectedRun" />
         </template>
     </UDashboardPanel>
 </template>

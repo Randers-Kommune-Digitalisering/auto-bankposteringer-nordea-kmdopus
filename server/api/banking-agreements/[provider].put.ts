@@ -4,11 +4,10 @@ import { eq } from 'drizzle-orm'
 import db from '~/lib/db'
 import { bankingAgreement, bankProviderValues, bankChannelValues } from '~/lib/db/schema/bankingAgreement'
 import { ZodError } from 'zod'
-
-import { loadDanskeBankEdiEnvConfig } from '~/../engine/banking-ingestion/infrastructure/danskebank/danskeBankEdiEnvConfig'
-import { loadDanskeBankEnvSecrets } from '~/../engine/banking-ingestion/infrastructure/danskebank/danskeBankEnvSecrets'
-import { loadNordeaCorporateAccessEnvConfig } from '~/../engine/banking-ingestion/infrastructure/nordea/nordeaCorporateAccessEnvConfig'
-import { loadNordeaEnvSecrets } from '~/../engine/banking-ingestion/infrastructure/nordea/nordeaEnvSecrets'
+import {
+  extractKeysFromZod,
+  validateProviderEnvOrThrow as validateProviderEnvOrThrowShared,
+} from '~/../engine/banking-ingestion/infrastructure/providerEnv'
 
 const bodySchema = z
   .object({
@@ -19,24 +18,7 @@ const bodySchema = z
     message: 'Body skal indeholde enabled og/eller channel',
   })
 
-function extractEnvKeysFromMessage(message: string): string[] {
-  const tokens = message.match(/[A-Z][A-Z0-9_]{2,}/g) ?? []
-  return Array.from(new Set(tokens.filter((t) => t.includes('_'))))
-}
-
-function extractKeysFromZod(err: ZodError): string[] {
-  const keys: string[] = []
-  for (const issue of err.issues) {
-    if (issue.path.length) {
-      keys.push(issue.path.map(String).join('.'))
-      continue
-    }
-    if (issue.message) {
-      keys.push(...extractEnvKeysFromMessage(issue.message))
-    }
-  }
-  return Array.from(new Set(keys)).filter(Boolean)
-}
+// NOTE: env key extraction helpers are imported from the shared provider-env module.
 
 function formatEnvValidationError(err: unknown): string {
   if (err instanceof ZodError) {
@@ -46,32 +28,6 @@ function formatEnvValidationError(err: unknown): string {
   }
   const msg = String((err as any)?.message ?? err)
   return msg || 'Ugyldig env-konfiguration'
-}
-
-function validateProviderEnvOrThrow(provider: string, channel: (typeof bankChannelValues)[number]): void {
-  if (channel === 'rest') {
-    if (provider === 'nordea') {
-      throw new Error('Nordea REST (Premium API) er ikke implementeret endnu')
-    }
-    if (provider === 'danskebank') {
-      throw new Error('Danske Bank REST API er ikke implementeret endnu')
-    }
-    throw new Error('REST kanal er ikke implementeret endnu')
-  }
-
-  if (provider === 'danskebank') {
-    loadDanskeBankEdiEnvConfig()
-    loadDanskeBankEnvSecrets()
-    return
-  }
-  if (provider === 'nordea') {
-    loadNordeaCorporateAccessEnvConfig()
-    loadNordeaEnvSecrets()
-    return
-  }
-  if (provider === 'bankconnect') {
-    throw new Error('BankConnect er ikke implementeret endnu')
-  }
 }
 
 export default defineEventHandler(async (event) => {
@@ -98,7 +54,7 @@ export default defineEventHandler(async (event) => {
 
   if (nextEnabled === true) {
     try {
-      validateProviderEnvOrThrow(provider, nextChannel)
+      validateProviderEnvOrThrowShared(provider, nextChannel)
     } catch (err) {
       throw createError({ statusCode: 400, statusMessage: formatEnvValidationError(err) })
     }

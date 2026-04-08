@@ -7,6 +7,18 @@ import type { AccountSelectSchema } from '~/lib/db/schema/account'
 
 type AllowlistAccount = { iban: string; name: string | null }
 
+type NordeaRestAuthStatus = {
+  provider: 'nordea'
+  channel: 'rest'
+  status: string | null
+  accessId: string | null
+  updatedAt: string | null
+  accessTokenExpiresAt: string | null
+  hasAccessToken: boolean
+  hasRefreshToken: boolean
+  message?: string
+}
+
 type BankingAgreement = {
   provider: 'danskebank' | 'nordea' | 'bankconnect'
   enabled: boolean
@@ -73,6 +85,56 @@ const channelOptions = [
 const channelLabel = (c: BankingAgreement['channel']) => {
   if (c === 'rest') return 'REST API'
   return 'ISO 20022'
+}
+
+const nordeaRestAuthPending = ref(false)
+const nordeaRestAuthStatus = ref<NordeaRestAuthStatus | null>(null)
+
+function formatNordeaRestAuthStatus(status: NordeaRestAuthStatus | null): string {
+  if (!status) return '—'
+  const s = status.status ?? 'UKENDT'
+  if (status.hasAccessToken) return `${s} (token OK)`
+  if (status.hasRefreshToken) return `${s} (refresh OK)`
+  return s
+}
+
+async function refreshNordeaRestAuthStatus(refresh = true) {
+  if (nordeaRestAuthPending.value) return
+  nordeaRestAuthPending.value = true
+  try {
+    const q = refresh ? '?refresh=1' : ''
+    nordeaRestAuthStatus.value = await $fetch<NordeaRestAuthStatus>(`/api/banking-agreements/nordea/authstatus${q}`)
+  } catch (err: any) {
+    toast.add({
+      title: 'Kan ikke hente auth-status',
+      description: String(err?.data?.statusMessage ?? err?.statusMessage ?? err?.message ?? err),
+      color: 'error',
+    })
+  } finally {
+    nordeaRestAuthPending.value = false
+  }
+}
+
+async function requestNordeaRestReauth() {
+  if (nordeaRestAuthPending.value) return
+  nordeaRestAuthPending.value = true
+  try {
+    const res = await $fetch<NordeaRestAuthStatus>(`/api/banking-agreements/nordea/reauth`, { method: 'POST' })
+    nordeaRestAuthStatus.value = res
+    toast.add({
+      title: '2FA/autorisation startet',
+      description: res?.message ?? 'Godkend i Nordea, og opdater status bagefter.',
+      color: 'success',
+    })
+  } catch (err: any) {
+    toast.add({
+      title: 'Kan ikke starte reauth',
+      description: String(err?.data?.statusMessage ?? err?.statusMessage ?? err?.message ?? err),
+      color: 'error',
+    })
+  } finally {
+    nordeaRestAuthPending.value = false
+  }
 }
 
 const modalOpen = ref(false)
@@ -501,6 +563,52 @@ async function handleDeleteAccount(row: Row<AccountSelectSchema>) {
               v-if="a.channel === 'rest'"
               class="pt-3 border-t border-default space-y-2"
             >
+              <div v-if="a.provider === 'nordea'" class="space-y-2">
+                <div class="text-xs font-semibold uppercase tracking-wide text-muted">2FA / autorisation</div>
+                <div class="text-xs text-muted">
+                  Nordea REST kræver godkendelse i Nordea (netbank/app) — der er normalt ingen URL at åbne i browseren.
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                  <UBadge
+                    color="neutral"
+                    variant="subtle"
+                    class="text-[11px]"
+                  >
+                    Status: {{ formatNordeaRestAuthStatus(nordeaRestAuthStatus) }}
+                  </UBadge>
+
+                  <UButton
+                    size="xs"
+                    color="neutral"
+                    variant="soft"
+                    :loading="nordeaRestAuthPending"
+                    icon="solar:refresh-bold-duotone"
+                    @click="refreshNordeaRestAuthStatus(true)"
+                  >
+                    Opdater status
+                  </UButton>
+
+                  <UButton
+                    size="xs"
+                    color="neutral"
+                    variant="soft"
+                    :loading="nordeaRestAuthPending"
+                    icon="solar:restart-bold-duotone"
+                    @click="requestNordeaRestReauth"
+                  >
+                    Genstart 2FA
+                  </UButton>
+                </div>
+
+                <div v-if="nordeaRestAuthStatus?.updatedAt" class="text-xs text-muted">
+                  Sidst opdateret: {{ nordeaRestAuthStatus.updatedAt }}
+                </div>
+                <div v-if="nordeaRestAuthStatus?.accessTokenExpiresAt" class="text-xs text-muted">
+                  Token udløber: {{ nordeaRestAuthStatus.accessTokenExpiresAt }}
+                </div>
+              </div>
+
               <div class="text-xs font-semibold uppercase tracking-wide text-muted">Konti til API</div>
               <div class="text-xs text-muted">
                 Angiv IBAN(s) som må hentes via API. Dette er pr. udbyder (ikke pr. kanal).
