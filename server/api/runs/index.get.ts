@@ -5,8 +5,11 @@ import { account } from "~/lib/db/schema/account";
 import { document } from "~/lib/db/schema/document";
 import { erpRequest, erpResponse } from "~/lib/db/schema/erp";
 import { errorLog } from "~/lib/db/schema/error";
+import { job } from "~/lib/db/schema/job";
+import { outbox } from "~/lib/db/schema/outbox";
 import { run } from "~/lib/db/schema/run";
 import { transaction, transactionProcessing } from "~/lib/db/schema/transaction";
+import type { RunStatus } from "~/lib/db/schema/enums";
 import type {
   DocumentListItem,
   ErpResponseListItem,
@@ -167,7 +170,7 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
 
   const runIds = runRows.map((row) => row.id);
 
-  const [transactionRows, documentRows, errorRows, erpResponseRows] = await Promise.all([
+  const [transactionRows, documentRows, errorRows, erpResponseRows, jobRows, outboxRows] = await Promise.all([
     db
       .select({
         id: transaction.id,
@@ -234,10 +237,27 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
       .select({
         runId: erpRequest.runId,
         id: erpResponse.id,
+        statusText: erpResponse.statusText,
       })
       .from(erpRequest)
       .innerJoin(erpResponse, eq(erpResponse.requestId, erpRequest.id))
       .where(inArray(erpRequest.runId, runIds)),
+    db
+      .select({
+        runId: job.runId,
+        status: job.status,
+      })
+      .from(job)
+      .where(inArray(job.runId, runIds as any))
+      .limit(500),
+    db
+      .select({
+        runId: outbox.runId,
+        status: outbox.status,
+      })
+      .from(outbox)
+      .where(inArray(outbox.runId, runIds as any))
+      .limit(500),
   ]);
 
   const transactionsByRun = new Map<string, TransactionListItem[]>();
@@ -287,6 +307,7 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
   });
 
   const erpResponsesByRun = new Map<string, ErpResponseListItem[]>();
+  const hasNegativeErpResponseByRun = new Map<string, boolean>();
   erpResponseRows.forEach((row) => {
     if (!row.runId) {
       return;
@@ -294,11 +315,59 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
     const list = erpResponsesByRun.get(row.runId) ?? [];
     list.push({ id: row.id });
     erpResponsesByRun.set(row.runId, list);
+
+    const statusText = row.statusText ? String(row.statusText) : ''
+    if (statusText && !statusText.trim().toUpperCase().startsWith('OK')) {
+      hasNegativeErpResponseByRun.set(String(row.runId), true)
+    }
   });
+
+  const hasInFlightByRun = new Map<string, boolean>();
+  const hasFailedIoByRun = new Map<string, boolean>();
+
+  for (const row of jobRows ?? []) {
+    const runId = row.runId ? String(row.runId) : ''
+    if (!runId) continue
+
+    const status = String(row.status ?? '')
+    if (status === 'failed') {
+      hasFailedIoByRun.set(runId, true)
+      continue
+    }
+    if (status === 'pending' || status === 'in_progress') {
+      hasInFlightByRun.set(runId, true)
+    }
+  }
+
+  for (const row of outboxRows ?? []) {
+    const runId = row.runId ? String(row.runId) : ''
+    if (!runId) continue
+
+    const status = String(row.status ?? '')
+    if (status === 'failed') {
+      hasFailedIoByRun.set(runId, true)
+      continue
+    }
+    if (status === 'pending' || status === 'processing') {
+      hasInFlightByRun.set(runId, true)
+    }
+  }
+
+  function resolveEffectiveRunStatus(runId: string, base: unknown): RunStatus {
+    const hasErrors = (errorsByRun.get(runId)?.length ?? 0) > 0
+    if (hasErrors) return 'fejl'
+    if (hasNegativeErpResponseByRun.get(runId)) return 'fejl'
+    if (hasFailedIoByRun.get(runId)) return 'fejl'
+    if (hasInFlightByRun.get(runId)) return 'indlæser'
+
+    const baseStatus = (base ?? null) as RunStatus | null
+    return baseStatus ?? 'afventer'
+  }
 
   return runRows.map<RunListItem>((row) => ({
     ...row,
     bookingDate: formatDate(row.bookingDate),
+    status: resolveEffectiveRunStatus(String(row.id), row.status),
     transactions: transactionsByRun.get(row.id) ?? [],
     documents: documentsByRun.get(row.id) ?? [],
     errors: errorsByRun.get(row.id) ?? [],

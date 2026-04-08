@@ -16,6 +16,7 @@ import { ingestCamt053Document } from './ingestCamt053Document'
 import { bankingAgreement } from '~/lib/db/schema/bankingAgreement'
 import type { BankProvider, BankChannel } from '~/lib/db/schema/bankingAgreement'
 import { getAgreementCursor, setAgreementCursor } from './bankingAgreementCursorStore'
+import { runNordeaRestIngestion } from '../infrastructure/nordea/rest/ingest'
 
 export async function runTransactionBatch(options: { runId?: string; bookingDate?: Date } = {}): Promise<{ runId: string; insertedCount: number }> {
   const log = logger.child({ scope: 'banking.runTransactionBatch' })
@@ -68,6 +69,19 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
 
     for (const r of runs) {
       try {
+        if (r.channel === 'rest') {
+          if (r.provider !== 'nordea') {
+            throw new Error(`REST kanal er ikke implementeret endnu for provider=${r.provider}`)
+          }
+
+          const nordea = await runNordeaRestIngestion(trx as any, { runId, bookingDate })
+          insertedStatements += nordea.insertedStatements
+          insertedBalances += nordea.insertedBalances
+          insertedTransactions += nordea.insertedTransactions
+          deduplicated = deduplicated || nordea.deduplicated
+          continue
+        }
+
         const adapter = (() => {
           if (adapterKeyOverride === 'danskebank-edi-ws') {
             const cfg = loadDanskeBankEdiEnvConfig()
