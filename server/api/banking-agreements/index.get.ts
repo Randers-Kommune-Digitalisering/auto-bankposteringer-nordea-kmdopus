@@ -3,11 +3,12 @@ import db from '~/lib/db'
 import { bankingAgreement, bankProviderValues } from '~/lib/db/schema/bankingAgreement'
 import { ZodError } from 'zod'
 import { bankingAgreementAccountAllowlist } from '~/lib/db/schema/bankingAgreementAccountAllowlist'
-
-import { loadDanskeBankEdiEnvConfig } from '~/../engine/banking-ingestion/infrastructure/danskebank/danskeBankEdiEnvConfig'
-import { loadDanskeBankEnvSecrets } from '~/../engine/banking-ingestion/infrastructure/danskebank/danskeBankEnvSecrets'
-import { loadNordeaCorporateAccessEnvConfig } from '~/../engine/banking-ingestion/infrastructure/nordea/nordeaCorporateAccessEnvConfig'
-import { loadNordeaEnvSecrets } from '~/../engine/banking-ingestion/infrastructure/nordea/nordeaEnvSecrets'
+import {
+  extractKeysFromZod,
+  nonEmpty,
+  providerEnvRequirements,
+  validateProviderEnvOrThrow,
+} from '~/../engine/banking-ingestion/infrastructure/providerEnv'
 
 type EnvRequirement =
   | { type: 'key'; key: string }
@@ -36,84 +37,6 @@ type Readiness =
   | { status: 'not_configured'; message: string; env: EnvStatus }
   | { status: 'missing_env'; message: string; missingKeys: string[]; env: EnvStatus }
   | { status: 'not_implemented'; message: string; env?: EnvStatus }
-
-function nonEmpty(value: unknown): boolean {
-  return typeof value === 'string' && value.trim().length > 0
-}
-
-function extractEnvKeysFromMessage(message: string): string[] {
-  // Conservative: only keep ALL_CAPS_WITH_UNDERSCORES tokens.
-  const tokens = message.match(/[A-Z][A-Z0-9_]{2,}/g) ?? []
-  return Array.from(new Set(tokens.filter((t) => t.includes('_'))))
-}
-
-function extractKeysFromZod(err: ZodError): string[] {
-  const keys: string[] = []
-  for (const issue of err.issues) {
-    if (issue.path.length) {
-      keys.push(issue.path.map(String).join('.'))
-      continue
-    }
-    if (issue.message) {
-      keys.push(...extractEnvKeysFromMessage(issue.message))
-    }
-  }
-  return Array.from(new Set(keys)).filter(Boolean)
-}
-
-function providerEnvRequirements(provider: string, channel: string): EnvRequirement[] | null {
-  if (channel === 'rest') return null
-
-  if (provider === 'danskebank') {
-    return [
-      { type: 'key', key: 'DANSKE_BANK_EDI_SENDER_ID' },
-      { type: 'key', key: 'DANSKE_BANK_EDI_USER_AGENT' },
-      { type: 'key', key: 'DANSKE_BANK_CUSTOMER_ID' },
-      { type: 'key', key: 'DANSKE_BANK_SIGNER_ID' },
-      { type: 'key', key: 'DANSKE_BANK_SOFTWARE_ID' },
-      { type: 'key', key: 'DANSKE_BANK_PKI_SENDER_ID' },
-      { type: 'key', key: 'DANSKE_BANK_PKI_CUSTOMER_ID' },
-      {
-        type: 'anyOf',
-        label: 'Privat nøgle (angiv mindst én)',
-        keys: [
-          'DANSKE_BANK_APPLICATION_REQUEST_PRIVATE_KEY_PEM',
-          'DANSKE_BANK_APPLICATION_REQUEST_PRIVATE_KEY_PEM_B64',
-        ],
-      },
-      {
-        type: 'anyOf',
-        label: 'Certifikat (angiv mindst én)',
-        keys: [
-          'DANSKE_BANK_APPLICATION_REQUEST_CERTIFICATE_PEM',
-          'DANSKE_BANK_APPLICATION_REQUEST_CERTIFICATE_PEM_B64',
-        ],
-      },
-    ]
-  }
-
-  if (provider === 'nordea') {
-    return [
-      { type: 'key', key: 'NORDEA_CA_WS_SENDER_ID' },
-      { type: 'key', key: 'NORDEA_CA_WS_USER_AGENT' },
-      { type: 'key', key: 'NORDEA_CA_CUSTOMER_ID' },
-      { type: 'key', key: 'NORDEA_CA_SIGNER_ID' },
-      { type: 'key', key: 'NORDEA_CA_SOFTWARE_ID' },
-      {
-        type: 'anyOf',
-        label: 'Privat nøgle (angiv mindst én)',
-        keys: ['NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM', 'NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM_B64'],
-      },
-      {
-        type: 'anyOf',
-        label: 'Certifikat (angiv mindst én)',
-        keys: ['NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM', 'NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM_B64'],
-      },
-    ]
-  }
-
-  return null
-}
 
 function computeEnvStatus(requirements: EnvRequirement[], invalidKeySet: Set<string>): EnvStatus {
   const statuses: EnvRequirementStatus[] = []
@@ -157,30 +80,12 @@ function computeEnvStatus(requirements: EnvRequirement[], invalidKeySet: Set<str
 }
 
 function validateProviderEnv(provider: string, channel: string): void {
-  if (channel === 'rest') {
-    if (provider === 'nordea') throw new Error('Nordea REST (Premium API) er ikke implementeret endnu')
-    if (provider === 'danskebank') throw new Error('Danske Bank REST API er ikke implementeret endnu')
-    throw new Error('REST kanal er ikke implementeret endnu')
-  }
-
-  if (provider === 'danskebank') {
-    loadDanskeBankEdiEnvConfig()
-    loadDanskeBankEnvSecrets()
-    return
-  }
-  if (provider === 'nordea') {
-    loadNordeaCorporateAccessEnvConfig()
-    loadNordeaEnvSecrets()
-    return
-  }
-
-  throw new Error('Ikke implementeret endnu')
+  validateProviderEnvOrThrow(provider, channel)
 }
 
 function computeProviderReadiness(provider: string, channel: string): Readiness {
   const requirements = providerEnvRequirements(provider, channel)
   if (!requirements) {
-    if (channel === 'rest') return { status: 'not_implemented', message: 'REST kanal er ikke implementeret endnu' }
     return { status: 'not_implemented', message: 'Ikke implementeret endnu' }
   }
 
