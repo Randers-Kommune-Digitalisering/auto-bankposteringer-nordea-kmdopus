@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { onBeforeUnmount } from 'vue'
 import { DateFormatter } from '@internationalized/date'
 import type { TimelineItem } from '@nuxt/ui'
 import type { RunListItem } from '~/types/runs'
@@ -30,6 +29,13 @@ const data = ref<RunTimelineResponse | null>(null)
 const openPopovers = ref<Record<string, boolean>>({})
 
 const runId = computed(() => props.run?.id ?? '')
+
+function formatDateOnly(value: string | Date | null | undefined): string {
+  if (!value) return '—'
+  const d = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(d.getTime())) return String(value)
+  return df.format(d)
+}
 
 async function load() {
   if (!props.run?.id) return
@@ -70,6 +76,23 @@ function formatMaybeIso(value: string | null | undefined): string {
   const d = new Date(value)
   if (Number.isNaN(d.getTime())) return String(value)
   return dtf.format(d)
+}
+
+function isoDateToLocalMidnight(value: string): Date | null {
+  const m = String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (!m) return null
+  const year = Number(m[1])
+  const month = Number(m[2])
+  const day = Number(m[3])
+  if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) return null
+  return new Date(year, month - 1, day, 0, 0, 0, 0)
+}
+
+function formatRunBookingDateWithTime(value: string | null | undefined): string {
+  if (!value) return '—'
+  const midnight = isoDateToLocalMidnight(value)
+  if (!midnight) return formatMaybeIso(value)
+  return dtf.format(midnight)
 }
 
 function jobStatusLabel(status: string): string {
@@ -248,6 +271,21 @@ const errorsState = computed(() => {
   return { color: 'error' as StatusColor, label: 'Fejl', description: `${errs.length} fejl` }
 })
 
+const bankingEvents = computed(() => {
+  const rows = (data.value?.errors ?? []).filter((e) => e.source === 'banking')
+  return [...rows].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+})
+
+const applicationEvents = computed(() => {
+  const rows = (data.value?.errors ?? []).filter((e) => !e.source || e.source === 'application')
+  return [...rows].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+})
+
+const erpEvents = computed(() => {
+  const rows = (data.value?.errors ?? []).filter((e) => e.source === 'erp')
+  return [...rows].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+})
+
 const overallState = computed(() => {
   const anyError =
     (data.value?.errors?.length ?? 0) > 0 ||
@@ -267,39 +305,17 @@ const overallState = computed(() => {
   return { color: 'success' as StatusColor, label: 'OK' }
 })
 
-const canTreatIssues = computed(() => {
-  if (!props.run?.id) return false
-  if (!data.value) return false
-  return overallState.value.color !== 'success'
-})
-
-const treatLink = computed(() => {
-  const id = props.run?.id
-  if (!id || !data.value) return { path: '/fejlhaandtering/koe', query: {} as Record<string, any> }
-
-  const rejected = erpDeliveries.value
-    .filter((d) => Boolean(d.responseId && d.responseStatusText && !isOkErpStatusText(d.responseStatusText)))
-    .filter((d) => Boolean(d.requestId))
-
-  if (rejected.length === 1) {
-    const requestId = rejected[0]?.requestId
-    if (requestId) {
-      return { path: '/fejlhaandtering/erp', query: { requestId } }
-    }
-  }
-
-  return { path: '/fejlhaandtering/koe', query: { runId: id } }
-})
-
 type RunTimelineItem = TimelineItem & { slot: string }
 
 const timelineItems = computed<RunTimelineItem[]>(() => {
+  const bookingDate = props.run?.bookingDate ? formatRunBookingDateWithTime(props.run.bookingDate) : undefined
+
   const base: RunTimelineItem[] = [
     {
       slot: 'banking',
       value: 'banking',
       title: 'Hentning af bankdata',
-      date: bankingJob.value?.runAt ? formatMaybeIso(bankingJob.value.runAt) : undefined,
+      date: bankingJob.value?.runAt ? formatMaybeIso(bankingJob.value.runAt) : bookingDate,
       description: bankingJobState.value.description,
       icon: 'solar:download-bold-duotone',
     },
@@ -307,6 +323,7 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
       slot: 'matching',
       value: 'matching',
       title: 'Matching',
+      date: bookingDate,
       description: matchingState.value.description,
       icon: 'solar:magic-stick-3-bold-duotone',
     },
@@ -318,7 +335,7 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
       slot: 'erpDelivery',
       value: d.requestId ? `erp-${d.requestId}` : `erp-unknown-${d.firstCreatedAt ?? ''}`,
       title: 'Aflevering til ERP',
-      date: d.firstCreatedAt ? formatMaybeIso(d.firstCreatedAt) : undefined,
+      date: d.firstCreatedAt ? formatMaybeIso(d.firstCreatedAt) : bookingDate,
       description: state.description,
       icon: 'solar:upload-bold-duotone',
       _delivery: d,
@@ -326,121 +343,42 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
     } as any
   })
 
-  const tail: RunTimelineItem[] = [
-    {
-      slot: 'events',
-      value: 'events',
-      title: 'Hændelser',
-      description: errorsState.value.description,
-      icon: 'solar:shield-warning-bold-duotone',
-    },
-  ]
-
-  return [...base, ...deliveries, ...tail]
+  return [...base, ...deliveries]
 })
 
-const docUrlMap = new Map<string, string>()
-const isClient = import.meta.client
-
-function attemptCreateBlobFromContent(doc: RunListItem['documents'][number]): Blob | null {
-  const content: any = doc.content
-  if (content instanceof Blob) return content as Blob
-
-  if (typeof doc.content === 'string') {
-    const fallbackMime = doc.mimeType ?? 'application/octet-stream'
-    try {
-      const normalizedContent = doc.content.includes(',') ? doc.content.split(',').at(-1) ?? '' : doc.content
-      const binary = atob(normalizedContent)
-      const bytes = new Uint8Array(binary.length)
-      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
-      return new Blob([bytes], { type: fallbackMime })
-    } catch {
-      const likelyText = fallbackMime.startsWith('text/') || fallbackMime.includes('xml')
-      return new Blob([doc.content], { type: likelyText ? fallbackMime : 'text/plain' })
-    }
-  }
-
-  return null
-}
-
-function getDocUrl(doc: RunListItem['documents'][number]): string | null {
-  if (!isClient || !doc.content) return null
-
-  const existing = docUrlMap.get(doc.id)
-  if (existing) return existing
-
-  const blob = attemptCreateBlobFromContent(doc)
-  if (!blob) return null
-
-  const url = URL.createObjectURL(blob)
-  docUrlMap.set(doc.id, url)
-  return url
-}
-
-onBeforeUnmount(() => {
-  if (!isClient) return
-  for (const url of docUrlMap.values()) URL.revokeObjectURL(url)
-  docUrlMap.clear()
-})
-
-const docsByType = computed(() => {
-  const docs = props.run?.documents ?? []
-  return docs.reduce((acc: Record<string, RunListItem['documents']>, d) => {
-    const typeKey = d.type ?? 'ukendt'
-    acc[typeKey] = acc[typeKey] ?? []
-    acc[typeKey].push(d)
-    return acc
-  }, {})
-})
 </script>
 
 <template>
-  <UModal v-model:open="open">
+  <UModal v-model:open="open" :ui="{ content: 'max-w-md' }">
     <template #header>
-      <div class="flex items-start justify-between gap-4">
+      <div class="grid w-full gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-4">
         <div class="min-w-0">
           <div class="text-lg font-semibold">Kørsel</div>
-          <div v-if="run" class="text-sm text-muted">
-            <span class="font-mono">{{ run.id }}</span>
-            <span class="mx-2">•</span>
-            <span>{{ df.format(new Date(run.bookingDate)) }}</span>
+          <div v-if="run" class="text-sm text-muted whitespace-nowrap">
+            Bogføringsdato: {{ df.format(new Date(run.bookingDate)) }}
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center justify-end gap-2 justify-self-end">
           <UBadge :color="overallState.color" variant="subtle">{{ overallState.label }}</UBadge>
 
-          <UButton
-            v-if="canTreatIssues && run"
-            icon="solar:shield-warning-bold-duotone"
-            label="Behandl"
-            color="warning"
-            variant="soft"
-            :to="treatLink"
-          />
-
           <template v-if="run && runId">
-            <RunsDataPopover
-              v-if="run.errors?.length"
-              type="error"
-              :run="run"
-              :open="!!openPopovers[`${runId}-error`]"
-              @update:open="(v: boolean) => (openPopovers[`${runId}-error`] = v)"
-            />
-            <RunsDataPopover
-              v-if="run.erpResponses?.length"
-              type="erpResponses"
-              :run="run"
-              :open="!!openPopovers[`${runId}-erpResponses`]"
-              @update:open="(v: boolean) => (openPopovers[`${runId}-erpResponses`] = v)"
-            />
-            <RunsDataPopover
-              v-if="run.documents?.length"
-              type="docs"
-              :run="run"
-              :open="!!openPopovers[`${runId}-docs`]"
-              @update:open="(v: boolean) => (openPopovers[`${runId}-docs`] = v)"
-            />
+            <div class="flex items-center gap-2">
+              <RunsDataPopover
+                v-if="run.errors?.length"
+                type="error"
+                :run="run"
+                :open="!!openPopovers[`${runId}-error`]"
+                @update:open="(v: boolean) => (openPopovers[`${runId}-error`] = v)"
+              />
+              <RunsDataPopover
+                v-if="run.erpResponses?.length"
+                type="erpResponses"
+                :run="run"
+                :open="!!openPopovers[`${runId}-erpResponses`]"
+                @update:open="(v: boolean) => (openPopovers[`${runId}-erpResponses`] = v)"
+              />
+            </div>
           </template>
 
           <UButton
@@ -456,10 +394,6 @@ const docsByType = computed(() => {
 
     <template #body>
       <div class="space-y-4">
-        <UAlert color="neutral" variant="soft" icon="solar:info-circle-bold-duotone" class="text-sm">
-          Timeline viser kørslens forløb ud fra persisted DB-state.
-        </UAlert>
-
         <div v-if="!run" class="text-sm text-muted">Ingen kørsel valgt.</div>
 
         <div v-else>
@@ -471,10 +405,50 @@ const docsByType = computed(() => {
               </div>
             </template>
 
+            <template #banking-description>
+              <div class="space-y-2">
+                <div class="text-sm text-muted">{{ bankingJobState.description }}</div>
+
+                <ul v-if="bankingEvents.length" class="list-disc pl-5 space-y-1">
+                  <li v-for="e in bankingEvents" :key="e.id" class="text-sm">
+                    <span class="text-muted">{{ formatMaybeIso(e.createdAt) }}:</span>
+                    <span class="ml-1">{{ e.errorString ?? 'Ukendt hændelse' }}</span>
+                  </li>
+                </ul>
+              </div>
+            </template>
+
             <template #matching-title>
               <div class="flex items-center gap-2">
                 <span>Matching</span>
                 <UBadge :color="matchingState.color" variant="subtle">{{ matchingState.label }}</UBadge>
+              </div>
+            </template>
+
+            <template #matching-description>
+              <div class="space-y-2">
+                <div class="text-sm text-muted">{{ matchingState.description }}</div>
+                <div v-if="data?.matching" class="text-xs text-muted">
+                  Total transaktioner: {{ data.matching.totalTransactions }} • Behandlet: {{ data.matching.processedTransactions }}
+                </div>
+
+                <ul v-if="applicationEvents.length" class="list-disc pl-5 space-y-1">
+                  <li v-for="e in applicationEvents" :key="e.id" class="text-sm">
+                    <span class="text-muted">{{ formatMaybeIso(e.createdAt) }}:</span>
+                    <span class="ml-1">{{ e.errorString ?? 'Ukendt hændelse' }}</span>
+                  </li>
+                </ul>
+
+                <div v-if="data?.matching?.open" class="pt-1">
+                  <UButton
+                    icon="solar:pen-new-round-bold-duotone"
+                    label="Behandl åbne poster"
+                    color="primary"
+                    variant="soft"
+                    size="xs"
+                    to="/aabne-poster"
+                  />
+                </div>
               </div>
             </template>
 
@@ -490,6 +464,14 @@ const docsByType = computed(() => {
             <template #erpDelivery-description="{ item: slotItem }">
               <div class="space-y-2">
                 <div class="text-sm text-muted">{{ (slotItem as any)._state?.description ?? slotItem.description }}</div>
+
+                <ul v-if="erpEvents.length" class="list-disc pl-5 space-y-1">
+                  <li v-for="e in erpEvents" :key="e.id" class="text-sm">
+                    <span class="text-muted">{{ formatMaybeIso(e.createdAt) }}:</span>
+                    <span class="ml-1">{{ e.errorString ?? 'Ukendt hændelse' }}</span>
+                  </li>
+                </ul>
+
                 <div v-if="run" class="flex flex-wrap gap-2">
                   <UButton
                     icon="solar:shield-warning-bold-duotone"
@@ -508,50 +490,6 @@ const docsByType = computed(() => {
                     size="xs"
                     :to="{ path: '/fejlhaandtering/erp', query: { requestId: (slotItem as any)._delivery.requestId } }"
                   />
-                </div>
-              </div>
-            </template>
-
-            <template #events-title>
-              <div class="flex items-center gap-2">
-                <span>Hændelser</span>
-                <UBadge :color="errorsState.color" variant="subtle">{{ errorsState.label }}</UBadge>
-              </div>
-            </template>
-
-            <template #events-description>
-              <div v-if="loading" class="text-sm text-muted">Henter…</div>
-              <div v-else class="space-y-2">
-                <div class="text-sm text-muted">{{ errorsState.description }}</div>
-
-                <ul v-if="(data?.errors?.length ?? 0)" class="list-disc pl-5 space-y-1">
-                  <li v-for="e in data?.errors" :key="e.id" class="text-sm">
-                    <span class="font-medium">{{ e.source ?? 'ukendt' }}:</span>
-                    <span class="ml-1">{{ e.errorString ?? 'Ukendt fejl' }}</span>
-                    <span class="text-muted"> • {{ formatMaybeIso(e.createdAt) }}</span>
-                  </li>
-                </ul>
-
-                <div class="pt-2" v-if="Object.keys(docsByType).length">
-                  <div class="text-sm font-medium">Dokumenter</div>
-                  <div class="space-y-3 mt-2">
-                    <div v-for="(docs, t) in docsByType" :key="t">
-                      <div class="text-sm font-medium capitalize">{{ t }}</div>
-                      <ul class="list-disc pl-5 space-y-1 mt-1">
-                        <li v-for="doc in docs" :key="doc.id" class="text-sm">
-                          <template v-if="doc.content && isClient">
-                            <a :href="getDocUrl(doc) ?? undefined" :download="doc.filename" class="underline">
-                              {{ doc.filename }}
-                            </a>
-                          </template>
-                          <template v-else>
-                            <span class="text-muted">{{ doc.filename }}</span>
-                          </template>
-                          <span class="text-muted text-xs ml-1">({{ doc.mimeType ?? doc.fileExtension }})</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
                 </div>
               </div>
             </template>
