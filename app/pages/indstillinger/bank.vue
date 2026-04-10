@@ -566,7 +566,7 @@ async function handleDeleteAccount(row: Row<AccountSelectSchema>) {
               <div v-if="a.provider === 'nordea'" class="space-y-2">
                 <div class="text-xs font-semibold uppercase tracking-wide text-muted">2FA / autorisation</div>
                 <div class="text-xs text-muted">
-                  Nordea REST kræver godkendelse i Nordea (netbank/app) — der er normalt ingen URL at åbne i browseren.
+                  Nordeas REST API kræver godkendelse i Nordea ID
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2">
@@ -611,7 +611,7 @@ async function handleDeleteAccount(row: Row<AccountSelectSchema>) {
 
               <div class="text-xs font-semibold uppercase tracking-wide text-muted">Konti til API</div>
               <div class="text-xs text-muted">
-                Angiv IBAN(s) som må hentes via API. Dette er pr. udbyder (ikke pr. kanal).
+                Angiv IBAN(s) hos Nordea, som må hentes via API
               </div>
 
               <div v-if="(a.allowlistAccounts?.length ?? 0)" class="flex flex-wrap gap-1.5">
