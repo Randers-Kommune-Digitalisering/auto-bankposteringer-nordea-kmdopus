@@ -14,11 +14,9 @@ services:
       - .env
     environment:
       NODE_ENV: development
-      DB_RESET_ON_START: "1"
-      DB_MIGRATE_ON_START: "1"
-      SEED_DEV_DATA: "1"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   mailpit:
     image: axllent/mailpit:latest
@@ -38,6 +36,21 @@ services:
       - .env
     volumes:
       - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  sftp:
+    image: atmoz/sftp:alpine
+    container_name: sftp_dev
+    ports:
+      - "2223:22"
+    # Creates user "test" with password "pass" and two directories inside the chroot:
+    #   /test-from-randers
+    #   /test-to-randers
+    command: "test:pass:1001:100:test-from-randers,test-to-randers"
 
 volumes:
   postgres_data:

@@ -52,6 +52,34 @@ const schema = z
 
 export type DanskeBankEnvSecrets = z.infer<typeof schema>
 
+type CacheEntry = {
+  signature: string
+  value: {
+    applicationRequestPrivateKeyPem: string
+    applicationRequestCertificatePem: string
+    trustedSigningCertificateFingerprintSha256Hex?: string
+    mtlsClientPrivateKeyPem?: string
+    mtlsClientCertificatePem?: string
+  }
+}
+
+let cache: CacheEntry | null = null
+
+function signatureFromEnv(env: NodeJS.ProcessEnv): string {
+  const keys = [
+    'DANSKE_BANK_APPLICATION_REQUEST_PRIVATE_KEY_PEM',
+    'DANSKE_BANK_APPLICATION_REQUEST_CERTIFICATE_PEM',
+    'DANSKE_BANK_APPLICATION_REQUEST_PRIVATE_KEY_PEM_B64',
+    'DANSKE_BANK_APPLICATION_REQUEST_CERTIFICATE_PEM_B64',
+    'DANSKE_BANK_TRUSTED_SIGNING_CERT_SHA256',
+    'DANSKE_BANK_MTLS_CLIENT_PRIVATE_KEY_PEM',
+    'DANSKE_BANK_MTLS_CLIENT_CERTIFICATE_PEM',
+    'DANSKE_BANK_MTLS_CLIENT_PRIVATE_KEY_PEM_B64',
+    'DANSKE_BANK_MTLS_CLIENT_CERTIFICATE_PEM_B64',
+  ]
+  return keys.map((k) => `${k}=${String(env[k] ?? '')}`).join('\n')
+}
+
 export function loadDanskeBankEnvSecrets(
   env: NodeJS.ProcessEnv = process.env,
 ): {
@@ -61,6 +89,18 @@ export function loadDanskeBankEnvSecrets(
   mtlsClientPrivateKeyPem?: string
   mtlsClientCertificatePem?: string
 } {
+  if (env === process.env) {
+    const signature = signatureFromEnv(env)
+    if (cache?.signature === signature) return cache.value
+    const value = loadDanskeBankEnvSecretsUncached(env)
+    cache = { signature, value }
+    return value
+  }
+
+  return loadDanskeBankEnvSecretsUncached(env)
+}
+
+function loadDanskeBankEnvSecretsUncached(env: NodeJS.ProcessEnv) {
   const parsed = schema.parse(env)
 
   const decodeMaybeB64 = (pem: string | undefined, b64: string | undefined): string => {

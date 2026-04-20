@@ -2,7 +2,6 @@
 import { z } from "zod";
 import tryParseEnv from "./try-parse-env";
 import { erpSupplierValues } from "../db/schema/enums";
-import { IngestionEnvSchema } from "./env-ingestion";
 
 const baseCommonSchema = z.object({
   APP_ROLE: z.enum(["web", "scheduler", "worker"]).optional().default("web"),
@@ -105,8 +104,6 @@ const EnvSchema = z.union([webSchema, workerSchema, schedulerSchema]);
 export type EnvSchema = z.infer<typeof EnvSchema>;
 
 tryParseEnv(EnvSchema, { ...process.env, APP_ROLE: process.env.APP_ROLE ?? "web" });
-// Only validates ingestion env when a provider is being configured.
-tryParseEnv(IngestionEnvSchema);
 const parsedEnv = EnvSchema.parse({ ...process.env, APP_ROLE: process.env.APP_ROLE ?? "web" });
 
 export const smtpNotificationConfig = (() => {

@@ -36,10 +36,7 @@ export function extractKeysFromZod(err: ZodError): string[] {
 export function providerEnvRequirements(provider: string, channel: string): EnvRequirement[] | null {
   if (provider === 'danskebank' && channel === 'iso20022') {
     return [
-      { type: 'key', key: 'DANSKE_BANK_EDI_SENDER_ID' },
       { type: 'key', key: 'DANSKE_BANK_EDI_USER_AGENT' },
-      { type: 'key', key: 'DANSKE_BANK_CUSTOMER_ID' },
-      { type: 'key', key: 'DANSKE_BANK_SIGNER_ID' },
       { type: 'key', key: 'DANSKE_BANK_SOFTWARE_ID' },
       { type: 'key', key: 'DANSKE_BANK_PKI_SENDER_ID' },
       { type: 'key', key: 'DANSKE_BANK_PKI_CUSTOMER_ID' },

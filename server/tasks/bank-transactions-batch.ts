@@ -6,6 +6,7 @@ import { withPgAdvisoryLock } from '~/lib/db/advisoryLock'
 import { allowRoleGatedWork } from '../utils/appRole'
 import db from '~/lib/db'
 import { run } from '~/lib/db/schema/run'
+import { sql } from 'drizzle-orm'
 
 export default defineTask({
   meta: {
@@ -21,6 +22,23 @@ export default defineTask({
       log.info('Starter bank-transaktion batch', { scheduledTime: payload?.scheduledTime })
 
       const bookingDate = payload?.scheduledTime ? new Date(payload.scheduledTime) : new Date()
+      const bookingDateIso = bookingDate.toISOString().slice(0, 10)
+
+      const existing = await db
+        .select({ id: run.id })
+        .from(run)
+        .where(sql`${run.bookingDate} = ${bookingDateIso}::date`)
+        .limit(1)
+
+      if (existing?.[0]?.id) {
+        log.info('Batch skipped (run already exists for bookingDate)', {
+          runId: existing[0].id,
+          bookingDate: bookingDate.toISOString().slice(0, 10),
+          scheduledTime: payload?.scheduledTime,
+        })
+        return
+      }
+
       const runId = crypto.randomUUID()
 
       await db.insert(run).values({ id: runId, bookingDate, status: 'afventer' })

@@ -42,13 +42,32 @@ function parseStringArrayParam(value: unknown): string[] {
   return [];
 }
 
+function parseStringParam(value: unknown): string {
+  if (typeof value !== 'string') return ''
+  return value.trim()
+}
+
+function escapeLike(value: string): string {
+  // Escape LIKE wildcards and backslashes.
+  return value.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_')
+}
+
 export default defineEventHandler(async (event) => {
-  setHeader(event, "Cache-Control", "private, max-age=30");
+  // Interactive UI endpoint: must reflect new ingestions immediately.
+  setHeader(event, "Cache-Control", "no-store");
 
   const query = getQuery(event);
   const start = parseDateParam(query.start);
   const end = parseDateParam(query.end);
   const q: any = query as any;
+  const page = Math.max(1, Number.parseInt(String(q.page ?? "1"), 10) || 1);
+  const pageSize = Math.min(
+    200,
+    Math.max(1, Number.parseInt(String(q.pageSize ?? "50"), 10) || 50),
+  );
+  const offset = (page - 1) * pageSize;
+  const search = parseStringParam(q.search ?? q.q)
+  const like = search ? `%${escapeLike(search)}%` : null
   const accountIds = parseStringArrayParam(
     q.accountIds ??
       q['accountIds[]'] ??
@@ -59,6 +78,16 @@ export default defineEventHandler(async (event) => {
 
   // The UI always provides start/end; keep a safe fallback for non-UI callers.
   if (!start || !end) {
+    let totalQuery = db
+      .select({ count: sql<number>`count(*)` })
+      .from(transaction)
+      .leftJoin(account, eq(transaction.accountId, account.id));
+    if (accountIds.length) {
+      totalQuery = totalQuery.where(inArray(transaction.accountId, accountIds));
+    }
+
+    const totalRows = await totalQuery;
+
     const baseQuery = db
       .select({
         id: transaction.id,
@@ -113,7 +142,8 @@ export default defineEventHandler(async (event) => {
       .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
       .leftJoin(account, eq(transaction.accountId, account.id))
       .orderBy(transaction.bookingDate)
-      .limit(500);
+      .limit(pageSize)
+      .offset(offset);
 
     const rows = accountIds.length
       ? await baseQuery.where(inArray(transaction.accountId, accountIds))
@@ -127,12 +157,51 @@ export default defineEventHandler(async (event) => {
     }));
 
     setHeader(event, "X-Data-Source", "db");
-    return payload;
+    return {
+      rows: payload,
+      total: totalRows[0]?.count ?? payload.length,
+      page,
+      pageSize,
+    };
   }
 
   const accountFilterSql = accountIds.length
     ? sql` AND t.account IN (${sql.join(accountIds.map((id) => sql`${id}`), sql`, `)})`
     : sql``;
+
+  const searchFilterSql = like
+    ? sql` AND (
+        id::text ILIKE ${like} ESCAPE '\\'
+        OR "runId"::text ILIKE ${like} ESCAPE '\\'
+        OR COALESCE("bankAccountName", '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE("accountId"::text, '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE(amount::text, '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE(currency, '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE("creditDebitIndicator", '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE(status, '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE("processingStatus", '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE("ruleApplied", '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE("bkTxCdProprietary", '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE("bkTxCdDomain", '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE("bkTxCdFamily", '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE("bkTxCdSubFamily", '') ILIKE ${like} ESCAPE '\\'
+
+        OR COALESCE("debtorName", '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE("debtorId", '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE("debtorAccountIban", '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE("creditorName", '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE("creditorId", '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE("creditorAccountIban", '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE("ultimateDebtorName", '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE("ultimateCreditorName", '') ILIKE ${like} ESCAPE '\\'
+
+        OR COALESCE("remittanceCreditorReference", '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE("entryAdditionalInfo", '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE("txAdditionalInfo", '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE(array_to_string("remittanceUstrd", ' '), '') ILIKE ${like} ESCAPE '\\'
+        OR COALESCE(array_to_string("remittanceAdditional", ' '), '') ILIKE ${like} ESCAPE '\\'
+      )`
+    : sql``
 
   // Compute running balance based on statement opening balance (OPBD) + bank sequential order.
   // Important: we compute the window over ALL entries in the relevant statements, and only
@@ -238,6 +307,7 @@ export default defineEventHandler(async (event) => {
       FROM base
     )
     SELECT
+      count(*) OVER()::int AS "totalCount",
       id,
       "runId",
       "accountId",
@@ -288,6 +358,7 @@ export default defineEventHandler(async (event) => {
       "runningBalance"
     FROM with_running
     WHERE "bookingDate" >= ${start} AND "bookingDate" <= ${end}
+      ${searchFilterSql}
     ORDER BY
       COALESCE("statementCreatedAt", "bookingDate"::timestamp) DESC,
       COALESCE("statementElectronicSeqNo", -1) DESC,
@@ -296,7 +367,8 @@ export default defineEventHandler(async (event) => {
       COALESCE("entrySubIndex", 1) DESC,
       "bookingDate" DESC,
       id DESC
-    LIMIT 500
+    LIMIT ${pageSize}
+    OFFSET ${offset}
   `);
 
   const payload: StatementTransaction[] = rows.rows.map((row: any) => ({
@@ -306,6 +378,13 @@ export default defineEventHandler(async (event) => {
     runningBalance: row.runningBalance ?? null,
   }));
 
+  const total = rows.rows.length ? Number((rows.rows[0] as any).totalCount ?? 0) : 0
+
   setHeader(event, "X-Data-Source", "db");
-  return payload;
+  return {
+    rows: payload,
+    total,
+    page,
+    pageSize,
+  };
 });

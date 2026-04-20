@@ -1,8 +1,9 @@
-import { eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import { createError, defineEventHandler, readBody } from 'h3'
 import { z } from 'zod'
 import db from '~/lib/db'
 import { account } from '~/lib/db/schema/account'
+import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreementAccountDimension'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import {
   manualBookingDraft,
@@ -10,7 +11,6 @@ import {
   manualBookingDraftLine,
   manualBookingDraftLineDimension,
 } from '~/lib/db/schema/manualBookingDraft'
-import env from '~/lib/env/env'
 import { manualBookingPayloadSchema, type CprType } from '#engine/manual-booking/domain/manualBooking'
 import type { PostingAttachment } from '#engine/posting/domain/posting'
 import { buildPostingCommand, executePostingCommand } from '#engine/posting/handlers/postingCommand'
@@ -25,6 +25,7 @@ import {
   normalizeDimensionInput,
 } from '~~/server/utils/accountingDimensions'
 import { requireRoles } from '~~/server/auth/keycloakAuth'
+import { parseAmount } from '#engine/matching/domain/amount'
 
 export default defineEventHandler(async (event) => {
   await requireRoles(event, ['write'])
@@ -58,7 +59,8 @@ export default defineEventHandler(async (event) => {
       bookingDate: transaction.bookingDate,
       amount: transaction.amount,
       accountId: transaction.accountId,
-      statusAccount: account.statusAccount,
+      accountProvider: account.provider,
+      accountIban: account.iban,
       debtorName: transaction.debtorName,
       debtorId: transaction.debtorId,
       creditorName: transaction.creditorName,
@@ -86,12 +88,39 @@ export default defineEventHandler(async (event) => {
   }
 
   const amount = parseNumeric(row.amount);
-  const statusAccount = row.statusAccount ? String(row.statusAccount) : env.ERP_ERROR_ACCOUNT;
+  const provider = row.accountProvider ? String(row.accountProvider) : ''
+  const iban = row.accountIban ? String(row.accountIban) : ''
+
+  const dimRows = provider && iban
+    ? await db
+        .select({ key: bankingAgreementAccountDimension.dimensionKey, value: bankingAgreementAccountDimension.dimensionValue })
+        .from(bankingAgreementAccountDimension)
+        .where(and(
+          eq(bankingAgreementAccountDimension.provider, provider as any),
+          eq(bankingAgreementAccountDimension.iban, iban),
+          inArray(bankingAgreementAccountDimension.dimensionKey, ['statuskonto', 'artskonto']),
+        ))
+    : []
+
+  const statuskonto = (() => {
+    const preferred = dimRows.find((d) => String(d.key) === 'statuskonto')
+    if (preferred?.value) return String(preferred.value)
+    const legacy = dimRows.find((d) => String(d.key) === 'artskonto')
+    if (legacy?.value) return String(legacy.value)
+    return null
+  })()
+
+  if (!statuskonto) {
+    throw createError({
+      statusCode: 409,
+      statusMessage: `Mangler statuskonto-kontering for bankkonto (IBAN=${row.accountIban ?? row.accountId})`,
+    })
+  }
 
   const txContext: PostingTransactionContext = {
     transactionId: row.id,
     amount,
-    statusDimensions: { artskonto: statusAccount },
+    statusDimensions: { statuskonto },
     debtorName: row.debtorName,
     debtorId: row.debtorId,
     creditorName: row.creditorName,
@@ -187,15 +216,7 @@ async function clearManualBookingDraft(transactionId: string) {
 }
 
 function parseNumeric(value: unknown): number {
-  if (typeof value === "number") {
-    return value;
-  }
-  if (typeof value === "string") {
-    const normalized = value.replace(/\./g, "").replace(/,/g, ".").trim();
-    const parsed = Number(normalized);
-    return Number.isNaN(parsed) ? 0 : parsed;
-  }
-  return 0;
+  return parseAmount(value)
 }
 
 function normalizeOptionalString(value?: string | null): string | null {

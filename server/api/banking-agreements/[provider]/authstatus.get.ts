@@ -80,7 +80,14 @@ export default defineEventHandler(async (event) => {
 
     // If it's ACTIVE, exchange code -> tokens and store them.
     if (state.status === 'ACTIVE' && !state.accessToken) {
-      const codeToExchange = state.authorizationCode ?? state.clientToken
+      const codeToExchange = state.authorizationCode
+      if (!codeToExchange) {
+        throw createError({
+          statusCode: 502,
+          statusMessage:
+            'Nordea REST status er ACTIVE men mangler authorization code (code). Ifølge docs skal token-exchange bruge code fra GET /corporate/v2/authorize/<access_id>.',
+        })
+      }
       const exchanged = await client.exchangeAuthorizationCodeForTokens({ code: codeToExchange })
 
       state = {
@@ -114,6 +121,10 @@ export default defineEventHandler(async (event) => {
         ? 'Autorisation er ACTIVE. Der kan nu hentes token (brug "Opdater status" én gang til hvis den ikke allerede står COMPLETED).'
         : state.status === 'COMPLETED'
           ? 'Autorisation er COMPLETED.'
-          : 'Godkend autorisation i Nordea og brug "Opdater status".',
+          : String(state.status ?? '').toUpperCase() === 'FAILED'
+            ? 'Autorisation er FAILED (typisk afvist i Nordea). Brug "Genstart 2FA" for at lave en ny anmodning.'
+            : String(state.status ?? '').toUpperCase() === 'EXPIRED'
+              ? 'Autorisation er EXPIRED. Brug "Genstart 2FA" for at lave en ny anmodning.'
+              : 'Godkend autorisation i Nordea og brug "Opdater status".',
   }
 })

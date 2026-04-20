@@ -235,6 +235,12 @@ function erpDeliveryState(delivery: ErpDelivery): { color: StatusColor; label: s
   const hasInFlight = rows.some((r) => r.status === 'pending' || r.status === 'processing')
   const rejectedByErp = Boolean(delivery.responseStatusText && !isOkErpStatusText(delivery.responseStatusText))
 
+  const lastOutboxError =
+    rows
+      .filter((r) => r.status === 'failed' && r.lastError)
+      .map((r) => String(r.lastError))
+      .find(Boolean) ?? null
+
   const color: StatusColor = hasFailed || rejectedByErp ? 'error' : hasInFlight ? 'warning' : 'success'
 
   const statusCounts = rows.reduce(
@@ -250,18 +256,17 @@ function erpDeliveryState(delivery: ErpDelivery): { color: StatusColor; label: s
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([k, v]) => `${deliveryStatusLabel(k)}: ${v}`)
 
-  const responsePart = delivery.responseId
-    ? rejectedByErp
-      ? `Afvist af ERP: ${delivery.responseStatusText ?? ''}`
-      : `Bilag: ${delivery.responseId}`
-    : 'Afventer ERP-svar'
-
-  const requestPart = delivery.requestId ? `Leverance: ${delivery.requestId}` : undefined
+  const responsePart = rejectedByErp
+    ? `Afvist af ERP: ${delivery.responseStatusText ?? ''}`
+    : hasInFlight
+      ? 'Afventer ERP-svar'
+      : undefined
+  const errorPart = lastOutboxError ? `Sidste fejl: ${lastOutboxError}` : undefined
 
   return {
     color,
     label: statusLabelFromColor(color),
-    description: [requestPart, parts.join(', '), responsePart].filter(Boolean).join(' • '),
+    description: [parts.join(', '), responsePart, errorPart].filter(Boolean).join(' • '),
   }
 }
 
@@ -323,7 +328,11 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
       slot: 'matching',
       value: 'matching',
       title: 'Matching',
-      date: bookingDate,
+      date: bankingJob.value?.updatedAt
+        ? formatMaybeIso(bankingJob.value.updatedAt)
+        : bankingJob.value?.runAt
+          ? formatMaybeIso(bankingJob.value.runAt)
+          : bookingDate,
       description: matchingState.value.description,
       icon: 'solar:magic-stick-3-bold-duotone',
     },
@@ -474,6 +483,7 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
 
                 <div v-if="run" class="flex flex-wrap gap-2">
                   <UButton
+                    v-if="(slotItem as any)._state?.label === 'Fejl'"
                     icon="solar:shield-warning-bold-duotone"
                     label="Behandl aflevering"
                     color="warning"

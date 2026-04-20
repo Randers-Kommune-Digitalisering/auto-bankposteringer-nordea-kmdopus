@@ -8,7 +8,8 @@ export const account = pgTable('account', {
   id: text().primaryKey(),
   name: text(),
   provider: bankProvider().notNull(),
-  statusAccount: integer('status_account').notNull()
+  iban: text('iban').notNull(),
+  currency: text('currency'),
 })
 
 export const accountInsertSchema = createInsertSchema(account)
