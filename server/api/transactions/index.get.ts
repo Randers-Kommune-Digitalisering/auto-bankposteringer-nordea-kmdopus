@@ -5,6 +5,7 @@ import { account } from "~/lib/db/schema/account";
 import { transaction, transactionProcessing } from "~/lib/db/schema/transaction";
 import { presentOpenTransaction } from "../../presenters/openTransactionPresenter";
 import type { OpenTransaction, OpenTransactionInput } from "~/types/transactions";
+import { parseAmount } from "#engine/matching/domain/amount";
 
 export default defineEventHandler(async (event) => {
   let payload: OpenTransaction[] = [];
@@ -15,6 +16,7 @@ export default defineEventHandler(async (event) => {
       runId: transaction.runId,
       bookingDate: transaction.bookingDate,
       amount: transaction.amount,
+      creditDebitIndicator: transaction.creditDebitIndicator,
       accountId: transaction.accountId,
       bankAccountName: account.name,
       status: transactionProcessing.status,
@@ -52,7 +54,9 @@ export default defineEventHandler(async (event) => {
   payload = rows
     .filter((row) => row.id && row.runId)
     .map<OpenTransaction>((row) => {
-      const amount = parseNumeric(row.amount);
+      const amountAbs = Math.abs(parseNumeric(row.amount));
+      const isOutgoing = String(row.creditDebitIndicator ?? '').toUpperCase() === 'DBIT'
+      const amount = isOutgoing ? -amountAbs : amountAbs;
 
       const base: OpenTransactionInput = {
         id: row.id!,
@@ -76,15 +80,7 @@ export default defineEventHandler(async (event) => {
 });
 
 function parseNumeric(value: unknown): number {
-  if (typeof value === "number") {
-    return value;
-  }
-  if (typeof value === "string") {
-    const normalized = value.replace(/\./g, "").replace(/,/g, ".").trim();
-    const parsed = Number(normalized);
-    return Number.isNaN(parsed) ? 0 : parsed;
-  }
-  return 0;
+  return parseAmount(value)
 }
 
 function toIsoDate(value: Date | string | null): string {

@@ -6,12 +6,13 @@ import { getDefaultNotificationTemplate } from '#engine/notifications/domain/not
 
 export default defineEventHandler(async () => {
   const [row] = await db
-    .select({ mailTemplate: notificationSettings.mailTemplate })
+    .select({ mailTemplate: notificationSettings.mailTemplate, adminEmail: notificationSettings.adminEmail })
     .from(notificationSettings)
     .where(eq(notificationSettings.id, 'default'))
     .limit(1)
 
   return {
     mailTemplate: row?.mailTemplate ?? getDefaultNotificationTemplate(),
+    adminEmail: row?.adminEmail ?? null,
   }
 })

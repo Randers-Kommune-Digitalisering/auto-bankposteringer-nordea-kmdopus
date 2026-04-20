@@ -59,6 +59,7 @@ import {
 } from '../../app/lib/db/schema/statement'
 import { transaction, transactionProcessing } from '../../app/lib/db/schema/transaction'
 import { bankingAgreement } from '../../app/lib/db/schema/bankingAgreement'
+import { bankingAgreementAccountDimension } from '../../app/lib/db/schema/bankingAgreementAccountDimension'
 
 const SEED_KEY_RUN_ID = '11111111-1111-4111-8111-111111111111'
 
@@ -327,7 +328,8 @@ async function main() {
             "rule_tag",
             "rule",
             "run",
-            "account"
+            "account",
+            "banking_agreement_account_dimension"
           restart identity cascade;
         `),
       )
@@ -351,11 +353,26 @@ async function main() {
     await tx
       .insert(account)
       .values([
-        { id: 'DK20005908764988-DKK', name: 'Hovedkonto', provider: 'nordea', statusAccount: 90540000 },
-        { id: 'DK20009042714507-DKK', name: 'Kreditorkonto', provider: 'nordea', statusAccount: 90540098 },
-        { id: 'DK50004004401162-DKK', name: 'Udbetalinger', provider: 'nordea', statusAccount: 90540099 },
+        { id: 'DK20005908764988-DKK', iban: 'DK20005908764988', currency: 'DKK', name: 'Hovedkonto', provider: 'nordea' },
+        { id: 'DK20009042714507-DKK', iban: 'DK20009042714507', currency: 'DKK', name: 'Kreditorkonto', provider: 'nordea' },
+        { id: 'DK50004004401162-DKK', iban: 'DK50004004401162', currency: 'DKK', name: 'Udbetalinger', provider: 'nordea' },
       ])
       .onConflictDoNothing({ target: account.id })
+
+    await tx
+      .insert(bankingAgreementAccountDimension)
+      .values([
+        { provider: 'nordea', iban: 'DK20005908764988', dimensionKey: 'artskonto', dimensionValue: '90540000' },
+        { provider: 'nordea', iban: 'DK20009042714507', dimensionKey: 'artskonto', dimensionValue: '90540098' },
+        { provider: 'nordea', iban: 'DK50004004401162', dimensionKey: 'artskonto', dimensionValue: '90540099' },
+      ])
+      .onConflictDoNothing({
+        target: [
+          bankingAgreementAccountDimension.provider,
+          bankingAgreementAccountDimension.iban,
+          bankingAgreementAccountDimension.dimensionKey,
+        ],
+      })
 
     await tx
       .insert(run)

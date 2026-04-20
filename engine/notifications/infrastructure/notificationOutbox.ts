@@ -11,6 +11,8 @@ import { safeEmailMeta } from '~/lib/logging/logMeta'
 export type SubmitMailNotificationInput = {
   runId: string
   notification: MailMessage
+  /** Optional stable dedupe key. If omitted, we dedupe only within the current run. */
+  dedupeKey?: string
 }
 
 export async function submitMailNotificationViaOutbox(
@@ -25,7 +27,12 @@ export async function submitMailNotificationViaOutbox(
 
   const toMeta = safeEmailMeta(to)
 
-  const dedupeKey = `notifications.mail:${input.runId}:${to}:${crypto.createHash('sha256').update(input.notification.subject + '\n' + input.notification.body).digest('hex')}`
+  const dedupeKey =
+    input.dedupeKey ??
+    `notifications.mail:${input.runId}:${to}:${crypto
+      .createHash('sha256')
+      .update(input.notification.subject + '\n' + input.notification.body)
+      .digest('hex')}`
   const lockedBy = `submit-${process.pid}-${crypto.randomUUID()}`
 
   const outboxId = await db.transaction(async trx => {

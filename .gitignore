@@ -20,6 +20,9 @@ logs
 .DS_Store
 .fleet
 .idea
+*.swp
+*.swo
+*.swx
 
 # Local env files
 .env

@@ -27,11 +27,17 @@
           "primaryKey": false,
           "notNull": true
         },
-        "status_account": {
-          "name": "status_account",
-          "type": "integer",
+        "iban": {
+          "name": "iban",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -708,6 +714,81 @@
           "columns": [
             "provider",
             "iban"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.banking_agreement_account_dimension": {
+      "name": "banking_agreement_account_dimension",
+      "schema": "",
+      "columns": {
+        "provider": {
+          "name": "provider",
+          "type": "bank_provider",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "iban": {
+          "name": "iban",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dimension_key": {
+          "name": "dimension_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dimension_value": {
+          "name": "dimension_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "banking_agreement_account_dimension_provider_fk": {
+          "name": "banking_agreement_account_dimension_provider_fk",
+          "tableFrom": "banking_agreement_account_dimension",
+          "tableTo": "banking_agreement",
+          "columnsFrom": [
+            "provider"
+          ],
+          "columnsTo": [
+            "provider"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "banking_agreement_account_dimension_provider_iban_dimension_key_pk": {
+          "name": "banking_agreement_account_dimension_provider_iban_dimension_key_pk",
+          "columns": [
+            "provider",
+            "iban",
+            "dimension_key"
           ]
         }
       },
@@ -1468,6 +1549,12 @@
           "type": "text",
           "primaryKey": true,
           "notNull": true
+        },
+        "admin_email": {
+          "name": "admin_email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "mail_template": {
           "name": "mail_template",

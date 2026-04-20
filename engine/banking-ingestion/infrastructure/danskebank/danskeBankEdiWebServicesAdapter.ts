@@ -44,7 +44,7 @@ export const danskeBankEdiWsConfigSchema = z.object({
   pkiSenderId: z.string().min(1),
   pkiCustomerId: z.string().min(1),
   pkiInterfaceVersion: z.string().min(1).default('1'),
-  pkiBankRootCertificateSerialNo: z.string().min(1).default('1111130003'),
+  pkiBankRootCertificateSerialNo: z.string().min(1).default('1111110003'),
 
   // Our signing material (certificate typically created/renewed via PKIWS).
   applicationRequestPrivateKeyPem: z.string().min(1),

@@ -25,7 +25,8 @@ async function main() {
       id: accountId,
       name: 'Smoke test account',
       provider: 'nordea',
-      statusAccount: 95999999,
+      iban: 'SMOKE-IBAN',
+      currency: 'DKK',
     })
   }
 

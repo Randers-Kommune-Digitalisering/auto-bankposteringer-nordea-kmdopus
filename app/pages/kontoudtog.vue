@@ -3,7 +3,6 @@ import { h } from 'vue'
 import { today } from '@internationalized/date'
 import type { TableColumn } from '@nuxt/ui'
 import type { StatementTransaction } from '~/types/transactions'
-import useFlattenArray from '~/composables/useFlattenArray'
 import { DEFAULT_TIME_ZONE } from '~/lib/timeZone'
 
 const UBadge = resolveComponent('UBadge')
@@ -31,6 +30,9 @@ const defaultRange = {
 const dateRange = ref<any>(defaultRange)
 const globalFilterValue = ref('')
 
+const page = ref(1)
+const pageSize = ref(50)
+
 // Source of truth: selected account IDs (strings)
 const selectedAccountIds = ref<string[]>([])
 
@@ -44,64 +46,43 @@ const end = computed(() => {
   return v.toDate(timeZone).toISOString().slice(0, 10)
 })
 
-const { data, status, refresh } = await useFetch<StatementTransaction[]>('/api/transactions/statement', {
+const search = computed(() => globalFilterValue.value.trim())
+
+type StatementPage = { rows: StatementTransaction[]; total: number; page: number; pageSize: number }
+
+const { data, status, refresh } = await useFetch<StatementPage>('/api/transactions/statement', {
   // Key intentionally excludes accountIds so fast toggles don't create multiple keys.
   // This allows `dedupe: 'cancel'` to cancel in-flight requests and prevents "1 tick behind".
-  key: computed(() => `statement:${start.value}:${end.value}`),
+  key: computed(() => `statement:${start.value}:${end.value}:q:${search.value}:p${page.value}:s${pageSize.value}`),
   query: computed(() => ({
     start: start.value,
     end: end.value,
     // Always pass primitive IDs as a comma-separated string to avoid query serialization pitfalls.
-    accountIds: selectedAccountIds.value.length ? selectedAccountIds.value.join(',') : undefined
+    accountIds: selectedAccountIds.value.length ? selectedAccountIds.value.join(',') : undefined,
+    search: search.value.length ? search.value : undefined,
+    page: page.value,
+    pageSize: pageSize.value,
   })),
-  watch: [start, end, selectedAccountIds],
+  watch: [start, end, selectedAccountIds, search, page, pageSize],
   // Avoid "1 tick behind" behavior caused by out-of-order responses when filters change quickly.
   dedupe: 'cancel',
-  default: () => ([]),
+  default: () => ({ rows: [], total: 0, page: 1, pageSize: pageSize.value }),
 })
 
-const fetchedRows = computed<StatementTransaction[]>(() => useFlattenArray<StatementTransaction>(data))
+watch([start, end, selectedAccountIds, search], () => {
+  page.value = 1
+})
 
-function normalizeSearchText(value: string): string {
-  return value.trim().toLowerCase()
+const fetchedRows = computed<StatementTransaction[]>(() => data.value?.rows ?? [])
+const totalRows = computed<number>(() => data.value?.total ?? 0)
+
+const visibleRows = computed<StatementTransaction[]>(() => fetchedRows.value)
+const visibleRowCount = computed<number>(() => fetchedRows.value.length)
+const pageCount = computed<number>(() => Math.max(1, Math.ceil(totalRows.value / pageSize.value)))
+
+function setPage(p: number): void {
+  page.value = p
 }
-
-const visibleRows = computed<StatementTransaction[]>(() => {
-  const q = normalizeSearchText(globalFilterValue.value)
-  if (!q.length) return fetchedRows.value.slice()
-
-  return fetchedRows.value
-    .filter((row) => {
-      const parts: Array<string | number | null | undefined> = [
-        row.bookingDate,
-        row.valueDate,
-        row.bankAccountName,
-        row.accountId,
-        row.amount,
-        row.runningBalance,
-        row.currency,
-        row.creditDebitIndicator,
-        resolveCounterpart(row),
-        resolveTransactionType(row),
-        buildFreeText(row).join(' '),
-        row.id,
-        row.runId,
-        row.status,
-        row.processingStatus,
-        row.ruleApplied
-      ]
-
-      const haystack = parts
-        .filter((v) => v !== null && v !== undefined)
-        .map((v) => String(v).toLowerCase())
-        .join(' ')
-
-      return haystack.includes(q)
-    })
-    .slice()
-})
-
-const visibleRowCount = computed<number>(() => visibleRows.value.length)
 
 type CsvColumn = { header: string; value: (row: StatementTransaction) => string | number | null | undefined }
 
@@ -511,7 +492,7 @@ const tableUi = {
         />
 
         <div v-if="dateRange?.start && dateRange?.end" class="text-sm text-muted">
-          {{ visibleRowCount }} transaktioner i valgt periode
+          Viser {{ visibleRowCount }} af {{ totalRows }} transaktioner i valgt periode
         </div>
 
         <UEmpty
@@ -538,6 +519,19 @@ const tableUi = {
           :loading="status === 'pending'"
           :ui="tableUi"
         />
+
+        <div v-if="totalRows > pageSize" class="flex items-center border-t border-default pt-4 mt-auto">
+          <div class="flex-1" />
+          <div class="flex justify-center flex-1">
+            <UPagination
+              :default-page="page"
+              :items-per-page="pageSize"
+              :total="totalRows"
+              @update:page="setPage"
+            />
+          </div>
+          <div class="flex-1" />
+        </div>
       </div>
     </template>
   </UDashboardPanel>

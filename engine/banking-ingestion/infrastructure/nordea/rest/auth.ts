@@ -105,6 +105,102 @@ export async function getNordeaRestAccessToken(db: any, input: {
     }
   }
 
+  // If we already have an in-progress authorization persisted, try to continue it.
+  // This allows the ingestion to proceed as soon as the user has approved in Nordea,
+  // even if nobody clicked the manual "Opdater status" endpoint.
+  if (state.accessId && state.clientToken && state.status !== 'RESTART_REQUESTED') {
+    const accessId = state.accessId
+    const clientToken = state.clientToken
+
+    let nextState: StoredNordeaRestAuthState = {
+      ...state,
+      updatedAt: new Date().toISOString(),
+    }
+
+    // If still CREATED, confirm (same step as in the full flow).
+    if ((nextState.status ?? null) === 'CREATED') {
+      const confirmed = await input.client.confirmAuthorization({
+        accessId,
+        authorizerId: input.authorizerId,
+        bearerToken: clientToken,
+      })
+
+      nextState = {
+        ...nextState,
+        status: confirmed.status ?? nextState.status ?? null,
+        updatedAt: new Date().toISOString(),
+      }
+
+      await setAgreementCursor(db, {
+        provider: input.provider,
+        adapterKey: NORDEA_REST_AUTH_CURSOR_KEY,
+        cursor: toCursor(nextState),
+      })
+    }
+
+    const polled = await input.client.getAuthorizationStatus({ accessId, bearerToken: clientToken })
+    nextState = {
+      ...nextState,
+      status: polled.status ?? nextState.status ?? null,
+      authorizationCode: polled.code ?? nextState.authorizationCode ?? null,
+      updatedAt: new Date().toISOString(),
+    }
+
+    // If it's ACTIVE, exchange code -> tokens and store them.
+    if (nextState.status === 'ACTIVE' && !nextState.accessToken) {
+      const codeToExchange = nextState.authorizationCode
+      if (!codeToExchange) {
+        await setAgreementCursor(db, {
+          provider: input.provider,
+          adapterKey: NORDEA_REST_AUTH_CURSOR_KEY,
+          cursor: toCursor(nextState),
+        })
+        throw new Error(
+          'Nordea REST authorization is ACTIVE but no authorization code was returned. Docs state the token exchange requires the `code` value from GET /corporate/v2/authorize/<access_id>.',
+        )
+      }
+
+      const exchanged = await input.client.exchangeAuthorizationCodeForTokens({ code: codeToExchange })
+      const raw = exchanged.raw as any
+      const expiresIn = typeof raw?.response?.expires_in === 'number' ? raw.response.expires_in : null
+      const expiresAt = expiresIn ? new Date(Date.now() + expiresIn * 1000).toISOString() : null
+
+      nextState = {
+        ...nextState,
+        status: 'COMPLETED',
+        accessToken: exchanged.tokens.accessToken,
+        refreshToken: exchanged.tokens.refreshToken,
+        accessTokenExpiresAt: expiresAt,
+        updatedAt: new Date().toISOString(),
+      }
+
+      await setAgreementCursor(db, {
+        provider: input.provider,
+        adapterKey: NORDEA_REST_AUTH_CURSOR_KEY,
+        cursor: toCursor(nextState),
+      })
+
+      return exchanged.tokens.accessToken
+    }
+
+    await setAgreementCursor(db, {
+      provider: input.provider,
+      adapterKey: NORDEA_REST_AUTH_CURSOR_KEY,
+      cursor: toCursor(nextState),
+    })
+
+    if (String(nextState.status ?? '').toUpperCase() === 'FAILED') {
+      throw new Error('Nordea REST authorization is FAILED. Restart the authorization (2FA) and try again.')
+    }
+    if (nextState.status === 'EXPIRED') {
+      throw new Error('Nordea REST authorization is EXPIRED. Restart the authorization (2FA) and try again.')
+    }
+
+    throw new Error(
+      `Nordea REST authorization not completed yet (status=${nextState.status ?? 'null'}). Approve in Nordea and retry.`,
+    )
+  }
+
   const initiated = await input.client.initiateAuthorization({
     agreementNumber: input.agreementNumber,
     durationSeconds: input.durationSeconds,
@@ -184,7 +280,12 @@ export async function getNordeaRestAccessToken(db: any, input: {
     throw new Error(`Nordea REST authorization did not become ACTIVE (status=${status ?? 'null'})`)
   }
 
-  const codeToExchange = nextState.authorizationCode ?? clientToken
+  const codeToExchange = nextState.authorizationCode
+  if (!codeToExchange) {
+    throw new Error(
+      'Nordea REST authorization became ACTIVE but no authorization code was returned. Docs state the token exchange requires the `code` value from GET /corporate/v2/authorize/<access_id>.',
+    )
+  }
 
   const exchanged = await input.client.exchangeAuthorizationCodeForTokens({ code: codeToExchange })
   const raw = exchanged.raw as any

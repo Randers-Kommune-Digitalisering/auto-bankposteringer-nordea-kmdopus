@@ -4,6 +4,7 @@ import { and, eq } from 'drizzle-orm'
 import db from '~/lib/db'
 import { bankProviderValues } from '~/lib/db/schema/bankingAgreement'
 import { bankingAgreementAccountAllowlist } from '~/lib/db/schema/bankingAgreementAccountAllowlist'
+import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreementAccountDimension'
 
 function normalizeIban(input: string): string {
   return input.replace(/\s+/g, '').toUpperCase()
@@ -22,14 +23,25 @@ export default defineEventHandler(async (event) => {
 
   const iban = normalizeIban(ibanParam)
 
-  await db
-    .delete(bankingAgreementAccountAllowlist)
-    .where(
-      and(
-        eq(bankingAgreementAccountAllowlist.provider, provider as any),
-        eq(bankingAgreementAccountAllowlist.iban, iban),
-      ),
-    )
+  await db.transaction(async (trx) => {
+    await trx
+      .delete(bankingAgreementAccountAllowlist)
+      .where(
+        and(
+          eq(bankingAgreementAccountAllowlist.provider, provider as any),
+          eq(bankingAgreementAccountAllowlist.iban, iban),
+        ),
+      )
+
+    await trx
+      .delete(bankingAgreementAccountDimension)
+      .where(
+        and(
+          eq(bankingAgreementAccountDimension.provider, provider as any),
+          eq(bankingAgreementAccountDimension.iban, iban),
+        ),
+      )
+  })
 
   return { success: true }
 })

@@ -16,11 +16,36 @@ const pemFromBase64Der = (base64Der: string): string => {
   return `-----BEGIN CERTIFICATE-----\n${lines.join('\n')}\n-----END CERTIFICATE-----\n`
 }
 
-function firstText(doc: any, tagName: string): string | null {
-  const nodes = doc.getElementsByTagName(tagName)
-  const node = nodes?.item(0) ?? null
+function localNameOf(node: any): string {
+  const name = String(node?.localName ?? node?.tagName ?? '')
+  const i = name.indexOf(':')
+  return i >= 0 ? name.slice(i + 1) : name
+}
+
+function firstElementByLocalName(root: any, localName: string): any | null {
+  // Fast path when XML has no namespace prefixes.
+  const direct = root?.getElementsByTagName?.(localName)?.item?.(0) ?? null
+  if (direct) return direct
+
+  const nodes = root?.getElementsByTagName?.('*')
+  if (!nodes) return null
+
+  for (let i = 0; i < nodes.length; i++) {
+    const n = nodes.item(i)
+    if (localNameOf(n) === localName) return n
+  }
+
+  return null
+}
+
+function firstText(root: any, localName: string): string | null {
+  const node = firstElementByLocalName(root, localName)
   const text = node?.textContent?.trim() ?? ''
   return text.length > 0 ? text : null
+}
+
+function looksLikeXmlDsigSignature(xml: string): boolean {
+  return /<(?:\w+:)?Signature\b/.test(xml)
 }
 
 function generatePkiRequestId(): string {
@@ -30,20 +55,58 @@ function generatePkiRequestId(): string {
 }
 
 function parsePkiFactoryServiceFaultOrNull(doc: any): {
+  senderId?: string | null
+  customerId?: string | null
+  requestId?: string | null
+  timestamp?: string | null
+  environment?: string | null
+
   returnCode: string
   returnText?: string | null
   additionalReturnText?: string | null
 } | null {
-  const faultNode = doc.getElementsByTagName('PKIFactoryServiceFault')?.item(0) ?? null
-  if (!faultNode) return null
+  // Danske-specific fault element (not SOAP Fault).
+  const faultNode = firstElementByLocalName(doc, 'PKIFactoryServiceFault')
+  if (faultNode) {
+    const rc = firstText(faultNode, 'ReturnCode')
+    const rt = firstText(faultNode, 'ReturnText')
+    const art = firstText(faultNode, 'AdditionalReturnText')
 
-  const rc = firstText(doc, 'ReturnCode')
-  const rt = firstText(doc, 'ReturnText')
-  const art = firstText(doc, 'AdditionalReturnText')
-  if (!rc) {
-    return { returnCode: 'UNKNOWN', returnText: rt, additionalReturnText: art }
+    // Echoed header fields (useful for debugging miswired IDs / env).
+    const senderId = firstText(faultNode, 'SenderId')
+    const customerId = firstText(faultNode, 'CustomerId')
+    const requestId = firstText(faultNode, 'RequestId')
+    const timestamp = firstText(faultNode, 'Timestamp')
+    const environment = firstText(faultNode, 'Environment')
+
+    return {
+      senderId,
+      customerId,
+      requestId,
+      timestamp,
+      environment,
+
+      returnCode: rc ?? 'UNKNOWN',
+      returnText: rt,
+      additionalReturnText: art,
+    }
   }
-  return { returnCode: rc, returnText: rt, additionalReturnText: art }
+
+  // Generic SOAP 1.1 fault.
+  const soapFault = firstElementByLocalName(doc, 'Fault')
+  if (soapFault) {
+    const code = firstText(soapFault, 'faultcode')
+    const text = firstText(soapFault, 'faultstring')
+    const detail = firstText(soapFault, 'detail')
+
+    return {
+      returnCode: code ?? 'SOAP_FAULT',
+      returnText: text,
+      additionalReturnText: detail,
+    }
+  }
+
+  return null
 }
 
 async function postSoap(options: {
@@ -104,7 +167,7 @@ export const danskePkiWsConfigSchema = z.object({
   environment: z.enum(['production', 'customertest']).default('production'),
 
   /** Required by GetBankCertificateRequest */
-  bankRootCertificateSerialNo: z.string().min(1).default('1111130003'),
+  bankRootCertificateSerialNo: z.string().min(1).default('1111110003'),
 
   /** Optional pinning for the bank signing certificate returned by GetBankCertificate. */
   trustedBankSigningCertFingerprintSha256Hex: z.string().length(64).optional(),
@@ -172,7 +235,17 @@ export async function danskePkiGetBankCertificates(
   const fault = parsePkiFactoryServiceFaultOrNull(doc)
   if (fault) {
     const extra = fault.additionalReturnText ? ` ${fault.additionalReturnText}` : ''
-    throw new Error(`PKIWS fault ${fault.returnCode}: ${fault.returnText ?? ''}${extra}`.trim())
+    const ctxParts = [
+      fault.senderId ? `SenderId=${fault.senderId}` : null,
+      fault.customerId ? `CustomerId=${fault.customerId}` : null,
+      fault.requestId ? `RequestId=${fault.requestId}` : null,
+      fault.environment ? `Environment=${fault.environment}` : null,
+      fault.timestamp ? `Timestamp=${fault.timestamp}` : null,
+    ].filter(Boolean)
+
+    const ctx = ctxParts.length ? ` (${ctxParts.join(', ')})` : ''
+
+    throw new Error(`PKIWS fault ${fault.returnCode}: ${fault.returnText ?? ''}${extra}${ctx}`.trim())
   }
 
   const bankEnc = firstText(doc, 'BankEncryptionCert')
@@ -180,7 +253,10 @@ export async function danskePkiGetBankCertificates(
   const bankRoot = firstText(doc, 'BankRootCert')
 
   if (!bankEnc || !bankSign) {
-    throw new Error('PKIWS GetBankCertificate: missing BankEncryptionCert/BankSigningCert in response')
+    const rootTag = doc?.documentElement?.tagName ? ` (root: ${doc.documentElement.tagName})` : ''
+    throw new Error(
+      `PKIWS GetBankCertificate: missing BankEncryptionCert/BankSigningCert in response${rootTag}`,
+    )
   }
 
   const bankSigningCertificatePem = pemFromBase64Der(bankSign)
@@ -195,13 +271,17 @@ export async function danskePkiGetBankCertificates(
   }
 
   // Verify signature on the response payload using the embedded bank signing cert.
-  // This isn't full PKI validation, but combined with fingerprint pinning it protects against tampering.
-  const verify = verifyEnvelopedXmlDsig({
-    xml: responseXml,
-    trustedCertificateFingerprintSha256Hex: cfg.trustedBankSigningCertFingerprintSha256Hex ?? bankSigningFingerprint,
-  })
-  if (!verify.isSignatureValid) {
-    throw new Error('PKIWS GetBankCertificate: response signature verification failed')
+  // Danske docs note that GetBankCertificate is unsigned/unencrypted.
+  // If a signature is present anyway, verify it (best-effort hardening).
+  if (looksLikeXmlDsigSignature(responseXml)) {
+    const verify = verifyEnvelopedXmlDsig({
+      xml: responseXml,
+      trustedCertificateFingerprintSha256Hex:
+        cfg.trustedBankSigningCertFingerprintSha256Hex ?? bankSigningFingerprint,
+    })
+    if (!verify.isSignatureValid) {
+      throw new Error('PKIWS GetBankCertificate: response signature verification failed')
+    }
   }
 
   return {
@@ -287,7 +367,17 @@ export async function danskePkiCreateCertificate(options: {
   const fault = parsePkiFactoryServiceFaultOrNull(doc)
   if (fault) {
     const extra = fault.additionalReturnText ? ` ${fault.additionalReturnText}` : ''
-    throw new Error(`PKIWS fault ${fault.returnCode}: ${fault.returnText ?? ''}${extra}`.trim())
+    const ctxParts = [
+      fault.senderId ? `SenderId=${fault.senderId}` : null,
+      fault.customerId ? `CustomerId=${fault.customerId}` : null,
+      fault.requestId ? `RequestId=${fault.requestId}` : null,
+      fault.environment ? `Environment=${fault.environment}` : null,
+      fault.timestamp ? `Timestamp=${fault.timestamp}` : null,
+    ].filter(Boolean)
+
+    const ctx = ctxParts.length ? ` (${ctxParts.join(', ')})` : ''
+
+    throw new Error(`PKIWS fault ${fault.returnCode}: ${fault.returnText ?? ''}${extra}${ctx}`.trim())
   }
 
   const enc = firstText(doc, 'EncryptionCert')

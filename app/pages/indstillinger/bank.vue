@@ -1,11 +1,21 @@
 <script setup lang="ts">
-import { z } from 'zod'
 import type { TableColumn } from '@nuxt/ui'
-import type { Row, SortingState } from '@tanstack/table-core'
+import type { SortingState } from '@tanstack/table-core'
 import { getPaginationRowModel } from '@tanstack/table-core'
-import type { AccountSelectSchema } from '~/lib/db/schema/account'
+import BankingAccountModal from '~/components/banking/AccountModal.vue'
 
-type AllowlistAccount = { iban: string; name: string | null }
+type BankingAccountUnionDto = {
+  provider: 'danskebank' | 'nordea' | 'bankconnect'
+  iban: string
+  currency: string | null
+  name: string | null
+  statuskonto: string | null
+  observed: boolean
+  configuredForApi: boolean
+  observedAccountId: string | null
+}
+
+type AllowlistAccount = { iban: string; name: string | null; statuskonto: string | null }
 
 type NordeaRestAuthStatus = {
   provider: 'nordea'
@@ -24,6 +34,22 @@ type BankingAgreement = {
   enabled: boolean
   channel: 'iso20022' | 'rest'
   allowlistAccounts?: AllowlistAccount[]
+  certificate?:
+    | { status: 'not_applicable'; message: string }
+    | {
+        provider: string
+        channel: string
+        status: 'missing' | 'invalid'
+        message: string
+      }
+    | {
+        provider: string
+        channel: string
+        status: 'ok' | 'expires_soon' | 'expired'
+        expiresAt: string
+        daysRemaining: number
+        fingerprintSha256Hex?: string
+      }
   readiness?: 
     | {
         status: 'ready'
@@ -74,7 +100,6 @@ const toast = useToast()
 const table = useTemplateRef('table')
 const globalFilterValue = ref('')
 const UButton = resolveComponent('UButton')
-const UDropdownMenu = resolveComponent('UDropdownMenu')
 const UIcon = resolveComponent('UIcon')
 
 const channelOptions = [
@@ -89,6 +114,14 @@ const channelLabel = (c: BankingAgreement['channel']) => {
 
 const nordeaRestAuthPending = ref(false)
 const nordeaRestAuthStatus = ref<NordeaRestAuthStatus | null>(null)
+
+const accountModalOpen = ref(false)
+const accountModalMode = ref<'observed' | 'configured'>('observed')
+const editingObservedAccountId = ref<string | null>(null)
+const configuredDraft = ref<
+  | { provider: 'danskebank' | 'nordea' | 'bankconnect'; iban: string; name?: string | null; statuskonto?: string | null }
+  | null
+>(null)
 
 function formatNordeaRestAuthStatus(status: NordeaRestAuthStatus | null): string {
   if (!status) return '—'
@@ -137,58 +170,31 @@ async function requestNordeaRestReauth() {
   }
 }
 
-const modalOpen = ref(false)
-const editingAccountId = ref<string | null>(null)
-const deletingAccountId = ref<string | null>(null)
 const refreshingAccounts = ref(false)
 const sorting = ref<SortingState>([])
 
 const envModalOpen = ref(false)
 const envModalProvider = ref<BankingAgreement['provider'] | null>(null)
 
-const allowlistDraftByProvider = reactive<Record<BankingAgreement['provider'], { iban: string; name: string }>>({
-  danskebank: { iban: '', name: '' },
-  nordea: { iban: '', name: '' },
-  bankconnect: { iban: '', name: '' },
-})
-
-const allowlistErrorsByProvider = reactive<
-  Record<BankingAgreement['provider'], { iban?: string; name?: string }>
->({
-  danskebank: {},
-  nordea: {},
-  bankconnect: {},
-})
-
-function normalizeIban(input: string): string {
-  return input.replace(/\s+/g, '').toUpperCase()
-}
-
-const allowlistSchema = z.object({
-  iban: z
-    .string()
-    .min(1, 'IBAN er påkrævet')
-    .transform((v) => normalizeIban(v))
-    .refine((v) => /^[A-Z]{2}[0-9A-Z]{13,32}$/.test(v), 'Ugyldig IBAN'),
-  name: z.string().trim().max(80, 'Kaldenavn er for langt').optional(),
-})
-
-const { data: accounts, pending, refresh: refreshBankAccounts } = await useFetch<AccountSelectSchema[]>(
-  '/api/bank-accounts',
+const { data: accounts, pending, refresh: refreshBankAccounts } = useFetch<BankingAccountUnionDto[]>(
+  '/api/banking-accounts',
   {
     key: BANK_ACCOUNTS_QUERY_KEY,
-    default: () => []
-  }
+    default: () => [],
+    lazy: true,
+  },
 )
 
-
-const { data: agreements, refresh: refreshAgreements } = await useFetch<BankingAgreement[]>(
+const { data: agreements, refresh: refreshAgreements } = useFetch<BankingAgreement[]>(
   '/api/banking-agreements',
   {
     key: 'banking-agreements',
     default: () => [],
-  }
+    lazy: true,
+  },
 )
+
+// Keep Nuxt's client-side cache for these endpoints; explicit refreshes are triggered after mutations.
 
 const providerLabel = (p: BankingAgreement['provider']) => {
   if (p === 'danskebank') return 'Danske Bank'
@@ -239,15 +245,20 @@ const readinessText = (a: BankingAgreement) => {
   if (r.status === 'not_implemented') return 'Ikke implementeret'
   if (r.status === 'not_configured') return 'Ikke konfigureret'
   if (r.status === 'missing_env') {
-    const missing = (r as any)?.env?.missingKeys ?? r.missingKeys ?? []
-    const invalid = (r as any)?.env?.invalidKeys ?? []
-    const missingText = missing?.length ? missing.slice(0, 3).join(', ') : ''
-    const invalidText = invalid?.length ? invalid.slice(0, 2).join(', ') : ''
-    if (missingText && invalidText) return `Mangler: ${missingText} • Ugyldig: ${invalidText}`
-    if (missingText) return `Mangler: ${missingText}`
-    if (invalidText) return `Ugyldig: ${invalidText}`
     return 'Mangler env'
   }
+  return '—'
+}
+
+function certificateText(a: BankingAgreement): string {
+  const c: any = a.certificate
+  if (!c) return '—'
+  if (c.status === 'not_applicable') return '—'
+  if (c.status === 'missing') return 'Certifikat mangler'
+  if (c.status === 'invalid') return 'Certifikat ugyldigt'
+  if (c.status === 'expired') return `Certifikat udløbet (${c.expiresAt?.slice(0, 10) ?? ''})`
+  if (c.status === 'expires_soon') return `Certifikat udløber snart (${c.daysRemaining} dage)`
+  if (c.status === 'ok') return `Certifikat OK (${c.expiresAt?.slice(0, 10) ?? ''})`
   return '—'
 }
 
@@ -278,57 +289,6 @@ async function activateSelectedAgreement() {
   }
 }
 
-async function addAllowlistIban(provider: BankingAgreement['provider']) {
-  allowlistErrorsByProvider[provider] = {}
-
-  const draft = allowlistDraftByProvider[provider]
-  const parsed = allowlistSchema.safeParse({ iban: draft.iban, name: draft.name })
-  if (!parsed.success) {
-    const nextErrors: { iban?: string; name?: string } = {}
-    for (const issue of parsed.error.issues) {
-      const key = issue.path?.[0]
-      if (key === 'iban') nextErrors.iban = issue.message
-      if (key === 'name') nextErrors.name = issue.message
-    }
-    allowlistErrorsByProvider[provider] = nextErrors
-    return
-  }
-
-  const iban = parsed.data.iban
-  const name = parsed.data.name?.trim() ? parsed.data.name.trim() : undefined
-
-  try {
-    await $fetch(`/api/banking-agreements/${provider}/allowlist`, {
-      method: 'POST',
-      body: { iban, name },
-    })
-    allowlistDraftByProvider[provider].iban = ''
-    allowlistDraftByProvider[provider].name = ''
-    await refreshAgreements()
-  } catch (err: any) {
-    toast.add({
-      title: 'Kan ikke tilføje konto',
-      description: String(err?.data?.statusMessage ?? err?.statusMessage ?? err?.message ?? err),
-      color: 'error',
-    })
-  }
-}
-
-async function removeAllowlistIban(provider: BankingAgreement['provider'], iban: string) {
-  try {
-    await $fetch(`/api/banking-agreements/${provider}/allowlist/${encodeURIComponent(iban)}`, {
-      method: 'DELETE',
-    })
-    await refreshAgreements()
-  } catch (err: any) {
-    toast.add({
-      title: 'Kan ikke fjerne konto',
-      description: String(err?.data?.statusMessage ?? err?.statusMessage ?? err?.message ?? err),
-      color: 'error',
-    })
-  }
-}
-
 const refreshAccounts = async () => {
   refreshingAccounts.value = true
   try {
@@ -339,6 +299,65 @@ const refreshAccounts = async () => {
 }
 
 const rows = computed(() => [...(accounts.value ?? [])])
+
+const configuredProviders = computed(() =>
+  (agreements.value ?? [])
+    .filter((a) => a.channel === 'rest')
+    .map((a) => a.provider),
+)
+
+function openNewApiAccountModal() {
+  accountModalMode.value = 'configured'
+  editingObservedAccountId.value = null
+  configuredDraft.value = null
+  accountModalOpen.value = true
+}
+
+function openEditObservedAccountModal(accountId: string) {
+  accountModalMode.value = 'observed'
+  configuredDraft.value = null
+  editingObservedAccountId.value = accountId
+  accountModalOpen.value = true
+}
+
+function openEditConfiguredAccountModal(row: BankingAccountUnionDto) {
+  accountModalMode.value = 'configured'
+  editingObservedAccountId.value = null
+  configuredDraft.value = {
+    provider: row.provider,
+    iban: row.iban,
+    name: row.name,
+    statuskonto: row.statuskonto,
+  }
+  accountModalOpen.value = true
+}
+
+async function removeConfiguredAccount(row: BankingAccountUnionDto) {
+  const ok = window.confirm(`Er du sikker på at du vil fjerne API-kontoen ${row.iban} (${providerLabel(row.provider)})?`)
+  if (!ok) return
+  try {
+    await $fetch(`/api/banking-agreements/${row.provider}/allowlist/${encodeURIComponent(row.iban)}`, {
+      method: 'DELETE',
+    })
+    await refreshBankAccounts()
+    await refreshAgreements()
+    toast.add({ title: 'Konto fjernet', description: `${row.iban} er fjernet fra allowlist.` })
+  } catch (err: any) {
+    toast.add({
+      title: 'Kan ikke fjerne konto',
+      description: String(err?.data?.statusMessage ?? err?.statusMessage ?? err?.message ?? err),
+      color: 'error',
+    })
+  }
+}
+
+async function handleAccountModalSaved() {
+  editingObservedAccountId.value = null
+  configuredDraft.value = null
+  accountModalOpen.value = false
+  await refreshAccounts()
+  await refreshAgreements()
+}
 
 const createSortableHeader = (label: string) => ({ column }: { column: any }) => {
   const sortingState = column.getIsSorted?.()
@@ -365,28 +384,23 @@ const createSortableHeader = (label: string) => ({ column }: { column: any }) =>
   )
 }
 
-// Dropdown-menu for actions
-function getRowItems(row: Row<AccountSelectSchema>) {
-  return [
-    { type: 'label', label: 'Handlinger' },
-    {
-      label: 'Rediger',
-      icon: 'solar:ruler-cross-pen-bold-duotone',
-      onSelect() { handleEditAccount(row) }
-    }
-  ]
-}
-
-const columns: TableColumn<AccountSelectSchema>[] = [
-  { // id
-    accessorKey: 'id',
-    id: 'id',
-    header: createSortableHeader('Bankkonto'),
+const columns: TableColumn<BankingAccountUnionDto>[] = [
+  {
+    accessorKey: 'iban',
+    id: 'iban',
+    header: createSortableHeader('IBAN'),
     enableSorting: true,
     cell: ({ row }) => {
-      const v = String(row.original.id ?? '')
+      const v = String((row.original as any).iban ?? '')
       return h('span', { class: 'font-mono text-xs' }, v.toUpperCase())
     }
+  },
+  {
+    accessorKey: 'currency',
+    id: 'currency',
+    header: createSortableHeader('Valuta'),
+    enableSorting: true,
+    cell: ({ row }) => String((row.original as any).currency ?? '—')
   },
   { // name
     accessorKey: 'name',
@@ -407,88 +421,57 @@ const columns: TableColumn<AccountSelectSchema>[] = [
       return String(p ?? '')
     }
   },
-  { // statusAccount
-    accessorKey: 'statusAccount',
-    id: 'statusAccount',
+  {
+    accessorKey: 'statuskonto',
+    id: 'statuskonto',
     header: createSortableHeader('Statuskonto'),
-    enableSorting: true
+    enableSorting: true,
+    cell: ({ row }) => String((row.original as any).statuskonto ?? '—')
   },
-  { // Handlinger
-    id: 'actions',
-    enableHiding: false,
+  {
+    id: 'source',
+    header: 'Kilde',
     enableSorting: false,
     cell: ({ row }) => {
-      return h(
-        'div',
-        { class: 'text-right' },
-        h(
-          UDropdownMenu,
-          {
-            content: {
-              align: 'end'
-            },
-            items: getRowItems(row)
-          },
-          () =>
-            h(UButton, {
-              icon: 'solar:menu-dots-bold-duotone',
-              color: 'neutral',
-              variant: 'ghost',
-              class: 'ml-auto'
-            })
-        )
-      )
+      const r = row.original
+      const labels: string[] = []
+      if (r.configuredForApi) labels.push('API')
+      if (r.observed) labels.push('Observeret')
+      return labels.length ? labels.join(' • ') : '—'
     }
-  }
+  },
+  {
+    id: 'actions',
+    enableSorting: false,
+    cell: ({ row }) =>
+      h(
+        'div',
+        { class: 'text-right flex items-center justify-end gap-1' },
+        [
+          h(UButton, {
+            icon: 'solar:ruler-cross-pen-bold-duotone',
+            color: 'neutral',
+            variant: 'ghost',
+            onClick: () => {
+              const r: any = row.original
+              if (r.observedAccountId) return openEditObservedAccountModal(String(r.observedAccountId))
+              return openEditConfiguredAccountModal(row.original)
+            },
+          }),
+          row.original.configuredForApi
+            ? h(UButton, {
+                icon: 'solar:trash-bin-trash-bold-duotone',
+                color: 'error',
+                variant: 'ghost',
+                onClick: () => removeConfiguredAccount(row.original),
+              })
+            : null,
+        ],
+      ),
+  },
 ]
 
 const pagination = ref({ pageIndex: 0, pageSize: 20 })
-
-function handleAddAccount() {
-  // Manual account creation is intentionally disabled.
-}
-
-function handleEditAccount(row: Row<AccountSelectSchema>) {
-  editingAccountId.value = row.original.id
-  modalOpen.value = true
-}
-
-async function handleSaved() {
-  editingAccountId.value = null
-  await refreshAccounts()
-  modalOpen.value = false
-}
-
-async function handleDeleteAccount(row: Row<AccountSelectSchema>) {
-  // Discovered accounts are managed by ingestion and should not be deleted from UI.
-  void row
-  return
-  const accountId = row.original.id
-  deletingAccountId.value = accountId
-
-  try {
-    await $fetch(`/api/bank-accounts/${accountId}`, {
-      method: 'DELETE'
-    })
-
-    toast.add({
-      title: 'Bankkonto slettet',
-      description: `${accountId} er blevet fjernet.`
-    })
-
-    accounts.value = (accounts.value ?? []).filter((account) => account.id !== accountId)
-    await refreshAccounts()
-  } catch (error) {
-    console.error('Fejl ved sletning af konto', error)
-    toast.add({
-      title: 'Fejl ved sletning',
-      description: 'Kunne ikke slette bankkontoen. Prøv igen senere.',
-      color: 'error'
-    })
-  } finally {
-    deletingAccountId.value = null
-  }
-}
 </script>
 
 <template>
@@ -500,7 +483,14 @@ async function handleDeleteAccount(row: Row<AccountSelectSchema>) {
         </template>
 
         <template #right>
-          <div />
+          <UButton
+            v-if="configuredProviders.length"
+            class="font-bold rounded-full"
+            icon="solar:notes-bold-duotone"
+            label="Ny bankkonto"
+            @click="openNewApiAccountModal"
+          />
+          <div v-else />
         </template>
       </UDashboardNavbar>
     </template>
@@ -523,6 +513,9 @@ async function handleDeleteAccount(row: Row<AccountSelectSchema>) {
                 <div class="text-sm font-semibold">{{ providerLabel(a.provider) }}</div>
                 <div class="text-xs text-muted">
                   {{ a.enabled ? 'Aktiv' : 'Inaktiv' }} • {{ readinessText(a) }}
+                </div>
+                <div class="text-xs text-muted">
+                  {{ certificateText(a) }}
                 </div>
               </div>
 
@@ -608,71 +601,6 @@ async function handleDeleteAccount(row: Row<AccountSelectSchema>) {
                   Token udløber: {{ nordeaRestAuthStatus.accessTokenExpiresAt }}
                 </div>
               </div>
-
-              <div class="text-xs font-semibold uppercase tracking-wide text-muted">Konti til API</div>
-              <div class="text-xs text-muted">
-                Angiv IBAN(s) hos Nordea, som må hentes via API
-              </div>
-
-              <div v-if="(a.allowlistAccounts?.length ?? 0)" class="flex flex-wrap gap-1.5">
-                <UBadge
-                  v-for="entry in a.allowlistAccounts"
-                  :key="entry.iban"
-                  color="neutral"
-                  variant="subtle"
-                  class="gap-1"
-                >
-                  <span v-if="entry.name" class="text-[11px] font-medium">{{ entry.name }}</span>
-                  <span class="font-mono text-[11px]" :class="entry.name ? 'text-muted' : ''">{{ entry.iban }}</span>
-                  <UButton
-                    size="xs"
-                    color="neutral"
-                    variant="ghost"
-                    icon="solar:close-circle-bold-duotone"
-                    @click="removeAllowlistIban(a.provider, entry.iban)"
-                  />
-                </UBadge>
-              </div>
-              <div v-else class="text-xs text-muted">
-                Ingen konti tilføjet endnu.
-              </div>
-
-              <div class="space-y-2">
-                <UFormField :error="allowlistErrorsByProvider[a.provider]?.iban">
-                  <UiFloatingLabelInput
-                    v-model="allowlistDraftByProvider[a.provider].iban"
-                    label="IBAN"
-                    size="sm"
-                    :color="allowlistErrorsByProvider[a.provider]?.iban ? 'error' : 'neutral'"
-                    class="w-full"
-                  />
-                </UFormField>
-
-                <div class="flex items-start gap-2">
-                  <UFormField
-                    class="flex-1"
-                    :error="allowlistErrorsByProvider[a.provider]?.name"
-                  >
-                    <UiFloatingLabelInput
-                      v-model="allowlistDraftByProvider[a.provider].name"
-                      label="Kaldenavn"
-                      size="sm"
-                      :color="allowlistErrorsByProvider[a.provider]?.name ? 'error' : 'neutral'"
-                      class="w-full"
-                    />
-                  </UFormField>
-
-                  <UButton
-                    size="sm"
-                    color="neutral"
-                    variant="soft"
-                    class="whitespace-nowrap self-end"
-                    @click="addAllowlistIban(a.provider)"
-                  >
-                    Tilføj
-                  </UButton>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -682,9 +610,11 @@ async function handleDeleteAccount(row: Row<AccountSelectSchema>) {
         <UiFloatingLabelInput
           v-model="globalFilterValue"
           class="max-w-sm"
-          icon="solar:magnifer-bold-duotone"
-          label="Søg efter en bankkonto..."
-          color="neutral"
+          color="primary"
+          variant="outline"
+          :ui="{ base: 'ring-primary/50 text-primary focus-visible:ring-primary' }"
+          trailing-icon="solar:magnifer-bold-duotone"
+          label="Søg..."
         />
       </div>
 
@@ -727,13 +657,16 @@ async function handleDeleteAccount(row: Row<AccountSelectSchema>) {
         </div>
         <div class="flex-1"></div>
       </div>
-      
-      <BankingAccountModal
-        v-model:open="modalOpen"
-        :account-id="editingAccountId"
-        @saved="handleSaved"
-      />
 
+      <BankingAccountModal
+        v-model:open="accountModalOpen"
+        :account-id="editingObservedAccountId"
+        :mode="accountModalMode"
+        :configured-draft="configuredDraft"
+        :configured-providers="configuredProviders"
+        @saved="handleAccountModalSaved"
+      />
+      
         <UModal v-model:open="envModalOpen">
           <template #header>
             <div class="flex items-center justify-between gap-4">

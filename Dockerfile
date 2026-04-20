@@ -1,7 +1,7 @@
 # -------------------------
 # Base
 # -------------------------
-FROM node:20-alpine AS base
+FROM node:20-bookworm-slim AS base
 WORKDIR /app
 RUN corepack enable
 
@@ -10,6 +10,7 @@ RUN corepack enable
 # -------------------------
 FROM base AS deps
 COPY package.json pnpm-lock.yaml ./
+COPY patches ./patches
 RUN pnpm install --frozen-lockfile
 
 # -------------------------
@@ -32,7 +33,7 @@ RUN pnpm build
 # -------------------------
 # Production
 # -------------------------
-FROM node:20-alpine AS prod
+FROM node:20-bookworm-slim AS prod
 WORKDIR /app
 ENV NODE_ENV=production
 
@@ -41,6 +42,7 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 COPY --from=build /app/.output ./.output
 COPY package.json pnpm-lock.yaml ./
+COPY patches ./patches
 RUN corepack enable && pnpm install --prod --frozen-lockfile
 
 EXPOSE 3000

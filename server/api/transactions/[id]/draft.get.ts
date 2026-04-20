@@ -9,6 +9,7 @@ import {
   manualBookingDraftLine,
   manualBookingDraftLineDimension,
 } from '~/lib/db/schema/manualBookingDraft'
+import { parseAmount } from '#engine/matching/domain/amount'
 
 export default defineEventHandler(async (event) => {
   const transactionIdParam = event.context.params?.id
@@ -100,11 +101,5 @@ export default defineEventHandler(async (event) => {
 })
 
 function parseNumeric(value: unknown): number {
-  if (typeof value === 'number') return value
-  if (typeof value === 'string') {
-    const normalized = value.replace(/,/g, '.').trim()
-    const parsed = Number(normalized)
-    return Number.isNaN(parsed) ? 0 : parsed
-  }
-  return 0
+  return parseAmount(value)
 }

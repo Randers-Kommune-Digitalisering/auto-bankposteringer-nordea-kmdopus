@@ -41,18 +41,30 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
     'camt.053e.xml',
   )
 
-  const adapterKeyOverride = process.env.BANK_ADAPTER
+  const adapterKeyOverride = `${process.env.BANK_ADAPTER ?? ''}`.trim() || null
+
+  const overrideRun: Array<{ provider: BankProvider; channel: BankChannel }> = adapterKeyOverride
+    ? (
+        adapterKeyOverride === 'danskebank-edi-ws'
+          ? [{ provider: 'danskebank' as const, channel: 'iso20022' as const }]
+          : adapterKeyOverride === 'nordea-corporate-access-ws' || adapterKeyOverride === 'local-file'
+            ? [{ provider: 'nordea' as const, channel: 'iso20022' as const }]
+            : []
+      )
+    : []
 
   const runs: Array<{ provider: BankProvider; channel: BankChannel }> = agreements.length
     ? agreements.map((a) => ({ provider: a.provider as BankProvider, channel: a.channel as BankChannel }))
-    : [{ provider: 'nordea' as const, channel: 'iso20022' as const }]
+    : overrideRun
 
   const result = await db.transaction(async (trx) => {
     // Ensure agreement rows exist for any provider we might persist cursor for.
-    await trx
-      .insert(bankingAgreement)
-      .values(runs.map((r) => ({ provider: r.provider, enabled: false })))
-      .onConflictDoNothing({ target: bankingAgreement.provider })
+    if (runs.length) {
+      await trx
+        .insert(bankingAgreement)
+        .values(runs.map((r) => ({ provider: r.provider, enabled: false })))
+        .onConflictDoNothing({ target: bankingAgreement.provider })
+    }
     await trx
       .insert(run)
       .values({ id: runId, bookingDate, status: 'indlæser' })
@@ -143,19 +155,6 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
               mtlsClientPrivateKeyPem:
                 secrets.NORDEA_MTLS_CLIENT_PRIVATE_KEY_PEM ?? secrets.NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM,
               timeoutMs: 30_000,
-            })
-          }
-
-          // No override: pick based on persisted agreement channel.
-          if (r.channel === 'rest') {
-            throw new Error(`REST kanal er ikke implementeret endnu for provider=${r.provider}`)
-          }
-
-          if (!agreements.length && r.provider === 'nordea') {
-            return new LocalFileBankAdapter({
-              key: 'nordea-example-file',
-              filePath: examplePath,
-              filename: 'camt.053e.xml',
             })
           }
 

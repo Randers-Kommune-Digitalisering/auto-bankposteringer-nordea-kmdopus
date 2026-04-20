@@ -24,11 +24,11 @@ export type DefaultAccountingDimensionConstraint = {
 export const defaultAccountingDimensionDefinitions: DefaultAccountingDimensionDefinition[] = [
   {
     supplier: 'kmd',
-    key: 'artskonto',
+    key: 'statuskonto',
     sortOrder: 1,
     required: true,
     erpTarget: 'glAccount',
-    valueRegex: '^(S|9|\\d)\\d{7}$',
+    valueRegex: '^905\\d{5}$',
   },
   {
     supplier: 'kmd',
@@ -52,14 +52,14 @@ export const defaultAccountingDimensionDefinitions: DefaultAccountingDimensionDe
 export const defaultAccountingDimensionConstraints: DefaultAccountingDimensionConstraint[] = [
   {
     supplier: 'kmd',
-    ifKey: 'artskonto',
+    ifKey: 'statuskonto',
     kind: 'forbids_any_of',
     ifValueRegex: '^[S9].*',
     members: ['omkostningssted', 'psp-element'],
   },
   {
     supplier: 'kmd',
-    ifKey: 'artskonto',
+    ifKey: 'statuskonto',
     kind: 'requires_exactly_one_of',
     ifValueRegex: '^(?![S9]).+',
     members: ['omkostningssted', 'psp-element'],

@@ -2,12 +2,19 @@
 import { z } from 'zod'
 import type { AccountSelectSchema } from '~/lib/db/schema/account'
 
+type BankProvider = 'danskebank' | 'nordea' | 'bankconnect'
+
 const props = defineProps<{
   open: boolean
   accountId: string | null
+  mode?: 'observed' | 'configured'
+  configuredDraft?: { provider: BankProvider; iban: string; name?: string | null; statuskonto?: string | null; artskonto?: string | null } | null
+  configuredProviders?: BankProvider[]
 }>()
 
-const isEdit = computed(() => props.accountId !== null)
+const mode = computed(() => props.mode ?? 'observed')
+const isEditObserved = computed(() => mode.value === 'observed' && props.accountId !== null)
+const isConfiguredMode = computed(() => mode.value === 'configured')
 
 const emit = defineEmits<{
   (e: 'update:open', value: boolean): void
@@ -21,47 +28,133 @@ const open = computed({
 
 const toast = useToast()
 
-const baseSchema = z.object({
-  id: z.string().min(1, 'Bankkonto-id er påkrævet'),
-  name: z.string().trim().max(80, 'Kaldenavn er for langt').optional(),
-  provider: z.enum(['danskebank', 'nordea', 'bankconnect'], { message: 'Vælg bankudbyder' }),
-  statusAccount: z.preprocess((value) => {
-    if (typeof value === 'string' && value.trim() !== '') return Number(value)
-    return value
-  }, z.number('Statuskonto er påkrævet').int('Skal være et helt tal'))
+type AccountingDimensionDefinition = {
+  id: string
+  key: string
+  required: boolean
+  sortOrder: number
+  valueRegex?: string | null
+  valueRegexFlags?: string | null
+}
+
+type AccountingDimensionsResponse = {
+  erpSupplier: string
+  dimensions: AccountingDimensionDefinition[]
+  constraints: unknown[]
+}
+
+const {
+  data: accountingDimensionConfig,
+  pending: accountingDimensionPending,
+  error: accountingDimensionError,
+  refresh: refreshAccountingDimensions,
+} = await useFetch<AccountingDimensionsResponse>('/api/settings/accounting-dimensions', {
+  key: 'accounting-dimensions',
+  // Match RuleModal behavior: fetch eagerly (client-side) so validation is ready when modal opens.
+  server: false,
 })
 
-const updateSchema = baseSchema
-  .pick({ statusAccount: true, name: true })
-  .extend({ provider: baseSchema.shape.provider.optional() })
-const formSchema = computed(() => (isEdit.value ? updateSchema : baseSchema))
+const isAccountingDimensionConfigReady = computed(() =>
+  !accountingDimensionPending.value && !accountingDimensionError.value,
+)
+
+const statuskontoDefinition = computed(() =>
+  (accountingDimensionConfig.value?.dimensions ?? []).find((d) => d.key === 'statuskonto') ?? null,
+)
+
+function normalizeIban(input: string): string {
+  return input.replace(/\s+/g, '').toUpperCase()
+}
+
+const ibanSchema = z
+  .string()
+  .transform((v) => normalizeIban(String(v ?? '')))
+  .refine((v) => {
+    if (v.startsWith('DK')) return v.length === 18
+    return v.length >= 15 && v.length <= 34
+  }, 'Ugyldig IBAN længde')
+  .refine((v) => {
+    if (v.startsWith('DK')) return /^DK\d{16}$/.test(v)
+    return /^[A-Z]{2}[0-9A-Z]{13,32}$/.test(v)
+  }, 'Ugyldig IBAN format')
+
+const statuskontoSchema = computed(() => {
+  let schema = z
+    .string()
+    .trim()
+    .min(1, 'Statuskonto er påkrævet')
+    .max(32, 'Statuskonto er for langt')
+    .refine((v) => !/\s/.test(v), 'Statuskonto må ikke indeholde mellemrum')
+
+  const supplier = String((accountingDimensionConfig.value as any)?.erpSupplier ?? '').trim().toLowerCase()
+  if (supplier === 'kmd') {
+    schema = schema.refine((v) => /^905\d{5}$/.test(v), 'Statuskonto skal være artskonto i formatet 905XXXXX')
+  }
+
+  const def = statuskontoDefinition.value
+  const reSource = def?.valueRegex ?? null
+  if (!reSource) return schema
+
+  let re: RegExp
+  try {
+    re = new RegExp(reSource, def?.valueRegexFlags ?? '')
+  } catch {
+    // Misconfigured regex in DB; keep UI usable but avoid false positives.
+    return schema
+  }
+
+  return schema.refine((v) => re.test(v), 'Ugyldigt format for statuskonto (valideres mod ERP)')
+})
+
+const observedUpdateSchema = computed(() =>
+  z.object({
+    name: z.string().trim().max(80, 'Kaldenavn er for langt').optional(),
+    statuskonto: statuskontoSchema.value,
+  }),
+)
+
+const configuredSchema = computed(() =>
+  z.object({
+    provider: z.enum(['danskebank', 'nordea', 'bankconnect'], { message: 'Vælg bankudbyder' }),
+    iban: ibanSchema,
+    name: z.string().trim().max(80, 'Kaldenavn er for langt').optional(),
+    statuskonto: statuskontoSchema.value,
+  }),
+)
+
+const formSchema = computed(() => (isConfiguredMode.value ? configuredSchema.value : observedUpdateSchema.value))
 
 type FormState = {
-  id: string | undefined
   name: string | undefined
-  provider: 'danskebank' | 'nordea' | 'bankconnect' | undefined
-  statusAccount: string | undefined
+  statuskonto: string | undefined
+  provider: BankProvider | undefined
+  iban: string | undefined
 }
 
 const state = reactive<FormState>({
-  id: undefined,
   name: undefined,
+  statuskonto: undefined,
   provider: undefined,
-  statusAccount: undefined
+  iban: undefined,
 })
 
 function resetForm() {
-  state.id = undefined
   state.name = undefined
+  state.statuskonto = undefined
   state.provider = undefined
-  state.statusAccount = undefined
+  state.iban = undefined
 }
 
 function hydrateDraft(account: AccountSelectSchema) {
-  state.id = account.id
   state.name = account.name ?? undefined
-  state.provider = account.provider
-  state.statusAccount = String(account.statusAccount)
+  state.statuskonto = String((account as any).statuskonto ?? (account as any).artskonto ?? '') || undefined
+}
+
+function hydrateConfiguredDraft(draft: { provider: BankProvider; iban: string; name?: string | null; statuskonto?: string | null; artskonto?: string | null }) {
+  state.provider = draft.provider
+  state.iban = draft.iban
+  state.name = draft.name ?? undefined
+  state.statuskonto = (draft.statuskonto ?? draft.artskonto) ?? undefined
 }
 
 watch(
@@ -69,6 +162,20 @@ watch(
   async ([id, isOpen]) => {
     if (!isOpen) {
       resetForm()
+      return
+    }
+
+    // Ensure ERP-driven validation config is available when the modal is opened.
+    if (!isAccountingDimensionConfigReady.value) {
+      await refreshAccountingDimensions().catch(() => {})
+    }
+
+    if (isConfiguredMode.value) {
+      if (props.configuredDraft) {
+        hydrateConfiguredDraft(props.configuredDraft)
+      } else {
+        resetForm()
+      }
       return
     }
 
@@ -89,32 +196,57 @@ watch(
 )
 
 async function onSubmit() {
-  const payload = {
-    id: state.id?.trim(),
-    name: state.name?.trim() || undefined,
-    provider: state.provider,
-    statusAccount: Number(state.statusAccount)
-  }
-
-  const result = formSchema.value.safeParse(payload)
-  if (!result.success) {
-    console.error(result.error)
-    return
-  }
-  
   try {
-    if (isEdit.value && props.accountId) {
+    if (!isAccountingDimensionConfigReady.value) {
+      toast.add({
+        title: 'Konteringsvalidering ikke klar',
+        description: 'Kunne ikke hente ERP-dimensioner. Prøv igen om et øjeblik.',
+        color: 'warning',
+      })
+      return
+    }
+
+    if (isConfiguredMode.value) {
+      const payload = {
+        provider: state.provider,
+        iban: state.iban,
+        name: state.name?.trim() || undefined,
+        statuskonto: state.statuskonto?.trim() || undefined,
+      }
+
+      const result = formSchema.value.safeParse(payload)
+      if (!result.success) {
+        const msg = result.error.issues?.[0]?.message ?? 'Ugyldigt input'
+        toast.add({ title: 'Ugyldigt input', description: msg, color: 'warning' })
+        return
+      }
+
+      await $fetch('/api/banking-accounts', {
+        method: 'POST',
+        body: result.data,
+      })
+
+      toast.add({ title: 'Bankkonto oprettet', description: `${result.data.iban} er tilføjet til API.` })
+    } else {
+      if (!props.accountId) return
+
+      const payload = {
+        name: state.name?.trim() || undefined,
+        statuskonto: state.statuskonto?.trim() || undefined,
+      }
+
+      const result = formSchema.value.safeParse(payload)
+      if (!result.success) {
+        const msg = result.error.issues?.[0]?.message ?? 'Ugyldigt input'
+        toast.add({ title: 'Ugyldigt input', description: msg, color: 'warning' })
+        return
+      }
+
       await $fetch(`/api/bank-accounts/${props.accountId}`, {
         method: 'PUT',
-        body: { statusAccount: payload.statusAccount, name: payload.name }
+        body: { name: result.data.name, statuskonto: result.data.statuskonto },
       })
       toast.add({ title: 'Bankkonto opdateret', description: `${props.accountId} er opdateret.` })
-    } else {
-      await $fetch('/api/bank-accounts', {
-        method: 'POST',
-        body: payload
-      })
-      toast.add({ title: 'Bankkonto oprettet', description: `${payload.id} er oprettet.` })
     }
 
     open.value = false
@@ -123,7 +255,7 @@ async function onSubmit() {
   } catch (error) {
     toast.add({
       title: 'Fejl ved lagring',
-      description: isEdit.value ? 'Fejl ved opdatering.' : 'Fejl ved oprettelse.',
+      description: 'Fejl ved opdatering.',
       color: 'error'
     })
   }
@@ -135,7 +267,12 @@ async function onSubmit() {
     <template #header>
       <div class="flex items-center justify-between">
         <h2 class="text-lg font-semibold">
-          {{ isEdit ? `Rediger bankkonto ${props.accountId}` : 'Ny bankkonto' }}
+          <template v-if="isConfiguredMode">
+            Ny bankkonto (API)
+          </template>
+          <template v-else>
+            {{ isEditObserved ? `Rediger bankkonto ${props.accountId}` : 'Rediger bankkonto' }}
+          </template>
         </h2>
       </div>
     </template>
@@ -145,33 +282,31 @@ async function onSubmit() {
         <div
           class="mt-4 p-4 rounded-md border border-default space-y-4"
         >
+          <template v-if="isConfiguredMode">
+            <UFormField label="Aftale" name="provider" required>
+              <USelect
+                v-model="state.provider"
+                :items="(props.configuredProviders ?? ['nordea','danskebank','bankconnect']).map(p => ({
+                  label: p === 'nordea' ? 'Nordea' : p === 'danskebank' ? 'Danske Bank' : 'Bank Connect',
+                  value: p
+                }))"
+                labelKey="label"
+                valueKey="value"
+                placeholder="Vælg aftale"
+                class="w-full"
+              />
+            </UFormField>
 
-          <UFormField label="Bankudbyder" name="provider" required>
-            <USelect
-              v-model="state.provider"
-              :disabled="isEdit"
-              :items="[
-                { label: 'Danske Bank', value: 'danskebank' },
-                { label: 'Nordea', value: 'nordea' },
-                { label: 'Bank Connect', value: 'bankconnect' }
-              ]"
-              labelKey="label"
-              valueKey="value"
-              placeholder="Vælg bankudbyder"
-              class="w-full"
-            />
-          </UFormField>
-
-          <UFormField name="id" required>
-            <UiFloatingLabelInput
-              v-model="state.id"
-              :disabled="isEdit"
-              label="Bankkonto"
-              required
-              color="neutral"
-              class="w-full"
-            />
-          </UFormField>
+            <UFormField name="iban" required>
+              <UiFloatingLabelInput
+                v-model="state.iban"
+                label="IBAN"
+                required
+                color="neutral"
+                class="w-full"
+              />
+            </UFormField>
+          </template>
 
           <UFormField name="name">
             <UiFloatingLabelInput
@@ -182,17 +317,12 @@ async function onSubmit() {
             />
           </UFormField>
 
-          <UFormField name="statusAccount" required>
+          <UFormField name="statuskonto" required>
             <UiFloatingLabelInput
-              v-model="state.statusAccount"
+              v-model="state.statuskonto"
               label="Statuskonto"
               required
               color="neutral"
-              type="number"
-              :format-options="{
-                maximumFractionDigits: 0,
-                useGrouping: false
-              }"
               class="w-full"
             />
           </UFormField>
@@ -211,7 +341,7 @@ async function onSubmit() {
             type="submit"
             color="primary"
           >
-            {{ isEdit ? 'Opdater bankkonto' : 'Opret bankkonto' }}
+            {{ isConfiguredMode ? 'Tilføj bankkonto' : 'Opdater bankkonto' }}
           </UButton>
         </div>
       </UForm>

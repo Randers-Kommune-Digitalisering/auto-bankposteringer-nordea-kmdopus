@@ -19,7 +19,10 @@ function toRfc1123Utc(date: Date): string {
 function buildQueryString(pairs: Array<[string, string | null | undefined]>): string {
   const filtered = pairs.filter(([, v]) => v != null && String(v).length > 0) as Array<[string, string]>
   if (!filtered.length) return ''
-  return `?${filtered.map(([k, v]) => `${k}=${v}`).join('&')}`
+
+  // Use deterministic encoding. (Also important for signature stability.)
+  const encoded = filtered.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&')
+  return `?${encoded}`
 }
 
 function stableJsonStringify(value: unknown): string {
@@ -49,9 +52,13 @@ export function serializeNordeaRestRequestBody(
     .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
     .map((k) => [k, body.data[k]] as const)
     .filter(([, v]) => v !== undefined)
-    .map(([k, v]) => `${k}=${v ?? ''}`)
+    .map(([k, v]) => [k, v ?? ''] as const)
 
-  return { contentType: body.contentType, bodyText: pairs.join('&') }
+  // URLSearchParams ensures correct form-encoding.
+  const params = new URLSearchParams()
+  for (const [k, v] of pairs) params.append(k, String(v))
+
+  return { contentType: body.contentType, bodyText: params.toString() }
 }
 
 export function computeSha256DigestHeader(bodyText: string): string {
@@ -93,7 +100,17 @@ export function buildNordeaHttpSignature(options: {
   const signer = crypto.createSign('RSA-SHA256')
   signer.update(normalizedString, 'utf8')
   signer.end()
-  const signatureBase64 = signer.sign(options.privateKeyPem, 'base64')
+  let signatureBase64: string
+  try {
+    signatureBase64 = signer.sign(options.privateKeyPem, 'base64')
+  } catch (err) {
+    const msg = String((err as any)?.message ?? err)
+    throw new Error(
+      'Nordea REST signing failed. The private key PEM could not be decoded/used for RSA-SHA256 signing. ' +
+        'Ensure NORDEA_REST_EIDAS_PRIVATE_KEY_PEM(_B64) is a valid, unencrypted RSA private key in PEM format. ' +
+        `Underlying error: ${msg}`,
+    )
+  }
 
   return { headersList, normalizedString, signatureBase64 }
 }
@@ -142,6 +159,9 @@ export class NordeaCorporateRestClient {
     const headers: Record<string, string> = {
       'X-Nordea-Originating-Host': this.host,
       'X-Nordea-Originating-Date': dateRfc1123,
+      // Docs for Instant Reporting mention `X-IBM-Client`.
+      // Other docs/examples mention `X-IBM-Client-Id`. We send both for compatibility.
+      'X-IBM-Client': this.clientId,
       'X-IBM-Client-Id': this.clientId,
       'X-IBM-Client-Secret': this.clientSecret,
     }
@@ -315,15 +335,38 @@ export class NordeaCorporateRestClient {
 
   async listAccounts(input: {
     bearerToken: string
-  }): Promise<{ accounts: unknown[]; raw: unknown }> {
+    page?: number
+    size?: number
+  }): Promise<{ accounts: unknown[]; nextPage: number | null; raw: unknown }> {
     const res = await this.request<any>({
       method: 'GET',
       path: '/corporate/premium/v4/accounts',
       bearerToken: input.bearerToken,
+      queryPairs: [
+        ['page', input.page != null ? String(input.page) : null],
+        ['size', input.size != null ? String(input.size) : null],
+      ],
     })
     const r = (res.data as any)?.response
     const accounts = Array.isArray(r?.accounts) ? r.accounts : Array.isArray(r?.account_list) ? r.account_list : []
-    return { accounts, raw: res.data }
+
+    let nextPage: number | null = null
+    const links = Array.isArray(r?._links) ? r._links : Array.isArray((res.data as any)?._links) ? (res.data as any)._links : []
+    const nextLink = links.find((l: any) => (l?.rel ?? l?.Rel ?? '').toString().toLowerCase() === 'next')
+    const href = typeof nextLink?.href === 'string' ? nextLink.href : typeof nextLink?.Href === 'string' ? nextLink.Href : null
+    if (href) {
+      try {
+        // href in docs examples can be a relative path like `/premium/v4/accounts?page=2&size=30`.
+        // We only need the `page` parameter, we keep calling our known API path.
+        const u = new URL(href, 'https://example.invalid')
+        const pageStr = u.searchParams.get('page')
+        if (pageStr && Number.isFinite(Number(pageStr))) nextPage = Number(pageStr)
+      } catch {
+        // ignore
+      }
+    }
+
+    return { accounts, nextPage, raw: res.data }
   }
 
   async listTransactions(input: {

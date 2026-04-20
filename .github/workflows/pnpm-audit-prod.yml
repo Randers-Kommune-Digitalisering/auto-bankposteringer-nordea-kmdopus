@@ -1,0 +1,239 @@
+name: pnpm audit (prod)
+
+on:
+  schedule:
+    # Runs on the default branch (main)
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+    inputs:
+      minimum_severity:
+        description: 'Minimum severity to alert on (info|low|moderate|high|critical)'
+        required: false
+        default: 'high'
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: pnpm-audit-prod
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      # pnpm audit reads pnpm-lock.yaml; install is not required.
+      - name: Run pnpm audit (prod)
+        run: pnpm -s audit --prod --json > audit.json || true
+
+      - name: Compute fingerprint
+        id: fp
+        env:
+          MINIMUM_SEVERITY: ${{ inputs.minimum_severity || 'high' }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs')
+          const crypto = require('node:crypto')
+
+          const severityRank = {
+            info: 0,
+            low: 1,
+            moderate: 2,
+            high: 3,
+            critical: 4,
+          }
+
+          function toRank(s) {
+            const key = String(s || '').toLowerCase()
+            return severityRank[key] ?? -1
+          }
+
+          const minSeverity = process.env.MINIMUM_SEVERITY || 'high'
+          const minRank = toRank(minSeverity)
+          if (minRank < 0) {
+            console.error(`Invalid MINIMUM_SEVERITY: ${minSeverity}`)
+            process.exit(2)
+          }
+
+          const raw = JSON.parse(fs.readFileSync('audit.json', 'utf8'))
+          const advisories = raw.advisories || {}
+
+          const items = Object.values(advisories)
+            .map((a) => {
+              const ghsa = a.github_advisory_id || a.githubAdvisoryId || null
+              const moduleName = a.module_name || a.moduleName || null
+              const severity = (a.severity || '').toLowerCase()
+              const vulnerableVersions = a.vulnerable_versions || a.vulnerableVersions || null
+              const patchedVersions = a.patched_versions || a.patchedVersions || null
+              const url = a.url || null
+              const title = a.title || null
+              const cves = Array.isArray(a.cves) ? a.cves : []
+              const findings = Array.isArray(a.findings) ? a.findings : []
+
+              return {
+                ghsa,
+                moduleName,
+                severity,
+                vulnerableVersions,
+                patchedVersions,
+                url,
+                title,
+                cves,
+                findings,
+                rank: toRank(severity),
+              }
+            })
+            .filter((x) => x.rank >= minRank)
+            .sort((a, b) => {
+              const ak = `${a.severity}|${a.ghsa || ''}|${a.moduleName || ''}`
+              const bk = `${b.severity}|${b.ghsa || ''}|${b.moduleName || ''}`
+              return ak.localeCompare(bk)
+            })
+
+          const fingerprintPayload = items.map((x) => ({
+            severity: x.severity,
+            ghsa: x.ghsa,
+            module: x.moduleName,
+            vulnerable: x.vulnerableVersions,
+            patched: x.patchedVersions,
+          }))
+
+          const fingerprint = crypto
+            .createHash('sha256')
+            .update(JSON.stringify(fingerprintPayload))
+            .digest('hex')
+            .slice(0, 16)
+
+          const meta = raw.metadata?.vulnerabilities || {}
+          const countsLine = `Counts (prod): critical=${meta.critical ?? 0}, high=${meta.high ?? 0}, moderate=${meta.moderate ?? 0}, low=${meta.low ?? 0}`
+
+          const lines = []
+          lines.push('audit-workflow: pnpm-audit-prod')
+          lines.push('audit-scope: prod')
+          lines.push(`Minimum severity: ${minSeverity}`)
+          lines.push(countsLine)
+          lines.push(`audit-fingerprint: ${fingerprint}`)
+          lines.push('')
+
+          if (items.length === 0) {
+            lines.push('No vulnerabilities at or above the configured minimum severity were found.')
+          } else {
+            lines.push('Vulnerabilities:')
+            for (const v of items) {
+              const id = v.ghsa ? v.ghsa : '(no GHSA id)'
+              const cveText = v.cves?.length ? ` (CVEs: ${v.cves.join(', ')})` : ''
+              lines.push(`- [${v.severity}] ${v.moduleName || '(unknown module)'}: ${id}${cveText}`)
+              if (v.title) lines.push(`  - ${v.title}`)
+              if (v.vulnerableVersions) lines.push(`  - vulnerable: ${v.vulnerableVersions}`)
+              if (v.patchedVersions) lines.push(`  - patched: ${v.patchedVersions}`)
+              if (v.url) lines.push(`  - ${v.url}`)
+              const paths = (v.findings || [])
+                .flatMap((f) => Array.isArray(f.paths) ? f.paths : [])
+                .filter(Boolean)
+              const uniquePaths = Array.from(new Set(paths)).slice(0, 20)
+              if (uniquePaths.length) {
+                lines.push(`  - paths (sample): ${uniquePaths.join(', ')}`)
+              }
+            }
+          }
+
+          const out = fs.createWriteStream(process.env.GITHUB_OUTPUT, { flags: 'a' })
+          out.write(`has_findings=${items.length > 0}\n`)
+          out.write(`fingerprint=${fingerprint}\n`)
+          // Multiline output
+          out.write('report<<__REPORT__\n')
+          out.write(lines.join('\n'))
+          out.write('\n__REPORT__\n')
+          out.end()
+          NODE
+
+      - name: Create issue if new
+        if: ${{ steps.fp.outputs.has_findings == 'true' }}
+        uses: actions/github-script@v7
+        env:
+          REPORT: ${{ steps.fp.outputs.report }}
+          FINGERPRINT: ${{ steps.fp.outputs.fingerprint }}
+          MINIMUM_SEVERITY: ${{ inputs.minimum_severity || 'high' }}
+        with:
+          script: |
+            const owner = context.repo.owner
+            const repo = context.repo.repo
+
+            const fingerprint = process.env.FINGERPRINT
+            const report = process.env.REPORT
+            const minSeverity = process.env.MINIMUM_SEVERITY
+
+            const query = `repo:${owner}/${repo} is:issue is:open "audit-fingerprint: ${fingerprint}"`
+            const existing = await github.rest.search.issuesAndPullRequests({ q: query, per_page: 5 })
+            if (existing.data.items.length > 0) {
+              core.info(`Issue already exists for fingerprint ${fingerprint}`)
+              return
+            }
+
+            const today = new Date().toISOString().slice(0, 10)
+            const title = `Security: pnpm audit (prod) findings (${today})`
+
+            await github.rest.issues.create({
+              owner,
+              repo,
+              title,
+              body: report,
+            })
+
+      - name: Close previous issue if clean
+        if: ${{ steps.fp.outputs.has_findings == 'false' }}
+        uses: actions/github-script@v7
+        env:
+          MINIMUM_SEVERITY: ${{ inputs.minimum_severity || 'high' }}
+        with:
+          script: |
+            const owner = context.repo.owner
+            const repo = context.repo.repo
+            const minSeverity = process.env.MINIMUM_SEVERITY
+
+            const marker = 'audit-workflow: pnpm-audit-prod'
+            const query = `repo:${owner}/${repo} is:issue is:open "${marker}" "Minimum severity: ${minSeverity}"`
+
+            const existing = await github.rest.search.issuesAndPullRequests({
+              q: query,
+              sort: 'created',
+              order: 'desc',
+              per_page: 5,
+            })
+
+            if (existing.data.items.length === 0) {
+              core.info('No open audit issue found to close.')
+              return
+            }
+
+            const issue = existing.data.items[0]
+            core.info(`Closing issue #${issue.number}: ${issue.title}`)
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: issue.number,
+              body: `Resolved automatically: nightly \`pnpm audit --prod\` is now clean for minimum severity **${minSeverity}**.\n\nRun: ${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`,
+            })
+
+            await github.rest.issues.update({
+              owner,
+              repo,
+              issue_number: issue.number,
+              state: 'closed',
+            })
