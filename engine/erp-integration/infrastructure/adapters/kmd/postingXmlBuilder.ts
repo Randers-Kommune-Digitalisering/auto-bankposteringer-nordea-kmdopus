@@ -65,7 +65,7 @@ export function buildErpPostingXml(postings: PostingLineInput[], options: BuildP
       creditSum += amountInOre
     }
 
-    const glAccountKey = options.dimensionKeyByTarget?.glAccount ?? 'artskonto'
+    const glAccountKey = options.dimensionKeyByTarget?.glAccount ?? 'statuskonto'
     const costCenterKey = options.dimensionKeyByTarget?.costCenter ?? 'omkostningssted'
     const wbsElementKey = options.dimensionKeyByTarget?.wbsElement ?? 'psp-element'
 

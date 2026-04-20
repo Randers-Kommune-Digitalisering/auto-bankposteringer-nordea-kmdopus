@@ -6,18 +6,73 @@
     import useFlattenArray from '~/composables/useFlattenArray'
     import { DEFAULT_TIME_ZONE } from '~/lib/timeZone'
 
+    const toast = useToast()
+
+    const refreshNonce = ref(0)
+
     const { data, status, refresh } = await useFetch<RunListResponse>('/api/runs', {
-        key: 'runs'
+        key: computed(() => `runs:${refreshNonce.value}`),
+        query: computed(() => ({ t: refreshNonce.value })),
+        dedupe: 'cancel',
     })
 
     const allRows = computed<RunListItem[]>(() => useFlattenArray<RunListItem>(data))
+
+    const timeZone = DEFAULT_TIME_ZONE
+    const startRunDate = ref<any>(today(timeZone))
+    const startRunDateIso = computed(() => String(startRunDate.value))
+    const runExistsForStartDate = computed(() => {
+        const iso = startRunDateIso.value
+        return allRows.value.some((r) => String(r.bookingDate).slice(0, 10) === iso)
+    })
+
+    const startingRun = ref(false)
+
+    async function handleRefresh() {
+        refreshNonce.value += 1
+        await refresh()
+    }
+
+    async function startRunForDate() {
+        if (!startRunDate.value) return
+
+        if (runExistsForStartDate.value) {
+            toast.add({
+                title: 'Kørsel findes allerede',
+                description: `Der findes allerede en kørsel for ${startRunDateIso.value}`,
+                color: 'warning',
+            })
+            return
+        }
+
+        startingRun.value = true
+        try {
+            const res = await $fetch<{ success: boolean; runId: string; insertedCount: number }>(
+                '/api/runs/start',
+                { method: 'POST', body: { bookingDate: String(startRunDate.value) } },
+            )
+            toast.add({
+                title: 'Kørsel startet',
+                description: res.insertedCount
+                  ? `Run: ${res.runId} (${res.insertedCount} transaktioner)`
+                  : `Run: ${res.runId} (ingen transaktioner — mangler allowlist eller ingen bevægelser på datoen)`,
+            })
+                        await handleRefresh()
+        } catch (error) {
+            console.error('Start kørsel fejlede', error)
+            const msg = String((error as any)?.data?.statusMessage ?? (error as any)?.statusMessage ?? (error as any)?.message ?? error)
+            toast.add({ title: 'Kunne ikke starte kørsel', description: msg, color: 'error' })
+        } finally {
+            startingRun.value = false
+        }
+    }
 
     // Date formatter
     const df = new DateFormatter('da-DK', {
         dateStyle: 'medium'
     })
 
-    const timeZone = DEFAULT_TIME_ZONE
+
 
     // Date range picker state
     const endDefault = today(timeZone)
@@ -241,7 +296,7 @@
                         variant="ghost"
                         color="primary"
                         :loading="status === 'pending'"
-                        @click="refresh()"
+                        @click="handleRefresh"
                     />
                 </template>
             </UDashboardNavbar>
@@ -253,56 +308,92 @@
                     v-model:account-ids="selectedAccountIds"
                 >
                     <template #date>
-                        <!-- Date Range Picker -->
-                        <UPopover :popper="{ placement: 'bottom-start' }">
-                            <UButton
-                                variant="outline"
-                                icon="solar:calendar-bold-duotone"
-                            >
-                                <template v-if="dateRange?.start">
-                                    <template v-if="dateRange?.end">
-                                        {{ df.format(dateRange.start.toDate(timeZone)) }} - {{ df.format(dateRange.end.toDate(timeZone)) }}
+                        <div class="inline-flex flex-col gap-2">
+                            <!-- Date Range Picker -->
+                            <UPopover :popper="{ placement: 'bottom-start' }">
+                                <UButton
+                                    variant="outline"
+                                    icon="solar:calendar-bold-duotone"
+                                    size="sm"
+                                >
+                                    <template v-if="dateRange?.start">
+                                        <template v-if="dateRange?.end">
+                                            {{ df.format(dateRange.start.toDate(timeZone)) }} - {{ df.format(dateRange.end.toDate(timeZone)) }}
+                                        </template>
+                                        <template v-else>
+                                            {{ df.format(dateRange.start.toDate(timeZone)) }}
+                                        </template>
                                     </template>
                                     <template v-else>
-                                        {{ df.format(dateRange.start.toDate(timeZone)) }}
+                                        Vælg periode
                                     </template>
-                                </template>
-                                <template v-else>
-                                    Vælg periode
-                                </template>
-                            </UButton>
+                                </UButton>
 
-                            <template #content>
-                                <div class="p-4">
-                                    <UCalendar
-                                        v-model="dateRange"
-                                        variant="subtle"
-                                        class="p-2"
-                                        :number-of-months="2"
-                                        range
-                                    >
-                                        <template #day="{ day }">
-                                            <UChip
-                                                :show="!!getChipColorByDate(day.toDate('UTC'))"
-                                                :color="getChipColorByDate(day.toDate('UTC'))"
-                                                size="lg"
-                                            >
-                                                {{ day.day }}
-                                            </UChip>
-                                        </template>
-                                    </UCalendar>
-                                    <div v-if="dateRange?.start && dateRange?.end" class="mt-4 flex gap-2">
-                                        <UButton
-                                            variant="ghost"
-                                            size="sm"
-                                            label="Nulstil"
-                                            @click="dateRange = defaultRange"
-                                            class="flex-1"
-                                        />
+                                <template #content>
+                                    <div class="p-4">
+                                        <UCalendar
+                                            v-model="dateRange"
+                                            variant="subtle"
+                                            class="p-2"
+                                            :number-of-months="2"
+                                            range
+                                        >
+                                            <template #day="{ day }">
+                                                <UChip
+                                                    :show="!!getChipColorByDate(day.toDate('UTC'))"
+                                                    :color="getChipColorByDate(day.toDate('UTC'))"
+                                                    size="lg"
+                                                >
+                                                    {{ day.day }}
+                                                </UChip>
+                                            </template>
+                                        </UCalendar>
+                                        <div v-if="dateRange?.start && dateRange?.end" class="mt-4 flex gap-2">
+                                            <UButton
+                                                variant="ghost"
+                                                size="sm"
+                                                label="Nulstil"
+                                                @click="dateRange = defaultRange"
+                                                class="flex-1"
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                            </template>
-                        </UPopover>
+                                </template>
+                            </UPopover>
+
+                            <!-- Start run (single date) -->
+                            <div class="flex items-center gap-2">
+                                <UPopover :popper="{ placement: 'bottom-start' }">
+                                    <UButton
+                                        variant="outline"
+                                        icon="solar:calendar-bold-duotone"
+                                        size="sm"
+                                    >
+                                        {{ df.format(startRunDate.toDate(timeZone)) }}
+                                    </UButton>
+
+                                    <template #content>
+                                        <div class="p-4">
+                                            <UCalendar
+                                                v-model="startRunDate"
+                                                variant="subtle"
+                                                class="p-2"
+                                            />
+                                        </div>
+                                    </template>
+                                </UPopover>
+
+                                <UButton
+                                    label="Start kørsel"
+                                    color="primary"
+                                    variant="soft"
+                                    size="sm"
+                                    :disabled="runExistsForStartDate"
+                                    :loading="startingRun"
+                                    @click="startRunForDate"
+                                />
+                            </div>
+                        </div>
                     </template>
                 </FiltersRow>
 

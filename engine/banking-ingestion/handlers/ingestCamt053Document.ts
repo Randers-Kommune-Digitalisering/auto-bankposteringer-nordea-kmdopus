@@ -27,22 +27,23 @@ type IngestCamt053DocumentInput = {
 
 function accountIdFromStatement(stmt: { iban?: string | null; currency?: string | null }): string | null {
   const iban = (stmt.iban ?? '').trim()
-  const ccy = (stmt.currency ?? '').trim()
-  if (!iban || !ccy) return null
-  return `${iban}-${ccy}`
+  const currency = (stmt.currency ?? '').trim()
+  if (!iban || !currency) return null
+  return `${iban}-${currency}`
 }
 
 async function ensureAccountExists(
   db: DbClient,
-  input: { id: string; provider: BankProvider; name?: string | null; statusAccount: number },
+  input: { id: string; provider: BankProvider; iban: string; currency?: string | null; name?: string | null },
 ): Promise<void> {
   await db
     .insert(account)
     .values({
       id: input.id,
       provider: input.provider,
+      iban: input.iban,
+      currency: input.currency ?? null,
       name: input.name ?? null,
-      statusAccount: input.statusAccount,
     })
     .onConflictDoNothing({ target: account.id })
 
@@ -136,8 +137,6 @@ export async function ingestCamt053Document(
   let insertedBalances = 0
   let insertedTransactions = 0
 
-  const defaultStatusAccount = 9999
-
   for (const stmt of parsed.statements) {
     const derivedAccountId = accountIdFromStatement(stmt)
     if (!derivedAccountId) {
@@ -147,8 +146,9 @@ export async function ingestCamt053Document(
     await ensureAccountExists(db, {
       id: derivedAccountId,
       provider: input.provider,
+      iban: stmt.iban!,
+      currency: stmt.currency ?? null,
       name: stmt.ownerName ?? null,
-      statusAccount: defaultStatusAccount,
     })
 
     const statementInsert = await db

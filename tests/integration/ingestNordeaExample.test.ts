@@ -35,6 +35,7 @@ describe('ingestCamt053Document (integration)', () => {
     const parsed = parseCamt053Xml(xml)
     const stmt0 = parsed.statements[0]
     const derivedAccountId = stmt0?.iban && stmt0?.currency ? `${stmt0.iban}-${stmt0.currency}` : null
+    const legacyAccountId = stmt0?.iban ? `${stmt0.iban}` : null
     if (!derivedAccountId) {
       throw new Error('Test setup failed: could not derive account id from CAMT.053 example')
     }
@@ -46,12 +47,21 @@ describe('ingestCamt053Document (integration)', () => {
 
     // Clean only rows created by this test.
     try {
-      await db.execute(
-        sql`DELETE FROM transaction_processing WHERE transaction_id IN (
-          SELECT id FROM "transaction" WHERE account = ${derivedAccountId}
-        )`
-      )
-      await db.execute(sql`DELETE FROM "transaction" WHERE account = ${derivedAccountId}`)
+      // Delete transactions linked to statements/documents for this content hash.
+      await db.execute(sql`DELETE FROM transaction_processing WHERE transaction_id IN (
+        SELECT t.id
+        FROM "transaction" t
+        JOIN banking_statement s ON s.id = t.statement_id
+        JOIN banking_document d ON d.id = s.document_id
+        WHERE d.content_hash = ${contentHash}
+      )`)
+
+      await db.execute(sql`DELETE FROM "transaction" WHERE statement_id IN (
+        SELECT s.id
+        FROM banking_statement s
+        JOIN banking_document d ON d.id = s.document_id
+        WHERE d.content_hash = ${contentHash}
+      )`)
 
       // Statements + balances linked to this account via banking_document.
       await db.execute(
@@ -71,7 +81,7 @@ describe('ingestCamt053Document (integration)', () => {
 
       // Runs created by this test.
       await db.execute(sql`DELETE FROM run WHERE id IN (${runId1}::uuid, ${runId2}::uuid)`)
-      await db.execute(sql`DELETE FROM account WHERE id = ${derivedAccountId}`)
+      await db.execute(sql`DELETE FROM account WHERE id IN (${derivedAccountId}, ${legacyAccountId})`)
     } catch (err) {
       if (isDatabaseReachableError(err)) {
         // Give a clearer error when Postgres isn't running.

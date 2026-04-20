@@ -1,7 +1,7 @@
 import { and, eq } from 'drizzle-orm'
-import { bankingAgreementCursor } from '~/lib/db/schema/bankingAgreementCursor'
+import { bankingAgreementCursor } from '../../../app/lib/db/schema/bankingAgreementCursor'
 import type { BankAdapterKey, BankCursor } from '../ports/bankAdapter'
-import type { BankProvider } from '~/lib/db/schema/bankingAgreement'
+import type { BankProvider } from '../../../app/lib/db/schema/bankingAgreement'
 
 type DbClient = {
   select: any

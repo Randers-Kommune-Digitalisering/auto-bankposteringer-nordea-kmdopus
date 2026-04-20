@@ -19,7 +19,8 @@ CREATE TABLE "account" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text,
 	"provider" "bank_provider" NOT NULL,
-	"status_account" integer NOT NULL
+	"iban" text NOT NULL,
+	"currency" text
 );
 --> statement-breakpoint
 CREATE TABLE "erp_accounting_dimension_constraint" (
@@ -119,7 +120,19 @@ CREATE TABLE "banking_agreement_account_allowlist" (
 	CONSTRAINT "banking_agreement_account_allowlist_provider_iban_pk" PRIMARY KEY("provider","iban")
 );
 --> statement-breakpoint
+CREATE TABLE "banking_agreement_account_dimension" (
+	"provider" "bank_provider" NOT NULL,
+	"iban" text NOT NULL,
+	"dimension_key" text NOT NULL,
+	"dimension_value" text NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "banking_agreement_account_dimension_provider_iban_dimension_key_pk" PRIMARY KEY("provider","iban","dimension_key")
+);
+--> statement-breakpoint
 ALTER TABLE "banking_agreement_account_allowlist" ADD CONSTRAINT "banking_agreement_account_allowlist_provider_fk" FOREIGN KEY ("provider") REFERENCES "public"."banking_agreement"("provider") ON DELETE cascade ON UPDATE no action;
+--> statement-breakpoint
+ALTER TABLE "banking_agreement_account_dimension" ADD CONSTRAINT "banking_agreement_account_dimension_provider_fk" FOREIGN KEY ("provider") REFERENCES "public"."banking_agreement"("provider") ON DELETE cascade ON UPDATE no action;
 --> statement-breakpoint
 CREATE TABLE "banking_agreement_cursor" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
@@ -223,6 +236,7 @@ CREATE TABLE "manual_booking_draft_line_dimension" (
 --> statement-breakpoint
 CREATE TABLE "notification_settings" (
 	"id" text PRIMARY KEY NOT NULL,
+	"admin_email" text,
 	"mail_template" text NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );

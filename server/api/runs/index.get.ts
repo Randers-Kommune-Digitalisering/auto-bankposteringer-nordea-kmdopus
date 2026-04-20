@@ -18,6 +18,7 @@ import type {
   RunListResponse,
   TransactionListItem,
 } from "~/types/runs";
+import { parseAmount } from "#engine/matching/domain/amount";
 
 const formatDate = (value: Date | string | null): string => {
   if (!value) {
@@ -33,15 +34,7 @@ const formatDate = (value: Date | string | null): string => {
 };
 
 function parseNumeric(value: unknown): number {
-  if (typeof value === "number") {
-    return value;
-  }
-  if (typeof value === "string") {
-    const normalized = value.replace(/\./g, "").replace(/,/g, ".").trim();
-    const parsed = Number(normalized);
-    return Number.isNaN(parsed) ? 0 : parsed;
-  }
-  return 0;
+  return parseAmount(value)
 }
 
 function inferMimeType(fileExtension: string | null | undefined, filename?: string | null): string | null {
@@ -376,7 +369,9 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
 }
 
 export default defineEventHandler(async (event) => {
-  setHeader(event, "Cache-Control", "private, max-age=30");
+  // This endpoint is used in interactive UI and must reflect new runs immediately.
+  // Browser/proxy caching caused the refresh button to still show stale data.
+  setHeader(event, "Cache-Control", "no-store");
 
   const databaseRuns: RunListResponse = await fetchRunsFromDb();
 

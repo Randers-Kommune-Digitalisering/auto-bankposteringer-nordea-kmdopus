@@ -45,9 +45,54 @@ const schema = z
     }
   })
 
-export type NordeaEnvSecrets = z.infer<typeof schema>
+export type NordeaEnvSecrets = {
+  // Required (enforced by schema.superRefine)
+  NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM: string
+  NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM: string
+
+  // Optional pins / mTLS material
+  NORDEA_TRUSTED_SIGNING_CERT_SHA256?: string
+  NORDEA_MTLS_CLIENT_PRIVATE_KEY_PEM?: string
+  NORDEA_MTLS_CLIENT_CERTIFICATE_PEM?: string
+
+  // Optional raw env inputs (useful for debugging)
+  NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM_B64?: string
+  NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM_B64?: string
+  NORDEA_MTLS_CLIENT_PRIVATE_KEY_PEM_B64?: string
+  NORDEA_MTLS_CLIENT_CERTIFICATE_PEM_B64?: string
+}
+
+type CacheEntry = { signature: string; value: NordeaEnvSecrets }
+let cache: CacheEntry | null = null
+
+function signatureFromEnv(env: NodeJS.ProcessEnv): string {
+  const keys = [
+    'NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM',
+    'NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM',
+    'NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM_B64',
+    'NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM_B64',
+    'NORDEA_TRUSTED_SIGNING_CERT_SHA256',
+    'NORDEA_MTLS_CLIENT_PRIVATE_KEY_PEM',
+    'NORDEA_MTLS_CLIENT_CERTIFICATE_PEM',
+    'NORDEA_MTLS_CLIENT_PRIVATE_KEY_PEM_B64',
+    'NORDEA_MTLS_CLIENT_CERTIFICATE_PEM_B64',
+  ]
+  return keys.map((k) => `${k}=${String(env[k] ?? '')}`).join('\n')
+}
 
 export function loadNordeaEnvSecrets(env: NodeJS.ProcessEnv = process.env): NordeaEnvSecrets {
+  if (env === process.env) {
+    const signature = signatureFromEnv(env)
+    if (cache?.signature === signature) return cache.value
+    const value = loadNordeaEnvSecretsUncached(env)
+    cache = { signature, value }
+    return value
+  }
+
+  return loadNordeaEnvSecretsUncached(env)
+}
+
+function loadNordeaEnvSecretsUncached(env: NodeJS.ProcessEnv): NordeaEnvSecrets {
   const parsed = schema.parse(env)
 
   const decodeMaybeB64 = (pem: string | undefined, b64: string | undefined): string => {
@@ -56,15 +101,18 @@ export function loadNordeaEnvSecrets(env: NodeJS.ProcessEnv = process.env): Nord
     return Buffer.from(b64, 'base64').toString('utf8')
   }
 
+  const privateKeyPem = decodeMaybeB64(
+    parsed.NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM,
+    parsed.NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM_B64,
+  )
+  const certificatePem = decodeMaybeB64(
+    parsed.NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM,
+    parsed.NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM_B64,
+  )
+
   return {
-    NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM: decodeMaybeB64(
-      parsed.NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM,
-      parsed.NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM_B64,
-    ),
-    NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM: decodeMaybeB64(
-      parsed.NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM,
-      parsed.NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM_B64,
-    ),
+    NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM: privateKeyPem,
+    NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM: certificatePem,
     NORDEA_TRUSTED_SIGNING_CERT_SHA256: parsed.NORDEA_TRUSTED_SIGNING_CERT_SHA256,
     NORDEA_MTLS_CLIENT_PRIVATE_KEY_PEM: decodeMaybeB64(
       parsed.NORDEA_MTLS_CLIENT_PRIVATE_KEY_PEM,

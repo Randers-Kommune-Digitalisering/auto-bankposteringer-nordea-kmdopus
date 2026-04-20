@@ -2,6 +2,7 @@ import { and, eq, inArray, isNotNull, lte } from 'drizzle-orm'
 import db from '~/lib/db'
 import env from '~/lib/env/env'
 import { account } from '~/lib/db/schema/account'
+import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreementAccountDimension'
 import { rule } from '~/lib/db/schema/rule'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import type {
@@ -24,6 +25,7 @@ import {
 } from '../domain/postingUtils'
 import { renderNotificationTemplate, getDefaultNotificationTemplate } from '../../notifications/domain/notificationTemplate'
 import { amountMatchesAbsolute, compareRulesBySpecificity } from '../domain/rulePrioritization'
+import { parseAmount } from '../domain/amount'
 
 export interface MatchingNotification {
   to: string
@@ -96,7 +98,8 @@ export type RuleAccounting = {
   attachments: RuleAccountingAttachmentRow[]
 }
 
-const STATUS_ACCOUNT_DIMENSION_KEY = 'artskonto'
+const STATUS_ACCOUNT_DIMENSION_KEY = 'statuskonto'
+const LEGACY_STATUS_ACCOUNT_DIMENSION_KEY = 'artskonto'
 
 type MatchOutcome =
   | { kind: 'exception'; rule: HydratedRule }
@@ -238,29 +241,85 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
       remittanceAdditional: transaction.remittanceAdditional,
       processingStatus: transactionProcessing.status,
       processingRule: transactionProcessing.ruleApplied,
-      statusAccount: account.statusAccount,
+      accountProvider: account.provider,
+      accountIban: account.iban,
     })
     .from(transaction)
     .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
     .leftJoin(account, eq(transaction.accountId, account.id))
     .where(eq(transaction.runId, runId))
 
+  const providerSet = new Set<string>()
+  const ibanSet = new Set<string>()
+  for (const r of rows) {
+    if (r.accountProvider) providerSet.add(String(r.accountProvider))
+    if (r.accountIban) ibanSet.add(String(r.accountIban))
+  }
+
+  const providers = Array.from(providerSet)
+  const ibans = Array.from(ibanSet)
+
+  const dimRows = providers.length && ibans.length
+    ? await db
+        .select({
+          provider: bankingAgreementAccountDimension.provider,
+          iban: bankingAgreementAccountDimension.iban,
+          key: bankingAgreementAccountDimension.dimensionKey,
+          value: bankingAgreementAccountDimension.dimensionValue,
+        })
+        .from(bankingAgreementAccountDimension)
+        .where(and(
+          inArray(bankingAgreementAccountDimension.provider, providers as any),
+          inArray(bankingAgreementAccountDimension.iban, ibans),
+          inArray(bankingAgreementAccountDimension.dimensionKey, [
+            STATUS_ACCOUNT_DIMENSION_KEY,
+            LEGACY_STATUS_ACCOUNT_DIMENSION_KEY,
+          ]),
+        ))
+    : []
+
+  const statuskontoByProviderIban = new Map<string, string>()
+  // Prefer new key, but allow legacy.
+  for (const d of dimRows) {
+    const provider = String(d.provider)
+    const iban = String(d.iban)
+    const mapKey = `${provider}:${iban}`
+    const key = String(d.key)
+    const value = String(d.value)
+
+    if (key === STATUS_ACCOUNT_DIMENSION_KEY) {
+      statuskontoByProviderIban.set(mapKey, value)
+      continue
+    }
+
+    if (!statuskontoByProviderIban.has(mapKey)) {
+      statuskontoByProviderIban.set(mapKey, value)
+    }
+  }
+
   return rows
     .filter(row => row.transactionId && row.runId && row.accountId)
     .filter(row => !row.processingStatus || row.processingStatus === 'åben')
     .map(row => {
-      const statusAccount = row.statusAccount ? String(row.statusAccount) : env.ERP_ERROR_ACCOUNT
+      const provider = row.accountProvider ? String(row.accountProvider) : ''
+      const iban = row.accountIban ? String(row.accountIban) : ''
+      const mapped = provider && iban ? statuskontoByProviderIban.get(`${provider}:${iban}`) ?? null : null
+      const statusDimensions = mapped ? { [STATUS_ACCOUNT_DIMENSION_KEY]: String(mapped) } : {}
       return {
       transactionId: row.transactionId!,
       runId: row.runId!,
       accountId: row.accountId!,
-      statusDimensions: { [STATUS_ACCOUNT_DIMENSION_KEY]: statusAccount },
+      statusDimensions,
       bookingDate:
         row.bookingDate instanceof Date
           ? row.bookingDate
           : new Date(row.bookingDate as string),
-      amount: parseAmount(row.amount),
       creditDebitIndicator: row.creditDebitIndicator ?? null,
+      amount: (() => {
+        const abs = Math.abs(parseAmount(row.amount))
+        const ind = String(row.creditDebitIndicator ?? '').toUpperCase()
+        return ind === 'DBIT' ? -abs : abs
+      })(),
       ntryRef: row.ntryRef ?? null,
       ntryAcctSvcrRef: row.ntryAcctSvcrRef ?? null,
       txAcctSvcrRef: row.txAcctSvcrRef ?? null,

@@ -68,7 +68,25 @@ function normalizeNumeric(value: unknown): number | null {
   if (value == null) return null
   if (typeof value === 'number') return Number.isFinite(value) ? value : null
   if (typeof value === 'string') {
-    const normalized = value.replace(/\./g, '').replace(/,/g, '.').trim()
+    const raw = value.trim()
+    if (!raw.length) return null
+
+    const compact = raw.replace(/[\s\u00A0]/g, '')
+    const lastComma = compact.lastIndexOf(',')
+    const lastDot = compact.lastIndexOf('.')
+
+    let normalized = compact
+    if (lastComma !== -1 && lastDot !== -1) {
+      const commaIsDecimal = lastComma > lastDot
+      normalized = commaIsDecimal
+        ? normalized.replace(/\./g, '').replace(/,/g, '.')
+        : normalized.replace(/,/g, '')
+    } else if (lastComma !== -1) {
+      normalized = normalized.replace(/,/g, '.')
+    } else {
+      normalized = normalized.replace(/,/g, '')
+    }
+
     if (!normalized.length) return null
     const parsed = Number(normalized)
     return Number.isNaN(parsed) ? null : parsed

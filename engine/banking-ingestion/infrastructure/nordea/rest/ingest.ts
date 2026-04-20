@@ -1,5 +1,6 @@
 import { asc, eq } from 'drizzle-orm'
 import { logger } from '~/lib/logger'
+import appEnv from '~/lib/env/env'
 import { bankingAgreementAccountAllowlist } from '~/lib/db/schema/bankingAgreementAccountAllowlist'
 import { account } from '~/lib/db/schema/account'
 
@@ -24,6 +25,48 @@ function pickString(v: any): string | null {
   }
   if (typeof v === 'number' || typeof v === 'boolean') return String(v)
   return null
+}
+
+function normalizeAccountKey(input: string): string {
+  return input.replace(/\s+/g, '').toUpperCase()
+}
+
+function stripCurrencySuffix(value: string): string {
+  // Nordea REST `/accounts` uses `_id` values like `DK2000...-DKK`.
+  // For matching allowlisted IBANs (and derived DK+BBAN keys), we want a comparable key without the currency suffix.
+  return value.replace(/-[A-Z]{3}$/i, '')
+}
+
+/**
+ * Nordea REST /accounts sometimes returns Danish account identifiers in a "DK+BBAN" form
+ * (e.g. "DK2000...") while allowlists often use full IBAN (e.g. "DK65...").
+ * For DK IBAN, we can derive the DK+BBAN form by dropping the 2-digit checksum.
+ */
+function deriveDkBbanKeyFromIbanOrAccount(value: string): string | null {
+  const n = normalizeAccountKey(value)
+  if (!n.startsWith('DK')) return null
+  const stripped = stripCurrencySuffix(n)
+
+  // DK BBAN key (as used by Nordea identifiers) is:
+  // DK + 4-digit regnr + 10-digit kontonr (14 digits total).
+  if (/^DK\d{14}$/.test(stripped)) return stripped
+
+  // DK IBAN is: DK + 2 checksum digits + 14 BBAN digits (16 digits total after DK).
+  if (/^DK\d{16}$/.test(stripped)) return `DK${stripped.slice(4)}`
+
+  return null
+}
+
+function buildComparableKeys(value: string): string[] {
+  const n = normalizeAccountKey(value)
+  const stripped = stripCurrencySuffix(n)
+  const keys = new Set<string>()
+  if (n) keys.add(n)
+  if (stripped && stripped !== n) keys.add(stripped)
+
+  const dk = deriveDkBbanKeyFromIbanOrAccount(stripped)
+  if (dk) keys.add(dk)
+  return Array.from(keys)
 }
 
 function isUnauthorized(err: unknown): boolean {
@@ -70,36 +113,77 @@ export async function runNordeaRestIngestion(
     return { insertedStatements: 0, insertedBalances: 0, insertedTransactions: 0, deduplicated: false }
   }
 
-  let accountList: Awaited<ReturnType<typeof client.listAccounts>>
-  try {
-    accountList = await client.listAccounts({ bearerToken: bearer })
-  } catch (err) {
-    if (!isUnauthorized(err)) throw err
-    bearer = await getNordeaRestAccessToken(trx as any, {
-      client,
-      provider: 'nordea',
-      agreementNumber: env.NORDEA_REST_AGREEMENT_NUMBER,
-      authorizerId: env.NORDEA_REST_AUTHORIZER_ID,
-      durationSeconds: env.NORDEA_REST_ACCESS_DURATION_SEC,
-      scopes: env.scopes,
-    })
-    accountList = await client.listAccounts({ bearerToken: bearer })
+  const allowlistedKeySet = new Set<string>()
+  for (const r of allowlisted) {
+    for (const k of buildComparableKeys(String(r.iban))) allowlistedKeySet.add(k)
   }
 
-  const accountsRaw = accountList.accounts
+  const accountsRaw: unknown[] = []
+  const pageSize = 30
+  let page = 1
+  let guard = 0
+  while (guard < 50) {
+    guard += 1
+    let accountList: Awaited<ReturnType<typeof client.listAccounts>>
+    try {
+      accountList = await client.listAccounts({ bearerToken: bearer, page, size: pageSize })
+    } catch (err) {
+      if (!isUnauthorized(err)) throw err
+      bearer = await getNordeaRestAccessToken(trx as any, {
+        client,
+        provider: 'nordea',
+        agreementNumber: env.NORDEA_REST_AGREEMENT_NUMBER,
+        authorizerId: env.NORDEA_REST_AUTHORIZER_ID,
+        durationSeconds: env.NORDEA_REST_ACCESS_DURATION_SEC,
+        scopes: env.scopes,
+      })
+      accountList = await client.listAccounts({ bearerToken: bearer, page, size: pageSize })
+    }
+
+    accountsRaw.push(...accountList.accounts)
+
+    // Stop early if all allowlisted IBANs are present in the accounts we have.
+    const presentKeys = new Set<string>()
+    for (const a of accountsRaw as any[]) {
+      const candidate =
+        pickString((a as any)?._id) ??
+        pickString((a as any)?.id) ??
+        pickString((a as any)?.iban) ??
+        pickString((a as any)?.IBAN) ??
+        pickString((a as any)?.bban) ??
+        pickString((a as any)?.bankAccount) ??
+        pickString((a as any)?.bank_account)
+      if (!candidate) continue
+      for (const k of buildComparableKeys(candidate)) presentKeys.add(k)
+    }
+    let allFound = true
+    for (const k of allowlistedKeySet) {
+      if (!presentKeys.has(k)) {
+        allFound = false
+        break
+      }
+    }
+    if (allFound) break
+
+    if (!accountList.nextPage) break
+    page = accountList.nextPage
+  }
 
   const findAccountForIban = (iban: string): any | null => {
-    const needle = iban.replace(/\s+/g, '').toUpperCase()
+    const needles = new Set(buildComparableKeys(iban))
     for (const a of accountsRaw as any[]) {
       if (!a || typeof a !== 'object') continue
       const candidate =
+        pickString((a as any)._id) ??
+        pickString((a as any).id) ??
         pickString((a as any).iban) ??
         pickString((a as any).IBAN) ??
+        pickString((a as any).bban) ??
         pickString((a as any).bankAccount) ??
         pickString((a as any).bank_account)
       if (!candidate) continue
-      const normalized = candidate.replace(/\s+/g, '').toUpperCase()
-      if (normalized === needle) return a
+      const candidateKeys = buildComparableKeys(candidate)
+      if (candidateKeys.some((k) => needles.has(k))) return a
     }
     return null
   }
@@ -119,13 +203,6 @@ export async function runNordeaRestIngestion(
     const currency =
       pickString((resolved as any).currency) ?? pickString((resolved as any).ccy) ?? pickString((resolved as any).Ccy)
 
-    const accountRef =
-      pickString((resolved as any).bankAccount) ??
-      pickString((resolved as any).bank_account) ??
-      pickString((resolved as any).account_id) ??
-      pickString((resolved as any).accountId) ??
-      row.iban
-
     const ownerName = row.name ?? pickString((resolved as any).name) ?? null
 
     if (!currency) {
@@ -133,11 +210,36 @@ export async function runNordeaRestIngestion(
       continue
     }
 
+    // Nordea expects the account identifier from /accounts (typically `_id`, e.g. DK2000...-DKK)
+    // when calling /accounts/{account_id}/transactions. Using a raw IBAN will be rejected.
+    const accountRef =
+      pickString((resolved as any)._id) ??
+      pickString((resolved as any).account_id) ??
+      pickString((resolved as any).accountId) ??
+      pickString((resolved as any).id) ??
+      pickString((resolved as any).bankAccount) ??
+      pickString((resolved as any).bank_account) ??
+      deriveDkBbanKeyFromIbanOrAccount(row.iban)?.concat(`-${currency.toUpperCase()}`) ??
+      null
+
+    if (!accountRef) {
+      log.warn('Nordea REST: kunne ikke udlede account_id for /transactions (mangler _id/account_id)', {
+        iban: row.iban,
+      })
+      continue
+    }
+
     const derivedAccountId = `${row.iban}-${currency}`
 
     await trx
       .insert(account)
-      .values({ id: derivedAccountId, provider: 'nordea' as any, name: ownerName, statusAccount: 9999 })
+      .values({
+        id: derivedAccountId,
+        provider: 'nordea' as any,
+        iban: row.iban,
+        currency,
+        name: ownerName,
+      })
       .onConflictDoNothing({ target: account.id })
 
     const existingCursor = await getAdapterCursor(trx as any, {

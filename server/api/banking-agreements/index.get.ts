@@ -1,14 +1,18 @@
-import { asc } from 'drizzle-orm'
+import { and, asc, eq, inArray } from 'drizzle-orm'
 import db from '~/lib/db'
 import { bankingAgreement, bankProviderValues } from '~/lib/db/schema/bankingAgreement'
 import { ZodError } from 'zod'
 import { bankingAgreementAccountAllowlist } from '~/lib/db/schema/bankingAgreementAccountAllowlist'
+import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreementAccountDimension'
 import {
   extractKeysFromZod,
   nonEmpty,
   providerEnvRequirements,
-  validateProviderEnvOrThrow,
 } from '~/../engine/banking-ingestion/infrastructure/providerEnv'
+import { getCertificateStatusFromPem, type CertificateStatus } from '~/../engine/banking-ingestion/infrastructure/certificateStatus'
+import { loadDanskeBankEnvSecrets } from '~/../engine/banking-ingestion/infrastructure/danskebank/danskeBankEnvSecrets'
+import { loadNordeaEnvSecrets } from '~/../engine/banking-ingestion/infrastructure/nordea/nordeaEnvSecrets'
+import { setHeader } from 'h3'
 
 type EnvRequirement =
   | { type: 'key'; key: string }
@@ -37,6 +41,62 @@ type Readiness =
   | { status: 'not_configured'; message: string; env: EnvStatus }
   | { status: 'missing_env'; message: string; missingKeys: string[]; env: EnvStatus }
   | { status: 'not_implemented'; message: string; env?: EnvStatus }
+
+type CertInfo =
+  | { status: 'not_applicable'; message: string }
+  | ({ provider: string; channel: string } & CertificateStatus)
+
+function computeProviderCertificateInfo(input: {
+  provider: string
+  channel: string
+  enabled: boolean
+  readiness: Readiness
+}): CertInfo {
+  // Keep this cheap: only compute certificate status when the agreement is enabled
+  // and the provider/channel is configured.
+  if (!input.enabled) {
+    return { status: 'not_applicable', message: 'Ikke aktiv' }
+  }
+  if (input.readiness.status !== 'ready') {
+    return { status: 'not_applicable', message: 'Ikke konfigureret' }
+  }
+
+  // Only ISO20022 providers use certificates in this UI.
+  if (input.channel !== 'iso20022') {
+    return { status: 'not_applicable', message: 'Ikke relevant for kanal' }
+  }
+
+  if (input.provider === 'danskebank' && input.channel === 'iso20022') {
+    try {
+      const secrets = loadDanskeBankEnvSecrets()
+      return {
+        provider: input.provider,
+        channel: input.channel,
+        ...getCertificateStatusFromPem({ certificatePem: secrets.applicationRequestCertificatePem, expiresSoonDays: 7 }),
+      }
+    } catch (e) {
+      return { provider: input.provider, channel: input.channel, status: 'invalid', message: String((e as any)?.message ?? e) }
+    }
+  }
+
+  if (input.provider === 'nordea' && input.channel === 'iso20022') {
+    try {
+      const secrets = loadNordeaEnvSecrets()
+      return {
+        provider: input.provider,
+        channel: input.channel,
+        ...getCertificateStatusFromPem({
+          certificatePem: secrets.NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM,
+          expiresSoonDays: 7,
+        }),
+      }
+    } catch (e) {
+      return { provider: input.provider, channel: input.channel, status: 'invalid', message: String((e as any)?.message ?? e) }
+    }
+  }
+
+  return { status: 'not_applicable', message: 'Ikke relevant for kanal' }
+}
 
 function computeEnvStatus(requirements: EnvRequirement[], invalidKeySet: Set<string>): EnvStatus {
   const statuses: EnvRequirementStatus[] = []
@@ -79,60 +139,30 @@ function computeEnvStatus(requirements: EnvRequirement[], invalidKeySet: Set<str
   }
 }
 
-function validateProviderEnv(provider: string, channel: string): void {
-  validateProviderEnvOrThrow(provider, channel)
-}
-
 function computeProviderReadiness(provider: string, channel: string): Readiness {
   const requirements = providerEnvRequirements(provider, channel)
   if (!requirements) {
     return { status: 'not_implemented', message: 'Ikke implementeret endnu' }
   }
 
-  // First pass: compute invalid keys if Zod points to keys that are set but invalid.
-  let invalidFromZod = new Set<string>()
-  try {
-    validateProviderEnv(provider, channel)
-  } catch (err) {
-    if (err instanceof ZodError) {
-      const keys = extractKeysFromZod(err)
-      invalidFromZod = new Set(keys.filter((k) => nonEmpty(process.env[k])))
-    }
-  }
-
-  const env = computeEnvStatus(requirements, invalidFromZod)
+  // Keep readiness checks lightweight (presence-based).
+  // Full/deep validation (e.g., key decoding) happens when enabling agreements or running ingestion.
+  const env = computeEnvStatus(requirements, new Set())
   const hasAnyRelevantEnv = env.presentKeys.length > 0
 
   if (!hasAnyRelevantEnv) {
     return { status: 'not_configured', message: 'Ingen relevante env vars sat', env }
   }
 
-  // Second pass: enforce full validation and produce a stable readiness status.
-  try {
-    validateProviderEnv(provider, channel)
-    if (env.missingKeys.length === 0 && env.invalidKeys.length === 0) return { status: 'ready', env }
-    return { status: 'missing_env', message: 'Mangler env vars for at aktivere', missingKeys: env.missingKeys, env }
-  } catch (err) {
-    if (err instanceof ZodError) {
-      const invalidKeys = extractKeysFromZod(err).filter((k) => nonEmpty(process.env[k]))
-      const envWithInvalid = computeEnvStatus(requirements, new Set(invalidKeys))
-      return {
-        status: 'missing_env',
-        message: 'Mangler/ugyldige env vars for at aktivere',
-        missingKeys: envWithInvalid.missingKeys,
-        env: envWithInvalid,
-      }
-    }
-    return {
-      status: 'missing_env',
-      message: String((err as any)?.message ?? err),
-      missingKeys: env.missingKeys,
-      env,
-    }
-  }
+
+  if (env.missingKeys.length === 0 && env.invalidKeys.length === 0) return { status: 'ready', env }
+  return { status: 'missing_env', message: 'Mangler env vars for at aktivere', missingKeys: env.missingKeys, env }
 }
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
+  // This endpoint is used in interactive settings screens; avoid HTTP caching so refetch shows changes immediately.
+  setHeader(event, 'Cache-Control', 'no-store')
+
   // Ensure baseline rows exist for each provider.
   await db
     .insert(bankingAgreement)
@@ -141,26 +171,63 @@ export default defineEventHandler(async () => {
 
   const agreements = await db.select().from(bankingAgreement).orderBy(asc(bankingAgreement.provider))
   const allowlistRows = await db
-    .select()
+    .select({
+      provider: bankingAgreementAccountAllowlist.provider,
+      iban: bankingAgreementAccountAllowlist.iban,
+      name: bankingAgreementAccountAllowlist.name,
+    })
     .from(bankingAgreementAccountAllowlist)
     .orderBy(asc(bankingAgreementAccountAllowlist.provider), asc(bankingAgreementAccountAllowlist.iban))
 
-  const allowlistByProvider = new Map<string, Array<{ iban: string; name: string | null }>>()
+  const providers = Array.from(new Set(allowlistRows.map((r) => String(r.provider))))
+  const ibans = Array.from(new Set(allowlistRows.map((r) => String(r.iban))))
+
+  const dimRows = providers.length && ibans.length
+    ? await db
+        .select({
+          provider: bankingAgreementAccountDimension.provider,
+          iban: bankingAgreementAccountDimension.iban,
+          key: bankingAgreementAccountDimension.dimensionKey,
+          value: bankingAgreementAccountDimension.dimensionValue,
+        })
+        .from(bankingAgreementAccountDimension)
+        .where(and(
+          inArray(bankingAgreementAccountDimension.provider, providers as any),
+          inArray(bankingAgreementAccountDimension.iban, ibans),
+          inArray(bankingAgreementAccountDimension.dimensionKey, ['statuskonto', 'artskonto']),
+        ))
+    : []
+
+  const statuskontoByProviderIban = new Map<string, string>()
+  for (const d of dimRows) {
+    const k = `${String(d.provider)}:${String(d.iban)}`
+    if (String(d.key) === 'statuskonto') {
+      statuskontoByProviderIban.set(k, String(d.value))
+      continue
+    }
+    if (!statuskontoByProviderIban.has(k)) statuskontoByProviderIban.set(k, String(d.value))
+  }
+
+  const allowlistByProvider = new Map<string, Array<{ iban: string; name: string | null; statuskonto: string | null }>>()
   for (const row of allowlistRows) {
-    const provider = String((row as any).provider)
-    const iban = String((row as any).iban)
-    const name = (row as any).name === null || typeof (row as any).name === 'undefined' ? null : String((row as any).name)
+    const provider = String(row.provider)
+    const iban = String(row.iban)
+    const name = row.name === null || typeof row.name === 'undefined' ? null : String(row.name)
+    const statuskonto = statuskontoByProviderIban.get(`${provider}:${iban}`) ?? null
     const existing = allowlistByProvider.get(provider) ?? []
-    existing.push({ iban, name })
+    existing.push({ iban, name, statuskonto })
     allowlistByProvider.set(provider, existing)
   }
 
   return agreements.map((a) => {
     const providerKey = String(a.provider)
+    const channel = String(a.channel ?? 'iso20022')
+    const readiness = computeProviderReadiness(providerKey, channel)
     return {
       ...a,
       allowlistAccounts: allowlistByProvider.get(providerKey) ?? [],
-      readiness: computeProviderReadiness(providerKey, String(a.channel ?? 'iso20022')),
+      readiness,
+      certificate: computeProviderCertificateInfo({ provider: providerKey, channel, enabled: Boolean(a.enabled), readiness }),
     }
   })
 })
