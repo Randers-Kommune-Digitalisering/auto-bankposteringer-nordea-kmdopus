@@ -43,6 +43,7 @@ const route = useRoute()
 
 const { data: runsData, pending: runsPending, refresh: refreshRuns } = await useFetch<RunListResponse>('/api/runs', {
   key: 'runs-for-recovery-queue',
+  deep: true,
   default: () => ([]),
 })
 
@@ -94,6 +95,9 @@ const runErp = ref<RunOutboxContextResponse | null>(null)
 
 const runJobsLoading = ref(false)
 const runJobs = ref<RunJobsContextResponse | null>(null)
+
+const runJobsTableKey = computed(() => (runJobs.value?.jobs ?? []).map((j) => String(j.id)).join('|'))
+const runOutboxTableKey = computed(() => (runErp.value?.outbox ?? []).map((o) => String(o.id)).join('|'))
 
 async function loadRunErp() {
   const runIds = selectedRunIds.value
@@ -700,6 +704,7 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
 
               <UTable
                 v-else-if="runJobs"
+                :key="runJobsTableKey"
                 :data="runJobs?.jobs ?? []"
                 :columns="runJobColumns"
                 :loading="runJobsLoading"
@@ -730,6 +735,7 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
 
               <UTable
                 v-else-if="runErp"
+                :key="runOutboxTableKey"
                 :data="runErp?.outbox ?? []"
                 :columns="runOutboxColumns"
                 :loading="runErpLoading"

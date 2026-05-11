@@ -5,7 +5,7 @@ import db from '~/lib/db'
 import { createError, setHeader } from 'h3'
 
 export default defineEventHandler(async (event) => {
-  setHeader(event, 'Cache-Control', 'private, max-age=60')
+  setHeader(event, 'Cache-Control', 'no-store')
 
   const id = event.context.params?.id
   if (!id) {

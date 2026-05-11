@@ -9,18 +9,35 @@ const props = withDefaults(
     resetDateRange?: DateRangeValue
     timeZone?: string
 
+    showDate?: boolean
+    showDateLabel?: boolean
+    dateLabel?: string
+
     accountIds?: string[]
     accountPlaceholder?: string
+    showAccountLabel?: boolean
+    accountLabel?: string
+    showAccounts?: boolean
 
     search?: string
+    showSearchLabel?: boolean
+    searchLabel?: string
     searchPlaceholder?: string
     showSearch?: boolean
   }>(),
   {
     timeZone: DEFAULT_TIME_ZONE,
+    showDate: true,
+    showDateLabel: true,
+    dateLabel: 'Periode',
     accountIds: () => [],
     accountPlaceholder: 'Alle konti',
+    showAccountLabel: true,
+    accountLabel: 'Konti',
+    showAccounts: true,
     search: '',
+    showSearchLabel: true,
+    searchLabel: 'Søg',
     searchPlaceholder: 'Søg...',
     showSearch: false,
   },
@@ -50,31 +67,61 @@ const searchModel = computed<string>({
 </script>
 
 <template>
-  <div class="flex flex-wrap items-center gap-2 justify-between">
-    <div class="flex flex-wrap items-center gap-2">
-      <div class="min-w-64">
+  <div class="flex flex-wrap gap-2 justify-between" :class="(props.showAccountLabel || props.showSearch) ? 'items-start' : 'items-center'">
+    <div class="flex flex-wrap gap-2" :class="(props.showAccountLabel || props.showSearch) ? 'items-start' : 'items-center'">
+      <div v-if="props.showAccounts" class="min-w-64">
+        <UFormField v-if="props.showAccountLabel" :label="props.accountLabel">
+          <FiltersBankAccountPicker
+            v-model="accountIdsModel"
+            :placeholder="accountPlaceholder"
+            class="min-w-64"
+          />
+        </UFormField>
+
         <FiltersBankAccountPicker
+          v-else
           v-model="accountIdsModel"
           :placeholder="accountPlaceholder"
           class="min-w-64"
         />
       </div>
 
-      <UiFloatingLabelInput
-        v-if="showSearch"
+      <UFormField v-if="showSearch && props.showSearchLabel" :label="props.searchLabel" class="min-w-64 max-w-sm">
+        <UInput
+          v-model="searchModel"
+          class="w-full"
+          color="primary"
+          variant="outline"
+          :ui="{ base: 'ring-primary/50 text-primary focus-visible:ring-primary' }"
+          trailing-icon="solar:magnifer-bold-duotone"
+          :placeholder="searchPlaceholder"
+        />
+      </UFormField>
+
+      <UInput
+        v-else-if="showSearch"
         v-model="searchModel"
-        class="max-w-sm"
+        class="min-w-64 max-w-sm"
         color="primary"
         variant="outline"
         :ui="{ base: 'ring-primary/50 text-primary focus-visible:ring-primary' }"
         trailing-icon="solar:magnifer-bold-duotone"
-        :label="searchPlaceholder"
+        :placeholder="searchPlaceholder"
       />
     </div>
 
-    <div class="w-full sm:w-auto">
+    <div v-if="$slots.date || props.showDate" class="w-full sm:w-auto">
       <slot name="date">
+        <UFormField v-if="props.showDate && props.showDateLabel" :label="props.dateLabel">
+          <FiltersDateRangePicker
+            v-model="dateRangeModel"
+            :reset-value="resetDateRange"
+            :time-zone="timeZone"
+          />
+        </UFormField>
+
         <FiltersDateRangePicker
+          v-else-if="props.showDate"
           v-model="dateRangeModel"
           :reset-value="resetDateRange"
           :time-zone="timeZone"

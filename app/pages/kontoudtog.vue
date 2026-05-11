@@ -66,6 +66,14 @@ const { data, status, refresh } = await useFetch<StatementPage>('/api/transactio
   watch: [start, end, selectedAccountIds, search, page, pageSize],
   // Avoid "1 tick behind" behavior caused by out-of-order responses when filters change quickly.
   dedupe: 'cancel',
+  deep: true,
+  transform: (v) => {
+    const rows = Array.isArray((v as any)?.rows) ? (v as any).rows.slice() : []
+    return {
+      ...(v as any),
+      rows,
+    } as any
+  },
   default: () => ({ rows: [], total: 0, page: 1, pageSize: pageSize.value }),
 })
 
@@ -79,6 +87,8 @@ const totalRows = computed<number>(() => data.value?.total ?? 0)
 const visibleRows = computed<StatementTransaction[]>(() => fetchedRows.value)
 const visibleRowCount = computed<number>(() => fetchedRows.value.length)
 const pageCount = computed<number>(() => Math.max(1, Math.ceil(totalRows.value / pageSize.value)))
+
+const statementTableKey = computed(() => visibleRows.value.map((r) => String(r.id)).join('|'))
 
 function setPage(p: number): void {
   page.value = p
@@ -315,7 +325,7 @@ const columns: TableColumn<StatementTransaction>[] = [
     enableSorting: false,
     cell: () => undefined
   },
-  {
+  { // Bogføringsdato
     accessorKey: 'bookingDate',
     header: 'Dato',
     size: 120,
@@ -327,7 +337,7 @@ const columns: TableColumn<StatementTransaction>[] = [
       })
     }
   },
-  {
+  { // Konto
     id: 'account',
     header: 'Konto',
     size: 180,
@@ -335,39 +345,28 @@ const columns: TableColumn<StatementTransaction>[] = [
       return row.original.bankAccountName ?? row.original.accountId ?? '-'
     }
   },
-  {
+  { // Beløb
     id: 'amount',
     header: 'Beløb',
     size: 140,
     cell: ({ row }) => {
-      return h('span', { class: 'font-medium' }, formatAmount(row.original))
+      return h('span', { class: 'font-bold' }, formatAmount(row.original))
     }
   },
-  {
-    id: 'runningBalance',
-    header: 'Saldo',
-    size: 160,
-    cell: ({ row }) => {
-      const value = row.original.runningBalance
-      if (!value) return '-'
-
-      return h('span', { class: 'font-medium' }, formatMoney(value, row.original.currency))
-    }
-  },
-  {
+  { // Counterpart
     id: 'counterpart',
     header: 'Modpart',
     size: 220,
     cell: ({ row }) => {
       const counterpart = resolveCounterpart(row.original)
       if (!counterpart) return '-'
-
+      
       return h('div', { class: classBadgeColumn }, [
         h(UBadge, { class: 'capitalize', variant: 'subtle', color: 'secondary' }, () => counterpart)
       ])
     }
   },
-  {
+  { // Fritekst (aggregated from multiple fields)
     id: 'freeText',
     header: 'Fritekst',
     enableSorting: false,
@@ -384,20 +383,31 @@ const columns: TableColumn<StatementTransaction>[] = [
       )
     }
   },
-  {
+  { // Transaktionstype (aggregated from multiple fields)
     id: 'type',
     header: 'Transaktionstype',
     size: 180,
     cell: ({ row }) => {
       const txType = resolveTransactionType(row.original)
       if (!txType) return '-'
-
+      
       return h('div', { class: classBadgeColumn }, [
         h(UBadge, { class: 'capitalize', variant: 'subtle', color: 'warning' }, () => txType)
       ])
     }
   },
-  {
+  { // Løbende saldo
+    id: 'runningBalance',
+    header: 'Saldo',
+    size: 160,
+    cell: ({ row }) => {
+      const value = row.original.runningBalance
+      if (!value) return '-'
+
+      return h('span', { class: 'font-medium' }, formatMoney(value, row.original.currency))
+    }
+  },
+  { // Detaljer (aggregated from multiple fields)
     id: 'details',
     header: 'Detaljer',
     size: 80,
@@ -513,6 +523,7 @@ const tableUi = {
 
         <UTable
           v-else
+          :key="statementTableKey"
           v-model:column-visibility="columnVisibility"
           :data="visibleRows"
           :columns="columns"

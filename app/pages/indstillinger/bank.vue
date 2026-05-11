@@ -94,7 +94,7 @@ type BankingAgreement = {
     | { status: 'not_implemented'; message: string; env?: any }
 }
 
-const BANK_ACCOUNTS_QUERY_KEY = 'bank-accounts' as const
+const BANKING_ACCOUNTS_QUERY_KEY = 'banking-accounts' as const
 
 const toast = useToast()
 const table = useTemplateRef('table')
@@ -131,6 +131,42 @@ function formatNordeaRestAuthStatus(status: NordeaRestAuthStatus | null): string
   return s
 }
 
+function formatHttpErrorBrief(err: any): { titleSuffix?: string; description: string } {
+  const statusCode = err?.statusCode ?? err?.data?.statusCode ?? err?.response?.status
+  const statusText =
+    err?.statusMessage ??
+    err?.data?.statusMessage ??
+    err?.response?.statusText ??
+    (typeof err?.message === 'string' ? err.message : null)
+
+  const upstreamFailureDescription =
+    err?.data?.data?.upstream?.failureDescription ?? err?.data?.upstream?.failureDescription ?? null
+
+  const upstreamSnippet =
+    err?.data?.data?.upstream?.responseTextSnippet ?? err?.data?.upstream?.responseTextSnippet ?? null
+
+  const shortText = typeof statusText === 'string' ? statusText.split('\n')[0].trim().slice(0, 180) : ''
+  const failureText =
+    typeof upstreamFailureDescription === 'string'
+      ? upstreamFailureDescription.replace(/\s+/g, ' ').trim().slice(0, 220)
+      : ''
+  const snippetText =
+    typeof upstreamSnippet === 'string'
+      ? upstreamSnippet.replace(/\s+/g, ' ').trim().slice(0, 220)
+      : ''
+
+  if (statusCode) {
+    return {
+      titleSuffix: `HTTP ${statusCode}`,
+      description: `HTTP ${statusCode}${shortText ? ` ${shortText}` : ''}${failureText ? ` — ${failureText}` : snippetText ? ` — ${snippetText}` : ''}`,
+    }
+  }
+
+  return {
+    description: shortText || String(err),
+  }
+}
+
 async function refreshNordeaRestAuthStatus(refresh = true) {
   if (nordeaRestAuthPending.value) return
   nordeaRestAuthPending.value = true
@@ -138,9 +174,10 @@ async function refreshNordeaRestAuthStatus(refresh = true) {
     const q = refresh ? '?refresh=1' : ''
     nordeaRestAuthStatus.value = await $fetch<NordeaRestAuthStatus>(`/api/banking-agreements/nordea/authstatus${q}`)
   } catch (err: any) {
+    const formatted = formatHttpErrorBrief(err)
     toast.add({
-      title: 'Kan ikke hente auth-status',
-      description: String(err?.data?.statusMessage ?? err?.statusMessage ?? err?.message ?? err),
+      title: formatted.titleSuffix ? `Kan ikke hente auth-status (${formatted.titleSuffix})` : 'Kan ikke hente auth-status',
+      description: formatted.description,
       color: 'error',
     })
   } finally {
@@ -160,9 +197,10 @@ async function requestNordeaRestReauth() {
       color: 'success',
     })
   } catch (err: any) {
+    const formatted = formatHttpErrorBrief(err)
     toast.add({
-      title: 'Kan ikke starte reauth',
-      description: String(err?.data?.statusMessage ?? err?.statusMessage ?? err?.message ?? err),
+      title: formatted.titleSuffix ? `Kan ikke starte reauth (${formatted.titleSuffix})` : 'Kan ikke starte reauth',
+      description: formatted.description,
       color: 'error',
     })
   } finally {
@@ -179,7 +217,9 @@ const envModalProvider = ref<BankingAgreement['provider'] | null>(null)
 const { data: accounts, pending, refresh: refreshBankAccounts } = useFetch<BankingAccountUnionDto[]>(
   '/api/banking-accounts',
   {
-    key: BANK_ACCOUNTS_QUERY_KEY,
+    key: BANKING_ACCOUNTS_QUERY_KEY,
+    deep: true,
+    transform: (v) => Array.isArray(v) ? v.slice() : [],
     default: () => [],
     lazy: true,
   },
@@ -189,6 +229,8 @@ const { data: agreements, refresh: refreshAgreements } = useFetch<BankingAgreeme
   '/api/banking-agreements',
   {
     key: 'banking-agreements',
+    deep: true,
+    transform: (v) => Array.isArray(v) ? v.slice() : [],
     default: () => [],
     lazy: true,
   },
@@ -300,6 +342,8 @@ const refreshAccounts = async () => {
 
 const rows = computed(() => [...(accounts.value ?? [])])
 
+const accountsTableKey = computed(() => rows.value.map((r) => `${String((r as any).provider ?? '')}:${String((r as any).iban ?? '')}`).join('|'))
+
 const configuredProviders = computed(() =>
   (agreements.value ?? [])
     .filter((a) => a.channel === 'rest')
@@ -341,6 +385,7 @@ async function removeConfiguredAccount(row: BankingAccountUnionDto) {
     })
     await refreshBankAccounts()
     await refreshAgreements()
+    await refreshNuxtData('bank-accounts')
     toast.add({ title: 'Konto fjernet', description: `${row.iban} er fjernet fra allowlist.` })
   } catch (err: any) {
     toast.add({
@@ -620,6 +665,7 @@ const pagination = ref({ pageIndex: 0, pageSize: 20 })
 
       <UTable
         ref="table"
+        :key="accountsTableKey"
         v-model:global-filter="globalFilterValue"
         v-model:pagination="pagination"
         v-model:sorting="sorting"

@@ -12,6 +12,60 @@ export type NordeaRestAuthTokens = {
   refreshToken: string | null
 }
 
+function tryExtractNordeaFailureDetails(text: string): {
+  httpCode?: number
+  requestUrl?: string
+  failureCode?: string
+  failureDescription?: string
+} {
+  const trimmed = text.trim()
+  if (!trimmed) return {}
+
+  // Nordea error responses are JSON; we only extract the most actionable parts.
+  try {
+    const json = JSON.parse(trimmed)
+    const httpCode = typeof json?.group_header?.http_code === 'number' ? json.group_header.http_code : undefined
+    const requestUrl = typeof json?.error?.request?.url === 'string' ? json.error.request.url : undefined
+
+    const failures = Array.isArray(json?.error?.failures) ? json.error.failures : []
+    const first = failures[0]
+    const failureCode = typeof first?.code === 'string' ? first.code : undefined
+    const failureDescription = typeof first?.description === 'string' ? first.description : undefined
+
+    return { httpCode, requestUrl, failureCode, failureDescription }
+  } catch {
+    return {}
+  }
+}
+
+export class NordeaRestHttpError extends Error {
+  readonly status: number
+  readonly statusText: string
+  readonly responseTextSnippet: string
+  readonly httpCode?: number
+  readonly requestUrl?: string
+  readonly failureCode?: string
+  readonly failureDescription?: string
+
+  constructor(input: { status: number; statusText: string; responseTextSnippet?: string }) {
+    const snippet = (input.responseTextSnippet ?? '').trim()
+    const details = tryExtractNordeaFailureDetails(snippet)
+    super(
+      `Nordea REST HTTP ${input.status} ${input.statusText}` +
+        (details.failureDescription ? `: ${details.failureDescription}` : ''),
+    )
+    this.name = 'NordeaRestHttpError'
+    this.status = input.status
+    this.statusText = input.statusText
+    this.responseTextSnippet = snippet
+
+    this.httpCode = details.httpCode
+    this.requestUrl = details.requestUrl
+    this.failureCode = details.failureCode
+    this.failureDescription = details.failureDescription
+  }
+}
+
 function toRfc1123Utc(date: Date): string {
   return date.toUTCString()
 }
@@ -204,7 +258,11 @@ export class NordeaCorporateRestClient {
       const text = await res.text()
 
       if (!res.ok) {
-        throw new Error(`Nordea REST HTTP ${res.status} ${res.statusText}: ${text.slice(0, 500)}`)
+        throw new NordeaRestHttpError({
+          status: res.status,
+          statusText: res.statusText,
+          responseTextSnippet: text.slice(0, 500),
+        })
       }
 
       const data = (contentTypeHeader.includes('application/json') ? JSON.parse(text) : (text as any)) as T

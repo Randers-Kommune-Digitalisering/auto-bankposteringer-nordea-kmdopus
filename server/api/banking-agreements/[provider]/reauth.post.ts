@@ -6,7 +6,7 @@ import { bankProviderValues } from '~/lib/db/schema/bankingAgreement'
 import { setAgreementCursor } from '~/../engine/banking-ingestion/handlers/bankingAgreementCursorStore'
 import { validateProviderEnvOrThrow } from '~/../engine/banking-ingestion/infrastructure/providerEnv'
 import { loadNordeaRestEnv } from '~/../engine/banking-ingestion/infrastructure/nordea/rest/env'
-import { NordeaCorporateRestClient } from '~/../engine/banking-ingestion/infrastructure/nordea/rest/client'
+import { NordeaCorporateRestClient, NordeaRestHttpError } from '~/../engine/banking-ingestion/infrastructure/nordea/rest/client'
 import { NORDEA_REST_AUTH_CURSOR_KEY } from '~/../engine/banking-ingestion/infrastructure/nordea/rest/constants'
 
 export default defineEventHandler(async (event) => {
@@ -36,11 +36,33 @@ export default defineEventHandler(async (event) => {
     timeoutMs: env.NORDEA_REST_TIMEOUT_MS,
   })
 
-  const initiated = await client.initiateAuthorization({
-    agreementNumber: env.NORDEA_REST_AGREEMENT_NUMBER,
-    durationSeconds: env.NORDEA_REST_ACCESS_DURATION_SEC,
-    scopes: env.scopes,
-  })
+  let initiated: Awaited<ReturnType<typeof client.initiateAuthorization>>
+  try {
+    initiated = await client.initiateAuthorization({
+      agreementNumber: env.NORDEA_REST_AGREEMENT_NUMBER,
+      durationSeconds: env.NORDEA_REST_ACCESS_DURATION_SEC,
+      scopes: env.scopes,
+    })
+  } catch (err: any) {
+    if (err?.statusCode) throw err
+    if (err instanceof NordeaRestHttpError) {
+      throw createError({
+        statusCode: err.status,
+        statusMessage: `Nordea REST: ${err.failureDescription || err.statusText || 'HTTP error'}`,
+        data: {
+          upstream: {
+            status: err.status,
+            statusText: err.statusText,
+            httpCode: err.httpCode,
+            requestUrl: err.requestUrl,
+            failureCode: err.failureCode,
+            failureDescription: err.failureDescription,
+          },
+        },
+      })
+    }
+    throw createError({ statusCode: 502, statusMessage: String(err?.message ?? err) })
+  }
 
   const accessId = initiated.accessId
   const clientToken = initiated.clientToken
@@ -55,12 +77,33 @@ export default defineEventHandler(async (event) => {
 
   // Confirm right away (same step as the ingestion auth flow).
   if (status === 'CREATED') {
-    const confirmed = await client.confirmAuthorization({
-      accessId,
-      authorizerId: env.NORDEA_REST_AUTHORIZER_ID,
-      bearerToken: clientToken,
-    })
-    status = confirmed.status
+    try {
+      const confirmed = await client.confirmAuthorization({
+        accessId,
+        authorizerId: env.NORDEA_REST_AUTHORIZER_ID,
+        bearerToken: clientToken,
+      })
+      status = confirmed.status
+    } catch (err: any) {
+      if (err?.statusCode) throw err
+      if (err instanceof NordeaRestHttpError) {
+        throw createError({
+          statusCode: err.status,
+          statusMessage: `Nordea REST: ${err.failureDescription || err.statusText || 'HTTP error'}`,
+          data: {
+            upstream: {
+              status: err.status,
+              statusText: err.statusText,
+              httpCode: err.httpCode,
+              requestUrl: err.requestUrl,
+              failureCode: err.failureCode,
+              failureDescription: err.failureDescription,
+            },
+          },
+        })
+      }
+      throw createError({ statusCode: 502, statusMessage: String(err?.message ?? err) })
+    }
   }
 
   const updatedAt = new Date().toISOString()

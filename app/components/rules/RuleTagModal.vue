@@ -101,6 +101,8 @@ async function onSubmit() {
         body: { id: result.data.newId }
       })
 
+      await refreshNuxtData('rule-tags')
+
       toast.add({
         title: 'Tag opdateret',
         description: `${capitalizeFirst(props.tagId ?? '')} er opdateret.`
@@ -131,6 +133,8 @@ async function onSubmit() {
       method: 'POST',
       body: { id: result.data.id }
     })
+
+    await refreshNuxtData('rule-tags')
 
     toast.add({
       title: 'Tag oprettet',

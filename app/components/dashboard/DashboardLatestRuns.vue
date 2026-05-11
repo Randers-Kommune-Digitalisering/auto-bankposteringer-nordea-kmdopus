@@ -65,6 +65,8 @@ const columns: TableColumn<DashboardLatestRun>[] = [
     },
   },
 ]
+
+const latestRunsTableKey = computed(() => props.runs.map((r) => `${String((r as any).bookingDate ?? '')}:${String((r as any).status ?? '')}`).join('|'))
 </script>
 
 <template>
@@ -86,6 +88,7 @@ const columns: TableColumn<DashboardLatestRun>[] = [
 
     <UTable
       v-else
+      :key="latestRunsTableKey"
       :data="runs"
       :columns="columns"
       :ui="{
