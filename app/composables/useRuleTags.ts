@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, watchEffect } from 'vue'
 import type { RuleTagSelectSchema } from '~/lib/db/schema/ruleTag'
 
 export function useRuleTags() {
@@ -6,15 +6,29 @@ export function useRuleTags() {
   const loading = ref(false)
   const error = ref<Error | null>(null)
 
+  // Keep a single Nuxt data cache entry so `refresh()` / `refreshNuxtData('rule-tags')`
+  // updates every consumer consistently.
+  const {
+    data,
+    pending,
+    error: fetchError,
+    refresh,
+  } = useFetch<RuleTagSelectSchema[]>('/api/rule-tags', {
+    key: 'rule-tags',
+    default: () => [],
+  })
+
+  watchEffect(() => {
+    ruleTags.value = data.value ?? []
+    loading.value = Boolean(pending.value)
+    error.value = (fetchError.value as any) ?? null
+  })
+
   async function fetchRuleTags() {
-    loading.value = true
     try {
-      const { data } = await useFetch<RuleTagSelectSchema[]>('/api/rule-tags')
-      ruleTags.value = data.value || []
-    } catch (err) {
-      error.value = err as Error
-    } finally {
-      loading.value = false
+      await refresh()
+    } catch {
+      // Errors are surfaced via `error` from useFetch
     }
   }
 

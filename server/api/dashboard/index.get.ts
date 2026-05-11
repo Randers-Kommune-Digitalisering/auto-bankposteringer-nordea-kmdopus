@@ -79,7 +79,7 @@ function buildDateRange(start: Date, end: Date): string[] {
 }
 
 export default defineEventHandler(async (event): Promise<DashboardResponse> => {
-  setHeader(event, 'Cache-Control', 'private, max-age=30')
+  setHeader(event, 'Cache-Control', 'no-store')
 
   const rawQuery = getQuery(event)
   const parsedQuery = querySchema.parse(rawQuery)

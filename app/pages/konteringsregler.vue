@@ -31,7 +31,9 @@ const typeFilter = ref('alle')
 // API calls
 const { data: rules, status } = await useFetch<RuleListDto[]>('/api/rules', {
   key: 'rules',
-  method: 'GET'
+  method: 'GET',
+  deep: true,
+  transform: (v) => Array.isArray(v) ? v.slice() : [],
 })
 
 // Type labels
@@ -81,6 +83,8 @@ const visibleRows = computed<RuleListDto[]>(() => {
     })
     .slice()
 })
+
+  const rulesTableKey = computed(() => visibleRows.value.map((r) => String(r.id)).join('|'))
 
 const compareStrings = (a?: string | null, b?: string | null) =>
   (a ?? '').localeCompare(b ?? '', 'da', { sensitivity: 'base', numeric: true })
@@ -430,8 +434,8 @@ function handleEditRule(row: Row<RuleListDto>) {
   modalOpen.value = true
 }
 
-function handleSaved() {
-  refreshNuxtData('rules')
+async function handleSaved() {
+  await refreshNuxtData('rules')
   modalOpen.value = false
   editingRuleId.value = null
 }
@@ -562,6 +566,7 @@ async function handleDeleteRule(row: Row<RuleListDto>) {
 
       <UTable
         ref="table"
+        :key="rulesTableKey"
         v-model:column-visibility="columnVisibility"
         v-model:pagination="pagination"
         v-model:sorting="sorting"

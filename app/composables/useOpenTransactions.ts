@@ -7,7 +7,12 @@ type AccountBuckets = Record<string, OpenTransaction[]>
 export async function useOpenTransactions() {
   const { data, pending, refresh } = await useFetch<OpenTransaction[]>(
     '/api/transactions',
-    { key: 'open-transactions', lazy: false }
+    {
+      key: 'open-transactions',
+      lazy: false,
+      deep: true,
+      transform: (v) => Array.isArray(v) ? v.slice() : [],
+    }
   )
 
   const transactions = computed<OpenTransaction[]>(() => useFlattenArray<OpenTransaction>(data))

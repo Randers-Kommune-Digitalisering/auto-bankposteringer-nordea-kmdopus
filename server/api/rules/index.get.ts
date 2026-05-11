@@ -20,7 +20,7 @@ function serializeDates(rows: RuleListDto[]) {
 }
 
 export default defineEventHandler(async (event) => {
-  setHeader(event, 'Cache-Control', 'private, max-age=60')
+  setHeader(event, 'Cache-Control', 'no-store')
 
   const storage = useStorage('rules')
   const cached = await storage.getItem<unknown>('rule-list')

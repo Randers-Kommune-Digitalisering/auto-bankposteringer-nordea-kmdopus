@@ -226,6 +226,12 @@ async function onSubmit() {
         body: result.data,
       })
 
+      await Promise.all([
+        refreshNuxtData('banking-accounts'),
+        refreshNuxtData('banking-agreements'),
+        refreshNuxtData('bank-accounts'),
+      ])
+
       toast.add({ title: 'Bankkonto oprettet', description: `${result.data.iban} er tilføjet til API.` })
     } else {
       if (!props.accountId) return
@@ -246,6 +252,11 @@ async function onSubmit() {
         method: 'PUT',
         body: { name: result.data.name, statuskonto: result.data.statuskonto },
       })
+
+      await Promise.all([
+        refreshNuxtData('bank-accounts'),
+        refreshNuxtData('banking-accounts'),
+      ])
       toast.add({ title: 'Bankkonto opdateret', description: `${props.accountId} er opdateret.` })
     }
 

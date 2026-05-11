@@ -3,6 +3,22 @@ import { eq } from 'drizzle-orm'
 import { mapConditionsToMatches, ruleDraftSchema, rule } from '~/lib/db/schema/rule'
 import { mapDimensionRowsToDto } from '~~/server/utils/accountingDimensions'
 import db from '~/lib/db'
+import { parseAmount } from '#engine/matching/domain/amount'
+
+function parseDbNumericOrUndefined(value: unknown): number | undefined {
+  if (value == null) return undefined
+  if (typeof value === 'number') return Number.isFinite(value) ? value : undefined
+  if (typeof value === 'string') {
+    const t = value.trim()
+    if (!t.length) return undefined
+    const n = Number(t)
+    if (Number.isFinite(n)) return n
+    // Fallback for any unexpected formatting.
+    const parsed = parseAmount(t)
+    return Number.isFinite(parsed) ? parsed : undefined
+  }
+  return undefined
+}
 
 function normalizeDbRow(row: any) {
   const normalized: any = { ...row }
@@ -83,6 +99,8 @@ export default defineEventHandler(async (event) => {
     // --------------------------
     const { accountingParameters, conditions, accountingDimensions, ...rest } = dbRule
     const normalizedRule = normalizeDbRow(rest)
+    ;(normalizedRule as any).matchAmountMin = parseDbNumericOrUndefined((normalizedRule as any).matchAmountMin)
+    ;(normalizedRule as any).matchAmountMax = parseDbNumericOrUndefined((normalizedRule as any).matchAmountMax)
     const relatedBankAccounts = dbRule.bankAccounts?.map(acc => acc.bankAccountId).filter(Boolean) ?? []
     const ruleTags = dbRule.tags?.map(tag => tag.ruleTagId).filter(Boolean) ?? []
 

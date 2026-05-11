@@ -21,6 +21,15 @@ import { normalizeRuleTagIds, resolveRuleTagIds } from '~~/server/utils/ruleTags
 
 const version = 1
 
+function toDbNumericStringOrUndefined(value: number | null | undefined): string | undefined {
+  if (value == null) return undefined
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw createError({ statusCode: 400, statusMessage: 'Ugyldigt beløb (amount_min/amount_max)' })
+  }
+  // Amount min/max is DKK with øre. Store as fixed 2 decimals to avoid floating noise.
+  return value.toFixed(2)
+}
+
 export function compileRuleDraftToDb(draft: RuleDraftSchema) {
   const {
     matches,
@@ -113,6 +122,8 @@ export default defineEventHandler(async (event) => {
 
     const validatedRule = createInsertSchema(rule).parse({
       ...ruleData,
+      matchAmountMin: toDbNumericStringOrUndefined((ruleData as any).matchAmountMin),
+      matchAmountMax: toDbNumericStringOrUndefined((ruleData as any).matchAmountMax),
       erpSupplier: activeSupplier,
     })
 
