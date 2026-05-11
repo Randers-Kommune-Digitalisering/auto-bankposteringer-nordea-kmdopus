@@ -6,7 +6,7 @@ import { bankProviderValues } from '~/lib/db/schema/bankingAgreement'
 
 import { getAgreementCursor, setAgreementCursor } from '~/../engine/banking-ingestion/handlers/bankingAgreementCursorStore'
 import { loadNordeaRestEnv } from '~/../engine/banking-ingestion/infrastructure/nordea/rest/env'
-import { NordeaCorporateRestClient } from '~/../engine/banking-ingestion/infrastructure/nordea/rest/client'
+import { NordeaCorporateRestClient, NordeaRestHttpError } from '~/../engine/banking-ingestion/infrastructure/nordea/rest/client'
 import { NORDEA_REST_AUTH_CURSOR_KEY } from '~/../engine/banking-ingestion/infrastructure/nordea/rest/constants'
 
 const storedSchema = z
@@ -60,51 +60,78 @@ export default defineEventHandler(async (event) => {
   let state = safeParseCursor(current?.value)
 
   if (refresh && state.accessId && state.clientToken) {
-    const env = loadNordeaRestEnv()
-    const client = new NordeaCorporateRestClient({
-      host: env.NORDEA_REST_HOST,
-      clientId: env.NORDEA_REST_CLIENT_ID,
-      clientSecret: env.NORDEA_REST_CLIENT_SECRET,
-      eidasPrivateKeyPem: env.eidasPrivateKeyPem,
-      timeoutMs: env.NORDEA_REST_TIMEOUT_MS,
-    })
+    try {
+      const env = loadNordeaRestEnv()
+      const client = new NordeaCorporateRestClient({
+        host: env.NORDEA_REST_HOST,
+        clientId: env.NORDEA_REST_CLIENT_ID,
+        clientSecret: env.NORDEA_REST_CLIENT_SECRET,
+        eidasPrivateKeyPem: env.eidasPrivateKeyPem,
+        timeoutMs: env.NORDEA_REST_TIMEOUT_MS,
+      })
 
-    const polled = await client.getAuthorizationStatus({ accessId: state.accessId, bearerToken: state.clientToken })
-
-    state = {
-      ...state,
-      status: polled.status ?? state.status ?? null,
-      authorizationCode: polled.code ?? state.authorizationCode ?? null,
-      updatedAt: new Date().toISOString(),
-    }
-
-    // If it's ACTIVE, exchange code -> tokens and store them.
-    if (state.status === 'ACTIVE' && !state.accessToken) {
-      const codeToExchange = state.authorizationCode
-      if (!codeToExchange) {
-        throw createError({
-          statusCode: 502,
-          statusMessage:
-            'Nordea REST status er ACTIVE men mangler authorization code (code). Ifølge docs skal token-exchange bruge code fra GET /corporate/v2/authorize/<access_id>.',
-        })
-      }
-      const exchanged = await client.exchangeAuthorizationCodeForTokens({ code: codeToExchange })
+      const polled = await client.getAuthorizationStatus({ accessId: state.accessId, bearerToken: state.clientToken })
 
       state = {
         ...state,
-        status: 'COMPLETED',
-        accessToken: exchanged.tokens.accessToken,
-        refreshToken: exchanged.tokens.refreshToken,
-        accessTokenExpiresAt: computeExpiresAt(exchanged.raw),
+        status: polled.status ?? state.status ?? null,
+        authorizationCode: polled.code ?? state.authorizationCode ?? null,
         updatedAt: new Date().toISOString(),
       }
-    }
 
-    await setAgreementCursor(db as any, {
-      provider: 'nordea' as any,
-      adapterKey: NORDEA_REST_AUTH_CURSOR_KEY,
-      cursor: { value: JSON.stringify(state) },
-    })
+      // If it's ACTIVE, exchange code -> tokens and store them.
+      if (state.status === 'ACTIVE' && !state.accessToken) {
+        const codeToExchange = state.authorizationCode
+        if (!codeToExchange) {
+          throw createError({
+            statusCode: 502,
+            statusMessage:
+              'Nordea REST status er ACTIVE men mangler authorization code (code). Ifølge docs skal token-exchange bruge code fra GET /corporate/v2/authorize/<access_id>.',
+          })
+        }
+        const exchanged = await client.exchangeAuthorizationCodeForTokens({ code: codeToExchange })
+
+        state = {
+          ...state,
+          status: 'COMPLETED',
+          accessToken: exchanged.tokens.accessToken,
+          refreshToken: exchanged.tokens.refreshToken,
+          accessTokenExpiresAt: computeExpiresAt(exchanged.raw),
+          updatedAt: new Date().toISOString(),
+        }
+      }
+
+      await setAgreementCursor(db as any, {
+        provider: 'nordea' as any,
+        adapterKey: NORDEA_REST_AUTH_CURSOR_KEY,
+        cursor: { value: JSON.stringify(state) },
+      })
+    } catch (err: any) {
+      // Preserve explicit h3 errors.
+      if (err?.statusCode) throw err
+
+      if (err instanceof NordeaRestHttpError) {
+        throw createError({
+          statusCode: err.status,
+          statusMessage: `Nordea REST: ${err.failureDescription || err.statusText || 'HTTP error'}`,
+          data: {
+            upstream: {
+              status: err.status,
+              statusText: err.statusText,
+              httpCode: err.httpCode,
+              requestUrl: err.requestUrl,
+              failureCode: err.failureCode,
+              failureDescription: err.failureDescription,
+            },
+          },
+        })
+      }
+
+      throw createError({
+        statusCode: 502,
+        statusMessage: String(err?.message ?? err),
+      })
+    }
   }
 
   return {

@@ -46,6 +46,8 @@ const UButton = resolveComponent('UButton')
 const { data: rules, pending: rulesPending, refresh: refreshRules } = await useFetch<RuleListDto[]>('/api/rules', {
   key: 'rules',
   method: 'GET',
+  deep: true,
+  transform: (v) => Array.isArray(v) ? v.slice() : [],
   default: () => [],
 })
 
@@ -222,6 +224,10 @@ const errorPreview = computed(() => {
   if (!v || v.success) return []
   return v.errors.slice(0, 25)
 })
+
+const importErrorsTableKey = computed(() => errorPreview.value.map((e) => `${e.row}:${e.field ?? ''}:${e.message}`).join('|'))
+
+const versionsTableKey = computed(() => (versionsData.value?.versions ?? []).map((v) => String(v.version)).join('|'))
 </script>
 
 <template>
@@ -371,6 +377,7 @@ const errorPreview = computed(() => {
 
             <UTable
               v-if="errorPreview.length"
+              :key="importErrorsTableKey"
               :data="errorPreview"
               :columns="[
                 { accessorKey: 'row', header: 'Række' },
@@ -444,6 +451,7 @@ const errorPreview = computed(() => {
 
           <UTable
             v-else-if="versionsData"
+            :key="versionsTableKey"
             class="mt-4"
             :data="versionsData.versions"
             :columns="versionColumns"

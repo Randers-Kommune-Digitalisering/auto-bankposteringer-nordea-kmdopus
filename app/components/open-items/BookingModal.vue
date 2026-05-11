@@ -163,6 +163,7 @@ async function handleSubmit(event?: FormSubmitEvent<ManualFormState>) {
 			description: `Transaktion ${transaction.value.id} er sendt til ERP`,
 			color: 'primary'
 		})
+		await refreshNuxtData('open-transactions')
 		savedSnapshot.value = currentSnapshot.value
 		emit('processed')
 	} catch (error: any) {

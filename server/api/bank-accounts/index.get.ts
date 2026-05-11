@@ -5,7 +5,7 @@ import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreeme
 import db from '~/lib/db'
 
 export default defineEventHandler(async (event) => {
-  setHeader(event, 'Cache-Control', 'private, max-age=60')
+  setHeader(event, 'Cache-Control', 'no-store')
 
   const base = await db
     .select({

@@ -246,9 +246,14 @@ const {
   data: accountingDimensionConfig,
   pending: accountingDimensionPending,
   error: accountingDimensionError,
+  refresh: refreshAccountingDimensions,
 } = await useFetch<AccountingDimensionsResponse>(
   '/api/settings/accounting-dimensions',
-  { key: 'accounting-dimensions' },
+  {
+    key: 'accounting-dimensions',
+    server: false,
+    default: () => ({ erpSupplier: '', dimensions: [], constraints: [] }),
+  },
 )
 
 const isAccountingDimensionConfigReady = computed(() =>
@@ -304,6 +309,15 @@ watch(
       savedSnapshot.value = null
       bypassUnsavedPromptOnce.value = false
       return
+    }
+
+    // Always refresh dimension config when opening.
+    if (process.client) {
+      try {
+        await refreshAccountingDimensions()
+      } catch {
+        // Error is exposed via accountingDimensionError
+      }
     }
 
     // When opening in create mode, the current in-memory state might be stale.
@@ -373,7 +387,7 @@ watchEffect(async () => {
 // Fetch rule tags
 // ---------------
 type RuleTag = { id: string }
-const { data: ruleTagsData } = await useFetch<RuleTag[]>('/api/rule-tags', { key: 'ruletags' })
+const { data: ruleTagsData } = await useFetch<RuleTag[]>('/api/rule-tags', { key: 'rule-tags' })
 const ruleTagOptions = computed(() =>
   (ruleTagsData.value ?? []).map(tag => ({
     label: tag.id,
@@ -682,7 +696,7 @@ const ruleSubmitSchema = computed(() =>
 // Options to USelect og USelectMenu elements
 // ------------------------------------------
 type AccountOption = { label: string; value: string }
-const { data: rawAccounts } = await useFetch<AccountSelectSchema[]>('/api/bank-accounts', { key: 'bankaccounts' })
+const { data: rawAccounts } = await useFetch<AccountSelectSchema[]>('/api/bank-accounts', { key: 'bank-accounts' })
 const accountOptions = computed<AccountOption[]>(() =>
   (rawAccounts.value ?? []).map(acc => ({
     label: acc.id,
@@ -812,6 +826,8 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
       }
       toast.add({ title: 'Regel oprettet', description: 'Den nye regel er blevet oprettet' })
     }
+
+    await refreshNuxtData('rules')
 
     // Close without prompting, then reset.
     bypassUnsavedPromptOnce.value = true
@@ -948,6 +964,8 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                       v-model="state.matchAmountMin"
                       placeholder="DKK"
                       :min="0"
+                      :step="0.01"
+                      :format-options="{ maximumFractionDigits: 2 }"
                       currency="DKK"
                       currencyDisplay="symbol"
                       class="min-w-fit"
@@ -958,6 +976,8 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                       v-model="state.matchAmountMax"
                       placeholder="DKK"
                       :min="0"
+                      :step="0.01"
+                      :format-options="{ maximumFractionDigits: 2 }"
                       currency="DKK"
                       currencyDisplay="symbol"
                       class="min-w-fit"
@@ -1090,6 +1110,23 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
             <template v-if="item.id === 'accounting'">
               <UCard variant="soft" :ui="{ body: 'space-y-4 p-4' }" class="w-full mt-6 mb-6">
                 <div class="grid grid-cols-1 gap-4 w-full max-w-full">
+                  <UAlert
+                    v-if="accountingDimensionError"
+                    variant="soft"
+                    color="error"
+                    title="Konteringsdimensioner"
+                    description="Kunne ikke indlæse konteringsdimensioner. Prøv at åbne modal'en igen."
+                  />
+                  <div v-else-if="accountingDimensionPending" class="flex justify-center py-2">
+                    <USkeleton class="h-6 w-56" />
+                  </div>
+                  <UAlert
+                    v-else-if="isAccountingDimensionConfigReady && accountingDimensionDefinitions.length === 0"
+                    variant="soft"
+                    color="neutral"
+                    title="Konteringsdimensioner"
+                    description="Der er ingen konteringsdimensioner konfigureret for den aktive ERP-integration."
+                  />
                   <UFormField
                     v-for="def in accountingDimensionDefinitions"
                     :key="def.id"

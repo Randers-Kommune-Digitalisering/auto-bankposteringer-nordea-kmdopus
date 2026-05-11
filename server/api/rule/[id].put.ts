@@ -19,6 +19,14 @@ import { ruleVersion, type RuleVersionInsertSchema } from '~/lib/db/schema/ruleV
 import { getActiveErpSupplier, listAccountingDimensionConstraints, listAccountingDimensionDefinitions, resolveDimensionValueRows } from '~~/server/utils/accountingDimensions'
 import { requireRoles } from '~~/server/auth/keycloakAuth'
 
+function toDbNumericStringOrUndefined(value: number | null | undefined): string | undefined {
+  if (value == null) return undefined
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw createError({ statusCode: 400, statusMessage: 'Ugyldigt beløb (amount_min/amount_max)' })
+  }
+  return value.toFixed(2)
+}
+
 function compileRuleDraftToDb(draft: RuleDraftSchema, newVersion: number, erpSupplier: string) {
   const {
     matches,
@@ -127,7 +135,11 @@ export default defineEventHandler(async (event) => {
   const dimensionConstraints = await listAccountingDimensionConstraints(activeSupplier)
 
   const { ruleData, bankAccountIds, tagIds, conditionRows, accountingParameters, attachments, versionContent } = compileRuleDraftToDb(parsed.data, newVersion, existingRule.erpSupplier)
-  const validatedDbPayload = createInsertSchema(rule).parse(ruleData)
+  const validatedDbPayload = createInsertSchema(rule).parse({
+    ...ruleData,
+    matchAmountMin: toDbNumericStringOrUndefined((ruleData as any).matchAmountMin),
+    matchAmountMax: toDbNumericStringOrUndefined((ruleData as any).matchAmountMax),
+  })
 
   await db.transaction(async (tx) => {
     const [updatedRule] = await tx.update(rule)

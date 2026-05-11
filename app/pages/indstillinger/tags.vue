@@ -24,6 +24,9 @@ const { data: ruleTags, pending, refresh: refreshRuleTags } = await useFetch<Rul
 	'/api/rule-tags',
 	{
 		key: RULE_TAGS_QUERY_KEY,
+		deep: true,
+		dedupe: 'cancel',
+		transform: (v) => Array.isArray(v) ? v.slice() : [],
 		default: () => []
 	}
 )
@@ -38,6 +41,17 @@ const refreshTags = async () => {
 }
 
 const rows = computed(() => [...(ruleTags.value ?? [])])
+
+const tableDataKey = computed(() => rows.value.map((t) => String(t.id)).join('|'))
+
+watch(
+	() => tableDataKey.value,
+	() => {
+		// If the dataset changes, keep the UI predictable by going back to page 1.
+		// Otherwise a newly created tag can land on a different page and look like "no refresh".
+		pagination.value = { ...pagination.value, pageIndex: 0 }
+	}
+)
 
 const createSortableHeader = (label: string) => ({ column }: { column: any }) => {
 	const sortingState = column.getIsSorted?.()
@@ -76,7 +90,6 @@ function handleEditTag(row: Row<RuleTagSelectSchema>) {
 
 async function handleSaved() {
 	editingTagId.value = null
-	await refreshTags()
 	modalOpen.value = false
 }
 
@@ -94,8 +107,7 @@ async function handleDeleteTag(row: Row<RuleTagSelectSchema>) {
 			description: `${capitalizeFirst(tagId)} er blevet fjernet.`
 		})
 
-		ruleTags.value = (ruleTags.value ?? []).filter((t) => t.id !== tagId)
-		await refreshTags()
+		await refreshNuxtData(RULE_TAGS_QUERY_KEY)
 	} catch (error) {
 		console.error('Fejl ved sletning af tag', error)
 		toast.add({
@@ -186,16 +198,17 @@ const pagination = ref({ pageIndex: 0, pageSize: 20 })
 
 		<template #body>
 			<div class="flex flex-wrap items-center justify-between gap-1.5">
-				<UiFloatingLabelInput
-					v-model="globalFilterValue"
-					class="max-w-sm"
-					icon="solar:magnifer-bold-duotone"
-					label="Søg efter et tag..."
-					color="neutral"
-				/>
+        <FiltersRow
+          v-model:search="globalFilterValue"
+          :show-search="true"
+					:show-accounts="false"
+					:show-date="false"
+					search-placeholder="Søg i tags..."
+        />
 			</div>
 
 			<UTable
+				:key="tableDataKey"
 				ref="table"
 				v-model:global-filter="globalFilterValue"
 				v-model:pagination="pagination"

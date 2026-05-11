@@ -4,7 +4,7 @@ import { ruleTagSelectSchema, ruleTag } from '~/lib/db/schema/ruleTag'
 import db from '~/lib/db'
 
 export default defineEventHandler(async (event) => {
-  setHeader(event, 'Cache-Control', 'private, max-age=60')
+  setHeader(event, 'Cache-Control', 'no-store')
 
   const storage = useStorage('rule-tags')
   const cached = await storage.getItem('list')

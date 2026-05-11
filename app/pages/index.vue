@@ -29,6 +29,7 @@ const end = computed(() => {
 
 const { data, status, refresh } = await useFetch<DashboardResponse>('/api/dashboard', {
 	key: computed(() => `dashboard:${start.value}:${end.value}`),
+	deep: true,
 	query: computed(() => ({
 		start: start.value,
 		end: end.value,

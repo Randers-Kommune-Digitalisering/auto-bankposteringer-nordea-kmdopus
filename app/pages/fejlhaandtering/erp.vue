@@ -54,9 +54,14 @@ const { data: failedList, pending: failedPending, refresh: refreshFailed } = awa
   '/api/fejlhaandtering/erp-requests/failed',
   {
     key: 'failed-erp-requests',
+    deep: true,
     default: () => ({ items: [] }),
   },
 )
+
+const failedTableKey = computed(() => (failedList.value?.items ?? []).map((i) => String(i.requestId)).join('|'))
+
+const erpLinesTableKey = computed(() => (erpLines.value?.lines ?? []).map((l) => `${l.lineNo}:${l.transactionId ?? ''}`).join('|'))
 
 async function refreshAll() {
   await refreshFailed()
@@ -397,6 +402,7 @@ async function reopenBookedTransactions() {
 
           <UTable
             v-else
+            :key="failedTableKey"
             :data="failedList.items"
             :columns="failedColumns"
             :loading="failedPending"
@@ -504,6 +510,7 @@ async function reopenBookedTransactions() {
 
                 <UTable
                   v-if="erpLines"
+                  :key="erpLinesTableKey"
                   :data="erpLines.lines"
                   :columns="linesColumns"
                   :loading="erpLinesLoading"
