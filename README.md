@@ -105,3 +105,14 @@ Der udvikles løbende nye features.
 ![](https://avatars.githubusercontent.com/u/5375661?s=36&v=4)  Node-RED som orkestrator
 
 ![](https://avatars.githubusercontent.com/u/6128107?s=36&v=4)  Vue som front-end framework
+
+
+der er noget PVC i kit her 
+https://github.com/Randers-Kommune-Digitalisering/kithosting-randers-kommune-apps/blob/0bc3600ccc8ac97a9a1dcb4de6be0dcde0b4e79a/auto-bankposteringer-nordea/values.yaml#L131
+
+    extraVolumes:
+      nordea-kmdopus-pvc: |
+        persistentVolumeClaim:
+          claimName: nordea-kmdopus-pvc
+
+i henhold til issue #215 skal der lige vurderes hvad der skal brues af database s3 eller lign.
