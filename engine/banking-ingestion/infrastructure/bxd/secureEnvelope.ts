@@ -172,6 +172,7 @@ export function buildBxdUploadFileApplicationRequestXml(
   const timestamp = parsed.timestamp ?? new Date()
 
   const compressionMethod = parsed.compressionMethod ?? 'GZIP'
+  const includeEncryption = parsed.encryption === true
 
   // Note: Element order follows XSD sequence.
   const xmlUnsigned =
@@ -181,11 +182,13 @@ export function buildBxdUploadFileApplicationRequestXml(
     `<Command>UploadFile</Command>` +
     `<Timestamp>${timestamp.toISOString()}</Timestamp>` +
     `<Environment>${escapeXml(parsed.environment)}</Environment>` +
-    (parsed.encryption === true ? `<Encryption>true</Encryption>` : '') +
-    (parsed.encryptionMethod ? `<EncryptionMethod>${escapeXml(parsed.encryptionMethod)}</EncryptionMethod>` : '') +
     (parsed.userFilename ? `<UserFilename>${escapeXml(parsed.userFilename)}</UserFilename>` : '') +
     `<TargetId>${escapeXml(parsed.signerId)}</TargetId>` +
     (parsed.executionSerial ? `<ExecutionSerial>${escapeXml(parsed.executionSerial)}</ExecutionSerial>` : '') +
+    (includeEncryption ? `<Encryption>true</Encryption>` : '') +
+    (includeEncryption && parsed.encryptionMethod
+      ? `<EncryptionMethod>${escapeXml(parsed.encryptionMethod)}</EncryptionMethod>`
+      : '') +
     (shouldCompress
       ? `<Compression>true</Compression><CompressionMethod>${escapeXml(compressionMethod)}</CompressionMethod>`
       : '') +
@@ -208,6 +211,7 @@ export function buildBxdDownloadFileListApplicationRequestXml(
 ): string {
   const parsed = bxdDownloadFileListRequestSchema.parse(input)
   const timestamp = parsed.timestamp ?? new Date()
+  const includeEncryption = parsed.encryption === true
 
   const xmlUnsigned =
     `<?xml version="1.0" encoding="UTF-8"?>` +
@@ -219,11 +223,13 @@ export function buildBxdDownloadFileListApplicationRequestXml(
     (parsed.endDate ? `<EndDate>${formatDateOnlyUtc(parsed.endDate)}</EndDate>` : '') +
     `<Status>${parsed.status}</Status>` +
     (parsed.serviceId ? `<ServiceId>${escapeXml(parsed.serviceId)}</ServiceId>` : '') +
-    (parsed.encryption === true ? `<Encryption>true</Encryption>` : '') +
-    (parsed.encryptionMethod ? `<EncryptionMethod>${escapeXml(parsed.encryptionMethod)}</EncryptionMethod>` : '') +
     `<Environment>${escapeXml(parsed.environment)}</Environment>` +
     `<TargetId>${escapeXml(parsed.signerId)}</TargetId>` +
     (parsed.executionSerial ? `<ExecutionSerial>${escapeXml(parsed.executionSerial)}</ExecutionSerial>` : '') +
+    (includeEncryption ? `<Encryption>true</Encryption>` : '') +
+    (includeEncryption && parsed.encryptionMethod
+      ? `<EncryptionMethod>${escapeXml(parsed.encryptionMethod)}</EncryptionMethod>`
+      : '') +
     `<SoftwareId>${escapeXml(parsed.softwareId)}</SoftwareId>` +
     (parsed.fileType ? `<FileType>${escapeXml(parsed.fileType)}</FileType>` : '') +
     `</ApplicationRequest>`
@@ -250,6 +256,7 @@ export function buildBxdDownloadFileApplicationRequestXml(
 
   const requestCompressed = parsed.requestCompressed === true
   const compressionMethod = parsed.compressionMethod ?? 'GZIP'
+  const includeEncryption = parsed.encryption === true
 
   const xmlUnsigned =
     `<?xml version="1.0" encoding="UTF-8"?>` +
@@ -258,12 +265,14 @@ export function buildBxdDownloadFileApplicationRequestXml(
     `<Command>DownloadFile</Command>` +
     `<Timestamp>${timestamp.toISOString()}</Timestamp>` +
     (parsed.serviceId ? `<ServiceId>${escapeXml(parsed.serviceId)}</ServiceId>` : '') +
-    (parsed.encryption === true ? `<Encryption>true</Encryption>` : '') +
-    (parsed.encryptionMethod ? `<EncryptionMethod>${escapeXml(parsed.encryptionMethod)}</EncryptionMethod>` : '') +
     `<Environment>${escapeXml(parsed.environment)}</Environment>` +
     fileRefsXml +
     `<TargetId>${escapeXml(parsed.signerId)}</TargetId>` +
     (parsed.executionSerial ? `<ExecutionSerial>${escapeXml(parsed.executionSerial)}</ExecutionSerial>` : '') +
+    (includeEncryption ? `<Encryption>true</Encryption>` : '') +
+    (includeEncryption && parsed.encryptionMethod
+      ? `<EncryptionMethod>${escapeXml(parsed.encryptionMethod)}</EncryptionMethod>`
+      : '') +
     (requestCompressed
       ? `<Compression>true</Compression><CompressionMethod>${escapeXml(compressionMethod)}</CompressionMethod>`
       : '') +

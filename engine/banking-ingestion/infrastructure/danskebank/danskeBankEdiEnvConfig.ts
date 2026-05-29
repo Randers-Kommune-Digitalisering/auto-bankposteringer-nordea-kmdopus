@@ -21,7 +21,6 @@ const schema = z.object({
   // If omitted, defaults to DANSKE_BANK_PKI_SENDER_ID.
   DANSKE_BANK_EDI_SENDER_ID: z.string().min(1).optional(),
   DANSKE_BANK_EDI_RECEIVER_ID: z.string().min(1).optional().default('Danske Bank'),
-  DANSKE_BANK_EDI_USER_AGENT: z.string().min(1),
   DANSKE_BANK_EDI_LANGUAGE: z.string().min(1).optional().default('EN'),
 
   // If omitted, defaults to DANSKE_BANK_PKI_CUSTOMER_ID.
@@ -31,6 +30,8 @@ const schema = z.object({
   DANSKE_BANK_SIGNER_ID: z.string().min(1).max(80).optional(),
   DANSKE_BANK_SOFTWARE_ID: z.string().min(1).max(80),
   DANSKE_BANK_ENVIRONMENT: z.enum(['TEST', 'PRODUCTION']).optional().default('TEST'),
+  DANSKE_BANK_FILE_STATUS: z.enum(['NEW', 'DLD', 'ALL']).optional().default('NEW'),
+  DANSKE_BANK_LOOKBACK_DAYS: z.coerce.number().int().min(1).max(365).optional().default(7),
 
   // PKIWS RequestHeader
   DANSKE_BANK_PKI_SENDER_ID: z.string().min(1),

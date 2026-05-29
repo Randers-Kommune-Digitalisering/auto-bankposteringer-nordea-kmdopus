@@ -3,6 +3,7 @@ import os from 'node:os'
 import path from 'node:path'
 import crypto from 'node:crypto'
 import { spawnSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 
 import {
   danskePkiCreateCertificate,
@@ -93,8 +94,8 @@ function runOpenSsl(cmd: string, args: string[], cwd: string) {
   }
 }
 
-async function main() {
-  const args = parseArgs(process.argv.slice(2))
+export async function runDanskePkiCreateCustomerCerts(rawArgv: string[] = process.argv.slice(2)) {
+  const args = parseArgs(rawArgv)
 
   if (args.help) {
     console.log(`\nDanske Bank PKIWS: Create customer certificates (signing + encryption)\n\nUsage:\n  pnpm tsx scripts/banking/danske/pkiws-create-customer-certs.ts \\\n    --mode CUSTOMERTEST|PRODUCTION \\\n    --pin <PIN_FROM_DANSKE> \\\n    --pki-sender-id <PKI_SENDER_ID> \\\n    --pki-customer-id <PKI_CUSTOMER_ID> \\\n    --subject-cn "Randers Kommune" \\\n    [--key-bits 2048] \\\n    [--pki-endpoint-url https://.../pkiservice.asmx] \\\n    [--bank-root-serial 1111110003]\n\nMode aliases:\n  TEST == CUSTOMERTEST\n  PROD == PRODUCTION\n\nQuick smoke test (PKIWS doc dummy mode, no args):\n  pnpm banking:danske:pkiws:smoke-docs\n\nShortcut (recommended):\n  pnpm banking:danske:pkiws:create-customer-certs -- <same args>\n\nEnv var shortcuts (preferred first):\n  DANSKE_BANK_PKI_PIN\n  DANSKE_BANK_PKI_SENDER_ID\n  DANSKE_BANK_PKI_CUSTOMER_ID\n\nCompatibility (also accepted):\n  DANSKE_PKI_PIN\n  DANSKE_PKI_SENDER_ID\n  DANSKE_PKI_CUSTOMER_ID\n\nExample (customertest):\n  pnpm banking:danske:pkiws:create-customer-certs -- \\\n    --mode customertest \\\n    --pin "123456" \\\n    --pki-sender-id "5Q4192" \\\n    --pki-customer-id "351340" \\\n    --subject-cn "Randers Kommune"\n\nOptions:\n  --doc-smoke-test       Run the spec's dummy checks against the customer test environment\n  --only-get-bank-certs  Only call GetBankCertificate (no PIN, no key/CSR)\n  --confirm-production   Required to call CreateCertificate in production\n\nOutputs:\n  - Private key PEM + base64\n  - Signing certificate PEM + base64\n  - Encryption certificate PEM + base64\n  - Suggested env vars for runtime\n\nSECURITY NOTE:\n  This prints secrets to stdout. Run it in a safe terminal and store outputs immediately.\n`)
@@ -279,5 +280,9 @@ async function main() {
   }
 }
 
-// eslint-disable-next-line unicorn/prefer-top-level-await
-main()
+const isDirectExecution = process.argv[1] === fileURLToPath(import.meta.url)
+
+if (isDirectExecution) {
+  // eslint-disable-next-line unicorn/prefer-top-level-await
+  runDanskePkiCreateCustomerCerts()
+}
