@@ -32,6 +32,27 @@ Operational detail (EDIWS v5.0): EDIWS validates a SOAP-level XMLDSig signature 
 
 Operational detail (Nordea CA Web Services): Nordea requires WS-Security `Timestamp` and a SOAP-level XMLDSig signature over the SOAP Body. For account statements we default to the Corporate Access file type `NDAREXXMLO` (CAMT.053 extended).
 
+### Certificate enrollment (provider-agnostic)
+
+Certificate enrollment is modeled as a provider-dispatch operation under `scripts/banking/pki/create-customer-certs.ts`.
+
+- Shared entrypoint: `pnpm banking:pki:create-customer-certs -- --provider <vendor> ...`
+- Provider implementations live under `scripts/banking/<vendor>/`.
+- Runtime ingestion uses persisted key/certificate material; enrollment is an operational provisioning workflow, not part of the stateless matching/posting engine path.
+
+Current providers:
+
+- Danske Bank: PKIWS-based provisioning script.
+- Nordea: CertificateService SOAP-based provisioning script (best effort from public docs/WSDL shape).
+
+Security posture for enrollment workflows:
+
+- Prefer secret input via files/env over plaintext CLI arguments.
+- Keep generated key/cert artifacts in workspace-local secret paths (for example `.secrets/`) and out of git.
+- Avoid printing secret material by default where provider implementation allows it.
+
+For operational commands and provider-specific parameters, see `docs/CERTIFICATE_ENROLLMENT_RUNBOOK.md` (cross-vendor runbook).
+
 ### Selecting an adapter (runtime)
 
 At runtime the batch ingestion handler selects a bank adapter **deterministically from persisted database state**:

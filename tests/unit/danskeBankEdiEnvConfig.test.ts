@@ -8,7 +8,6 @@ describe('loadDanskeBankEdiEnvConfig', () => {
       DANSKE_BANK_PKI_SENDER_ID: '5Q4192',
       DANSKE_BANK_PKI_CUSTOMER_ID: '351340',
 
-      DANSKE_BANK_EDI_USER_AGENT: 'EDI WS RANDERS KOMMUNE',
       DANSKE_BANK_SOFTWARE_ID: 'SOFTWARE',
     } as any)
 
@@ -25,7 +24,6 @@ describe('loadDanskeBankEdiEnvConfig', () => {
       DANSKE_BANK_EDI_SENDER_ID: 'EDI',
       DANSKE_BANK_CUSTOMER_ID: 'EDI-CUST',
 
-      DANSKE_BANK_EDI_USER_AGENT: 'UA',
       DANSKE_BANK_SIGNER_ID: 'SIGNER',
       DANSKE_BANK_SOFTWARE_ID: 'SOFTWARE',
     } as any)

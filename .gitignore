@@ -27,3 +27,6 @@ logs
 # Local env files
 .env
 .env.*
+
+# Local secret artifacts (cert enrollment outputs, response XML, key material)
+.secrets/

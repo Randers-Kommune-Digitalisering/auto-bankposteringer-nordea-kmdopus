@@ -74,6 +74,10 @@ function parseResponseHeaderOrNull(doc: any): { responseCode: string; responseTe
   return { responseCode, responseText }
 }
 
+function compactSnippet(value: string, maxLength = 500): string {
+  return value.replace(/\s+/g, ' ').slice(0, maxLength)
+}
+
 async function postSoap(options: {
   endpointUrl: string
   xmlBody: string
@@ -117,7 +121,7 @@ export const danskeEdiWsConfigSchema = z.object({
   // RequestHeader fields
   senderId: z.string().min(1),
   receiverId: z.string().min(1).default('Danske Bank'),
-  userAgent: z.string().min(1),
+  userAgent: z.string().min(1).optional().default('AutoBankposteringer'),
   language: z.string().min(1).default('EN'),
 
   // ApplicationRequest fields
@@ -265,7 +269,18 @@ export async function danskeEdiDownloadFileList(cfgInput: DanskeEdiWsConfig, inp
 
   const responseHeader = parseResponseHeaderOrNull(soapDoc)
   if (responseHeader && responseHeader.responseCode !== '00') {
-    throw new Error(`EDIWS downloadFileList: ResponseHeader ${responseHeader.responseCode} ${responseHeader.responseText}`)
+    const context = [
+      `senderId=${cfg.senderId}`,
+      `receiverId=${cfg.receiverId}`,
+      `customerId=${cfg.customerId}`,
+      `signerId=${cfg.signerId}`,
+      `softwareId=${cfg.softwareId}`,
+      `requestId=${requestId}`,
+    ].join(', ')
+    const soapSnippet = compactSnippet(responseXml)
+    throw new Error(
+      `EDIWS downloadFileList: ResponseHeader ${responseHeader.responseCode} ${responseHeader.responseText}. context: ${context}. soapSnippet: ${soapSnippet}`,
+    )
   }
 
   const appRespB64 = firstText(soapDoc, 'ApplicationResponse')
@@ -378,7 +393,18 @@ export async function danskeEdiDownloadFile(cfgInput: DanskeEdiWsConfig, input: 
 
   const responseHeader = parseResponseHeaderOrNull(soapDoc)
   if (responseHeader && responseHeader.responseCode !== '00') {
-    throw new Error(`EDIWS downloadFile: ResponseHeader ${responseHeader.responseCode} ${responseHeader.responseText}`)
+    const context = [
+      `senderId=${cfg.senderId}`,
+      `receiverId=${cfg.receiverId}`,
+      `customerId=${cfg.customerId}`,
+      `signerId=${cfg.signerId}`,
+      `softwareId=${cfg.softwareId}`,
+      `requestId=${requestId}`,
+    ].join(', ')
+    const soapSnippet = compactSnippet(responseXml)
+    throw new Error(
+      `EDIWS downloadFile: ResponseHeader ${responseHeader.responseCode} ${responseHeader.responseText}. context: ${context}. soapSnippet: ${soapSnippet}`,
+    )
   }
 
   const appRespB64 = firstText(soapDoc, 'ApplicationResponse')

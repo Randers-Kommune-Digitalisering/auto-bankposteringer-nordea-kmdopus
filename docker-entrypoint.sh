@@ -100,4 +100,11 @@ else
   fi
 fi
 
+# Temporary compatibility switch for bank response decryption using RSA v1.5.
+# Enabled only when explicitly requested in local/test environments.
+if [ "${NODE_SECURITY_REVERT_CVE_2023_46809:-0}" = "1" ] && [ "${1:-}" = "pnpm" ]; then
+  shift
+  set -- node --security-revert=CVE-2023-46809 "$(command -v pnpm)" "$@"
+fi
+
 exec "$@"
