@@ -31,7 +31,7 @@ export const danskeBankEdiWsConfigSchema = z.object({
   // EDI RequestHeader
   senderId: z.string().min(1),
   receiverId: z.string().min(1).default('Danske Bank'),
-  userAgent: z.string().min(1),
+  userAgent: z.string().min(1).optional().default('AutoBankposteringer'),
   language: z.string().min(1).default('EN'),
 
   // ApplicationRequest
@@ -39,6 +39,8 @@ export const danskeBankEdiWsConfigSchema = z.object({
   signerId: z.string().min(1).max(80),
   softwareId: z.string().min(1).max(80),
   environment: z.enum(['TEST', 'PRODUCTION']).default('TEST'),
+  downloadStatus: z.enum(['NEW', 'DLD', 'ALL']).default('NEW'),
+  lookbackDays: z.number().int().min(1).max(365).default(7),
 
   // PKIWS RequestHeader (often equals customer id)
   pkiSenderId: z.string().min(1),
@@ -109,12 +111,12 @@ export class DanskeBankEdiWebServicesAdapter implements BankAdapter {
     }
 
     // 2) Fetch available file references.
-    // Default strategy (safe + deterministic): pull a rolling window (7 days) and rely on content hash for idempotency.
+    // Default strategy: pull a rolling window and rely on content hash for idempotency.
     const endDate = new Date()
-    const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000)
+    const startDate = new Date(endDate.getTime() - cfg.lookbackDays * 24 * 60 * 60 * 1000)
 
     const list = await danskeEdiDownloadFileList(ediCfg, {
-      status: 'NEW',
+      status: cfg.downloadStatus,
       startDate,
       endDate,
     })
