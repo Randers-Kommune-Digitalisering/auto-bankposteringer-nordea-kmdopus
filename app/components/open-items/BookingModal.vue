@@ -10,6 +10,7 @@ import type { ManualBookingFormState as ManualFormState } from '#engine/manual-b
 const props = defineProps<{
 	open: boolean
 	transaction: OpenTransaction | null
+	groupTransactions?: OpenTransaction[] | null
 }>()
 const transaction = toRef(props, 'transaction')
 
@@ -82,6 +83,9 @@ const {
 })
 
 const summary = computed<TransactionSummary | null>(() => transaction.value?.summary ?? null)
+const groupTransactions = computed<OpenTransaction[]>(() => props.groupTransactions ?? [])
+const isGroupMode = computed(() => groupTransactions.value.length > 1)
+const groupTransactionIds = computed(() => groupTransactions.value.map((entry) => entry.id))
 
 const dimensionLabel = (key: string) => key.charAt(0).toUpperCase() + key.slice(1)
 
@@ -120,6 +124,24 @@ watch(
 	() => [open.value, transaction.value?.id] as const,
 	async ([isOpen, txId]) => {
 		if (!isOpen || !txId) return
+		if (isGroupMode.value) {
+			const payload = {
+				lines: groupTransactions.value.map((entry) => ({
+					amount: Math.abs(Number(entry.amount) || 0),
+					text: 'Tekst fra bank',
+					dimensions: [],
+				})),
+				text: 'Tekst fra bank',
+				cprType: 'ingen' as const,
+				cprNumber: '',
+				notifyTo: '',
+				note: '',
+			}
+			applyManualBookingPayload(payload)
+			await nextTick()
+			savedSnapshot.value = currentSnapshot.value
+			return
+		}
 		try {
 			isLoadingDraft.value = true
 			const response = await $fetch<{ draft: any }>(`/api/transactions/${txId}/draft`)
@@ -154,13 +176,25 @@ async function handleSubmit(event?: FormSubmitEvent<ManualFormState>) {
 
 	try {
 		isSubmitting.value = true
-		await $fetch(`/api/transactions/${transaction.value.id}/process`, {
-			method: 'POST',
-			body: payload
-		})
+		if (isGroupMode.value) {
+			await $fetch('/api/transactions/group/process', {
+				method: 'POST',
+				body: {
+					transactionIds: groupTransactionIds.value,
+					payload,
+				},
+			})
+		} else {
+			await $fetch(`/api/transactions/${transaction.value.id}/process`, {
+				method: 'POST',
+				body: payload
+			})
+		}
 		toast.add({
 			title: 'Postering sendt',
-			description: `Transaktion ${transaction.value.id} er sendt til ERP`,
+			description: isGroupMode.value
+				? `Samlepost med ${groupTransactionIds.value.length} transaktioner er sendt til ERP`
+				: `Transaktion ${transaction.value.id} er sendt til ERP`,
 			color: 'primary'
 		})
 		await refreshNuxtData('open-transactions')
@@ -179,6 +213,7 @@ async function handleSubmit(event?: FormSubmitEvent<ManualFormState>) {
 }
 
 async function handleSaveDraft() {
+	if (isGroupMode.value) return
 	if (!transaction.value) return
 	if (!isAccountingDimensionConfigReady.value) {
 		toast.add({
@@ -217,12 +252,20 @@ async function handleSaveDraft() {
 </script>
 
 <template>
-	<UModal v-model:open="open" :title="transaction ? 'Konter transaktion' : 'Vælg transaktion'">
+	<UModal v-model:open="open" :title="transaction ? (isGroupMode ? 'Konter samlepost' : 'Konter transaktion') : 'Vælg transaktion'">
 		<template #body>
 			<div v-if="!transaction" class="py-8 text-center text-sm text-gray-500">
 				Vælg en transaktion for at starte behandlingen
 			</div>
 			<div v-else class="space-y-4">
+				<UAlert
+					v-if="isGroupMode"
+					variant="soft"
+					color="primary"
+					icon="solar:layers-bold-duotone"
+					:title="`Samlepost med ${groupTransactionIds.length} transaktioner`"
+					description="Hver transaktion er forudfyldt som en finanslinje. Justér linjer efter behov før afsendelse."
+				/>
 				<div
 					v-if="(formState.note ?? '').trim().length > 0"
 					class="rounded-md border border-default bg-default px-3 py-2 text-sm border-l-4 border-l-primary/60"
@@ -393,6 +436,7 @@ async function handleSaveDraft() {
 
 						<div class="flex items-center justify-end gap-3 pt-4">
 							<UButton
+								v-if="!isGroupMode"
 								variant="soft"
 								color="primary"
 								icon="solar:diskette-bold-duotone"

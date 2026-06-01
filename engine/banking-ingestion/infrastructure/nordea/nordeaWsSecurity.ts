@@ -28,13 +28,16 @@ function buildTimestampXml(ts: WsseTimestamp): string {
 }
 
 class WsseKeyInfoProvider {
-  constructor(private readonly tokenId: string) {}
+  constructor(private readonly certificateDerBase64: string) {}
 
   getKeyInfo(): string {
     return (
       `<wsse:SecurityTokenReference>` +
-      `<wsse:Reference URI="#${this.tokenId}" ` +
-      `ValueType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3"/>` +
+      `<wsse:KeyIdentifier ` +
+      `EncodingType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary" ` +
+      `ValueType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3">` +
+      `${this.certificateDerBase64}` +
+      `</wsse:KeyIdentifier>` +
       `</wsse:SecurityTokenReference>`
     )
   }
@@ -82,6 +85,7 @@ export function buildSignedSoapEnvelope(options: {
     privateKey: normalizePem(options.signingPrivateKeyPem),
     signatureAlgorithm: 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
     canonicalizationAlgorithm: 'http://www.w3.org/2001/10/xml-exc-c14n#',
+    getKeyInfoContent: () => new WsseKeyInfoProvider(certPemToDerBase64(options.signingCertificatePem)).getKeyInfo(),
   })
 
   signer.addReference({
@@ -90,8 +94,6 @@ export function buildSignedSoapEnvelope(options: {
     digestAlgorithm: 'http://www.w3.org/2001/04/xmlenc#sha256',
     transforms: ['http://www.w3.org/2001/10/xml-exc-c14n#'],
   })
-
-  signer.keyInfoProvider = new WsseKeyInfoProvider(tokenId) as any
 
   signer.computeSignature(unsignedSoap, {
     location: {

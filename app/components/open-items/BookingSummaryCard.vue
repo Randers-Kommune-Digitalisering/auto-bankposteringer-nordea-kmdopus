@@ -63,13 +63,47 @@ type SectionEntry = {
 	values: Array<{ value: string; hint?: string }>
 }
 
+function splitTriadTokens(values: string[]): string[] {
+	return values
+		.flatMap((value) => String(value ?? '').split(';'))
+		.map((value) => value.trim())
+		.filter(Boolean)
+}
+
+function parseTriadToken(token: string): { code: string; label: string; value: string } | null {
+	const match = /^(\d{2,3}):([^:]+):(.*)$/.exec(token)
+	if (!match) return null
+	const code = String(match[1] ?? '').trim()
+	const label = String(match[2] ?? '').trim()
+	const value = String(match[3] ?? '').trim()
+	if (!code || !label || !value) return null
+	return { code, label, value }
+}
+
 function toSectionEntry(section: TransactionSummarySection): SectionEntry {
 	if (section.key === 'fritekst') {
+		const tokens = splitTriadTokens(section.chips)
+		const triadBadges: Array<{ value: string; hint?: string }> = []
+		const freeTextBadges: Array<{ value: string; hint?: string }> = []
+
+		for (const token of tokens) {
+			const triad = parseTriadToken(token)
+			if (!triad) {
+				freeTextBadges.push({ value: token })
+				continue
+			}
+
+			triadBadges.push({
+				value: `${triad.code} · ${triad.label} · ${triad.value}`,
+				hint: `${triad.code}:${triad.label}`,
+			})
+		}
+
 		return {
 			key: section.key,
 			label: section.label,
 			color: sectionColor(section.key),
-			values: section.chips.map((chip) => ({ value: chip })),
+			values: [...triadBadges, ...freeTextBadges],
 		}
 	}
 	return {
@@ -100,19 +134,15 @@ const sectionEntries = computed<SectionEntry[]>(() => orderedSections.value.map(
         <span>{{ directionLabel }}</span>
       </UBadge>
       <!-- Amount -->
-      <div class="space-y-1 text-center mt-2 mb-12">
+			<div class="space-y-1 text-center mt-2 mb-6">
         <p class="text-xs font-medium uppercase tracking-wide">{{ summary.amount.label }}</p>
         <p class="text-3xl font-bold">{{ summary.amount.value }}</p>
       </div>
       <!-- Metadata -->
-      <div class="flex flex-wrap items-start justify-between gap-4 mt-2">
-        <div>
-          <p class="text-xs font-medium uppercase tracking-wide">{{ summary.transactionId.label }}</p>
-          <p class="text-sm font-bold">{{ summary.transactionId.value }}</p>
-        </div>
-        <div>
-          <p class="text-xs font-medium uppercase tracking-wide">{{ summary.bookingDate.label }}</p>
-          <p class="text-sm font-bold">{{ summary.bookingDate.value }}</p>
+			<div class="flex flex-wrap items-start justify-center gap-4 mt-0">
+				<div class="text-center">
+					<p class="text-center text-xs font-medium uppercase tracking-wide">{{ summary.bookingDate.label }}</p>
+					<p class="text-center text-sm font-bold">{{ summary.bookingDate.value }}</p>
         </div>
       </div>
     </template>

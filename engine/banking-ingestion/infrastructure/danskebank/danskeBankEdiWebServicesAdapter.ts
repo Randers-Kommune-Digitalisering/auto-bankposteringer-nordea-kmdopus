@@ -41,6 +41,7 @@ export const danskeBankEdiWsConfigSchema = z.object({
   environment: z.enum(['TEST', 'PRODUCTION']).default('TEST'),
   downloadStatus: z.enum(['NEW', 'DLD', 'ALL']).default('NEW'),
   lookbackDays: z.number().int().min(1).max(365).default(7),
+  maxFilesPerRun: z.number().int().min(1).max(100).default(25),
 
   // PKIWS RequestHeader (often equals customer id)
   pkiSenderId: z.string().min(1),
@@ -110,18 +111,22 @@ export class DanskeBankEdiWebServicesAdapter implements BankAdapter {
       mtlsClientPrivateKeyPem: cfg.mtlsClientPrivateKeyPem,
     }
 
-    // 2) Fetch available file references.
-    // Default strategy: pull a rolling window and rely on content hash for idempotency.
-    const endDate = new Date()
-    const startDate = new Date(endDate.getTime() - cfg.lookbackDays * 24 * 60 * 60 * 1000)
-
-    const list = await danskeEdiDownloadFileList(ediCfg, {
+    // Daily default: query NEW files and let the bank decide unread set.
+    // Date window is only used for explicit backfill modes (DLD/ALL).
+    const listInput: Parameters<typeof danskeEdiDownloadFileList>[1] = {
       status: cfg.downloadStatus,
-      startDate,
-      endDate,
-    })
+    }
+    if (cfg.downloadStatus !== 'NEW') {
+      const endDate = new Date()
+      const startDate = new Date(endDate.getTime() - cfg.lookbackDays * 24 * 60 * 60 * 1000)
+      listInput.startDate = startDate
+      listInput.endDate = endDate
+    }
 
-    const limit = input.limit ?? 25
+    const list = await danskeEdiDownloadFileList(ediCfg, listInput)
+
+    const requestedLimit = input.limit ?? cfg.maxFilesPerRun
+    const limit = Math.max(1, Math.min(requestedLimit, cfg.maxFilesPerRun))
     const refs = list.fileReferences.slice(0, limit)
 
     const documents = [] as FetchBankDocumentsOutput['documents']

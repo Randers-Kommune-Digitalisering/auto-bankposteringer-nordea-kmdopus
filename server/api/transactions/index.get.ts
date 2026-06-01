@@ -6,10 +6,9 @@ import { transaction, transactionProcessing } from "~/lib/db/schema/transaction"
 import { presentOpenTransaction } from "../../presenters/openTransactionPresenter";
 import type { OpenTransaction, OpenTransactionInput } from "~/types/transactions";
 import { parseAmount } from "#engine/matching/domain/amount";
+import { buildNordeaDeterministicGroupKey } from "#engine/banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo";
 
 export default defineEventHandler(async (event) => {
-  let payload: OpenTransaction[] = [];
-
   const rows = await db
     .select({
       id: transaction.id,
@@ -51,17 +50,27 @@ export default defineEventHandler(async (event) => {
     .orderBy(desc(transaction.bookingDate))
     .limit(200);
 
-  payload = rows
+  const normalized = rows
     .filter((row) => row.id && row.runId)
-    .map<OpenTransaction>((row) => {
+    .map((row) => {
       const amountAbs = Math.abs(parseNumeric(row.amount));
       const isOutgoing = String(row.creditDebitIndicator ?? '').toUpperCase() === 'DBIT'
       const amount = isOutgoing ? -amountAbs : amountAbs;
 
+      const bookingDateIso = toIsoDate(row.bookingDate)
+      const bookingDate = new Date(bookingDateIso)
+      const groupKey = buildNordeaDeterministicGroupKey({
+        accountId: row.accountId ?? '',
+        bookingDate,
+        creditDebitIndicator: row.creditDebitIndicator ?? null,
+        entryAdditionalInfo: row.entryAdditionalInfo ?? null,
+      })
+
       const base: OpenTransactionInput = {
         id: row.id!,
         runId: row.runId!,
-        bookingDate: toIsoDate(row.bookingDate),
+        groupKey,
+        bookingDate: bookingDateIso,
         amount,
         accountId: row.accountId ?? "",
         bankAccountName: row.bankAccountName ?? null,
@@ -71,9 +80,10 @@ export default defineEventHandler(async (event) => {
         counterpart: resolveCounterpart(amount, row),
         references: buildReferences(row),
       };
-
-      return presentOpenTransaction(base);
+      return base
     });
+
+  const payload = normalized.map<OpenTransaction>((entry) => presentOpenTransaction(entry));
 
   setHeader(event, "X-Data-Source", "db");
   return payload;

@@ -46,6 +46,13 @@ const baseCommonSchema = z.object({
   // Keep stateless: this only changes runtime behavior based on env.
   DEV_AUTH_BYPASS: z.enum(['true', 'false']).optional().default('false').transform(v => v === 'true'),
 
+  // Controls whether members of deterministic grouped open items can be processed individually in UI.
+  OPEN_ITEMS_ALLOW_GROUP_MEMBER_PROCESSING: z
+    .enum(['true', 'false'])
+    .optional()
+    .default('false')
+    .transform(v => v === 'true'),
+
   // Retention policy for deleting sensitive/history tables.
   // Default is 90 days if unset.
   DATA_RETENTION_DAYS: z.coerce.number().int().min(1).max(3650).default(90),
