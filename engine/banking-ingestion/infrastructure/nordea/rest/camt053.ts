@@ -80,10 +80,14 @@ function normalizeAmountAndIndicator(input: {
 }
 
 type ScaledDecimal = { int: bigint; scale: number }
+const BIGINT_ZERO = BigInt(0)
+const BIGINT_ONE = BigInt(1)
+const BIGINT_TEN = BigInt(10)
+const BIGINT_NEG_ONE = BigInt(-1)
 
 function pow10BigInt(exp: number): bigint {
-  let out = 1n
-  for (let i = 0; i < exp; i += 1) out *= 10n
+  let out = BIGINT_ONE
+  for (let i = 0; i < exp; i += 1) out *= BIGINT_TEN
   return out
 }
 
@@ -91,7 +95,7 @@ function parseScaledDecimal(value: string): ScaledDecimal {
   const t = normalizeDecimalString(value)
   if (!t) throw new Error('Missing decimal')
 
-  const sign = t.startsWith('-') ? -1n : 1n
+  const sign = t.startsWith('-') ? BIGINT_NEG_ONE : BIGINT_ONE
   const unsigned = t.replace(/^[+-]/, '')
   const [intPartRaw, fracRaw = ''] = unsigned.split('.')
   const intPart = (intPartRaw ?? '').replace(/^0+(?=\d)/, '')
@@ -104,14 +108,14 @@ function parseScaledDecimal(value: string): ScaledDecimal {
 
 function alignScales(a: ScaledDecimal, b: ScaledDecimal): { a: bigint; b: bigint; scale: number } {
   const scale = Math.max(a.scale, b.scale)
-  const aMul = scale > a.scale ? pow10BigInt(scale - a.scale) : 1n
-  const bMul = scale > b.scale ? pow10BigInt(scale - b.scale) : 1n
+  const aMul = scale > a.scale ? pow10BigInt(scale - a.scale) : BIGINT_ONE
+  const bMul = scale > b.scale ? pow10BigInt(scale - b.scale) : BIGINT_ONE
   return { a: a.int * aMul, b: b.int * bMul, scale }
 }
 
 function formatScaledDecimal(value: ScaledDecimal): string {
-  const sign = value.int < 0n ? '-' : ''
-  const abs = value.int < 0n ? -value.int : value.int
+  const sign = value.int < BIGINT_ZERO ? '-' : ''
+  const abs = value.int < BIGINT_ZERO ? -value.int : value.int
   if (value.scale <= 0) return `${sign}${abs.toString()}`
 
   const s = abs.toString().padStart(value.scale + 1, '0')
@@ -137,8 +141,8 @@ function inferOpeningBalanceFromAfterTx(input: {
   const openingAligned = afterAligned - signedAmt
 
   const opening: ScaledDecimal = { int: openingAligned, scale }
-  const openingIndicator: 'CRDT' | 'DBIT' = opening.int < 0n ? 'DBIT' : 'CRDT'
-  const openingAbs: ScaledDecimal = { int: opening.int < 0n ? -opening.int : opening.int, scale }
+  const openingIndicator: 'CRDT' | 'DBIT' = opening.int < BIGINT_ZERO ? 'DBIT' : 'CRDT'
+  const openingAbs: ScaledDecimal = { int: opening.int < BIGINT_ZERO ? -opening.int : opening.int, scale }
   return {
     openingAmountAbs: formatScaledDecimal(openingAbs),
     openingIndicator,

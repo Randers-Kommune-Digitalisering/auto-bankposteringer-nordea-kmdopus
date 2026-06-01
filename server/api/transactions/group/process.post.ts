@@ -5,12 +5,6 @@ import db from '~/lib/db'
 import { account } from '~/lib/db/schema/account'
 import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreementAccountDimension'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
-import {
-  manualBookingDraft,
-  manualBookingDraftAttachment,
-  manualBookingDraftLine,
-  manualBookingDraftLineDimension,
-} from '~/lib/db/schema/manualBookingDraft'
 import { manualBookingPayloadSchema, type CprType } from '#engine/manual-booking/domain/manualBooking'
 import type { PostingAttachment } from '#engine/posting/domain/posting'
 import { buildPostingCommand, executePostingCommand } from '#engine/posting/handlers/postingCommand'
@@ -26,44 +20,41 @@ import {
 } from '~~/server/utils/accountingDimensions'
 import { requireRoles } from '~~/server/auth/keycloakAuth'
 import { parseAmount } from '#engine/matching/domain/amount'
-import env from '~/lib/env/env'
 import { buildNordeaDeterministicGroupKey } from '#engine/banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo'
+
+const groupProcessSchema = z.object({
+  transactionIds: z.array(z.string().uuid()).min(2),
+  payload: manualBookingPayloadSchema,
+})
 
 export default defineEventHandler(async (event) => {
   await requireRoles(event, ['write'])
-  const transactionIdParam = event.context.params?.id;
-  if (!transactionIdParam) {
-    throw createError({ statusCode: 400, statusMessage: "Mangler transaktions-id" });
+
+  const parsed = groupProcessSchema.safeParse(await readBody(event))
+  if (!parsed.success) {
+    throw createError({ statusCode: 400, statusMessage: 'Ugyldig payload for samlepost-behandling' })
   }
 
-  const transactionIdResult = z.string().uuid().safeParse(transactionIdParam);
-  if (!transactionIdResult.success) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Transaktionen kan ikke behandles (ugyldigt id eller mock-data)",
-    });
-  }
-  const transactionId = transactionIdResult.data;
+  const transactionIds = Array.from(new Set(parsed.data.transactionIds))
+  const body = parsed.data.payload
 
-  const body = manualBookingPayloadSchema.parse(await readBody(event));
-
-  if (body.cprType === "statisk" && !normalizeDigits(body.cprNumber)) {
+  if (body.cprType === 'statisk' && !normalizeDigits(body.cprNumber)) {
     throw createError({
       statusCode: 422,
-      statusMessage: "CPR-nummer er påkrævet, når CPR-type er statisk",
-    });
+      statusMessage: 'CPR-nummer er påkrævet, når CPR-type er statisk',
+    })
   }
 
-  const [row] = await db
+  const rows = await db
     .select({
       id: transaction.id,
       runId: transaction.runId,
       bookingDate: transaction.bookingDate,
-      creditDebitIndicator: transaction.creditDebitIndicator,
       amount: transaction.amount,
       accountId: transaction.accountId,
       accountProvider: account.provider,
       accountIban: account.iban,
+      creditDebitIndicator: transaction.creditDebitIndicator,
       debtorName: transaction.debtorName,
       debtorId: transaction.debtorId,
       creditorName: transaction.creditorName,
@@ -79,73 +70,61 @@ export default defineEventHandler(async (event) => {
     .from(transaction)
     .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
     .leftJoin(account, eq(transaction.accountId, account.id))
-    .where(eq(transaction.id, transactionId))
-    .limit(1);
+    .where(inArray(transaction.id, transactionIds))
 
-  if (!row || !row.id || !row.runId) {
-    throw createError({ statusCode: 404, statusMessage: "Transaktion blev ikke fundet" });
+  if (rows.length !== transactionIds.length) {
+    throw createError({ statusCode: 404, statusMessage: 'En eller flere transaktioner blev ikke fundet' })
   }
 
-  if (row.processingStatus && row.processingStatus !== "åben") {
-    throw createError({ statusCode: 409, statusMessage: "Transaktionen er allerede behandlet" });
+  for (const row of rows) {
+    if (row.processingStatus && row.processingStatus !== 'åben') {
+      throw createError({ statusCode: 409, statusMessage: 'En eller flere transaktioner er allerede behandlet' })
+    }
   }
 
-  if (!env.OPEN_ITEMS_ALLOW_GROUP_MEMBER_PROCESSING) {
-    const bookingDate = toDate(row.bookingDate)
-    const groupKey = buildNordeaDeterministicGroupKey({
+  const first = rows[0]
+  if (!first?.runId) {
+    throw createError({ statusCode: 409, statusMessage: 'Mangler run-id for samleposten' })
+  }
+
+  const accountId = first.accountId
+  const creditDebitIndicator = first.creditDebitIndicator ?? null
+  const bookingDate = toDate(first.bookingDate)
+
+  const expectedGroupKey = buildNordeaDeterministicGroupKey({
+    accountId,
+    bookingDate,
+    creditDebitIndicator,
+    entryAdditionalInfo: first.entryAdditionalInfo ?? null,
+  })
+
+  if (!expectedGroupKey) {
+    throw createError({ statusCode: 409, statusMessage: 'Transaktionerne udgør ikke en deterministisk samlepost' })
+  }
+
+  for (const row of rows) {
+    if (row.accountId !== accountId) {
+      throw createError({ statusCode: 409, statusMessage: 'Samlepost kræver samme konto på alle linjer' })
+    }
+
+    if ((row.creditDebitIndicator ?? null) !== creditDebitIndicator) {
+      throw createError({ statusCode: 409, statusMessage: 'Samlepost kræver samme debet/kredit-retning på alle linjer' })
+    }
+
+    const rowGroupKey = buildNordeaDeterministicGroupKey({
       accountId: row.accountId,
-      bookingDate,
+      bookingDate: toDate(row.bookingDate),
       creditDebitIndicator: row.creditDebitIndicator ?? null,
       entryAdditionalInfo: row.entryAdditionalInfo ?? null,
     })
 
-    if (groupKey) {
-      const creditDebitCondition = row.creditDebitIndicator == null
-        ? isNull(transaction.creditDebitIndicator)
-        : eq(transaction.creditDebitIndicator, row.creditDebitIndicator)
-
-      const groupCandidates = await db
-        .select({
-          id: transaction.id,
-          accountId: transaction.accountId,
-          bookingDate: transaction.bookingDate,
-          creditDebitIndicator: transaction.creditDebitIndicator,
-          entryAdditionalInfo: transaction.entryAdditionalInfo,
-          processingStatus: transactionProcessing.status,
-        })
-        .from(transaction)
-        .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
-        .where(and(
-          eq(transaction.accountId, row.accountId),
-          eq(transaction.bookingDate, bookingDate),
-          creditDebitCondition,
-        ))
-
-      const openMembers = groupCandidates.filter(
-        (candidate) => !candidate.processingStatus || candidate.processingStatus === 'åben',
-      )
-      const groupedOpenCount = openMembers.filter((candidate) => {
-        const candidateKey = buildNordeaDeterministicGroupKey({
-          accountId: candidate.accountId,
-          bookingDate: toDate(candidate.bookingDate),
-          creditDebitIndicator: candidate.creditDebitIndicator ?? null,
-          entryAdditionalInfo: candidate.entryAdditionalInfo ?? null,
-        })
-        return candidateKey === groupKey
-      }).length
-
-      if (groupedOpenCount > 1) {
-        throw createError({
-          statusCode: 409,
-          statusMessage: 'Individuel behandling af linjer i samlepost er slået fra',
-        })
-      }
+    if (rowGroupKey !== expectedGroupKey) {
+      throw createError({ statusCode: 409, statusMessage: 'Transaktioner matcher ikke samme samlepost-nøgle' })
     }
   }
 
-  const amount = parseNumeric(row.amount);
-  const provider = row.accountProvider ? String(row.accountProvider) : ''
-  const iban = row.accountIban ? String(row.accountIban) : ''
+  const provider = first.accountProvider ? String(first.accountProvider) : ''
+  const iban = first.accountIban ? String(first.accountIban) : ''
 
   const dimRows = provider && iban
     ? await db
@@ -169,32 +148,36 @@ export default defineEventHandler(async (event) => {
   if (!statuskonto) {
     throw createError({
       statusCode: 409,
-      statusMessage: `Mangler statuskonto-kontering for bankkonto (IBAN=${row.accountIban ?? row.accountId})`,
+      statusMessage: `Mangler statuskonto-kontering for bankkonto (IBAN=${first.accountIban ?? first.accountId})`,
     })
   }
-
-  const txContext: PostingTransactionContext = {
-    transactionId: row.id,
-    amount,
-    statusDimensions: { statuskonto },
-    debtorName: row.debtorName,
-    debtorId: row.debtorId,
-    creditorName: row.creditorName,
-    creditorId: row.creditorId,
-    entryAdditionalInfo: row.entryAdditionalInfo,
-    txAdditionalInfo: row.txAdditionalInfo,
-    remittanceUstrd: row.remittanceUstrd,
-    remittanceCreditorReference: row.remittanceCreditorReference,
-    remittanceAdditional: row.remittanceAdditional,
-  };
 
   const supplier = await getActiveErpSupplier()
   const definitions = await listAccountingDimensionDefinitions(supplier)
   const defaultTextTemplate = normalizeOptionalString(body.text) ?? undefined
+
+  const lineTotalAmount = rows.reduce((sum, row) => sum + resolveSignedAmount(row.amount, row.creditDebitIndicator), 0)
+
+  const txContext: PostingTransactionContext = {
+    transactionId: `SAMLEPOST:${expectedGroupKey}`,
+    amount: lineTotalAmount,
+    statusDimensions: { statuskonto },
+    debtorName: first.debtorName,
+    debtorId: first.debtorId,
+    creditorName: first.creditorName,
+    creditorId: first.creditorId,
+    entryAdditionalInfo: rows.map((r) => r.entryAdditionalInfo).filter(Boolean).join(' || ') || null,
+    txAdditionalInfo: rows.map((r) => r.txAdditionalInfo).filter(Boolean).join(' || ') || null,
+    remittanceUstrd: dedupeStrings(rows.flatMap((r) => r.remittanceUstrd ?? [])),
+    remittanceCreditorReference: rows.map((r) => r.remittanceCreditorReference).find(Boolean) ?? null,
+    remittanceAdditional: dedupeStrings(rows.flatMap((r) => r.remittanceAdditional ?? [])),
+  }
+
   const landingLines = body.lines.map((line) => {
     const normalizedDimensions = normalizeDimensionInput(line.dimensions)
     validateDimensionsAgainstDefinitions(normalizedDimensions, definitions)
     const dimensions = Object.fromEntries(normalizedDimensions.map((d) => [d.key, d.value]))
+
     return {
       amount: Number(line.amount),
       dimensions,
@@ -202,16 +185,16 @@ export default defineEventHandler(async (event) => {
     }
   })
 
-  const postingText = resolvePostingText(defaultTextTemplate, txContext);
+  validateLineAmounts(landingLines, lineTotalAmount)
+
+  const postingText = resolvePostingText(defaultTextTemplate, txContext)
   const attachments = (body.attachments ?? []).map<PostingAttachment>((attachment) => ({
     name: attachment.name,
     type: attachment.type,
     data: attachment.data,
-  }));
+  }))
 
-  const resolvedCpr = resolveManualCpr(body.cprType, normalizeDigits(body.cprNumber), txContext);
-
-  validateLineAmounts(landingLines, amount)
+  const resolvedCpr = resolveManualCpr(body.cprType, normalizeDigits(body.cprNumber), txContext)
 
   const command = buildPostingCommand({
     transaction: txContext,
@@ -219,28 +202,32 @@ export default defineEventHandler(async (event) => {
     text: postingText,
     cpr: resolvedCpr,
     attachments: attachments.length ? attachments : undefined,
-  });
+  })
 
-  const bookingDate = toDate(row.bookingDate);
   const submission = await executePostingCommand(command, {
-    runId: row.runId,
+    runId: first.runId,
     bookingDate,
-  });
+  })
 
-  if (row.processingId) {
+  const withProcessingRow = rows.filter((r) => r.processingId).map((r) => r.id)
+  const withoutProcessingRow = rows.filter((r) => !r.processingId).map((r) => r.id)
+
+  if (withProcessingRow.length) {
     await db
       .update(transactionProcessing)
-      .set({ status: "bogført", ruleApplied: null })
-      .where(eq(transactionProcessing.transactionId, row.id));
-  } else {
-    await db.insert(transactionProcessing).values({
-      transactionId: row.id,
-      status: "bogført",
-      ruleApplied: null,
-    });
+      .set({ status: 'bogført', ruleApplied: null })
+      .where(inArray(transactionProcessing.transactionId, withProcessingRow))
   }
 
-  await clearManualBookingDraft(row.id)
+  if (withoutProcessingRow.length) {
+    await db.insert(transactionProcessing).values(
+      withoutProcessingRow.map((id) => ({
+        transactionId: id,
+        status: 'bogført' as const,
+        ruleApplied: null,
+      })),
+    )
+  }
 
   return {
     success: true,
@@ -248,27 +235,23 @@ export default defineEventHandler(async (event) => {
     filename: submission.filename,
     remotePath: submission.remotePath,
     lineCount: submission.lineCount,
-  };
-});
+    processedTransactions: rows.length,
+  }
+})
 
-async function clearManualBookingDraft(transactionId: string) {
-  await db.transaction(async (trx) => {
-    const lines = await trx
-      .select({ id: manualBookingDraftLine.id })
-      .from(manualBookingDraftLine)
-      .where(eq(manualBookingDraftLine.transactionId, transactionId))
+function toDate(value: Date | string | null): Date {
+  if (!value) {
+    return new Date()
+  }
+  if (value instanceof Date) {
+    return value
+  }
+  return new Date(value)
+}
 
-    const lineIds = lines.map((l) => l.id)
-    if (lineIds.length) {
-      await trx
-        .delete(manualBookingDraftLineDimension)
-        .where(inArray(manualBookingDraftLineDimension.lineId, lineIds))
-    }
-
-    await trx.delete(manualBookingDraftAttachment).where(eq(manualBookingDraftAttachment.transactionId, transactionId))
-    await trx.delete(manualBookingDraftLine).where(eq(manualBookingDraftLine.transactionId, transactionId))
-    await trx.delete(manualBookingDraft).where(eq(manualBookingDraft.transactionId, transactionId))
-  })
+function resolveSignedAmount(amount: unknown, indicator: string | null): number {
+  const amountAbs = Math.abs(parseNumeric(amount))
+  return String(indicator ?? '').toUpperCase() === 'DBIT' ? -amountAbs : amountAbs
 }
 
 function parseNumeric(value: unknown): number {
@@ -277,18 +260,23 @@ function parseNumeric(value: unknown): number {
 
 function normalizeOptionalString(value?: string | null): string | null {
   if (!value) {
-    return null;
+    return null
   }
-  const trimmed = value.trim();
-  return trimmed.length ? trimmed : null;
+  const trimmed = value.trim()
+  return trimmed.length ? trimmed : null
 }
 
 function normalizeDigits(value?: string | null): string | null {
   if (!value) {
-    return null;
+    return null
   }
-  const digits = value.replace(/\D+/g, "");
-  return digits.length ? digits : null;
+  const digits = value.replace(/\D+/g, '')
+  return digits.length ? digits : null
+}
+
+function dedupeStrings(values: string[]): string[] | null {
+  const merged = Array.from(new Set(values.map((v) => String(v).trim()).filter(Boolean)))
+  return merged.length ? merged : null
 }
 
 function validateDimensionsAgainstDefinitions(
@@ -354,25 +342,11 @@ function resolveManualCpr(
   cprNumber: string | null,
   tx: PostingTransactionContext,
 ): string | undefined {
-  if (cprType === "statisk") {
-    return cprNumber ?? undefined;
+  if (cprType === 'statisk') {
+    return cprNumber ?? undefined
   }
-  if (cprType === "dynamisk") {
-    return extractCprFromTransaction(tx) ?? undefined;
+  if (cprType === 'dynamisk') {
+    return extractCprFromTransaction(tx) ?? undefined
   }
-  return undefined;
-}
-
-function toDate(value: Date | string | null): Date {
-  if (!value) {
-    return new Date();
-  }
-  if (value instanceof Date) {
-    return value;
-  }
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return new Date();
-  }
-  return parsed;
+  return undefined
 }
