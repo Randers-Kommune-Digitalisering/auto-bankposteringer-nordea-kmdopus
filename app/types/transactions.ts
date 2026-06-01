@@ -24,6 +24,7 @@ export type TransactionSummary = {
 export type OpenTransaction = {
   id: string;
   runId: string;
+  groupKey: string | null;
   bookingDate: string;
   amount: number;
   accountId: string;

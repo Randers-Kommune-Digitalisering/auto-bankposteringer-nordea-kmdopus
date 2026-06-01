@@ -26,6 +26,7 @@ import {
 import { renderNotificationTemplate, getDefaultNotificationTemplate } from '../../notifications/domain/notificationTemplate'
 import { amountMatchesAbsolute, compareRulesBySpecificity } from '../domain/rulePrioritization'
 import { parseAmount } from '../domain/amount'
+import { buildNordeaDeterministicGroupKey } from '../../banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo'
 
 export interface MatchingNotification {
   to: string
@@ -43,6 +44,8 @@ export interface MatchSummary {
 
 export type MatchableTransaction = {
   transactionId: string
+  groupedTransactionIds: string[]
+  groupKey: string | null
   runId: string
   accountId: string
   statusDimensions: Record<string, string>
@@ -297,7 +300,7 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
     }
   }
 
-  return rows
+  const normalized = rows
     .filter(row => row.transactionId && row.runId && row.accountId)
     .filter(row => !row.processingStatus || row.processingStatus === 'åben')
     .map(row => {
@@ -305,21 +308,29 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
       const iban = row.accountIban ? String(row.accountIban) : ''
       const mapped = provider && iban ? statuskontoByProviderIban.get(`${provider}:${iban}`) ?? null : null
       const statusDimensions = mapped ? { [STATUS_ACCOUNT_DIMENSION_KEY]: String(mapped) } : {}
+      const bookingDate =
+        row.bookingDate instanceof Date
+          ? row.bookingDate
+          : new Date(row.bookingDate as string)
+
+      const amountAbs = Math.abs(parseAmount(row.amount))
+      const indicator = String(row.creditDebitIndicator ?? '').toUpperCase()
+
       return {
       transactionId: row.transactionId!,
+      groupedTransactionIds: [row.transactionId!],
+      groupKey: buildNordeaDeterministicGroupKey({
+        accountId: row.accountId!,
+        bookingDate,
+        creditDebitIndicator: row.creditDebitIndicator ?? null,
+        entryAdditionalInfo: row.entryAdditionalInfo ?? null,
+      }),
       runId: row.runId!,
       accountId: row.accountId!,
       statusDimensions,
-      bookingDate:
-        row.bookingDate instanceof Date
-          ? row.bookingDate
-          : new Date(row.bookingDate as string),
+      bookingDate,
       creditDebitIndicator: row.creditDebitIndicator ?? null,
-      amount: (() => {
-        const abs = Math.abs(parseAmount(row.amount))
-        const ind = String(row.creditDebitIndicator ?? '').toUpperCase()
-        return ind === 'DBIT' ? -abs : abs
-      })(),
+      amount: indicator === 'DBIT' ? -amountAbs : amountAbs,
       ntryRef: row.ntryRef ?? null,
       ntryAcctSvcrRef: row.ntryAcctSvcrRef ?? null,
       txAcctSvcrRef: row.txAcctSvcrRef ?? null,
@@ -348,6 +359,38 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
       hasProcessingRow: Boolean(row.processingStatus ?? row.processingRule),
       }
     })
+
+  const grouped = new Map<string, MatchableTransaction>()
+  const singles: MatchableTransaction[] = []
+
+  for (const tx of normalized) {
+    if (!tx.groupKey) {
+      singles.push(tx)
+      continue
+    }
+
+    const existing = grouped.get(tx.groupKey)
+    if (!existing) {
+      grouped.set(tx.groupKey, { ...tx })
+      continue
+    }
+
+    existing.groupedTransactionIds.push(tx.transactionId)
+    existing.amount += tx.amount
+    existing.entryAdditionalInfo = [existing.entryAdditionalInfo, tx.entryAdditionalInfo].filter(Boolean).join(' || ') || null
+    existing.txAdditionalInfo = [existing.txAdditionalInfo, tx.txAdditionalInfo].filter(Boolean).join(' || ') || null
+
+    const mergeStringArray = (left: string[] | null | undefined, right: string[] | null | undefined): string[] | null => {
+      const merged = Array.from(new Set([...(left ?? []), ...(right ?? [])].filter(Boolean)))
+      return merged.length ? merged : null
+    }
+
+    existing.remittanceUstrd = mergeStringArray(existing.remittanceUstrd, tx.remittanceUstrd)
+    existing.remittanceAdditional = mergeStringArray(existing.remittanceAdditional, tx.remittanceAdditional)
+    existing.remittanceCreditorReference = existing.remittanceCreditorReference ?? tx.remittanceCreditorReference ?? null
+  }
+
+  return [...singles, ...Array.from(grouped.values())]
 }
 
 async function fetchActiveRules(accountIds: string[]): Promise<HydratedRule[]> {
@@ -715,17 +758,19 @@ async function persistProcessing(
   status: BookingStatus,
   ruleId: number | null,
 ): Promise<void> {
-  if (tx.hasProcessingRow) {
-    await executor
-      .update(transactionProcessing)
-      .set({ status, ruleApplied: ruleId ?? null })
-      .where(eq(transactionProcessing.transactionId, tx.transactionId))
-    return
-  }
+  for (const transactionId of tx.groupedTransactionIds) {
+    if (tx.hasProcessingRow) {
+      await executor
+        .update(transactionProcessing)
+        .set({ status, ruleApplied: ruleId ?? null })
+        .where(eq(transactionProcessing.transactionId, transactionId))
+      continue
+    }
 
-  await executor.insert(transactionProcessing).values({
-    transactionId: tx.transactionId,
-    status,
-    ruleApplied: ruleId ?? null,
-  })
+    await executor.insert(transactionProcessing).values({
+      transactionId,
+      status,
+      ruleApplied: ruleId ?? null,
+    })
+  }
 }

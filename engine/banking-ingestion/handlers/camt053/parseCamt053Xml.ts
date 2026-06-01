@@ -1,4 +1,9 @@
 import { XMLParser } from 'fast-xml-parser'
+import {
+  parseNordeaAdditionalEntryInfo,
+  extractNordeaGroupingIdentifiers,
+  type NordeaAdditionalEntryInfoSegment,
+} from './nordeaAdditionalEntryInfo'
 
 export type Camt053ParsedDocument = {
   messageId: string | null
@@ -42,6 +47,10 @@ export type Camt053ParsedTransaction = {
   ntryRef: string | null
   ntryAcctSvcrRef: string | null
   entryAdditionalInfo: string | null
+  entryAdditionalInfoSegments: NordeaAdditionalEntryInfoSegment[]
+  entrySummaryItemId: string | null
+  entryGsipTransactionDetailKey: string | null
+  entryIdTag: string | null
 
   txAcctSvcrRef: string | null
   refsEndToEndId: string | null
@@ -183,6 +192,10 @@ export function parseCamt053Xml(xml: string): Camt053ParsedDocument {
         const txAmount = asAmountValue(txAmtNode) ?? entryAmount
         const txCurrency = asAmountCurrency(txAmtNode) ?? entryCurrency
 
+        const entryAdditionalInfo = asTrimmedString(entry?.AddtlNtryInf)
+        const entryAdditionalInfoSegments = parseNordeaAdditionalEntryInfo(entryAdditionalInfo)
+        const entryGroupingIds = extractNordeaGroupingIdentifiers(entryAdditionalInfo)
+
         transactions.push({
           entryIndex,
           entrySubIndex,
@@ -194,7 +207,11 @@ export function parseCamt053Xml(xml: string): Camt053ParsedDocument {
           valueDate,
           ntryRef: asTrimmedString(entry?.NtryRef),
           ntryAcctSvcrRef: asTrimmedString(entry?.AcctSvcrRef),
-          entryAdditionalInfo: asTrimmedString(entry?.AddtlNtryInf),
+          entryAdditionalInfo,
+          entryAdditionalInfoSegments,
+          entrySummaryItemId: entryGroupingIds.summaryItemId,
+          entryGsipTransactionDetailKey: entryGroupingIds.gsipTransactionDetailKey,
+          entryIdTag: entryGroupingIds.idTag,
           txAcctSvcrRef: asTrimmedString(txRefs?.AcctSvcrRef),
           refsEndToEndId: asTrimmedString(txRefs?.EndToEndId),
           refsInstrId: asTrimmedString(txRefs?.InstrId),

@@ -1,4 +1,4 @@
-import { and, eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray, isNull } from 'drizzle-orm'
 import { createError, defineEventHandler, readBody } from 'h3'
 import { z } from 'zod'
 import db from '~/lib/db'
@@ -26,6 +26,8 @@ import {
 } from '~~/server/utils/accountingDimensions'
 import { requireRoles } from '~~/server/auth/keycloakAuth'
 import { parseAmount } from '#engine/matching/domain/amount'
+import env from '~/lib/env/env'
+import { buildNordeaDeterministicGroupKey } from '#engine/banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo'
 
 export default defineEventHandler(async (event) => {
   await requireRoles(event, ['write'])
@@ -57,6 +59,7 @@ export default defineEventHandler(async (event) => {
       id: transaction.id,
       runId: transaction.runId,
       bookingDate: transaction.bookingDate,
+      creditDebitIndicator: transaction.creditDebitIndicator,
       amount: transaction.amount,
       accountId: transaction.accountId,
       accountProvider: account.provider,
@@ -85,6 +88,59 @@ export default defineEventHandler(async (event) => {
 
   if (row.processingStatus && row.processingStatus !== "åben") {
     throw createError({ statusCode: 409, statusMessage: "Transaktionen er allerede behandlet" });
+  }
+
+  if (!env.OPEN_ITEMS_ALLOW_GROUP_MEMBER_PROCESSING) {
+    const bookingDate = toDate(row.bookingDate)
+    const groupKey = buildNordeaDeterministicGroupKey({
+      accountId: row.accountId,
+      bookingDate,
+      creditDebitIndicator: row.creditDebitIndicator ?? null,
+      entryAdditionalInfo: row.entryAdditionalInfo ?? null,
+    })
+
+    if (groupKey) {
+      const creditDebitCondition = row.creditDebitIndicator == null
+        ? isNull(transaction.creditDebitIndicator)
+        : eq(transaction.creditDebitIndicator, row.creditDebitIndicator)
+
+      const groupCandidates = await db
+        .select({
+          id: transaction.id,
+          accountId: transaction.accountId,
+          bookingDate: transaction.bookingDate,
+          creditDebitIndicator: transaction.creditDebitIndicator,
+          entryAdditionalInfo: transaction.entryAdditionalInfo,
+          processingStatus: transactionProcessing.status,
+        })
+        .from(transaction)
+        .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
+        .where(and(
+          eq(transaction.accountId, row.accountId),
+          eq(transaction.bookingDate, bookingDate),
+          creditDebitCondition,
+        ))
+
+      const openMembers = groupCandidates.filter(
+        (candidate) => !candidate.processingStatus || candidate.processingStatus === 'åben',
+      )
+      const groupedOpenCount = openMembers.filter((candidate) => {
+        const candidateKey = buildNordeaDeterministicGroupKey({
+          accountId: candidate.accountId,
+          bookingDate: toDate(candidate.bookingDate),
+          creditDebitIndicator: candidate.creditDebitIndicator ?? null,
+          entryAdditionalInfo: candidate.entryAdditionalInfo ?? null,
+        })
+        return candidateKey === groupKey
+      }).length
+
+      if (groupedOpenCount > 1) {
+        throw createError({
+          statusCode: 409,
+          statusMessage: 'Individuel behandling af linjer i samlepost er slået fra',
+        })
+      }
+    }
   }
 
   const amount = parseNumeric(row.amount);

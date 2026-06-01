@@ -36,6 +36,11 @@ export const nordeaCorporateAccessWsConfigSchema = z.object({
   /** Default statement file type (prefer extended CAMT.053). */
   statementFileType: z.string().min(1).default('NDAREXXMLO'),
 
+  /** Daily default is unread files only. */
+  downloadStatus: z.enum(['NEW', 'DLD', 'ALL']).default('NEW'),
+  lookbackDays: z.number().int().min(1).max(365).default(7),
+  maxFilesPerRun: z.number().int().min(1).max(100).default(25),
+
   /** Whether DownloadFile should request compressed payloads. */
   requestCompressed: z.boolean().optional().default(true),
 
@@ -86,17 +91,21 @@ export class NordeaCorporateAccessWebServicesAdapter implements BankAdapter {
       timeoutMs: cfg.timeoutMs,
     })
 
-    const endDate = new Date()
-    const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000)
-
-    const list = await nordeaDownloadFileList(clientCfg, {
-      status: 'NEW',
-      startDate,
-      endDate,
+    const listInput: Parameters<typeof nordeaDownloadFileList>[1] = {
+      status: cfg.downloadStatus,
       fileType: cfg.statementFileType,
-    })
+    }
+    if (cfg.downloadStatus !== 'NEW') {
+      const endDate = new Date()
+      const startDate = new Date(endDate.getTime() - cfg.lookbackDays * 24 * 60 * 60 * 1000)
+      listInput.startDate = startDate
+      listInput.endDate = endDate
+    }
 
-    const limit = input.limit ?? 25
+    const list = await nordeaDownloadFileList(clientCfg, listInput)
+
+    const requestedLimit = input.limit ?? cfg.maxFilesPerRun
+    const limit = Math.max(1, Math.min(requestedLimit, cfg.maxFilesPerRun))
     const refs = list.fileDescriptors
       .filter((d) => !d.fileType || d.fileType === cfg.statementFileType)
       .slice(0, limit)

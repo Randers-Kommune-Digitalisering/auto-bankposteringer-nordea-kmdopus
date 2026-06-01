@@ -18,9 +18,21 @@ function base64DecodeUtf8(b64: string): string {
   return Buffer.from(String(b64).replace(/\s+/g, ''), 'base64').toString('utf8')
 }
 
+function firstElementByLocalName(doc: any, localName: string): any | null {
+  const all = doc.getElementsByTagName('*')
+  for (let i = 0; i < all.length; i++) {
+    const n = all.item(i)
+    const ln = String((n as any)?.localName ?? '').trim()
+    const nn = String((n as any)?.nodeName ?? '').trim()
+    if (ln === localName) return n
+    if (!ln && nn.endsWith(`:${localName}`)) return n
+    if (!ln && nn === localName) return n
+  }
+  return null
+}
+
 function firstTextByLocalName(doc: any, localName: string): string | null {
-  const nodes = doc.getElementsByTagName(localName)
-  const node = nodes?.item(0) ?? null
+  const node = firstElementByLocalName(doc, localName)
   const text = node?.textContent?.trim() ?? ''
   return text.length ? text : null
 }
@@ -135,9 +147,12 @@ function parseResponseHeaderOrThrow(doc: any): void {
 }
 
 function extractApplicationResponseBase64OrThrow(doc: any): string {
-  const node = doc.getElementsByTagName('ApplicationResponse')?.item(0) ?? null
+  const node = firstElementByLocalName(doc, 'ApplicationResponse')
   const b64 = String(node?.textContent ?? '').trim()
-  if (!b64) throw new Error('Missing ApplicationResponse in SOAP response')
+  if (!b64) {
+    const snippet = String((doc as any)?.toString?.() ?? '').replace(/\s+/g, ' ').slice(0, 500)
+    throw new Error(`Missing ApplicationResponse in SOAP response: ${snippet}`)
+  }
   return b64
 }
 
