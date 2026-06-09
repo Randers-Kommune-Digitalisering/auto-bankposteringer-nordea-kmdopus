@@ -1,0 +1,1 @@
+export const MAX_TOP_TRANSACTIONS = 50

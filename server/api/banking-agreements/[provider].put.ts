@@ -8,6 +8,7 @@ import {
   extractKeysFromZod,
   validateProviderEnvOrThrow as validateProviderEnvOrThrowShared,
 } from '~/../engine/banking-ingestion/infrastructure/providerEnv'
+import { discoverAgreementAccounts } from '~/../engine/banking-ingestion/handlers/discoverAgreementAccounts'
 
 const bodySchema = z
   .object({
@@ -60,6 +61,9 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  // Important behavior: enabling an agreement must NOT start transaction ingestion.
+  // Ingestion is always initiated explicitly via run endpoints/tasks with a booking date.
+
   const updatePatch: Record<string, any> = { updatedAt: new Date() }
   if (typeof parsed.data.enabled === 'boolean') updatePatch.enabled = parsed.data.enabled
   if (typeof parsed.data.channel === 'string') updatePatch.channel = parsed.data.channel
@@ -79,7 +83,49 @@ export default defineEventHandler(async (event) => {
       .values(insertValues as any)
       .returning()
 
+    if (nextEnabled && nextChannel === 'iso20022') {
+      try {
+        const accountDiscovery = await discoverAgreementAccounts({
+          provider: provider as any,
+          channel: nextChannel,
+          bookingDate: new Date(),
+        })
+        return { success: true, agreement: inserted, accountDiscovery }
+      } catch (error: any) {
+        return {
+          success: true,
+          agreement: inserted,
+          accountDiscovery: {
+            discoveredAccounts: 0,
+            inspectedDocuments: 0,
+            error: String(error?.message ?? error),
+          },
+        }
+      }
+    }
+
     return { success: true, agreement: inserted }
+  }
+
+  if (nextEnabled && nextChannel === 'iso20022') {
+    try {
+      const accountDiscovery = await discoverAgreementAccounts({
+        provider: provider as any,
+        channel: nextChannel,
+        bookingDate: new Date(),
+      })
+      return { success: true, agreement: updated, accountDiscovery }
+    } catch (error: any) {
+      return {
+        success: true,
+        agreement: updated,
+        accountDiscovery: {
+          discoveredAccounts: 0,
+          inspectedDocuments: 0,
+          error: String(error?.message ?? error),
+        },
+      }
+    }
   }
 
   return { success: true, agreement: updated }

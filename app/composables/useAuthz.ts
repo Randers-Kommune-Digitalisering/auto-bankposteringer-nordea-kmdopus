@@ -1,20 +1,45 @@
 import type { Ref } from 'vue'
+import type { AppRole } from '~/lib/authz/roles'
+import { resolveAppRolesFromSession, hasAnyRole } from '~/lib/authz/roles'
 
-type RolesResponse = { roles?: string[]; username?: string }
+function toRecord(input: unknown): Record<string, unknown> {
+  return input && typeof input === 'object' ? (input as Record<string, unknown>) : {}
+}
 
-export type AppRole = 'requesting' | 'bookkeeping' | 'sys_admin' | 'rule_admin'
+function resolveUsernameFromOidcUser(user: unknown): string | null {
+  const record = toRecord(user)
+  const userInfo = toRecord(record.userInfo)
+
+  const preferred = userInfo.preferred_username
+  if (typeof preferred === 'string' && preferred.trim().length > 0) return preferred
+
+  const username = record.userName
+  if (typeof username === 'string' && username.trim().length > 0) return username
+
+  const email = userInfo.email
+  if (typeof email === 'string' && email.trim().length > 0) return email
+
+  return null
+}
 
 export function useAuthz() {
   const roles = useState<AppRole[]>('authz.roles', () => [])
   const username = useState<string | null>('authz.username', () => null)
   const loaded = useState<boolean>('authz.loaded', () => false)
+  const oidc = useOidcAuth()
+
+  function syncFromCurrentUser() {
+    roles.value = resolveAppRolesFromSession(oidc.user.value, {
+      clientId: useRuntimeConfig().public?.oidcClientId,
+    })
+    username.value = resolveUsernameFromOidcUser(oidc.user.value)
+    loaded.value = true
+  }
 
   async function refresh() {
     try {
-      const res = await $fetch<RolesResponse>('/api/auth').catch(() => $fetch<RolesResponse>('/api/roles'))
-      roles.value = (Array.isArray(res.roles) ? res.roles : []) as AppRole[]
-      username.value = res.username ?? null
-      loaded.value = true
+      await oidc.fetch()
+      syncFromCurrentUser()
     } catch {
       roles.value = []
       username.value = null
@@ -22,9 +47,16 @@ export function useAuthz() {
     }
   }
 
+  watch(
+    () => oidc.user.value,
+    () => {
+      syncFromCurrentUser()
+    },
+    { immediate: true },
+  )
+
   function hasAny(required: AppRole[] | undefined): boolean {
-    if (!required?.length) return true
-    return required.some(r => roles.value.includes(r))
+    return hasAnyRole(roles.value, required ?? [])
   }
 
   return {

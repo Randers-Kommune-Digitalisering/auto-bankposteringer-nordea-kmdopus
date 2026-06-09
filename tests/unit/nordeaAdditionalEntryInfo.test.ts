@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   buildNordeaDeterministicGroupKey,
   extractNordeaGroupingIdentifiers,
+  findNordeaAdditionalEntryInfoValueByCode,
   parseNordeaAdditionalEntryInfo,
 } from '../../engine/banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo'
 
@@ -48,5 +49,27 @@ describe('nordeaAdditionalEntryInfo', () => {
     expect(fromSummary).toContain('013711357')
     expect(fromGsip).toContain('nordea:gsip:')
     expect(fromGsip).toContain('20260529GIDK37116671')
+  })
+
+  it('falls back to Ntry entry identity when summary identifiers are absent', () => {
+    const bookingDate = new Date('2026-06-03T00:00:00.000Z')
+
+    const key = buildNordeaDeterministicGroupKey({
+      accountId: 'DK6520005908764988-DKK',
+      bookingDate,
+      creditDebitIndicator: 'CRDT',
+      entryAdditionalInfo: '502:REFERENCE:K 84788767-02.06;501:REFERENCE:120260603000005850',
+      ntryRef: '141',
+      ntryAcctSvcrRef: 'K 84788767-02.06',
+    })
+
+    expect(key).toContain('nordea:ntry:')
+    expect(key).toContain(':141:')
+    expect(key).toContain('K 84788767-02.06')
+  })
+
+  it('extracts field 510 value for creditor fallback', () => {
+    const segments = parseNordeaAdditionalEntryInfo('510:CREDITOR:Randers Leverandoer;500:REFERENCE:ABC')
+    expect(findNordeaAdditionalEntryInfoValueByCode(segments, '510')).toBe('Randers Leverandoer')
   })
 })

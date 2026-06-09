@@ -12,6 +12,8 @@ import {
 import { ruleTag } from "./ruleTag";
 import { document } from "./document";
 import { transaction, transactionProcessing } from "./transaction";
+import { transactionReference } from "./transactionReference";
+import { transactionParty } from "./transactionParty";
 import { manualBookingDraft } from "./manualBookingDraft";
 import { run } from "./run";
 import { account } from "./account";
@@ -125,12 +127,28 @@ export const erpResponseRelations = relations(erpResponse, ({ one }) => ({
   }),
 }));
 
-export const transactionRelations = relations(transaction, ({ one }) => ({
+export const transactionRelations = relations(transaction, ({ one, many }) => ({
   run: one(run, { fields: [transaction.runId], references: [run.id] }),
   account: one(account, { fields: [transaction.accountId], references: [account.id] }),
   statement: one(bankingStatement, { fields: [transaction.statementId], references: [bankingStatement.id] }),
   processing: one(transactionProcessing, { fields: [transaction.id], references: [transactionProcessing.transactionId] }),
   manualBookingDraft: one(manualBookingDraft, { fields: [transaction.id], references: [manualBookingDraft.transactionId] }),
+  references: many(transactionReference),
+  parties: many(transactionParty),
+}));
+
+export const transactionReferenceRelations = relations(transactionReference, ({ one }) => ({
+  transaction: one(transaction, {
+    fields: [transactionReference.transactionId],
+    references: [transaction.id],
+  }),
+}));
+
+export const transactionPartyRelations = relations(transactionParty, ({ one }) => ({
+  transaction: one(transaction, {
+    fields: [transactionParty.transactionId],
+    references: [transaction.id],
+  }),
 }));
 
 export const transactionProcessingRelations = relations(transactionProcessing, ({ one }) => ({

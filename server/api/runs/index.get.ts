@@ -95,6 +95,9 @@ function resolveCounterpart(amount: number, row: TransactionPartyRow): string | 
       row.creditorName ??
       row.ultimateCreditorName ??
       row.creditorId ??
+      row.debtorName ??
+      row.ultimateDebtorName ??
+      row.debtorId ??
       null
     );
   }
@@ -102,6 +105,9 @@ function resolveCounterpart(amount: number, row: TransactionPartyRow): string | 
     row.debtorName ??
     row.ultimateDebtorName ??
     row.debtorId ??
+    row.creditorName ??
+    row.ultimateCreditorName ??
+    row.creditorId ??
     null
   );
 }

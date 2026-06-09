@@ -90,3 +90,15 @@ export type JobStatus = typeof jobStatusValues[number]
 export const outboxStatusValues = ['pending', 'processing', 'sent', 'failed'] as const
 export const outboxStatusEnum = pgEnum('outbox_status', outboxStatusValues)
 export type OutboxStatus = typeof outboxStatusValues[number]
+
+export const transactionReferenceTypeValues = ['reference', 'freetext', 'technical', 'remittance'] as const
+export const transactionReferenceTypeEnum = pgEnum('transaction_reference_type', transactionReferenceTypeValues)
+export type TransactionReferenceType = typeof transactionReferenceTypeValues[number]
+
+export const transactionSourceScopeValues = ['entry', 'tx', 'remittance', 'party'] as const
+export const transactionSourceScopeEnum = pgEnum('transaction_source_scope', transactionSourceScopeValues)
+export type TransactionSourceScope = typeof transactionSourceScopeValues[number]
+
+export const transactionPartyRoleValues = ['debtor', 'creditor', 'ultimateDebtor', 'ultimateCreditor'] as const
+export const transactionPartyRoleEnum = pgEnum('transaction_party_role', transactionPartyRoleValues)
+export type TransactionPartyRole = typeof transactionPartyRoleValues[number]

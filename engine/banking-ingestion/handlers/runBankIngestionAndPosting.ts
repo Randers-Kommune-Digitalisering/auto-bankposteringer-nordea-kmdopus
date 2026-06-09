@@ -88,7 +88,26 @@ export async function runBankIngestionAndPosting(options: {
 } = {}): Promise<{ runId: string; insertedCount: number; notificationCount: number }> {
   const log = logger.child({ scope: 'banking.runBankIngestionAndPosting' })
 
-  const ingest = await runTransactionBatch({ runId: options.runId, bookingDate: options.bookingDate })
+  let bookingDate = options.bookingDate
+  if (!bookingDate && options.runId) {
+    const existingRun = await db
+      .select({ bookingDate: run.bookingDate })
+      .from(run)
+      .where(eq(run.id, options.runId))
+      .limit(1)
+
+    const runBookingDate = existingRun[0]?.bookingDate
+    if (runBookingDate instanceof Date) {
+      bookingDate = runBookingDate
+    } else if (runBookingDate) {
+      const parsed = new Date(runBookingDate as any)
+      if (!Number.isNaN(parsed.getTime())) {
+        bookingDate = parsed
+      }
+    }
+  }
+
+  const ingest = await runTransactionBatch({ runId: options.runId, bookingDate })
 
   const pauseCheck = await pauseRunIfMissingAccountMappings(ingest.runId)
   if (pauseCheck.paused) {
@@ -107,7 +126,7 @@ export async function runBankIngestionAndPosting(options: {
       await submitPostingViaOutbox({
         runId: ingest.runId,
         postings: summary.postings,
-        bookingDate: options.bookingDate ?? new Date(),
+        bookingDate: bookingDate ?? new Date(),
         erpSupplier: env.ERP_SUPPLIER,
       })
     } catch (err) {

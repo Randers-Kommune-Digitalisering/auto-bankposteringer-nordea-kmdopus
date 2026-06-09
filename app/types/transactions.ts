@@ -1,15 +1,25 @@
 import type { BookingStatus, CprType, CreditDebitIndicator } from "~/lib/db/schema/enums";
 
+export type TransactionReferenceDetail = {
+  value: string;
+  source: string;
+};
+
+export type TransactionSummaryChip = {
+  value: string;
+  source?: string;
+};
+
 export type TransactionSummarySection =
   | {
       key: "part" | "transaktionstype";
       label: string;
-      items: Array<{ label: string; value: string }>;
+      items: Array<{ label: string; value: string; hint?: string }>;
     }
   | {
-    key: "fritekst";
+    key: "reference" | "teknisk";
     label: string;
-    chips: string[];
+    chips: TransactionSummaryChip[];
   };
 
 export type TransactionSummary = {
@@ -31,13 +41,36 @@ export type OpenTransaction = {
   bankAccountName: string | null;
   status: BookingStatus | null;
   ruleApplied: number | null;
+  draftNote?: string | null;
   transactionType: string | null;
+  transactionTypeCode?: string | null;
+  transactionTypeHint?: string | null;
   counterpart: string | null;
+  counterpartHint?: string | null;
   references: string[];
+  referenceDetails: TransactionReferenceDetail[];
   summary: TransactionSummary;
 };
 
 export type OpenTransactionInput = Omit<OpenTransaction, "summary">;
+
+export type OpenTransactionStack = {
+  stackId: string;
+  groupKey: string | null;
+  items: OpenTransaction[];
+  representative: OpenTransaction;
+  totalAmount: number;
+  isGrouped: boolean;
+};
+
+export type OpenTransactionsResponse = {
+  items: OpenTransaction[];
+  stacks?: OpenTransactionStack[];
+  groupedStacksByAccount?: Record<string, OpenTransactionStack[]>;
+  total: number;
+  limit: number;
+  totalTopTransactions?: number;
+};
 
 export type TransactionSummaryInput = {
   id: string;
@@ -45,8 +78,12 @@ export type TransactionSummaryInput = {
   bookingDate: string;
   amount: number;
   transactionType: string | null;
+  transactionTypeCode?: string | null;
+  transactionTypeHint?: string | null;
   counterpart: string | null;
+  counterpartHint?: string | null;
   references: string[];
+  referenceDetails: TransactionReferenceDetail[];
 };
 
 export type ManualPostingAttachment = {
@@ -71,6 +108,7 @@ export type ManualBookingPayload = {
 
 export type StatementTransaction = {
   id: string;
+  topStackId?: string;
   runId: string;
   accountId: string | null;
   bankAccountName: string | null;
