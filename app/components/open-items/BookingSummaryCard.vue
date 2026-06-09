@@ -1,25 +1,35 @@
 <script setup lang="ts">
 import { computed, toRef } from 'vue'
+import { formatTransactionFieldHint } from '~/lib/presenters/transactionFieldHints'
+import { toSummarySectionEntries } from '~/lib/presenters/transactionSummaryEntries'
 import type { TransactionSummary } from '~/types/transactions'
 
-const props = defineProps<{ summary: TransactionSummary }>()
+type HideableSectionKey = 'reference' | 'teknisk'
+
+const props = withDefaults(defineProps<{ summary: TransactionSummary; hideSectionKeys?: HideableSectionKey[] }>(), {
+	hideSectionKeys: () => [],
+})
 const summary = toRef(props, 'summary')
 
 type SummaryItemsSection = {
 	key: 'part' | 'transaktionstype'
 	label: string
-	items: Array<{ label: string; value: string }>
+	items: Array<{ label: string; value: string; hint?: string }>
 }
 
 type SummaryChipsSection = {
-	key: 'fritekst'
+	key: 'reference' | 'teknisk'
 	label: string
-	chips: string[]
+	chips: Array<{ value: string; source?: string }>
 }
 
 type TransactionSummarySection = SummaryItemsSection | SummaryChipsSection
 
-const directionLabel = computed(() => (summary.value.direction === 'credit' ? 'Indbetaling' : 'Udbetaling'))
+const isGroupedSummary = computed(() => /^samlepost\s*\(/i.test(String(summary.value.transactionId?.value ?? '').trim()))
+const directionLabel = computed(() => {
+	const base = summary.value.direction === 'credit' ? 'Indbetaling' : 'Udbetaling'
+	return isGroupedSummary.value ? `${base} (samlepost)` : base
+})
 const directionIcon = computed(() =>
 	summary.value.direction === 'credit' ? 'solar:arrow-to-down-left-bold-duotone' : 'solar:arrow-to-top-right-bold-duotone'
 )
@@ -29,28 +39,28 @@ const partSection = computed<SummaryItemsSection | null>(() => {
 	return section?.key === 'part' ? section : null
 })
 
-const counterpartLabel = computed(() => partSection.value?.items?.[0]?.value ?? 'Ukendt modpart')
-const hasCounterpart = computed(() => counterpartLabel.value !== 'Ukendt modpart')
-
 type BadgeColor = 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'error' | 'neutral'
 
 const orderedSections = computed<TransactionSummarySection[]>(() => {
-	const order: TransactionSummarySection['key'][] = ['part', 'fritekst', 'transaktionstype']
+	const order: TransactionSummarySection['key'][] = ['part', 'reference', 'teknisk', 'transaktionstype']
 	const prioritized = order
 		.map((key) => (summary.value.sections as TransactionSummarySection[]).find((section) => section.key === key))
 		.filter((section): section is TransactionSummarySection => Boolean(section))
 	const remaining = (summary.value.sections as TransactionSummarySection[]).filter((section) => !order.includes(section.key))
-	return [...prioritized, ...remaining]
+	const hidden = new Set(props.hideSectionKeys)
+	return [...prioritized, ...remaining].filter((section) => !hidden.has(section.key as HideableSectionKey))
 })
 
 const sectionColor = (key: TransactionSummarySection['key']): BadgeColor => {
 	switch (key) {
-		case 'fritekst':
-			return 'primary'
+		case 'reference':
+			return 'success'
+		case 'teknisk':
+			return 'warning'
 		case 'part':
 			return 'secondary'
 		case 'transaktionstype':
-			return 'warning'
+				return 'warning'
 		default:
 			return 'neutral'
 	}
@@ -63,57 +73,12 @@ type SectionEntry = {
 	values: Array<{ value: string; hint?: string }>
 }
 
-function splitTriadTokens(values: string[]): string[] {
-	return values
-		.flatMap((value) => String(value ?? '').split(';'))
-		.map((value) => value.trim())
-		.filter(Boolean)
-}
-
-function parseTriadToken(token: string): { code: string; label: string; value: string } | null {
-	const match = /^(\d{2,3}):([^:]+):(.*)$/.exec(token)
-	if (!match) return null
-	const code = String(match[1] ?? '').trim()
-	const label = String(match[2] ?? '').trim()
-	const value = String(match[3] ?? '').trim()
-	if (!code || !label || !value) return null
-	return { code, label, value }
-}
-
 function toSectionEntry(section: TransactionSummarySection): SectionEntry {
-	if (section.key === 'fritekst') {
-		const tokens = splitTriadTokens(section.chips)
-		const triadBadges: Array<{ value: string; hint?: string }> = []
-		const freeTextBadges: Array<{ value: string; hint?: string }> = []
-
-		for (const token of tokens) {
-			const triad = parseTriadToken(token)
-			if (!triad) {
-				freeTextBadges.push({ value: token })
-				continue
-			}
-
-			triadBadges.push({
-				value: `${triad.code} · ${triad.label} · ${triad.value}`,
-				hint: `${triad.code}:${triad.label}`,
-			})
-		}
-
-		return {
-			key: section.key,
-			label: section.label,
-			color: sectionColor(section.key),
-			values: [...triadBadges, ...freeTextBadges],
-		}
-	}
 	return {
 		key: section.key,
 		label: section.label,
 		color: sectionColor(section.key),
-		values: section.items.map((item) => ({
-			value: item.value,
-			hint: item.label,
-		})),
+		values: toSummarySectionEntries(section),
 	}
 }
 
@@ -158,7 +123,7 @@ const sectionEntries = computed<SectionEntry[]>(() => orderedSections.value.map(
 						variant="soft"
 						:color="section.color"
 						size="lg"
-						:title="entry.hint ?? undefined"
+						:title="formatTransactionFieldHint(entry.hint)"
 						class="max-w-full min-w-0 whitespace-normal break-all"
 					>
 						{{ entry.value }}

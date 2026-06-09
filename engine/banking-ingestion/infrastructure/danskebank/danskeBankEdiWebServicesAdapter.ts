@@ -116,12 +116,13 @@ export class DanskeBankEdiWebServicesAdapter implements BankAdapter {
     const listInput: Parameters<typeof danskeEdiDownloadFileList>[1] = {
       status: cfg.downloadStatus,
     }
-    if (cfg.downloadStatus !== 'NEW') {
-      const endDate = new Date()
-      const startDate = new Date(endDate.getTime() - cfg.lookbackDays * 24 * 60 * 60 * 1000)
-      listInput.startDate = startDate
-      listInput.endDate = endDate
-    }
+
+    const requestedBookingDate = input.bookingDate.trim()
+    const startDate = new Date(`${requestedBookingDate}T00:00:00.000Z`)
+    const endDate = new Date(`${requestedBookingDate}T23:59:59.999Z`)
+    listInput.status = 'ALL'
+    listInput.startDate = startDate
+    listInput.endDate = endDate
 
     const list = await danskeEdiDownloadFileList(ediCfg, listInput)
 

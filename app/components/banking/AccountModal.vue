@@ -8,7 +8,7 @@ const props = defineProps<{
   open: boolean
   accountId: string | null
   mode?: 'observed' | 'configured'
-  configuredDraft?: { provider: BankProvider; iban: string; name?: string | null; statuskonto?: string | null; artskonto?: string | null } | null
+  configuredDraft?: { provider: BankProvider; iban: string; name?: string | null; statuskonto?: string | null; artskonto?: string | null; ignoreIngestion?: boolean } | null
   configuredProviders?: BankProvider[]
 }>()
 
@@ -109,7 +109,8 @@ const statuskontoSchema = computed(() => {
 const observedUpdateSchema = computed(() =>
   z.object({
     name: z.string().trim().max(80, 'Kaldenavn er for langt').optional(),
-    statuskonto: statuskontoSchema.value,
+    statuskonto: statuskontoSchema.value.optional(),
+    ignoreIngestion: z.boolean().optional(),
   }),
 )
 
@@ -118,7 +119,8 @@ const configuredSchema = computed(() =>
     provider: z.enum(['danskebank', 'nordea', 'bankconnect'], { message: 'Vælg bankudbyder' }),
     iban: ibanSchema,
     name: z.string().trim().max(80, 'Kaldenavn er for langt').optional(),
-    statuskonto: statuskontoSchema.value,
+    statuskonto: statuskontoSchema.value.optional(),
+    ignoreIngestion: z.boolean().optional(),
   }),
 )
 
@@ -129,6 +131,7 @@ type FormState = {
   statuskonto: string | undefined
   provider: BankProvider | undefined
   iban: string | undefined
+  ignoreIngestion: boolean
 }
 
 const state = reactive<FormState>({
@@ -136,6 +139,7 @@ const state = reactive<FormState>({
   statuskonto: undefined,
   provider: undefined,
   iban: undefined,
+  ignoreIngestion: false,
 })
 
 function resetForm() {
@@ -143,18 +147,21 @@ function resetForm() {
   state.statuskonto = undefined
   state.provider = undefined
   state.iban = undefined
+  state.ignoreIngestion = false
 }
 
 function hydrateDraft(account: AccountSelectSchema) {
   state.name = account.name ?? undefined
   state.statuskonto = String((account as any).statuskonto ?? (account as any).artskonto ?? '') || undefined
+  state.ignoreIngestion = Boolean((account as any).ignoreIngestion)
 }
 
-function hydrateConfiguredDraft(draft: { provider: BankProvider; iban: string; name?: string | null; statuskonto?: string | null; artskonto?: string | null }) {
+function hydrateConfiguredDraft(draft: { provider: BankProvider; iban: string; name?: string | null; statuskonto?: string | null; artskonto?: string | null; ignoreIngestion?: boolean }) {
   state.provider = draft.provider
   state.iban = draft.iban
   state.name = draft.name ?? undefined
   state.statuskonto = (draft.statuskonto ?? draft.artskonto) ?? undefined
+  state.ignoreIngestion = Boolean(draft.ignoreIngestion)
 }
 
 watch(
@@ -212,6 +219,7 @@ async function onSubmit() {
         iban: state.iban,
         name: state.name?.trim() || undefined,
         statuskonto: state.statuskonto?.trim() || undefined,
+        ignoreIngestion: Boolean(state.ignoreIngestion),
       }
 
       const result = formSchema.value.safeParse(payload)
@@ -239,6 +247,7 @@ async function onSubmit() {
       const payload = {
         name: state.name?.trim() || undefined,
         statuskonto: state.statuskonto?.trim() || undefined,
+        ignoreIngestion: Boolean(state.ignoreIngestion),
       }
 
       const result = formSchema.value.safeParse(payload)
@@ -250,7 +259,11 @@ async function onSubmit() {
 
       await $fetch(`/api/bank-accounts/${props.accountId}`, {
         method: 'PUT',
-        body: { name: result.data.name, statuskonto: result.data.statuskonto },
+        body: {
+          name: result.data.name,
+          statuskonto: result.data.statuskonto,
+          ignoreIngestion: result.data.ignoreIngestion,
+        },
       })
 
       await Promise.all([
@@ -328,13 +341,20 @@ async function onSubmit() {
             />
           </UFormField>
 
-          <UFormField name="statuskonto" required>
+          <UFormField name="statuskonto">
             <UiFloatingLabelInput
               v-model="state.statuskonto"
               label="Statuskonto"
-              required
               color="neutral"
               class="w-full"
+            />
+          </UFormField>
+
+          <UFormField name="ignoreIngestion">
+            <UCheckbox
+              v-model="state.ignoreIngestion"
+              label="Ignorér konto ved ingestion"
+              description="Hvis valgt, bliver transaktioner for kontoen ikke indlæst i applikationen."
             />
           </UFormField>
         </div>

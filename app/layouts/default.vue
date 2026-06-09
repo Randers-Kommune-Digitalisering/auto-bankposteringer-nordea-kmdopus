@@ -1,12 +1,18 @@
 <script lang="ts" setup>
 import type { NavigationMenuItem } from '@nuxt/ui'
+import { requiredRolesForPath } from '~/lib/authz/policy'
+import type { AppRole } from '~/lib/authz/roles'
 
-import { useAuthz } from '~/composables/useAuthz'
-import type { AppRole } from '~/composables/useAuthz'
+const { loggedIn, user, logout } = useOidcAuth()
+const { loaded, refresh, hasAny } = useAuthz()
 
 const open = ref(false)
 
 const route = useRoute()
+
+if (!loaded.value) {
+  refresh()
+}
 
 function normalizePath(path: string): string {
   const trimmed = path.length > 1 ? path.replace(/\/+$/, '') : path
@@ -40,7 +46,7 @@ function findLabelByPath(items: NavigationMenuItem[] | undefined, path: string):
   }
 }
 
-const links = [[
+const primaryLinks = [
   {
     label: 'Dashboard',
     icon: 'solar:clipboard-bold-duotone',
@@ -147,47 +153,50 @@ const links = [[
       }
     ]
   }
-]] satisfies NavigationMenuItem[][]
+] satisfies NavigationMenuItem[]
 
-const { loaded, refresh, hasAny } = useAuthz()
-if (!loaded.value) {
-  refresh()
-}
+const userLabel = computed(() => {
+  return user.value?.userName
+    ?? (user.value?.userInfo?.preferred_username as string | undefined)
+    ?? 'Bruger'
+})
 
-const visibilityRules: Array<{ to: string; roles: AppRole[] }> = [
-  { to: '/konteringsregler', roles: ['rule_admin'] },
-  { to: '/aabne-poster', roles: ['bookkeeping'] },
-  { to: '/kontoudtog', roles: ['bookkeeping', 'sys_admin', 'rule_admin'] },
-  { to: '/koersler', roles: ['bookkeeping', 'sys_admin'] },
-  { to: '/indstillinger', roles: ['sys_admin', 'rule_admin'] },
-  { to: '/fejlhaandtering', roles: ['sys_admin'] },
-]
-
-function isVisible(item: NavigationMenuItem): boolean {
-  const to = typeof item.to === 'string' ? item.to : undefined
-  if (!to) return true
-  const rule = visibilityRules.find(r => r.to === to)
-  if (!rule) return true
-  return hasAny(rule.roles)
-}
-
-const visibleLinks = computed(() => {
-  const group = links[0] ?? []
-  return group
-    .filter(isVisible)
+const links = computed(() => {
+  const visiblePrimaryLinks = primaryLinks
     .map((item) => {
-      if (item.children?.length) {
-        const children = (item.children as NavigationMenuItem[]).filter(isVisible)
-        return { ...item, children }
-      }
-      return item
+      const childItems = (item.children as NavigationMenuItem[] | undefined)
+        ?.filter((child) => {
+          const to = typeof child.to === 'string' ? child.to : undefined
+          if (!to) return true
+          const requiredRoles = requiredRolesForPath(to)
+          return hasAny(requiredRoles as AppRole[] | undefined)
+        })
+
+      const withChildren = childItems ? { ...item, children: childItems } : item
+      return withChildren
     })
+    .filter((item) => {
+      const to = typeof item.to === 'string' ? item.to : undefined
+      const requiredRoles = to ? requiredRolesForPath(to) : undefined
+      const hasVisibleChildren = Array.isArray(item.children) && item.children.length > 0
+      const canSeeItem = hasAny(requiredRoles as AppRole[] | undefined)
+      return canSeeItem || hasVisibleChildren
+    })
+
+  const secondaryLinks: NavigationMenuItem[] = [
+    {
+      label: userLabel.value,
+      icon: 'solar:user-bold-duotone',
+    },
+  ]
+
+  return [visiblePrimaryLinks, secondaryLinks]
 })
 
 const APP_TITLE = 'FOBI'
 
 const activePageLabel = computed(() => {
-  const allItems = links.flat()
+  const allItems = links.value.flat()
   return findLabelByPath(allItems, route.path)
 })
 
@@ -219,7 +228,7 @@ useHead(() => ({
         <!-- Primær navigation -->
         <UNavigationMenu
           :collapsed="collapsed"
-          :items="visibleLinks"
+          :items="links[0]"
           :ui="{ 
             linkLeadingIcon: 'size-6',
             childLinkIcon: 'size-6'

@@ -22,12 +22,34 @@ const baseCommonSchema = z.object({
 
   // Keycloak / OpenID Connect (for access control)
   KEYCLOAK_AUTH_URL: z.string().optional(),
+  KEYCLOAK_PUBLIC_URL: z.string().optional(),
+  // Legacy alias still used in local .env files.
+  KEYCLOAK_URL: z.string().optional(),
   KEYCLOAK_REALM: z.string().optional().default('randers-kommune'),
   KEYCLOAK_CLIENT_ID: z.string().optional(),
+  KEYCLOAK_CLIENT_SECRET: z.string().optional(),
+  // Legacy alias for app client id.
+  KEYCLOAK_APP_CLIENT_ID: z.string().optional(),
+  KEYCLOAK_APP_CLIENT_SECRET: z.string().optional(),
+  // Dedicated admin client used for Keycloak Admin API access.
+  KEYCLOAK_ADMIN_CLIENT_ID: z.string().optional(),
+  KEYCLOAK_ADMIN_CLIENT_SECRET: z.string().optional(),
+  // Legacy aliases used by existing Flask/Python setup.
+  KEYCLOAK_USER_ADMIN_CLIENT_ID: z.string().optional(),
+  KEYCLOAK_USER_ADMIN_CLIENT_SECRET: z.string().optional(),
+  // Optional scope for token requests, when required by the IdP policy.
+  KEYCLOAK_ADMIN_CLIENT_SCOPE: z.string().optional(),
+  // Client where roles are managed (defaults to KEYCLOAK_CLIENT_ID if unset).
+  KEYCLOAK_ADMIN_TARGET_CLIENT_ID: z.string().optional(),
   // Optional: expected audience override. Defaults to KEYCLOAK_CLIENT_ID.
   KEYCLOAK_AUDIENCE: z.string().optional(),
   // Optional: cookie name for access token if provided by an upstream auth proxy.
   KEYCLOAK_ACCESS_TOKEN_COOKIE: z.string().optional(),
+
+  // nuxt-oidc-auth session/key material.
+  NUXT_OIDC_SESSION_SECRET: z.string().optional(),
+  NUXT_OIDC_AUTH_SESSION_SECRET: z.string().optional(),
+  NUXT_OIDC_TOKEN_KEY: z.string().optional(),
 
   // oauth2-proxy / openid proxy integration (xauthrequest headers)
   // If set, groups from X-Auth-Request-Groups can be mapped to app roles.
@@ -64,6 +86,18 @@ const baseCommonSchema = z.object({
   SFTP_REQUEST_DIR: z.string().optional(),
   SFTP_RESPONSE_DIR: z.string().optional(),
 });
+
+function withNormalizedEnv(raw: NodeJS.ProcessEnv): Record<string, string | undefined> {
+  const out = { ...raw }
+
+  out.KEYCLOAK_AUTH_URL = out.KEYCLOAK_AUTH_URL ?? out.KEYCLOAK_URL
+  out.KEYCLOAK_CLIENT_ID = out.KEYCLOAK_CLIENT_ID ?? out.KEYCLOAK_APP_CLIENT_ID
+  out.KEYCLOAK_CLIENT_SECRET = out.KEYCLOAK_CLIENT_SECRET ?? out.KEYCLOAK_APP_CLIENT_SECRET
+  out.KEYCLOAK_ADMIN_CLIENT_ID = out.KEYCLOAK_ADMIN_CLIENT_ID ?? out.KEYCLOAK_USER_ADMIN_CLIENT_ID
+  out.KEYCLOAK_ADMIN_CLIENT_SECRET = out.KEYCLOAK_ADMIN_CLIENT_SECRET ?? out.KEYCLOAK_USER_ADMIN_CLIENT_SECRET
+
+  return out
+}
 
 function withCommonRefinements<T extends z.ZodTypeAny>(schema: T): T {
   return schema.superRefine((env: any, ctx) => {
@@ -110,8 +144,9 @@ const EnvSchema = z.union([webSchema, workerSchema, schedulerSchema]);
 
 export type EnvSchema = z.infer<typeof EnvSchema>;
 
-tryParseEnv(EnvSchema, { ...process.env, APP_ROLE: process.env.APP_ROLE ?? "web" });
-const parsedEnv = EnvSchema.parse({ ...process.env, APP_ROLE: process.env.APP_ROLE ?? "web" });
+const normalizedEnv = withNormalizedEnv({ ...process.env, APP_ROLE: process.env.APP_ROLE ?? "web" })
+tryParseEnv(EnvSchema, normalizedEnv);
+const parsedEnv = EnvSchema.parse(normalizedEnv);
 
 export const smtpNotificationConfig = (() => {
   const host = (parsedEnv.SMTP_HOST ?? parsedEnv.SMTP_DOMAIN)?.trim();

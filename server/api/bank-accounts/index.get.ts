@@ -33,14 +33,23 @@ export default defineEventHandler(async (event) => {
         .where(and(
           inArray(bankingAgreementAccountDimension.provider, providers as any),
           inArray(bankingAgreementAccountDimension.iban, ibans),
-          inArray(bankingAgreementAccountDimension.dimensionKey, ['statuskonto', 'artskonto']),
+          inArray(bankingAgreementAccountDimension.dimensionKey, ['statuskonto', 'artskonto', 'ignore_ingestion']),
         ))
     : []
 
   const mapped = new Map<string, string>()
+  const ignored = new Map<string, boolean>()
   for (const d of dimRows) {
     const k = `${String(d.provider)}:${String(d.iban)}`
-    if (String(d.key) === 'statuskonto') {
+    const key = String(d.key)
+    const value = String(d.value)
+
+    if (key === 'ignore_ingestion') {
+      ignored.set(k, /^(1|true|yes)$/i.test(value.trim()))
+      continue
+    }
+
+    if (key === 'statuskonto') {
       mapped.set(k, String(d.value))
       continue
     }
@@ -50,6 +59,7 @@ export default defineEventHandler(async (event) => {
   const accounts = base.map((r) => ({
     ...r,
     statuskonto: mapped.get(`${String(r.provider)}:${String(r.iban)}`) ?? null,
+    ignoreIngestion: ignored.get(`${String(r.provider)}:${String(r.iban)}`) ?? false,
   }))
 
   return accounts

@@ -30,6 +30,18 @@ export function parseNordeaAdditionalEntryInfo(input: string | null | undefined)
     .filter((segment): segment is NordeaAdditionalEntryInfoSegment => Boolean(segment))
 }
 
+export function findNordeaAdditionalEntryInfoValueByCode(
+  segments: NordeaAdditionalEntryInfoSegment[],
+  code: string,
+): string | null {
+  const normalizedCode = String(code ?? '').trim()
+  if (!normalizedCode) return null
+
+  const segment = segments.find((s) => s.code === normalizedCode)
+  const value = String(segment?.value ?? '').trim()
+  return value.length ? value : null
+}
+
 export function extractNordeaGroupingIdentifiers(input: string | null | undefined): NordeaGroupingIdentifiers {
   const segments = parseNordeaAdditionalEntryInfo(input)
 
@@ -51,6 +63,8 @@ export function buildNordeaDeterministicGroupKey(input: {
   bookingDate: Date
   creditDebitIndicator?: string | null
   entryAdditionalInfo?: string | null
+  ntryRef?: string | null
+  ntryAcctSvcrRef?: string | null
 }): string | null {
   const ids = extractNordeaGroupingIdentifiers(input.entryAdditionalInfo)
   const bookingDateIso = input.bookingDate.toISOString().slice(0, 10)
@@ -63,6 +77,16 @@ export function buildNordeaDeterministicGroupKey(input: {
 
   if (ids.gsipTransactionDetailKey) {
     return `nordea:gsip:${input.accountId}:${bookingDateIso}:${cdi}:${idTag}:${ids.gsipTransactionDetailKey}`
+  }
+
+  const ntryRef = String(input.ntryRef ?? '').trim()
+  if (ntryRef) {
+    const normalizedNtryRef = ntryRef.replace(/\s+/g, ' ').toUpperCase()
+    const ntryAcctSvcrRef = String(input.ntryAcctSvcrRef ?? '').trim()
+    const normalizedEntryRef = ntryAcctSvcrRef
+      ? ntryAcctSvcrRef.replace(/\s+/g, ' ').toUpperCase()
+      : '-'
+    return `nordea:ntry:${input.accountId}:${bookingDateIso}:${cdi}:${normalizedNtryRef}:${normalizedEntryRef}`
   }
 
   return null

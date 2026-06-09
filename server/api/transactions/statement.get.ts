@@ -1,9 +1,10 @@
-import { eq, inArray, sql } from "drizzle-orm";
+import { desc, eq, inArray, sql } from "drizzle-orm";
 import { defineEventHandler, getQuery, setHeader } from "h3";
 import db from "~/lib/db";
 import { account } from "~/lib/db/schema/account";
 import { transaction, transactionProcessing } from "~/lib/db/schema/transaction";
 import type { StatementTransaction } from "~/types/transactions";
+import { buildNordeaDeterministicGroupKey } from "#engine/banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo";
 
 function formatDate(value: Date | string | null): string {
   if (!value) {
@@ -52,6 +53,34 @@ function escapeLike(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_')
 }
 
+function toDateOnlyDate(value: Date | string | null): Date {
+  if (value instanceof Date) return value
+  const parsed = value ? new Date(value) : new Date()
+  return Number.isNaN(parsed.getTime()) ? new Date() : parsed
+}
+
+function toTopTransactionStackId(input: {
+  id: string | null
+  accountId: string | null
+  bookingDate: Date | string | null
+  creditDebitIndicator: string | null
+  ntryRef: string | null
+  entryAdditionalInfo: string | null
+  ntryAcctSvcrRef: string | null
+}): string {
+  const groupKey = buildNordeaDeterministicGroupKey({
+    accountId: input.accountId ?? '',
+    bookingDate: toDateOnlyDate(input.bookingDate),
+    creditDebitIndicator: input.creditDebitIndicator ?? null,
+    ntryRef: input.ntryRef ?? null,
+    entryAdditionalInfo: input.entryAdditionalInfo ?? null,
+    ntryAcctSvcrRef: input.ntryAcctSvcrRef ?? null,
+  })
+
+  if (groupKey) return `group:${groupKey}`
+  return `single:${String(input.id ?? '')}`
+}
+
 export default defineEventHandler(async (event) => {
   // Interactive UI endpoint: must reflect new ingestions immediately.
   setHeader(event, "Cache-Control", "no-store");
@@ -78,16 +107,6 @@ export default defineEventHandler(async (event) => {
 
   // The UI always provides start/end; keep a safe fallback for non-UI callers.
   if (!start || !end) {
-    let totalQuery = db
-      .select({ count: sql<number>`count(*)` })
-      .from(transaction)
-      .leftJoin(account, eq(transaction.accountId, account.id));
-    if (accountIds.length) {
-      totalQuery = totalQuery.where(inArray(transaction.accountId, accountIds));
-    }
-
-    const totalRows = await totalQuery;
-
     const baseQuery = db
       .select({
         id: transaction.id,
@@ -141,9 +160,7 @@ export default defineEventHandler(async (event) => {
       .from(transaction)
       .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
       .leftJoin(account, eq(transaction.accountId, account.id))
-      .orderBy(transaction.bookingDate)
-      .limit(pageSize)
-      .offset(offset);
+      .orderBy(desc(transaction.bookingDate), desc(transaction.id));
 
     const rows = accountIds.length
       ? await baseQuery.where(inArray(transaction.accountId, accountIds))
@@ -151,15 +168,38 @@ export default defineEventHandler(async (event) => {
 
     const payload: StatementTransaction[] = rows.map((row) => ({
       ...row,
+      topStackId: toTopTransactionStackId({
+        id: row.id,
+        accountId: row.accountId,
+        bookingDate: row.bookingDate,
+        creditDebitIndicator: row.creditDebitIndicator,
+        ntryRef: row.ntryRef,
+        entryAdditionalInfo: row.entryAdditionalInfo,
+        ntryAcctSvcrRef: row.ntryAcctSvcrRef,
+      }),
       bookingDate: formatDate(row.bookingDate),
       valueDate: row.valueDate ? formatDate(row.valueDate) : null,
       runningBalance: null,
     }));
 
+    const stackOrder: string[] = []
+    const seenStackIds = new Set<string>()
+    for (const row of payload) {
+      const stackId = String(row.topStackId ?? row.id)
+      if (seenStackIds.has(stackId)) continue
+      seenStackIds.add(stackId)
+      stackOrder.push(stackId)
+    }
+
+    const totalTopTransactions = stackOrder.length
+    const pageStackIds = new Set(stackOrder.slice(offset, offset + pageSize))
+    const pagedRows = payload.filter((row) => pageStackIds.has(String(row.topStackId ?? row.id)))
+
     setHeader(event, "X-Data-Source", "db");
     return {
-      rows: payload,
-      total: totalRows[0]?.count ?? payload.length,
+      rows: pagedRows,
+      total: totalTopTransactions,
+      totalTopTransactions,
       page,
       pageSize,
     };
@@ -307,7 +347,6 @@ export default defineEventHandler(async (event) => {
       FROM base
     )
     SELECT
-      count(*) OVER()::int AS "totalCount",
       id,
       "runId",
       "accountId",
@@ -367,23 +406,42 @@ export default defineEventHandler(async (event) => {
       COALESCE("entrySubIndex", 1) DESC,
       "bookingDate" DESC,
       id DESC
-    LIMIT ${pageSize}
-    OFFSET ${offset}
   `);
 
   const payload: StatementTransaction[] = rows.rows.map((row: any) => ({
     ...row,
+    topStackId: toTopTransactionStackId({
+      id: row.id,
+      accountId: row.accountId,
+      bookingDate: row.bookingDate,
+      creditDebitIndicator: row.creditDebitIndicator,
+      ntryRef: row.ntryRef,
+      entryAdditionalInfo: row.entryAdditionalInfo,
+      ntryAcctSvcrRef: row.ntryAcctSvcrRef,
+    }),
     bookingDate: formatDate(row.bookingDate),
     valueDate: row.valueDate ? formatDate(row.valueDate) : null,
     runningBalance: row.runningBalance ?? null,
   }));
 
-  const total = rows.rows.length ? Number((rows.rows[0] as any).totalCount ?? 0) : 0
+  const stackOrder: string[] = []
+  const seenStackIds = new Set<string>()
+  for (const row of payload) {
+    const stackId = String(row.topStackId ?? row.id)
+    if (seenStackIds.has(stackId)) continue
+    seenStackIds.add(stackId)
+    stackOrder.push(stackId)
+  }
+
+  const totalTopTransactions = stackOrder.length
+  const pageStackIds = new Set(stackOrder.slice(offset, offset + pageSize))
+  const pagedRows = payload.filter((row) => pageStackIds.has(String(row.topStackId ?? row.id)))
 
   setHeader(event, "X-Data-Source", "db");
   return {
-    rows: payload,
-    total,
+    rows: pagedRows,
+    total: totalTopTransactions,
+    totalTopTransactions,
     page,
     pageSize,
   };

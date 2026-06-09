@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { username, roles } = useAuthz()
+const { user } = useOidcAuth()
 </script>
 
 <template>
@@ -11,8 +11,8 @@ const { username, roles } = useAuthz()
     <template #body>
       <div class="space-y-3">
         <p>Du har ikke adgang til nogen sider endnu.</p>
-        <p v-if="username">Bruger: {{ username }}</p>
-        <p v-if="roles?.length">Roller: {{ roles.join(', ') }}</p>
+        <p v-if="user?.userName">Bruger: {{ user.userName }}</p>
+        <p v-if="user?.userInfo">Roller: {{ user.userInfo.roles }}</p>
       </div>
     </template>
   </UDashboardPanel>

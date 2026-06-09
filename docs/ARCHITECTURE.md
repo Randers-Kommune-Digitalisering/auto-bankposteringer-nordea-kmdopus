@@ -13,6 +13,13 @@ This repo is a stateless financial integration engine:
 4) Generate ERP posting payloads and execute ERP integration
 5) Send notifications (mail/SMS/etc.) via outbox (side-effect)
 
+## Banking agreement activation and SOAP date scoping
+
+- Enabling a banking agreement must not trigger transaction ingestion as a side effect.
+- Ingestion is initiated explicitly via run endpoints/scheduled tasks.
+- For ISO 20022 SOAP adapters, fetch requests are always scoped to a concrete booking date.
+- The booking date is propagated end-to-end from run start to adapter fetch (`YYYY-MM-DD`) and used as an explicit day window.
+
 ## Bank adapters (transport)
 
 Bank ingestion integrates via the narrow port `BankAdapter.fetchDocuments`.
@@ -93,6 +100,7 @@ Bank accounts are not manually created by end users. Instead, accounts are disco
 - `banking_statement`: statement header/account info extracted from document
 - `banking_statement_balance`: statement balances (OPBD/CLBD/CLAV, etc.)
 - `transaction`: normalized entry/tx details (Refs, Parties, BkTxCd, remittance)
+- `transaction_code_catalog`: provider-scoped code/name catalog for human-readable BkTxCd/proprietary labels (deterministic lookup)
 - `rule` + `rule_banking_condition`: deterministic matching rules (CAMT-keyed). Conditions include an explicit operator (e.g. `eq`, `ilike`, `regex`). Regex is only allowed for selected text/counterparty fields and is validated on input/import.
 - `erp_accounting_dimension_definition`: supplier-scoped definition of accounting dimensions (domain key, required/optional, ordering)
 - `erp_accounting_dimension_constraint` + `erp_accounting_dimension_constraint_member`: supplier-scoped dependency rules between dimensions (used for deterministic validation across UI/API/import). Constraints may be conditional on the triggering dimension value via regex (e.g. different rules for `artskonto` prefixes).

@@ -1,16 +1,39 @@
+import 'dotenv/config'
 import crypto from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import dns from 'node:dns/promises'
 import { eq, sql } from 'drizzle-orm'
 
-import db from '../../app/lib/db/index'
 import { account } from '../../app/lib/db/schema/account'
 import { run } from '../../app/lib/db/schema/run'
 import { bankingDocument, bankingStatement, bankingStatementBalance } from '../../app/lib/db/schema/statement'
 import { transaction } from '../../app/lib/db/schema/transaction'
 import { ingestCamt053Document } from '../../engine/banking-ingestion/handlers/ingestCamt053Document'
 
+async function normalizeDatabaseUrlForLocalScripts() {
+  const raw = process.env.DATABASE_URL
+  if (!raw) return
+  try {
+    const url = new URL(raw)
+    if (url.hostname === 'db') {
+      try {
+        await dns.lookup('db')
+        return
+      } catch {
+        url.hostname = 'localhost'
+        process.env.DATABASE_URL = url.toString()
+      }
+    }
+  } catch {
+    // Ignore invalid URLs; db client will emit a useful runtime error.
+  }
+}
+
 async function main() {
+  await normalizeDatabaseUrlForLocalScripts()
+  const { default: db } = await import('../../app/lib/db/index')
+
   const accountId = 'SMOKE-ACCOUNT'
 
   // Ensure at least one account exists (the ingestion is account-scoped).
@@ -30,8 +53,25 @@ async function main() {
     })
   }
 
-  const runId = crypto.randomUUID()
-  await db.insert(run).values({ id: runId, bookingDate: new Date(), status: 'indlæser' })
+  const bookingDate = new Date()
+  bookingDate.setHours(0, 0, 0, 0)
+
+  const existingRun = await db
+    .select({ id: run.id })
+    .from(run)
+    .where(eq(run.bookingDate, bookingDate))
+    .limit(1)
+
+  const runId = existingRun[0]?.id ?? crypto.randomUUID()
+
+  if (existingRun.length) {
+    await db
+      .update(run)
+      .set({ status: 'indlæser' })
+      .where(eq(run.id, runId))
+  } else {
+    await db.insert(run).values({ id: runId, bookingDate, status: 'indlæser' })
+  }
 
   const examplePath = join(
     process.cwd(),

@@ -2,6 +2,7 @@ import { XMLParser } from 'fast-xml-parser'
 import {
   parseNordeaAdditionalEntryInfo,
   extractNordeaGroupingIdentifiers,
+  findNordeaAdditionalEntryInfoValueByCode,
   type NordeaAdditionalEntryInfoSegment,
 } from './nordeaAdditionalEntryInfo'
 
@@ -177,23 +178,25 @@ export function parseCamt053Xml(xml: string): Camt053ParsedDocument {
         const ultimateDebtor = txRltdPties?.UltmtDbtr
         const ultimateCreditor = txRltdPties?.UltmtCdtr
 
-        const debtorName = asTrimmedString(debtor?.Nm)
+        const debtorName = extractPartyDisplayName(debtor)
         const debtorId = extractPartyId(debtor)
         const debtorAccountIban = asTrimmedString(debtorAcct?.Id?.IBAN)
 
-        const creditorName = asTrimmedString(creditor?.Nm)
+        const entryAdditionalInfo = asTrimmedString(entry?.AddtlNtryInf)
+        const entryAdditionalInfoSegments = parseNordeaAdditionalEntryInfo(entryAdditionalInfo)
+        const creditorFromAdditionalEntryInfo = findNordeaAdditionalEntryInfoValueByCode(entryAdditionalInfoSegments, '510')
+
+        const creditorName = extractPartyDisplayName(creditor) ?? creditorFromAdditionalEntryInfo
         const creditorId = extractPartyId(creditor)
         const creditorAccountIban = asTrimmedString(creditorAcct?.Id?.IBAN)
 
-        const ultimateDebtorName = asTrimmedString(ultimateDebtor?.Nm)
-        const ultimateCreditorName = asTrimmedString(ultimateCreditor?.Nm)
+        const ultimateDebtorName = extractPartyDisplayName(ultimateDebtor)
+        const ultimateCreditorName = extractPartyDisplayName(ultimateCreditor)
 
         const txAmtNode = tx?.AmtDtls?.TxAmt?.Amt
         const txAmount = asAmountValue(txAmtNode) ?? entryAmount
         const txCurrency = asAmountCurrency(txAmtNode) ?? entryCurrency
 
-        const entryAdditionalInfo = asTrimmedString(entry?.AddtlNtryInf)
-        const entryAdditionalInfoSegments = parseNordeaAdditionalEntryInfo(entryAdditionalInfo)
         const entryGroupingIds = extractNordeaGroupingIdentifiers(entryAdditionalInfo)
 
         transactions.push({
@@ -350,4 +353,53 @@ function extractPartyId(party: any): string | null {
   }
 
   return null
+}
+
+function extractPartyDisplayName(party: any): string | null {
+  if (!party || typeof party !== 'object') return null
+
+  const adrLines = normalizeStringArray(party?.PstlAdr?.AdrLine)
+  const preferredAdrLine = pickPreferredPartyAdrLine(adrLines)
+  if (preferredAdrLine) {
+    return preferredAdrLine
+  }
+
+  const directName = asTrimmedString(party?.Nm)
+  if (directName) return directName
+
+  return null
+}
+
+function pickPreferredPartyAdrLine(lines: string[]): string | null {
+  if (!Array.isArray(lines) || lines.length === 0) return null
+
+  const normalized = lines
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+
+  if (normalized.length === 0) return null
+
+  const bestNameLike = normalized.find((line) => !isLikelyHonorific(line) && !isLikelyAddressLine(line))
+  if (bestNameLike) return bestNameLike
+
+  const fallbackNonAddress = normalized.find((line) => !isLikelyAddressLine(line))
+  if (fallbackNonAddress) return fallbackNonAddress
+
+  return normalized[0] ?? null
+}
+
+function isLikelyHonorific(line: string): boolean {
+  return /^(hr|fru|mr|mrs|ms|dr)\.?$/i.test(line.trim())
+}
+
+function isLikelyAddressLine(line: string): boolean {
+  const value = line.trim()
+  if (!value) return false
+
+  // Postal codes, house numbers, or floor/door markers are usually address fragments.
+  if (/\b\d{4}\b/.test(value)) return true
+  if (/\d/.test(value) && /\b(st|th|tv|mf|sal)\b/i.test(value)) return true
+
+  const upper = value.toUpperCase()
+  return /(VEJ|GADE|STI|STIEN|ALLE|ALL[EÉ]|TORV|PLADS|PARK|BOULEVARD|V[ÆA]NGE|MARKEN|BAKKEN|TOFTEN)\b/.test(upper)
 }

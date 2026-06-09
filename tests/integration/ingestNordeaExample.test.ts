@@ -92,7 +92,10 @@ describe('ingestCamt053Document (integration)', () => {
       throw err
     }
 
-    await db.insert(run).values({ id: runId1, bookingDate: new Date(), status: 'indlæser' })
+    const bookingDate1 = new Date('2026-06-03T12:00:00.000Z')
+    const bookingDate2 = new Date('2026-06-04T12:00:00.000Z')
+
+    await db.insert(run).values({ id: runId1, bookingDate: bookingDate1, status: 'indlæser' })
 
     const result1 = await db.transaction(async (trx) => {
       return ingestCamt053Document(trx as any, {
@@ -108,7 +111,7 @@ describe('ingestCamt053Document (integration)', () => {
     expect(result1.insertedBalances).toBe(3)
     expect(result1.insertedTransactions).toBe(8)
 
-    await db.insert(run).values({ id: runId2, bookingDate: new Date(), status: 'indlæser' })
+    await db.insert(run).values({ id: runId2, bookingDate: bookingDate2, status: 'indlæser' })
 
     const result2 = await db.transaction(async (trx) => {
       return ingestCamt053Document(trx as any, {

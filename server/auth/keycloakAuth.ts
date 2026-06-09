@@ -1,8 +1,10 @@
-import { getRequestHeader, H3Event, createError } from 'h3'
+import { createError, getRequestHeader, getRequestURL, H3Event } from 'h3'
 import env from '~/lib/env/env'
+import { resolveAppRolesFromSession, type AppRole } from '~/lib/authz/roles'
 
 export type KeycloakTokenPayload = {
   preferred_username?: string
+  [key: string]: unknown
 }
 
 export type AuthContext = {
@@ -12,66 +14,63 @@ export type AuthContext = {
   roles: string[]
 }
 
-type ProxyAuthHeaders = {
-  user?: string
-  email?: string
-  groups?: string
+type OidcSession = {
+  userName?: string
+  userInfo?: Record<string, unknown>
+  claims?: Record<string, unknown>
 }
 
-export type ProxyAuthContext = {
-  username: string
-  roles: string[]
+function toRecord(input: unknown): Record<string, unknown> {
+  return input && typeof input === 'object' ? (input as Record<string, unknown>) : {}
 }
 
-function getProxyAuthHeaders(event: H3Event): ProxyAuthHeaders {
-  return {
-    user: getRequestHeader(event, 'x-auth-request-user') ?? undefined,
-    email: getRequestHeader(event, 'x-auth-request-email') ?? undefined,
-    groups: getRequestHeader(event, 'x-auth-request-groups') ?? undefined,
-  }
-}
-
-function parseGroupsHeader(groups: string | undefined): string[] {
-  if (!groups) return []
-  // oauth2-proxy commonly separates groups by comma
-  return groups
-    .split(',')
-    .map(s => s.trim())
-    .filter(Boolean)
-}
-
-function mapGroupsToRoles(groups: string[], allowedGroupPrefix: string | undefined): string[] {
-  // Convention: allowed group prefix + role slug as child group.
-  // Example prefix: /auto-bankposteringer-nordea-kmdopus-adgang
-  // Roles: /...-adgang/sys_admin, /...-adgang/bookkeeping, ...
-  if (!allowedGroupPrefix) return []
-  const normalizedPrefix = allowedGroupPrefix.replace(/\/+$/, '')
-
-  const allowed = new Set(['requesting', 'bookkeeping', 'sys_admin', 'rule_admin'])
-  const out = new Set<string>()
-
-  for (const g of groups) {
-    const ng = g.trim()
-    if (!ng.startsWith(normalizedPrefix)) continue
-    const rest = ng.slice(normalizedPrefix.length)
-    const parts = rest.split('/').filter(Boolean)
-    for (const p of parts) {
-      if (allowed.has(p)) out.add(p)
-    }
+function resolvePreferredUsername(session: OidcSession): string | undefined {
+  const userInfo = toRecord(session.userInfo)
+  const preferredUsername = userInfo.preferred_username
+  if (typeof preferredUsername === 'string' && preferredUsername.trim().length > 0) {
+    return preferredUsername
   }
 
-  return Array.from(out)
+  const email = userInfo.email
+  if (typeof email === 'string' && email.trim().length > 0) {
+    return email
+  }
+
+  if (typeof session.userName === 'string' && session.userName.trim().length > 0) {
+    return session.userName
+  }
+
+  return undefined
 }
 
-export function authFromProxyHeaders(input: ProxyAuthHeaders, allowedGroupPrefix: string | undefined): ProxyAuthContext | null {
-  if (!input.user) return null
-  const groups = parseGroupsHeader(input.groups)
-  const roles = mapGroupsToRoles(groups, allowedGroupPrefix)
-  return { username: input.user, roles }
+async function getOidcSessionFromApi(event: H3Event): Promise<OidcSession> {
+  const url = new URL('/api/_auth/session', getRequestURL(event))
+  const cookie = getRequestHeader(event, 'cookie')
+
+  const response = await fetch(url, {
+    headers: {
+      accept: 'application/json',
+      ...(cookie ? { cookie } : {}),
+    },
+  })
+
+  if (!response.ok) {
+    throw createError({ statusCode: 401, statusMessage: 'Kunne ikke hente OIDC session' })
+  }
+
+  const payload = (await response.json()) as OidcSession | Record<string, unknown>
+  if (!payload || typeof payload !== 'object') {
+    throw createError({ statusCode: 401, statusMessage: 'OIDC session mangler eller er ugyldig' })
+  }
+
+  return payload as OidcSession
 }
 
-export function extractRolesFromToken(): string[] {
-  return []
+export function extractRolesFromToken(session: OidcSession): AppRole[] {
+  return resolveAppRolesFromSession(session, {
+    clientId: env.KEYCLOAK_CLIENT_ID,
+    allowedGroupPrefix: env.OIDC_ALLOWED_GROUP_PREFIX,
+  })
 }
 
 export async function requireAuth(event: H3Event): Promise<AuthContext> {
@@ -84,21 +83,23 @@ export async function requireAuth(event: H3Event): Promise<AuthContext> {
     }
   }
 
-  // Preferred in A-architecture: oauth2-proxy injects xauthrequest headers.
-  const proxyHeaders = getProxyAuthHeaders(event)
-  const proxyCtx = authFromProxyHeaders(proxyHeaders, env.OIDC_ALLOWED_GROUP_PREFIX)
-  if (proxyCtx) {
-    return {
-      token: 'proxy-xauthrequest',
-      payload: {
-        preferred_username: proxyCtx.username,
-      },
-      username: proxyCtx.username,
-      roles: proxyCtx.roles,
-    }
+  const session = await getOidcSessionFromApi(event)
+  const roles = extractRolesFromToken(session)
+  const username = resolvePreferredUsername(session)
+
+  if (!roles.length) {
+    throw createError({ statusCode: 403, statusMessage: 'Ingen gyldige applikationsroller fundet i session' })
   }
 
-  throw createError({ statusCode: 401, statusMessage: 'Missing proxy auth headers (X-Auth-Request-User)' })
+  return {
+    token: 'oidc-session',
+    payload: {
+      preferred_username: username,
+      ...toRecord(session.claims),
+    },
+    username,
+    roles,
+  }
 }
 
 export async function requireRoles(event: H3Event, requiredRoles: string[]): Promise<AuthContext> {

@@ -1,14 +1,19 @@
 import { defineEventHandler, readBody, createError } from 'h3'
 import { z } from 'zod'
-import { and, eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray, sql } from 'drizzle-orm'
 import db from '~/lib/db'
 import { account } from '~/lib/db/schema/account'
+import { bankingAgreementAccountAllowlist } from '~/lib/db/schema/bankingAgreementAccountAllowlist'
 import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreementAccountDimension'
+import { erpRequestLine } from '~/lib/db/schema/erp'
+import { manualBookingDraft } from '~/lib/db/schema/manualBookingDraft'
+import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import { requireRoles } from '~~/server/auth/keycloakAuth'
 
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
   statuskonto: z.string().trim().min(1).max(32).optional(),
+  ignoreIngestion: z.boolean().optional(),
   // Legacy input
   artskonto: z.string().trim().min(1).max(32).optional(),
 })
@@ -43,6 +48,15 @@ export default defineEventHandler(async (event) => {
   const updated = await db.transaction(async (trx) => {
     if (typeof payload.name !== 'undefined') {
       await trx.update(account).set({ name: payload.name }).where(eq(account.id, id))
+
+      // Keep configured allowlist name in sync when the account is both observed and configured.
+      await trx
+        .update(bankingAgreementAccountAllowlist)
+        .set({ name: payload.name, updatedAt: new Date() } as any)
+        .where(and(
+          eq(bankingAgreementAccountAllowlist.provider, existing.provider as any),
+          eq(bankingAgreementAccountAllowlist.iban, existing.iban),
+        ))
     }
 
     const incomingStatuskonto = (payload.statuskonto ?? payload.artskonto)
@@ -66,6 +80,71 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    if (typeof payload.ignoreIngestion === 'boolean') {
+      await trx
+        .insert(bankingAgreementAccountDimension)
+        .values({
+          provider: existing.provider as any,
+          iban: existing.iban,
+          dimensionKey: 'ignore_ingestion',
+          dimensionValue: payload.ignoreIngestion ? 'true' : 'false',
+          updatedAt: new Date(),
+        } as any)
+        .onConflictDoUpdate({
+          target: [
+            bankingAgreementAccountDimension.provider,
+            bankingAgreementAccountDimension.iban,
+            bankingAgreementAccountDimension.dimensionKey,
+          ],
+          set: {
+            dimensionValue: payload.ignoreIngestion ? 'true' : 'false',
+            updatedAt: new Date(),
+          } as any,
+        })
+
+      if (payload.ignoreIngestion) {
+        const accountTxRows = await trx
+          .select({ id: transaction.id })
+          .from(transaction)
+          .where(eq(transaction.accountId, id))
+
+        const accountTxIds = accountTxRows.map((row) => row.id)
+        if (accountTxIds.length > 0) {
+          await trx.delete(transactionProcessing).where(inArray(transactionProcessing.transactionId, accountTxIds))
+          await trx.delete(manualBookingDraft).where(inArray(manualBookingDraft.transactionId, accountTxIds))
+          await trx.delete(erpRequestLine).where(inArray(erpRequestLine.transactionId, accountTxIds))
+          await trx.delete(transaction).where(inArray(transaction.id, accountTxIds))
+        }
+
+        // Keep statement/document storage clean after account-level purge.
+        await trx.execute(sql`
+          delete from banking_statement_balance b
+          where exists (
+            select 1
+            from banking_statement s
+            where s.id = b.statement_id
+              and not exists (
+                select 1 from "transaction" t where t.statement_id = s.id
+              )
+          )
+        `)
+
+        await trx.execute(sql`
+          delete from banking_statement s
+          where not exists (
+            select 1 from "transaction" t where t.statement_id = s.id
+          )
+        `)
+
+        await trx.execute(sql`
+          delete from banking_document d
+          where not exists (
+            select 1 from banking_statement s where s.document_id = d.id
+          )
+        `)
+      }
+    }
+
     const [base] = await trx
       .select({
         id: account.id,
@@ -86,7 +165,7 @@ export default defineEventHandler(async (event) => {
       .where(and(
         eq(bankingAgreementAccountDimension.provider, base.provider as any),
         eq(bankingAgreementAccountDimension.iban, base.iban),
-        inArray(bankingAgreementAccountDimension.dimensionKey, ['statuskonto', 'artskonto']),
+        inArray(bankingAgreementAccountDimension.dimensionKey, ['statuskonto', 'artskonto', 'ignore_ingestion']),
       ))
 
     const statuskonto = (() => {
@@ -97,7 +176,13 @@ export default defineEventHandler(async (event) => {
       return null
     })()
 
-    return { ...base, statuskonto }
+    const ignoreIngestion = (() => {
+      const raw = dims.find((d) => String(d.key) === 'ignore_ingestion')?.value
+      if (raw == null) return false
+      return /^(1|true|yes)$/i.test(String(raw).trim())
+    })()
+
+    return { ...base, statuskonto, ignoreIngestion }
   })
 
   const storage = useStorage('bank-accounts')

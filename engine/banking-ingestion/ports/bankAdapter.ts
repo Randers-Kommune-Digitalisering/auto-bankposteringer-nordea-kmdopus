@@ -30,6 +30,8 @@ export type FetchBankDocumentsInput = {
   accountId: string
   cursor: BankCursor | null
   limit?: number
+  /** Required ISO date (YYYY-MM-DD). Adapters must scope fetches to this booking date. */
+  bookingDate: string
 }
 
 export type FetchBankDocumentsOutput = {
