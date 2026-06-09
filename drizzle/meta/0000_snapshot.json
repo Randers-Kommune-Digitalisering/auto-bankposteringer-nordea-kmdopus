@@ -1,5 +1,5 @@
 {
-  "id": "442af78f-57e3-4a08-bba1-8d4b684c7312",
+  "id": "6f81f96d-d993-4b21-a33b-b7173e7545d9",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -694,8 +694,8 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "banking_agreement_account_allowlist_provider_fk": {
-          "name": "banking_agreement_account_allowlist_provider_fk",
+        "banking_agreement_account_allowlist_provider_banking_agreement_provider_fk": {
+          "name": "banking_agreement_account_allowlist_provider_banking_agreement_provider_fk",
           "tableFrom": "banking_agreement_account_allowlist",
           "tableTo": "banking_agreement",
           "columnsFrom": [
@@ -768,8 +768,8 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "banking_agreement_account_dimension_provider_fk": {
-          "name": "banking_agreement_account_dimension_provider_fk",
+        "banking_agreement_account_dimension_provider_banking_agreement_provider_fk": {
+          "name": "banking_agreement_account_dimension_provider_banking_agreement_provider_fk",
           "tableFrom": "banking_agreement_account_dimension",
           "tableTo": "banking_agreement",
           "columnsFrom": [
@@ -2420,7 +2420,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "run_booking_date_unique": {
+          "name": "run_booking_date_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "booking_date"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -3039,6 +3047,201 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+    },
+    "public.transaction_party": {
+      "name": "transaction_party",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "transaction_id": {
+          "name": "transaction_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "transaction_party_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sequence_no": {
+          "name": "sequence_no",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "display_name": {
+          "name": "display_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "identifier": {
+          "name": "identifier",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "account_iban": {
+          "name": "account_iban",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "xml_path_name": {
+          "name": "xml_path_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "xml_path_id": {
+          "name": "xml_path_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "transaction_party_transaction_id_transaction_id_fk": {
+          "name": "transaction_party_transaction_id_transaction_id_fk",
+          "tableFrom": "transaction_party",
+          "tableTo": "transaction",
+          "columnsFrom": [
+            "transaction_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "transaction_party_transaction_role_sequence_unique": {
+          "name": "transaction_party_transaction_role_sequence_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "transaction_id",
+            "role",
+            "sequence_no"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.transaction_reference": {
+      "name": "transaction_reference",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "transaction_id": {
+          "name": "transaction_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "xml_path": {
+          "name": "xml_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_scope": {
+          "name": "source_scope",
+          "type": "transaction_source_scope",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reference_type": {
+          "name": "reference_type",
+          "type": "transaction_reference_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sequence_no": {
+          "name": "sequence_no",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value_raw": {
+          "name": "value_raw",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value_normalized": {
+          "name": "value_normalized",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "transaction_reference_transaction_id_transaction_id_fk": {
+          "name": "transaction_reference_transaction_id_transaction_id_fk",
+          "tableFrom": "transaction_reference",
+          "tableTo": "transaction",
+          "columnsFrom": [
+            "transaction_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "transaction_reference_source_value_unique": {
+          "name": "transaction_reference_source_value_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "transaction_id",
+            "xml_path",
+            "value_normalized"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
   "enums": {
@@ -3051,14 +3254,6 @@
         "bankconnect"
       ]
     },
-    "public.bank_channel": {
-      "name": "bank_channel",
-      "schema": "public",
-      "values": [
-        "iso20022",
-        "rest"
-      ]
-    },
     "public.accounting_dimension_constraint_kind": {
       "name": "accounting_dimension_constraint_kind",
       "schema": "public",
@@ -3067,6 +3262,14 @@
         "requires_all_of",
         "requires_exactly_one_of",
         "forbids_any_of"
+      ]
+    },
+    "public.bank_channel": {
+      "name": "bank_channel",
+      "schema": "public",
+      "values": [
+        "iso20022",
+        "rest"
       ]
     },
     "public.banking_document_format": {
@@ -3178,6 +3381,7 @@
         "neq",
         "like",
         "ilike",
+        "regex",
         "gt",
         "gte",
         "lt",
@@ -3219,6 +3423,36 @@
         "indlæser",
         "udført",
         "fejl"
+      ]
+    },
+    "public.transaction_party_role": {
+      "name": "transaction_party_role",
+      "schema": "public",
+      "values": [
+        "debtor",
+        "creditor",
+        "ultimateDebtor",
+        "ultimateCreditor"
+      ]
+    },
+    "public.transaction_reference_type": {
+      "name": "transaction_reference_type",
+      "schema": "public",
+      "values": [
+        "reference",
+        "freetext",
+        "technical",
+        "remittance"
+      ]
+    },
+    "public.transaction_source_scope": {
+      "name": "transaction_source_scope",
+      "schema": "public",
+      "values": [
+        "entry",
+        "tx",
+        "remittance",
+        "party"
       ]
     }
   },

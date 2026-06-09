@@ -12,6 +12,7 @@ export type BankingAccountUnionDto = {
   currency: string | null
   name: string | null
   statuskonto: string | null
+  ignoreIngestion: boolean
   observed: boolean
   configuredForApi: boolean
   observedAccountId: string | null
@@ -67,11 +68,12 @@ export default defineEventHandler(async (event) => {
         .where(and(
           inArray(bankingAgreementAccountDimension.provider, providers as any),
           inArray(bankingAgreementAccountDimension.iban, ibans),
-          inArray(bankingAgreementAccountDimension.dimensionKey, ['statuskonto', 'artskonto']),
+          inArray(bankingAgreementAccountDimension.dimensionKey, ['statuskonto', 'artskonto', 'ignore_ingestion']),
         ))
     : []
 
   const statuskontoByProviderIban = new Map<string, string>()
+  const ignoreIngestionByProviderIban = new Map<string, boolean>()
   // Prefer new key, but allow legacy.
   for (const d of dimRows) {
     const provider = String(d.provider)
@@ -79,6 +81,11 @@ export default defineEventHandler(async (event) => {
     const mapKey = `${provider}:${iban}`
     const key = String(d.key)
     const value = String(d.value)
+
+    if (key === 'ignore_ingestion') {
+      ignoreIngestionByProviderIban.set(mapKey, /^(1|true|yes)$/i.test(value.trim()))
+      continue
+    }
 
     if (key === 'statuskonto') {
       statuskontoByProviderIban.set(mapKey, value)
@@ -103,6 +110,7 @@ export default defineEventHandler(async (event) => {
       currency: row.currency ? String(row.currency) : null,
       name: row.name ? String(row.name) : null,
       statuskonto: statuskontoByProviderIban.get(key) ?? null,
+      ignoreIngestion: ignoreIngestionByProviderIban.get(key) ?? false,
       observed: true,
       configuredForApi: false,
       observedAccountId: String(row.id),
@@ -129,8 +137,8 @@ export default defineEventHandler(async (event) => {
     if (bucket?.length) {
       for (const row of bucket) {
         row.configuredForApi = true
-        // Prefer configured name if observed is missing.
-        if (!row.name && cfg.name) row.name = String(cfg.name)
+        // Prefer explicit configured name over observed bank owner name.
+        if (cfg.name) row.name = String(cfg.name)
         if (!row.statuskonto) row.statuskonto = statuskontoByProviderIban.get(key) ?? null
       }
       continue
@@ -142,6 +150,7 @@ export default defineEventHandler(async (event) => {
       currency: null,
       name: cfg.name ? String(cfg.name) : null,
       statuskonto: statuskontoByProviderIban.get(key) ?? null,
+      ignoreIngestion: ignoreIngestionByProviderIban.get(key) ?? false,
       observed: false,
       configuredForApi: true,
       observedAccountId: null,

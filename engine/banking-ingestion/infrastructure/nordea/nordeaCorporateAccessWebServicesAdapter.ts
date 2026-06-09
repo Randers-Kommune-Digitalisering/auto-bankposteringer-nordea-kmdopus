@@ -95,12 +95,13 @@ export class NordeaCorporateAccessWebServicesAdapter implements BankAdapter {
       status: cfg.downloadStatus,
       fileType: cfg.statementFileType,
     }
-    if (cfg.downloadStatus !== 'NEW') {
-      const endDate = new Date()
-      const startDate = new Date(endDate.getTime() - cfg.lookbackDays * 24 * 60 * 60 * 1000)
-      listInput.startDate = startDate
-      listInput.endDate = endDate
-    }
+
+    const requestedBookingDate = input.bookingDate.trim()
+    const startDate = new Date(`${requestedBookingDate}T00:00:00.000Z`)
+    const endDate = new Date(`${requestedBookingDate}T23:59:59.999Z`)
+    listInput.status = 'ALL'
+    listInput.startDate = startDate
+    listInput.endDate = endDate
 
     const list = await nordeaDownloadFileList(clientCfg, listInput)
 

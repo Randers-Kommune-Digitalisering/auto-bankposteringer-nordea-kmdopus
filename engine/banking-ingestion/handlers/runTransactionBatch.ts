@@ -1,6 +1,6 @@
 import crypto from 'node:crypto'
 import { join } from 'node:path'
-import { asc, eq } from 'drizzle-orm'
+import { and, asc, eq, inArray, sql } from 'drizzle-orm'
 import db from '~/lib/db'
 import { run } from '~/lib/db/schema/run'
 import { errorLog } from '~/lib/db/schema/error'
@@ -14,15 +14,31 @@ import { loadNordeaCorporateAccessEnvConfig } from '../infrastructure/nordea/nor
 import { loadNordeaEnvSecrets } from '../infrastructure/nordea/nordeaEnvSecrets'
 import { ingestCamt053Document } from './ingestCamt053Document'
 import { bankingAgreement } from '~/lib/db/schema/bankingAgreement'
+import { transaction } from '~/lib/db/schema/transaction'
 import type { BankProvider, BankChannel } from '~/lib/db/schema/bankingAgreement'
 import { getAgreementCursor, setAgreementCursor } from './bankingAgreementCursorStore'
 import { runNordeaRestIngestion } from '../infrastructure/nordea/rest/ingest'
+
+function toDateOnlyUtc(value: Date): string {
+  return value.toISOString().slice(0, 10)
+}
+
+function toDateOnly(value: Date | string): string {
+  if (value instanceof Date) {
+    return toDateOnlyUtc(value)
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value
+  }
+  return toDateOnlyUtc(new Date(value))
+}
 
 export async function runTransactionBatch(options: { runId?: string; bookingDate?: Date } = {}): Promise<{ runId: string; insertedCount: number }> {
   const log = logger.child({ scope: 'banking.runTransactionBatch' })
 
   const runId = options.runId ?? crypto.randomUUID()
   const bookingDate = options.bookingDate ?? new Date()
+  const bookingDateOnly = toDateOnlyUtc(bookingDate)
 
   const agreements = await db
     .select()
@@ -240,6 +256,7 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
           accountId: `provider:${r.provider}`,
           cursor: persistedCursor,
           limit: 25,
+          bookingDate: bookingDateOnly,
         })
 
         for (const doc of fetched.documents) {
@@ -286,6 +303,74 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
       }
     }
 
+    const offDateRows = await trx
+      .select({ id: transaction.id, bookingDate: transaction.bookingDate })
+      .from(transaction)
+      .where(and(
+        eq(transaction.runId, runId),
+        sql`${transaction.bookingDate} <> ${bookingDateOnly}::date`,
+      ))
+
+    if (offDateRows.length > 0) {
+      if (options.bookingDate) {
+        const offDateIds = offDateRows.map((row) => row.id)
+        if (offDateIds.length) {
+          await trx
+            .delete(transaction)
+            .where(inArray(transaction.id, offDateIds))
+
+          log.info('Fjernede transaktioner uden for valgt bogfoeringsdato', {
+            runId,
+            selectedBookingDate: bookingDateOnly,
+            removedTransactions: offDateIds.length,
+          })
+        }
+      } else {
+      const txIdsByBookingDate = new Map<string, string[]>()
+      for (const row of offDateRows) {
+        const dateOnly = toDateOnly(row.bookingDate)
+        const txIds = txIdsByBookingDate.get(dateOnly) ?? []
+        txIds.push(row.id)
+        txIdsByBookingDate.set(dateOnly, txIds)
+      }
+
+      for (const [dateOnly, txIds] of txIdsByBookingDate.entries()) {
+        const existingRun = await trx
+          .select({ id: run.id })
+          .from(run)
+          .where(sql`${run.bookingDate} = ${dateOnly}::date`)
+          .limit(1)
+
+        const targetRunId = existingRun[0]?.id ?? crypto.randomUUID()
+        if (!existingRun[0]?.id) {
+          await trx
+            .insert(run)
+            .values({ id: targetRunId, bookingDate: new Date(`${dateOnly}T00:00:00.000Z`), status: 'udført' })
+        }
+
+        await trx
+          .update(transaction)
+          .set({ runId: targetRunId })
+          .where(inArray(transaction.id, txIds))
+
+        log.info('Flyttede transaktioner til matchende bogfoeringsdato-run', {
+          sourceRunId: runId,
+          targetRunId,
+          bookingDate: dateOnly,
+          movedTransactions: txIds.length,
+        })
+      }
+      }
+    }
+
+    const runTxCountRows = await trx
+      .select({ total: sql<number>`count(*)` })
+      .from(transaction)
+      .where(eq(transaction.runId, runId))
+      .limit(1)
+
+    const runInsertedCount = Number(runTxCountRows[0]?.total ?? 0)
+
     await trx
       .update(run)
       .set({ status: providerErrors > 0 ? 'fejl' : 'udført' })
@@ -294,7 +379,7 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
     return {
       insertedStatements,
       insertedBalances,
-      insertedTransactions,
+      insertedTransactions: runInsertedCount,
       deduplicated,
     }
   })

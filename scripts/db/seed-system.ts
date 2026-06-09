@@ -2,7 +2,7 @@ import 'dotenv/config'
 import dns from 'node:dns/promises'
 import { and, eq, isNull } from 'drizzle-orm'
 import { z } from 'zod'
-import tryParseEnv from '../../app/lib/try-parse-env'
+import tryParseEnv from '../../app/lib/env/try-parse-env'
 
 async function normalizeDatabaseUrlForLocalScripts() {
   const raw = process.env.DATABASE_URL

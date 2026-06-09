@@ -7,6 +7,7 @@ import { run } from '~/lib/db/schema/run'
 import { rule } from '~/lib/db/schema/rule'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import type { DashboardResponse } from '~/types/dashboard'
+import { buildNordeaDeterministicGroupKey } from '#engine/banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo'
 
 const querySchema = z.object({
   start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
@@ -78,6 +79,34 @@ function buildDateRange(start: Date, end: Date): string[] {
   return dates
 }
 
+function toDateOnlyDate(value: Date | string | null): Date {
+  if (value instanceof Date) return value
+  const parsed = value ? new Date(value) : new Date()
+  return Number.isNaN(parsed.getTime()) ? new Date() : parsed
+}
+
+function toTopTransactionStackId(input: {
+  id: string | null
+  accountId: string | null
+  bookingDate: Date | string | null
+  creditDebitIndicator: string | null
+  ntryRef: string | null
+  entryAdditionalInfo: string | null
+  ntryAcctSvcrRef: string | null
+}): string {
+  const groupKey = buildNordeaDeterministicGroupKey({
+    accountId: input.accountId ?? '',
+    bookingDate: toDateOnlyDate(input.bookingDate),
+    creditDebitIndicator: input.creditDebitIndicator ?? null,
+    ntryRef: input.ntryRef ?? null,
+    entryAdditionalInfo: input.entryAdditionalInfo ?? null,
+    ntryAcctSvcrRef: input.ntryAcctSvcrRef ?? null,
+  })
+
+  if (groupKey) return `group:${groupKey}`
+  return `single:${String(input.id ?? '')}`
+}
+
 export default defineEventHandler(async (event): Promise<DashboardResponse> => {
   setHeader(event, 'Cache-Control', 'no-store')
 
@@ -109,7 +138,7 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
     ? sql`exists (select 1 from "transaction" t where t.run_id = ${run.id} and t.account in ${accountInSql(accountIds)})`
     : null
 
-  const [seriesRows, openTxRows, ruleRows, runFailureRows, errorRows, latestRuns] = await Promise.all([
+  const [seriesRows, openRowsForTopTx, ruleRows, runFailureRows, errorRows, latestRuns] = await Promise.all([
     db
       .select({
         date: transaction.bookingDate,
@@ -129,14 +158,21 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
 
     db
       .select({
-        openTransactions: sql<number>`count(*)::int`,
+        id: transaction.id,
+        accountId: transaction.accountId,
+        bookingDate: transaction.bookingDate,
+        creditDebitIndicator: transaction.creditDebitIndicator,
+        ntryRef: transaction.ntryRef,
+        entryAdditionalInfo: transaction.entryAdditionalInfo,
+        ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,
       })
       .from(transaction)
       .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
       .where(and(
         or(isNull(transactionProcessing.status), eq(transactionProcessing.status, 'åben')),
         ...(txAccountFilter ? [txAccountFilter] : []),
-      )),
+      ))
+      .orderBy(desc(transaction.bookingDate), desc(transaction.id)),
 
     db
       .select({
@@ -258,6 +294,21 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
   const matchedTransactions = automationSeries.reduce((acc, p) => acc + p.matchedTransactions, 0)
   const autoBookedTransactions = automationSeries.reduce((acc, p) => acc + p.autoBookedTransactions, 0)
 
+  const openTopStackIds = new Set<string>()
+  for (const row of openRowsForTopTx) {
+    const stackId = toTopTransactionStackId({
+      id: row.id,
+      accountId: row.accountId,
+      bookingDate: row.bookingDate,
+      creditDebitIndicator: row.creditDebitIndicator,
+      ntryRef: row.ntryRef,
+      entryAdditionalInfo: row.entryAdditionalInfo,
+      ntryAcctSvcrRef: row.ntryAcctSvcrRef,
+    })
+
+    openTopStackIds.add(stackId)
+  }
+
   const ruleAgg = ruleRows[0] ?? {
     activeRules: 0,
     inactiveRules: 0,
@@ -274,7 +325,7 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
       matchedTransactions,
       autoBookedTransactions,
       automationRatePercent: percent(matchedTransactions, totalTransactions),
-      openTransactions: clampNumber(openTxRows[0]?.openTransactions ?? 0),
+      openTransactions: openTopStackIds.size,
 
       activeRules: clampNumber(ruleAgg.activeRules),
       inactiveRules: clampNumber(ruleAgg.inactiveRules),

@@ -17,6 +17,7 @@ import * as ruleVersionSchema from './schema/ruleVersion'
 import * as runSchema from './schema/run'
 import * as statementSchema from './schema/statement'
 import * as transactionSchema from './schema/transaction'
+import * as transactionCodeCatalogSchema from './schema/transactionCodeCatalog'
 import * as bankingAdapterCursorSchema from './schema/bankingAdapterCursor'
 import * as manualBookingDraftSchema from './schema/manualBookingDraft'
 
@@ -36,13 +37,14 @@ const schema = {
   ...runSchema,
   ...statementSchema,
   ...transactionSchema,
+  ...transactionCodeCatalogSchema,
   ...bankingAdapterCursorSchema,
   ...manualBookingDraftSchema,
 } as const
 
 
 export const pool = new Pool({
-  connectionString: dbEnv.DATABASE_URL
+  connectionString: dbEnv.DATABASE_URL,
 })
 
 const db = drizzle(pool, { schema })

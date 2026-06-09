@@ -3,13 +3,11 @@ import { h } from 'vue'
 import { today } from '@internationalized/date'
 import type { TableColumn } from '@nuxt/ui'
 import type { StatementTransaction } from '~/types/transactions'
+import { TRANSACTION_BADGE_COLUMN_CLASS, TRANSACTION_BADGE_STYLE } from '~/lib/presenters/transactionBadgeStyles'
 import { DEFAULT_TIME_ZONE } from '~/lib/timeZone'
+import { formatTransactionFieldHint } from '~/lib/presenters/transactionFieldHints'
 
 const UBadge = resolveComponent('UBadge')
-const UButton = resolveComponent('UButton')
-const UPopover = resolveComponent('UPopover')
-const UInput = resolveComponent('UInput')
-const USelectMenu = resolveComponent('USelectMenu')
 
 definePageMeta({
   path: '/kontoudtog'
@@ -48,7 +46,13 @@ const end = computed(() => {
 
 const search = computed(() => globalFilterValue.value.trim())
 
-type StatementPage = { rows: StatementTransaction[]; total: number; page: number; pageSize: number }
+type StatementPage = {
+  rows: StatementTransaction[]
+  total: number
+  page: number
+  pageSize: number
+  totalTopTransactions?: number
+}
 
 const { data, status, refresh } = await useFetch<StatementPage>('/api/transactions/statement', {
   // Key intentionally excludes accountIds so fast toggles don't create multiple keys.
@@ -83,16 +87,69 @@ watch([start, end, selectedAccountIds, search], () => {
 
 const fetchedRows = computed<StatementTransaction[]>(() => data.value?.rows ?? [])
 const totalRows = computed<number>(() => data.value?.total ?? 0)
+const shownTopTransactions = computed<number>(() => new Set(
+  fetchedRows.value.map((row) => String(row.topStackId ?? row.id)),
+).size)
+const totalTopTransactions = computed<number>(() => Number(data.value?.totalTopTransactions ?? shownTopTransactions.value))
 
 const visibleRows = computed<StatementTransaction[]>(() => fetchedRows.value)
 const visibleRowCount = computed<number>(() => fetchedRows.value.length)
-const pageCount = computed<number>(() => Math.max(1, Math.ceil(totalRows.value / pageSize.value)))
 
-const statementTableKey = computed(() => visibleRows.value.map((r) => String(r.id)).join('|'))
+const groupedVisibleRows = computed<StatementStackRow[]>(() => {
+  const byStack = new Map<string, StatementTransaction[]>()
+  const stackOrder: string[] = []
+
+  for (const row of visibleRows.value) {
+    const stackId = String(row.topStackId ?? row.id)
+    if (!byStack.has(stackId)) {
+      byStack.set(stackId, [])
+      stackOrder.push(stackId)
+    }
+    byStack.get(stackId)!.push(row)
+  }
+
+  return stackOrder.map((stackId) => {
+    const items = byStack.get(stackId) ?? []
+    const representative = items[0]!
+
+    const counterpartEntries = dedupeBadgeEntries(
+      [resolveCounterpartEntry(representative)].filter((entry): entry is BadgeEntry => Boolean(entry)),
+    )
+
+    const referenceEntries = dedupeBadgeEntries(buildReferenceEntries(representative))
+
+    const transactionTypeEntries = dedupeBadgeEntries(
+      [resolveTransactionTypeEntry(representative)].filter((entry): entry is BadgeEntry => Boolean(entry)),
+    )
+
+    const amount = items.reduce((sum, entry) => sum + Number(entry.amount ?? 0), 0)
+
+    return {
+      stackId,
+      representative,
+      items,
+      bookingDate: representative.bookingDate,
+      account: representative.bankAccountName ?? representative.accountId ?? '-',
+      amount,
+      runningBalance: representative.runningBalance,
+      counterpartEntries,
+      referenceEntries,
+      transactionTypeEntries,
+      category: items.length > 1 ? 'Samlepost' : 'Enkeltpost',
+      lineCount: items.length,
+    }
+  })
+})
+
+const statementTableKey = computed(() => groupedVisibleRows.value.map((r) => r.stackId).join('|'))
 
 function setPage(p: number): void {
   page.value = p
 }
+
+watch(pageSize, () => {
+  page.value = 1
+})
 
 type CsvColumn = { header: string; value: (row: StatementTransaction) => string | number | null | undefined }
 
@@ -124,7 +181,7 @@ function downloadStatementCsv(): void {
     { header: 'Valuta', value: (r) => r.currency ?? 'DKK' },
     { header: 'Kredit/debet', value: (r) => r.creditDebitIndicator },
     { header: 'Modpart', value: (r) => resolveCounterpart(r) ?? '' },
-    { header: 'Fritekst', value: (r) => buildFreeText(r).join(' · ') },
+    { header: 'Reference', value: (r) => buildReference(r).join(' · ') },
     { header: 'Transaktionstype', value: (r) => resolveTransactionType(r) ?? '' },
     { header: 'Transaktions-id', value: (r) => r.id },
     { header: 'Kørsel', value: (r) => r.runId },
@@ -173,9 +230,21 @@ function resolveCounterpart(row: StatementTransaction): string | null {
   return row.debtorName ?? row.ultimateDebtorName ?? row.debtorId ?? row.debtorAccountIban ?? null
 }
 
-type DetailEntry = { label: string; value: string }
-
-const classBadgeColumn = 'flex flex-wrap gap-1'
+type BadgeEntry = { value: string; hint?: string }
+type StatementStackRow = {
+  stackId: string
+  representative: StatementTransaction
+  items: StatementTransaction[]
+  bookingDate: string
+  account: string
+  amount: number
+  runningBalance: string | null
+  counterpartEntries: BadgeEntry[]
+  referenceEntries: BadgeEntry[]
+  transactionTypeEntries: BadgeEntry[]
+  category: 'Samlepost' | 'Enkeltpost'
+  lineCount: number
+}
 
 function normalizeText(value: string): string {
   return value.trim()
@@ -203,80 +272,133 @@ function uniqueTextsFromArray(values: Array<string[] | null | undefined>): strin
   return Array.from(set)
 }
 
-function buildFreeText(row: StatementTransaction): string[] {
-  return uniqueTexts([
-    ...uniqueTextsFromArray([row.remittanceUstrd, row.remittanceAdditional]),
-    ...uniqueTexts([row.remittanceCreditorReference, row.entryAdditionalInfo, row.txAdditionalInfo])
-  ])
-}
+function dedupeBadgeEntries(entries: BadgeEntry[]): BadgeEntry[] {
+  const byValue = new Map<string, { value: string; hints: Set<string> }>()
 
-function buildDetails(row: StatementTransaction): DetailEntry[] {
-  const details: DetailEntry[] = []
-
-  const add = (label: string, value: unknown) => {
-    if (value === null || value === undefined) return
-    if (Array.isArray(value)) {
-      const filtered = value.filter((v) => typeof v === 'string' && v.trim().length)
-      if (!filtered.length) return
-      details.push({ label, value: filtered.join(' · ') })
-      return
-    }
-
-    const str = String(value)
-    if (!str.trim().length) return
-    details.push({ label, value: str })
+  for (const entry of entries) {
+    const value = normalizeText(entry.value)
+    if (!value.length) continue
+    const key = value.toLowerCase()
+    const existing = byValue.get(key) ?? { value, hints: new Set<string>() }
+    const hint = String(entry.hint ?? '').trim()
+    if (hint.length) existing.hints.add(hint)
+    byValue.set(key, existing)
   }
 
-  add('Transaktions-id', row.id)
-  add('Kørsel', row.runId)
-  add('Konto-id', row.accountId)
-  add('Kontonavn', row.bankAccountName)
+  return Array.from(byValue.values()).map((entry) => ({
+    value: entry.value,
+    hint: entry.hints.size ? Array.from(entry.hints).join(' | ') : undefined,
+  }))
+}
 
-  add('Beløb', row.amount)
-  add('Saldo', row.runningBalance)
-  add('Valuta', row.currency)
-  add('Kredit/debet', row.creditDebitIndicator)
-  add('Status', row.status)
-  add('Bogføringsdato', row.bookingDate)
-  add('Valørdag', row.valueDate)
+function resolveCounterpartEntry(row: StatementTransaction): BadgeEntry | null {
+  const isOutgoing = row.creditDebitIndicator === 'DBIT'
 
-  add('Statement-id', row.statementId)
-  add('Entry index', row.entryIndex)
-  add('Entry sub index', row.entrySubIndex)
+  const outgoingCandidates: Array<{ value: string | null; hint: string }> = [
+    { value: row.creditorName, hint: 'creditorName' },
+    { value: row.ultimateCreditorName, hint: 'ultimateCreditorName' },
+    { value: row.creditorId, hint: 'creditorId' },
+    { value: row.creditorAccountIban, hint: 'creditorAccountIban' },
+  ]
 
-  add('NtryRef', row.ntryRef)
-  add('NtryAcctSvcrRef', row.ntryAcctSvcrRef)
-  add('Entry additional info', row.entryAdditionalInfo)
+  const incomingCandidates: Array<{ value: string | null; hint: string }> = [
+    { value: row.debtorName, hint: 'debtorName' },
+    { value: row.ultimateDebtorName, hint: 'ultimateDebtorName' },
+    { value: row.debtorId, hint: 'debtorId' },
+    { value: row.debtorAccountIban, hint: 'debtorAccountIban' },
+  ]
 
-  add('TxAcctSvcrRef', row.txAcctSvcrRef)
-  add('EndToEndId', row.refsEndToEndId)
-  add('InstrId', row.refsInstrId)
-  add('PmtInfId', row.refsPmtInfId)
-  add('UETR', row.uetr)
-  add('Tx additional info', row.txAdditionalInfo)
+  const selected = isOutgoing ? outgoingCandidates : incomingCandidates
+  for (const candidate of selected) {
+    const value = String(candidate.value ?? '').trim()
+    if (value.length) {
+      return { value, hint: candidate.hint }
+    }
+  }
 
-  add('BkTxCd (domain)', row.bkTxCdDomain)
-  add('BkTxCd (family)', row.bkTxCdFamily)
-  add('BkTxCd (sub family)', row.bkTxCdSubFamily)
-  add('BkTxCd (proprietary)', row.bkTxCdProprietary)
+  return null
+}
 
-  add('Debtor name', row.debtorName)
-  add('Debtor id', row.debtorId)
-  add('Debtor IBAN', row.debtorAccountIban)
-  add('Creditor name', row.creditorName)
-  add('Creditor id', row.creditorId)
-  add('Creditor IBAN', row.creditorAccountIban)
-  add('Ultimate debtor', row.ultimateDebtorName)
-  add('Ultimate creditor', row.ultimateCreditorName)
+function resolveTransactionTypeEntry(row: StatementTransaction): BadgeEntry | null {
+  if (row.bkTxCdProprietary && row.bkTxCdProprietary.trim().length) {
+    return {
+      value: row.bkTxCdProprietary.trim(),
+      hint: 'bkTxCdProprietary',
+    }
+  }
 
-  add('Remittance (Ustrd)', row.remittanceUstrd)
-  add('Creditor reference', row.remittanceCreditorReference)
-  add('Remittance additional', row.remittanceAdditional)
+  const parts: string[] = []
+  const sourceParts: string[] = []
 
-  add('Behandlingsstatus', row.processingStatus)
-  add('Regel-id', row.ruleApplied)
+  if (row.bkTxCdDomain?.trim()) {
+    parts.push(row.bkTxCdDomain.trim())
+    sourceParts.push('bkTxCdDomain')
+  }
+  if (row.bkTxCdFamily?.trim()) {
+    parts.push(row.bkTxCdFamily.trim())
+    sourceParts.push('bkTxCdFamily')
+  }
+  if (row.bkTxCdSubFamily?.trim()) {
+    parts.push(row.bkTxCdSubFamily.trim())
+    sourceParts.push('bkTxCdSubFamily')
+  }
 
-  return details
+  if (!parts.length) {
+    return null
+  }
+
+  return {
+    value: parts.join('/'),
+    hint: sourceParts.join(' + '),
+  }
+}
+
+function buildReferenceEntries(row: StatementTransaction): BadgeEntry[] {
+  const entries: BadgeEntry[] = []
+
+  if (Array.isArray(row.remittanceUstrd)) {
+    for (const value of row.remittanceUstrd) {
+      const text = normalizeText(value)
+      if (text.length) {
+        entries.push({ value: text, hint: 'remittanceUstrd' })
+      }
+    }
+  }
+
+  if (Array.isArray(row.remittanceAdditional)) {
+    for (const value of row.remittanceAdditional) {
+      const text = normalizeText(value)
+      if (text.length) {
+        entries.push({ value: text, hint: 'remittanceAdditional' })
+      }
+    }
+  }
+
+  const singleFields: Array<{ value: string | null; hint: string }> = [
+    { value: row.remittanceCreditorReference, hint: 'remittanceCreditorReference' },
+    { value: row.entryAdditionalInfo, hint: 'entryAdditionalInfo' },
+    { value: row.txAdditionalInfo, hint: 'txAdditionalInfo' },
+    { value: row.refsEndToEndId, hint: 'refsEndToEndId' },
+    { value: row.refsInstrId, hint: 'refsInstrId' },
+    { value: row.refsPmtInfId, hint: 'refsPmtInfId' },
+    { value: row.uetr, hint: 'uetr' },
+    { value: row.txAcctSvcrRef, hint: 'txAcctSvcrRef' },
+    { value: row.ntryAcctSvcrRef, hint: 'ntryAcctSvcrRef' },
+    { value: row.ntryRef, hint: 'ntryRef' },
+  ]
+
+  for (const field of singleFields) {
+    const text = normalizeText(field.value ?? '')
+    if (text.length) {
+      entries.push({ value: text, hint: field.hint })
+    }
+  }
+
+  return dedupeBadgeEntries(entries)
+}
+
+function buildReference(row: StatementTransaction): string[] {
+  return buildReferenceEntries(row).map((entry) => entry.value)
 }
 
 function formatMoney(amount: string | number | null | undefined, currency: string | null | undefined): string {
@@ -289,31 +411,26 @@ function formatMoney(amount: string | number | null | undefined, currency: strin
   return `${amount} ${ccy}`
 }
 
-const formatAmount = (row: StatementTransaction): string => {
-  return formatMoney(row.amount, row.currency)
+const formatAmount = (row: StatementStackRow): string => {
+  return formatMoney(row.amount, row.representative.currency)
 }
 
-const columns: TableColumn<StatementTransaction>[] = [
+const columns: TableColumn<StatementStackRow>[] = [
   {
     id: 'search_flat',
     accessorFn: (row) => {
       const parts: Array<string | number | null | undefined> = [
         row.bookingDate,
-        row.valueDate,
-        row.bankAccountName,
-        row.accountId,
+        row.account,
         row.amount,
         row.runningBalance,
-        row.currency,
-        row.creditDebitIndicator,
-        resolveCounterpart(row),
-        resolveTransactionType(row),
-        buildFreeText(row).join(' '),
-        row.id,
-        row.runId,
-        row.status,
-        row.processingStatus,
-        row.ruleApplied
+        row.counterpartEntries.map((entry) => entry.value).join(' '),
+        row.referenceEntries.map((entry) => entry.value).join(' '),
+        row.transactionTypeEntries.map((entry) => entry.value).join(' '),
+        row.items.map((entry) => entry.id).join(' '),
+        row.items.map((entry) => entry.runId).join(' '),
+        row.category,
+        row.lineCount,
       ]
 
       return parts
@@ -330,7 +447,7 @@ const columns: TableColumn<StatementTransaction>[] = [
     header: 'Dato',
     size: 120,
     cell: ({ row }) => {
-      return new Date(row.getValue('bookingDate')).toLocaleString('da-DK', {
+      return new Date(row.original.bookingDate).toLocaleString('da-DK', {
         day: 'numeric',
         month: 'short',
         year: 'numeric'
@@ -342,7 +459,12 @@ const columns: TableColumn<StatementTransaction>[] = [
     header: 'Konto',
     size: 180,
     cell: ({ row }) => {
-      return row.original.bankAccountName ?? row.original.accountId ?? '-'
+      const value = row.original.account
+      if (!value) return '-'
+
+      return h('div', { class: TRANSACTION_BADGE_COLUMN_CLASS }, [
+        h(UBadge, { variant: 'subtle', color: 'neutral' }, () => value),
+      ])
     }
   },
   { // Beløb
@@ -358,27 +480,42 @@ const columns: TableColumn<StatementTransaction>[] = [
     header: 'Modpart',
     size: 220,
     cell: ({ row }) => {
-      const counterpart = resolveCounterpart(row.original)
-      if (!counterpart) return '-'
-      
-      return h('div', { class: classBadgeColumn }, [
-        h(UBadge, { class: 'capitalize', variant: 'subtle', color: 'secondary' }, () => counterpart)
-      ])
-    }
-  },
-  { // Fritekst (aggregated from multiple fields)
-    id: 'freeText',
-    header: 'Fritekst',
-    enableSorting: false,
-    cell: ({ row }) => {
-      const texts = buildFreeText(row.original)
-      if (!texts.length) return '-'
+      const entries = row.original.counterpartEntries
+      if (!entries.length) return '-'
 
       return h(
         'div',
-        { class: classBadgeColumn },
-        texts.map((text) =>
-          h(UBadge, { class: 'capitalize', variant: 'subtle', color: 'primary' }, () => text)
+        { class: TRANSACTION_BADGE_COLUMN_CLASS },
+        entries.map((entry, index) =>
+          h(UBadge, {
+            key: `counterpart-${index}`,
+            class: TRANSACTION_BADGE_STYLE.counterpart.class,
+            variant: TRANSACTION_BADGE_STYLE.counterpart.variant,
+            color: TRANSACTION_BADGE_STYLE.counterpart.color,
+            title: formatTransactionFieldHint(entry.hint),
+          }, () => entry.value),
+        ),
+      )
+    }
+  },
+  { // Reference (aggregated from multiple fields)
+    id: 'reference',
+    header: 'Reference',
+    enableSorting: false,
+    cell: ({ row }) => {
+      const entries = row.original.referenceEntries
+      if (!entries.length) return '-'
+
+      return h(
+        'div',
+        { class: TRANSACTION_BADGE_COLUMN_CLASS },
+        entries.map((entry) =>
+          h(UBadge, {
+            class: TRANSACTION_BADGE_STYLE.freeTextOrReference.class,
+            variant: TRANSACTION_BADGE_STYLE.freeTextOrReference.variant,
+            color: TRANSACTION_BADGE_STYLE.freeTextOrReference.color,
+            title: formatTransactionFieldHint(entry.hint),
+          }, () => entry.value)
         )
       )
     }
@@ -388,64 +525,44 @@ const columns: TableColumn<StatementTransaction>[] = [
     header: 'Transaktionstype',
     size: 180,
     cell: ({ row }) => {
-      const txType = resolveTransactionType(row.original)
-      if (!txType) return '-'
-      
-      return h('div', { class: classBadgeColumn }, [
-        h(UBadge, { class: 'capitalize', variant: 'subtle', color: 'warning' }, () => txType)
-      ])
-    }
-  },
-  { // Løbende saldo
-    id: 'runningBalance',
-    header: 'Saldo',
-    size: 160,
-    cell: ({ row }) => {
-      const value = row.original.runningBalance
-      if (!value) return '-'
-
-      return h('span', { class: 'font-medium' }, formatMoney(value, row.original.currency))
-    }
-  },
-  { // Detaljer (aggregated from multiple fields)
-    id: 'details',
-    header: 'Detaljer',
-    size: 80,
-    enableSorting: false,
-    cell: ({ row }) => {
-      const entries = buildDetails(row.original)
+      const entries = row.original.transactionTypeEntries
+      if (!entries.length) return '-'
 
       return h(
-        UPopover,
-        { popper: { placement: 'left-start' } },
-        {
-          default: () =>
-            h(UButton, {
-              icon: 'solar:document-bold-duotone',
-              label: 'Vis',
-              variant: 'soft',
-              size: 'xs',
-              color: 'neutral'
-            }),
-          content: () =>
-            h(
-              'div',
-              { class: 'p-4 max-w-2xl max-h-96 overflow-y-auto space-y-2' },
-              entries.map((entry) =>
-                h('div', { class: 'flex gap-2 text-sm' }, [
-                  h('span', { class: 'text-muted w-40 shrink-0' }, entry.label),
-                  h('span', { class: 'break-all min-w-0' }, entry.value)
-                ])
-              )
-            )
-        }
+        'div',
+        { class: TRANSACTION_BADGE_COLUMN_CLASS },
+        entries.map((entry, index) =>
+          h(UBadge, {
+            key: `transaction-type-${index}`,
+            class: TRANSACTION_BADGE_STYLE.transactionType.class,
+            variant: TRANSACTION_BADGE_STYLE.transactionType.variant,
+            color: TRANSACTION_BADGE_STYLE.transactionType.color,
+            title: formatTransactionFieldHint(entry.hint),
+          }, () => entry.value),
+        ),
       )
     }
-  }
+  },
+  {
+    id: 'category',
+    header: 'Kategori',
+    cell: ({ row }) => {
+      const lineCount = row.original.lineCount
+      const category = row.original.category
+
+      return h('div', { class: 'flex items-center gap-2' }, [
+        h(UBadge, {
+          variant: 'subtle',
+          color: 'neutral',
+        }, () => category),
+        h('span', { class: 'text-xs text-muted' }, `${lineCount} linje${lineCount === 1 ? '' : 'r'}`),
+      ])
+    },
+  },
 ]
 
 const columnVisibility = ref({
-  search_flat: false
+  search_flat: false,
 })
 
 const tableUi = {
@@ -501,8 +618,16 @@ const tableUi = {
           search-placeholder="Søg i kontoudtog..."
         />
 
-        <div v-if="dateRange?.start && dateRange?.end" class="text-sm text-muted">
-          Viser {{ visibleRowCount }} af {{ totalRows }} transaktioner i valgt periode
+        <div v-if="dateRange?.start && dateRange?.end" class="mb-3 mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div class="text-sm text-muted">
+            Viser {{ groupedVisibleRows.length }} af {{ totalTopTransactions }} posteringer ({{ visibleRowCount }} linjer i visningen)
+          </div>
+
+          <USelect
+            v-model="pageSize"
+            :items="[10, 25, 50, 100]"
+            class="w-full sm:w-28"
+          />
         </div>
 
         <UEmpty
@@ -525,7 +650,7 @@ const tableUi = {
           v-else
           :key="statementTableKey"
           v-model:column-visibility="columnVisibility"
-          :data="visibleRows"
+          :data="groupedVisibleRows"
           :columns="columns"
           :loading="status === 'pending'"
           :ui="tableUi"

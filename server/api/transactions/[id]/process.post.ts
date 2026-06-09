@@ -59,7 +59,9 @@ export default defineEventHandler(async (event) => {
       id: transaction.id,
       runId: transaction.runId,
       bookingDate: transaction.bookingDate,
+      ntryRef: transaction.ntryRef,
       creditDebitIndicator: transaction.creditDebitIndicator,
+      ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,
       amount: transaction.amount,
       accountId: transaction.accountId,
       accountProvider: account.provider,
@@ -96,7 +98,9 @@ export default defineEventHandler(async (event) => {
       accountId: row.accountId,
       bookingDate,
       creditDebitIndicator: row.creditDebitIndicator ?? null,
+      ntryRef: row.ntryRef ?? null,
       entryAdditionalInfo: row.entryAdditionalInfo ?? null,
+      ntryAcctSvcrRef: row.ntryAcctSvcrRef ?? null,
     })
 
     if (groupKey) {
@@ -110,6 +114,8 @@ export default defineEventHandler(async (event) => {
           accountId: transaction.accountId,
           bookingDate: transaction.bookingDate,
           creditDebitIndicator: transaction.creditDebitIndicator,
+          ntryRef: transaction.ntryRef,
+          ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,
           entryAdditionalInfo: transaction.entryAdditionalInfo,
           processingStatus: transactionProcessing.status,
         })
@@ -129,7 +135,9 @@ export default defineEventHandler(async (event) => {
           accountId: candidate.accountId,
           bookingDate: toDate(candidate.bookingDate),
           creditDebitIndicator: candidate.creditDebitIndicator ?? null,
+          ntryRef: candidate.ntryRef ?? null,
           entryAdditionalInfo: candidate.entryAdditionalInfo ?? null,
+          ntryAcctSvcrRef: candidate.ntryAcctSvcrRef ?? null,
         })
         return candidateKey === groupKey
       }).length

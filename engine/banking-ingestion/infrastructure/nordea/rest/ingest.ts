@@ -1,8 +1,9 @@
-import { asc, eq } from 'drizzle-orm'
+import { and, asc, eq } from 'drizzle-orm'
 import { logger } from '~/lib/logger'
 import appEnv from '~/lib/env/env'
 import { bankingAgreementAccountAllowlist } from '~/lib/db/schema/bankingAgreementAccountAllowlist'
 import { account } from '~/lib/db/schema/account'
+import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreementAccountDimension'
 
 import { getAdapterCursor, setAdapterCursor } from '../../../handlers/bankAdapterCursorStore'
 import { ingestCamt053Document } from '../../../handlers/ingestCamt053Document'
@@ -108,13 +109,29 @@ export async function runNordeaRestIngestion(
     .where(eq(bankingAgreementAccountAllowlist.provider, 'nordea' as any))
     .orderBy(asc(bankingAgreementAccountAllowlist.iban))
 
-  if (!allowlisted.length) {
+  const ignoredRows = await trx
+    .select({ iban: bankingAgreementAccountDimension.iban, value: bankingAgreementAccountDimension.dimensionValue })
+    .from(bankingAgreementAccountDimension)
+    .where(and(
+      eq(bankingAgreementAccountDimension.provider, 'nordea' as any),
+      eq(bankingAgreementAccountDimension.dimensionKey, 'ignore_ingestion'),
+    ))
+
+  const ignoredIbans = new Set(
+    ignoredRows
+      .filter((row) => /^(1|true|yes)$/i.test(String(row.value ?? '').trim()))
+      .map((row) => String(row.iban ?? '').trim().toUpperCase()),
+  )
+
+  const allowlistedActive = allowlisted.filter((row) => !ignoredIbans.has(String(row.iban).trim().toUpperCase()))
+
+  if (!allowlistedActive.length) {
     log.warn('Nordea REST: ingen allowlisted konti i banking_agreement_account_allowlist')
     return { insertedStatements: 0, insertedBalances: 0, insertedTransactions: 0, deduplicated: false }
   }
 
   const allowlistedKeySet = new Set<string>()
-  for (const r of allowlisted) {
+  for (const r of allowlistedActive) {
     for (const k of buildComparableKeys(String(r.iban))) allowlistedKeySet.add(k)
   }
 
@@ -193,7 +210,7 @@ export async function runNordeaRestIngestion(
   let insertedTransactions = 0
   let deduplicated = false
 
-  for (const row of allowlisted) {
+  for (const row of allowlistedActive) {
     const resolved = findAccountForIban(row.iban)
     if (!resolved) {
       log.warn('Nordea REST: allowlisted IBAN ikke fundet i /accounts response', { iban: row.iban })

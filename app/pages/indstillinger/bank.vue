@@ -10,12 +10,13 @@ type BankingAccountUnionDto = {
   currency: string | null
   name: string | null
   statuskonto: string | null
+  ignoreIngestion: boolean
   observed: boolean
   configuredForApi: boolean
   observedAccountId: string | null
 }
 
-type AllowlistAccount = { iban: string; name: string | null; statuskonto: string | null }
+type AllowlistAccount = { iban: string; name: string | null; statuskonto: string | null; ignoreIngestion: boolean }
 
 type NordeaRestAuthStatus = {
   provider: 'nordea'
@@ -92,6 +93,16 @@ type BankingAgreement = {
         }
       }
     | { status: 'not_implemented'; message: string; env?: any }
+}
+
+type AgreementToggleResponse = {
+  success: boolean
+  agreement?: BankingAgreement
+  accountDiscovery?: {
+    discoveredAccounts: number
+    inspectedDocuments: number
+    error?: string
+  }
 }
 
 const BANKING_ACCOUNTS_QUERY_KEY = 'banking-accounts' as const
@@ -246,11 +257,33 @@ const providerLabel = (p: BankingAgreement['provider']) => {
 
 async function toggleAgreement(provider: BankingAgreement['provider'], enabled: boolean) {
   try {
-    await $fetch(`/api/banking-agreements/${provider}`, {
+    const response = await $fetch<AgreementToggleResponse>(`/api/banking-agreements/${provider}`, {
       method: 'PUT',
       body: { enabled },
     })
-    await refreshAgreements()
+
+    await Promise.all([
+      refreshAgreements(),
+      refreshBankAccounts(),
+    ])
+
+    if (enabled) {
+      const discovery = response?.accountDiscovery
+      if (discovery?.error) {
+        toast.add({
+          title: 'Aktiveret, men kontohentning fejlede',
+          description: discovery.error,
+          color: 'warning',
+        })
+      } else if (discovery) {
+        toast.add({
+          title: 'Konti opdateret',
+          description: `Fandt ${discovery.discoveredAccounts} konti i ${discovery.inspectedDocuments} dokumenter.`,
+          color: 'success',
+        })
+      }
+    }
+
     return true
   } catch (err: any) {
     toast.add({
@@ -372,6 +405,7 @@ function openEditConfiguredAccountModal(row: BankingAccountUnionDto) {
     iban: row.iban,
     name: row.name,
     statuskonto: row.statuskonto,
+    ignoreIngestion: row.ignoreIngestion,
   }
   accountModalOpen.value = true
 }
@@ -472,6 +506,13 @@ const columns: TableColumn<BankingAccountUnionDto>[] = [
     header: createSortableHeader('Statuskonto'),
     enableSorting: true,
     cell: ({ row }) => String((row.original as any).statuskonto ?? '—')
+  },
+  {
+    accessorKey: 'ignoreIngestion',
+    id: 'ignoreIngestion',
+    header: createSortableHeader('Ingestion'),
+    enableSorting: true,
+    cell: ({ row }) => row.original.ignoreIngestion ? 'Ignoreres' : 'Aktiv',
   },
   {
     id: 'source',
