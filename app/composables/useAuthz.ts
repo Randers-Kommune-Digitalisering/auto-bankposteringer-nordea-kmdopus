@@ -1,69 +1,32 @@
-import type { Ref } from 'vue'
-import type { AppRole } from '~/lib/authz/roles'
-import { resolveAppRolesFromSession, hasAnyRole } from '~/lib/authz/roles'
-
-function toRecord(input: unknown): Record<string, unknown> {
-  return input && typeof input === 'object' ? (input as Record<string, unknown>) : {}
-}
-
-function resolveUsernameFromOidcUser(user: unknown): string | null {
-  const record = toRecord(user)
-  const userInfo = toRecord(record.userInfo)
-
-  const preferred = userInfo.preferred_username
-  if (typeof preferred === 'string' && preferred.trim().length > 0) return preferred
-
-  const username = record.userName
-  if (typeof username === 'string' && username.trim().length > 0) return username
-
-  const email = userInfo.email
-  if (typeof email === 'string' && email.trim().length > 0) return email
-
-  return null
-}
-
 export function useAuthz() {
-  const roles = useState<AppRole[]>('authz.roles', () => [])
-  const username = useState<string | null>('authz.username', () => null)
-  const loaded = useState<boolean>('authz.loaded', () => false)
-  const oidc = useOidcAuth()
+  const { user } = useOidcAuth()
 
-  function syncFromCurrentUser() {
-    roles.value = resolveAppRolesFromSession(oidc.user.value, {
-      clientId: useRuntimeConfig().public?.oidcClientId,
-    })
-    username.value = resolveUsernameFromOidcUser(oidc.user.value)
-    loaded.value = true
-  }
-
-  async function refresh() {
-    try {
-      await oidc.fetch()
-      syncFromCurrentUser()
-    } catch {
-      roles.value = []
-      username.value = null
-      loaded.value = true
+  function toStringRoles(value: unknown): string[] {
+    if (Array.isArray(value)) {
+      return value.filter((role): role is string => typeof role === 'string' && role.trim().length > 0)
     }
+
+    if (typeof value === 'string' && value.trim().length > 0) {
+      return [value]
+    }
+
+    return []
   }
 
-  watch(
-    () => oidc.user.value,
-    () => {
-      syncFromCurrentUser()
-    },
-    { immediate: true },
-  )
+  const roles = computed<string[]>(() => {
+    const claimRoles = toStringRoles(user.value?.claims?.roles)
+    const userInfoRoles = toStringRoles(user.value?.userInfo?.roles)
 
-  function hasAny(required: AppRole[] | undefined): boolean {
-    return hasAnyRole(roles.value, required ?? [])
+    return Array.from(new Set([...claimRoles, ...userInfoRoles]))
+  })
+
+  function hasAny(required: readonly string[]) {
+    return required.some(role => roles.value.includes(role))
   }
 
   return {
-    roles: roles as Ref<AppRole[]>,
-    username: username as Ref<string | null>,
-    loaded: loaded as Ref<boolean>,
-    refresh,
+    user,
+    roles,
     hasAny,
   }
 }

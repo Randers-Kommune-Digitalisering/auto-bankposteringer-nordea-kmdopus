@@ -19,7 +19,25 @@ import { parseAmount } from "#engine/matching/domain/amount";
 import { buildNordeaDeterministicGroupKey } from "#engine/banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo";
 import { MAX_TOP_TRANSACTIONS } from "~/lib/constants/topTransactions";
 
+const OPEN_TRANSACTIONS_CACHE_TTL_SECONDS = Number.parseInt(
+  process.env.OPEN_TRANSACTIONS_CACHE_TTL_SECONDS ?? '30',
+  10,
+)
+
+type OpenTransactionsCacheEntry = {
+  expiresAtMs: number
+  payload: OpenTransactionsResponse
+}
+
+let openTransactionsCache: OpenTransactionsCacheEntry | null = null
+
 export default defineEventHandler(async (event) => {
+  const nowMs = Date.now()
+  if (openTransactionsCache && openTransactionsCache.expiresAtMs > nowMs) {
+    setHeader(event, "X-Data-Source", "cache");
+    return openTransactionsCache.payload
+  }
+
   const maxTopTransactions = MAX_TOP_TRANSACTIONS
   const openTransactionCondition = or(isNull(transactionProcessing.status), eq(transactionProcessing.status, "åben"))
 
@@ -192,7 +210,7 @@ export default defineEventHandler(async (event) => {
     codeKey: string
     displayName: string
   }> = []
-  if (catalogCodeKeys.size && catalogProviders.size) {
+  if (catalogCodeKeys.size && catalogProviders.size && await hasTransactionCodeCatalogTable()) {
     try {
       txCodeCatalogRows = await db
         .select({
@@ -343,6 +361,13 @@ export default defineEventHandler(async (event) => {
     total,
     limit: maxTopTransactions,
     totalTopTransactions,
+  }
+
+  if (OPEN_TRANSACTIONS_CACHE_TTL_SECONDS > 0) {
+    openTransactionsCache = {
+      expiresAtMs: nowMs + OPEN_TRANSACTIONS_CACHE_TTL_SECONDS * 1000,
+      payload: response,
+    }
   }
 
   setHeader(event, "X-Data-Source", "db");
@@ -601,4 +626,16 @@ function buildReferenceDetails(row: TransactionReferenceRow): TransactionReferen
   }
 
   return Array.from(refs.values());
+}
+
+async function hasTransactionCodeCatalogTable(): Promise<boolean> {
+  try {
+    const result = await db.execute(sql`
+      SELECT to_regclass('public.transaction_code_catalog') AS table_name
+    `)
+    const row = result.rows[0] as { table_name?: string | null } | undefined
+    return Boolean(row?.table_name)
+  } catch {
+    return false
+  }
 }

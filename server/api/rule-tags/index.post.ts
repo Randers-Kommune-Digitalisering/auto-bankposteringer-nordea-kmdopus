@@ -3,14 +3,14 @@ import { sql } from 'drizzle-orm'
 import db from '~/lib/db'
 import { ruleTag, ruleTagInsertSchema } from '~/lib/db/schema/ruleTag'
 import { capitalizeFirst } from '~/lib/text/capitalizeFirst'
-import { requireRoles } from '~~/server/auth/keycloakAuth'
+import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
 
 function getPgErrorCode(error: any): string | undefined {
   return error?.code ?? error?.cause?.code ?? error?.cause?.cause?.code
 }
 
 export default defineEventHandler(async (event) => {
-  await requireRoles(event, ['write'])
+  await requireWriteAccess(event)
   const body = await readBody(event)
 
   let payload

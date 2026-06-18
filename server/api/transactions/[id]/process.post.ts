@@ -24,13 +24,13 @@ import {
   listAccountingDimensionDefinitions,
   normalizeDimensionInput,
 } from '~~/server/utils/accountingDimensions'
-import { requireRoles } from '~~/server/auth/keycloakAuth'
+import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
 import { parseAmount } from '#engine/matching/domain/amount'
 import env from '~/lib/env/env'
 import { buildNordeaDeterministicGroupKey } from '#engine/banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo'
 
 export default defineEventHandler(async (event) => {
-  await requireRoles(event, ['write'])
+  await requireWriteAccess(event)
   const transactionIdParam = event.context.params?.id;
   if (!transactionIdParam) {
     throw createError({ statusCode: 400, statusMessage: "Mangler transaktions-id" });

@@ -14,8 +14,11 @@ wait_for_db() {
 const { Client } = require('pg');
 
 const url = process.env.DATABASE_URL;
-const maxAttempts = 60;
-const delayMs = 500;
+const maxAttemptsRaw = Number.parseInt(process.env.DB_WAIT_MAX_ATTEMPTS || '0', 10);
+const maxAttempts = Number.isFinite(maxAttemptsRaw) && maxAttemptsRaw > 0 ? maxAttemptsRaw : 0;
+const delayMsRaw = Number.parseInt(process.env.DB_WAIT_RETRY_MS || '1000', 10);
+const delayMs = Number.isFinite(delayMsRaw) && delayMsRaw > 0 ? delayMsRaw : 1000;
+const maxAttemptsLabel = maxAttempts > 0 ? String(maxAttempts) : '∞';
 
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
@@ -23,13 +26,15 @@ function sleep(ms) {
 
 (async () => {
   let lastErr = null;
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+  let attempt = 0;
+  while (maxAttempts === 0 || attempt < maxAttempts) {
+    attempt += 1;
     try {
       const client = new Client({ connectionString: url });
       await client.connect();
       await client.query('select 1');
       await client.end();
-      process.stdout.write(`Database ready (attempt ${attempt}/${maxAttempts})\n`);
+      process.stdout.write(`Database ready (attempt ${attempt}/${maxAttemptsLabel})\n`);
       process.exit(0);
     } catch (err) {
       lastErr = err;
@@ -40,11 +45,13 @@ function sleep(ms) {
       const transient =
         code === '57P03' ||
         code === 'ECONNREFUSED' ||
+        code === 'ENOTFOUND' ||
         msg.includes('the database system is starting up') ||
+        msg.includes('ENOTFOUND') ||
         msg.includes('ECONNREFUSED') ||
         msg.includes('terminating connection due to administrator command');
 
-      process.stdout.write(`DB not ready yet (attempt ${attempt}/${maxAttempts})${code ? ` code=${code}` : ''}\n`);
+      process.stdout.write(`DB not ready yet (attempt ${attempt}/${maxAttemptsLabel})${code ? ` code=${code}` : ''}\n`);
       if (!transient) {
         // Still retry a few times; network/DNS can be flaky during compose boot.
       }
@@ -58,6 +65,26 @@ function sleep(ms) {
 })();
 NODE
 }
+
+configure_oidc_origin() {
+  if [ -n "${OIDC_APP_ORIGIN:-}" ]; then
+    return 0
+  fi
+
+  if [ -n "${CODESPACE_NAME:-}" ] && [ -n "${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN:-}" ]; then
+    OIDC_APP_ORIGIN="https://${CODESPACE_NAME}-3000.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
+    export OIDC_APP_ORIGIN
+    echo "Derived OIDC_APP_ORIGIN for Codespaces: ${OIDC_APP_ORIGIN}"
+
+    if [ -z "${OIDC_CORS_ALLOWED_ORIGINS:-}" ]; then
+      OIDC_CORS_ALLOWED_ORIGINS="${OIDC_APP_ORIGIN}"
+      export OIDC_CORS_ALLOWED_ORIGINS
+      echo "Derived OIDC_CORS_ALLOWED_ORIGINS from OIDC_APP_ORIGIN"
+    fi
+  fi
+}
+
+configure_oidc_origin
 
 if [ "$NODE_ENV" = "production" ]; then
   if [ "${DB_MIGRATE_ON_START:-}" = "1" ]; then

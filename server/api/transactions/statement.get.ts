@@ -3,6 +3,7 @@ import { defineEventHandler, getQuery, setHeader } from "h3";
 import db from "~/lib/db";
 import { account } from "~/lib/db/schema/account";
 import { transaction, transactionProcessing } from "~/lib/db/schema/transaction";
+import { transactionCodeCatalog } from "~/lib/db/schema/transactionCodeCatalog";
 import type { StatementTransaction } from "~/types/transactions";
 import { buildNordeaDeterministicGroupKey } from "#engine/banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo";
 
@@ -81,6 +82,131 @@ function toTopTransactionStackId(input: {
   return `single:${String(input.id ?? '')}`
 }
 
+type TransactionTypeRow = {
+  bankProvider: string | null
+  bkTxCdProprietary: string | null
+  bkTxCdDomain: string | null
+  bkTxCdFamily: string | null
+  bkTxCdSubFamily: string | null
+}
+
+function buildTransactionCodeKey(row: TransactionTypeRow): string | null {
+  if (row.bkTxCdProprietary && row.bkTxCdProprietary.trim().length) {
+    return `PRTRY:${row.bkTxCdProprietary.trim()}`
+  }
+
+  const parts = [row.bkTxCdDomain, row.bkTxCdFamily, row.bkTxCdSubFamily]
+    .map((value) => (value ? value.trim() : ''))
+    .filter(Boolean)
+
+  return parts.length ? parts.join('/') : null
+}
+
+function normalizeProvider(value: string | null | undefined): 'danskebank' | 'nordea' | 'bankconnect' | null {
+  const normalized = String(value ?? '').trim().toLowerCase()
+  if (normalized === 'danskebank') return 'danskebank'
+  if (normalized === 'nordea') return 'nordea'
+  if (normalized === 'bankconnect') return 'bankconnect'
+  return null
+}
+
+function resolveTransactionTypeHint(row: TransactionTypeRow): string | null {
+  if (row.bkTxCdProprietary && row.bkTxCdProprietary.trim().length) {
+    return 'bkTxCdProprietary'
+  }
+
+  const sourceParts: string[] = []
+  if (row.bkTxCdDomain?.trim()) sourceParts.push('bkTxCdDomain')
+  if (row.bkTxCdFamily?.trim()) sourceParts.push('bkTxCdFamily')
+  if (row.bkTxCdSubFamily?.trim()) sourceParts.push('bkTxCdSubFamily')
+
+  return sourceParts.length ? sourceParts.join(' + ') : null
+}
+
+function resolveTransactionType(input: {
+  row: TransactionTypeRow
+  catalogDisplayNameByCodeKey: Map<string, string>
+}): string | null {
+  const codeKey = buildTransactionCodeKey(input.row)
+  if (!codeKey) return null
+
+  const provider = normalizeProvider(input.row.bankProvider)
+  const displayName = provider
+    ? input.catalogDisplayNameByCodeKey.get(`${provider}:${codeKey.toUpperCase()}`)
+    : undefined
+  if (displayName) return displayName
+
+  if (codeKey.startsWith('PRTRY:')) {
+    return codeKey.slice('PRTRY:'.length)
+  }
+
+  return codeKey
+}
+
+async function loadTransactionTypeCatalogDisplayNames(rows: TransactionTypeRow[]): Promise<Map<string, string>> {
+  const catalogCodeKeys = new Set<string>()
+  const catalogProviders = new Set<'danskebank' | 'nordea' | 'bankconnect'>()
+
+  for (const row of rows) {
+    const key = buildTransactionCodeKey(row)
+    if (key) catalogCodeKeys.add(key)
+
+    const provider = normalizeProvider(row.bankProvider)
+    if (provider) catalogProviders.add(provider)
+  }
+
+  if (!catalogCodeKeys.size || !catalogProviders.size) {
+    return new Map<string, string>()
+  }
+
+  if (!(await hasTransactionCodeCatalogTable())) {
+    return new Map<string, string>()
+  }
+
+  let catalogRows: Array<{
+    provider: 'danskebank' | 'nordea' | 'bankconnect'
+    codeKey: string
+    displayName: string
+  }> = []
+
+  try {
+    catalogRows = await db
+      .select({
+        provider: transactionCodeCatalog.provider,
+        codeKey: transactionCodeCatalog.codeKey,
+        displayName: transactionCodeCatalog.displayName,
+      })
+      .from(transactionCodeCatalog)
+      .where(inArray(transactionCodeCatalog.provider, Array.from(catalogProviders)))
+  } catch {
+    catalogRows = []
+  }
+
+  const byCodeKey = new Map<string, string>()
+  for (const row of catalogRows) {
+    const provider = normalizeProvider(row.provider)
+    const key = String(row.codeKey ?? '').trim()
+    const name = String(row.displayName ?? '').trim()
+    if (!provider || !key || !name || !catalogCodeKeys.has(key)) continue
+
+    byCodeKey.set(`${provider}:${key.toUpperCase()}`, name)
+  }
+
+  return byCodeKey
+}
+
+async function hasTransactionCodeCatalogTable(): Promise<boolean> {
+  try {
+    const result = await db.execute(sql`
+      SELECT to_regclass('public.transaction_code_catalog') AS table_name
+    `)
+    const row = result.rows[0] as { table_name?: string | null } | undefined
+    return Boolean(row?.table_name)
+  } catch {
+    return false
+  }
+}
+
 export default defineEventHandler(async (event) => {
   // Interactive UI endpoint: must reflect new ingestions immediately.
   setHeader(event, "Cache-Control", "no-store");
@@ -113,6 +239,7 @@ export default defineEventHandler(async (event) => {
         runId: transaction.runId,
         accountId: transaction.accountId,
         bankAccountName: account.name,
+        bankProvider: account.provider,
 
         statementId: transaction.statementId,
         entryIndex: transaction.entryIndex,
@@ -166,6 +293,8 @@ export default defineEventHandler(async (event) => {
       ? await baseQuery.where(inArray(transaction.accountId, accountIds))
       : await baseQuery;
 
+    const catalogDisplayNameByCodeKey = await loadTransactionTypeCatalogDisplayNames(rows)
+
     const payload: StatementTransaction[] = rows.map((row) => ({
       ...row,
       topStackId: toTopTransactionStackId({
@@ -176,6 +305,12 @@ export default defineEventHandler(async (event) => {
         ntryRef: row.ntryRef,
         entryAdditionalInfo: row.entryAdditionalInfo,
         ntryAcctSvcrRef: row.ntryAcctSvcrRef,
+      }),
+      transactionTypeCode: buildTransactionCodeKey(row),
+      transactionTypeHint: resolveTransactionTypeHint(row),
+      transactionType: resolveTransactionType({
+        row,
+        catalogDisplayNameByCodeKey,
       }),
       bookingDate: formatDate(row.bookingDate),
       valueDate: row.valueDate ? formatDate(row.valueDate) : null,
@@ -262,6 +397,7 @@ export default defineEventHandler(async (event) => {
         t.run_id AS "runId",
         t.account AS "accountId",
         a.name AS "bankAccountName",
+        a.provider AS "bankProvider",
 
         t.statement_id AS "statementId",
         t.entry_index AS "entryIndex",
@@ -351,6 +487,7 @@ export default defineEventHandler(async (event) => {
       "runId",
       "accountId",
       "bankAccountName",
+      "bankProvider",
 
       "statementId",
       "entryIndex",
@@ -408,6 +545,8 @@ export default defineEventHandler(async (event) => {
       id DESC
   `);
 
+  const catalogDisplayNameByCodeKey = await loadTransactionTypeCatalogDisplayNames(rows.rows as TransactionTypeRow[])
+
   const payload: StatementTransaction[] = rows.rows.map((row: any) => ({
     ...row,
     topStackId: toTopTransactionStackId({
@@ -418,6 +557,12 @@ export default defineEventHandler(async (event) => {
       ntryRef: row.ntryRef,
       entryAdditionalInfo: row.entryAdditionalInfo,
       ntryAcctSvcrRef: row.ntryAcctSvcrRef,
+    }),
+    transactionTypeCode: buildTransactionCodeKey(row),
+    transactionTypeHint: resolveTransactionTypeHint(row),
+    transactionType: resolveTransactionType({
+      row,
+      catalogDisplayNameByCodeKey,
     }),
     bookingDate: formatDate(row.bookingDate),
     valueDate: row.valueDate ? formatDate(row.valueDate) : null,

@@ -17,7 +17,7 @@ import {
 } from '~/lib/db/schema/rule'
 import { ruleVersion, type RuleVersionInsertSchema } from '~/lib/db/schema/ruleVersion'
 import { getActiveErpSupplier, listAccountingDimensionConstraints, listAccountingDimensionDefinitions, resolveDimensionValueRows } from '~~/server/utils/accountingDimensions'
-import { requireRoles } from '~~/server/auth/keycloakAuth'
+import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
 
 function toDbNumericStringOrUndefined(value: number | null | undefined): string | undefined {
   if (value == null) return undefined
@@ -100,7 +100,7 @@ function compileRuleDraftToDb(draft: RuleDraftSchema, newVersion: number, erpSup
 }
 
 export default defineEventHandler(async (event) => {
-  await requireRoles(event, ['write'])
+  await requireWriteAccess(event)
   const id = Number(event.context.params?.id)
   if (!id) throw createError({ statusCode: 400, statusMessage: 'Missing rule id' })
 

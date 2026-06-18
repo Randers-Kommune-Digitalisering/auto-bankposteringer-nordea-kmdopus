@@ -18,7 +18,7 @@ import {
   listAccountingDimensionDefinitions,
   normalizeDimensionInput,
 } from '~~/server/utils/accountingDimensions'
-import { requireRoles } from '~~/server/auth/keycloakAuth'
+import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
 import { parseAmount } from '#engine/matching/domain/amount'
 import { buildNordeaDeterministicGroupKey } from '#engine/banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo'
 
@@ -28,7 +28,7 @@ const groupProcessSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  await requireRoles(event, ['write'])
+  await requireWriteAccess(event)
 
   const parsed = groupProcessSchema.safeParse(await readBody(event))
   if (!parsed.success) {
