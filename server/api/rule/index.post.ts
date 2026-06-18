@@ -16,7 +16,7 @@ import { ruleVersion, type RuleVersionInsertSchema } from '~/lib/db/schema/ruleV
 import db from '~/lib/db'
 import { logger } from '~/lib/logger'
 import { getActiveErpSupplier, listAccountingDimensionConstraints, listAccountingDimensionDefinitions, resolveDimensionValueRows } from '~~/server/utils/accountingDimensions'
-import { requireRoles } from '~~/server/auth/keycloakAuth'
+import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
 import { normalizeRuleTagIds, resolveRuleTagIds } from '~~/server/utils/ruleTags/resolveRuleTagIds'
 
 const version = 1
@@ -102,7 +102,7 @@ export function compileRuleDraftToDb(draft: RuleDraftSchema) {
 }
 
 export default defineEventHandler(async (event) => {
-  await requireRoles(event, ['write'])
+  await requireWriteAccess(event)
   const log = logger.child({ scope: 'api.rule.post' })
   try {
     const activeSupplier = await getActiveErpSupplier()

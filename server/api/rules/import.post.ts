@@ -30,7 +30,7 @@ import {
 } from '~~/server/utils/accountingDimensions'
 import { compileRuleDraftToDb } from '~~/server/utils/rules/compileRuleDraftToDb'
 import { normalizeRuleTagIds } from '~~/server/utils/ruleTags/resolveRuleTagIds'
-import { requireRoles } from '~~/server/auth/keycloakAuth'
+import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
 
 const version = 1
 
@@ -249,7 +249,7 @@ function buildMatches(row: any, operator: string): MatchEntry[] | undefined {
 }
 
 export default defineEventHandler(async (event) => {
-  await requireRoles(event, ['write'])
+  await requireWriteAccess(event)
   const log = logger.child({ scope: 'api.rules.import' })
   const query = getQuery(event)
   const queryDryRun = query.dryRun === '1' || query.dryRun === 'true'

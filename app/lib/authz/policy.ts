@@ -1,29 +1,46 @@
-import type { AppRole } from '~/lib/authz/roles'
-import { hasAnyRole } from '~/lib/authz/roles'
+const APP_ROLES = ['bookkeeper', 'admin', 'rule_admin', 'dev'] as const
+export type AppRole = (typeof APP_ROLES)[number]
 
-export type RouteRolePolicy = {
-  prefix: string
-  roles: AppRole[]
+export const ROUTE_ROLE_POLICIES = {
+  '/': ['bookkeeper', 'admin', 'rule_admin', 'dev'],
+  '/indstillinger': ['admin', 'rule_admin', 'dev'],
+  '/fejlhaandtering': ['admin', 'dev'],
+  '/konteringsregler': ['rule_admin', 'dev'],
+  '/aabne-poster': ['bookkeeper', 'dev'],
+  '/kontoudtog': ['bookkeeper', 'admin', 'rule_admin', 'dev'],
+  '/koersler': ['admin', 'bookkeeper', 'dev'],
+} as const satisfies Record<string, readonly AppRole[]>
+
+export function requiredRolesForPath(path: string): readonly AppRole[] | undefined {
+  const match = Object.entries(ROUTE_ROLE_POLICIES)
+    .sort(([a], [b]) => b.length - a.length)
+    .find(([prefix]) =>
+      path === prefix || path.startsWith(`${prefix}/`)
+    )
+
+  return match?.[1]
 }
 
-// Keep one canonical route -> role map for UI visibility and route guards.
-export const routeRolePolicies: RouteRolePolicy[] = [
-  { prefix: '/indstillinger', roles: ['sys_admin', 'rule_admin', 'dev'] },
-  { prefix: '/fejlhaandtering', roles: ['sys_admin'] },
-  { prefix: '/konteringsregler', roles: ['rule_admin'] },
-  { prefix: '/aabne-poster', roles: ['bookkeeping', 'dev'] },
-  { prefix: '/kontoudtog', roles: ['bookkeeping', 'sys_admin', 'rule_admin', 'dev'] },
-  { prefix: '/koersler', roles: ['sys_admin', 'bookkeeping'] },
-  { prefix: '/', roles: ['bookkeeping', 'sys_admin', 'rule_admin', 'dev'] },
-]
-
-export function requiredRolesForPath(path: string): AppRole[] | undefined {
-  const match = routeRolePolicies.find((policy) => path === policy.prefix || path.startsWith(`${policy.prefix}/`))
-  return match?.roles
+export function hasAnyRole(
+  userRoles: readonly string[],
+  requiredRoles: readonly AppRole[],
+): boolean {
+  return requiredRoles.some(role => userRoles.includes(role))
 }
 
-export function canAccessPath(path: string, roles: readonly AppRole[]): boolean {
-  const required = requiredRolesForPath(path)
-  if (!required) return true
-  return hasAnyRole(roles, required)
+export function canAccessPath(
+  path: string,
+  userRoles: readonly string[],
+): boolean {
+  const requiredRoles = requiredRolesForPath(path)
+
+  if (!path) return true
+
+  if (!requiredRoles?.length) {
+    return true
+  }
+
+  return requiredRoles.some(role =>
+    userRoles.includes(role),
+  )
 }

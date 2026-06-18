@@ -21,9 +21,6 @@ const baseCommonSchema = z.object({
   ERP_INTEGRATION_FILENAME_MASK: z.string(),
 
   // Keycloak / OpenID Connect (for access control)
-  KEYCLOAK_AUTH_URL: z.string().optional(),
-  KEYCLOAK_PUBLIC_URL: z.string().optional(),
-  // Legacy alias still used in local .env files.
   KEYCLOAK_URL: z.string().optional(),
   KEYCLOAK_REALM: z.string().optional().default('randers-kommune'),
   KEYCLOAK_CLIENT_ID: z.string().optional(),
@@ -31,9 +28,6 @@ const baseCommonSchema = z.object({
   // Legacy alias for app client id.
   KEYCLOAK_APP_CLIENT_ID: z.string().optional(),
   KEYCLOAK_APP_CLIENT_SECRET: z.string().optional(),
-  // Dedicated admin client used for Keycloak Admin API access.
-  KEYCLOAK_ADMIN_CLIENT_ID: z.string().optional(),
-  KEYCLOAK_ADMIN_CLIENT_SECRET: z.string().optional(),
   // Legacy aliases used by existing Flask/Python setup.
   KEYCLOAK_USER_ADMIN_CLIENT_ID: z.string().optional(),
   KEYCLOAK_USER_ADMIN_CLIENT_SECRET: z.string().optional(),
@@ -45,7 +39,7 @@ const baseCommonSchema = z.object({
   KEYCLOAK_AUDIENCE: z.string().optional(),
   // Optional: cookie name for access token if provided by an upstream auth proxy.
   KEYCLOAK_ACCESS_TOKEN_COOKIE: z.string().optional(),
-
+  
   // nuxt-oidc-auth session/key material.
   NUXT_OIDC_SESSION_SECRET: z.string().optional(),
   NUXT_OIDC_AUTH_SESSION_SECRET: z.string().optional(),
@@ -54,6 +48,8 @@ const baseCommonSchema = z.object({
   // oauth2-proxy / openid proxy integration (xauthrequest headers)
   // If set, groups from X-Auth-Request-Groups can be mapped to app roles.
   OIDC_ALLOWED_GROUP_PREFIX: z.string().optional(),
+  // Optional comma-separated allowlist for API CORS (supports credentials).
+  OIDC_CORS_ALLOWED_ORIGINS: z.string().optional(),
 
   // Notifications (SMTP)
   AUTH_SENDER_ADDRESS: z.email(),

@@ -8,7 +8,7 @@ import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreeme
 import { erpRequestLine } from '~/lib/db/schema/erp'
 import { manualBookingDraft } from '~/lib/db/schema/manualBookingDraft'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
-import { requireRoles } from '~~/server/auth/keycloakAuth'
+import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
 
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
@@ -19,7 +19,7 @@ const updateSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  await requireRoles(event, ['write'])
+  await requireWriteAccess(event)
   const id = event.context.params?.id
   if (!id) {
     throw createError({ statusCode: 400, statusMessage: 'Manglende konto-id' })
