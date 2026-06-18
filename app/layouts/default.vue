@@ -1,18 +1,11 @@
 <script lang="ts" setup>
 import type { NavigationMenuItem } from '@nuxt/ui'
-import { requiredRolesForPath } from '~/lib/authz/policy'
-import type { AppRole } from '~/lib/authz/roles'
+import { canAccessPath } from '~/lib/authz/policy'
 
-const { loggedIn, user, logout } = useOidcAuth()
-const { loaded, refresh, hasAny } = useAuthz()
-
+const APP_TITLE = 'FOBI'
 const open = ref(false)
-
 const route = useRoute()
-
-if (!loaded.value) {
-  refresh()
-}
+const { user, roles } = useAuthz()
 
 function normalizePath(path: string): string {
   const trimmed = path.length > 1 ? path.replace(/\/+$/, '') : path
@@ -46,7 +39,7 @@ function findLabelByPath(items: NavigationMenuItem[] | undefined, path: string):
   }
 }
 
-const primaryLinks = [
+const primaryLinks: NavigationMenuItem[] = [
   {
     label: 'Dashboard',
     icon: 'solar:clipboard-bold-duotone',
@@ -153,34 +146,29 @@ const primaryLinks = [
       }
     ]
   }
-] satisfies NavigationMenuItem[]
+]
 
 const userLabel = computed(() => {
-  return user.value?.userName
-    ?? (user.value?.userInfo?.preferred_username as string | undefined)
-    ?? 'Bruger'
+  return user.value?.userName ?? 'Bruger'
 })
 
 const links = computed(() => {
   const visiblePrimaryLinks = primaryLinks
     .map((item) => {
-      const childItems = (item.children as NavigationMenuItem[] | undefined)
-        ?.filter((child) => {
-          const to = typeof child.to === 'string' ? child.to : undefined
-          if (!to) return true
-          const requiredRoles = requiredRolesForPath(to)
-          return hasAny(requiredRoles as AppRole[] | undefined)
-        })
+      const children = (item.children as NavigationMenuItem[] | undefined)
+        ?.filter((child) => canAccessPath(child.to as string, roles.value))
 
-      const withChildren = childItems ? { ...item, children: childItems } : item
-      return withChildren
+      return {
+        ...item,
+        children,
+      }
     })
     .filter((item) => {
-      const to = typeof item.to === 'string' ? item.to : undefined
-      const requiredRoles = to ? requiredRolesForPath(to) : undefined
-      const hasVisibleChildren = Array.isArray(item.children) && item.children.length > 0
-      const canSeeItem = hasAny(requiredRoles as AppRole[] | undefined)
-      return canSeeItem || hasVisibleChildren
+      const hasChildren =
+        Array.isArray(item.children) &&
+        item.children.length > 0
+
+      return canAccessPath(item.to as string, roles.value) || hasChildren
     })
 
   const secondaryLinks: NavigationMenuItem[] = [
@@ -192,8 +180,6 @@ const links = computed(() => {
 
   return [visiblePrimaryLinks, secondaryLinks]
 })
-
-const APP_TITLE = 'FOBI'
 
 const activePageLabel = computed(() => {
   const allItems = links.value.flat()

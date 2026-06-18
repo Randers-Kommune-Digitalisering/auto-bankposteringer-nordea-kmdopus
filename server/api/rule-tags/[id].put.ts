@@ -5,7 +5,7 @@ import db from '~/lib/db'
 import { ruleTag } from '~/lib/db/schema/ruleTag'
 import { ruleRuleTag } from '~/lib/db/schema/rule'
 import { capitalizeFirst } from '~/lib/text/capitalizeFirst'
-import { requireRoles } from '~~/server/auth/keycloakAuth'
+import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
 
 function getPgErrorCode(error: any): string | undefined {
   return error?.code ?? error?.cause?.code ?? error?.cause?.cause?.code
@@ -16,7 +16,7 @@ const renameSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  await requireRoles(event, ['write'])
+  await requireWriteAccess(event)
   const oldId = event.context.params?.id
   if (!oldId) {
     throw createError({ statusCode: 400, statusMessage: 'Manglende ruletag-id' })
