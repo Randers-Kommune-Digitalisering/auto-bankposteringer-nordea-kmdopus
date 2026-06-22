@@ -1,4 +1,4 @@
-import { pgEnum, pgTable, text, uuid, primaryKey, unique, date } from 'drizzle-orm/pg-core'
+import { pgEnum, pgTable, text, uuid, primaryKey, unique, date, index } from 'drizzle-orm/pg-core'
 import { erpSupplierEnum } from './enums'
 
 export const accountingDimensionConstraintKindValues = [
@@ -30,6 +30,7 @@ export const erpAccountingDimensionConstraint = pgTable('erp_accounting_dimensio
     t.kind,
     t.ifValueRegex,
   ),
+  supplierIdx: index('erp_accounting_dimension_constraint_supplier_idx').on(t.erpSupplier),
 }))
 
 export const erpAccountingDimensionConstraintMember = pgTable('erp_accounting_dimension_constraint_member', {

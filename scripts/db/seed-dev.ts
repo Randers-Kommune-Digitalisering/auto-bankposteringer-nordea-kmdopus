@@ -194,8 +194,15 @@ async function ensureDimensionDefinitions(tx: any) {
         valueRegex: d.valueRegex,
         valueRegexFlags: d.valueRegexFlags,
       })
-      .onConflictDoNothing({
+      .onConflictDoUpdate({
         target: [erpAccountingDimensionDefinition.erpSupplier, erpAccountingDimensionDefinition.key],
+        set: {
+          erpTarget: d.erpTarget,
+          sortOrder: d.sortOrder,
+          required: d.required,
+          valueRegex: d.valueRegex,
+          valueRegexFlags: d.valueRegexFlags,
+        },
       })
   }
 }

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
-import { pgTable, uuid, text, integer, jsonb, timestamp } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, integer, jsonb, timestamp, index } from 'drizzle-orm/pg-core'
 import { outboxStatusEnum } from './enums'
 import { run } from './run'
 
@@ -18,7 +18,11 @@ export const outbox = pgTable('outbox', {
   lastError: text('last_error'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   processedAt: timestamp('processed_at', { withTimezone: true }),
-})
+}, (t) => ({
+  statusNextAttemptAtIdx: index('outbox_status_next_attempt_at_idx').on(t.status, t.nextAttemptAt),
+  runIdCreatedAtIdx: index('outbox_run_id_created_at_idx').on(t.runId, t.createdAt),
+  statusCreatedAtIdx: index('outbox_status_created_at_idx').on(t.status, t.createdAt),
+}))
 
 export const outboxInsertSchema = createInsertSchema(outbox)
 export const outboxUpdateSchema = createUpdateSchema(outbox)

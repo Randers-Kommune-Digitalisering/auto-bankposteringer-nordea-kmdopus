@@ -86,11 +86,6 @@ const statuskontoSchema = computed(() => {
     .max(32, 'Statuskonto er for langt')
     .refine((v) => !/\s/.test(v), 'Statuskonto må ikke indeholde mellemrum')
 
-  const supplier = String((accountingDimensionConfig.value as any)?.erpSupplier ?? '').trim().toLowerCase()
-  if (supplier === 'kmd') {
-    schema = schema.refine((v) => /^905\d{5}$/.test(v), 'Statuskonto skal være artskonto i formatet 905XXXXX')
-  }
-
   const def = statuskontoDefinition.value
   const reSource = def?.valueRegex ?? null
   if (!reSource) return schema
@@ -240,7 +235,7 @@ async function onSubmit() {
         refreshNuxtData('bank-accounts'),
       ])
 
-      toast.add({ title: 'Bankkonto oprettet', description: `${result.data.iban} er tilføjet til API.` })
+      toast.add({ title: 'Bankkonto oprettet', description: `${result.data.name} er tilføjet til API.` })
     } else {
       if (!props.accountId) return
 

@@ -127,6 +127,8 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
 
   const startDate = parsedQuery.start ? parseDate(parsedQuery.start) : defaultStart
   const endDate = parsedQuery.end ? parseDate(parsedQuery.end) : defaultEnd
+  const endDateExclusive = new Date(endDate)
+  endDateExclusive.setDate(endDateExclusive.getDate() + 1)
 
   const start = formatDate(startDate)
   const end = formatDate(endDate)
@@ -203,7 +205,8 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
       })
       .from(errorLog)
       .where(and(
-        sql`date(${errorLog.createdAt}) between ${start} and ${end}`,
+        gte(errorLog.createdAt, startDate),
+        sql`${errorLog.createdAt} < ${endDateExclusive}`,
         ...(accountIds.length
           ? [sql`${errorLog.runId} in (select distinct t.run_id from "transaction" t where t.account in ${accountInSql(accountIds)})`]
           : []),

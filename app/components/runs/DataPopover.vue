@@ -12,6 +12,8 @@
         (e: 'update:open', value: boolean): void
     }
 
+    const appConfig = useAppConfig()
+
     const props = defineProps<Props>()
     const emit = defineEmits<Emits>()
 
@@ -95,11 +97,11 @@
     const getIcon = () => {
         switch (props.type) {
             case 'error':
-                return 'solar:shield-warning-bold-duotone'
+                return appConfig.ui.icons.warning
             case 'docs':
-                return 'solar:file-bold-duotone'
+                return appConfig.ui.icons.file
             case 'erpResponses':
-                return 'solar:hashtag-square-bold-duotone'
+                return appConfig.ui.icons.hash
         }
     }
 

@@ -18,6 +18,9 @@ function resolveAppOrigin(): string | undefined {
 }
 
 const appOrigin = resolveAppOrigin()
+const isCodespaces = Boolean(process.env.CODESPACE_NAME?.trim())
+const devtoolsEnv = process.env.NUXT_DEVTOOLS?.trim().toLowerCase()
+const enableNuxtDevtools = devtoolsEnv === 'true' || (devtoolsEnv !== 'false' && !isCodespaces)
 
 export default defineNuxtConfig({
   alias: {
@@ -92,10 +95,10 @@ export default defineNuxtConfig({
 
   compatibilityDate: '2025-07-15',
   devtools: {
-    enabled: true,
+    enabled: enableNuxtDevtools,
 
     timeline: {
-      enabled: true
+      enabled: enableNuxtDevtools
     }
   },
 })

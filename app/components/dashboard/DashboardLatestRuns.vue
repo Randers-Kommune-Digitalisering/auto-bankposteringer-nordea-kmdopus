@@ -3,6 +3,8 @@ import type { TableColumn } from '@nuxt/ui'
 import type { DashboardLatestRun } from '~/types/dashboard'
 import type { RunStatus } from '~/lib/db/schema/enums'
 
+const appConfig = useAppConfig()
+
 const props = defineProps<{
   runs: DashboardLatestRun[]
 }>()
@@ -74,13 +76,13 @@ const latestRunsTableKey = computed(() => props.runs.map((r) => `${String((r as 
     <template #header>
       <div class="flex items-center justify-between">
         <div class="font-medium">Seneste kørsler</div>
-        <UButton to="/koersler" variant="ghost" icon="solar:alt-arrow-right-bold-duotone" label="Se alle" />
+        <UButton to="/koersler" variant="ghost" :icon="appConfig.ui.icons.arrowRight" label="Se alle" />
       </div>
     </template>
 
     <UEmpty
       v-if="!runs.length"
-      icon="solar:archive-bold-duotone"
+      :icon="appConfig.ui.icons.archive"
       title="Ingen kørsler"
       description="Der er ingen kørsler endnu."
       class="border border-dashed border-default rounded-lg"

@@ -7,6 +7,8 @@ const open = ref(false)
 const route = useRoute()
 const { user, roles } = useAuthz()
 
+const appConfig = useAppConfig()
+
 function normalizePath(path: string): string {
   const trimmed = path.length > 1 ? path.replace(/\/+$/, '') : path
   try {
@@ -42,7 +44,7 @@ function findLabelByPath(items: NavigationMenuItem[] | undefined, path: string):
 const primaryLinks: NavigationMenuItem[] = [
   {
     label: 'Dashboard',
-    icon: 'solar:clipboard-bold-duotone',
+    icon: appConfig.ui.icons.clipboard,
     to: '/',
     onSelect: () => {
       open.value = false
@@ -50,7 +52,7 @@ const primaryLinks: NavigationMenuItem[] = [
   },
   {
     label: 'Konteringsregler',
-    icon: 'solar:notebook-bookmark-bold-duotone',
+    icon: appConfig.ui.icons.notebook,
     to: '/konteringsregler',
     onSelect: () => {
       open.value = false
@@ -58,7 +60,7 @@ const primaryLinks: NavigationMenuItem[] = [
   },
   {
     label: 'Åbne poster',
-    icon: 'solar:inbox-bold-duotone',
+    icon: appConfig.ui.icons.inbox,
     to: '/aabne-poster',
     onSelect: () => {
       open.value = false
@@ -66,7 +68,7 @@ const primaryLinks: NavigationMenuItem[] = [
   },
   {
     label: 'Kontoudtog',
-    icon: 'solar:card-transfer-bold-duotone',
+    icon: appConfig.ui.icons.accountStatement,
     to: '/kontoudtog',
     onSelect: () => {
       open.value = false
@@ -74,7 +76,7 @@ const primaryLinks: NavigationMenuItem[] = [
   },
   {
     label: 'Kørsler',
-    icon: 'solar:alarm-bold-duotone',
+    icon: appConfig.ui.icons.clock,
     to: '/koersler',
     onSelect: () => {
       open.value = false
@@ -83,7 +85,7 @@ const primaryLinks: NavigationMenuItem[] = [
   {
     label: 'Indstillinger',
     to: '/indstillinger',
-    icon: 'solar:settings-bold-duotone',
+    icon: appConfig.ui.icons.settings,
     defaultOpen: true,
     type: 'trigger',
     children: [
@@ -127,7 +129,7 @@ const primaryLinks: NavigationMenuItem[] = [
   {
     label: 'Fejlhåndtering',
     to: '/fejlhaandtering',
-    icon: 'solar:shield-warning-bold-duotone',
+    icon: appConfig.ui.icons.warning,
     type: 'trigger',
     children: [
       {
@@ -174,7 +176,7 @@ const links = computed(() => {
   const secondaryLinks: NavigationMenuItem[] = [
     {
       label: userLabel.value,
-      icon: 'solar:user-bold-duotone',
+      icon: appConfig.ui.icons.user,
     },
   ]
 

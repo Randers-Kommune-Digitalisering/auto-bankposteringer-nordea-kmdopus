@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import type { DashboardKpis } from '~/types/dashboard'
 
+const appConfig = useAppConfig()
+
 const props = defineProps<{
   kpis: DashboardKpis
-}>()
+}>()  
 
 const formatInt = (value: number) => new Intl.NumberFormat('da-DK', { maximumFractionDigits: 0 }).format(value)
 const formatPct = (value: number) => `${new Intl.NumberFormat('da-DK', { maximumFractionDigits: 1 }).format(value)}%`
@@ -46,7 +48,7 @@ const stats = computed<DashboardStat[]>(() => {
     {
       key: 'automation',
       title: 'Automatisering',
-      icon: 'solar:magic-stick-2-bold-duotone',
+      icon: appConfig.ui.icons.wand,
       value: formatPct(kpis.automationRatePercent),
       badge: `${formatInt(kpis.matchedTransactions)} / ${formatInt(kpis.totalTransactions)}`,
       sub: `Auto: ${formatInt(kpis.autoBookedTransactions)}`
@@ -54,14 +56,14 @@ const stats = computed<DashboardStat[]>(() => {
     {
       key: 'open-items',
       title: 'Åbne poster',
-      icon: 'solar:inbox-bold-duotone',
+      icon: appConfig.ui.icons.inbox,
       to: '/aabne-poster',
       value: formatInt(kpis.openTransactions)
     },
     {
       key: 'rules',
       title: 'Regler',
-      icon: 'solar:notebook-bookmark-bold-duotone',
+      icon: appConfig.ui.icons.notebook,
       to: '/konteringsregler',
       value: formatInt(kpis.activeRules),
       badge: 'Aktive',
@@ -70,7 +72,7 @@ const stats = computed<DashboardStat[]>(() => {
     {
       key: 'errors',
       title: 'Fejl',
-      icon: 'solar:shield-warning-bold-duotone',
+      icon: appConfig.ui.icons.warning,
       to: '/koersler',
       value: formatInt(kpis.errorCount),
       badge: 'Fejl',
