@@ -37,6 +37,7 @@ type RuleImportResponseFail = {
 
 type RuleImportResponse = RuleImportResponseSuccess | RuleImportResponseFail
 
+const appConfig = useAppConfig()
 const toast = useToast()
 const UButton = resolveComponent('UButton')
 
@@ -240,7 +241,7 @@ const versionsTableKey = computed(() => (versionsData.value?.versions ?? []).map
 
         <template #right>
           <UButton
-            icon="solar:refresh-bold-duotone"
+            :icon="appConfig.ui.icons.reload"
             variant="ghost"
             color="primary"
             label="Opdater"
@@ -300,7 +301,7 @@ const versionsTableKey = computed(() => (versionsData.value?.versions ?? []).map
               </div>
               <div class="flex flex-col items-stretch gap-2 min-w-64">
                 <UButton
-                  icon="solar:clipboard-list-bold-duotone"
+                  :icon="appConfig.ui.icons.clipboard"
                   color="neutral"
                   variant="soft"
                   label="Skabelon"
@@ -308,7 +309,7 @@ const versionsTableKey = computed(() => (versionsData.value?.versions ?? []).map
                   target="_blank"
                 />
                 <UButton
-                  icon="solar:clipboard-add-bold-duotone"
+                  :icon="appConfig.ui.icons.clipboardExtra"
                   color="neutral"
                   variant="soft"
                   label="Udvidet skabelon"
@@ -316,7 +317,7 @@ const versionsTableKey = computed(() => (versionsData.value?.versions ?? []).map
                   target="_blank"
                 />
                 <UButton
-                  icon="solar:download-bold-duotone"
+                  :icon="appConfig.ui.icons.download"
                   color="primary"
                   variant="soft"
                   label="Download alle regler"
@@ -330,7 +331,7 @@ const versionsTableKey = computed(() => (versionsData.value?.versions ?? []).map
           <div class="grid gap-4">
             <UFileUpload
               v-model="csvFiles"
-              icon="solar:upload-bold-duotone"
+              :icon="appConfig.ui.icons.upload"
               label="Upload CSV"
               description=".csv"
               layout="list"
@@ -341,7 +342,7 @@ const versionsTableKey = computed(() => (versionsData.value?.versions ?? []).map
 
             <div class="flex flex-wrap gap-2">
               <UButton
-                icon="solar:shield-check-bold-duotone"
+                :icon="appConfig.ui.icons.check"
                 label="Kontrollér fil"
                 color="primary"
                 variant="soft"
@@ -350,7 +351,7 @@ const versionsTableKey = computed(() => (versionsData.value?.versions ?? []).map
                 @click="validateCsv"
               />
               <UButton
-                icon="solar:database-bold-duotone"
+                :icon="appConfig.ui.icons.database"
                 label="Importér"
                 color="primary"
                 :disabled="!validatedOk || hasErrors"
@@ -443,7 +444,7 @@ const versionsTableKey = computed(() => (versionsData.value?.versions ?? []).map
 
           <UEmpty
             v-if="selectedRuleId && !versionsLoading && (!versionsData || !versionsData.versions.length)"
-            icon="solar:archive-bold-duotone"
+            :icon="appConfig.ui.icons.archive"
             title="Ingen versionshistorik"
             description="Der blev ikke fundet nogen rule_versions for den valgte regel."
             class="border border-dashed border-default rounded-lg mt-4"

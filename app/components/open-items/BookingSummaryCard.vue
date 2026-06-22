@@ -4,6 +4,12 @@ import { formatTransactionFieldHint } from '~/lib/presenters/transactionFieldHin
 import { toSummarySectionEntries } from '~/lib/presenters/transactionSummaryEntries'
 import type { TransactionSummary } from '~/types/transactions'
 
+const appConfig = useAppConfig()
+
+const directionIcon = computed(() =>
+	summary.value.direction === 'credit' ? appConfig.ui.icons.arrowAngleDown : appConfig.ui.icons.arrowAngleUp
+)
+
 type HideableSectionKey = 'reference' | 'teknisk'
 
 const props = withDefaults(defineProps<{ summary: TransactionSummary; hideSectionKeys?: HideableSectionKey[] }>(), {
@@ -30,9 +36,7 @@ const directionLabel = computed(() => {
 	const base = summary.value.direction === 'credit' ? 'Indbetaling' : 'Udbetaling'
 	return isGroupedSummary.value ? `${base} (samlepost)` : base
 })
-const directionIcon = computed(() =>
-	summary.value.direction === 'credit' ? 'solar:arrow-to-down-left-bold-duotone' : 'solar:arrow-to-top-right-bold-duotone'
-)
+
 
 const partSection = computed<SummaryItemsSection | null>(() => {
 	const section = (summary.value.sections as TransactionSummarySection[]).find((entry) => entry.key === 'part')
@@ -129,7 +133,7 @@ const sectionEntries = computed<SectionEntry[]>(() => orderedSections.value.map(
 						{{ entry.value }}
 					</UBadge>
 				</div>
-				<UAlert v-else color="neutral" variant="soft" icon="solar:align-left-bold-duotone" class="text-xs">
+				<UAlert v-else color="neutral" variant="soft" :icon="appConfig.ui.icons.leftAlign" class="text-xs">
 					Ingen data i denne kategori
 				</UAlert>
 			</section>

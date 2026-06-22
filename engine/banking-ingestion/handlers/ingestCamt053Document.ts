@@ -280,7 +280,7 @@ export async function ingestCamt053Document(
   const xml = input.xml
   const contentHash = crypto.createHash('sha256').update(xml, 'utf8').digest('hex')
 
-  log.info('CAMT.053 ingest start', {
+  log.debug('CAMT.053 ingest start', {
     filename: input.filename ?? null,
     contentHashPrefix: contentHash.slice(0, 12),
     bytes: Buffer.byteLength(xml, 'utf8'),
@@ -293,7 +293,7 @@ export async function ingestCamt053Document(
     .limit(1)
 
   if (existing.length) {
-    log.info('CAMT.053 ingest deduplicated', {
+    log.debug('CAMT.053 ingest deduplicated', {
       documentId: existing[0]!.id,
       ms: Date.now() - startedAt,
     })
@@ -461,7 +461,7 @@ export async function ingestCamt053Document(
     }
   }
 
-  log.info('CAMT.053 ingest done', {
+  log.debug('CAMT.053 ingest done', {
     documentId,
     insertedStatements,
     insertedBalances,

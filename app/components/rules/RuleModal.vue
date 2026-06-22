@@ -14,6 +14,8 @@ import { ruleBasicSchema, ruleMatchingSchema, ruleAccountingSchema } from '~/lib
 import { DEFAULT_TIME_ZONE } from '~/lib/timeZone'
 import { accountingDimensionFormatHint } from '~/lib/presenters/accountingDimensionFormatHints'
 
+const appConfig = useAppConfig()
+
 const props = defineProps<{
   open?: boolean
   ruleId?: number | null
@@ -702,7 +704,7 @@ const { data: rawAccounts } = await useFetch<AccountSelectSchema[]>('/api/bank-a
 })
 const accountOptions = computed<AccountOption[]>(() =>
   (rawAccounts.value ?? []).map(acc => ({
-    label: acc.id,
+    label: acc.name,
     value: acc.id
   }))
 )
@@ -1016,7 +1018,7 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                         class="flex-1"
                       />
                       <UButton
-                        icon="solar:add-circle-bold-duotone"
+                        :icon="appConfig.ui.icons.plus"
                         color="primary"
                         @click="() => addMatchEntry(category, 'Alle felter')"
                       />
@@ -1039,7 +1041,7 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                         class="flex-1"
                       />
                       <UButton
-                        icon="solar:add-circle-bold-duotone"
+                        :icon="appConfig.ui.icons.plus"
                         color="primary"
                         @click="() => addMatchEntry(category, 'Vælg felter')"
                         :disabled="selectedColumns[category].length === 0"
@@ -1100,7 +1102,7 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                             {{ entry.fields.join(', ') }}
                           </div>
                         </div>
-                        <UIcon name="solar:close-circle-bold-duotone" class="ml-2 w-3 h-3" />
+                        <UIcon :name="appConfig.ui.icons.delete" class="ml-2 w-3 h-3" />
                       </UBadge>
                     </div>
                   </div>

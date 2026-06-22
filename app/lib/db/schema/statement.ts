@@ -7,6 +7,7 @@ import {
   integer,
   numeric,
   timestamp,
+  index,
 } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { account } from './account'
@@ -31,7 +32,9 @@ export const bankingDocument = pgTable('banking_document', {
   // Common CAMT group header fields (optional; filled by adapters when available)
   messageId: text('message_id'),
   createdAt: timestamp('created_at', { withTimezone: true }),
-})
+}, (t) => ({
+  accountReceivedAtIdx: index('banking_document_account_received_at_idx').on(t.accountId, t.receivedAt),
+}))
 
 export const bankingStatement = pgTable('banking_statement', {
   id: uuid().defaultRandom().primaryKey(),
@@ -50,7 +53,10 @@ export const bankingStatement = pgTable('banking_statement', {
   // Optional period (some CAMT variants provide From/To)
   fromDate: date('from_date', { mode: 'date' }),
   toDate: date('to_date', { mode: 'date' }),
-})
+}, (t) => ({
+  documentIdIdx: index('banking_statement_document_id_idx').on(t.documentId),
+  statementIdIdx: index('banking_statement_statement_id_idx').on(t.statementId),
+}))
 
 export const bankingStatementBalance = pgTable('banking_statement_balance', {
   id: uuid().defaultRandom().primaryKey(),
@@ -61,7 +67,9 @@ export const bankingStatementBalance = pgTable('banking_statement_balance', {
   currency: text('currency'),
   creditDebitIndicator: creditDebitIndicatorEnum('credit_debit_indicator'),
   balanceDate: date('balance_date', { mode: 'date' }),
-})
+}, (t) => ({
+  statementTypeCodeIdx: index('banking_statement_balance_statement_type_code_idx').on(t.statementId, t.typeCode),
+}))
 
 export const bankingDocumentInsertSchema = createInsertSchema(bankingDocument)
 export const bankingDocumentSelectSchema = createSelectSchema(bankingDocument)

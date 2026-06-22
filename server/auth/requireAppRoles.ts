@@ -1,4 +1,4 @@
-import { createError, getRequestHeader, getRequestURL, type H3Event } from 'h3'
+import { createError, getRequestHeader, type H3Event } from 'h3'
 import type { AppRole } from '~/lib/authz/policy'
 
 type OidcSession = {
@@ -31,30 +31,33 @@ function extractSessionRoles(session: OidcSession): string[] {
 }
 
 async function getOidcSession(event: H3Event): Promise<OidcSession> {
-  const url = new URL('/api/_auth/session', getRequestURL(event))
   const cookie = getRequestHeader(event, 'cookie')
 
-  const response = await fetch(url, {
-    headers: {
-      accept: 'application/json',
-      ...(cookie ? { cookie } : {}),
-    },
-  })
+  try {
+    const payload = await event.$fetch<OidcSession | Record<string, unknown>>('/api/_auth/session', {
+      headers: {
+        accept: 'application/json',
+        ...(cookie ? { cookie } : {}),
+      },
+    })
 
-  if (response.status === 401) {
-    throw createError({ statusCode: 401, statusMessage: 'Ikke logget ind' })
+    if (!payload || typeof payload !== 'object') {
+      throw createError({ statusCode: 401, statusMessage: 'Bruger-session er ugyldig' })
+    }
+
+    return payload as OidcSession
   }
+  catch (error) {
+    const status = typeof error === 'object' && error !== null && 'response' in error
+      ? ((error as { response?: { status?: number } }).response?.status ?? null)
+      : null
 
-  if (!response.ok) {
+    if (status === 401) {
+      throw createError({ statusCode: 401, statusMessage: 'Ikke logget ind' })
+    }
+
     throw createError({ statusCode: 401, statusMessage: 'Kunne ikke hente bruger-session' })
   }
-
-  const payload = (await response.json()) as OidcSession | Record<string, unknown>
-  if (!payload || typeof payload !== 'object') {
-    throw createError({ statusCode: 401, statusMessage: 'Bruger-session er ugyldig' })
-  }
-
-  return payload as OidcSession
 }
 
 export async function requireAnyAppRole(event: H3Event, requiredRoles: readonly AppRole[]): Promise<void> {

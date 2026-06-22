@@ -13,6 +13,16 @@ This repo is a stateless financial integration engine:
 4) Generate ERP posting payloads and execute ERP integration
 5) Send notifications (mail/SMS/etc.) via outbox (side-effect)
 
+## Authentication and Authorization (v1)
+
+- Authentication/session lifecycle is handled by `nuxt-oidc-auth`.
+- UI visibility is role-gated in:
+  - `app/composables/useAuthz.ts`
+  - `app/layouts/default.vue`
+  - role policies in `app/lib/authz/policy.ts`
+- Server API authorization is enforced in route handlers via `server/auth/requireAppRoles.ts`.
+- The first releasable version does not include the Keycloak Admin management API surface.
+
 ## Banking agreement activation and SOAP date scoping
 
 - Enabling a banking agreement must not trigger transaction ingestion as a side effect.
@@ -111,6 +121,19 @@ Bank accounts are not manually created by end users. Instead, accounts are disco
 - `notification_settings`: persisted notification template settings (UI-editable)
 - `banking_agreement_cursor`: opaque cursor per (provider agreement, adapter) for incremental fetching
 - `run`: batch execution unit (audit/logging)
+
+## Database indexing strategy
+
+The database remains the single source of truth, so read performance is achieved by explicit, deterministic indexes in Drizzle schema definitions.
+
+- Indexes are added on foreign keys that are frequently joined (`run_id`, `transaction_id`, `statement_id`, etc.).
+- API list endpoints use composite indexes that mirror filter+sort paths (for example account/date/id and run/status/date patterns).
+- Worker claim loops use composite status+time indexes:
+  - `job(status, run_at)` for pending job pickup
+  - `outbox(status, next_attempt_at)` for retry-safe outbox pickup
+- Diagnostics endpoints use run/status/time indexes (`error`, `job`, `outbox`) for fast incident views.
+
+When schema/indexes change, migrations follow the baseline-only workflow used in this repository (regenerate a single `drizzle/0000_baseline.sql`).
 
 ## Notifications (SMTP)
 

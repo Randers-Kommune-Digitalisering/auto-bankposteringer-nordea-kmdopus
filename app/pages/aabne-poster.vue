@@ -9,6 +9,7 @@ import { extractSummaryCategoryEntries, type TransactionSummaryCategoryKey } fro
 import { useOpenTransactions } from '~/composables/useOpenTransactions'
 import type { OpenTransaction, TransactionSummary } from '~/types/transactions'
 
+const appConfig = useAppConfig()
 const UBadge = resolveComponent('UBadge')
 
 const {
@@ -21,9 +22,9 @@ const {
   pageLimit,
   isCapped,
   stacksByAccount
-} = await useOpenTransactions()
+} = useOpenTransactions()
 
-const { data: openItemsSettings } = await useFetch<{ allowIndividualGroupedProcessing: boolean }>(
+const { data: openItemsSettings } = useFetch<{ allowIndividualGroupedProcessing: boolean }>(
   '/api/settings/open-items',
   {
     key: 'open-items-settings',
@@ -36,6 +37,10 @@ const useTableView = ref(false)
 const tableSearchValue = ref('')
 const tablePage = ref(1)
 const tablePageSize = ref(25)
+const tablePageSizeOptions = [5, 10, 25, 50].map((value) => ({
+  label: `${value} pr. side`,
+  value,
+}))
 const expandedTableStackIds = ref<Record<string, boolean>>({})
 const selectedTransactionId = ref<string | null>(null)
 const selectedGroupTransactions = ref<OpenTransaction[] | null>(null)
@@ -115,12 +120,16 @@ function extractEntriesForCategory(summary: TransactionSummary, category: OpenIt
 }
 
 const tableRows = computed<OpenItemsTableRow[]>(() => {
-  return Object.values(stacksByAccount.value)
+  const buckets = Object.values(stacksByAccount.value) as OpenTransactionStack[][]
+
+  return buckets
     .flatMap((stacks) => stacks)
     .map((stack) => {
       const representative = stack.representative
       const summary = toStackSummary(stack)
-      const referenceEntries = extractEntriesForCategory(summary, 'reference')
+      const referenceEntries = stack.items.length > 1
+        ? []
+        : extractEntriesForCategory(summary, 'reference')
       const counterpartEntries = extractEntriesForCategory(summary, 'counterpart')
       const transactionTypeEntries = extractEntriesForCategory(summary, 'transactionType')
 
@@ -202,8 +211,11 @@ const expandedTableRows = computed<OpenItemsTableRow[]>(() => {
   return pagedTableRows.value.filter((row) => row.stack.items.length > 1 && isTableStackExpanded(row.stackId))
 })
 
+const skeletonTableRows = Array.from({ length: 8 }, (_, index) => `skeleton-table-row-${index + 1}`)
+const skeletonCardRows = Array.from({ length: 6 }, (_, index) => `skeleton-card-${index + 1}`)
+
 const tableColumns: TableColumn<OpenItemsTableRow>[] = [
-  {
+  { // Banking date
     accessorKey: 'bookingDate',
     header: 'Dato',
     cell: ({ row }) => {
@@ -214,7 +226,7 @@ const tableColumns: TableColumn<OpenItemsTableRow>[] = [
       })
     },
   },
-  {
+  { // Bank account
     accessorKey: 'account',
     header: 'Konto',
     cell: ({ row }) => {
@@ -226,12 +238,12 @@ const tableColumns: TableColumn<OpenItemsTableRow>[] = [
       ])
     },
   },
-  {
+  { // Amount
     accessorKey: 'amount',
     header: 'Beløb',
     cell: ({ row }) => h('span', { class: 'font-bold' }, dkkFormatter.format(row.original.amount)),
   },
-  {
+  { // Counterparty
     accessorKey: 'counterpartEntries',
     header: 'Modpart',
     cell: ({ row }) => {
@@ -253,29 +265,7 @@ const tableColumns: TableColumn<OpenItemsTableRow>[] = [
       )
     },
   },
-  {
-    accessorKey: 'transactionTypeEntries',
-    header: 'Transaktionstype',
-    cell: ({ row }) => {
-      const entries = row.original.transactionTypeEntries
-      if (!entries.length) return '-'
-
-      return h(
-        'div',
-        { class: TRANSACTION_BADGE_COLUMN_CLASS },
-        entries.map((entry, index) =>
-          h(UBadge, {
-            key: `transaction-type-${index}`,
-            class: TRANSACTION_BADGE_STYLE.transactionType.class,
-            variant: TRANSACTION_BADGE_STYLE.transactionType.variant,
-            color: TRANSACTION_BADGE_STYLE.transactionType.color,
-            title: formatTransactionFieldHint(entry.hint),
-          }, () => entry.value),
-        ),
-      )
-    },
-  },
-  {
+  { // References
     accessorKey: 'referenceEntries',
     header: 'Reference',
     cell: ({ row }) => {
@@ -297,7 +287,29 @@ const tableColumns: TableColumn<OpenItemsTableRow>[] = [
       )
     },
   },
-  {
+  { // Transaction type
+    accessorKey: 'transactionTypeEntries',
+    header: 'Transaktionstype',
+    cell: ({ row }) => {
+      const entries = row.original.transactionTypeEntries
+      if (!entries.length) return '-'
+
+      return h(
+        'div',
+        { class: TRANSACTION_BADGE_COLUMN_CLASS },
+        entries.map((entry, index) =>
+          h(UBadge, {
+            key: `transaction-type-${index}`,
+            class: TRANSACTION_BADGE_STYLE.transactionType.class,
+            variant: TRANSACTION_BADGE_STYLE.transactionType.variant,
+            color: TRANSACTION_BADGE_STYLE.transactionType.color,
+            title: formatTransactionFieldHint(entry.hint),
+          }, () => entry.value),
+        ),
+      )
+    },
+  },
+  { // Kategori (samlepost vs. enkeltpost)
     accessorKey: 'category',
     header: 'Kategori',
     cell: ({ row }) => h('div', { class: 'flex items-center gap-2' }, [
@@ -308,7 +320,7 @@ const tableColumns: TableColumn<OpenItemsTableRow>[] = [
       h('span', { class: 'text-xs text-muted' }, `${row.original.lineCount} linje${row.original.lineCount === 1 ? '' : 'r'}`),
     ]),
   },
-  {
+  { // Notat preview
     accessorKey: 'notePreview',
     header: 'Notat',
     cell: ({ row }) => {
@@ -321,19 +333,19 @@ const tableColumns: TableColumn<OpenItemsTableRow>[] = [
       }, notePreview)
     },
   },
-  {
+  { // Actions
     id: 'actions',
     header: 'Handling',
     cell: ({ row }) => {
       const stack = row.original.stack
       const isGrouped = stack.items.length > 1
 
-      return h('div', { class: 'flex flex-col gap-2' }, [
+      return h('div', { class: 'flex gap-2' }, [
         h(resolveComponent('UButton'), {
           size: 'sm',
           color: 'primary',
           variant: 'soft',
-          trailingIcon: 'solar:pen-new-round-bold-duotone',
+          trailingIcon: appConfig.ui.icons.edit,
           onClick: () => {
             if (isGrouped) {
               openGroupedBookingModal(stack.items)
@@ -348,8 +360,8 @@ const tableColumns: TableColumn<OpenItemsTableRow>[] = [
             color: 'neutral',
             variant: 'outline',
             icon: isTableStackExpanded(row.original.stackId)
-              ? 'i-heroicons-chevron-up'
-              : 'i-heroicons-chevron-down',
+              ? appConfig.ui.icons.arrowUp
+              : appConfig.ui.icons.arrowDown,
             onClick: () => toggleTableStack(row.original.stackId),
           }, () => (isTableStackExpanded(row.original.stackId) ? 'Skjul linjer' : 'Vis linjer'))
           : null,
@@ -378,6 +390,7 @@ function toStackSummary(stack: OpenTransactionStack): TransactionSummary {
 
   return {
     ...base,
+    sections: base.sections.filter((section) => section.key !== 'reference' && section.key !== 'teknisk'),
     amount: {
       ...base.amount,
       raw: stack.totalAmount,
@@ -405,6 +418,7 @@ function toGroupedModalTransaction(items: OpenTransaction[]): OpenTransaction | 
     amount: totalAmount,
     summary: {
       ...base,
+      sections: base.sections.filter((section) => section.key !== 'reference' && section.key !== 'teknisk'),
       amount: {
         ...base.amount,
         raw: totalAmount,
@@ -467,258 +481,296 @@ function handleDraftSaved(payload: { transactionId: string; note: string | null 
 
 <template>
   <UDashboardPanel id="open-items">
-    <template #header>
-      <UDashboardNavbar title="Åbne poster">
-        <template #leading>
-          <UDashboardSidebarCollapse />
-        </template>
-        <template #right>
-          <div class="flex items-center gap-3">
-            <span class="text-xs text-muted">Kort</span>
-            <USwitch v-model="useTableView" />
-            <span class="text-xs text-muted">Liste</span>
-          </div>
-        </template>
-      </UDashboardNavbar>
-    </template>
+      <template #header>
+        <UDashboardNavbar title="Åbne poster">
+          <template #leading>
+            <UDashboardSidebarCollapse />
+          </template>
+          <template #right>
+            <div class="flex items-center gap-3">
+              <span class="text-xs text-muted">Kort</span>
+              <USwitch v-model="useTableView" />
+              <span class="text-xs text-muted">Liste</span>
+            </div>
+          </template>
+        </UDashboardNavbar>
+      </template>
 
-    <template #body>
-      <div v-if="pending" class="flex justify-center py-10">
-        <USkeleton class="h-10 w-32" />
-      </div>
-      <div v-else-if="!transactions.length" class="py-10 text-center text-gray-500">
-        Der er ingen åbne transaktioner at behandle.
-      </div>
-      <template v-else>
-        <div v-if="isCapped" class="relative z-40 mb-6 w-full">
-          <UAlert
-            class="w-full"
-            color="warning"
-            variant="soft"
-            icon="solar:danger-triangle-bold-duotone"
-            :ui="{ title: 'text-left', description: 'text-left' }"
-          >
-            <template #title>
-              Viser {{ shownTopTransactions }} af {{ totalTopTransactions }} posteringer
-            </template>
-          </UAlert>
+      <template #body>
+        <div v-if="!pending && !transactions.length" class="py-10 text-center text-gray-500">
+          Der er ingen åbne transaktioner at behandle.
         </div>
-
-        <template v-if="useTableView">
-          <FiltersRow
-            v-model:search="tableSearchValue"
-            :show-search="true"
-            :show-accounts="false"
-            :show-date="false"
-            search-placeholder="Søg i åbne poster..."
-          />
-
-          <div class="mb-3 mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="text-sm text-muted">
-              Viser {{ pagedTableRows.length }} af {{ filteredTableRows.length }} posteringer ({{ shownTopTransactions }} af {{ totalTopTransactions }} top-posteringer)
-            </div>
-
-            <USelect
-              v-model="tablePageSize"
-              :items="[10, 25, 50, 100]"
-              class="w-full sm:w-28"
-            />
-          </div>
-
-          <UTable
-            :data="pagedTableRows"
-            :columns="tableColumns"
-            :ui="tableUi"
-          />
-
-          <div v-if="expandedTableRows.length" class="mt-4 space-y-3">
-            <UCard
-              v-for="row in expandedTableRows"
-              :key="`expanded-${row.stackId}`"
-              variant="soft"
-              :ui="{ body: 'space-y-3 p-4' }"
-            >
-              <div class="flex flex-wrap items-center justify-between gap-2">
-                <div class="text-sm font-semibold">
-                  {{ row.account }} · {{ row.lineCount }} linjer
-                </div>
-                <UBadge color="neutral" variant="subtle" size="sm">
-                  Samlepost
-                </UBadge>
-              </div>
-
-              <UAlert
-                v-if="stackNotePreview(row.stack)"
-                color="primary"
-                variant="soft"
-                icon="solar:notes-bold-duotone"
-                title="Notat"
-                :description="stackNotePreview(row.stack) ?? ''"
-              />
-
-              <div class="space-y-2">
-                <div
-                  v-for="member in row.stack.items"
-                  :key="member.id"
-                  class="flex items-center justify-between gap-2 rounded-md border border-default/60 bg-default px-3 py-2"
-                >
-                  <div class="text-sm">
-                    {{ member.summary.amount.value }}
-                  </div>
-                  <UButton
-                    size="xs"
-                    color="primary"
-                    variant="soft"
-                    @click="openBookingModal(member)"
-                  >
-                    Behandl linje
-                  </UButton>
-                </div>
-              </div>
-            </UCard>
-          </div>
-
-          <div v-if="filteredTableRows.length > tablePageSize" class="mt-4 flex items-center border-t border-default pt-4">
-            <div class="flex-1" />
-            <div class="flex flex-1 justify-center">
-              <UPagination
-                :default-page="tablePage"
-                :items-per-page="tablePageSize"
-                :total="filteredTableRows.length"
-                @update:page="(value) => (tablePage = value)"
-              />
-            </div>
-            <div class="flex-1" />
-          </div>
-        </template>
-
         <template v-else>
-          <UPageSection
-            v-for="(stacks, accountKey) in stacksByAccount"
-            :key="accountKey"
-            :title="stacks[0]?.representative.accountId ?? accountKey"
-            :headline="stacks[0]?.representative.bankAccountName ?? 'Nordea'"
-          >
-            <template #description>
-              {{ stacks.length }} {{ stacks.length === 1 ? 'poster' : 'poster' }}
+          <div v-if="isCapped && !useTableView" class="relative z-40 mb-6 w-full">
+            <UAlert
+              class="w-full"
+              color="warning"
+              variant="soft"
+              :icon="appConfig.ui.icons.warning"
+              :ui="{ title: 'text-left', description: 'text-left' }"
+            >
+              <template #title>
+                Viser {{ shownTopTransactions }} af {{ totalTopTransactions }} posteringer
+              </template>
+            </UAlert>
+          </div>
+
+          <template v-if="useTableView">
+            <FiltersRow
+              v-model:search="tableSearchValue"
+              :show-search="true"
+              :show-accounts="false"
+              :show-date="false"
+              search-placeholder="Søg i åbne poster..."
+            />
+
+            <div class="mb-3 mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div class="text-sm text-muted">
+                <template v-if="pending">
+                  <USkeleton class="h-4 w-56" />
+                </template>
+                <template v-else>
+                  Viser {{ pagedTableRows.length }} af {{ totalTopTransactions }} posteringer
+                </template>
+              </div>
+
+              <USelect
+                v-model="tablePageSize"
+                :items="tablePageSizeOptions"
+                labelKey="label"
+                valueKey="value"
+                class="w-full sm:w-28"
+                :disabled="pending"
+              />
+            </div>
+
+            <template v-if="pending">
+              <UCard variant="subtle" :ui="{ body: 'p-0 overflow-hidden' }">
+                <div class="divide-y divide-default">
+                  <div v-for="rowKey in skeletonTableRows" :key="rowKey" class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-3 p-3">
+                    <USkeleton class="h-4 w-20" />
+                    <USkeleton class="h-4 w-28" />
+                    <USkeleton class="h-4 w-24" />
+                    <USkeleton class="h-4 w-28" />
+                    <USkeleton class="h-4 w-36" />
+                    <USkeleton class="h-8 w-20" />
+                  </div>
+                </div>
+              </UCard>
             </template>
-            <div class="columns-1 md:columns-2 xl:columns-3 [column-gap:1.5rem]">
-              <div
-                v-for="stack in stacks"
-                :key="stack.stackId"
-                class="relative isolate mb-6 w-full min-w-0 break-inside-avoid"
-                :class="stack.items.length > 1 ? 'pr-2 pt-2' : ''"
+            <UTable
+              v-else
+              :data="pagedTableRows"
+              :columns="tableColumns"
+              :ui="tableUi"
+            />
+
+            <div v-if="expandedTableRows.length" class="mt-4 space-y-3">
+              <UCard
+                v-for="row in expandedTableRows"
+                :key="`expanded-${row.stackId}`"
+                variant="soft"
+                :ui="{ body: 'space-y-3 p-4' }"
               >
-                <div class="relative">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div class="text-sm font-semibold">
+                    {{ row.account }} · {{ row.lineCount }} linjer
+                  </div>
+                  <UBadge color="neutral" variant="subtle" size="sm">
+                    Samlepost
+                  </UBadge>
+                </div>
+
+                <UAlert
+                  v-if="stackNotePreview(row.stack)"
+                  color="primary"
+                  variant="soft"
+                  :icon="appConfig.ui.icons.notes"
+                  title="Notat"
+                  :description="stackNotePreview(row.stack) ?? ''"
+                />
+
+                <div class="space-y-2">
                   <div
-                    v-if="stack.items.length > 1"
-                    class="pointer-events-none absolute inset-0 z-0 -translate-y-1 translate-x-1 rounded-xl border border-default/60 bg-accented"
-                  />
+                    v-for="member in row.stack.items"
+                    :key="member.id"
+                    class="flex items-center justify-between gap-2 rounded-md border border-default/60 bg-default px-3 py-2"
+                  >
+                    <div class="text-sm">
+                      {{ member.summary.amount.value }}
+                    </div>
+                    <UButton
+                      size="xs"
+                      color="primary"
+                      variant="soft"
+                      @click="openBookingModal(member)"
+                    >
+                      Behandl linje
+                    </UButton>
+                  </div>
+                </div>
+              </UCard>
+            </div>
 
-                  <div class="relative z-20 rounded-xl border border-default/60 bg-default">
-                    <BookingSummaryCard :summary="toStackSummary(stack)" :hide-section-keys="['teknisk']">
-                    <template #footer>
-                      <div class="mt-4 space-y-3">
-                        <UAlert
-                          v-if="stackNotePreview(stack)"
-                          color="primary"
-                          variant="soft"
-                          icon="solar:notes-bold-duotone"
-                          title="Notat"
-                          :description="stackNotePreview(stack) ?? ''"
-                        />
+            <div v-if="filteredTableRows.length > tablePageSize" class="mt-4 flex items-center border-t border-default pt-4">
+              <div class="flex-1" />
+              <div class="flex flex-1 justify-center">
+                <UPagination
+                  :default-page="tablePage"
+                  :items-per-page="tablePageSize"
+                  :total="filteredTableRows.length"
+                  @update:page="(value) => (tablePage = value)"
+                />
+              </div>
+              <div class="flex-1" />
+            </div>
+          </template>
 
-                        <div v-if="stack.items.length > 1" class="space-y-3">
-                          <div class="flex items-center justify-center">
-                            <UBadge color="neutral" variant="subtle" size="sm">
-                              Samlepost · {{ stack.items.length }} poster
-                            </UBadge>
+          <template v-else>
+            <template v-if="pending">
+              <div class="columns-1 md:columns-2 xl:columns-3 [column-gap:1.5rem]">
+                <UCard
+                  v-for="cardKey in skeletonCardRows"
+                  :key="cardKey"
+                  variant="subtle"
+                  class="mb-6 break-inside-avoid"
+                  :ui="{ body: 'space-y-3 p-5' }"
+                >
+                  <USkeleton class="h-4 w-24" />
+                  <USkeleton class="h-8 w-40" />
+                  <USkeleton class="h-4 w-full" />
+                  <USkeleton class="h-4 w-5/6" />
+                  <USkeleton class="h-10 w-full" />
+                </UCard>
+              </div>
+            </template>
+            <UPageSection
+              v-else
+              v-for="(stacks, accountKey) in stacksByAccount"
+              :key="accountKey"
+              :title="stacks[0]?.representative.accountId ?? accountKey"
+              :headline="stacks[0]?.representative.bankAccountName ?? 'Nordea'"
+            >
+              <template #description>
+                {{ stacks.length }} {{ stacks.length === 1 ? 'poster' : 'poster' }}
+              </template>
+              <div class="columns-1 md:columns-2 xl:columns-3 [column-gap:1.5rem]">
+                <div
+                  v-for="stack in stacks"
+                  :key="stack.stackId"
+                  class="relative isolate mb-6 w-full min-w-0 break-inside-avoid"
+                  :class="stack.items.length > 1 ? 'pr-2 pt-2' : ''"
+                >
+                  <div class="relative">
+                    <div
+                      v-if="stack.items.length > 1"
+                      class="pointer-events-none absolute inset-0 z-0 -translate-y-1 translate-x-1 rounded-xl border border-default/60 bg-accented"
+                    />
+
+                    <div class="relative z-20 rounded-xl border border-default/60 bg-default">
+                      <BookingSummaryCard :summary="toStackSummary(stack)" :hide-section-keys="['teknisk']">
+                      <template #footer>
+                        <div class="mt-4 space-y-3">
+                          <UAlert
+                            v-if="stackNotePreview(stack)"
+                            color="primary"
+                            variant="soft"
+                            :icon="appConfig.ui.icons.notes"
+                            title="Notat"
+                            :description="stackNotePreview(stack) ?? ''"
+                          />
+
+                          <div v-if="stack.items.length > 1" class="space-y-3">
+                            <div class="flex items-center justify-center">
+                              <UBadge color="neutral" variant="subtle" size="sm">
+                                Samlepost · {{ stack.items.length }} poster
+                              </UBadge>
+                            </div>
+
+                            <div
+                              class="grid grid-cols-1 gap-2"
+                              :class="allowIndividualGroupedProcessing ? 'sm:grid-cols-2' : ''"
+                            >
+                              <UButton
+                                v-if="allowIndividualGroupedProcessing"
+                                class="w-full justify-center font-semibold"
+                                color="neutral"
+                                variant="outline"
+                                size="lg"
+                                :icon="isStackExpanded(stack.stackId) ? appConfig.ui.icons.arrowUp : appConfig.ui.icons.arrowDown"
+                                @click="toggleStack(stack.stackId)"
+                              >
+                                {{ isStackExpanded(stack.stackId) ? 'Skjul poster' : 'Vis poster' }}
+                              </UButton>
+                              <UButton
+                                class="font-bold"
+                                color="primary"
+                                variant="solid"
+                                size="lg"
+                                block
+                                :trailing-icon="appConfig.ui.icons.edit"
+                                @click="openGroupedBookingModal(stack.items)"
+                              >
+                                Behandl
+                              </UButton>
+                            </div>
                           </div>
 
-                          <div
-                            class="grid grid-cols-1 gap-2"
-                            :class="allowIndividualGroupedProcessing ? 'sm:grid-cols-2' : ''"
-                          >
+                          <UAlert
+                            v-if="stack.items.length > 1 && !allowIndividualGroupedProcessing"
+                            color="warning"
+                            variant="soft"
+                            :icon="appConfig.ui.icons.lock"
+                            title="Individuel behandling er slået fra"
+                          />
+
+                          <div v-if="stack.items.length <= 1" class="grid grid-cols-1 gap-2">
                             <UButton
-                              v-if="allowIndividualGroupedProcessing"
-                              class="w-full justify-center font-semibold"
-                              color="neutral"
-                              variant="outline"
-                              size="lg"
-                              :icon="isStackExpanded(stack.stackId) ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
-                              @click="toggleStack(stack.stackId)"
-                            >
-                              {{ isStackExpanded(stack.stackId) ? 'Skjul poster' : 'Vis poster' }}
-                            </UButton>
-                            <UButton
-                              class="font-bold"
+                              class="w-full justify-center font-bold"
                               color="primary"
                               variant="solid"
                               size="lg"
                               block
-                              trailing-icon="solar:pen-new-round-bold-duotone"
-                              @click="openGroupedBookingModal(stack.items)"
+                              :trailing-icon="appConfig.ui.icons.edit"
+                              @click="stack.items.length > 1 && allowIndividualGroupedProcessing ? openGroupedBookingModal(stack.items) : openBookingModal(stack.representative)"
                             >
                               Behandl
                             </UButton>
                           </div>
-                        </div>
 
-                        <UAlert
-                          v-if="stack.items.length > 1 && !allowIndividualGroupedProcessing"
-                          color="warning"
-                          variant="soft"
-                          icon="solar:lock-bold-duotone"
-                          title="Individuel behandling er slået fra"
-                        />
-
-                        <div v-if="stack.items.length <= 1" class="grid grid-cols-1 gap-2">
-                          <UButton
-                            class="w-full justify-center font-bold"
-                            color="primary"
-                            variant="solid"
-                            size="lg"
-                            block
-                            trailing-icon="solar:pen-new-round-bold-duotone"
-                            @click="stack.items.length > 1 && allowIndividualGroupedProcessing ? openGroupedBookingModal(stack.items) : openBookingModal(stack.representative)"
+                          <UCard
+                            v-if="stack.items.length > 1 && allowIndividualGroupedProcessing && isStackExpanded(stack.stackId)"
+                            variant="soft"
+                            :ui="{ body: 'space-y-2 p-2' }"
                           >
-                            Behandl
-                          </UButton>
-                        </div>
-
-                        <UCard
-                          v-if="stack.items.length > 1 && allowIndividualGroupedProcessing && isStackExpanded(stack.stackId)"
-                          variant="soft"
-                          :ui="{ body: 'space-y-2 p-2' }"
-                        >
-                          <div
-                            v-for="member in stack.items"
-                            :key="member.id"
-                            class="flex items-center justify-between gap-2"
-                          >
-                            <span class="text-sm font-medium">{{ member.summary.amount.value }}</span>
-                            <UButton
-                              size="xs"
-                              color="primary"
-                              variant="soft"
-                              :disabled="!allowIndividualGroupedProcessing"
-                              @click="openBookingModal(member)"
+                            <div
+                              v-for="member in stack.items"
+                              :key="member.id"
+                              class="flex items-center justify-between gap-2"
                             >
-                              Behandl linje
-                            </UButton>
-                          </div>
-                        </UCard>
-                      </div>
-                    </template>
-                    </BookingSummaryCard>
+                              <span class="text-sm font-medium">{{ member.summary.amount.value }}</span>
+                              <UButton
+                                size="xs"
+                                color="primary"
+                                variant="soft"
+                                :disabled="!allowIndividualGroupedProcessing"
+                                @click="openBookingModal(member)"
+                              >
+                                Behandl linje
+                              </UButton>
+                            </div>
+                          </UCard>
+                        </div>
+                      </template>
+                      </BookingSummaryCard>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </UPageSection>
+            </UPageSection>
+          </template>
         </template>
       </template>
-    </template>
   </UDashboardPanel>
   <BookingModal
     v-model:open="isBookingOpen"

@@ -6,6 +6,7 @@
     import useFlattenArray from '~/composables/useFlattenArray'
     import { DEFAULT_TIME_ZONE } from '~/lib/timeZone'
 
+    const appConfig = useAppConfig()
     const toast = useToast()
 
     const refreshNonce = ref(0)
@@ -294,7 +295,7 @@
                 </template>
                 <template #right>
                     <UButton
-                        icon="solar:refresh-bold-duotone"
+                        :icon="appConfig.ui.icons.reload"
                         label="Opdater"
                         variant="ghost"
                         color="primary"
@@ -318,7 +319,7 @@
                                         <UPopover :popper="{ placement: 'bottom-start' }">
                                             <UButton
                                                 variant="outline"
-                                                icon="solar:calendar-bold-duotone"
+                                                :icon="appConfig.ui.icons.calendar"
                                                 class="w-full"
                                             >
                                                 <template v-if="dateRange?.start">
@@ -374,7 +375,7 @@
                                             <UPopover :popper="{ placement: 'bottom-start' }">
                                                 <UButton
                                                     variant="outline"
-                                                    icon="solar:calendar-bold-duotone"
+                                                    :icon="appConfig.ui.icons.calendar"
                                                     class="w-full"
                                                 >
                                                     {{ df.format(startRunDate.toDate(timeZone)) }}
@@ -415,7 +416,7 @@
                     </div>
                     <UEmpty
                         v-if="!rows.length && status !== 'pending'"
-                        icon="solar:archive-bold-duotone"
+                        :icon="appConfig.ui.icons.archive"
                         title="Ingen kørsler"
                         description="Der er ingen kørsler i den valgte periode endnu."
                         class="border border-dashed border-default rounded-lg"

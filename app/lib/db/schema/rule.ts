@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { pgTable, text, date, numeric, integer, uuid, primaryKey, bigint, boolean, unique } from "drizzle-orm/pg-core"
+import { pgTable, text, date, numeric, integer, uuid, primaryKey, bigint, boolean, unique, index } from "drizzle-orm/pg-core"
 import { createUpdateSchema, createSelectSchema } from "drizzle-zod"
 import type { RuleType, RuleStatus, RuleConditionOperator } from "./enums"
 import {
@@ -40,7 +40,10 @@ export const rule = pgTable('rule', {
   status: ruleStatusEnum('rule_status'),
   matchAmountMin: numeric('amount_min'),
   matchAmountMax: numeric('amount_max'),
-})
+}, (t) => ({
+  statusUpdatedAtIdx: index('rule_status_updated_at_idx').on(t.status, t.updatedAt),
+  statusLastUsedIdx: index('rule_status_last_used_idx').on(t.status, t.lastUsed),
+}))
 
 // Singleton configuration row for the tenant/deployment.
 // Policy A: seeded once from env; mismatch should fail fast.
@@ -68,6 +71,7 @@ export const erpAccountingDimensionDefinition = pgTable('erp_accounting_dimensio
   updatedAt: date('updated_at', { mode: 'date' }).defaultNow().$onUpdate(() => new Date()),
 }, (t) => ({
   supplierKeyUnique: unique('erp_accounting_dimension_definition_supplier_key_unique').on(t.erpSupplier, t.key),
+  supplierSortOrderIdx: index('erp_accounting_dimension_definition_supplier_sort_order_idx').on(t.erpSupplier, t.sortOrder),
 }))
 
 export const ruleAccountingDimensionValue = pgTable('rule_accounting_dimension_value', {
@@ -98,7 +102,9 @@ export const ruleBankingCondition = pgTable('rule_banking_condition', {
   field: ruleConditionFieldEnum('field').notNull(),
   operator: ruleConditionOperatorEnum('operator').notNull().default('eq'),
   value: text('value').notNull(),
-})
+}, (t) => ({
+  ruleIdIdx: index('rule_banking_condition_rule_id_idx').on(t.ruleId),
+}))
 
 export const ruleAccountingParameters = pgTable('kmd_accounting_parameters', {
   id: uuid().defaultRandom().primaryKey(),
@@ -108,7 +114,9 @@ export const ruleAccountingParameters = pgTable('kmd_accounting_parameters', {
   cprNumber: text('cpr_number'),
   notifyTo: text('notify_to'),
   note: text('note'),
-})
+}, (t) => ({
+  ruleIdIdx: index('kmd_accounting_parameters_rule_id_idx').on(t.ruleId),
+}))
 
 export const ruleAccountingAttachment = pgTable('kmd_attachment', {
   id: uuid().defaultRandom().primaryKey(),

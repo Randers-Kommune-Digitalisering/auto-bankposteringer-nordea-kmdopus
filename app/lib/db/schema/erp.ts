@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { pgTable, text, uuid, integer, primaryKey } from "drizzle-orm/pg-core";
+import { pgTable, text, uuid, integer, primaryKey, index } from "drizzle-orm/pg-core";
 import { run } from "./run";
 import { transaction } from "./transaction";
 
@@ -8,7 +8,9 @@ export const erpRequest = pgTable("erp_request", {
   id: text().primaryKey(),
   runId: uuid("run_id").notNull().references(() => run.id),
   payload: text("payload"),
-});
+}, (t) => ({
+  runIdIdx: index('erp_request_run_id_idx').on(t.runId),
+}));
 
 export const erpResponse = pgTable("erp_response", {
   id: text().primaryKey(),
@@ -30,6 +32,7 @@ export const erpRequestLine = pgTable(
   },
   (table) => ([
     primaryKey({ columns: [table.requestId, table.lineNo] }),
+    index('erp_request_line_transaction_id_idx').on(table.transactionId),
   ]),
 );
 

@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { pgTable, uuid, text, numeric, date, integer, unique } from "drizzle-orm/pg-core"
+import { pgTable, uuid, text, numeric, date, integer, unique, index } from "drizzle-orm/pg-core"
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod"
 import { account } from "./account"
 import { run } from "./run"
@@ -60,6 +60,11 @@ export const transaction = pgTable('transaction', {
   remittanceAdditional: text('rmt_addtl').array(),
 }, (t) => ({
   statementEntryUnique: unique('transaction_statement_entry_unique').on(t.statementId, t.entryIndex, t.entrySubIndex),
+  runIdIdx: index('transaction_run_id_idx').on(t.runId),
+  runIdAccountIdIdx: index('transaction_run_id_account_id_idx').on(t.runId, t.accountId),
+  bookingDateIdIdx: index('transaction_booking_date_id_idx').on(t.bookingDate, t.id),
+  accountBookingDateIdIdx: index('transaction_account_booking_date_id_idx').on(t.accountId, t.bookingDate, t.id),
+  statementOrderIdx: index('transaction_statement_order_idx').on(t.statementId, t.entryIndex, t.entrySubIndex),
 }))
 
 export const transactionSelectSchema = createSelectSchema(transaction)
@@ -74,7 +79,10 @@ export const transactionProcessing = pgTable('transaction_processing', {
   ruleApplied: integer('rule_applied').references(() => rule.id),
   lockedAt: date('locked_at', { mode: "date" }),
   lockedBy: text('locked_by'),
-})
+}, (t) => ({
+  statusTransactionIdIdx: index('transaction_processing_status_transaction_id_idx').on(t.status, t.transactionId),
+  ruleAppliedIdx: index('transaction_processing_rule_applied_idx').on(t.ruleApplied),
+}))
 
 export const transactionProcessingInsertSchema = createInsertSchema(transactionProcessing)
 export const transactionProcessingUpdateSchema = createUpdateSchema(transactionProcessing)

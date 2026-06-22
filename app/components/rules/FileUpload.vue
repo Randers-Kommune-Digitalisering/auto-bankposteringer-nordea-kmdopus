@@ -1,4 +1,4 @@
-<!-- Den her fil konverterer filer til base64, som passer til KMD Postering Ind -->
+<!-- Den her fil konverterer filer til base64 -->
 
 <script setup lang="ts">
 type AttachmentPayload = {
@@ -6,6 +6,9 @@ type AttachmentPayload = {
   extensions: string[]
   base64: string[]
 }
+
+const appConfig = useAppConfig()
+
 
 const emit = defineEmits<{
   (e: 'update', value: AttachmentPayload | null): void
@@ -62,7 +65,7 @@ watch(files, async (newFiles) => {
 <template>
   <UFileUpload
     v-model="files"
-    icon="solar:paperclip-bold-duotone"
+    :icon="appConfig.ui.icons.attachment"
     label="Vedhæft bilag"
     description="PDF, Excel, billeder m.m."
     layout="list"
@@ -73,7 +76,7 @@ watch(files, async (newFiles) => {
     <template #actions="{ open }">
       <UButton
         label="Vælg filer"
-        icon="solar:pin-bold-duotone"
+        :icon="appConfig.ui.icons.pin"
         color="neutral"
         variant="outline"
         @click="open()"

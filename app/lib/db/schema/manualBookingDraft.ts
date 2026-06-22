@@ -7,6 +7,7 @@ import {
   numeric,
   timestamp,
   primaryKey,
+  index,
 } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
 import { transaction } from './transaction'
@@ -30,7 +31,9 @@ export const manualBookingDraftLine = pgTable('manual_booking_draft_line', {
   sortOrder: integer('sort_order').notNull(),
   amount: numeric('amount').notNull(),
   text: text('text'),
-})
+}, (t) => ({
+  transactionSortOrderIdx: index('manual_booking_draft_line_transaction_sort_order_idx').on(t.transactionId, t.sortOrder),
+}))
 
 export const manualBookingDraftLineDimension = pgTable(
   'manual_booking_draft_line_dimension',
@@ -51,7 +54,9 @@ export const manualBookingDraftAttachment = pgTable('manual_booking_draft_attach
   name: text('name').notNull(),
   type: text('type').notNull(),
   data: text('data').notNull(),
-})
+}, (t) => ({
+  transactionSortOrderIdx: index('manual_booking_draft_attachment_transaction_sort_order_idx').on(t.transactionId, t.sortOrder),
+}))
 
 export const manualBookingDraftInsertSchema = createInsertSchema(manualBookingDraft)
 export const manualBookingDraftUpdateSchema = createUpdateSchema(manualBookingDraft)

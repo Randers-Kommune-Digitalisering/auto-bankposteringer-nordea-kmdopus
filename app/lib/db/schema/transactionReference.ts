@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { pgTable, uuid, text, integer, timestamp, unique } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, integer, timestamp, unique, index } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
 import { transaction } from './transaction'
 import { transactionReferenceTypeEnum, transactionSourceScopeEnum } from './enums'
@@ -22,6 +22,7 @@ export const transactionReference = pgTable('transaction_reference', {
     t.xmlPath,
     t.valueNormalized,
   ),
+  transactionSequenceIdx: index('transaction_reference_transaction_sequence_idx').on(t.transactionId, t.sequenceNo),
 }))
 
 export const transactionReferenceInsertSchema = createInsertSchema(transactionReference)

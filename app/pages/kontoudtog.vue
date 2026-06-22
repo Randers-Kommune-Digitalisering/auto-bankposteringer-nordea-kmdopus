@@ -6,7 +6,9 @@ import type { StatementTransaction } from '~/types/transactions'
 import { TRANSACTION_BADGE_COLUMN_CLASS, TRANSACTION_BADGE_STYLE } from '~/lib/presenters/transactionBadgeStyles'
 import { DEFAULT_TIME_ZONE } from '~/lib/timeZone'
 import { formatTransactionFieldHint } from '~/lib/presenters/transactionFieldHints'
+import { buildReferenceBadgeEntries, dedupeBadgeEntries, type BadgeEntry } from '~/lib/presenters/referenceBadgeEntries'
 
+const appConfig = useAppConfig()
 const UBadge = resolveComponent('UBadge')
 
 definePageMeta({
@@ -30,6 +32,10 @@ const globalFilterValue = ref('')
 
 const page = ref(1)
 const pageSize = ref(50)
+const pageSizeOptions = [5, 10, 25, 50].map((value) => ({
+  label: `${value} pr. side`,
+  value,
+}))
 
 // Source of truth: selected account IDs (strings)
 const selectedAccountIds = ref<string[]>([])
@@ -93,7 +99,6 @@ const shownTopTransactions = computed<number>(() => new Set(
 const totalTopTransactions = computed<number>(() => Number(data.value?.totalTopTransactions ?? shownTopTransactions.value))
 
 const visibleRows = computed<StatementTransaction[]>(() => fetchedRows.value)
-const visibleRowCount = computed<number>(() => fetchedRows.value.length)
 
 const groupedVisibleRows = computed<StatementStackRow[]>(() => {
   const byStack = new Map<string, StatementTransaction[]>()
@@ -116,7 +121,9 @@ const groupedVisibleRows = computed<StatementStackRow[]>(() => {
       [resolveCounterpartEntry(representative)].filter((entry): entry is BadgeEntry => Boolean(entry)),
     )
 
-    const referenceEntries = dedupeBadgeEntries(buildReferenceEntries(representative))
+    const referenceEntries = items.length > 1
+      ? []
+      : dedupeBadgeEntries(buildReferenceEntries(representative))
 
     const transactionTypeEntries = dedupeBadgeEntries(
       [resolveTransactionTypeEntry(representative)].filter((entry): entry is BadgeEntry => Boolean(entry)),
@@ -206,6 +213,10 @@ function downloadStatementCsv(): void {
 }
 
 function resolveTransactionType(row: StatementTransaction): string | null {
+  if (row.transactionType && row.transactionType.trim().length) {
+    return row.transactionType.trim()
+  }
+
   if (row.bkTxCdProprietary && row.bkTxCdProprietary.trim().length) {
     return row.bkTxCdProprietary.trim()
   }
@@ -230,7 +241,6 @@ function resolveCounterpart(row: StatementTransaction): string | null {
   return row.debtorName ?? row.ultimateDebtorName ?? row.debtorId ?? row.debtorAccountIban ?? null
 }
 
-type BadgeEntry = { value: string; hint?: string }
 type StatementStackRow = {
   stackId: string
   representative: StatementTransaction
@@ -244,51 +254,6 @@ type StatementStackRow = {
   transactionTypeEntries: BadgeEntry[]
   category: 'Samlepost' | 'Enkeltpost'
   lineCount: number
-}
-
-function normalizeText(value: string): string {
-  return value.trim()
-}
-
-function uniqueTexts(values: Array<string | null | undefined>): string[] {
-  const set = new Set<string>()
-  values.forEach((v) => {
-    if (!v) return
-    const n = normalizeText(v)
-    if (n.length) set.add(n)
-  })
-  return Array.from(set)
-}
-
-function uniqueTextsFromArray(values: Array<string[] | null | undefined>): string[] {
-  const set = new Set<string>()
-  values.forEach((arr) => {
-    if (!Array.isArray(arr)) return
-    arr.forEach((v) => {
-      const n = normalizeText(v)
-      if (n.length) set.add(n)
-    })
-  })
-  return Array.from(set)
-}
-
-function dedupeBadgeEntries(entries: BadgeEntry[]): BadgeEntry[] {
-  const byValue = new Map<string, { value: string; hints: Set<string> }>()
-
-  for (const entry of entries) {
-    const value = normalizeText(entry.value)
-    if (!value.length) continue
-    const key = value.toLowerCase()
-    const existing = byValue.get(key) ?? { value, hints: new Set<string>() }
-    const hint = String(entry.hint ?? '').trim()
-    if (hint.length) existing.hints.add(hint)
-    byValue.set(key, existing)
-  }
-
-  return Array.from(byValue.values()).map((entry) => ({
-    value: entry.value,
-    hint: entry.hints.size ? Array.from(entry.hints).join(' | ') : undefined,
-  }))
 }
 
 function resolveCounterpartEntry(row: StatementTransaction): BadgeEntry | null {
@@ -320,10 +285,10 @@ function resolveCounterpartEntry(row: StatementTransaction): BadgeEntry | null {
 }
 
 function resolveTransactionTypeEntry(row: StatementTransaction): BadgeEntry | null {
-  if (row.bkTxCdProprietary && row.bkTxCdProprietary.trim().length) {
+  if (row.transactionType && row.transactionType.trim().length) {
     return {
-      value: row.bkTxCdProprietary.trim(),
-      hint: 'bkTxCdProprietary',
+      value: row.transactionType.trim(),
+      hint: row.transactionTypeHint ?? 'transactionType',
     }
   }
 
@@ -354,27 +319,13 @@ function resolveTransactionTypeEntry(row: StatementTransaction): BadgeEntry | nu
 }
 
 function buildReferenceEntries(row: StatementTransaction): BadgeEntry[] {
-  const entries: BadgeEntry[] = []
-
-  if (Array.isArray(row.remittanceUstrd)) {
-    for (const value of row.remittanceUstrd) {
-      const text = normalizeText(value)
-      if (text.length) {
-        entries.push({ value: text, hint: 'remittanceUstrd' })
-      }
-    }
-  }
-
-  if (Array.isArray(row.remittanceAdditional)) {
-    for (const value of row.remittanceAdditional) {
-      const text = normalizeText(value)
-      if (text.length) {
-        entries.push({ value: text, hint: 'remittanceAdditional' })
-      }
-    }
-  }
-
-  const singleFields: Array<{ value: string | null; hint: string }> = [
+  return buildReferenceBadgeEntries([
+    ...(Array.isArray(row.remittanceUstrd)
+      ? row.remittanceUstrd.map((value) => ({ value, hint: 'remittanceUstrd' }))
+      : []),
+    ...(Array.isArray(row.remittanceAdditional)
+      ? row.remittanceAdditional.map((value) => ({ value, hint: 'remittanceAdditional' }))
+      : []),
     { value: row.remittanceCreditorReference, hint: 'remittanceCreditorReference' },
     { value: row.entryAdditionalInfo, hint: 'entryAdditionalInfo' },
     { value: row.txAdditionalInfo, hint: 'txAdditionalInfo' },
@@ -385,16 +336,7 @@ function buildReferenceEntries(row: StatementTransaction): BadgeEntry[] {
     { value: row.txAcctSvcrRef, hint: 'txAcctSvcrRef' },
     { value: row.ntryAcctSvcrRef, hint: 'ntryAcctSvcrRef' },
     { value: row.ntryRef, hint: 'ntryRef' },
-  ]
-
-  for (const field of singleFields) {
-    const text = normalizeText(field.value ?? '')
-    if (text.length) {
-      entries.push({ value: text, hint: field.hint })
-    }
-  }
-
-  return dedupeBadgeEntries(entries)
+  ])
 }
 
 function buildReference(row: StatementTransaction): string[] {
@@ -416,7 +358,7 @@ const formatAmount = (row: StatementStackRow): string => {
 }
 
 const columns: TableColumn<StatementStackRow>[] = [
-  {
+  { // Søgeværktøj
     id: 'search_flat',
     accessorFn: (row) => {
       const parts: Array<string | number | null | undefined> = [
@@ -475,7 +417,7 @@ const columns: TableColumn<StatementStackRow>[] = [
       return h('span', { class: 'font-bold' }, formatAmount(row.original))
     }
   },
-  { // Counterpart
+  { // Counterparty
     id: 'counterpart',
     header: 'Modpart',
     size: 220,
@@ -543,7 +485,7 @@ const columns: TableColumn<StatementStackRow>[] = [
       )
     }
   },
-  {
+  { // Category (samlepost vs. enkeltpost)
     id: 'category',
     header: 'Kategori',
     cell: ({ row }) => {
@@ -586,7 +528,7 @@ const tableUi = {
         <template #right>
           <div class="flex items-center gap-2">
             <UButton
-              icon="solar:download-bold-duotone"
+              :icon="appConfig.ui.icons.download"
               label="Download CSV"
               variant="ghost"
               color="primary"
@@ -594,7 +536,7 @@ const tableUi = {
               @click="downloadStatementCsv()"
             />
             <UButton
-              icon="solar:refresh-bold-duotone"
+              :icon="appConfig.ui.icons.reload"
               label="Opdater"
               variant="ghost"
               color="primary"
@@ -620,19 +562,21 @@ const tableUi = {
 
         <div v-if="dateRange?.start && dateRange?.end" class="mb-3 mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div class="text-sm text-muted">
-            Viser {{ groupedVisibleRows.length }} af {{ totalTopTransactions }} posteringer ({{ visibleRowCount }} linjer i visningen)
+            Viser {{ groupedVisibleRows.length }} af {{ totalTopTransactions }} posteringer
           </div>
 
           <USelect
             v-model="pageSize"
-            :items="[10, 25, 50, 100]"
-            class="w-full sm:w-28"
+            :items="pageSizeOptions"
+            labelKey="label"
+            valueKey="value"
+            class="w-full sm:w-34"
           />
         </div>
 
         <UEmpty
           v-if="!visibleRows.length && status !== 'pending'"
-          icon="solar:archive-bold-duotone"
+          :icon="appConfig.ui.icons.archive"
           :title="fetchedRows.length ? 'Ingen resultater' : 'Ingen transaktioner'"
           :description="fetchedRows.length
             ? 'Ingen transaktioner matcher den valgte søgning/konto i perioden.'

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
-import { pgTable, uuid, text, integer, jsonb, timestamp } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, integer, jsonb, timestamp, index } from 'drizzle-orm/pg-core'
 import { jobStatusEnum } from './enums'
 import { run } from './run'
 
@@ -18,7 +18,11 @@ export const job = pgTable('job', {
   lastError: text('last_error'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-})
+}, (t) => ({
+  statusRunAtIdx: index('job_status_run_at_idx').on(t.status, t.runAt),
+  runIdUpdatedAtIdx: index('job_run_id_updated_at_idx').on(t.runId, t.updatedAt),
+  statusUpdatedAtIdx: index('job_status_updated_at_idx').on(t.status, t.updatedAt),
+}))
 
 export const jobInsertSchema = createInsertSchema(job)
 export const jobUpdateSchema = createUpdateSchema(job)

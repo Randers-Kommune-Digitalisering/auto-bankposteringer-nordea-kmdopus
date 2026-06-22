@@ -1,0 +1,16 @@
+{
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.nuxt/**": true,
+    "**/.output/**": true,
+    "**/drizzle/**": true
+  },
+  "search.exclude": {
+    "**/.nuxt/**": true,
+    "**/.output/**": true
+  },
+  "typescript.tsserver.maxTsServerMemory": 1536,
+  "vue.server.maxOldSpaceSize": 1536
+}

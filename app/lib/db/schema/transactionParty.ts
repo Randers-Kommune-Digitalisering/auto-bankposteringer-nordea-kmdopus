@@ -1,5 +1,5 @@
 import type { z } from 'zod'
-import { pgTable, uuid, text, integer, timestamp, unique } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, integer, timestamp, unique, index } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
 import { transaction } from './transaction'
 import { transactionPartyRoleEnum } from './enums'
@@ -23,6 +23,7 @@ export const transactionParty = pgTable('transaction_party', {
     t.role,
     t.sequenceNo,
   ),
+  transactionSequenceIdx: index('transaction_party_transaction_sequence_idx').on(t.transactionId, t.sequenceNo),
 }))
 
 export const transactionPartyInsertSchema = createInsertSchema(transactionParty)

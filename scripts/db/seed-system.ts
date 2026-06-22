@@ -77,8 +77,15 @@ async function ensureDimensionDefinitions() {
         sortOrder: dim.sortOrder,
         required: dim.required,
       })
-      .onConflictDoNothing({
+      .onConflictDoUpdate({
         target: [erpAccountingDimensionDefinition.erpSupplier, erpAccountingDimensionDefinition.key],
+        set: {
+          valueRegex: dim.valueRegex,
+          valueRegexFlags: dim.valueRegexFlags,
+          erpTarget: dim.erpTarget,
+          sortOrder: dim.sortOrder,
+          required: dim.required,
+        },
       })
   }
 }

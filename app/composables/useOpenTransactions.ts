@@ -1,5 +1,9 @@
 import { computed } from 'vue'
-import type { OpenTransaction, OpenTransactionStack, OpenTransactionsResponse } from '~/types/transactions'
+import type {
+  OpenTransaction,
+  OpenTransactionStack,
+  OpenTransactionsResponse,
+} from '~/types/transactions'
 
 type AccountStackBuckets = Record<string, OpenTransactionStack[]>
 
@@ -7,134 +11,167 @@ function toStackId(tx: OpenTransaction): string {
   return tx.groupKey ? `group:${tx.groupKey}` : `single:${tx.id}`
 }
 
-export async function useOpenTransactions() {
-  const { data: rawData, pending, refresh } = await useFetch<OpenTransactionsResponse | OpenTransaction[]>(
-    '/api/transactions',
-    {
-      key: 'open-transactions',
-      lazy: false,
-      deep: true,
-      transform: (v) => {
-        if (Array.isArray(v)) {
-          return {
-            items: v.slice(),
-            stacks: undefined,
-            groupedStacksByAccount: undefined,
-            total: v.length,
-            limit: v.length,
-            totalTopTransactions: new Set(
-              v.map((entry) => toStackId(entry)),
-            ).size,
-          }
-        }
-        return {
-          items: Array.isArray(v?.items) ? v.items.slice() : [],
-          stacks: Array.isArray(v?.stacks) ? v.stacks : undefined,
-          groupedStacksByAccount: v?.groupedStacksByAccount && typeof v.groupedStacksByAccount === 'object'
-            ? v.groupedStacksByAccount
-            : undefined,
-          total: typeof v?.total === 'number' ? v.total : 0,
-          limit: typeof v?.limit === 'number' ? v.limit : 0,
-          totalTopTransactions: typeof v?.totalTopTransactions === 'number' ? v.totalTopTransactions : undefined,
-        }
-      },
-    }
-  )
-
-  const data = computed<OpenTransactionsResponse>(() => {
-    const value = rawData.value
-    if (Array.isArray(value)) {
-      return {
-        items: value,
-        stacks: undefined,
-        groupedStacksByAccount: undefined,
-        total: value.length,
-        limit: value.length,
-        totalTopTransactions: new Set(
-          value.map((entry) => toStackId(entry)),
-        ).size,
-      }
-    }
-
+function normalizeResponse(
+  v: OpenTransactionsResponse | OpenTransaction[] | null | undefined,
+): OpenTransactionsResponse {
+  if (!v) {
     return {
-      items: Array.isArray(value?.items) ? value.items : [],
-      stacks: Array.isArray(value?.stacks) ? value.stacks : undefined,
-      groupedStacksByAccount: value?.groupedStacksByAccount && typeof value.groupedStacksByAccount === 'object'
-        ? value.groupedStacksByAccount
-        : undefined,
-      total: typeof value?.total === 'number' ? value.total : 0,
-      limit: typeof value?.limit === 'number' ? value.limit : 0,
-      totalTopTransactions: typeof value?.totalTopTransactions === 'number' ? value.totalTopTransactions : undefined,
+      items: [],
+      stacks: undefined,
+      groupedStacksByAccount: undefined,
+      total: 0,
+      limit: 0,
+      totalTopTransactions: 0,
     }
+  }
+
+  if (Array.isArray(v)) {
+    return {
+      items: v,
+      stacks: undefined,
+      groupedStacksByAccount: undefined,
+      total: v.length,
+      limit: v.length,
+      totalTopTransactions: new Set(v.map(toStackId)).size,
+    }
+  }
+
+  return {
+    items: v.items ?? [],
+    stacks: v.stacks,
+    groupedStacksByAccount: v.groupedStacksByAccount,
+    total: v.total ?? 0,
+    limit: v.limit ?? 0,
+    totalTopTransactions: v.totalTopTransactions,
+  }
+}
+
+export function useOpenTransactions() {
+  const { data: rawData, pending, refresh } = useFetch<
+    OpenTransactionsResponse | OpenTransaction[]
+  >('/api/transactions', {
+    key: 'open-transactions',
+    server: false,
+    lazy: false,
+    dedupe: 'cancel',
+    staleTime: 30_000,
+    default: () => normalizeResponse(undefined),
   })
 
+  const data = computed<OpenTransactionsResponse>(() =>
+    normalizeResponse(rawData.value),
+  )
+
+  /**
+   * 1. BASE ITEMS (single source of truth)
+   */
+  const items = computed<OpenTransaction[]>(() => data.value.items ?? [])
+
+  /**
+   * 2. STACKS (either backend or client fallback)
+   */
   const stacks = computed<OpenTransactionStack[]>(() => {
-    if (Array.isArray(data.value.stacks)) {
+    if (data.value.stacks?.length) {
       return data.value.stacks
     }
 
-    const byStack = new Map<string, OpenTransactionStack>()
-    for (const tx of data.value.items ?? []) {
-      const stackId = toStackId(tx)
-      const existing = byStack.get(stackId)
-      if (!existing) {
-        byStack.set(stackId, {
-          stackId,
-          groupKey: tx.groupKey,
-          items: [tx],
-          representative: tx,
-          totalAmount: tx.amount,
-          isGrouped: Boolean(tx.groupKey),
-        })
+    const map = new Map<string, OpenTransactionStack>()
+
+    for (const tx of items.value) {
+      const id = toStackId(tx)
+
+      const existing = map.get(id)
+      if (existing) {
+        existing.items.push(tx)
+        existing.totalAmount += tx.amount
         continue
       }
 
-      existing.items.push(tx)
-      existing.totalAmount += tx.amount
+      map.set(id, {
+        stackId: id,
+        groupKey: tx.groupKey,
+        items: [tx],
+        representative: tx,
+        totalAmount: tx.amount,
+        isGrouped: !!tx.groupKey,
+      })
     }
 
-    return Array.from(byStack.values())
+    return [...map.values()]
   })
 
+  /**
+   * 3. BUCKETS (group by account)
+   */
   const stacksByAccount = computed<AccountStackBuckets>(() => {
     if (data.value.groupedStacksByAccount) {
       return data.value.groupedStacksByAccount
     }
 
     const buckets: AccountStackBuckets = {}
+
     for (const stack of stacks.value) {
-      const accountKey = stack.representative.bankAccountName || 'Ukendt konto'
-      if (!buckets[accountKey]) {
-        buckets[accountKey] = []
-      }
-      buckets[accountKey]!.push(stack)
+      const key = stack.representative.bankAccountName ?? 'Ukendt konto'
+
+      if (!buckets[key]) buckets[key] = []
+      buckets[key].push(stack)
     }
 
     return buckets
   })
 
+  /**
+   * 4. FLAT VIEW (only when needed)
+   */
   const transactions = computed<OpenTransaction[]>(() => {
-    return Object.values(stacksByAccount.value)
-      .flatMap((entry) => entry)
-      .flatMap((stack) => stack.items)
+    const result: OpenTransaction[] = []
+
+    for (const stacks of Object.values(stacksByAccount.value)) {
+      for (const stack of stacks) {
+        result.push(...stack.items)
+      }
+    }
+
+    return result
   })
-  const totalTransactions = computed<number>(() => Number(data.value.total ?? transactions.value.length))
-  const pageLimit = computed<number>(() => Number(data.value.limit ?? transactions.value.length))
-  const shownTopTransactions = computed<number>(() => stacks.value.length)
-  const totalTopTransactions = computed<number>(() => Number(data.value.totalTopTransactions ?? shownTopTransactions.value))
-  const isCapped = computed<boolean>(() =>
-    totalTopTransactions.value > shownTopTransactions.value && shownTopTransactions.value >= pageLimit.value,
+
+  /**
+   * 5. METRICS (cheap derivations)
+   */
+  const shownTopTransactions = computed(() => stacks.value.length)
+
+  const totalTopTransactions = computed(() =>
+    data.value.totalTopTransactions ?? shownTopTransactions.value,
+  )
+
+  const totalTransactions = computed(() =>
+    data.value.total ?? transactions.value.length,
+  )
+
+  const pageLimit = computed(() =>
+    data.value.limit ?? transactions.value.length,
+  )
+
+  const isCapped = computed(() =>
+    totalTopTransactions.value > shownTopTransactions.value &&
+    shownTopTransactions.value >= pageLimit.value,
   )
 
   return {
     pending,
     refresh,
+
+    // core
+    items,
+    stacks,
+    stacksByAccount,
     transactions,
+
+    // meta
     totalTransactions,
-    shownTopTransactions,
     totalTopTransactions,
+    shownTopTransactions,
     pageLimit,
     isCapped,
-    stacksByAccount,
   }
 }

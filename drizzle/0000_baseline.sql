@@ -445,6 +445,22 @@ CREATE TABLE "transaction_processing" (
 	"locked_by" text
 );
 --> statement-breakpoint
+CREATE TABLE "transaction_code_catalog" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"provider" "bank_provider" NOT NULL,
+	"code_key" text NOT NULL,
+	"domain" text,
+	"family" text,
+	"sub_family" text,
+	"proprietary" text,
+	"display_name" text NOT NULL,
+	"description" text,
+	"source_document" text,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "transaction_code_catalog_provider_code_key_unique" UNIQUE("provider","code_key")
+);
+--> statement-breakpoint
 CREATE TABLE "transaction_party" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"transaction_id" uuid NOT NULL,
@@ -513,4 +529,40 @@ ALTER TABLE "transaction" ADD CONSTRAINT "transaction_statement_id_banking_state
 ALTER TABLE "transaction_processing" ADD CONSTRAINT "transaction_processing_transaction_id_transaction_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."transaction"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "transaction_processing" ADD CONSTRAINT "transaction_processing_rule_applied_rule_id_fk" FOREIGN KEY ("rule_applied") REFERENCES "public"."rule"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "transaction_party" ADD CONSTRAINT "transaction_party_transaction_id_transaction_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."transaction"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "transaction_reference" ADD CONSTRAINT "transaction_reference_transaction_id_transaction_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."transaction"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "transaction_reference" ADD CONSTRAINT "transaction_reference_transaction_id_transaction_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."transaction"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "account_iban_currency_provider_idx" ON "account" USING btree ("iban","currency","provider");--> statement-breakpoint
+CREATE INDEX "erp_accounting_dimension_constraint_supplier_idx" ON "erp_accounting_dimension_constraint" USING btree ("erp_supplier");--> statement-breakpoint
+CREATE INDEX "banking_agreement_account_allowlist_iban_provider_idx" ON "banking_agreement_account_allowlist" USING btree ("iban","provider");--> statement-breakpoint
+CREATE INDEX "document_run_id_idx" ON "document" USING btree ("run_id");--> statement-breakpoint
+CREATE INDEX "erp_request_run_id_idx" ON "erp_request" USING btree ("run_id");--> statement-breakpoint
+CREATE INDEX "erp_request_line_transaction_id_idx" ON "erp_request_line" USING btree ("transaction_id");--> statement-breakpoint
+CREATE INDEX "error_run_id_created_at_idx" ON "error" USING btree ("run_id","created_at");--> statement-breakpoint
+CREATE INDEX "error_created_at_idx" ON "error" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "job_status_run_at_idx" ON "job" USING btree ("status","run_at");--> statement-breakpoint
+CREATE INDEX "job_run_id_updated_at_idx" ON "job" USING btree ("run_id","updated_at");--> statement-breakpoint
+CREATE INDEX "job_status_updated_at_idx" ON "job" USING btree ("status","updated_at");--> statement-breakpoint
+CREATE INDEX "manual_booking_draft_attachment_transaction_sort_order_idx" ON "manual_booking_draft_attachment" USING btree ("transaction_id","sort_order");--> statement-breakpoint
+CREATE INDEX "manual_booking_draft_line_transaction_sort_order_idx" ON "manual_booking_draft_line" USING btree ("transaction_id","sort_order");--> statement-breakpoint
+CREATE INDEX "outbox_status_next_attempt_at_idx" ON "outbox" USING btree ("status","next_attempt_at");--> statement-breakpoint
+CREATE INDEX "outbox_run_id_created_at_idx" ON "outbox" USING btree ("run_id","created_at");--> statement-breakpoint
+CREATE INDEX "outbox_status_created_at_idx" ON "outbox" USING btree ("status","created_at");--> statement-breakpoint
+CREATE INDEX "erp_accounting_dimension_definition_supplier_sort_order_idx" ON "erp_accounting_dimension_definition" USING btree ("erp_supplier","sort_order");--> statement-breakpoint
+CREATE INDEX "rule_status_updated_at_idx" ON "rule" USING btree ("rule_status","updated_at");--> statement-breakpoint
+CREATE INDEX "rule_status_last_used_idx" ON "rule" USING btree ("rule_status","last_used");--> statement-breakpoint
+CREATE INDEX "kmd_accounting_parameters_rule_id_idx" ON "kmd_accounting_parameters" USING btree ("rule_id");--> statement-breakpoint
+CREATE INDEX "rule_banking_condition_rule_id_idx" ON "rule_banking_condition" USING btree ("rule_id");--> statement-breakpoint
+CREATE INDEX "rule_version_rule_id_version_idx" ON "rule_version" USING btree ("ruleId","version");--> statement-breakpoint
+CREATE INDEX "run_status_booking_date_idx" ON "run" USING btree ("status","booking_date");--> statement-breakpoint
+CREATE INDEX "banking_document_account_received_at_idx" ON "banking_document" USING btree ("account_id","received_at");--> statement-breakpoint
+CREATE INDEX "banking_statement_document_id_idx" ON "banking_statement" USING btree ("document_id");--> statement-breakpoint
+CREATE INDEX "banking_statement_statement_id_idx" ON "banking_statement" USING btree ("statement_id");--> statement-breakpoint
+CREATE INDEX "banking_statement_balance_statement_type_code_idx" ON "banking_statement_balance" USING btree ("statement_id","type_code");--> statement-breakpoint
+CREATE INDEX "transaction_run_id_idx" ON "transaction" USING btree ("run_id");--> statement-breakpoint
+CREATE INDEX "transaction_run_id_account_id_idx" ON "transaction" USING btree ("run_id","account");--> statement-breakpoint
+CREATE INDEX "transaction_booking_date_id_idx" ON "transaction" USING btree ("booking_date","id");--> statement-breakpoint
+CREATE INDEX "transaction_account_booking_date_id_idx" ON "transaction" USING btree ("account","booking_date","id");--> statement-breakpoint
+CREATE INDEX "transaction_statement_order_idx" ON "transaction" USING btree ("statement_id","entry_index","entry_sub_index");--> statement-breakpoint
+CREATE INDEX "transaction_processing_status_transaction_id_idx" ON "transaction_processing" USING btree ("status","transaction_id");--> statement-breakpoint
+CREATE INDEX "transaction_processing_rule_applied_idx" ON "transaction_processing" USING btree ("rule_applied");--> statement-breakpoint
+CREATE INDEX "transaction_party_transaction_sequence_idx" ON "transaction_party" USING btree ("transaction_id","sequence_no");--> statement-breakpoint
+CREATE INDEX "transaction_reference_transaction_sequence_idx" ON "transaction_reference" USING btree ("transaction_id","sequence_no");

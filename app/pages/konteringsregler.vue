@@ -7,11 +7,11 @@ import type { RuleListDto } from '~/lib/db/schema/rule'
 import { ruleTypeEnum, ruleStatusEnum } from '~/lib/db/schema/enums'
 import useFlattenArray from '~/composables/useFlattenArray'
 
+const appConfig = useAppConfig()
 const UButton = resolveComponent('UButton')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 const UBadge = resolveComponent('UBadge')
 const UCheckbox = resolveComponent('UCheckbox')
-const UIcon = resolveComponent('UIcon')
 
 const classBadgeColumn = 'flex flex-wrap gap-1'
 const classMultiplePropsColumn = 'flex flex-col gap-1 text-sm'
@@ -133,7 +133,7 @@ function getHeader(column: Column<RuleListDto>, label: string) {
         {
           label: 'Sortér stigende',
           type: 'checkbox',
-              icon: 'solar:sort-from-bottom-to-top-bold-duotone',
+              icon: appConfig.ui.icons.sortAscending,
           checked: isSorted === 'asc',
           onSelect: () => {
             if (isSorted === 'asc') {
@@ -145,7 +145,7 @@ function getHeader(column: Column<RuleListDto>, label: string) {
         },
         {
           label: 'Sortér faldende',
-              icon: 'solar:sort-from-top-to-bottom-bold-duotone',
+              icon: appConfig.ui.icons.sortDescending,
           type: 'checkbox',
           checked: isSorted === 'desc',
           onSelect: () => {
@@ -165,9 +165,9 @@ function getHeader(column: Column<RuleListDto>, label: string) {
         label,
         icon: isSorted
           ? isSorted === 'asc'
-                ? 'solar:sort-from-bottom-to-top-bold-duotone'
-                : 'solar:sort-from-top-to-bottom-bold-duotone'
-              : 'solar:sort-vertical-bold-duotone',
+                ? appConfig.ui.icons.sortAscending
+                : appConfig.ui.icons.sortDescending
+              : appConfig.ui.icons.unsorted,
         class: '-mx-2.5 data-[state=open]:bg-elevated',
         'aria-label': `Sortér efter ${isSorted === 'asc' ? 'faldende' : 'stigende'}`
       })
@@ -187,12 +187,12 @@ function getRowItems(row: Row<RuleListDto>) {
     { type: 'label', label: 'Handlinger' },
     {
       label: 'Rediger',
-      icon: 'solar:ruler-cross-pen-bold-duotone',
+      icon: appConfig.ui.icons.edit,
       onSelect() { handleEditRule(row) }
     },
     {
       label: 'Download',
-      icon: 'solar:download-bold-duotone',
+      icon: appConfig.ui.icons.download,
       onSelect() {
         if (process.client) {
           window.open(`/api/rule/${row.original.id}/export?variant=advanced`, '_blank')
@@ -202,7 +202,7 @@ function getRowItems(row: Row<RuleListDto>) {
     { type: 'separator' },
     {
       label: 'Slet',
-      icon: 'solar:trash-bin-trash-bold-duotone',
+      icon: appConfig.ui.icons.trash,
       color: 'error',
       disabled: deletingRuleId.value === row.original.id,
       onSelect() { handleDeleteRule(row) }
@@ -381,7 +381,7 @@ const columns: TableColumn<RuleListDto>[] = [
           },
           () =>
             h(UButton, {
-              icon: 'solar:menu-dots-bold-duotone',
+              icon: appConfig.ui.icons.dotMenu,
               color: 'neutral',
               variant: 'ghost',
               class: 'ml-auto'
@@ -484,7 +484,7 @@ async function handleDeleteRule(row: Row<RuleListDto>) {
         <template #right>
           <UButton
             class="font-bold rounded-full"
-            icon="solar:notes-bold-duotone"
+            :icon="appConfig.ui.icons.notes"
             label="Ny regel"
             @click="handleAddRule"
           />
@@ -506,7 +506,7 @@ async function handleDeleteRule(row: Row<RuleListDto>) {
         account-placeholder="Alle konti"
       >
         <template #date>
-          <div class="flex flex-wrap items-center gap-1.5 justify-end">
+          <div class="flex flex-wrap items-end gap-1.5 justify-end">
             <!-- Filtrering på status -->
             <UDropdownMenu
               :items="statusDropdownItems"
@@ -516,7 +516,7 @@ async function handleDeleteRule(row: Row<RuleListDto>) {
                 :label="`Status: ${statusItems.find(i => i.value === statusFilter)?.label}`"
                 color="neutral"
                 variant="outline"
-                trailing-icon="solar:double-alt-arrow-down-bold-duotone"
+                :trailing-icon="appConfig.ui.icons.arrowDown"
               />
             </UDropdownMenu>
 
@@ -529,7 +529,7 @@ async function handleDeleteRule(row: Row<RuleListDto>) {
                 :label="`Type: ${typeItems.find(i => i.value === typeFilter)?.label}`"
                 color="neutral"
                 variant="outline"
-                trailing-icon="solar:double-alt-arrow-down-bold-duotone"
+                :trailing-icon="appConfig.ui.icons.arrowDown"
               />
             </UDropdownMenu>
 
@@ -557,7 +557,7 @@ async function handleDeleteRule(row: Row<RuleListDto>) {
                 label="Vis kolonner"
                 color="neutral"
                 variant="outline"
-                trailing-icon="solar:settings-bold-duotone"
+                :trailing-icon="appConfig.ui.icons.settings"
               />
             </UDropdownMenu>
           </div>

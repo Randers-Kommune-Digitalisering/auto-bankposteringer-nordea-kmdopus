@@ -139,6 +139,9 @@ export type StatementTransaction = {
   bkTxCdFamily: string | null;
   bkTxCdSubFamily: string | null;
   bkTxCdProprietary: string | null;
+  transactionType: string | null;
+  transactionTypeCode?: string | null;
+  transactionTypeHint?: string | null;
 
   debtorName: string | null;
   debtorId: string | null;

@@ -37,7 +37,7 @@ Denne checkliste belyser efterlevelsen af OS2's niveaukrav for produktet.
 | 🔽 | #   | Krav                                          | Beskrivelse / Dokumentation                                                                                                                                          | Produktniveau |
 | -- | --- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
 | ❌ | F1  | Kildekode udvikles synligt i OS2 repository | Kode ligger pt. i eget repository. Ikke overdraget til OS2 endnu. | sandkasse |
-| ❓ | F2  | Open Source licenskriterier overholdes | Projektet anvender pt. MIT-licens. OS2 standard er MPL 2.0. Endelig afklaring mangler. | sandkasse |
+| ✅ | F2  | Open Source licenskriterier overholdes | Projektet bruger MPL 2.0 | sandkasse |
 | ✅ | F3  | Udbudsregler overholdt | Indkøb vurderes under tærskel uden klar grænseoverskridende interesse. | sandkasse |
 | ✅ | F4  | Sikkerhed er indtænkt | Integration til banker sker via web service-snitflader. Credentials krypteres og gemmes i YAML-filer i privat repo. ERP-integration sker via SFTP. Adgangsstyring håndteres via fælleskommunal Context Handler. Miljøadskillelse håndteres af driftsleverandør. Der mangler pt. audit trail, revisionsspor og dokumenteret risikovurdering. | sandkasse |
 | ✅ | F5  | Formål og værdi beskrevet | Udførligt beskrevet i README. | sandkasse |

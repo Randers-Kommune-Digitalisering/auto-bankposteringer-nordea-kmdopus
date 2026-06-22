@@ -4,6 +4,7 @@ import type { SortingState } from '@tanstack/table-core'
 import { getPaginationRowModel } from '@tanstack/table-core'
 import BankingAccountModal from '~/components/banking/AccountModal.vue'
 
+
 type BankingAccountUnionDto = {
   provider: 'danskebank' | 'nordea' | 'bankconnect'
   iban: string
@@ -107,6 +108,7 @@ type AgreementToggleResponse = {
 
 const BANKING_ACCOUNTS_QUERY_KEY = 'banking-accounts' as const
 
+const appConfig = useAppConfig()
 const toast = useToast()
 const table = useTemplateRef('table')
 const globalFilterValue = ref('')
@@ -441,10 +443,10 @@ async function handleAccountModalSaved() {
 const createSortableHeader = (label: string) => ({ column }: { column: any }) => {
   const sortingState = column.getIsSorted?.()
   const iconName = sortingState === 'asc'
-    ? 'solar:alt-arrow-up-bold-duotone'
-    : sortingState === 'desc'
-      ? 'solar:alt-arrow-down-bold-duotone'
-      : 'solar:sort-vertical-bold-duotone'
+		? appConfig.ui.icons.sortAscending
+		: sortingState === 'desc'
+			? appConfig.ui.icons.sortDescending
+			: appConfig.ui.icons.unsorted
 
   return h(
     'button',
@@ -535,7 +537,7 @@ const columns: TableColumn<BankingAccountUnionDto>[] = [
         { class: 'text-right flex items-center justify-end gap-1' },
         [
           h(UButton, {
-            icon: 'solar:ruler-cross-pen-bold-duotone',
+            icon: appConfig.ui.icons.edit,
             color: 'neutral',
             variant: 'ghost',
             onClick: () => {
@@ -546,7 +548,7 @@ const columns: TableColumn<BankingAccountUnionDto>[] = [
           }),
           row.original.configuredForApi
             ? h(UButton, {
-                icon: 'solar:trash-bin-trash-bold-duotone',
+                icon: appConfig.ui.icons.trash,
                 color: 'error',
                 variant: 'ghost',
                 onClick: () => removeConfiguredAccount(row.original),
@@ -572,7 +574,7 @@ const pagination = ref({ pageIndex: 0, pageSize: 20 })
           <UButton
             v-if="configuredProviders.length"
             class="font-bold rounded-full"
-            icon="solar:notes-bold-duotone"
+            :icon="appConfig.ui.icons.notes"
             label="Ny bankkonto"
             @click="openNewApiAccountModal"
           />
@@ -609,7 +611,7 @@ const pagination = ref({ pageIndex: 0, pageSize: 20 })
                 size="xs"
                 color="neutral"
                 variant="ghost"
-                icon="solar:settings-bold-duotone"
+                :icon="appConfig.ui.icons.settings"
                 :disabled="a.enabled"
                 @click="openEnvModal(a.provider)"
               />
@@ -662,7 +664,7 @@ const pagination = ref({ pageIndex: 0, pageSize: 20 })
                     color="neutral"
                     variant="soft"
                     :loading="nordeaRestAuthPending"
-                    icon="solar:refresh-bold-duotone"
+                    :icon="appConfig.ui.icons.reload"
                     @click="refreshNordeaRestAuthStatus(true)"
                   >
                     Opdater status
@@ -673,7 +675,7 @@ const pagination = ref({ pageIndex: 0, pageSize: 20 })
                     color="neutral"
                     variant="soft"
                     :loading="nordeaRestAuthPending"
-                    icon="solar:restart-bold-duotone"
+                    :icon="appConfig.ui.icons.reload"
                     @click="requestNordeaRestReauth"
                   >
                     Genstart 2FA
@@ -699,7 +701,7 @@ const pagination = ref({ pageIndex: 0, pageSize: 20 })
           color="primary"
           variant="outline"
           :ui="{ base: 'ring-primary/50 text-primary focus-visible:ring-primary' }"
-          trailing-icon="solar:magnifer-bold-duotone"
+          :trailing-icon="appConfig.ui.icons.search"
           label="Søg..."
         />
       </div>
@@ -765,7 +767,7 @@ const pagination = ref({ pageIndex: 0, pageSize: 20 })
               </div>
 
               <UButton
-                icon="solar:refresh-bold-duotone"
+                :icon="appConfig.ui.icons.reload"
                 color="neutral"
                 variant="ghost"
                 @click="refreshAgreements()"

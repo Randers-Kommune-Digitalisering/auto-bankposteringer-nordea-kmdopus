@@ -2,6 +2,8 @@
 import { DateFormatter } from '@internationalized/date'
 import { DEFAULT_TIME_ZONE } from '~/lib/timeZone'
 
+const appConfig = useAppConfig()
+
 const props = defineProps<{
   modelValue: any
   resetValue?: any
@@ -32,7 +34,7 @@ const label = computed(() => {
 
 <template>
   <UPopover :popper="{ placement: 'bottom-start' }">
-    <UButton variant="outline" icon="solar:calendar-bold-duotone">
+    <UButton variant="outline" :icon="appConfig.ui.icons.calendar">
       {{ label }}
     </UButton>
 

@@ -86,6 +86,18 @@ configure_oidc_origin() {
 
 configure_oidc_origin
 
+seed_system_if_enabled() {
+  # System seed is idempotent and safe to run on each startup.
+  if [ "${DB_SEED_SYSTEM_ON_START:-1}" = "1" ]; then
+    echo "Seeding system configuration..."
+    pnpm db:seed:system
+  else
+    echo "Skipping system seed (DB_SEED_SYSTEM_ON_START=${DB_SEED_SYSTEM_ON_START:-1})"
+  fi
+}
+
+wait_for_db
+
 if [ "$NODE_ENV" = "production" ]; then
   if [ "${DB_MIGRATE_ON_START:-}" = "1" ]; then
     echo "Running database migrations (production)..."
@@ -94,16 +106,9 @@ if [ "$NODE_ENV" = "production" ]; then
     echo "Skipping migrations (production)"
   fi
 
-  if [ "${DB_SEED_SYSTEM_ON_START:-}" = "1" ]; then
-    echo "Seeding system configuration (production)..."
-    pnpm db:seed:system
-  else
-    echo "Skipping system seed (production)"
-  fi
+  seed_system_if_enabled
 else
-  echo "Dev boot flags: DB_RESET_ON_START=${DB_RESET_ON_START:-} DB_MIGRATE_ON_START=${DB_MIGRATE_ON_START:-} SEED_DEV_DATA=${SEED_DEV_DATA:-} SEED_DEV_DATA_FORCE=${SEED_DEV_DATA_FORCE:-}"
-
-  wait_for_db
+  echo "Dev boot flags: DB_RESET_ON_START=${DB_RESET_ON_START:-} DB_MIGRATE_ON_START=${DB_MIGRATE_ON_START:-} DB_SEED_SYSTEM_ON_START=${DB_SEED_SYSTEM_ON_START:-1} SEED_DEV_DATA=${SEED_DEV_DATA:-} SEED_DEV_DATA_FORCE=${SEED_DEV_DATA_FORCE:-}"
 
   if [ "${DB_RESET_ON_START:-}" = "1" ]; then
     echo "Resetting public schema (dev)..."
@@ -116,6 +121,8 @@ else
   else
     echo "Skipping migrations (NODE_ENV=$NODE_ENV)"
   fi
+
+  seed_system_if_enabled
 
   if [ "${SEED_DEV_DATA:-}" = "1" ]; then
     if [ "${DB_RESET_ON_START:-}" = "1" ] || [ "${SEED_DEV_DATA_FORCE:-}" = "1" ]; then

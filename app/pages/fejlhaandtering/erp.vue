@@ -2,6 +2,8 @@
 import type { TableColumn } from '@nuxt/ui'
 import { prettyPrintXml } from '~/lib/prettyPrintXml'
 
+const appConfig = useAppConfig()
+
 type FailedErpRequestListItem = {
   requestId: string
   runId: string
@@ -363,7 +365,7 @@ async function reopenBookedTransactions() {
         </template>
         <template #right>
           <UButton
-            icon="solar:refresh-bold-duotone"
+            :icon="appConfig.ui.icons.refresh"
             variant="ghost"
             color="primary"
             label="Opdater"
@@ -394,7 +396,7 @@ async function reopenBookedTransactions() {
 
           <UEmpty
             v-if="!failedList?.items?.length"
-            icon="solar:check-circle-bold-duotone"
+            :icon="appConfig.ui.icons.check"
             title="Ingen afviste ERP-svar"
             description="Der er ingen ERP responses med negativ status i databasen."
             class="border border-dashed border-default rounded-lg"
@@ -429,7 +431,7 @@ async function reopenBookedTransactions() {
 
           <UEmpty
             v-if="!erpDetails"
-            icon="solar:document-text-bold-duotone"
+            :icon="appConfig.ui.icons.doc"
             title="Vælg en ERP request"
             description="Åbn en request fra listen ovenfor for at se payload, linjer og genfremsende."
             class="border border-dashed border-default rounded-lg"
@@ -460,7 +462,7 @@ async function reopenBookedTransactions() {
                 <div class="flex min-h-0 flex-1 flex-col gap-2">
                   <div class="flex justify-end">
                     <UButton
-                      icon="solar:magic-stick-3-bold-duotone"
+                      :icon="appConfig.ui.icons.wand"
                       label="Formatér XML"
                       color="neutral"
                       variant="ghost"
@@ -482,7 +484,7 @@ async function reopenBookedTransactions() {
 
               <div class="flex flex-wrap gap-2">
                 <UButton
-                  icon="solar:plain-bold-duotone"
+                  :icon="appConfig.ui.icons.send"
                   label="Genfremsend til ERP (ny request)"
                   color="primary"
                   variant="soft"
@@ -497,7 +499,7 @@ async function reopenBookedTransactions() {
               <UAlert
                 color="neutral"
                 variant="soft"
-                icon="solar:info-circle-bold-duotone"
+                :icon="appConfig.ui.icons.info"
                 class="text-sm"
               >
                 Du kan nu se den persisted kobling mellem ERP requestId → postering(lineNo) → transactionId og genåbne udvalgte bogførte transaktioner.
@@ -525,7 +527,7 @@ async function reopenBookedTransactions() {
                 />
                 <UEmpty
                   v-else
-                  icon="solar:list-bold-duotone"
+                  :icon="appConfig.ui.icons.list"
                   title="Ingen linjer"
                   description="Der blev ikke fundet linjer for dette request."
                   class="border border-dashed border-default rounded-lg"
@@ -533,7 +535,7 @@ async function reopenBookedTransactions() {
 
                 <div class="flex flex-wrap gap-2">
                   <UButton
-                    icon="solar:undo-left-bold-duotone"
+                    :icon="appConfig.ui.icons.undo"
                     label="Genåbn valgte transaktioner"
                     color="warning"
                     variant="soft"
@@ -563,7 +565,7 @@ async function reopenBookedTransactions() {
               <UiFloatingLabelInput v-model="reopenRunId" label="runId (uuid)" color="neutral" />
             </UFormField>
             <UButton
-              icon="solar:undo-left-bold-duotone"
+              :icon="appConfig.ui.icons.undo"
               label="Sæt bogførte tilbage til åbne poster"
               color="warning"
               variant="soft"

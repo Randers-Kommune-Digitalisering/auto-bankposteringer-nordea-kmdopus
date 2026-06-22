@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { pgTable, text, timestamp, primaryKey } from 'drizzle-orm/pg-core'
+import { pgTable, text, timestamp, primaryKey, index } from 'drizzle-orm/pg-core'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 
 import { bankProvider } from './account'
@@ -22,7 +22,10 @@ export const bankingAgreementAccountAllowlist = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [primaryKey({ columns: [table.provider, table.iban] })],
+  (table) => [
+    primaryKey({ columns: [table.provider, table.iban] }),
+    index('banking_agreement_account_allowlist_iban_provider_idx').on(table.iban, table.provider),
+  ],
 )
 
 export const bankingAgreementAccountAllowlistInsertSchema = createInsertSchema(bankingAgreementAccountAllowlist)
