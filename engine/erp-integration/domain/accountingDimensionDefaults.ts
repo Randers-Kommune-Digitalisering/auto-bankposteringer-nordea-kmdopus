@@ -28,7 +28,7 @@ export const defaultAccountingDimensionDefinitions: DefaultAccountingDimensionDe
     sortOrder: 1,
     required: true,
     erpTarget: 'glAccount',
-    valueRegex: '^905\\d{5}$',
+    valueRegex: '^(S\\d{7}|\\d{8})$',
   },
   {
     supplier: 'kmd',

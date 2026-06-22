@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { createInsertSchema, createUpdateSchema, createSelectSchema } from "drizzle-zod"
-import { pgTable, date, uuid, unique } from "drizzle-orm/pg-core"
+import { pgTable, date, uuid, unique, index } from "drizzle-orm/pg-core"
 import { runStatusEnum } from "./enums"
 
 export const run = pgTable('run', {
@@ -9,6 +9,7 @@ export const run = pgTable('run', {
   status: runStatusEnum('status'),
 }, (t) => ({
   bookingDateUnique: unique('run_booking_date_unique').on(t.bookingDate),
+  statusBookingDateIdx: index('run_status_booking_date_idx').on(t.status, t.bookingDate),
 }))
 
 export const runInsertSchema = createInsertSchema(run)

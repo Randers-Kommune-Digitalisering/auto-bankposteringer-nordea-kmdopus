@@ -2,7 +2,7 @@ export function accountingDimensionFormatHint(key: string): string | undefined {
   const normalized = String(key ?? '').trim().toLowerCase()
 
   if (normalized === 'statuskonto') {
-    return '8 cifre. Starter med S, 9 eller et tal.'
+    return '8 cifre (f.eks. 40000000) eller S efterfulgt af 7 cifre.'
   }
 
   if (normalized === 'psp-element') {

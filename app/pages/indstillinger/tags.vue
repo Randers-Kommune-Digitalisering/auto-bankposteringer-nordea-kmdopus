@@ -7,6 +7,7 @@ import { capitalizeFirst } from '~/lib/text/capitalizeFirst'
 
 const RULE_TAGS_QUERY_KEY = 'rule-tags' as const
 
+const appConfig = useAppConfig()
 const toast = useToast()
 const table = useTemplateRef('table')
 const globalFilterValue = ref('')
@@ -56,10 +57,10 @@ watch(
 const createSortableHeader = (label: string) => ({ column }: { column: any }) => {
 	const sortingState = column.getIsSorted?.()
 	const iconName = sortingState === 'asc'
-		? 'solar:alt-arrow-up-bold-duotone'
+		? appConfig.ui.icons.sortAscending
 		: sortingState === 'desc'
-			? 'solar:alt-arrow-down-bold-duotone'
-			: 'solar:sort-vertical-bold-duotone'
+			? appConfig.ui.icons.sortDescending
+			: appConfig.ui.icons.unsorted
 
 	return h(
 		'button',
@@ -125,13 +126,13 @@ function getRowItems(row: Row<RuleTagSelectSchema>) {
 		{ type: 'label', label: 'Handlinger' },
 		{
 			label: 'Rediger tag',
-			icon: 'solar:ruler-cross-pen-bold-duotone',
+			icon: appConfig.ui.icons.edit,
 			onSelect() { handleEditTag(row) }
 		},
 		{ type: 'separator' },
 		{
 			label: 'Slet tag',
-			icon: 'solar:trash-bin-trash-bold-duotone',
+			icon: appConfig.ui.icons.trash,
 			color: 'error',
 			disabled: deletingTagId.value === row.original.id,
 			onSelect() { handleDeleteTag(row) }
@@ -163,7 +164,7 @@ const columns: TableColumn<RuleTagSelectSchema>[] = [
 					},
 					() =>
 						h(UButton, {
-							icon: 'solar:menu-dots-bold-duotone',
+							icon: appConfig.ui.icons.dotMenu,
 							color: 'neutral',
 							variant: 'ghost',
 							class: 'ml-auto'
@@ -188,7 +189,7 @@ const pagination = ref({ pageIndex: 0, pageSize: 20 })
 				<template #right>
 					<UButton
 						class="font-bold rounded-full"
-						icon="solar:tag-bold-duotone"
+						:icon="appConfig.ui.icons.tag"
 						:label="'Nyt tag'"
 						@click="handleAddTag"
 					/>

@@ -4,6 +4,8 @@ import type { TimelineItem } from '@nuxt/ui'
 import type { RunListItem } from '~/types/runs'
 import type { RunTimelineResponse } from '~/types/runTimeline'
 
+const appConfig = useAppConfig()
+
 const props = defineProps<{
   open: boolean
   run: RunListItem | null
@@ -322,7 +324,7 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
       title: 'Hentning af bankdata',
       date: bankingJob.value?.runAt ? formatMaybeIso(bankingJob.value.runAt) : bookingDate,
       description: bankingJobState.value.description,
-      icon: 'solar:download-bold-duotone',
+      icon: appConfig.ui.icons.download,
     },
     {
       slot: 'matching',
@@ -334,7 +336,7 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
           ? formatMaybeIso(bankingJob.value.runAt)
           : bookingDate,
       description: matchingState.value.description,
-      icon: 'solar:magic-stick-3-bold-duotone',
+      icon: appConfig.ui.icons.wand,
     },
   ]
 
@@ -346,7 +348,7 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
       title: 'Aflevering til ERP',
       date: d.firstCreatedAt ? formatMaybeIso(d.firstCreatedAt) : bookingDate,
       description: state.description,
-      icon: 'solar:upload-bold-duotone',
+      icon: appConfig.ui.icons.upload,
       _delivery: d,
       _state: state,
     } as any
@@ -391,7 +393,7 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
           </template>
 
           <UButton
-            icon="solar:refresh-bold-duotone"
+            :icon="appConfig.ui.icons.reload"
             variant="ghost"
             color="primary"
             :loading="loading"
@@ -450,7 +452,7 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
 
                 <div v-if="data?.matching?.open" class="pt-1">
                   <UButton
-                    icon="solar:pen-new-round-bold-duotone"
+                    :icon="appConfig.ui.icons.edit"
                     label="Behandl åbne poster"
                     color="primary"
                     variant="soft"
@@ -484,7 +486,7 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
                 <div v-if="run" class="flex flex-wrap gap-2">
                   <UButton
                     v-if="(slotItem as any)._state?.label === 'Fejl'"
-                    icon="solar:shield-warning-bold-duotone"
+                    :icon="appConfig.ui.icons.warning"
                     label="Behandl aflevering"
                     color="warning"
                     variant="soft"
@@ -493,7 +495,7 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
                   />
                   <UButton
                     v-if="(slotItem as any)._delivery?.requestId"
-                    icon="solar:document-text-bold-duotone"
+                    :icon="appConfig.ui.icons.send"
                     label="Åbn ERP-aflevering"
                     color="neutral"
                     variant="soft"

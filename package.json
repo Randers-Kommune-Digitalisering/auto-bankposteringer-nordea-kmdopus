@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@iconify-json/solar": "^1.2.5",
+    "@iconify-json/lucide": "^1.2.114",
     "@internationalized/date": "^3.10.1",
     "@nuxt/ui": "4.2.1",
     "@tanstack/table-core": "^8.21.3",

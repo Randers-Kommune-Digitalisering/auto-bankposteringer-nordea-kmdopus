@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { pgTable, text, uuid } from "drizzle-orm/pg-core"
+import { pgTable, text, uuid, index } from "drizzle-orm/pg-core"
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { documentTypeEnum } from "./enums"
 import { run } from "./run"
@@ -11,7 +11,9 @@ export const document = pgTable('document', {
   content: text('content').notNull(),
   filename: text('filename').notNull(),
   fileExtension: text('file_extension').notNull(),
-})
+}, (t) => ({
+  runIdIdx: index('document_run_id_idx').on(t.runId),
+}))
 
 export const documentInsertSchema = createInsertSchema(document)
 export const documentSelectSchema = createSelectSchema(document)

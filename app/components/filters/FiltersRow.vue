@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { DEFAULT_TIME_ZONE } from '~/lib/timeZone'
 
+const appConfig = useAppConfig()
+
 type DateRangeValue = any
 
 const props = withDefaults(
@@ -93,7 +95,7 @@ const searchModel = computed<string>({
           color="primary"
           variant="outline"
           :ui="{ base: 'ring-primary/50 text-primary focus-visible:ring-primary' }"
-          trailing-icon="solar:magnifer-bold-duotone"
+          :trailing-icon="appConfig.ui.icons.search"
           :placeholder="searchPlaceholder"
         />
       </UFormField>
@@ -105,7 +107,7 @@ const searchModel = computed<string>({
         color="primary"
         variant="outline"
         :ui="{ base: 'ring-primary/50 text-primary focus-visible:ring-primary' }"
-        trailing-icon="solar:magnifer-bold-duotone"
+        :trailing-icon="appConfig.ui.icons.search"
         :placeholder="searchPlaceholder"
       />
     </div>

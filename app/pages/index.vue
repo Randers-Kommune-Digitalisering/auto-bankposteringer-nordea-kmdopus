@@ -3,6 +3,8 @@ import { today } from '@internationalized/date'
 import type { DashboardResponse } from '~/types/dashboard'
 import { DEFAULT_TIME_ZONE } from '~/lib/timeZone'
 
+const appConfig = useAppConfig()
+
 const timeZone = DEFAULT_TIME_ZONE
 
 const endDefault = today(timeZone)
@@ -51,7 +53,7 @@ const payload = computed(() => data.value)
 				</template>
 				<template #right>
 					<UButton
-						icon="solar:refresh-bold-duotone"
+						:icon="appConfig.ui.icons.reload"
 						label="Opdater"
 						variant="ghost"
 						color="primary"

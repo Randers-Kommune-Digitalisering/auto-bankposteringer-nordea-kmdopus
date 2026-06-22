@@ -1,5 +1,5 @@
 {
-  "id": "6f81f96d-d993-4b21-a33b-b7173e7545d9",
+  "id": "9d5c4489-7724-4e8e-8e80-530761c2f5d7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -40,7 +40,35 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "account_iban_currency_provider_idx": {
+          "name": "account_iban_currency_provider_idx",
+          "columns": [
+            {
+              "expression": "iban",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "currency",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "provider",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -100,7 +128,23 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "erp_accounting_dimension_constraint_supplier_idx": {
+          "name": "erp_accounting_dimension_constraint_supplier_idx",
+          "columns": [
+            {
+              "expression": "erp_supplier",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
@@ -692,7 +736,29 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "banking_agreement_account_allowlist_iban_provider_idx": {
+          "name": "banking_agreement_account_allowlist_iban_provider_idx",
+          "columns": [
+            {
+              "expression": "iban",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "provider",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "banking_agreement_account_allowlist_provider_banking_agreement_provider_fk": {
           "name": "banking_agreement_account_allowlist_provider_banking_agreement_provider_fk",
@@ -916,7 +982,23 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "document_run_id_idx": {
+          "name": "document_run_id_idx",
+          "columns": [
+            {
+              "expression": "run_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "document_run_id_run_id_fk": {
           "name": "document_run_id_run_id_fk",
@@ -961,7 +1043,23 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "erp_request_run_id_idx": {
+          "name": "erp_request_run_id_idx",
+          "columns": [
+            {
+              "expression": "run_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "erp_request_run_id_run_id_fk": {
           "name": "erp_request_run_id_run_id_fk",
@@ -1006,7 +1104,23 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "erp_request_line_transaction_id_idx": {
+          "name": "erp_request_line_transaction_id_idx",
+          "columns": [
+            {
+              "expression": "transaction_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "erp_request_line_request_id_erp_request_id_fk": {
           "name": "erp_request_line_request_id_erp_request_id_fk",
@@ -1152,7 +1266,44 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "error_run_id_created_at_idx": {
+          "name": "error_run_id_created_at_idx",
+          "columns": [
+            {
+              "expression": "run_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "error_created_at_idx": {
+          "name": "error_created_at_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "error_run_id_run_id_fk": {
           "name": "error_run_id_run_id_fk",
@@ -1265,7 +1416,71 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "job_status_run_at_idx": {
+          "name": "job_status_run_at_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "run_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "job_run_id_updated_at_idx": {
+          "name": "job_run_id_updated_at_idx",
+          "columns": [
+            {
+              "expression": "run_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "job_status_updated_at_idx": {
+          "name": "job_status_updated_at_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "job_run_id_run_id_fk": {
           "name": "job_run_id_run_id_fk",
@@ -1407,7 +1622,29 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "manual_booking_draft_attachment_transaction_sort_order_idx": {
+          "name": "manual_booking_draft_attachment_transaction_sort_order_idx",
+          "columns": [
+            {
+              "expression": "transaction_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "sort_order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "manual_booking_draft_attachment_transaction_id_manual_booking_draft_transaction_id_fk": {
           "name": "manual_booking_draft_attachment_transaction_id_manual_booking_draft_transaction_id_fk",
@@ -1465,7 +1702,29 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "manual_booking_draft_line_transaction_sort_order_idx": {
+          "name": "manual_booking_draft_line_transaction_sort_order_idx",
+          "columns": [
+            {
+              "expression": "transaction_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "sort_order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "manual_booking_draft_line_transaction_id_manual_booking_draft_transaction_id_fk": {
           "name": "manual_booking_draft_line_transaction_id_manual_booking_draft_transaction_id_fk",
@@ -1667,7 +1926,71 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "outbox_status_next_attempt_at_idx": {
+          "name": "outbox_status_next_attempt_at_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "next_attempt_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "outbox_run_id_created_at_idx": {
+          "name": "outbox_run_id_created_at_idx",
+          "columns": [
+            {
+              "expression": "run_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "outbox_status_created_at_idx": {
+          "name": "outbox_status_created_at_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "outbox_run_id_run_id_fk": {
           "name": "outbox_run_id_run_id_fk",
@@ -1768,7 +2091,29 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "erp_accounting_dimension_definition_supplier_sort_order_idx": {
+          "name": "erp_accounting_dimension_definition_supplier_sort_order_idx",
+          "columns": [
+            {
+              "expression": "erp_supplier",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "sort_order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
@@ -1890,7 +2235,50 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "rule_status_updated_at_idx": {
+          "name": "rule_status_updated_at_idx",
+          "columns": [
+            {
+              "expression": "rule_status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "rule_status_last_used_idx": {
+          "name": "rule_status_last_used_idx",
+          "columns": [
+            {
+              "expression": "rule_status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "last_used",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -2071,7 +2459,23 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "kmd_accounting_parameters_rule_id_idx": {
+          "name": "kmd_accounting_parameters_rule_id_idx",
+          "columns": [
+            {
+              "expression": "rule_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "kmd_accounting_parameters_rule_id_rule_id_fk": {
           "name": "kmd_accounting_parameters_rule_id_rule_id_fk",
@@ -2192,7 +2596,23 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "rule_banking_condition_rule_id_idx": {
+          "name": "rule_banking_condition_rule_id_idx",
+          "columns": [
+            {
+              "expression": "rule_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "rule_banking_condition_rule_id_rule_id_fk": {
           "name": "rule_banking_condition_rule_id_rule_id_fk",
@@ -2370,7 +2790,29 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "rule_version_rule_id_version_idx": {
+          "name": "rule_version_rule_id_version_idx",
+          "columns": [
+            {
+              "expression": "ruleId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "version",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "rule_version_ruleId_rule_id_fk": {
           "name": "rule_version_ruleId_rule_id_fk",
@@ -2417,7 +2859,29 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "run_status_booking_date_idx": {
+          "name": "run_status_booking_date_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "booking_date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
@@ -2495,7 +2959,29 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "banking_document_account_received_at_idx": {
+          "name": "banking_document_account_received_at_idx",
+          "columns": [
+            {
+              "expression": "account_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "received_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "banking_document_account_id_account_id_fk": {
           "name": "banking_document_account_id_account_id_fk",
@@ -2603,7 +3089,38 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "banking_statement_document_id_idx": {
+          "name": "banking_statement_document_id_idx",
+          "columns": [
+            {
+              "expression": "document_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "banking_statement_statement_id_idx": {
+          "name": "banking_statement_statement_id_idx",
+          "columns": [
+            {
+              "expression": "statement_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "banking_statement_document_id_banking_document_id_fk": {
           "name": "banking_statement_document_id_banking_document_id_fk",
@@ -2674,7 +3191,29 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "banking_statement_balance_statement_type_code_idx": {
+          "name": "banking_statement_balance_statement_type_code_idx",
+          "columns": [
+            {
+              "expression": "statement_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "type_code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "banking_statement_balance_statement_id_banking_statement_id_fk": {
           "name": "banking_statement_balance_statement_id_banking_statement_id_fk",
@@ -2919,7 +3458,119 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "transaction_run_id_idx": {
+          "name": "transaction_run_id_idx",
+          "columns": [
+            {
+              "expression": "run_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "transaction_run_id_account_id_idx": {
+          "name": "transaction_run_id_account_id_idx",
+          "columns": [
+            {
+              "expression": "run_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "account",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "transaction_booking_date_id_idx": {
+          "name": "transaction_booking_date_id_idx",
+          "columns": [
+            {
+              "expression": "booking_date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "transaction_account_booking_date_id_idx": {
+          "name": "transaction_account_booking_date_id_idx",
+          "columns": [
+            {
+              "expression": "account",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "booking_date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "transaction_statement_order_idx": {
+          "name": "transaction_statement_order_idx",
+          "columns": [
+            {
+              "expression": "statement_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "entry_index",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "entry_sub_index",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "transaction_run_id_run_id_fk": {
           "name": "transaction_run_id_run_id_fk",
@@ -3013,7 +3664,44 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "transaction_processing_status_transaction_id_idx": {
+          "name": "transaction_processing_status_transaction_id_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "transaction_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "transaction_processing_rule_applied_idx": {
+          "name": "transaction_processing_rule_applied_idx",
+          "columns": [
+            {
+              "expression": "rule_applied",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "transaction_processing_transaction_id_transaction_id_fk": {
           "name": "transaction_processing_transaction_id_transaction_id_fk",
@@ -3044,6 +3732,104 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.transaction_code_catalog": {
+      "name": "transaction_code_catalog",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "provider": {
+          "name": "provider",
+          "type": "bank_provider",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code_key": {
+          "name": "code_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "domain": {
+          "name": "domain",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "family": {
+          "name": "family",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sub_family": {
+          "name": "sub_family",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "proprietary": {
+          "name": "proprietary",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "display_name": {
+          "name": "display_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source_document": {
+          "name": "source_document",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "transaction_code_catalog_provider_code_key_unique": {
+          "name": "transaction_code_catalog_provider_code_key_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "provider",
+            "code_key"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -3116,7 +3902,29 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "transaction_party_transaction_sequence_idx": {
+          "name": "transaction_party_transaction_sequence_idx",
+          "columns": [
+            {
+              "expression": "transaction_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "sequence_no",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "transaction_party_transaction_id_transaction_id_fk": {
           "name": "transaction_party_transaction_id_transaction_id_fk",
@@ -3211,7 +4019,29 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "transaction_reference_transaction_sequence_idx": {
+          "name": "transaction_reference_transaction_sequence_idx",
+          "columns": [
+            {
+              "expression": "transaction_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "sequence_no",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "transaction_reference_transaction_id_transaction_id_fk": {
           "name": "transaction_reference_transaction_id_transaction_id_fk",

@@ -8,6 +8,8 @@ import { formatTransactionFieldHint } from '~/lib/presenters/transactionFieldHin
 import type { OpenTransaction, TransactionSummary } from '~/types/transactions'
 import type { ManualBookingFormState as ManualFormState } from '#engine/manual-booking/domain/manualBooking'
 
+const appConfig = useAppConfig()
+
 const props = defineProps<{
 	open: boolean
 	transaction: OpenTransaction | null
@@ -433,7 +435,7 @@ function collapseAllLines() {
 					v-if="isGroupMode"
 					variant="soft"
 					color="primary"
-					icon="solar:layers-bold-duotone"
+					:icon="appConfig.ui.icons.layers"
 					:title="`Samlepost med ${groupTransactionIds.length} transaktioner`"
 					description="Hver transaktion er forudfyldt som en finanslinje. Justér linjer efter behov før afsendelse."
 				/>
@@ -504,7 +506,7 @@ function collapseAllLines() {
 								<UButton
 									color="primary"
 									variant="soft"
-									icon="solar:add-circle-bold-duotone"
+									:icon="appConfig.ui.icons.plus"
 									@click="addLine"
 								>
 									Tilføj linje
@@ -513,7 +515,7 @@ function collapseAllLines() {
 									v-if="isGroupMode && formState.lines.length > 1"
 									color="neutral"
 									variant="soft"
-									icon="solar:layers-minimalistic-bold-duotone"
+									:icon="appConfig.ui.icons.layers"
 									@click="collapseAllLines"
 								>
 									Saml alle linjer
@@ -525,7 +527,7 @@ function collapseAllLines() {
 							v-if="hasSumMismatch"
 							color="error"
 							variant="soft"
-							icon="solar:danger-triangle-bold-duotone"
+							:icon="appConfig.ui.icons.warning"
 							class="text-xs"
 							:title="sumAlertTitle"
 							:description="sumAlertDescription"
@@ -547,7 +549,7 @@ function collapseAllLines() {
 										v-if="formState.lines.length > 1"
 										color="neutral"
 										variant="soft"
-										icon="solar:trash-bin-trash-bold-duotone"
+										:icon="appConfig.ui.icons.trash"
 										@click="removeLine(lineIndex)"
 									>
 										Fjern
@@ -644,7 +646,7 @@ function collapseAllLines() {
 								v-if="!isGroupMode"
 								variant="soft"
 								color="primary"
-								icon="solar:diskette-bold-duotone"
+								:icon="appConfig.ui.icons.save"
 								:loading="isSavingDraft"
 								:disabled="isSubmitting || isSavingDraft || hasSumMismatch || accountingDimensionPending || !!accountingDimensionError"
 								@click="handleSaveDraft"
@@ -654,7 +656,7 @@ function collapseAllLines() {
 							<UButton
 								type="submit"
 								color="primary"
-								icon="solar:plain-bold-duotone"
+								:icon="appConfig.ui.icons.send"
 								:loading="isSubmitting"
 								:disabled="isSubmitting || isSavingDraft || hasSumMismatch || accountingDimensionPending || !!accountingDimensionError"
 							>
