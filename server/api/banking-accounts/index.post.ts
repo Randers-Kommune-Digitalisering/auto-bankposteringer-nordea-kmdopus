@@ -34,10 +34,10 @@ const bodySchema = z.object({
   provider: z.enum(['danskebank', 'nordea', 'bankconnect']),
   iban: z.string().min(1),
   name: z.string().trim().min(1).max(80).optional(),
-  statuskonto: z.string().trim().min(1).max(32).optional(),
-  ignoreIngestion: z.boolean().optional(),
-  // Legacy input (UI used to send this)
   artskonto: z.string().trim().min(1).max(32).optional(),
+  ignoreIngestion: z.boolean().optional(),
+  // Legacy input
+  statuskonto: z.string().trim().min(1).max(32).optional(),
 })
 
 export default defineEventHandler(async (event) => {
@@ -50,22 +50,22 @@ export default defineEventHandler(async (event) => {
   const provider = parsed.data.provider
   const iban = normalizeIban(parsed.data.iban)
   const name = parsed.data.name?.trim().length ? parsed.data.name.trim() : null
-  const statuskonto = (parsed.data.statuskonto ?? parsed.data.artskonto ?? '').trim() || null
+  const artskonto = (parsed.data.artskonto ?? parsed.data.statuskonto ?? '').trim() || null
   const ignoreIngestion = Boolean(parsed.data.ignoreIngestion)
 
-  // Validate statuskonto format against active ERP dimension definitions (data-driven).
+  // Validate artskonto format against active ERP dimension definitions (data-driven).
   const supplier = await getActiveErpSupplier()
   const definitions = await listAccountingDimensionDefinitions(supplier)
-  const statuskontoDef = definitions.find((d) => d.key === 'statuskonto')
-  if (statuskonto && statuskontoDef?.valueRegex) {
+  const artskontoDef = definitions.find((d) => d.key === 'artskonto')
+  if (artskonto && artskontoDef?.valueRegex) {
     let re: RegExp
     try {
-      re = new RegExp(statuskontoDef.valueRegex, statuskontoDef.valueRegexFlags ?? '')
+      re = new RegExp(artskontoDef.valueRegex, artskontoDef.valueRegexFlags ?? '')
     } catch {
-      throw createError({ statusCode: 500, statusMessage: `Ugyldig ERP-regex for statuskonto (${supplier})` })
+      throw createError({ statusCode: 500, statusMessage: `Ugyldig ERP-regex for artskonto (${supplier})` })
     }
-    if (!re.test(statuskonto)) {
-      throw createError({ statusCode: 400, statusMessage: 'Ugyldigt format for statuskonto (valideres mod ERP)' })
+    if (!re.test(artskonto)) {
+      throw createError({ statusCode: 400, statusMessage: 'Ugyldigt format for artskonto (valideres mod ERP)' })
     }
   }
 
@@ -97,17 +97,17 @@ export default defineEventHandler(async (event) => {
         set: { name, updatedAt: new Date() } as any,
       })
 
-    if (statuskonto) {
+    if (artskonto) {
       await trx
         .insert(bankingAgreementAccountDimension)
-        .values({ provider: provider as any, iban, dimensionKey: 'statuskonto', dimensionValue: statuskonto, updatedAt: new Date() } as any)
+        .values({ provider: provider as any, iban, dimensionKey: 'artskonto', dimensionValue: artskonto, updatedAt: new Date() } as any)
         .onConflictDoUpdate({
           target: [
             bankingAgreementAccountDimension.provider,
             bankingAgreementAccountDimension.iban,
             bankingAgreementAccountDimension.dimensionKey,
           ],
-          set: { dimensionValue: statuskonto, updatedAt: new Date() } as any,
+          set: { dimensionValue: artskonto, updatedAt: new Date() } as any,
         })
     }
 

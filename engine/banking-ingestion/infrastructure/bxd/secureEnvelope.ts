@@ -18,7 +18,6 @@ import {
 export const BXD_SECURE_ENVELOPE_NAMESPACE = 'http://bxd.fi/xmldata/'
 
 export type BxdEnvironment = 'PRODUCTION' | 'TEST'
-
 export const bxdEnvironmentSchema = z.enum(['PRODUCTION', 'TEST'])
 
 export const bxdUploadFileRequestSchema = z.object({

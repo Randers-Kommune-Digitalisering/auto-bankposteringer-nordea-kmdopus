@@ -273,7 +273,6 @@ watch(
 				text: '',
 				cprType: 'ingen' as const,
 				cprNumber: '',
-				notifyTo: '',
 				note: '',
 			}
 			applyManualBookingPayload(payload)
@@ -624,16 +623,6 @@ function collapseAllLines() {
 								<UTextarea
 									v-model="formState.note"
 									placeholder="Gem interne noter uden at sende til ERP"
-									class="w-full"
-								/>
-							</UFormField>
-
-							<UFormField name="notifyTo">
-								<UiFloatingLabelInput
-									v-model="formState.notifyTo"
-									label="Notifikation sendes til"
-									type="email"
-									color="neutral"
 									class="w-full"
 								/>
 							</UFormField>

@@ -194,11 +194,11 @@ export default defineEventHandler(async (event) => {
         .where(and(
           inArray(bankingAgreementAccountDimension.provider, providers as any),
           inArray(bankingAgreementAccountDimension.iban, ibans),
-          inArray(bankingAgreementAccountDimension.dimensionKey, ['statuskonto', 'artskonto', 'ignore_ingestion']),
+          inArray(bankingAgreementAccountDimension.dimensionKey, ['artskonto', 'statuskonto', 'ignore_ingestion']),
         ))
     : []
 
-  const statuskontoByProviderIban = new Map<string, string>()
+  const artskontoByProviderIban = new Map<string, string>()
   const ignoreByProviderIban = new Map<string, boolean>()
   for (const d of dimRows) {
     const k = `${String(d.provider)}:${String(d.iban)}`
@@ -207,22 +207,28 @@ export default defineEventHandler(async (event) => {
       ignoreByProviderIban.set(k, /^(1|true|yes)$/i.test(String(d.value ?? '').trim()))
       continue
     }
-    if (key === 'statuskonto') {
-      statuskontoByProviderIban.set(k, String(d.value))
+    if (key === 'artskonto') {
+      artskontoByProviderIban.set(k, String(d.value))
       continue
     }
-    if (!statuskontoByProviderIban.has(k)) statuskontoByProviderIban.set(k, String(d.value))
+    if (!artskontoByProviderIban.has(k)) artskontoByProviderIban.set(k, String(d.value))
   }
 
-  const allowlistByProvider = new Map<string, Array<{ iban: string; name: string | null; statuskonto: string | null; ignoreIngestion: boolean }>>()
+  const allowlistByProvider = new Map<string, Array<{
+    iban: string
+    name: string | null
+    artskonto: string | null
+    statuskonto: string | null
+    ignoreIngestion: boolean
+  }>>()
   for (const row of allowlistRows) {
     const provider = String(row.provider)
     const iban = String(row.iban)
     const name = row.name === null || typeof row.name === 'undefined' ? null : String(row.name)
-    const statuskonto = statuskontoByProviderIban.get(`${provider}:${iban}`) ?? null
+    const artskonto = artskontoByProviderIban.get(`${provider}:${iban}`) ?? null
     const ignoreIngestion = ignoreByProviderIban.get(`${provider}:${iban}`) ?? false
     const existing = allowlistByProvider.get(provider) ?? []
-    existing.push({ iban, name, statuskonto, ignoreIngestion })
+    existing.push({ iban, name, artskonto, statuskonto: artskonto, ignoreIngestion })
     allowlistByProvider.set(provider, existing)
   }
 

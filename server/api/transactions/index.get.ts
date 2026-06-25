@@ -53,6 +53,8 @@ export default defineEventHandler(async (event) => {
     .select({
       id: transaction.id,
       accountId: transaction.accountId,
+      statementId: transaction.statementId,
+      entryIndex: transaction.entryIndex,
       bookingDate: transaction.bookingDate,
       creditDebitIndicator: transaction.creditDebitIndicator,
       ntryRef: transaction.ntryRef,
@@ -64,6 +66,22 @@ export default defineEventHandler(async (event) => {
     .where(openTransactionCondition)
     .orderBy(desc(transaction.bookingDate), desc(transaction.id))
 
+  const entryGroupSizeByEntryKey = new Map<string, number>()
+  for (const row of openRowsForGrouping) {
+    const entryKey = toStatementEntryKey(row.statementId, row.entryIndex)
+    if (!entryKey) continue
+    entryGroupSizeByEntryKey.set(entryKey, (entryGroupSizeByEntryKey.get(entryKey) ?? 0) + 1)
+  }
+
+  const entryGroupSizeByTransactionId = new Map<string, number>()
+  for (const row of openRowsForGrouping) {
+    const transactionId = String(row.id ?? '').trim()
+    if (!transactionId) continue
+    const entryKey = toStatementEntryKey(row.statementId, row.entryIndex)
+    const entryGroupSize = entryKey ? (entryGroupSizeByEntryKey.get(entryKey) ?? 0) : 0
+    entryGroupSizeByTransactionId.set(transactionId, entryGroupSize)
+  }
+
   const stackIdByTransactionId = new Map<string, string>()
   for (const row of openRowsForGrouping) {
     const transactionId = String(row.id ?? '').trim()
@@ -71,6 +89,7 @@ export default defineEventHandler(async (event) => {
     stackIdByTransactionId.set(transactionId, toTopTransactionStackId({
       id: row.id,
       accountId: row.accountId,
+      entryGroupSize: entryGroupSizeByTransactionId.get(transactionId) ?? 0,
       bookingDate: row.bookingDate,
       creditDebitIndicator: row.creditDebitIndicator,
       ntryRef: row.ntryRef,
@@ -102,6 +121,8 @@ export default defineEventHandler(async (event) => {
         .select({
           id: transaction.id,
           runId: transaction.runId,
+          statementId: transaction.statementId,
+          entryIndex: transaction.entryIndex,
           bookingDate: transaction.bookingDate,
           amount: transaction.amount,
           creditDebitIndicator: transaction.creditDebitIndicator,
@@ -281,6 +302,7 @@ export default defineEventHandler(async (event) => {
         accountId: row.accountId ?? '',
         bookingDate,
         creditDebitIndicator: row.creditDebitIndicator ?? null,
+        entryGroupSize: entryGroupSizeByTransactionId.get(String(row.id ?? '').trim()) ?? 0,
         ntryRef: row.ntryRef ?? null,
         entryAdditionalInfo: row.entryAdditionalInfo ?? null,
         ntryAcctSvcrRef: row.ntryAcctSvcrRef ?? null,
@@ -397,6 +419,7 @@ function toDateOnlyDate(value: Date | string | null): Date {
 function toTopTransactionStackId(input: {
   id: string | null
   accountId: string | null
+  entryGroupSize: number | null
   bookingDate: Date | string | null
   creditDebitIndicator: string | null
   ntryRef: string | null
@@ -407,6 +430,7 @@ function toTopTransactionStackId(input: {
     accountId: input.accountId ?? '',
     bookingDate: toDateOnlyDate(input.bookingDate),
     creditDebitIndicator: input.creditDebitIndicator ?? null,
+    entryGroupSize: input.entryGroupSize ?? 0,
     ntryRef: input.ntryRef ?? null,
     entryAdditionalInfo: input.entryAdditionalInfo ?? null,
     ntryAcctSvcrRef: input.ntryAcctSvcrRef ?? null,
@@ -414,6 +438,16 @@ function toTopTransactionStackId(input: {
 
   if (groupKey) return `group:${groupKey}`
   return `single:${String(input.id ?? '')}`
+}
+
+function toStatementEntryKey(statementId: string | null, entryIndex: number | null): string | null {
+  const normalizedStatementId = String(statementId ?? '').trim()
+  if (!normalizedStatementId) return null
+
+  const normalizedEntryIndex = Number(entryIndex)
+  if (!Number.isInteger(normalizedEntryIndex) || normalizedEntryIndex < 1) return null
+
+  return `${normalizedStatementId}:${normalizedEntryIndex}`
 }
 
 type TransactionRow = {

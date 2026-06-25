@@ -1545,12 +1545,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "notify_to": {
-          "name": "notify_to",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
         "note": {
           "name": "note",
           "type": "text",
@@ -1794,44 +1788,6 @@
           ]
         }
       },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.notification_settings": {
-      "name": "notification_settings",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "admin_email": {
-          "name": "admin_email",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "mail_template": {
-          "name": "mail_template",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -2442,12 +2398,6 @@
         },
         "cpr_number": {
           "name": "cpr_number",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "notify_to": {
-          "name": "notify_to",
           "type": "text",
           "primaryKey": false,
           "notNull": false

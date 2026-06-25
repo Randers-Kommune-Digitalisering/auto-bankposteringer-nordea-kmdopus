@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseAmount } from '../../engine/matching/domain/amount'
+import { parseAmount, parseAmountOrUndefined } from '../../engine/matching/domain/amount'
 
 describe('parseAmount', () => {
   it('parses dot-decimal format (DB numeric)', () => {
@@ -22,5 +22,13 @@ describe('parseAmount', () => {
     expect(parseAmount('')).toBe(0)
     expect(parseAmount('abc')).toBe(0)
     expect(parseAmount(null)).toBe(0)
+  })
+
+  it('supports strict parsing for numeric-only flows', () => {
+    expect(parseAmountOrUndefined('1234,50')).toBeCloseTo(1234.5)
+    expect(parseAmountOrUndefined('1,234.56')).toBeCloseTo(1234.56)
+    expect(parseAmountOrUndefined('')).toBeUndefined()
+    expect(parseAmountOrUndefined('abc')).toBeUndefined()
+    expect(parseAmountOrUndefined(null)).toBeUndefined()
   })
 })

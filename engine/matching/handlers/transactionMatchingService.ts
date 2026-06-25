@@ -23,20 +23,15 @@ import {
   resolveCounterpartyName,
   resolvePostingText,
 } from '../domain/postingUtils'
-import { renderNotificationTemplate, getDefaultNotificationTemplate } from '../../notifications/domain/notificationTemplate'
 import { amountMatchesAbsolute, compareRulesBySpecificity } from '../domain/rulePrioritization'
-import { parseAmount } from '../domain/amount'
+import {
+  parseAmount as parseTransactionAmount,
+  parseAmountOrUndefined,
+} from '../domain/amount'
 import { buildNordeaDeterministicGroupKey } from '../../banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo'
-
-export interface MatchingNotification {
-  to: string
-  subject: string
-  body: string
-}
 
 export interface MatchSummary {
   postings: PostingLineInput[]
-  notifications: MatchingNotification[]
   matchedTransactions: number
   exceptionTransactions: number
   unmatchedTransactions: number
@@ -96,13 +91,12 @@ export type RuleAccounting = {
   bookingText?: string | null
   cprType?: string | null
   cprNumber?: string | null
-  notifyTo?: string | null
   note?: string | null
   attachments: RuleAccountingAttachmentRow[]
 }
 
-const STATUS_ACCOUNT_DIMENSION_KEY = 'statuskonto'
-const LEGACY_STATUS_ACCOUNT_DIMENSION_KEY = 'artskonto'
+const STATUS_ACCOUNT_DIMENSION_KEY = 'artskonto'
+const LEGACY_STATUS_ACCOUNT_DIMENSION_KEY = 'statuskonto'
 
 type MatchOutcome =
   | { kind: 'exception'; rule: HydratedRule }
@@ -110,11 +104,8 @@ type MatchOutcome =
       kind: 'matched'
       rule: HydratedRule
       command: PostingCommand
-      notification?: MatchingNotification
     }
   | { kind: 'unmatched'; command: PostingCommand }
-
-const NOTIFICATION_SUBJECT = 'Indbetaling modtaget og bogført'
 
 export async function matchTransactionsForRun(runId: string): Promise<MatchSummary> {
   const now = new Date()
@@ -128,7 +119,6 @@ export async function matchTransactionsForRun(runId: string): Promise<MatchSumma
     await expireTimeLimitedRules(todayLocal)
     return {
       postings: [],
-      notifications: [],
       matchedTransactions: 0,
       exceptionTransactions: 0,
       unmatchedTransactions: 0,
@@ -141,7 +131,6 @@ export async function matchTransactionsForRun(runId: string): Promise<MatchSumma
 
   const summary: MatchSummary = {
     postings: [],
-    notifications: [],
     matchedTransactions: 0,
     exceptionTransactions: 0,
     unmatchedTransactions: 0,
@@ -161,9 +150,6 @@ export async function matchTransactionsForRun(runId: string): Promise<MatchSumma
         matchedRuleIds.add(outcome.rule.id)
         if (outcome.rule.type === 'engangs') {
           oneOffRuleIds.add(outcome.rule.id)
-        }
-        if (outcome.notification) {
-          summary.notifications.push(outcome.notification)
         }
         await persistProcessing(trx, trxItem, 'bogført', outcome.rule.id)
       } else if (outcome.kind === 'exception') {
@@ -215,6 +201,8 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
       transactionId: transaction.id,
       runId: transaction.runId,
       accountId: transaction.accountId,
+      statementId: transaction.statementId,
+      entryIndex: transaction.entryIndex,
       amount: transaction.amount,
       bookingDate: transaction.bookingDate,
       creditDebitIndicator: transaction.creditDebitIndicator,
@@ -281,8 +269,8 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
         ))
     : []
 
-  const statuskontoByProviderIban = new Map<string, string>()
-  // Prefer new key, but allow legacy.
+  const artskontoByProviderIban = new Map<string, string>()
+  // Prefer canonical key, but allow legacy data.
   for (const d of dimRows) {
     const provider = String(d.provider)
     const iban = String(d.iban)
@@ -291,29 +279,38 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
     const value = String(d.value)
 
     if (key === STATUS_ACCOUNT_DIMENSION_KEY) {
-      statuskontoByProviderIban.set(mapKey, value)
+      artskontoByProviderIban.set(mapKey, value)
       continue
     }
 
-    if (!statuskontoByProviderIban.has(mapKey)) {
-      statuskontoByProviderIban.set(mapKey, value)
+    if (!artskontoByProviderIban.has(mapKey)) {
+      artskontoByProviderIban.set(mapKey, value)
     }
+  }
+
+  const entryGroupSizeByEntryKey = new Map<string, number>()
+  for (const row of rows) {
+    const entryKey = toStatementEntryKey(row.statementId, row.entryIndex)
+    if (!entryKey) continue
+    entryGroupSizeByEntryKey.set(entryKey, (entryGroupSizeByEntryKey.get(entryKey) ?? 0) + 1)
   }
 
   const normalized = rows
     .filter(row => row.transactionId && row.runId && row.accountId)
     .filter(row => !row.processingStatus || row.processingStatus === 'åben')
-    .map(row => {
+    .map<MatchableTransaction>(row => {
       const provider = row.accountProvider ? String(row.accountProvider) : ''
       const iban = row.accountIban ? String(row.accountIban) : ''
-      const mapped = provider && iban ? statuskontoByProviderIban.get(`${provider}:${iban}`) ?? null : null
-      const statusDimensions = mapped ? { [STATUS_ACCOUNT_DIMENSION_KEY]: String(mapped) } : {}
+      const mapped = provider && iban ? artskontoByProviderIban.get(`${provider}:${iban}`) ?? null : null
+      const statusDimensions: Record<string, string> = mapped
+        ? { [STATUS_ACCOUNT_DIMENSION_KEY]: String(mapped) }
+        : {}
       const bookingDate =
         row.bookingDate instanceof Date
           ? row.bookingDate
           : new Date(row.bookingDate as string)
 
-      const amountAbs = Math.abs(parseAmount(row.amount))
+      const amountAbs = Math.abs(parseTransactionAmount(row.amount))
       const indicator = String(row.creditDebitIndicator ?? '').toUpperCase()
 
       return {
@@ -323,6 +320,7 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
         accountId: row.accountId!,
         bookingDate,
         creditDebitIndicator: row.creditDebitIndicator ?? null,
+        entryGroupSize: entryGroupSizeByEntryKey.get(toStatementEntryKey(row.statementId, row.entryIndex) ?? '') ?? 0,
         ntryRef: row.ntryRef ?? null,
         entryAdditionalInfo: row.entryAdditionalInfo ?? null,
         ntryAcctSvcrRef: row.ntryAcctSvcrRef ?? null,
@@ -395,6 +393,16 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
   return [...singles, ...Array.from(grouped.values())]
 }
 
+function toStatementEntryKey(statementId: string | null, entryIndex: number | null): string | null {
+  const normalizedStatementId = String(statementId ?? '').trim()
+  if (!normalizedStatementId) return null
+
+  const normalizedEntryIndex = Number(entryIndex)
+  if (!Number.isInteger(normalizedEntryIndex) || normalizedEntryIndex < 1) return null
+
+  return `${normalizedStatementId}:${normalizedEntryIndex}`
+}
+
 async function fetchActiveRules(accountIds: string[]): Promise<HydratedRule[]> {
   if (!accountIds.length) {
     return []
@@ -450,7 +458,6 @@ async function fetchActiveRules(accountIds: string[]): Promise<HydratedRule[]> {
           bookingText: parameters.bookingText ?? null,
           cprType: parameters.cprType ?? null,
           cprNumber: parameters.cprNumber ?? null,
-          notifyTo: parameters.notifyTo ?? null,
           note: parameters.note ?? null,
           attachments: parameters.attachments ?? [],
         }
@@ -508,9 +515,8 @@ function evaluateTransaction(tx: MatchableTransaction, rules: HydratedRule[]): M
       cpr,
       attachments: mapAttachments(accounting.attachments),
     })
-    const notification = buildNotification(accounting.notifyTo, tx, accounting)
 
-    return { kind: 'matched', rule: candidate, command, notification }
+    return { kind: 'matched', rule: candidate, command }
   }
 
   const fallbackCommand = buildPostingCommand({
@@ -645,9 +651,9 @@ function compareNumeric(
   expected: string,
   comparator: (a: number, b: number) => boolean,
 ): boolean {
-  const actualNumber = parseAmount(actual)
-  const expectedNumber = parseAmount(expected)
-  if (Number.isNaN(actualNumber) || Number.isNaN(expectedNumber)) {
+  const actualNumber = parseAmountOrUndefined(actual)
+  const expectedNumber = parseAmountOrUndefined(expected)
+  if (actualNumber == null || expectedNumber == null) {
     return false
   }
   return comparator(actualNumber, expectedNumber)
@@ -673,72 +679,11 @@ function resolveCpr(accounting: RuleAccounting, tx: MatchableTransaction): strin
   return undefined
 }
 
-function buildNotification(
-  recipient: string | null | undefined,
-  tx: MatchableTransaction,
-  accounting: RuleAccounting,
-): MatchingNotification | undefined {
-  if (!recipient) {
-    return undefined
-  }
-
-  const counterpart = resolveCounterpartyName(tx)
-    ?? tx.debtorName
-    ?? tx.creditorName
-    ?? tx.ultimateDebtorName
-    ?? tx.ultimateCreditorName
-    ?? 'modpart'
-  const amountFormatted = formatAmount(tx.amount)
-
-  const postingText = resolvePostingText(accounting.bookingText, tx)
-
-  const bookingDateFormatted = tx.bookingDate
-    ? new Date(tx.bookingDate).toLocaleDateString('da-DK')
-    : ''
-
-  const body = renderNotificationTemplate(getDefaultNotificationTemplate(), {
-    tx: tx as any,
-    accounting: accounting as any,
-    counterpartName: counterpart,
-    amountFormatted,
-    bookingDateFormatted,
-    postingText,
-    dimensions: Object.entries(accounting.dimensions)
-      .sort(([a], [b]) => {
-        if (a === STATUS_ACCOUNT_DIMENSION_KEY && b !== STATUS_ACCOUNT_DIMENSION_KEY) return -1
-        if (b === STATUS_ACCOUNT_DIMENSION_KEY && a !== STATUS_ACCOUNT_DIMENSION_KEY) return 1
-        return a.localeCompare(b)
-      })
-      .map(([key, value]) => ({ key, value })),
-  })
-
-  return {
-    to: recipient,
-    subject: NOTIFICATION_SUBJECT,
-    body,
-  }
-}
-
-function parseAmount(value: unknown): number {
-  if (typeof value === 'number') {
-    return value
-  }
-
-  if (typeof value === 'string') {
-    const normalized = value.replace(/\./g, '').replace(/,/g, '.').trim()
-    const parsed = Number(normalized)
-    return Number.isNaN(parsed) ? 0 : parsed
-  }
-
-  return 0
-}
-
 function parseNullableNumeric(value: unknown): number | undefined {
   if (value == null) {
     return undefined
   }
-  const parsed = parseAmount(value)
-  return Number.isNaN(parsed) ? undefined : parsed
+  return parseAmountOrUndefined(value)
 }
 
 function normalizeText(value: string): string {

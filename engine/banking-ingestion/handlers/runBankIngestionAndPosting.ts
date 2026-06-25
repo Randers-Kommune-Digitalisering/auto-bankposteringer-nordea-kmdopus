@@ -9,12 +9,10 @@ import env from '~/lib/env/env'
 import { logger } from '~/lib/logger'
 import { matchRun } from '../../matching/handlers/matchRun'
 import { submitPostingViaOutbox } from '../../erp-integration/handlers/submitPosting'
-import { sendNotificationsForRun } from '../../notifications/handlers/sendNotifications'
-import { sendCertificateExpiryAlertsForRun } from '../../notifications/handlers/sendCertificateExpiryAlerts'
 import { runTransactionBatch } from './runTransactionBatch'
 
-const REQUIRED_ACCOUNT_DIMENSION_KEY = 'statuskonto'
-const LEGACY_REQUIRED_ACCOUNT_DIMENSION_KEY = 'artskonto'
+const REQUIRED_ACCOUNT_DIMENSION_KEY = 'artskonto'
+const LEGACY_REQUIRED_ACCOUNT_DIMENSION_KEY = 'statuskonto'
 
 async function pauseRunIfMissingAccountMappings(runId: string): Promise<{
   paused: boolean
@@ -85,7 +83,7 @@ async function pauseRunIfMissingAccountMappings(runId: string): Promise<{
 export async function runBankIngestionAndPosting(options: {
   runId?: string
   bookingDate?: Date
-} = {}): Promise<{ runId: string; insertedCount: number; notificationCount: number }> {
+} = {}): Promise<{ runId: string; insertedCount: number }> {
   const log = logger.child({ scope: 'banking.runBankIngestionAndPosting' })
 
   let bookingDate = options.bookingDate
@@ -113,8 +111,7 @@ export async function runBankIngestionAndPosting(options: {
   if (pauseCheck.paused) {
     log.warn('Run sat på pause pga. manglende konto-kontering', { runId: ingest.runId, missing: pauseCheck.missingIbans })
     // Still run system alerts (e.g., expiring bank certificates)
-    await sendCertificateExpiryAlertsForRun({ runId: ingest.runId })
-    return { runId: ingest.runId, insertedCount: ingest.insertedCount, notificationCount: 0 }
+    return { runId: ingest.runId, insertedCount: ingest.insertedCount }
   }
 
   // After ingestion, perform matching (deterministic, DB-driven)
@@ -146,21 +143,14 @@ export async function runBankIngestionAndPosting(options: {
     }
   }
 
-  // Notifications are also sent via outbox/SMTP (synchronous submit)
-  const notifications = await sendNotificationsForRun({ runId: ingest.runId, summary })
-
-  // System alerts (e.g., expiring bank certificates)
-  await sendCertificateExpiryAlertsForRun({ runId: ingest.runId })
-
   // Mark run as completed (ingestion sets 'udført'; keep it consistent)
   await db.update(run).set({ status: 'udført' }).where(eq(run.id, ingest.runId))
 
-  log.info('Run udført (ingestion+matching+posting+notifications)', {
+  log.info('Run udført', {
     runId: ingest.runId,
     insertedCount: ingest.insertedCount,
     postingLines: summary.postings.length,
-    notifications: notifications.sent,
   })
 
-  return { runId: ingest.runId, insertedCount: ingest.insertedCount, notificationCount: notifications.sent }
+  return { runId: ingest.runId, insertedCount: ingest.insertedCount }
 }

@@ -88,7 +88,6 @@ export default defineEventHandler(async (event) => {
       text: header.text ?? undefined,
       cprType: header.cprType,
       cprNumber: header.cprNumber ?? undefined,
-      notifyTo: header.notifyTo ?? undefined,
       note: header.note ?? undefined,
       lines: lines.map((l) => ({
         amount: parseNumeric(l.amount),

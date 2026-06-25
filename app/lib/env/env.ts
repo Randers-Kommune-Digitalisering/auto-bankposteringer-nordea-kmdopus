@@ -51,15 +51,6 @@ const baseCommonSchema = z.object({
   // Optional comma-separated allowlist for API CORS (supports credentials).
   OIDC_CORS_ALLOWED_ORIGINS: z.string().optional(),
 
-  // Notifications (SMTP)
-  AUTH_SENDER_ADDRESS: z.email(),
-  // Legacy: used as both SMTP host and allowed recipient domain.
-  SMTP_DOMAIN: z.string().min(1).optional(),
-  // Preferred: split SMTP connection host from allowed recipient domain.
-  SMTP_HOST: z.string().min(1).optional(),
-  SMTP_ALLOWED_RECIPIENT_DOMAIN: z.string().min(1).optional(),
-  SMTP_PORT: z.coerce.number().int().positive().optional().default(25),
-
   // Dev convenience: bypass auth entirely in local dev.
   // Keep stateless: this only changes runtime behavior based on env.
   DEV_AUTH_BYPASS: z.enum(['true', 'false']).optional().default('false').transform(v => v === 'true'),
@@ -95,46 +86,22 @@ function withNormalizedEnv(raw: NodeJS.ProcessEnv): Record<string, string | unde
   return out
 }
 
-function withCommonRefinements<T extends z.ZodTypeAny>(schema: T): T {
-  return schema.superRefine((env: any, ctx) => {
-    const smtpHost = (env.SMTP_HOST ?? env.SMTP_DOMAIN)?.trim();
-    const allowedRecipientDomain = (env.SMTP_ALLOWED_RECIPIENT_DOMAIN ?? env.SMTP_DOMAIN)?.trim();
-
-    if (!smtpHost) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["SMTP_HOST"],
-        message: "Set SMTP_HOST (or legacy SMTP_DOMAIN) to the SMTP server hostname.",
-      });
-    }
-
-    if (!allowedRecipientDomain) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["SMTP_ALLOWED_RECIPIENT_DOMAIN"],
-        message:
-          "Set SMTP_ALLOWED_RECIPIENT_DOMAIN (or legacy SMTP_DOMAIN) to the allowed recipient email domain.",
-      });
-    }
-  }) as T;
-}
-
-const webSchema = withCommonRefinements(baseCommonSchema.extend({
+const webSchema = baseCommonSchema.extend({
   APP_ROLE: z.literal("web"),
-}));
+});
 
-const workerSchema = withCommonRefinements(baseCommonSchema.extend({
+const workerSchema = baseCommonSchema.extend({
   APP_ROLE: z.literal("worker"),
   SFTP_URL: z.string(),
   SFTP_USERNAME: z.string(),
   SFTP_PASSWORD: z.string(),
   SFTP_REQUEST_DIR: z.string(),
   SFTP_RESPONSE_DIR: z.string(),
-}));
+});
 
-const schedulerSchema = withCommonRefinements(baseCommonSchema.extend({
+const schedulerSchema = baseCommonSchema.extend({
   APP_ROLE: z.literal("scheduler"),
-}));
+});
 
 const EnvSchema = z.union([webSchema, workerSchema, schedulerSchema]);
 
@@ -143,26 +110,6 @@ export type EnvSchema = z.infer<typeof EnvSchema>;
 const normalizedEnv = withNormalizedEnv({ ...process.env, APP_ROLE: process.env.APP_ROLE ?? "web" })
 tryParseEnv(EnvSchema, normalizedEnv);
 const parsedEnv = EnvSchema.parse(normalizedEnv);
-
-export const smtpNotificationConfig = (() => {
-  const host = (parsedEnv.SMTP_HOST ?? parsedEnv.SMTP_DOMAIN)?.trim();
-  const allowedRecipientDomain = (
-    parsedEnv.SMTP_ALLOWED_RECIPIENT_DOMAIN ?? parsedEnv.SMTP_DOMAIN
-  )?.trim();
-
-  if (!host || !allowedRecipientDomain) {
-    throw new Error(
-      "SMTP configuration is invalid: set SMTP_HOST + SMTP_ALLOWED_RECIPIENT_DOMAIN (or legacy SMTP_DOMAIN).",
-    );
-  }
-
-  return {
-    host,
-    allowedRecipientDomain: allowedRecipientDomain.toLowerCase(),
-    port: parsedEnv.SMTP_PORT,
-    senderAddress: parsedEnv.AUTH_SENDER_ADDRESS,
-  };
-})();
 
 export const erpIntegrationMetadata = {
   erpSupplier: parsedEnv.ERP_SUPPLIER,

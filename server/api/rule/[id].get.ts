@@ -124,7 +124,6 @@ export default defineEventHandler(async (event) => {
       accountingText: accountingParameters?.bookingText ?? undefined,
       accountingCprType: accountingParameters?.cprType ?? 'ingen',
       accountingCprNumber: accountingParameters?.cprNumber ?? undefined,
-      accountingNotifyTo: accountingParameters?.notifyTo ?? undefined,
       accountingNote: accountingParameters?.note ?? undefined,
       accountingAttachmentName: attachmentNames.length ? attachmentNames : undefined,
       accountingAttachmentFileExtension: attachmentExtensions.length ? attachmentExtensions : undefined,

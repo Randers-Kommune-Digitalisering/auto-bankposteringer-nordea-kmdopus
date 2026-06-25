@@ -205,7 +205,6 @@ CREATE TABLE "manual_booking_draft" (
 	"text" text,
 	"cpr_type" "cpr_type" NOT NULL,
 	"cpr_number" text,
-	"notify_to" text,
 	"note" text
 );
 --> statement-breakpoint
@@ -231,13 +230,6 @@ CREATE TABLE "manual_booking_draft_line_dimension" (
 	"key" text NOT NULL,
 	"value" text NOT NULL,
 	CONSTRAINT "manual_booking_draft_line_dimension_line_id_key_pk" PRIMARY KEY("line_id","key")
-);
---> statement-breakpoint
-CREATE TABLE "notification_settings" (
-	"id" text PRIMARY KEY NOT NULL,
-	"admin_email" text,
-	"mail_template" text NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "outbox" (
@@ -309,7 +301,6 @@ CREATE TABLE "kmd_accounting_parameters" (
 	"booking_text" text,
 	"cpr_type" "cpr_type",
 	"cpr_number" text,
-	"notify_to" text,
 	"note" text
 );
 --> statement-breakpoint

@@ -31,6 +31,9 @@ export default defineNuxtConfig({
     optimizeDeps: {
       include: [
         '@internationalized/date',
+        '@tanstack/table-core',
+        'drizzle-orm/pg-core',
+        'drizzle-zod',
         'zod',
       ]
     },
@@ -58,12 +61,11 @@ export default defineNuxtConfig({
     provideDefaultSecrets: true,
     devMode: {
       enabled: process.env.OIDC_DEV_MODE === 'true',
-      claims: {
-        roles: ['dev'],
-      },
+      generateAccessToken: true,
     },
     providers: {
       keycloak: {
+        exposeAccessToken: true,
         baseUrl: process.env.KEYCLOAK_PUBLIC_URL ?? process.env.KEYCLOAK_AUTH_URL ?? process.env.KEYCLOAK_URL,
         realm: process.env.KEYCLOAK_REALM,
         clientId: process.env.KEYCLOAK_CLIENT_ID,
@@ -87,6 +89,7 @@ export default defineNuxtConfig({
     public: {
       oidcClientId: process.env.KEYCLOAK_CLIENT_ID,
       oidcDevMode: process.env.OIDC_DEV_MODE === 'true',
+      devAuthBypass: process.env.DEV_AUTH_BYPASS === 'true',
       appOrigin,
     },
   },

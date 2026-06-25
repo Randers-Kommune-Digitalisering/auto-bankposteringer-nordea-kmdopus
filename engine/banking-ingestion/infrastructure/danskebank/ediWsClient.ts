@@ -121,7 +121,6 @@ export const danskeEdiWsConfigSchema = z.object({
   // RequestHeader fields
   senderId: z.string().min(1),
   receiverId: z.string().min(1).default('Danske Bank'),
-  userAgent: z.string().min(1).optional().default('AutoBankposteringer'),
   language: z.string().min(1).default('EN'),
 
   // ApplicationRequest fields
@@ -242,7 +241,6 @@ export async function danskeEdiDownloadFileList(cfgInput: DanskeEdiWsConfig, inp
     `<mod:RequestId>${requestId}</mod:RequestId>` +
     `<mod:Timestamp>${timestamp}</mod:Timestamp>` +
     `<mod:Language>${cfg.language}</mod:Language>` +
-    `<mod:UserAgent>${cfg.userAgent}</mod:UserAgent>` +
     `<mod:ReceiverId>${cfg.receiverId}</mod:ReceiverId>` +
     `</mod:RequestHeader>` +
     `<mod:ApplicationRequest>${applicationRequestB64}</mod:ApplicationRequest>` +
@@ -366,7 +364,6 @@ export async function danskeEdiDownloadFile(cfgInput: DanskeEdiWsConfig, input: 
     `<mod:RequestId>${requestId}</mod:RequestId>` +
     `<mod:Timestamp>${timestamp}</mod:Timestamp>` +
     `<mod:Language>${cfg.language}</mod:Language>` +
-    `<mod:UserAgent>${cfg.userAgent}</mod:UserAgent>` +
     `<mod:ReceiverId>${cfg.receiverId}</mod:ReceiverId>` +
     `</mod:RequestHeader>` +
     `<mod:ApplicationRequest>${applicationRequestB64}</mod:ApplicationRequest>` +

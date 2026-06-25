@@ -39,7 +39,6 @@ export function compileRuleDraftToDb(draft: RuleDraftSchema) {
     accountingText,
     accountingCprType,
     accountingCprNumber,
-    accountingNotifyTo,
     accountingNote,
     accountingAttachmentName,
     accountingAttachmentFileExtension,
@@ -76,7 +75,6 @@ export function compileRuleDraftToDb(draft: RuleDraftSchema) {
     bookingText: accountingText,
     cprType: accountingCprType,
     cprNumber: accountingCprNumber,
-    notifyTo: accountingNotifyTo?.length ? accountingNotifyTo : null,
     note: accountingNote,
   }
 

@@ -28,44 +28,47 @@ describe('nordeaAdditionalEntryInfo', () => {
     })
   })
 
-  it('builds deterministic group key from 528 and falls back to 559', () => {
+  it('builds deterministic group key only for grouped batch entries', () => {
     const bookingDate = new Date('2026-05-29T00:00:00.000Z')
 
-    const fromSummary = buildNordeaDeterministicGroupKey({
+    const grouped = buildNordeaDeterministicGroupKey({
       accountId: 'DK4420000970205918-DKK',
       bookingDate,
       creditDebitIndicator: 'CRDT',
+      entryGroupSize: 2,
+      ntryRef: '141',
+      ntryAcctSvcrRef: 'K 84788767-02.06',
       entryAdditionalInfo: '500:REFERENCE:NKS-KY;196:ID.:47447409132;528:SUMMARY ITEM:013711357',
     })
 
-    const fromGsip = buildNordeaDeterministicGroupKey({
+    const notGrouped = buildNordeaDeterministicGroupKey({
       accountId: 'DK4420000970205918-DKK',
       bookingDate,
       creditDebitIndicator: 'CRDT',
+      entryGroupSize: 1,
+      ntryRef: '141',
+      ntryAcctSvcrRef: 'K 84788767-02.06',
       entryAdditionalInfo: '501:REFERENCE:tub310l90zyz7lxxknk1;559:GSIPTRANSACTIONDETKEY:20260529GIDK37116671',
     })
 
-    expect(fromSummary).toContain('nordea:summary:')
-    expect(fromSummary).toContain('013711357')
-    expect(fromGsip).toContain('nordea:gsip:')
-    expect(fromGsip).toContain('20260529GIDK37116671')
+    expect(grouped).toContain('nordea:batch:')
+    expect(grouped).toContain(':141:')
+    expect(grouped).toContain('K 84788767-02.06')
+    expect(notGrouped).toBeNull()
   })
 
-  it('falls back to Ntry entry identity when summary identifiers are absent', () => {
+  it('returns null when entry identity is missing for grouped batches', () => {
     const bookingDate = new Date('2026-06-03T00:00:00.000Z')
 
     const key = buildNordeaDeterministicGroupKey({
       accountId: 'DK6520005908764988-DKK',
       bookingDate,
       creditDebitIndicator: 'CRDT',
+      entryGroupSize: 3,
       entryAdditionalInfo: '502:REFERENCE:K 84788767-02.06;501:REFERENCE:120260603000005850',
-      ntryRef: '141',
-      ntryAcctSvcrRef: 'K 84788767-02.06',
     })
 
-    expect(key).toContain('nordea:ntry:')
-    expect(key).toContain(':141:')
-    expect(key).toContain('K 84788767-02.06')
+    expect(key).toBeNull()
   })
 
   it('extracts field 510 value for creditor fallback', () => {

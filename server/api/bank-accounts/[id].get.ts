@@ -36,13 +36,13 @@ export default defineEventHandler(async (event) => {
       .where(and(
         eq(bankingAgreementAccountDimension.provider, base.provider as any),
         eq(bankingAgreementAccountDimension.iban, base.iban),
-        inArray(bankingAgreementAccountDimension.dimensionKey, ['statuskonto', 'artskonto', 'ignore_ingestion']),
+        inArray(bankingAgreementAccountDimension.dimensionKey, ['artskonto', 'statuskonto', 'ignore_ingestion']),
       ))
 
-    const statuskonto = (() => {
-      const preferred = dimRows.find((d) => String(d.key) === 'statuskonto')
+    const artskonto = (() => {
+      const preferred = dimRows.find((d) => String(d.key) === 'artskonto')
       if (preferred?.value) return String(preferred.value)
-      const legacy = dimRows.find((d) => String(d.key) === 'artskonto')
+      const legacy = dimRows.find((d) => String(d.key) === 'statuskonto')
       if (legacy?.value) return String(legacy.value)
       return null
     })()
@@ -53,7 +53,7 @@ export default defineEventHandler(async (event) => {
       return /^(1|true|yes)$/i.test(String(raw).trim())
     })()
 
-    const row = { ...base, statuskonto, ignoreIngestion }
+    const row = { ...base, artskonto, statuskonto: artskonto, ignoreIngestion }
     if (!row) {
       throw createError({ statusCode: 404, statusMessage: 'Account not found' })
     }

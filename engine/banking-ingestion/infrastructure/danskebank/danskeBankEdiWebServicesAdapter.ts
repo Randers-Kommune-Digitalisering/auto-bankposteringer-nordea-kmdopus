@@ -31,7 +31,6 @@ export const danskeBankEdiWsConfigSchema = z.object({
   // EDI RequestHeader
   senderId: z.string().min(1),
   receiverId: z.string().min(1).default('Danske Bank'),
-  userAgent: z.string().min(1).optional().default('AutoBankposteringer'),
   language: z.string().min(1).default('EN'),
 
   // ApplicationRequest
@@ -73,48 +72,47 @@ export class DanskeBankEdiWebServicesAdapter implements BankAdapter {
   }
 
   async fetchDocuments(input: FetchBankDocumentsInput): Promise<FetchBankDocumentsOutput> {
-    const cfg = danskeBankEdiWsConfigSchema.parse(this.config)
+    const config = danskeBankEdiWsConfigSchema.parse(this.config)
 
-    const pkiEnvironment = cfg.environment === 'TEST' ? 'customertest' : 'production'
+    const pkiEnvironment = config.environment === 'TEST' ? 'customertest' : 'production'
 
     // 1) Fetch bank certificates via PKIWS (needed for XMLENC + signature verification)
     const bankCerts = await danskePkiGetBankCertificates({
-      endpointUrl: cfg.pkiEndpointUrl,
-      senderId: cfg.pkiSenderId,
-      customerId: cfg.pkiCustomerId,
-      interfaceVersion: cfg.pkiInterfaceVersion,
+      endpointUrl: config.pkiEndpointUrl,
+      senderId: config.pkiSenderId,
+      customerId: config.pkiCustomerId,
+      interfaceVersion: config.pkiInterfaceVersion,
       environment: pkiEnvironment,
-      bankRootCertificateSerialNo: cfg.pkiBankRootCertificateSerialNo,
-      trustedBankSigningCertFingerprintSha256Hex: cfg.trustedBankSigningCertFingerprintSha256Hex,
-      timeoutMs: cfg.httpTimeoutMs,
-      mtlsClientCertificatePem: cfg.mtlsClientCertificatePem,
-      mtlsClientPrivateKeyPem: cfg.mtlsClientPrivateKeyPem,
+      bankRootCertificateSerialNo: config.pkiBankRootCertificateSerialNo,
+      trustedBankSigningCertFingerprintSha256Hex: config.trustedBankSigningCertFingerprintSha256Hex,
+      timeoutMs: config.httpTimeoutMs,
+      mtlsClientCertificatePem: config.mtlsClientCertificatePem,
+      mtlsClientPrivateKeyPem: config.mtlsClientPrivateKeyPem,
     })
 
-    const ediCfg: DanskeEdiWsConfig = {
-      endpointUrl: cfg.ediEndpointUrl,
-      senderId: cfg.senderId,
-      receiverId: cfg.receiverId,
-      userAgent: cfg.userAgent,
-      language: cfg.language,
-      customerId: cfg.customerId,
-      signerId: cfg.signerId,
-      softwareId: cfg.softwareId,
-      environment: cfg.environment,
-      applicationRequestPrivateKeyPem: cfg.applicationRequestPrivateKeyPem,
-      applicationRequestCertificatePem: cfg.applicationRequestCertificatePem,
+    const ediConfig: DanskeEdiWsConfig = {
+      endpointUrl: config.ediEndpointUrl,
+      senderId: config.senderId,
+      receiverId: config.receiverId,
+      language: config.language,
+      customerId: config.customerId,
+      signerId: config.signerId,
+      softwareId: config.softwareId,
+      environment: config.environment,
+      applicationRequestPrivateKeyPem: config.applicationRequestPrivateKeyPem,
+      applicationRequestCertificatePem: config.applicationRequestCertificatePem,
       bankEncryptionCertificatePem: bankCerts.bankEncryptionCertificatePem,
       bankSigningCertificatePem: bankCerts.bankSigningCertificatePem,
-      trustedBankSigningCertFingerprintSha256Hex: cfg.trustedBankSigningCertFingerprintSha256Hex,
-      timeoutMs: cfg.httpTimeoutMs,
-      mtlsClientCertificatePem: cfg.mtlsClientCertificatePem,
-      mtlsClientPrivateKeyPem: cfg.mtlsClientPrivateKeyPem,
+      trustedBankSigningCertFingerprintSha256Hex: config.trustedBankSigningCertFingerprintSha256Hex,
+      timeoutMs: config.httpTimeoutMs,
+      mtlsClientCertificatePem: config.mtlsClientCertificatePem,
+      mtlsClientPrivateKeyPem: config.mtlsClientPrivateKeyPem,
     }
 
     // Daily default: query NEW files and let the bank decide unread set.
     // Date window is only used for explicit backfill modes (DLD/ALL).
     const listInput: Parameters<typeof danskeEdiDownloadFileList>[1] = {
-      status: cfg.downloadStatus,
+      status: config.downloadStatus,
     }
 
     const requestedBookingDate = input.bookingDate.trim()
@@ -124,16 +122,16 @@ export class DanskeBankEdiWebServicesAdapter implements BankAdapter {
     listInput.startDate = startDate
     listInput.endDate = endDate
 
-    const list = await danskeEdiDownloadFileList(ediCfg, listInput)
+    const list = await danskeEdiDownloadFileList(ediConfig, listInput)
 
-    const requestedLimit = input.limit ?? cfg.maxFilesPerRun
-    const limit = Math.max(1, Math.min(requestedLimit, cfg.maxFilesPerRun))
+    const requestedLimit = input.limit ?? config.maxFilesPerRun
+    const limit = Math.max(1, Math.min(requestedLimit, config.maxFilesPerRun))
     const refs = list.fileReferences.slice(0, limit)
 
     const documents = [] as FetchBankDocumentsOutput['documents']
 
     for (const ref of refs) {
-      const buf = await danskeEdiDownloadFile(ediCfg, {
+      const buf = await danskeEdiDownloadFile(ediConfig, {
         fileReference: ref,
         requestCompressed: true,
       })
