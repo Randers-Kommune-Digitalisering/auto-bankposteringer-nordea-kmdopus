@@ -56,7 +56,6 @@ const versionContentSchema = z
         bookingText: z.string().optional().nullable(),
         cprType: z.string().optional().nullable(),
         cprNumber: z.string().optional().nullable(),
-        notifyTo: z.string().optional().nullable(),
         note: z.string().optional().nullable(),
         attachments: z.array(attachmentSchema).optional().default([]),
       })
@@ -245,13 +244,11 @@ export default defineEventHandler(async (event) => {
       bookingText: string | null
       cprType: CprType | null
       cprNumber: string | null
-      notifyTo: string | null
       note: string | null
     } = {
       bookingText: accounting.bookingText ?? null,
       cprType: normalizeCprType(accounting.cprType),
       cprNumber: accounting.cprNumber ?? null,
-      notifyTo: accounting.notifyTo ?? null,
       note: accounting.note ?? null,
     }
 

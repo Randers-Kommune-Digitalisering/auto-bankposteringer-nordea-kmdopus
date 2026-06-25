@@ -49,7 +49,6 @@ const defaultState = (transactionAmount?: number): ManualFormState => ({
 	text: 'Tekst fra bank',
 	cprType: 'ingen' as CprType,
 	cprNumber: '',
-	notifyTo: '',
 	note: ''
 })
 
@@ -363,14 +362,12 @@ export function useManualBookingForm(options: {
 		text?: string | null
 		cprType: CprType
 		cprNumber?: string | null
-		notifyTo?: string | null
 		note?: string | null
 		attachments?: ManualPostingAttachment[]
 	}) => {
 		formState.text = payload.text ?? ''
 		formState.cprType = payload.cprType
 		formState.cprNumber = payload.cprNumber ?? ''
-		formState.notifyTo = payload.notifyTo ?? ''
 		formState.note = payload.note ?? ''
 
 		const nextLines = (payload.lines ?? []).length
@@ -424,7 +421,6 @@ export function useManualBookingForm(options: {
 		text: fallbackText,
 		cprType: data.cprType,
 		cprNumber: sanitize(data.cprNumber),
-		notifyTo: sanitize(data.notifyTo),
 		note: sanitize(data.note),
 		attachments: attachmentList.value.length ? attachmentList.value : undefined
 		}

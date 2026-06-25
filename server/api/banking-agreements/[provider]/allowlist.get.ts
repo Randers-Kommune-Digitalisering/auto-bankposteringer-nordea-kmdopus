@@ -36,11 +36,11 @@ export default defineEventHandler(async (event) => {
         .where(and(
           eq(bankingAgreementAccountDimension.provider, provider as any),
           inArray(bankingAgreementAccountDimension.iban, ibans),
-          inArray(bankingAgreementAccountDimension.dimensionKey, ['statuskonto', 'artskonto', 'ignore_ingestion']),
+          inArray(bankingAgreementAccountDimension.dimensionKey, ['artskonto', 'statuskonto', 'ignore_ingestion']),
         ))
     : []
 
-  const statuskontoByIban = new Map<string, string>()
+  const artskontoByIban = new Map<string, string>()
   const ignoreByIban = new Map<string, boolean>()
   for (const d of dims) {
     const iban = String(d.iban)
@@ -50,16 +50,17 @@ export default defineEventHandler(async (event) => {
       ignoreByIban.set(iban, /^(1|true|yes)$/i.test(value.trim()))
       continue
     }
-    if (key === 'statuskonto') {
-      statuskontoByIban.set(iban, value)
+    if (key === 'artskonto') {
+      artskontoByIban.set(iban, value)
       continue
     }
-    if (!statuskontoByIban.has(iban)) statuskontoByIban.set(iban, value)
+    if (!artskontoByIban.has(iban)) artskontoByIban.set(iban, value)
   }
 
   return rows.map((r) => ({
     ...r,
-    statuskonto: statuskontoByIban.get(String(r.iban)) ?? null,
+    artskonto: artskontoByIban.get(String(r.iban)) ?? null,
+    statuskonto: artskontoByIban.get(String(r.iban)) ?? null,
     ignoreIngestion: ignoreByIban.get(String(r.iban)) ?? false,
   }))
 })

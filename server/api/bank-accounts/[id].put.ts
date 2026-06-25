@@ -12,10 +12,10 @@ import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
 
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
-  statuskonto: z.string().trim().min(1).max(32).optional(),
+  artskonto: z.string().trim().min(1).max(32).optional(),
   ignoreIngestion: z.boolean().optional(),
   // Legacy input
-  artskonto: z.string().trim().min(1).max(32).optional(),
+  statuskonto: z.string().trim().min(1).max(32).optional(),
 })
 
 export default defineEventHandler(async (event) => {
@@ -59,15 +59,15 @@ export default defineEventHandler(async (event) => {
         ))
     }
 
-    const incomingStatuskonto = (payload.statuskonto ?? payload.artskonto)
-    if (typeof incomingStatuskonto !== 'undefined') {
+    const incomingArtskonto = (payload.artskonto ?? payload.statuskonto)
+    if (typeof incomingArtskonto !== 'undefined') {
       await trx
         .insert(bankingAgreementAccountDimension)
         .values({
           provider: existing.provider as any,
           iban: existing.iban,
-          dimensionKey: 'statuskonto',
-          dimensionValue: incomingStatuskonto,
+          dimensionKey: 'artskonto',
+          dimensionValue: incomingArtskonto,
           updatedAt: new Date(),
         } as any)
         .onConflictDoUpdate({
@@ -76,7 +76,7 @@ export default defineEventHandler(async (event) => {
             bankingAgreementAccountDimension.iban,
             bankingAgreementAccountDimension.dimensionKey,
           ],
-          set: { dimensionValue: incomingStatuskonto, updatedAt: new Date() } as any,
+          set: { dimensionValue: incomingArtskonto, updatedAt: new Date() } as any,
         })
     }
 
@@ -165,13 +165,13 @@ export default defineEventHandler(async (event) => {
       .where(and(
         eq(bankingAgreementAccountDimension.provider, base.provider as any),
         eq(bankingAgreementAccountDimension.iban, base.iban),
-        inArray(bankingAgreementAccountDimension.dimensionKey, ['statuskonto', 'artskonto', 'ignore_ingestion']),
+        inArray(bankingAgreementAccountDimension.dimensionKey, ['artskonto', 'statuskonto', 'ignore_ingestion']),
       ))
 
-    const statuskonto = (() => {
-      const preferred = dims.find((d) => String(d.key) === 'statuskonto')
+    const artskonto = (() => {
+      const preferred = dims.find((d) => String(d.key) === 'artskonto')
       if (preferred?.value) return String(preferred.value)
-      const legacy = dims.find((d) => String(d.key) === 'artskonto')
+      const legacy = dims.find((d) => String(d.key) === 'statuskonto')
       if (legacy?.value) return String(legacy.value)
       return null
     })()
@@ -182,7 +182,7 @@ export default defineEventHandler(async (event) => {
       return /^(1|true|yes)$/i.test(String(raw).trim())
     })()
 
-    return { ...base, statuskonto, ignoreIngestion }
+    return { ...base, artskonto, statuskonto: artskonto, ignoreIngestion }
   })
 
   const storage = useStorage('bank-accounts')

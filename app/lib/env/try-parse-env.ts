@@ -1,4 +1,5 @@
 // Formats the error message when required environment variables are missing
+
 import type { ZodTypeAny } from "zod";
 import { ZodError } from "zod";
 

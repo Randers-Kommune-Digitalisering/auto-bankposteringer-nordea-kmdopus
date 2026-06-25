@@ -40,25 +40,25 @@ function buildIso20022Adapter(provider: BankProvider): BankAdapter {
   }
 
   if (provider === 'danskebank') {
-    const cfg = loadDanskeBankEdiEnvConfig()
+    const config = loadDanskeBankEdiEnvConfig()
     const secrets = loadDanskeBankEnvSecrets()
     return new DanskeBankEdiWebServicesAdapter({
-      ediEndpointUrl: cfg.DANSKE_BANK_EDI_ENDPOINT_URL,
-      pkiEndpointUrl: cfg.DANSKE_BANK_PKI_ENDPOINT_URL,
-      senderId: cfg.DANSKE_BANK_EDI_SENDER_ID,
-      receiverId: cfg.DANSKE_BANK_EDI_RECEIVER_ID,
-      language: cfg.DANSKE_BANK_EDI_LANGUAGE,
-      customerId: cfg.DANSKE_BANK_CUSTOMER_ID,
-      signerId: cfg.DANSKE_BANK_SIGNER_ID,
-      softwareId: cfg.DANSKE_BANK_SOFTWARE_ID,
-      environment: cfg.DANSKE_BANK_ENVIRONMENT,
-      downloadStatus: cfg.DANSKE_BANK_FILE_STATUS,
-      lookbackDays: cfg.DANSKE_BANK_LOOKBACK_DAYS,
-      maxFilesPerRun: cfg.DANSKE_BANK_MAX_FILES_PER_RUN,
-      pkiSenderId: cfg.DANSKE_BANK_PKI_SENDER_ID,
-      pkiCustomerId: cfg.DANSKE_BANK_PKI_CUSTOMER_ID,
-      pkiInterfaceVersion: cfg.DANSKE_BANK_PKI_INTERFACE_VERSION,
-      pkiBankRootCertificateSerialNo: cfg.DANSKE_BANK_PKI_BANK_ROOT_CERT_SERIAL,
+      ediEndpointUrl: config.DANSKE_BANK_EDI_ENDPOINT_URL,
+      pkiEndpointUrl: config.DANSKE_BANK_PKI_ENDPOINT_URL,
+      senderId: config.DANSKE_BANK_EDI_SENDER_ID,
+      receiverId: config.DANSKE_BANK_EDI_RECEIVER_ID,
+      language: config.DANSKE_BANK_EDI_LANGUAGE,
+      customerId: config.DANSKE_BANK_CUSTOMER_ID,
+      signerId: config.DANSKE_BANK_SIGNER_ID,
+      softwareId: config.DANSKE_BANK_SOFTWARE_ID,
+      environment: config.DANSKE_BANK_ENVIRONMENT,
+      downloadStatus: config.DANSKE_BANK_FILE_STATUS,
+      lookbackDays: config.DANSKE_BANK_LOOKBACK_DAYS,
+      maxFilesPerRun: config.DANSKE_BANK_MAX_FILES_PER_RUN,
+      pkiSenderId: config.DANSKE_BANK_PKI_SENDER_ID,
+      pkiCustomerId: config.DANSKE_BANK_PKI_CUSTOMER_ID,
+      pkiInterfaceVersion: config.DANSKE_BANK_PKI_INTERFACE_VERSION,
+      pkiBankRootCertificateSerialNo: config.DANSKE_BANK_PKI_BANK_ROOT_CERT_SERIAL,
       applicationRequestPrivateKeyPem: secrets.applicationRequestPrivateKeyPem,
       applicationRequestCertificatePem: secrets.applicationRequestCertificatePem,
       trustedBankSigningCertFingerprintSha256Hex: secrets.trustedSigningCertificateFingerprintSha256Hex,
@@ -69,23 +69,23 @@ function buildIso20022Adapter(provider: BankProvider): BankAdapter {
   }
 
   if (provider === 'nordea') {
-    const cfg = loadNordeaCorporateAccessEnvConfig()
+    const config = loadNordeaCorporateAccessEnvConfig()
     const secrets = loadNordeaEnvSecrets()
     return new NordeaCorporateAccessWebServicesAdapter({
-      endpointUrl: cfg.NORDEA_CA_WS_ENDPOINT_URL,
-      senderId: cfg.NORDEA_CA_WS_SENDER_ID,
-      receiverId: cfg.NORDEA_CA_WS_RECEIVER_ID,
-      userAgent: cfg.NORDEA_CA_WS_USER_AGENT,
-      language: cfg.NORDEA_CA_WS_LANGUAGE,
-      customerId: cfg.NORDEA_CA_CUSTOMER_ID,
-      signerId: cfg.NORDEA_CA_SIGNER_ID,
-      softwareId: cfg.NORDEA_CA_SOFTWARE_ID,
-      environment: cfg.NORDEA_CA_ENVIRONMENT,
-      statementFileType: cfg.NORDEA_CA_STATEMENT_FILE_TYPE,
-      downloadStatus: cfg.NORDEA_CA_FILE_STATUS,
-      lookbackDays: cfg.NORDEA_CA_LOOKBACK_DAYS,
-      maxFilesPerRun: cfg.NORDEA_CA_MAX_FILES_PER_RUN,
-      requestCompressed: cfg.NORDEA_CA_REQUEST_COMPRESSED === '1',
+      endpointUrl: config.NORDEA_CA_WS_ENDPOINT_URL,
+      senderId: config.NORDEA_CA_WS_SENDER_ID,
+      receiverId: config.NORDEA_CA_WS_RECEIVER_ID,
+      userAgent: config.NORDEA_CA_WS_USER_AGENT,
+      language: config.NORDEA_CA_WS_LANGUAGE,
+      customerId: config.NORDEA_CA_CUSTOMER_ID,
+      signerId: config.NORDEA_CA_SIGNER_ID,
+      softwareId: config.NORDEA_CA_SOFTWARE_ID,
+      environment: config.NORDEA_CA_ENVIRONMENT,
+      statementFileType: config.NORDEA_CA_STATEMENT_FILE_TYPE,
+      downloadStatus: config.NORDEA_CA_FILE_STATUS,
+      lookbackDays: config.NORDEA_CA_LOOKBACK_DAYS,
+      maxFilesPerRun: config.NORDEA_CA_MAX_FILES_PER_RUN,
+      requestCompressed: config.NORDEA_CA_REQUEST_COMPRESSED === '1',
       applicationRequestPrivateKeyPem: secrets.NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM,
       applicationRequestCertificatePem: secrets.NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM,
       trustedNordeaCertificateFingerprintSha256Hex: secrets.NORDEA_TRUSTED_SIGNING_CERT_SHA256,

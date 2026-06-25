@@ -9,7 +9,7 @@ Hvorfor hedder den `engine/`?
 Mål:
 - Skarp opdeling mellem (1) bank-ingestion, (2) matching og (3) ERP-integration.
 - Stateless runtime: alt arbejde kan genafspilles ud fra DB-state.
-- Side-effekter (ERP upload, notifikationer) kører via DB-drevne `job` + `outbox` tabeller.
+- Side-effekter (ERP upload) kører via DB-drevne `job` + `outbox` tabeller.
 
 Strukturprincip:
 - `domain/`: typer + deterministisk logik (ingen IO)

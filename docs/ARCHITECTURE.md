@@ -11,7 +11,6 @@ This repo is a stateless financial integration engine:
 2) Persist document + normalize into canonical CAMT tables
 3) Match transactions against deterministic rules
 4) Generate ERP posting payloads and execute ERP integration
-5) Send notifications (mail/SMS/etc.) via outbox (side-effect)
 
 ## Authentication and Authorization (v1)
 
@@ -117,8 +116,6 @@ Bank accounts are not manually created by end users. Instead, accounts are disco
 - `rule_accounting_dimension_value`: per-rule values for accounting dimensions (normalized; no hardcoded primary/secondary/tertiary)
 - `transaction_processing`: processing status / rule-applied locking
 - `manual_booking_draft` (+ lines/dimensions/attachments): user-edited draft state for open transactions (supports saving notes and multi-line manual postings without sending to ERP)
-- `outbox`: durable, retry-safe side effects (ERP upload, notifications, ...)
-- `notification_settings`: persisted notification template settings (UI-editable)
 - `banking_agreement_cursor`: opaque cursor per (provider agreement, adapter) for incremental fetching
 - `run`: batch execution unit (audit/logging)
 
@@ -134,50 +131,6 @@ The database remains the single source of truth, so read performance is achieved
 - Diagnostics endpoints use run/status/time indexes (`error`, `job`, `outbox`) for fast incident views.
 
 When schema/indexes change, migrations follow the baseline-only workflow used in this repository (regenerate a single `drizzle/0000_baseline.sql`).
-
-## Notifications (SMTP)
-
-Notifications are treated as a **side effect** and must be retry-safe and auditable.
-
-- Matching produces notifications as pure data (`to`, `subject`, `body`).
-- Sending is performed via `outbox` (`topic=notifications.mail`).
-- The worker drains outbox items and performs SMTP IO, updating outbox status (`sent`/`failed`) with retries.
-
-### SMTP constraints
-
-- Sender address comes from env: `AUTH_SENDER_ADDRESS`.
-- SMTP host comes from env: `SMTP_HOST` (legacy fallback: `SMTP_DOMAIN`).
-- Allowed recipient domain comes from env: `SMTP_ALLOWED_RECIPIENT_DOMAIN` (legacy fallback: `SMTP_DOMAIN`).
-- SMTP port comes from env: `SMTP_PORT` (default: 25).
-- Rule-defined recipient addresses are validated to be within `SMTP_ALLOWED_RECIPIENT_DOMAIN`.
-
-### Local SMTP testing (Mailpit)
-
-For local development we use a local SMTP sink (Mailpit) to test email sending without delivering real email.
-
-- `docker-compose.yml` includes a `mailpit` service:
-  - SMTP: `mailpit:1025` (inside docker network)
-  - Web UI: http://localhost:8025 (from your browser)
-
-Recommended env values for local dev when running the app via docker compose:
-
-- `SMTP_HOST=mailpit`
-- `SMTP_PORT=1025`
-- `SMTP_ALLOWED_RECIPIENT_DOMAIN=example.com`
-- `AUTH_SENDER_ADDRESS=sender@example.com`
-
-Manual smoke test from the repo (sends one email using the SMTP client):
-
-- `pnpm smoke:smtp -- --to=test@example.com`
-
-Open Mailpit UI (http://localhost:8025) to verify the message was captured.
-
-### Template
-
-The notification body is rendered from a stored template:
-
-- Default template lives in code (deterministic fallback).
-- The active template is persisted in Postgres (`notification_settings.mail_template`) and can be edited under Indstillinger → Notifikation.
 
 ## Logging
 

@@ -15,7 +15,6 @@ Jobs er gode til orkestrering og periodiske processer.
 ### Outbox
 - `outbox` er en “send senere”-bakke til side-effekter, fx:
   - ERP upload af XML
-  - E-mail notifikation
 
 Outbox er god til integrations-IO og garanterer, at side-effekten ikke “forsvinder”, fordi den først registreres i DB.
 

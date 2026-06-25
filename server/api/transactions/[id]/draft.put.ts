@@ -57,7 +57,6 @@ export default defineEventHandler(async (event) => {
         text: body.text ?? null,
         cprType: body.cprType,
         cprNumber: body.cprNumber ?? null,
-        notifyTo: body.notifyTo ?? null,
         note: body.note ?? null,
       })
       .onConflictDoUpdate({
@@ -67,7 +66,6 @@ export default defineEventHandler(async (event) => {
           text: body.text ?? null,
           cprType: body.cprType,
           cprNumber: body.cprNumber ?? null,
-          notifyTo: body.notifyTo ?? null,
           note: body.note ?? null,
         },
       })

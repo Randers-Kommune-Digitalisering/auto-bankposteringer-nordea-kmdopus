@@ -62,7 +62,6 @@ export default defineEventHandler(async (event) => {
     'accountingText',
     'accountingCprType',
     'accountingCprNumber',
-    'accountingNotifyTo',
     'accountingNote',
     ...dimensionDefinitions.map(d => `dim_${d.key}`),
     ...(ruleConditionFieldValues.map(f => `field_${f}`)),
@@ -97,7 +96,6 @@ export default defineEventHandler(async (event) => {
     const accountingText = r.accountingParameters?.bookingText ?? ''
     const accountingCprType = r.accountingParameters?.cprType ?? 'ingen'
     const accountingCprNumber = r.accountingParameters?.cprNumber ?? ''
-    const accountingNotifyTo = r.accountingParameters?.notifyTo ?? ''
     const accountingNote = r.accountingParameters?.note ?? ''
 
     const dimByKey = new Map<string, string>()
@@ -142,7 +140,6 @@ export default defineEventHandler(async (event) => {
     values.push(String(accountingText ?? ''))
     values.push(String(accountingCprType ?? 'ingen'))
     values.push(String(accountingCprNumber ?? ''))
-    values.push(String(accountingNotifyTo ?? ''))
     values.push(String(accountingNote ?? ''))
 
     for (const def of dimensionDefinitions) {

@@ -7,7 +7,7 @@ import type { TransactionSummary } from '~/types/transactions'
 const appConfig = useAppConfig()
 
 const directionIcon = computed(() =>
-	summary.value.direction === 'credit' ? appConfig.ui.icons.arrowAngleDown : appConfig.ui.icons.arrowAngleUp
+	summary.value.direction === 'credit' ? appConfig.ui.icons.arrowAngleUp : appConfig.ui.icons.arrowAngleDown
 )
 
 type HideableSectionKey = 'reference' | 'teknisk'

@@ -58,6 +58,8 @@ export default defineEventHandler(async (event) => {
     .select({
       id: transaction.id,
       runId: transaction.runId,
+      statementId: transaction.statementId,
+      entryIndex: transaction.entryIndex,
       bookingDate: transaction.bookingDate,
       ntryRef: transaction.ntryRef,
       creditDebitIndicator: transaction.creditDebitIndicator,
@@ -94,39 +96,49 @@ export default defineEventHandler(async (event) => {
 
   if (!env.OPEN_ITEMS_ALLOW_GROUP_MEMBER_PROCESSING) {
     const bookingDate = toDate(row.bookingDate)
-    const groupKey = buildNordeaDeterministicGroupKey({
+    const creditDebitCondition = row.creditDebitIndicator == null
+      ? isNull(transaction.creditDebitIndicator)
+      : eq(transaction.creditDebitIndicator, row.creditDebitIndicator)
+
+    const groupCandidates = await db
+      .select({
+        id: transaction.id,
+        statementId: transaction.statementId,
+        entryIndex: transaction.entryIndex,
+        accountId: transaction.accountId,
+        bookingDate: transaction.bookingDate,
+        creditDebitIndicator: transaction.creditDebitIndicator,
+        ntryRef: transaction.ntryRef,
+        ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,
+        entryAdditionalInfo: transaction.entryAdditionalInfo,
+        processingStatus: transactionProcessing.status,
+      })
+      .from(transaction)
+      .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
+      .where(and(
+        eq(transaction.accountId, row.accountId),
+        eq(transaction.bookingDate, bookingDate),
+        creditDebitCondition,
+      ))
+
+    const entryGroupSizeByEntryKey = new Map<string, number>()
+    for (const candidate of groupCandidates) {
+      const entryKey = toStatementEntryKey(candidate.statementId, candidate.entryIndex)
+      if (!entryKey) continue
+      entryGroupSizeByEntryKey.set(entryKey, (entryGroupSizeByEntryKey.get(entryKey) ?? 0) + 1)
+    }
+
+    const rowGroupKey = buildNordeaDeterministicGroupKey({
       accountId: row.accountId,
       bookingDate,
       creditDebitIndicator: row.creditDebitIndicator ?? null,
+      entryGroupSize: entryGroupSizeByEntryKey.get(toStatementEntryKey(row.statementId, row.entryIndex) ?? '') ?? 0,
       ntryRef: row.ntryRef ?? null,
       entryAdditionalInfo: row.entryAdditionalInfo ?? null,
       ntryAcctSvcrRef: row.ntryAcctSvcrRef ?? null,
     })
 
-    if (groupKey) {
-      const creditDebitCondition = row.creditDebitIndicator == null
-        ? isNull(transaction.creditDebitIndicator)
-        : eq(transaction.creditDebitIndicator, row.creditDebitIndicator)
-
-      const groupCandidates = await db
-        .select({
-          id: transaction.id,
-          accountId: transaction.accountId,
-          bookingDate: transaction.bookingDate,
-          creditDebitIndicator: transaction.creditDebitIndicator,
-          ntryRef: transaction.ntryRef,
-          ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,
-          entryAdditionalInfo: transaction.entryAdditionalInfo,
-          processingStatus: transactionProcessing.status,
-        })
-        .from(transaction)
-        .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
-        .where(and(
-          eq(transaction.accountId, row.accountId),
-          eq(transaction.bookingDate, bookingDate),
-          creditDebitCondition,
-        ))
-
+    if (rowGroupKey) {
       const openMembers = groupCandidates.filter(
         (candidate) => !candidate.processingStatus || candidate.processingStatus === 'åben',
       )
@@ -135,11 +147,12 @@ export default defineEventHandler(async (event) => {
           accountId: candidate.accountId,
           bookingDate: toDate(candidate.bookingDate),
           creditDebitIndicator: candidate.creditDebitIndicator ?? null,
+          entryGroupSize: entryGroupSizeByEntryKey.get(toStatementEntryKey(candidate.statementId, candidate.entryIndex) ?? '') ?? 0,
           ntryRef: candidate.ntryRef ?? null,
           entryAdditionalInfo: candidate.entryAdditionalInfo ?? null,
           ntryAcctSvcrRef: candidate.ntryAcctSvcrRef ?? null,
         })
-        return candidateKey === groupKey
+        return candidateKey === rowGroupKey
       }).length
 
       if (groupedOpenCount > 1) {
@@ -162,29 +175,29 @@ export default defineEventHandler(async (event) => {
         .where(and(
           eq(bankingAgreementAccountDimension.provider, provider as any),
           eq(bankingAgreementAccountDimension.iban, iban),
-          inArray(bankingAgreementAccountDimension.dimensionKey, ['statuskonto', 'artskonto']),
+          inArray(bankingAgreementAccountDimension.dimensionKey, ['artskonto', 'statuskonto']),
         ))
     : []
 
-  const statuskonto = (() => {
-    const preferred = dimRows.find((d) => String(d.key) === 'statuskonto')
+  const artskonto = (() => {
+    const preferred = dimRows.find((d) => String(d.key) === 'artskonto')
     if (preferred?.value) return String(preferred.value)
-    const legacy = dimRows.find((d) => String(d.key) === 'artskonto')
+    const legacy = dimRows.find((d) => String(d.key) === 'statuskonto')
     if (legacy?.value) return String(legacy.value)
     return null
   })()
 
-  if (!statuskonto) {
+  if (!artskonto) {
     throw createError({
       statusCode: 409,
-      statusMessage: `Mangler statuskonto-kontering for bankkonto (IBAN=${row.accountIban ?? row.accountId})`,
+      statusMessage: `Mangler artskonto-kontering for bankkonto (IBAN=${row.accountIban ?? row.accountId})`,
     })
   }
 
   const txContext: PostingTransactionContext = {
     transactionId: row.id,
     amount,
-    statusDimensions: { statuskonto },
+    statusDimensions: { artskonto },
     debtorName: row.debtorName,
     debtorId: row.debtorId,
     creditorName: row.creditorName,
@@ -369,6 +382,26 @@ function resolveManualCpr(
     return extractCprFromTransaction(tx) ?? undefined;
   }
   return undefined;
+}
+
+function toStatementEntryKey(statementId: string | null, entryIndex: number | null): string | null {
+  const normalizedStatementId = String(statementId ?? '').trim()
+
+function toStatementEntryKey(statementId: string | null, entryIndex: number | null): string | null {
+  const normalizedStatementId = String(statementId ?? '').trim()
+  if (!normalizedStatementId) return null
+
+  const normalizedEntryIndex = Number(entryIndex)
+  if (!Number.isInteger(normalizedEntryIndex) || normalizedEntryIndex < 1) return null
+
+  return `${normalizedStatementId}:${normalizedEntryIndex}`
+}
+  if (!normalizedStatementId) return null
+
+  const normalizedEntryIndex = Number(entryIndex)
+  if (!Number.isInteger(normalizedEntryIndex) || normalizedEntryIndex < 1) return null
+
+  return `${normalizedStatementId}:${normalizedEntryIndex}`
 }
 
 function toDate(value: Date | string | null): Date {

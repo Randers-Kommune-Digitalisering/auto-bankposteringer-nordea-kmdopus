@@ -1,3 +1,11 @@
+/**
+ * Conditional validation for bank-ingestion env variables.
+ *
+ * Strategy:
+ * - If none of a provider/channel's credential env vars are set => do not error.
+ * - If any credential env var for a provider/channel is set => enforce full validation.
+ */
+
 import { z, ZodError } from 'zod'
 
 import {
@@ -6,23 +14,6 @@ import {
   validateProviderEnvOrThrow,
 } from '../../../engine/banking-ingestion/infrastructure/providerEnv'
 
-/**
- * Conditional validation for bank-ingestion env variables.
- *
- * Goal:
- * - Keep runtime stateless.
- * - Avoid failing application startup when a provider is not configured.
- * - Avoid duplicating env-requirements in multiple places.
- *
- * Strategy:
- * - If none of a provider/channel's *secret-like* env vars are set => do not error.
- * - If any secret-like env var for a provider/channel is set => enforce full validation via the provider env loader.
- *
- * Rationale:
- * - We want the UI to load even if a user has started filling in non-secret config
- *   (IDs, endpoints, etc.) but has not yet provisioned private keys/certificates.
- * - Full validation is still enforced when enabling agreements in the backend.
- */
 export const IngestionEnvSchema = z
   .object({})
   .passthrough()
@@ -39,7 +30,7 @@ export const IngestionEnvSchema = z
       const keys = providerEnvKeys(c.provider, c.channel)
       if (!keys.length) continue
 
-      const secretLikeKeys = (() => {
+      const credentialKeys = (() => {
         if (c.provider === 'danskebank' && c.channel === 'iso20022') {
           return [
             'DANSKE_BANK_APPLICATION_REQUEST_PRIVATE_KEY_PEM',
@@ -79,7 +70,7 @@ export const IngestionEnvSchema = z
         return keys
       })()
 
-      const anySet = secretLikeKeys.some((k) => typeof env[k] === 'string' && (env[k] ?? '').trim().length > 0)
+      const anySet = credentialKeys.some((k) => typeof env[k] === 'string' && (env[k] ?? '').trim().length > 0)
       if (!anySet) continue
 
       try {

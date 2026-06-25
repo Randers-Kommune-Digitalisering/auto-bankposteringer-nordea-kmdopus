@@ -63,6 +63,7 @@ function toDateOnlyDate(value: Date | string | null): Date {
 function toTopTransactionStackId(input: {
   id: string | null
   accountId: string | null
+  entryGroupSize: number | null
   bookingDate: Date | string | null
   creditDebitIndicator: string | null
   ntryRef: string | null
@@ -73,6 +74,7 @@ function toTopTransactionStackId(input: {
     accountId: input.accountId ?? '',
     bookingDate: toDateOnlyDate(input.bookingDate),
     creditDebitIndicator: input.creditDebitIndicator ?? null,
+    entryGroupSize: input.entryGroupSize ?? 0,
     ntryRef: input.ntryRef ?? null,
     entryAdditionalInfo: input.entryAdditionalInfo ?? null,
     ntryAcctSvcrRef: input.ntryAcctSvcrRef ?? null,
@@ -80,6 +82,16 @@ function toTopTransactionStackId(input: {
 
   if (groupKey) return `group:${groupKey}`
   return `single:${String(input.id ?? '')}`
+}
+
+function toStatementEntryKey(statementId: string | null, entryIndex: number | null): string | null {
+  const normalizedStatementId = String(statementId ?? '').trim()
+  if (!normalizedStatementId) return null
+
+  const normalizedEntryIndex = Number(entryIndex)
+  if (!Number.isInteger(normalizedEntryIndex) || normalizedEntryIndex < 1) return null
+
+  return `${normalizedStatementId}:${normalizedEntryIndex}`
 }
 
 type TransactionTypeRow = {
@@ -293,6 +305,13 @@ export default defineEventHandler(async (event) => {
       ? await baseQuery.where(inArray(transaction.accountId, accountIds))
       : await baseQuery;
 
+    const entryGroupSizeByEntryKey = new Map<string, number>()
+    for (const row of rows) {
+      const entryKey = toStatementEntryKey(row.statementId, row.entryIndex)
+      if (!entryKey) continue
+      entryGroupSizeByEntryKey.set(entryKey, (entryGroupSizeByEntryKey.get(entryKey) ?? 0) + 1)
+    }
+
     const catalogDisplayNameByCodeKey = await loadTransactionTypeCatalogDisplayNames(rows)
 
     const payload: StatementTransaction[] = rows.map((row) => ({
@@ -300,6 +319,7 @@ export default defineEventHandler(async (event) => {
       topStackId: toTopTransactionStackId({
         id: row.id,
         accountId: row.accountId,
+        entryGroupSize: entryGroupSizeByEntryKey.get(toStatementEntryKey(row.statementId, row.entryIndex) ?? '') ?? 0,
         bookingDate: row.bookingDate,
         creditDebitIndicator: row.creditDebitIndicator,
         ntryRef: row.ntryRef,
@@ -547,11 +567,19 @@ export default defineEventHandler(async (event) => {
 
   const catalogDisplayNameByCodeKey = await loadTransactionTypeCatalogDisplayNames(rows.rows as TransactionTypeRow[])
 
+  const entryGroupSizeByEntryKey = new Map<string, number>()
+  for (const row of rows.rows as any[]) {
+    const entryKey = toStatementEntryKey(row.statementId ?? null, row.entryIndex ?? null)
+    if (!entryKey) continue
+    entryGroupSizeByEntryKey.set(entryKey, (entryGroupSizeByEntryKey.get(entryKey) ?? 0) + 1)
+  }
+
   const payload: StatementTransaction[] = rows.rows.map((row: any) => ({
     ...row,
     topStackId: toTopTransactionStackId({
       id: row.id,
       accountId: row.accountId,
+      entryGroupSize: entryGroupSizeByEntryKey.get(toStatementEntryKey(row.statementId ?? null, row.entryIndex ?? null) ?? '') ?? 0,
       bookingDate: row.bookingDate,
       creditDebitIndicator: row.creditDebitIndicator,
       ntryRef: row.ntryRef,

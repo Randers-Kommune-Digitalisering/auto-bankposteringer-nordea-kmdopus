@@ -40,7 +40,6 @@ export default defineEventHandler(async (event) => {
     'accountingText',
     'accountingCprType',
     'accountingCprNumber',
-    'accountingNotifyTo',
     'accountingNote',
     ...dimensionDefinitions.map(d => `dim_${d.key}`),
     ...(isAdvanced ? ruleConditionFieldValues.map(f => `field_${f}`) : []),

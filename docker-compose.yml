@@ -23,15 +23,6 @@ services:
       db:
         condition: service_healthy
 
-  mailpit:
-    image: axllent/mailpit:latest
-    container_name: mailpit_dev
-    ports:
-      # Web UI
-      - "8025:8025"
-      # SMTP
-      - "1025:1025"
-
   db:
     image: postgres
     container_name: postgres_dev

@@ -10,6 +10,7 @@ type BankingAccountUnionDto = {
   iban: string
   currency: string | null
   name: string | null
+  artskonto: string | null
   statuskonto: string | null
   ignoreIngestion: boolean
   observed: boolean
@@ -17,7 +18,7 @@ type BankingAccountUnionDto = {
   observedAccountId: string | null
 }
 
-type AllowlistAccount = { iban: string; name: string | null; statuskonto: string | null; ignoreIngestion: boolean }
+type AllowlistAccount = { iban: string; name: string | null; artskonto: string | null; statuskonto: string | null; ignoreIngestion: boolean }
 
 type NordeaRestAuthStatus = {
   provider: 'nordea'
@@ -132,7 +133,7 @@ const accountModalOpen = ref(false)
 const accountModalMode = ref<'observed' | 'configured'>('observed')
 const editingObservedAccountId = ref<string | null>(null)
 const configuredDraft = ref<
-  | { provider: 'danskebank' | 'nordea' | 'bankconnect'; iban: string; name?: string | null; statuskonto?: string | null }
+  | { provider: 'danskebank' | 'nordea' | 'bankconnect'; iban: string; name?: string | null; artskonto?: string | null; statuskonto?: string | null }
   | null
 >(null)
 
@@ -406,6 +407,7 @@ function openEditConfiguredAccountModal(row: BankingAccountUnionDto) {
     provider: row.provider,
     iban: row.iban,
     name: row.name,
+    artskonto: row.artskonto ?? row.statuskonto,
     statuskonto: row.statuskonto,
     ignoreIngestion: row.ignoreIngestion,
   }
@@ -503,11 +505,11 @@ const columns: TableColumn<BankingAccountUnionDto>[] = [
     }
   },
   {
-    accessorKey: 'statuskonto',
-    id: 'statuskonto',
-    header: createSortableHeader('Statuskonto'),
+    accessorKey: 'artskonto',
+    id: 'artskonto',
+    header: createSortableHeader('Artskonto'),
     enableSorting: true,
-    cell: ({ row }) => String((row.original as any).statuskonto ?? '—')
+    cell: ({ row }) => String((row.original as any).artskonto ?? (row.original as any).statuskonto ?? '—')
   },
   {
     accessorKey: 'ignoreIngestion',

@@ -1,23 +1,14 @@
+import { extractRolesFromOidcUser } from '~/lib/authz/extractRoles'
+
 export function useAuthz() {
   const { user } = useOidcAuth()
-
-  function toStringRoles(value: unknown): string[] {
-    if (Array.isArray(value)) {
-      return value.filter((role): role is string => typeof role === 'string' && role.trim().length > 0)
-    }
-
-    if (typeof value === 'string' && value.trim().length > 0) {
-      return [value]
-    }
-
-    return []
-  }
+  const runtimeConfig = useRuntimeConfig()
 
   const roles = computed<string[]>(() => {
-    const claimRoles = toStringRoles(user.value?.claims?.roles)
-    const userInfoRoles = toStringRoles(user.value?.userInfo?.roles)
-
-    return Array.from(new Set([...claimRoles, ...userInfoRoles]))
+    return extractRolesFromOidcUser(user.value ?? {}, {
+      clientId: runtimeConfig.public.oidcClientId,
+      includeDevRole: runtimeConfig.public.devAuthBypass === true,
+    })
   })
 
   function hasAny(required: readonly string[]) {

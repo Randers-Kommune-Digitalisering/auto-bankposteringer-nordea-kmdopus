@@ -36,7 +36,6 @@ function compileRuleDraftToDb(draft: RuleDraftSchema, newVersion: number, erpSup
     accountingText,
     accountingCprType,
     accountingCprNumber,
-    accountingNotifyTo,
     accountingNote,
     accountingAttachmentName,
     accountingAttachmentFileExtension,
@@ -74,7 +73,6 @@ function compileRuleDraftToDb(draft: RuleDraftSchema, newVersion: number, erpSup
     bookingText: accountingText,
     cprType: accountingCprType,
     cprNumber: accountingCprNumber,
-    notifyTo: accountingNotifyTo?.length ? accountingNotifyTo : null,
     note: accountingNote,
   }
 

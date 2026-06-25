@@ -17,7 +17,6 @@
     "test": "vitest run",
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
-    "smoke:smtp": "tsx scripts/smoke/smtp-send.ts",
     "smoke:sftp": "tsx scripts/smoke/sftp-probe.ts",
     "smoke:banking:ingest:nordea-example": "tsx --tsconfig tsconfig.scripts.json scripts/smoke/ingest-nordea-example.ts",
     "smoke:banking:nordea:rest": "tsx scripts/smoke/nordea-rest.ts",
@@ -31,11 +30,12 @@
     "banking:nordea:certificate-enrollment": "tsx scripts/banking/pki/create-customer-certs.ts --provider nordea"
   },
   "dependencies": {
-    "@iconify-json/solar": "^1.2.5",
     "@iconify-json/lucide": "^1.2.114",
+    "@iconify-json/solar": "^1.2.5",
     "@internationalized/date": "^3.10.1",
     "@nuxt/ui": "4.2.1",
     "@tanstack/table-core": "^8.21.3",
+    "@types/xml-encryption": "^1.2.4",
     "@vee-validate/nuxt": "^4.15.1",
     "@vee-validate/zod": "^4.15.1",
     "@vueuse/nuxt": "^14.1.0",

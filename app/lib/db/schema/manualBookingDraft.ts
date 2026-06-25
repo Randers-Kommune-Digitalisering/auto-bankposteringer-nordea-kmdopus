@@ -21,7 +21,6 @@ export const manualBookingDraft = pgTable('manual_booking_draft', {
   text: text('text'),
   cprType: cprTypeEnum('cpr_type').notNull(),
   cprNumber: text('cpr_number'),
-  notifyTo: text('notify_to'),
   note: text('note'),
 })
 

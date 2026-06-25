@@ -117,13 +117,6 @@ const primaryLinks: NavigationMenuItem[] = [
           open.value = false
         }
       },
-      {
-        label: 'Notifikation',
-        to: '/indstillinger/notifikation',
-        onSelect: () => {
-          open.value = false
-        }
-      },
     ]
   },
   {

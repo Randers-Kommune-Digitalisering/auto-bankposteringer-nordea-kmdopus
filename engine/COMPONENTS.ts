@@ -14,8 +14,4 @@
  * 3) ERP integration
  *    - Afsend payloads til ERP + indlæs retursvar
  *    - Side-effekter går via outbox/job for retry og skalering
- *
- * Satellitter:
- * - Notifications: underretninger (outbox)
- * - Payroll: løndata til matching/kontering (job + DB-normalisering)
  */

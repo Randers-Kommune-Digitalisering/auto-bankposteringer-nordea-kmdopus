@@ -1,7 +1,6 @@
 import { XMLParser } from 'fast-xml-parser'
 import {
   parseNordeaAdditionalEntryInfo,
-  extractNordeaGroupingIdentifiers,
   findNordeaAdditionalEntryInfoValueByCode,
   type NordeaAdditionalEntryInfoSegment,
 } from './nordeaAdditionalEntryInfo'
@@ -49,9 +48,6 @@ export type Camt053ParsedTransaction = {
   ntryAcctSvcrRef: string | null
   entryAdditionalInfo: string | null
   entryAdditionalInfoSegments: NordeaAdditionalEntryInfoSegment[]
-  entrySummaryItemId: string | null
-  entryGsipTransactionDetailKey: string | null
-  entryIdTag: string | null
 
   txAcctSvcrRef: string | null
   refsEndToEndId: string | null
@@ -153,11 +149,12 @@ export function parseCamt053Xml(xml: string): Camt053ParsedDocument {
       const entryFamily = asTrimmedString(entry?.BkTxCd?.Domn?.Fmly?.Cd)
       const entrySubFamily = asTrimmedString(entry?.BkTxCd?.Domn?.Fmly?.SubFmlyCd)
 
-      const txDetails = asArray<any>(entry?.NtryDtls?.TxDtls)
+      const entryDetails = asArray<any>(entry?.NtryDtls)
+      const txDetails = entryDetails.flatMap((detail) => asArray<any>(detail?.TxDtls))
       const rows = txDetails.length ? txDetails : [null]
 
-        for (const [txIndexZero, tx] of rows.entries()) {
-          const entrySubIndex = txIndexZero + 1
+      for (const [txIndexZero, tx] of rows.entries()) {
+        const entrySubIndex = txIndexZero + 1
         const txRefs = tx?.Refs
         const txRmtInf = tx?.RmtInf
         const txRltdPties = tx?.RltdPties
@@ -197,8 +194,6 @@ export function parseCamt053Xml(xml: string): Camt053ParsedDocument {
         const txAmount = asAmountValue(txAmtNode) ?? entryAmount
         const txCurrency = asAmountCurrency(txAmtNode) ?? entryCurrency
 
-        const entryGroupingIds = extractNordeaGroupingIdentifiers(entryAdditionalInfo)
-
         transactions.push({
           entryIndex,
           entrySubIndex,
@@ -212,9 +207,6 @@ export function parseCamt053Xml(xml: string): Camt053ParsedDocument {
           ntryAcctSvcrRef: asTrimmedString(entry?.AcctSvcrRef),
           entryAdditionalInfo,
           entryAdditionalInfoSegments,
-          entrySummaryItemId: entryGroupingIds.summaryItemId,
-          entryGsipTransactionDetailKey: entryGroupingIds.gsipTransactionDetailKey,
-          entryIdTag: entryGroupingIds.idTag,
           txAcctSvcrRef: asTrimmedString(txRefs?.AcctSvcrRef),
           refsEndToEndId: asTrimmedString(txRefs?.EndToEndId),
           refsInstrId: asTrimmedString(txRefs?.InstrId),

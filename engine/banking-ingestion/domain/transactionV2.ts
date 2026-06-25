@@ -1,3 +1,5 @@
+// Normalize and deduplicate transaction data from various sources, ensuring consistent representation.
+
 export type TransactionDirectionV2 = 'debit' | 'credit'
 
 export type TransactionSourceScopeV2 = 'entry' | 'tx' | 'remittance' | 'party'

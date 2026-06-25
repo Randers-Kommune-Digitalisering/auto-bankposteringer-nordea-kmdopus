@@ -101,7 +101,6 @@ export type ManualBookingPayload = {
   text?: string | null;
   cprType: CprType;
   cprNumber?: string | null;
-  notifyTo?: string | null;
   note?: string | null;
   attachments?: ManualPostingAttachment[];
 };
