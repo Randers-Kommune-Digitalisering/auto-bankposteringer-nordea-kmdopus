@@ -49,6 +49,8 @@ export default defineEventHandler(async (event) => {
     .select({
       id: transaction.id,
       runId: transaction.runId,
+      statementId: transaction.statementId,
+      entryIndex: transaction.entryIndex,
       bookingDate: transaction.bookingDate,
       amount: transaction.amount,
       accountId: transaction.accountId,
@@ -93,10 +95,20 @@ export default defineEventHandler(async (event) => {
   const creditDebitIndicator = first.creditDebitIndicator ?? null
   const bookingDate = toDate(first.bookingDate)
 
+  const entryGroupSizeByEntryKey = new Map<string, number>()
+  for (const row of rows) {
+    const entryKey = toStatementEntryKey(row.statementId, row.entryIndex)
+    if (!entryKey) continue
+    entryGroupSizeByEntryKey.set(entryKey, (entryGroupSizeByEntryKey.get(entryKey) ?? 0) + 1)
+  }
+
+  const firstEntryGroupSize = entryGroupSizeByEntryKey.get(toStatementEntryKey(first.statementId, first.entryIndex) ?? '') ?? 0
+
   const expectedGroupKey = buildNordeaDeterministicGroupKey({
     accountId,
     bookingDate,
     creditDebitIndicator,
+    entryGroupSize: firstEntryGroupSize,
     ntryRef: first.ntryRef ?? null,
     entryAdditionalInfo: first.entryAdditionalInfo ?? null,
     ntryAcctSvcrRef: first.ntryAcctSvcrRef ?? null,
@@ -119,6 +131,7 @@ export default defineEventHandler(async (event) => {
       accountId: row.accountId,
       bookingDate: toDate(row.bookingDate),
       creditDebitIndicator: row.creditDebitIndicator ?? null,
+      entryGroupSize: entryGroupSizeByEntryKey.get(toStatementEntryKey(row.statementId, row.entryIndex) ?? '') ?? 0,
       ntryRef: row.ntryRef ?? null,
       entryAdditionalInfo: row.entryAdditionalInfo ?? null,
       ntryAcctSvcrRef: row.ntryAcctSvcrRef ?? null,
@@ -139,22 +152,22 @@ export default defineEventHandler(async (event) => {
         .where(and(
           eq(bankingAgreementAccountDimension.provider, provider as any),
           eq(bankingAgreementAccountDimension.iban, iban),
-          inArray(bankingAgreementAccountDimension.dimensionKey, ['statuskonto', 'artskonto']),
+          inArray(bankingAgreementAccountDimension.dimensionKey, ['artskonto', 'statuskonto']),
         ))
     : []
 
-  const statuskonto = (() => {
-    const preferred = dimRows.find((d) => String(d.key) === 'statuskonto')
+  const artskonto = (() => {
+    const preferred = dimRows.find((d) => String(d.key) === 'artskonto')
     if (preferred?.value) return String(preferred.value)
-    const legacy = dimRows.find((d) => String(d.key) === 'artskonto')
+    const legacy = dimRows.find((d) => String(d.key) === 'statuskonto')
     if (legacy?.value) return String(legacy.value)
     return null
   })()
 
-  if (!statuskonto) {
+  if (!artskonto) {
     throw createError({
       statusCode: 409,
-      statusMessage: `Mangler statuskonto-kontering for bankkonto (IBAN=${first.accountIban ?? first.accountId})`,
+      statusMessage: `Mangler artskonto-kontering for bankkonto (IBAN=${first.accountIban ?? first.accountId})`,
     })
   }
 
@@ -167,7 +180,7 @@ export default defineEventHandler(async (event) => {
   const txContext: PostingTransactionContext = {
     transactionId: `SAMLEPOST:${expectedGroupKey}`,
     amount: lineTotalAmount,
-    statusDimensions: { statuskonto },
+    statusDimensions: { artskonto },
     debtorName: first.debtorName,
     debtorId: first.debtorId,
     creditorName: first.creditorName,
@@ -253,6 +266,16 @@ function toDate(value: Date | string | null): Date {
     return value
   }
   return new Date(value)
+}
+
+function toStatementEntryKey(statementId: string | null, entryIndex: number | null): string | null {
+  const normalizedStatementId = String(statementId ?? '').trim()
+  if (!normalizedStatementId) return null
+
+  const normalizedEntryIndex = Number(entryIndex)
+  if (!Number.isInteger(normalizedEntryIndex) || normalizedEntryIndex < 1) return null
+
+  return `${normalizedStatementId}:${normalizedEntryIndex}`
 }
 
 function resolveSignedAmount(amount: unknown, indicator: string | null): number {

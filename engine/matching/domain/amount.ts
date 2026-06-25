@@ -1,9 +1,12 @@
-export function parseAmount(value: unknown): number {
-  if (typeof value === 'number') return value
-  if (typeof value !== 'string') return 0
+export function parseAmountOrUndefined(value: unknown): number | undefined {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : undefined
+  }
+
+  if (typeof value !== 'string') return undefined
 
   const raw = value.trim()
-  if (!raw) return 0
+  if (!raw) return undefined
 
   // Remove spaces (including NBSP) used as thousand separators.
   const compact = raw.replace(/[\s\u00A0]/g, '')
@@ -32,7 +35,10 @@ export function parseAmount(value: unknown): number {
     normalized = normalized.replace(/,/g, '')
   }
 
-  // Preserve leading sign.
   const parsed = Number(normalized)
-  return Number.isNaN(parsed) ? 0 : parsed
+  return Number.isFinite(parsed) ? parsed : undefined
+}
+
+export function parseAmount(value: unknown): number {
+  return parseAmountOrUndefined(value) ?? 0
 }

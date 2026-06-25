@@ -109,7 +109,6 @@ export default defineEventHandler(async (event) => {
         runId: result.runId,
         bookingDate: bookingDateIso,
         insertedCount: result.insertedCount,
-        notificationCount: result.notificationCount,
       }
     } catch (err: any) {
       await db

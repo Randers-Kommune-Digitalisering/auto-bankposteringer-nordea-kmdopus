@@ -112,7 +112,6 @@ export const ruleAccountingParameters = pgTable('kmd_accounting_parameters', {
   bookingText: text('booking_text'),
   cprType: cprTypeEnum('cpr_type'),
   cprNumber: text('cpr_number'),
-  notifyTo: text('notify_to'),
   note: text('note'),
 }, (t) => ({
   ruleIdIdx: index('kmd_accounting_parameters_rule_id_idx').on(t.ruleId),
@@ -250,7 +249,6 @@ export const ruleDraftSchema = z.object({
     value => (typeof value === 'string' && value.trim() === '' ? undefined : value),
     z.string().optional(),
   ),
-  accountingNotifyTo: z.string().email("Ugyldig email").optional().or(z.literal("")),
   accountingNote: z.string().optional(),
   accountingAttachmentName: z.array(z.string()).optional(),
   accountingAttachmentFileExtension: z.array(z.string()).optional(),
@@ -279,24 +277,6 @@ export const ruleDraftSchema = z.object({
         code: z.ZodIssueCode.custom,
         path: ['accountingCprNumber'],
         message: 'CPR skal matche formatet DDMMÅÅXXXX',
-      })
-    }
-
-    const raw = (data.accountingNotifyTo ?? '').trim()
-    if (!raw) return
-
-    const domain = (process.env.SMTP_ALLOWED_RECIPIENT_DOMAIN ?? process.env.SMTP_DOMAIN ?? '')
-      .trim()
-      .toLowerCase()
-    if (!domain) return
-
-    const at = raw.lastIndexOf('@')
-    const recipientDomain = at >= 0 ? raw.slice(at + 1).toLowerCase() : ''
-    if (recipientDomain !== domain) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['accountingNotifyTo'],
-        message: `Email skal være inden for domænet ${domain}`,
       })
     }
   })
@@ -350,7 +330,6 @@ export const ruleAccountingSchema = z.object({
     value => (typeof value === 'string' && value.trim() === '' ? undefined : value),
     z.string().optional(),
   ),
-  accountingNotifyTo: z.string().email("Ugyldig email").optional().or(z.literal("")),
   accountingNote: z.string().optional(),
   accountingAttachmentName: z.array(z.string()).optional(),
   accountingAttachmentFileExtension: z.array(z.string()).optional(),
@@ -361,24 +340,6 @@ export const ruleAccountingSchema = z.object({
       code: z.ZodIssueCode.custom,
       path: ['accountingCprNumber'],
       message: 'CPR skal matche formatet DDMMÅÅXXXX',
-    })
-  }
-
-  const raw = (data.accountingNotifyTo ?? '').trim()
-  if (!raw) return
-
-  const domain = (process.env.SMTP_ALLOWED_RECIPIENT_DOMAIN ?? process.env.SMTP_DOMAIN ?? '')
-    .trim()
-    .toLowerCase()
-  if (!domain) return
-
-  const at = raw.lastIndexOf('@')
-  const recipientDomain = at >= 0 ? raw.slice(at + 1).toLowerCase() : ''
-  if (recipientDomain !== domain) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['accountingNotifyTo'],
-      message: `Email skal være inden for domænet ${domain}`,
     })
   }
 })

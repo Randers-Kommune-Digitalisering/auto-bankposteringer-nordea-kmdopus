@@ -29,10 +29,6 @@ const baseManualBookingShape = {
     value => (typeof value === 'string' && value.trim() === '' ? undefined : value),
     z.string().optional(),
   ),
-  notifyTo: z.preprocess(
-    value => (typeof value === 'string' && value.trim() === '' ? undefined : value),
-    z.string().email('Ugyldig email').optional(),
-  ),
   note: z.string().optional(),
 } satisfies z.ZodRawShape
 

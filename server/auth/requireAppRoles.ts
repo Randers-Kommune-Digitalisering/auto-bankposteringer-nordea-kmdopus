@@ -1,33 +1,18 @@
 import { createError, getRequestHeader, type H3Event } from 'h3'
 import type { AppRole } from '~/lib/authz/policy'
+import { extractRolesFromOidcUser } from '~/lib/authz/extractRoles'
 
 type OidcSession = {
   userName?: string
   userInfo?: Record<string, unknown>
   claims?: Record<string, unknown>
+  accessToken?: string
 }
 
 const WRITE_ROLES: readonly AppRole[] = ['bookkeeper', 'admin', 'rule_admin', 'dev']
 
-function toRecord(input: unknown): Record<string, unknown> {
-  return input && typeof input === 'object' ? (input as Record<string, unknown>) : {}
-}
-
-function toStringArray(input: unknown): string[] {
-  return Array.isArray(input) ? input.filter((value): value is string => typeof value === 'string') : []
-}
-
-function extractSessionRoles(session: OidcSession): string[] {
-  const claims = toRecord(session.claims)
-  const userInfo = toRecord(session.userInfo)
-
-  // Keep extraction deterministic and explicit: claims.roles is primary, userInfo.roles as fallback.
-  const roles = [
-    ...toStringArray(claims.roles),
-    ...toStringArray(userInfo.roles),
-  ]
-
-  return Array.from(new Set(roles.map((role) => role.trim()).filter(Boolean)))
+function extractSessionRoles(session: OidcSession, clientId?: string, includeDevRole?: boolean): string[] {
+  return extractRolesFromOidcUser(session, { clientId, includeDevRole })
 }
 
 async function getOidcSession(event: H3Event): Promise<OidcSession> {
@@ -64,7 +49,13 @@ export async function requireAnyAppRole(event: H3Event, requiredRoles: readonly 
   if (!requiredRoles.length) return
 
   const session = await getOidcSession(event)
-  const userRoles = extractSessionRoles(session)
+  const config = useRuntimeConfig(event)
+  const oidcClientId = config.public?.oidcClientId
+  const userRoles = extractSessionRoles(
+    session,
+    typeof oidcClientId === 'string' ? oidcClientId : undefined,
+    config.public?.devAuthBypass === true,
+  )
 
   const hasRequiredRole = requiredRoles.some((role) => userRoles.includes(role))
   if (!hasRequiredRole) {

@@ -65,7 +65,7 @@ export function buildErpPostingXml(postings: PostingLineInput[], options: BuildP
       creditSum += amountInOre
     }
 
-    const glAccountKey = options.dimensionKeyByTarget?.glAccount ?? 'statuskonto'
+    const glAccountKey = options.dimensionKeyByTarget?.glAccount ?? 'artskonto'
     const costCenterKey = options.dimensionKeyByTarget?.costCenter ?? 'omkostningssted'
     const wbsElementKey = options.dimensionKeyByTarget?.wbsElement ?? 'psp-element'
 
@@ -140,8 +140,8 @@ export function buildErpPostingXml(postings: PostingLineInput[], options: BuildP
         RECEIVER: `${environmentCode}CLNT${municipalityCode}`,
         FILE_NAME: buildFileName(
           metadata.integrationFileNameMask,
-          metadata.integrationId,
           municipalityCode,
+          metadata.integrationId,
           docDate,
           docTime,
         ),
@@ -202,8 +202,31 @@ function normalizeAmount(amount: number | string): number {
     return amount
   }
 
-  const normalized = amount.replace(/\./g, '').replace(/,/g, '.').trim()
-  const parsed = parseFloat(normalized)
+  const raw = amount.trim()
+  if (!raw) {
+    throw new Error(`Ugyldigt beløb: ${amount}`)
+  }
+
+  const compact = raw.replace(/[\s\u00A0]/g, '')
+  const lastComma = compact.lastIndexOf(',')
+  const lastDot = compact.lastIndexOf('.')
+
+  let normalized = compact
+
+  if (lastComma !== -1 && lastDot !== -1) {
+    const commaIsDecimal = lastComma > lastDot
+    if (commaIsDecimal) {
+      normalized = normalized.replace(/\./g, '').replace(/,/g, '.')
+    } else {
+      normalized = normalized.replace(/,/g, '')
+    }
+  } else if (lastComma !== -1) {
+    normalized = normalized.replace(/,/g, '.')
+  } else {
+    normalized = normalized.replace(/,/g, '')
+  }
+
+  const parsed = Number(normalized)
 
   if (Number.isNaN(parsed)) {
     throw new Error(`Ugyldigt beløb: ${amount}`)
@@ -224,23 +247,18 @@ function deriveDocId(documentId?: string, runUid?: string, integrationId?: strin
 
 function buildFileName(
   mask: string,
-  integrationId: string,
   municipalityCode: string,
+  integrationId: string,
   docDate: string,
   docTime: string,
 ): string {
   // Support both the newer {token} style and the legacy KMD mask style
   // used historically in municipal configurations.
   return mask
-    .replaceAll('{integrationId}', integrationId)
     .replaceAll('{municipalityCode}', municipalityCode)
+    .replaceAll('{integrationId}', integrationId)
     .replaceAll('{docDate}', docDate)
     .replaceAll('{docTime}', docTime)
-    // Legacy tokens (example: ZFIR_..._IND_xxx_zzzz_yyyymmdd_hhmmss.xml)
-    .replaceAll('xxx', integrationId)
-    .replaceAll('zzzz', municipalityCode)
-    .replaceAll('yyyymmdd', docDate)
-    .replaceAll('hhmmss', docTime)
 }
 
 function normalizeAttachments(posting: PostingLineInput): PostingAttachment[] {

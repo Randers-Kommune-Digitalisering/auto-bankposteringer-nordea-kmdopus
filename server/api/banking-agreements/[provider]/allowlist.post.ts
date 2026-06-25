@@ -16,10 +16,10 @@ function normalizeIban(input: string): string {
 const bodySchema = z.object({
   iban: z.string().min(1),
   name: z.string().trim().min(1).max(80).optional(),
-  statuskonto: z.string().trim().min(1).max(32).optional(),
+  artskonto: z.string().trim().min(1).max(32).optional(),
   ignoreIngestion: z.boolean().optional(),
   // Legacy input
-  artskonto: z.string().trim().min(1).max(32).optional(),
+  statuskonto: z.string().trim().min(1).max(32).optional(),
 })
 
 const ibanSchema = z
@@ -42,17 +42,17 @@ export default defineEventHandler(async (event) => {
 
   const iban = normalizeIban(parsed.data.iban)
   const name = typeof parsed.data.name === 'string' && parsed.data.name.trim().length ? parsed.data.name.trim() : null
-  const statuskonto = (parsed.data.statuskonto ?? parsed.data.artskonto ?? '').trim() || null
+  const artskonto = (parsed.data.artskonto ?? parsed.data.statuskonto ?? '').trim() || null
   const ignoreIngestion = Boolean(parsed.data.ignoreIngestion)
 
   const supplier = await getActiveErpSupplier()
-  if (supplier === 'kmd' && statuskonto) {
-    // KMD Opus: statuskonto attached to a bank account must be an artskonto: 905XXXXX.
+  if (supplier === 'kmd' && artskonto) {
+    // KMD Opus: account mapping used for posting must be an artskonto: 905XXXXX.
     // (We keep this server-side so it remains deterministic and independent of UI.)
-    if (!/^905\d{5}$/.test(statuskonto)) {
+    if (!/^905\d{5}$/.test(artskonto)) {
       throw createError({
         statusCode: 422,
-        statusMessage: 'Statuskonto skal være en artskonto i formatet 905XXXXX (kun tal efter 905)',
+        statusMessage: 'Artskonto skal være i formatet 905XXXXX (kun tal efter 905)',
       })
     }
   }
@@ -70,14 +70,14 @@ export default defineEventHandler(async (event) => {
         set: { name, updatedAt: new Date() } as any,
       })
 
-    if (statuskonto) {
+    if (artskonto) {
       await trx
         .insert(bankingAgreementAccountDimension)
         .values({
           provider: provider as any,
           iban,
-          dimensionKey: 'statuskonto',
-          dimensionValue: statuskonto,
+          dimensionKey: 'artskonto',
+          dimensionValue: artskonto,
           updatedAt: new Date(),
         } as any)
         .onConflictDoUpdate({
@@ -86,7 +86,7 @@ export default defineEventHandler(async (event) => {
             bankingAgreementAccountDimension.iban,
             bankingAgreementAccountDimension.dimensionKey,
           ],
-          set: { dimensionValue: statuskonto, updatedAt: new Date() } as any,
+          set: { dimensionValue: artskonto, updatedAt: new Date() } as any,
         })
     }
 

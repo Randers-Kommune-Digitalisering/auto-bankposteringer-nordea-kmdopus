@@ -39,12 +39,12 @@ importers:
 
   .:
     dependencies:
-      '@iconify-json/solar':
-        specifier: ^1.2.5
-        version: 1.2.5
       '@iconify-json/lucide':
         specifier: ^1.2.114
         version: 1.2.114
+      '@iconify-json/solar':
+        specifier: ^1.2.5
+        version: 1.2.5
       '@internationalized/date':
         specifier: ^3.10.1
         version: 3.10.1
@@ -54,6 +54,9 @@ importers:
       '@tanstack/table-core':
         specifier: ^8.21.3
         version: 8.21.3
+      '@types/xml-encryption':
+        specifier: ^1.2.4
+        version: 1.2.4
       '@vee-validate/nuxt':
         specifier: ^4.15.1
         version: 4.15.1(magicast@0.5.3)(vue@3.5.25(typescript@5.9.3))
@@ -1907,6 +1910,9 @@ packages:
 
   '@types/ws@8.18.1':
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
+
+  '@types/xml-encryption@1.2.4':
+    resolution: {integrity: sha512-I69K/WW1Dv7j6O3jh13z0X8sLWJRXbu5xnHDl9yHzUNDUBtUoBY058eb5s+x/WG6yZC1h8aKdI2EoyEPjyEh+Q==}
 
   '@types/xml2js@0.4.14':
     resolution: {integrity: sha512-4YnrRemBShWRO2QjvUin8ESA41rH+9nQGLUGZV/1IDhi3SL9OhdpNC/MrulTWuptXKwhx/aDxE7toV0f/ypIXQ==}
@@ -8115,6 +8121,10 @@ snapshots:
   '@types/whatwg-mimetype@3.0.2': {}
 
   '@types/ws@8.18.1':
+    dependencies:
+      '@types/node': 24.10.1
+
+  '@types/xml-encryption@1.2.4':
     dependencies:
       '@types/node': 24.10.1
 

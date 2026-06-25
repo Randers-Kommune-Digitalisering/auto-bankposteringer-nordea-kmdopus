@@ -11,6 +11,7 @@ export type BankingAccountUnionDto = {
   iban: string
   currency: string | null
   name: string | null
+  artskonto: string | null
   statuskonto: string | null
   ignoreIngestion: boolean
   observed: boolean
@@ -68,13 +69,13 @@ export default defineEventHandler(async (event) => {
         .where(and(
           inArray(bankingAgreementAccountDimension.provider, providers as any),
           inArray(bankingAgreementAccountDimension.iban, ibans),
-          inArray(bankingAgreementAccountDimension.dimensionKey, ['statuskonto', 'artskonto', 'ignore_ingestion']),
+          inArray(bankingAgreementAccountDimension.dimensionKey, ['artskonto', 'statuskonto', 'ignore_ingestion']),
         ))
     : []
 
-  const statuskontoByProviderIban = new Map<string, string>()
+  const artskontoByProviderIban = new Map<string, string>()
   const ignoreIngestionByProviderIban = new Map<string, boolean>()
-  // Prefer new key, but allow legacy.
+  // Prefer canonical key, but allow legacy data.
   for (const d of dimRows) {
     const provider = String(d.provider)
     const iban = String(d.iban)
@@ -87,13 +88,13 @@ export default defineEventHandler(async (event) => {
       continue
     }
 
-    if (key === 'statuskonto') {
-      statuskontoByProviderIban.set(mapKey, value)
+    if (key === 'artskonto') {
+      artskontoByProviderIban.set(mapKey, value)
       continue
     }
 
-    if (!statuskontoByProviderIban.has(mapKey)) {
-      statuskontoByProviderIban.set(mapKey, value)
+    if (!artskontoByProviderIban.has(mapKey)) {
+      artskontoByProviderIban.set(mapKey, value)
     }
   }
 
@@ -109,7 +110,8 @@ export default defineEventHandler(async (event) => {
       iban,
       currency: row.currency ? String(row.currency) : null,
       name: row.name ? String(row.name) : null,
-      statuskonto: statuskontoByProviderIban.get(key) ?? null,
+      artskonto: artskontoByProviderIban.get(key) ?? null,
+      statuskonto: artskontoByProviderIban.get(key) ?? null,
       ignoreIngestion: ignoreIngestionByProviderIban.get(key) ?? false,
       observed: true,
       configuredForApi: false,
@@ -139,7 +141,11 @@ export default defineEventHandler(async (event) => {
         row.configuredForApi = true
         // Prefer explicit configured name over observed bank owner name.
         if (cfg.name) row.name = String(cfg.name)
-        if (!row.statuskonto) row.statuskonto = statuskontoByProviderIban.get(key) ?? null
+        if (!row.artskonto) {
+          const mapped = artskontoByProviderIban.get(key) ?? null
+          row.artskonto = mapped
+          row.statuskonto = mapped
+        }
       }
       continue
     }
@@ -149,7 +155,8 @@ export default defineEventHandler(async (event) => {
       iban,
       currency: null,
       name: cfg.name ? String(cfg.name) : null,
-      statuskonto: statuskontoByProviderIban.get(key) ?? null,
+      artskonto: artskontoByProviderIban.get(key) ?? null,
+      statuskonto: artskontoByProviderIban.get(key) ?? null,
       ignoreIngestion: ignoreIngestionByProviderIban.get(key) ?? false,
       observed: false,
       configuredForApi: true,

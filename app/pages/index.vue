@@ -19,14 +19,21 @@ const dateRange = ref<any>(defaultRange)
 
 const selectedAccountIds = ref<string[]>([])
 
+function toDateOnlyParam(value: any, fallback: any): string {
+	const candidate = value ?? fallback
+	return typeof candidate?.toString === 'function'
+		? candidate.toString()
+		: String(candidate)
+}
+
 const start = computed(() => {
 	const v = dateRange.value?.start ?? startDefault
-	return v.toDate(timeZone).toISOString().slice(0, 10)
+	return toDateOnlyParam(v, startDefault)
 })
 
 const end = computed(() => {
 	const v = dateRange.value?.end ?? endDefault
-	return v.toDate(timeZone).toISOString().slice(0, 10)
+	return toDateOnlyParam(v, endDefault)
 })
 
 const { data, status, refresh } = await useFetch<DashboardResponse>('/api/dashboard', {

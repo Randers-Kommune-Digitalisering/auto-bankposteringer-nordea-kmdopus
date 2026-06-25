@@ -115,7 +115,14 @@ else
     pnpm db:reset:public
   fi
 
-  if [ "${DB_MIGRATE_ON_START:-}" = "1" ]; then
+  # A reset leaves the schema empty, so migrations must run before any seed step.
+  should_migrate="${DB_MIGRATE_ON_START:-0}"
+  if [ "${DB_RESET_ON_START:-}" = "1" ] && [ "$should_migrate" != "1" ]; then
+    echo "DB_RESET_ON_START=1 requires migrations; forcing DB_MIGRATE_ON_START=1 for this boot"
+    should_migrate="1"
+  fi
+
+  if [ "$should_migrate" = "1" ]; then
     echo "Running database migrations (dev)..."
     pnpm db:migrate
   else

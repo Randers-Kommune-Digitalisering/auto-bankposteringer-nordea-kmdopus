@@ -45,7 +45,6 @@ type RuleSnapshot = {
   accountingText?: string
   accountingCprType: CprType
   accountingCprNumber?: string
-  accountingNotifyTo?: string
   accountingNote?: string
   attachments?: {
     names: string[]
@@ -82,7 +81,6 @@ function buildRuleSnapshot(): RuleSnapshot {
     accountingText: state.accountingText,
     accountingCprType: state.accountingCprType as CprType,
     accountingCprNumber: state.accountingCprNumber,
-    accountingNotifyTo: state.accountingNotifyTo,
     accountingNote: state.accountingNote,
     attachments: attachments.value,
   }
@@ -146,7 +144,6 @@ function createEmptyDraft(): RuleDraftUiState {
     accountingText: undefined,
     accountingCprType: 'ingen' as CprType,
     accountingCprNumber: undefined,
-    accountingNotifyTo: undefined,
     accountingNote: undefined,
     accountingAttachmentName: undefined,
     accountingAttachmentFileExtension: undefined,
@@ -1169,18 +1166,11 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                       />
                     </UFormField>
                   </div>
-                  <UFormField name="accountingNotifyTo">
-                    <UiFloatingLabelInput
-                      v-model="state.accountingNotifyTo"
-                      type="email"
-                      class="w-full"
-                      label="Notifikation til"
-                      color="neutral"
-                    />
-                  </UFormField>
+
                   <UFormField label="Noter" name="accountingNote">
                     <UTextarea v-model="state.accountingNote" class="w-full" placeholder="Valgfri notering" />
                   </UFormField>
+                  
                   <div>
                     <RulesFileUpload @update="handleAttachmentUpdate" />
                   </div>

@@ -88,6 +88,7 @@ function toDateOnlyDate(value: Date | string | null): Date {
 function toTopTransactionStackId(input: {
   id: string | null
   accountId: string | null
+  entryGroupSize: number | null
   bookingDate: Date | string | null
   creditDebitIndicator: string | null
   ntryRef: string | null
@@ -98,6 +99,7 @@ function toTopTransactionStackId(input: {
     accountId: input.accountId ?? '',
     bookingDate: toDateOnlyDate(input.bookingDate),
     creditDebitIndicator: input.creditDebitIndicator ?? null,
+    entryGroupSize: input.entryGroupSize ?? 0,
     ntryRef: input.ntryRef ?? null,
     entryAdditionalInfo: input.entryAdditionalInfo ?? null,
     ntryAcctSvcrRef: input.ntryAcctSvcrRef ?? null,
@@ -105,6 +107,16 @@ function toTopTransactionStackId(input: {
 
   if (groupKey) return `group:${groupKey}`
   return `single:${String(input.id ?? '')}`
+}
+
+function toStatementEntryKey(statementId: string | null, entryIndex: number | null): string | null {
+  const normalizedStatementId = String(statementId ?? '').trim()
+  if (!normalizedStatementId) return null
+
+  const normalizedEntryIndex = Number(entryIndex)
+  if (!Number.isInteger(normalizedEntryIndex) || normalizedEntryIndex < 1) return null
+
+  return `${normalizedStatementId}:${normalizedEntryIndex}`
 }
 
 export default defineEventHandler(async (event): Promise<DashboardResponse> => {
@@ -162,6 +174,8 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
       .select({
         id: transaction.id,
         accountId: transaction.accountId,
+        statementId: transaction.statementId,
+        entryIndex: transaction.entryIndex,
         bookingDate: transaction.bookingDate,
         creditDebitIndicator: transaction.creditDebitIndicator,
         ntryRef: transaction.ntryRef,
@@ -298,10 +312,20 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
   const autoBookedTransactions = automationSeries.reduce((acc, p) => acc + p.autoBookedTransactions, 0)
 
   const openTopStackIds = new Set<string>()
+  const entryGroupSizeByEntryKey = new Map<string, number>()
   for (const row of openRowsForTopTx) {
+    const entryKey = toStatementEntryKey(row.statementId, row.entryIndex)
+    if (!entryKey) continue
+    entryGroupSizeByEntryKey.set(entryKey, (entryGroupSizeByEntryKey.get(entryKey) ?? 0) + 1)
+  }
+
+  for (const row of openRowsForTopTx) {
+    const entryKey = toStatementEntryKey(row.statementId, row.entryIndex)
+    const entryGroupSize = entryKey ? (entryGroupSizeByEntryKey.get(entryKey) ?? 0) : 0
     const stackId = toTopTransactionStackId({
       id: row.id,
       accountId: row.accountId,
+      entryGroupSize,
       bookingDate: row.bookingDate,
       creditDebitIndicator: row.creditDebitIndicator,
       ntryRef: row.ntryRef,

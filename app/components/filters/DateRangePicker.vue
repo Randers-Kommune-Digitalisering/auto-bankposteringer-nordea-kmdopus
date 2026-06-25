@@ -14,9 +14,12 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: any): void
 }>()
 
-const df = new DateFormatter('da-DK', { dateStyle: 'medium' })
-
 const timeZone = computed(() => props.timeZone ?? DEFAULT_TIME_ZONE)
+
+const df = computed(() => new DateFormatter('da-DK', {
+  dateStyle: 'medium',
+  timeZone: timeZone.value,
+}))
 
 const value = computed<any>({
   get: () => props.modelValue,
@@ -27,8 +30,8 @@ const calendarEvents = computed(() => ({}))
 
 const label = computed(() => {
   if (!value.value?.start) return 'Vælg periode'
-  if (!value.value?.end) return df.format(value.value.start.toDate(timeZone.value))
-  return `${df.format(value.value.start.toDate(timeZone.value))} - ${df.format(value.value.end.toDate(timeZone.value))}`
+  if (!value.value?.end) return df.value.format(value.value.start.toDate(timeZone.value))
+  return `${df.value.format(value.value.start.toDate(timeZone.value))} - ${df.value.format(value.value.end.toDate(timeZone.value))}`
 })
 </script>
 

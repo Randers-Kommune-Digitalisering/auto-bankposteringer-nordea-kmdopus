@@ -21,8 +21,26 @@ export type WorkerRunOptions = {
   processOutbox?: boolean
 }
 
+// For validating job types
+const knownJobTypes = ['banking.ingest', 'erp.ingestResponses', 'ops.dbCleanup'] as const
+type KnownJobType = (typeof knownJobTypes)[number]
+
 const workerId = `${process.env.WORKER_ID ?? ''}`.trim() || `${process.pid}-${crypto.randomUUID()}`
 
+// For validating job types in input against known types, returning undefined if no valid types are found.
+function sanitizeAllowedJobTypes(input?: string[]): KnownJobType[] | undefined {
+  if (!input?.length) return undefined
+  const allowed = input.filter((t): t is KnownJobType => (knownJobTypes as readonly string[]).includes(t))
+  return allowed.length ? allowed : undefined
+}
+
+// For converting an array of strings to a PostgreSQL text array literal.
+function pgTextArrayLiteral(values: string[]): string {
+  const items = values.map((v) => `'${v.replaceAll("'", "''")}'`).join(',')
+  return `array[${items}]::text[]`
+}
+
+// Main function
 export async function runWorker(options: WorkerRunOptions = {}): Promise<{ jobs: number; outbox: number }> {
   const maxJobs = options.maxJobs ?? 10
   const maxOutbox = options.maxOutbox ?? 25
@@ -30,8 +48,8 @@ export async function runWorker(options: WorkerRunOptions = {}): Promise<{ jobs:
   const shouldProcessJobs = options.processJobs ?? true
   const shouldProcessOutbox = options.processOutbox ?? true
 
-  const allowedJobTypes = (options.jobTypes ?? []).map((t) => t.trim()).filter(Boolean)
-  const jobTypeFilter = allowedJobTypes.length ? allowedJobTypes : undefined
+  const allowedJobTypes = sanitizeAllowedJobTypes(options.jobTypes)
+  const jobTypeFilter = allowedJobTypes ? allowedJobTypes : undefined
 
   const processedJobs = shouldProcessJobs ? await processJobs(maxJobs, jobTypeFilter) : 0
   const processedOutbox = shouldProcessOutbox ? await processOutbox(maxOutbox) : 0
@@ -76,20 +94,7 @@ async function processJobs(limit: number, allowedTypes?: string[]): Promise<numb
   return processed
 }
 
-const knownJobTypes = ['banking.ingest', 'erp.ingestResponses', 'ops.dbCleanup'] as const
-type KnownJobType = (typeof knownJobTypes)[number]
-
-function sanitizeAllowedJobTypes(input?: string[]): KnownJobType[] | undefined {
-  if (!input?.length) return undefined
-  const allowed = input.filter((t): t is KnownJobType => (knownJobTypes as readonly string[]).includes(t))
-  return allowed.length ? allowed : undefined
-}
-
-function pgTextArrayLiteral(values: string[]): string {
-  const items = values.map((v) => `'${v.replaceAll("'", "''")}'`).join(',')
-  return `array[${items}]::text[]`
-}
-
+// Claim item from job queue, marking it as in_progress and locking it to this worker.
 async function claimJob(allowedTypes?: string[]): Promise<{ id: string; type: string; payload: any; runId: string | null } | null> {
   const allowed = sanitizeAllowedJobTypes(allowedTypes)
   const typeFilter = allowed ? sql.raw(`and type = any(${pgTextArrayLiteral(allowed)})`) : sql.raw('')
@@ -116,6 +121,7 @@ async function claimJob(allowedTypes?: string[]): Promise<{ id: string; type: st
   return { id: String(row.id), type: String(row.type), payload: row.payload, runId: row.run_id ? String(row.run_id) : null }
 }
 
+// Start processing outbox items
 async function processOutbox(limit: number): Promise<number> {
   let processed = 0
   for (let i = 0; i < limit; i += 1) {
@@ -153,6 +159,7 @@ async function processOutbox(limit: number): Promise<number> {
   return processed
 }
 
+// Claim item from outbox table, marking it as processing and locking it to this worker.
 async function claimOutbox(): Promise<{ id: string; topic: string; payload: any } | null> {
   const result = await db.execute(sql`
     with next_item as (
@@ -175,6 +182,7 @@ async function claimOutbox(): Promise<{ id: string; topic: string; payload: any 
   return { id: String(row.id), topic: String(row.topic), payload: row.payload }
 }
 
+// 
 async function handleJob(type: string, payload: any, context: { runId?: string } = {}): Promise<void> {
   if (type === 'banking.ingest') {
     const { runBankIngestionAndPosting } = await import('../../banking-ingestion/handlers/runBankIngestionAndPosting')
@@ -210,28 +218,6 @@ async function handleOutbox(topic: string, payload: any): Promise<any> {
 
     const { uploadErpRequestPayload } = await import('../../erp-integration/infrastructure/erpOutbox')
     return await uploadErpRequestPayload({ requestId, erpSupplier: payload?.erpSupplier })
-  }
-
-  if (topic === 'notifications.mail') {
-    const to = payload?.to
-    const subject = payload?.subject
-    const body = payload?.body
-    if (!to || typeof to !== 'string') throw new Error('Outbox payload mangler to')
-    if (!subject || typeof subject !== 'string') throw new Error('Outbox payload mangler subject')
-    if (body == null || typeof body !== 'string') throw new Error('Outbox payload mangler body')
-
-    const { sendSmtpMail } = await import('../../notifications/infrastructure/smtpClient')
-    const { smtpNotificationConfig } = await import('~/lib/env/env')
-
-    return await sendSmtpMail(
-      {
-        host: smtpNotificationConfig.host,
-        allowedRecipientDomain: smtpNotificationConfig.allowedRecipientDomain,
-        port: smtpNotificationConfig.port,
-        senderAddress: smtpNotificationConfig.senderAddress,
-      },
-      { to, subject, body },
-    )
   }
 
   throw new Error(`Ukendt outbox-topic: ${topic}`)

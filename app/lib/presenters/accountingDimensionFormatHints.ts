@@ -1,7 +1,7 @@
 export function accountingDimensionFormatHint(key: string): string | undefined {
   const normalized = String(key ?? '').trim().toLowerCase()
 
-  if (normalized === 'statuskonto') {
+  if (normalized === 'artskonto') {
     return '8 cifre (f.eks. 40000000) eller S efterfulgt af 7 cifre.'
   }
 

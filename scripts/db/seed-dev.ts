@@ -557,7 +557,6 @@ async function main() {
       update outbox
       set next_attempt_at = now() + interval '100 years'
       where id in (${seedIds.outbox.o1}, ${seedIds.outbox.o2})
-         or topic = 'notification.email.requested'
     `)
 
     await tx
@@ -756,7 +755,6 @@ async function main() {
           bookingText: 'SKAT - seed',
           cprType: 'ingen',
           cprNumber: null,
-          notifyTo: 'bogholderi@example.dk',
           note: 'Seed: automatisk match for SKAT',
         },
         {
@@ -765,7 +763,6 @@ async function main() {
           bookingText: 'Kreditorbetaling - seed',
           cprType: 'ingen',
           cprNumber: null,
-          notifyTo: '',
           note: 'Seed: kreditorbetalinger',
         },
       ])
@@ -848,7 +845,6 @@ async function main() {
               bookingText: 'SKAT - seed',
               cprType: 'ingen',
               cprNumber: null,
-              notifyTo: 'bogholderi@example.dk',
               note: 'Seed version 1',
               attachments: [{ name: 'seed-bilag', fileExtension: 'pdf', data: pdfBase64 }],
             },
@@ -875,7 +871,6 @@ async function main() {
               bookingText: 'SKAT (udvidet) - seed',
               cprType: 'ingen',
               cprNumber: null,
-              notifyTo: 'bogholderi@example.dk',
               note: 'Seed version 2',
               attachments: [{ name: 'seed-bilag', fileExtension: 'pdf', data: pdfBase64 }],
             },
@@ -902,7 +897,6 @@ async function main() {
               bookingText: 'Kreditorbetaling - seed',
               cprType: 'ingen',
               cprNumber: null,
-              notifyTo: '',
               note: 'Seed version 1',
               attachments: [],
             },
@@ -929,7 +923,6 @@ async function main() {
               bookingText: 'Kreditorbetaling (udvidet) - seed',
               cprType: 'ingen',
               cprNumber: null,
-              notifyTo: '',
               note: 'Seed version 2',
               attachments: [],
             },

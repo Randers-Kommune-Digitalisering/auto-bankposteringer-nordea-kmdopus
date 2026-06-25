@@ -62,32 +62,28 @@ export function buildNordeaDeterministicGroupKey(input: {
   accountId: string
   bookingDate: Date
   creditDebitIndicator?: string | null
+  entryGroupSize?: number | null
   entryAdditionalInfo?: string | null
   ntryRef?: string | null
   ntryAcctSvcrRef?: string | null
 }): string | null {
-  const ids = extractNordeaGroupingIdentifiers(input.entryAdditionalInfo)
+  const entryGroupSize = Number(input.entryGroupSize ?? 0)
+  if (!Number.isFinite(entryGroupSize) || entryGroupSize < 2) {
+    return null
+  }
+
   const bookingDateIso = input.bookingDate.toISOString().slice(0, 10)
   const cdi = String(input.creditDebitIndicator ?? '').toUpperCase() || 'UNKNOWN'
-  const idTag = ids.idTag ?? '-'
-
-  if (ids.summaryItemId) {
-    return `nordea:summary:${input.accountId}:${bookingDateIso}:${cdi}:${idTag}:${ids.summaryItemId}`
-  }
-
-  if (ids.gsipTransactionDetailKey) {
-    return `nordea:gsip:${input.accountId}:${bookingDateIso}:${cdi}:${idTag}:${ids.gsipTransactionDetailKey}`
-  }
-
   const ntryRef = String(input.ntryRef ?? '').trim()
-  if (ntryRef) {
-    const normalizedNtryRef = ntryRef.replace(/\s+/g, ' ').toUpperCase()
-    const ntryAcctSvcrRef = String(input.ntryAcctSvcrRef ?? '').trim()
-    const normalizedEntryRef = ntryAcctSvcrRef
-      ? ntryAcctSvcrRef.replace(/\s+/g, ' ').toUpperCase()
-      : '-'
-    return `nordea:ntry:${input.accountId}:${bookingDateIso}:${cdi}:${normalizedNtryRef}:${normalizedEntryRef}`
+  const ntryAcctSvcrRef = String(input.ntryAcctSvcrRef ?? '').trim()
+  if (!ntryRef && !ntryAcctSvcrRef) {
+    return null
   }
 
-  return null
+  const normalizedNtryRef = ntryRef ? ntryRef.replace(/\s+/g, ' ').toUpperCase() : '-'
+  const normalizedEntryRef = ntryAcctSvcrRef
+    ? ntryAcctSvcrRef.replace(/\s+/g, ' ').toUpperCase()
+    : '-'
+
+  return `nordea:batch:${input.accountId}:${bookingDateIso}:${cdi}:${normalizedNtryRef}:${normalizedEntryRef}`
 }

@@ -70,30 +70,30 @@ export class NordeaCorporateAccessWebServicesAdapter implements BankAdapter {
   async fetchDocuments(
     input: FetchBankDocumentsInput,
   ): Promise<FetchBankDocumentsOutput> {
-    const cfg = nordeaCorporateAccessWsConfigSchema.parse(this.config)
+    const config = nordeaCorporateAccessWsConfigSchema.parse(this.config)
 
-    const clientCfg = nordeaCorporateAccessWsClientConfigSchema.parse({
-      endpointUrl: cfg.endpointUrl,
-      senderId: cfg.senderId,
-      receiverId: cfg.receiverId,
-      userAgent: cfg.userAgent,
-      language: cfg.language,
-      customerId: cfg.customerId,
-      signerId: cfg.signerId,
-      softwareId: cfg.softwareId,
-      environment: cfg.environment,
-      signingPrivateKeyPem: cfg.applicationRequestPrivateKeyPem,
-      signingCertificatePem: cfg.applicationRequestCertificatePem,
-      trustedSoapSigningCertFingerprintSha256Hex: cfg.trustedNordeaCertificateFingerprintSha256Hex,
-      trustedApplicationResponseCertFingerprintSha256Hex: cfg.trustedNordeaCertificateFingerprintSha256Hex,
-      mtlsClientCertificatePem: cfg.mtlsClientCertificatePem,
-      mtlsClientPrivateKeyPem: cfg.mtlsClientPrivateKeyPem,
-      timeoutMs: cfg.timeoutMs,
+    const clientConfig = nordeaCorporateAccessWsClientConfigSchema.parse({
+      endpointUrl: config.endpointUrl,
+      senderId: config.senderId,
+      receiverId: config.receiverId,
+      userAgent: config.userAgent,
+      language: config.language,
+      customerId: config.customerId,
+      signerId: config.signerId,
+      softwareId: config.softwareId,
+      environment: config.environment,
+      signingPrivateKeyPem: config.applicationRequestPrivateKeyPem,
+      signingCertificatePem: config.applicationRequestCertificatePem,
+      trustedSoapSigningCertFingerprintSha256Hex: config.trustedNordeaCertificateFingerprintSha256Hex,
+      trustedApplicationResponseCertFingerprintSha256Hex: config.trustedNordeaCertificateFingerprintSha256Hex,
+      mtlsClientCertificatePem: config.mtlsClientCertificatePem,
+      mtlsClientPrivateKeyPem: config.mtlsClientPrivateKeyPem,
+      timeoutMs: config.timeoutMs,
     })
 
     const listInput: Parameters<typeof nordeaDownloadFileList>[1] = {
-      status: cfg.downloadStatus,
-      fileType: cfg.statementFileType,
+      status: config.downloadStatus,
+      fileType: config.statementFileType,
     }
 
     const requestedBookingDate = input.bookingDate.trim()
@@ -103,21 +103,21 @@ export class NordeaCorporateAccessWebServicesAdapter implements BankAdapter {
     listInput.startDate = startDate
     listInput.endDate = endDate
 
-    const list = await nordeaDownloadFileList(clientCfg, listInput)
+    const list = await nordeaDownloadFileList(clientConfig, listInput)
 
-    const requestedLimit = input.limit ?? cfg.maxFilesPerRun
-    const limit = Math.max(1, Math.min(requestedLimit, cfg.maxFilesPerRun))
+    const requestedLimit = input.limit ?? config.maxFilesPerRun
+    const limit = Math.max(1, Math.min(requestedLimit, config.maxFilesPerRun))
     const refs = list.fileDescriptors
-      .filter((d) => !d.fileType || d.fileType === cfg.statementFileType)
+      .filter((d) => !d.fileType || d.fileType === config.statementFileType)
       .slice(0, limit)
 
     const documents: FetchBankDocumentsOutput['documents'] = []
 
     for (const d of refs) {
-      const dl = await nordeaDownloadFile(clientCfg, {
+      const dl = await nordeaDownloadFile(clientConfig, {
         fileReference: d.fileReference,
-        requestCompressed: cfg.requestCompressed,
-        fileType: d.fileType ?? cfg.statementFileType,
+        requestCompressed: config.requestCompressed,
+        fileType: d.fileType ?? config.statementFileType,
         serviceId: d.serviceId ?? undefined,
       })
 

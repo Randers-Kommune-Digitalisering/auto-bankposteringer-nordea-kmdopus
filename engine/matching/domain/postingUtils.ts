@@ -69,7 +69,7 @@ export function resolvePostingText(
     tx.remittanceUstrd?.find(Boolean) ||
     tx.remittanceAdditional?.find(Boolean) ||
     ''
-
+  // Special domain rule for Randers Kommune - should not live here
   if (message.includes('BDP')) {
     const start = message.indexOf('BDP')
     return message
@@ -77,6 +77,7 @@ export function resolvePostingText(
       .replace(/\s+/g, '')
   }
 
+  // Special domain rule for Randers Kommune - should not live here
   if (message.includes('KSD')) {
     const start = message.indexOf('KSD')
     const counterpart = resolveCounterpartyName(tx)

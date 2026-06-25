@@ -327,7 +327,6 @@ export default defineEventHandler(async (event) => {
         accountingText: toOptionalString((row as any).accountingText),
         accountingCprType: (toOptionalString((row as any).accountingCprType) ?? 'ingen'),
         accountingCprNumber: toOptionalString((row as any).accountingCprNumber),
-        accountingNotifyTo: toOptionalEmailInput((row as any).accountingNotifyTo) ?? '',
         accountingNote: toOptionalString((row as any).accountingNote),
         accountingDimensions: mergeDimensions(
           parseDimensions((row as any).accountingDimensions),

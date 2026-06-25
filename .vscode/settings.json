@@ -11,6 +11,6 @@
     "**/.nuxt/**": true,
     "**/.output/**": true
   },
-  "typescript.tsserver.maxTsServerMemory": 1536,
+  "ts.tsserver.maxMemory": 1536,
   "vue.server.maxOldSpaceSize": 1536
 }
