@@ -22,6 +22,12 @@ function shiftDaysUtc(value: Date, daysBack: number): Date {
   return new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate() - daysBack, 0, 0, 0, 0))
 }
 
+function isRecoverableContentNotFound(provider: BankProvider, error: unknown): boolean {
+  if (provider !== 'nordea') return false
+  const message = String((error as any)?.message ?? error)
+  return message.includes('Nordea ResponseHeader 24') || message.toLowerCase().includes('content not found')
+}
+
 function toAccountId(input: { iban: string | null; currency: string | null }): string | null {
   const iban = String(input.iban ?? '').trim()
   const currency = String(input.currency ?? '').trim()
@@ -127,15 +133,31 @@ export async function discoverAgreementAccounts(options: {
   const knownIds = new Set<string>()
   let discoveredAccounts = 0
   let inspectedDocuments = 0
+  let skippedDays = 0
 
   for (let daysBack = 0; daysBack < lookbackDays; daysBack += 1) {
     const bookingDate = toDateOnlyUtc(shiftDaysUtc(options.bookingDate, daysBack))
-    const fetched = await adapter.fetchDocuments({
-      accountId: `provider:${options.provider}`,
-      cursor: null,
-      limit: 25,
-      bookingDate,
-    })
+    let fetched: Awaited<ReturnType<BankAdapter['fetchDocuments']>>
+    try {
+      fetched = await adapter.fetchDocuments({
+        accountId: `provider:${options.provider}`,
+        cursor: null,
+        limit: 25,
+        bookingDate,
+      })
+    } catch (error) {
+      if (!isRecoverableContentNotFound(options.provider, error)) {
+        throw error
+      }
+
+      skippedDays += 1
+      log.warn('Account discovery skipped date due to no content', {
+        bookingDate,
+        provider: options.provider,
+        reason: String((error as any)?.message ?? error),
+      })
+      continue
+    }
 
     inspectedDocuments += fetched.documents.length
 
@@ -171,6 +193,7 @@ export async function discoverAgreementAccounts(options: {
   log.info('Account discovery completed', {
     bookingDate: toDateOnlyUtc(options.bookingDate),
     lookbackDays,
+    skippedDays,
     inspectedDocuments,
     discoveredAccounts,
   })
