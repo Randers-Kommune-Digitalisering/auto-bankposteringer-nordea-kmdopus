@@ -1,47 +1,28 @@
 import { defineEventHandler, createError, readBody } from 'h3'
 import crypto from 'node:crypto'
-import { z } from 'zod'
 import { eq, sql } from 'drizzle-orm'
 import db from '~/lib/db'
-import { run } from '~/lib/db/schema/run'
+import { createUtcIsoString, parseIsoDateToUtcDate } from '~~/utils/function'
+import { run, runInsertSchema } from '~/lib/db/schema/run'
 import { job } from '~/lib/db/schema/job'
 import { bankingAgreement } from '~/lib/db/schema/bankingAgreement'
 import { withPgAdvisoryLock } from '~/lib/db/advisoryLock'
 import { runBankIngestionAndPosting } from '#engine/banking-ingestion/handlers/runBankIngestionAndPosting'
 
-const bodySchema = z.object({
-  bookingDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/)
-    .describe('ISO date (YYYY-MM-DD)')
-    .optional(),
-})
-
-function parseIsoDateOnlyToUtcDate(value: string): Date {
-  const parsed = new Date(`${value}T00:00:00.000Z`)
-  if (Number.isNaN(parsed.getTime())) {
-    throw createError({ statusCode: 400, statusMessage: `Ugyldig bookingDate: ${value}` })
-  }
-  return parsed
-}
-
-function normalizeToUtcDateOnly(d: Date): Date {
-  return new Date(`${d.toISOString().slice(0, 10)}T00:00:00.000Z`)
-}
-
 export default defineEventHandler(async (event) => {
-  const body = bodySchema.safeParse(await readBody(event).catch(() => ({})))
+  const body = runInsertSchema.safeParse(await readBody(event).catch(() => ({})))
+
   if (!body.success) {
-    throw createError({ statusCode: 400, statusMessage: 'Ugyldigt request body' })
+    throw createError({ statusCode: 400, statusMessage: 'Ugyldig request body' })
   }
 
-  const bookingDate = normalizeToUtcDateOnly(
-    body.data.bookingDate ? parseIsoDateOnlyToUtcDate(body.data.bookingDate) : new Date(),
-  )
+  const bookingDate = parseIsoDateToUtcDate(body.data.bookingDate)
+  const bookingDateIso = bookingDate ? createUtcIsoString(bookingDate) : ''
 
-  const bookingDateIso = (body.data.bookingDate ?? bookingDate.toISOString().slice(0, 10))
+  if (!bookingDate) {
+    throw createError({ statusCode: 400, statusMessage: 'Ugyldig bookingDate' })
+  }
 
-  // If no agreements are enabled, running a batch is a no-op (and confusing).
   const enabledAgreements = await db
     .select({ provider: bankingAgreement.provider, channel: bankingAgreement.channel })
     .from(bankingAgreement)

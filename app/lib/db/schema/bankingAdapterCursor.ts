@@ -10,6 +10,7 @@ import { account } from './account'
  * - Cursor is opaque (adapter-defined) and stored as-is.
  * - This keeps runtime stateless while allowing incremental fetching.
  */
+
 export const bankingAdapterCursor = pgTable(
   'banking_adapter_cursor',
   {
@@ -26,12 +27,12 @@ export const bankingAdapterCursor = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (t) => ({
-    accountAdapterUnique: unique('banking_adapter_cursor_account_adapter_unique').on(
+  (t) => [
+    unique('banking_adapter_cursor_account_adapter_unique').on(
       t.accountId,
       t.adapterKey,
     ),
-  }),
+  ],
 )
 
 export const bankingAdapterCursorInsertSchema = createInsertSchema(bankingAdapterCursor)

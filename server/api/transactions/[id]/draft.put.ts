@@ -15,19 +15,21 @@ import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
 
 export default defineEventHandler(async (event) => {
   await requireWriteAccess(event)
-  const transactionIdParam = event.context.params?.id
-  if (!transactionIdParam) {
+  const now = new Date()
+  const parsedBody = manualBookingPayloadSchema.parse(await readBody(event))
+
+  const txId = event.context.params?.id
+  if (!txId) {
     throw createError({ statusCode: 400, statusMessage: 'Mangler transaktions-id' })
   }
 
-  const transactionIdResult = z.string().uuid().safeParse(transactionIdParam)
-  if (!transactionIdResult.success) {
+  const parsedTxId = z.uuid().safeParse(txId)
+  if (!parsedTxId.success) {
     throw createError({ statusCode: 400, statusMessage: 'Ugyldigt transaktions-id' })
   }
-  const transactionId = transactionIdResult.data
+  const transactionId = parsedTxId.data
 
-  const body = manualBookingPayloadSchema.parse(await readBody(event))
-
+  // Check transaction state
   const [tx] = await db
     .select({
       id: transaction.id,
@@ -46,31 +48,30 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 409, statusMessage: 'Transaktionen er allerede behandlet' })
   }
 
-  const now = new Date()
-
-  await db.transaction(async (trx) => {
-    await trx
+  await db.transaction(async (tx) => {
+    await tx
       .insert(manualBookingDraft)
       .values({
         transactionId,
         updatedAt: now,
-        text: body.text ?? null,
-        cprType: body.cprType,
-        cprNumber: body.cprNumber ?? null,
-        note: body.note ?? null,
+        text: parsedBody.text ?? null,
+        cprType: parsedBody.cprType,
+        cprNumber: parsedBody.cprNumber ?? null,
+        note: parsedBody.note ?? null,
       })
       .onConflictDoUpdate({
         target: manualBookingDraft.transactionId,
         set: {
           updatedAt: now,
-          text: body.text ?? null,
-          cprType: body.cprType,
-          cprNumber: body.cprNumber ?? null,
-          note: body.note ?? null,
+          text: parsedBody.text ?? null,
+          cprType: parsedBody.cprType,
+          cprNumber: parsedBody.cprNumber ?? null,
+          note: parsedBody.note ?? null,
         },
       })
 
-    const existingLines = await trx
+    // Delete existing content
+    const existingLines = await tx
       .select({ id: manualBookingDraftLine.id })
       .from(manualBookingDraftLine)
       .where(eq(manualBookingDraftLine.transactionId, transactionId))
@@ -78,29 +79,30 @@ export default defineEventHandler(async (event) => {
     const existingLineIds = existingLines.map((l) => l.id)
 
     if (existingLineIds.length) {
-      await trx
+      await tx
         .delete(manualBookingDraftLineDimension)
         .where(inArray(manualBookingDraftLineDimension.lineId, existingLineIds))
     }
 
-    await trx.delete(manualBookingDraftLine).where(eq(manualBookingDraftLine.transactionId, transactionId))
-    await trx
+    await tx.delete(manualBookingDraftLine).where(eq(manualBookingDraftLine.transactionId, transactionId))
+    await tx
       .delete(manualBookingDraftAttachment)
       .where(eq(manualBookingDraftAttachment.transactionId, transactionId))
 
-    const lineRows = body.lines.map((line, index) => ({
+    const lineRows = parsedBody.lines.map((line, index) => ({
       id: randomUUID(),
       transactionId,
       sortOrder: index,
       amount: String(line.amount),
-    text: line.text ?? null,
+      text: line.text ?? null,
     }))
 
+    // Write new content
     if (lineRows.length) {
-      await trx.insert(manualBookingDraftLine).values(lineRows)
+      await tx.insert(manualBookingDraftLine).values(lineRows)
 
       const dimRows = lineRows.flatMap((lineRow, index) => {
-        const dims = body.lines[index]?.dimensions ?? []
+        const dims = parsedBody.lines[index]?.dimensions ?? []
         return dims
           .filter((d) => d.key?.trim() && d.value?.trim())
           .map((d) => ({
@@ -111,11 +113,12 @@ export default defineEventHandler(async (event) => {
       })
 
       if (dimRows.length) {
-        await trx.insert(manualBookingDraftLineDimension).values(dimRows)
+        await tx.insert(manualBookingDraftLineDimension).values(dimRows)
       }
     }
 
-    const attachmentRows = (body.attachments ?? []).map((a, index) => ({
+    // Write attachments
+    const attachmentRows = (parsedBody.attachments ?? []).map((a, index) => ({
       transactionId,
       sortOrder: index,
       name: a.name,
@@ -124,7 +127,7 @@ export default defineEventHandler(async (event) => {
     }))
 
     if (attachmentRows.length) {
-      await trx.insert(manualBookingDraftAttachment).values(attachmentRows)
+      await tx.insert(manualBookingDraftAttachment).values(attachmentRows)
     }
   })
 

@@ -43,7 +43,7 @@ describe('buildErpPostingXml', () => {
     expect(result.debitSumInOre).toBe(256450)
   })
 
-  it('builds legacy filename mask with municipality before integration id', () => {
+  it('builds placeholder filename mask with municipality before integration id', () => {
     const result = buildErpPostingXml([
       {
         ...basePosting,
@@ -55,10 +55,10 @@ describe('buildErpPostingXml', () => {
       metadataOverride: {
         municipalityCode: '730',
         integrationId: '6ROB',
-        integrationFileNameMask: 'ZFIR_KMD_Opus_Posteringer_IND_xxx_zzzz_yyyymmdd_hhmmss.xml',
+        integrationFileNameMask: 'ZFIR_KMD_Opus_Posteringer_IND_{municipalityCode}_{integrationId}_{docDate}_{docTime}.xml',
       },
     })
 
-    expect(result.filename).toContain('IND_730_6ROB_')
+    expect(result.filename).toBe('ZFIR_KMD_Opus_Posteringer_IND_730_6ROB_20260131_123456.xml')
   })
 })

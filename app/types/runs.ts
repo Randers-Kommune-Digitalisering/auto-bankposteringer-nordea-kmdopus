@@ -1,4 +1,3 @@
-import type { DocumentSelectSchema } from "~/lib/db/schema/document";
 import type { ErrorSelectSchema } from "~/lib/db/schema/error";
 import type { BookingStatus } from "~/lib/db/schema/enums";
 import type { RunSelectSchema } from "~/lib/db/schema/run";
@@ -19,7 +18,21 @@ export type TransactionListItem = {
 	ruleApplied?: number | null;
 };
 
-export type DocumentListItem = DocumentSelectSchema & {
+export type DocumentListItem = {
+	id: string;
+	runId: string;
+	type: string | null;
+	filename: string;
+	fileExtension: string;
+	content?: string | null;
+	mimeType?: string | null;
+};
+
+export type DocumentContentItem = {
+	id: string;
+	filename: string;
+	fileExtension: string;
+	content: string;
 	mimeType?: string | null;
 };
 

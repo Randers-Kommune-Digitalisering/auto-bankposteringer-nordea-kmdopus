@@ -39,7 +39,7 @@ jobs:
       ERP_MUNICIPALITY_CODE: "730"
       ERP_COMP_CODE: "0020"
       ERP_INTEGRATION_ID: TEST
-      ERP_INTEGRATION_FILENAME_MASK: TEST.xml
+      ERP_INTEGRATION_FILENAME_MASK: ZFIR_KMD_Opus_Posteringer_IND_{municipalityCode}_{integrationId}_{docDate}_{docTime}.xml
       ERP_PRIMARY_ACCOUNT_LABEL: Artskonto
       ERP_SECONDARY_ACCOUNT_LABEL: Omkostningssted
       ERP_TERTIARY_ACCOUNT_LABEL: PSP-element

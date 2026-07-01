@@ -69,7 +69,10 @@ export type OpenTransactionsResponse = {
   groupedStacksByAccount?: Record<string, OpenTransactionStack[]>;
   total: number;
   limit: number;
+  totalSamleposter?: number;
+  // Deprecated migration alias.
   totalTopTransactions?: number;
+
 };
 
 export type TransactionSummaryInput = {
@@ -107,7 +110,8 @@ export type ManualBookingPayload = {
 
 export type StatementTransaction = {
   id: string;
-  topStackId?: string;
+  samlepostId?: string;
+
   runId: string;
   accountId: string | null;
   bankAccountName: string | null;

@@ -41,6 +41,7 @@ export type FetchBankDocumentsOutput = {
 
 export interface BankAdapter {
   key: BankAdapterKey
+  lookbackDays?: number
 
   fetchDocuments(input: FetchBankDocumentsInput): Promise<FetchBankDocumentsOutput>
 }

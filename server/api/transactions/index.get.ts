@@ -1,239 +1,659 @@
-import { and, asc, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
-import { defineEventHandler, setHeader } from "h3";
-import db from "~/lib/db";
-import { account } from "~/lib/db/schema/account";
-import { transaction, transactionProcessing } from "~/lib/db/schema/transaction";
-import { transactionReference } from "~/lib/db/schema/transactionReference";
-import { transactionParty } from "~/lib/db/schema/transactionParty";
-import { transactionCodeCatalog } from "~/lib/db/schema/transactionCodeCatalog";
-import { manualBookingDraft } from "~/lib/db/schema/manualBookingDraft";
-import { presentOpenTransaction } from "../../presenters/openTransactionPresenter";
+import { and, desc, eq, inArray, isNull, or, sql } from 'drizzle-orm'
+import { defineEventHandler, getQuery, setHeader } from 'h3'
+import db from '~/lib/db'
+import { account } from '~/lib/db/schema/account'
+import { manualBookingDraft } from '~/lib/db/schema/manualBookingDraft'
+import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
+import { transactionCodeCatalog } from '~/lib/db/schema/transactionCodeCatalog'
 import type {
   OpenTransaction,
   OpenTransactionInput,
-  OpenTransactionStack,
   OpenTransactionsResponse,
-  TransactionReferenceDetail,
-} from "~/types/transactions";
-import { parseAmount } from "#engine/matching/domain/amount";
-import { buildNordeaDeterministicGroupKey } from "#engine/banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo";
-import { MAX_TOP_TRANSACTIONS } from "~/lib/constants/topTransactions";
+  StatementTransaction,
+} from '~/types/transactions'
+import { presentOpenTransaction } from '~~/server/presenters/openTransactionPresenter'
+import { createUtcIsoString, parseIsoDateToUtcDate } from '~~/utils/function'
+import { toSamlepostId, toStatementEntryKey } from '~~/server/utils/iso20022Samlepost'
 
-const OPEN_TRANSACTIONS_CACHE_TTL_SECONDS = Number.parseInt(
-  process.env.OPEN_TRANSACTIONS_CACHE_TTL_SECONDS ?? '30',
-  10,
-)
+type TransactionsMode = 'open-items' | 'statement'
 
-type OpenTransactionsCacheEntry = {
-  expiresAtMs: number
-  payload: OpenTransactionsResponse
+type StatementPageResponse = {
+  rows: StatementTransaction[]
+  total: number
+  page: number
+  pageSize: number
+  totalSamleposter: number
 }
 
-let openTransactionsCache: OpenTransactionsCacheEntry | null = null
+type BaseRow = {
+  id: string
+  runId: string
+  accountId: string | null
+  provider: string | null
+  bankAccountName: string | null
 
-export default defineEventHandler(async (event) => {
-  const nowMs = Date.now()
-  if (openTransactionsCache && openTransactionsCache.expiresAtMs > nowMs) {
-    setHeader(event, "X-Data-Source", "cache");
-    return openTransactionsCache.payload
+  statementId: string | null
+  entryIndex: number | null
+  entrySubIndex: number | null
+
+  amount: unknown
+  currency: string | null
+  creditDebitIndicator: string | null
+  status: string | null
+  bookingDate: Date
+  valueDate: Date | null
+
+  ntryRef: string | null
+  ntryAcctSvcrRef: string | null
+  entryAdditionalInfo: string | null
+
+  txAcctSvcrRef: string | null
+  refsEndToEndId: string | null
+  refsInstrId: string | null
+  refsPmtInfId: string | null
+  uetr: string | null
+  txAdditionalInfo: string | null
+
+  bkTxCdDomain: string | null
+  bkTxCdFamily: string | null
+  bkTxCdSubFamily: string | null
+  bkTxCdProprietary: string | null
+
+  debtorName: string | null
+  debtorId: string | null
+  debtorAccountIban: string | null
+  creditorName: string | null
+  creditorId: string | null
+  creditorAccountIban: string | null
+  ultimateDebtorName: string | null
+  ultimateCreditorName: string | null
+
+  remittanceUstrd: string[] | null
+  remittanceCreditorReference: string | null
+  remittanceAdditional: string[] | null
+
+  processingStatus: 'åben' | 'bogført' | 'undtaget' | null
+  ruleApplied: number | null
+  draftNote: string | null
+}
+
+type TransactionCodeCatalogMap = Map<string, string>
+
+function parseDateParam(value: unknown): string | null {
+  if (typeof value !== 'string') return null
+  const parsed = parseIsoDateToUtcDate(value.trim())
+  return parsed ? createUtcIsoString(parsed) : null
+}
+
+function parseStringParam(value: unknown): string {
+  if (typeof value !== 'string') return ''
+  return value.trim()
+}
+
+function parseStringArrayParam(value: unknown): string[] {
+  if (value == null) return []
+  if (Array.isArray(value)) {
+    return value
+      .flatMap((v) => (typeof v === 'string' ? v.split(',') : []))
+      .map((v) => v.trim())
+      .filter(Boolean)
+  }
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map((v) => v.trim())
+      .filter(Boolean)
+  }
+  return []
+}
+
+function parsePositiveIntParam(value: unknown, fallback: number): number {
+  const parsed = Number.parseInt(String(value ?? fallback), 10)
+  if (!Number.isInteger(parsed) || parsed <= 0) return fallback
+  return parsed
+}
+
+function parseMode(value: unknown): TransactionsMode {
+  return value === 'statement' ? 'statement' : 'open-items'
+}
+
+function parseAmount(value: unknown): number {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+function toSignedAmount(value: unknown, creditDebitIndicator: string | null): number {
+  const absolute = Math.abs(parseAmount(value))
+  if (creditDebitIndicator === 'DBIT') return -absolute
+  if (creditDebitIndicator === 'CRDT') return absolute
+  return parseAmount(value)
+}
+
+function normalizeString(value: unknown): string | null {
+  if (typeof value !== 'string') return null
+  const trimmed = value.trim()
+  return trimmed.length ? trimmed : null
+}
+
+function dedupeStrings(values: Array<string | null | undefined>): string[] {
+  const seen = new Set<string>()
+  const result: string[] = []
+
+  for (const entry of values) {
+    const value = normalizeString(entry)
+    if (!value) continue
+    const key = value.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    result.push(value)
   }
 
-  const maxTopTransactions = MAX_TOP_TRANSACTIONS
-  const openTransactionCondition = or(isNull(transactionProcessing.status), eq(transactionProcessing.status, "åben"))
+  return result
+}
 
-  const totalOpenRows = await db
-    .select({ total: sql<number>`count(*)` })
-    .from(transaction)
-    .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
-    .where(openTransactionCondition)
+function escapeRegExp(input: string): string {
+  return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
 
-  const total = Number(totalOpenRows[0]?.total ?? 0)
+function isSubsequence(needle: string, haystack: string): boolean {
+  if (!needle.length) return true
+  let i = 0
+  let j = 0
+  while (i < needle.length && j < haystack.length) {
+    if (needle[i] === haystack[j]) i += 1
+    j += 1
+  }
+  return i === needle.length
+}
 
-  const openRowsForGrouping = await db
+function fuzzyTokenScore(token: string, haystack: string): number {
+  const directIndex = haystack.indexOf(token)
+  if (directIndex >= 0) return 400 - Math.min(directIndex, 350)
+
+  const compactToken = token.replace(/\s+/g, '')
+  if (compactToken.length >= 3 && isSubsequence(compactToken, haystack.replace(/\s+/g, ''))) {
+    return 120
+  }
+
+  const tokenParts = token.split(/\s+/).filter(Boolean)
+  if (tokenParts.length > 1 && tokenParts.every((part) => haystack.includes(part))) {
+    return 90
+  }
+
+  return -1
+}
+
+function fuzzyScore(haystack: string, query: string): number {
+  const normalizedHaystack = haystack.toLowerCase()
+  const tokens = query
+    .toLowerCase()
+    .split(/\s+/)
+    .map((token) => token.trim())
+    .filter(Boolean)
+
+  if (!tokens.length) return 0
+
+  let score = 0
+  for (const token of tokens) {
+    const tokenScore = fuzzyTokenScore(token, normalizedHaystack)
+    if (tokenScore < 0) return -1
+    score += tokenScore
+  }
+
+  return score
+}
+
+function resolveCounterpartAndHint(input: {
+  creditDebitIndicator: string | null
+  debtorName: string | null
+  creditorName: string | null
+}): { counterpart: string | null; counterpartHint: string | null } {
+  const isOutgoing = input.creditDebitIndicator === 'DBIT'
+
+  const selected = normalizeString(isOutgoing ? input.creditorName : input.debtorName)
+  if (selected) {
+    return {
+      counterpart: selected,
+      counterpartHint: isOutgoing ? 'creditorName' : 'debtorName',
+    }
+  }
+
+  return {
+    counterpart: null,
+    counterpartHint: null,
+  }
+}
+
+function normalizeCodeKey(raw: string): string {
+  const normalized = raw.trim().toUpperCase()
+  return normalized.replace(/\s+/g, '')
+}
+
+function resolveTransactionType(input: {
+  provider: string | null
+  bkTxCdProprietary: string | null
+  bkTxCdDomain: string | null
+  bkTxCdFamily: string | null
+  bkTxCdSubFamily: string | null
+  catalogByProviderCodeKey: TransactionCodeCatalogMap
+}): { value: string | null; code: string | null; hint: string | null } {
+  const provider = normalizeString(input.provider)?.toLowerCase() ?? null
+
+  const proprietary = normalizeString(input.bkTxCdProprietary)
+  if (proprietary) {
+    const codeKey = normalizeCodeKey(`PRTRY:${proprietary}`)
+    const catalogHit = provider ? input.catalogByProviderCodeKey.get(`${provider}:${codeKey}`) : undefined
+    return {
+      value: catalogHit ?? proprietary,
+      code: codeKey,
+      hint: 'bkTxCdProprietary',
+    }
+  }
+
+  const parts = dedupeStrings([
+    input.bkTxCdDomain,
+    input.bkTxCdFamily,
+    input.bkTxCdSubFamily,
+  ])
+
+  if (parts.length) {
+    const codeKey = normalizeCodeKey(parts.join('/'))
+    const catalogHit = provider ? input.catalogByProviderCodeKey.get(`${provider}:${codeKey}`) : undefined
+    return {
+      value: catalogHit ?? parts.join('/'),
+      code: codeKey,
+      hint: ['bkTxCdDomain', 'bkTxCdFamily', 'bkTxCdSubFamily'].join(' + '),
+    }
+  }
+
+  return {
+    value: null,
+    code: null,
+    hint: null,
+  }
+}
+
+function buildReferenceDetails(input: {
+  remittanceUstrd: string[] | null
+  remittanceAdditional: string[] | null
+  remittanceCreditorReference: string | null
+  entryAdditionalInfo: string | null
+  txAdditionalInfo: string | null
+  refsEndToEndId: string | null
+  refsInstrId: string | null
+  refsPmtInfId: string | null
+  uetr: string | null
+  txAcctSvcrRef: string | null
+  ntryAcctSvcrRef: string | null
+  ntryRef: string | null
+}) {
+  const details: Array<{ value: string; source: string }> = []
+
+  // Deterministic free-text composition for Nordea-style CAMT:
+  // 1) Prtry-originated values (stored in remittanceAdditional)
+  // 2) RmtInf/Ustrd values
+  for (const value of input.remittanceAdditional ?? []) {
+    const normalized = normalizeString(value)
+    if (!normalized) continue
+    details.push({ value: normalized, source: '/Purp/Prtry' })
+  }
+
+  for (const value of input.remittanceUstrd ?? []) {
+    const normalized = normalizeString(value)
+    if (!normalized) continue
+    details.push({ value: normalized, source: '/RmtInf/Ustrd' })
+  }
+
+  const singleFieldCandidates: Array<{ value: string | null; source: string }> = [
+    { value: input.remittanceCreditorReference, source: '/RmtInf/Strd/CdtrRefInf/Ref' },
+    { value: input.entryAdditionalInfo, source: '/Ntry/AddtlNtryInf' },
+    { value: input.txAdditionalInfo, source: '/TxDtls/AddtlTxInf' },
+    { value: input.refsEndToEndId, source: '/TxDtls/Refs/EndToEndId' },
+    { value: input.refsInstrId, source: '/TxDtls/Refs/InstrId' },
+    { value: input.refsPmtInfId, source: '/TxDtls/Refs/PmtInfId' },
+    { value: input.uetr, source: '/TxDtls/Refs/UETR' },
+    { value: input.txAcctSvcrRef, source: '/TxDtls/Refs/AcctSvcrRef' },
+    { value: input.ntryAcctSvcrRef, source: '/Ntry/AcctSvcrRef' },
+    { value: input.ntryRef, source: '/Ntry/NtryRef' },
+  ]
+
+  for (const candidate of singleFieldCandidates) {
+    const normalized = normalizeString(candidate.value)
+    if (!normalized) continue
+    details.push({ value: normalized, source: candidate.source })
+  }
+
+  const seen = new Set<string>()
+  return details.filter((entry) => {
+    const key = `${entry.source}:${entry.value}`.toLowerCase()
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
+function buildSearchText(row: BaseRow): string {
+  const chunks: string[] = []
+
+  const push = (value: unknown) => {
+    const normalized = normalizeString(value)
+    if (!normalized) return
+    chunks.push(normalized)
+  }
+
+  push(row.id)
+  push(row.runId)
+  push(row.accountId)
+  push(row.bankAccountName)
+  push(String(row.amount ?? ''))
+  push(row.currency)
+  push(row.creditDebitIndicator)
+  push(row.status)
+  push(row.processingStatus)
+  push(String(row.ruleApplied ?? ''))
+
+  push(row.ntryRef)
+  push(row.ntryAcctSvcrRef)
+  push(row.entryAdditionalInfo)
+  push(row.txAcctSvcrRef)
+  push(row.refsEndToEndId)
+  push(row.refsInstrId)
+  push(row.refsPmtInfId)
+  push(row.uetr)
+  push(row.txAdditionalInfo)
+
+  push(row.bkTxCdProprietary)
+  push(row.bkTxCdDomain)
+  push(row.bkTxCdFamily)
+  push(row.bkTxCdSubFamily)
+
+  push(row.debtorName)
+  push(row.debtorId)
+  push(row.debtorAccountIban)
+  push(row.creditorName)
+  push(row.creditorId)
+  push(row.creditorAccountIban)
+  push(row.ultimateDebtorName)
+  push(row.ultimateCreditorName)
+
+  for (const value of row.remittanceUstrd ?? []) push(value)
+  for (const value of row.remittanceAdditional ?? []) push(value)
+  push(row.remittanceCreditorReference)
+
+  return chunks.join(' ')
+}
+
+function filterRowsByFuzzySearch(rows: BaseRow[], search: string): BaseRow[] {
+  const query = search.trim()
+  if (!query.length) return rows
+
+  const ranked = rows
+    .map((row) => ({ row, score: fuzzyScore(buildSearchText(row), query) }))
+    .filter((entry) => entry.score >= 0)
+    .sort((a, b) => b.score - a.score)
+
+  return ranked.map((entry) => entry.row)
+}
+
+function mapRowToStatementTransaction(
+  row: BaseRow,
+  samlepostId: string,
+  catalogByProviderCodeKey: TransactionCodeCatalogMap,
+): StatementTransaction {
+  const signedAmount = toSignedAmount(row.amount, row.creditDebitIndicator)
+
+  const transactionType = resolveTransactionType({
+    provider: row.provider,
+    bkTxCdProprietary: row.bkTxCdProprietary,
+    bkTxCdDomain: row.bkTxCdDomain,
+    bkTxCdFamily: row.bkTxCdFamily,
+    bkTxCdSubFamily: row.bkTxCdSubFamily,
+    catalogByProviderCodeKey,
+  })
+
+  return {
+    id: row.id,
+    samlepostId,
+    runId: row.runId,
+    accountId: row.accountId,
+    bankAccountName: row.bankAccountName,
+
+    statementId: row.statementId,
+    entryIndex: row.entryIndex,
+    entrySubIndex: row.entrySubIndex,
+
+    amount: String(signedAmount),
+    currency: row.currency,
+    creditDebitIndicator: row.creditDebitIndicator as StatementTransaction['creditDebitIndicator'],
+    status: row.status,
+    bookingDate: createUtcIsoString(row.bookingDate),
+    valueDate: row.valueDate ? createUtcIsoString(row.valueDate) : null,
+
+    ntryRef: row.ntryRef,
+    ntryAcctSvcrRef: row.ntryAcctSvcrRef,
+    entryAdditionalInfo: row.entryAdditionalInfo,
+
+    txAcctSvcrRef: row.txAcctSvcrRef,
+    refsEndToEndId: row.refsEndToEndId,
+    refsInstrId: row.refsInstrId,
+    refsPmtInfId: row.refsPmtInfId,
+    uetr: row.uetr,
+    txAdditionalInfo: row.txAdditionalInfo,
+
+    bkTxCdDomain: row.bkTxCdDomain,
+    bkTxCdFamily: row.bkTxCdFamily,
+    bkTxCdSubFamily: row.bkTxCdSubFamily,
+    bkTxCdProprietary: row.bkTxCdProprietary,
+    transactionType: transactionType.value,
+    transactionTypeCode: transactionType.code,
+    transactionTypeHint: transactionType.hint,
+
+    debtorName: row.debtorName,
+    debtorId: row.debtorId,
+    debtorAccountIban: row.debtorAccountIban,
+    creditorName: row.creditorName,
+    creditorId: row.creditorId,
+    creditorAccountIban: row.creditorAccountIban,
+    ultimateDebtorName: row.ultimateDebtorName,
+    ultimateCreditorName: row.ultimateCreditorName,
+
+    remittanceUstrd: row.remittanceUstrd,
+    remittanceCreditorReference: row.remittanceCreditorReference,
+    remittanceAdditional: row.remittanceAdditional,
+
+    processingStatus: row.processingStatus,
+    ruleApplied: row.ruleApplied,
+    runningBalance: null,
+  }
+}
+
+function mapRowToOpenTransaction(
+  row: BaseRow,
+  samlepostId: string,
+  catalogByProviderCodeKey: TransactionCodeCatalogMap,
+): OpenTransaction {
+  const groupKey = samlepostId.startsWith('group:') ? samlepostId.slice('group:'.length) : null
+  const counterpart = resolveCounterpartAndHint({
+    creditDebitIndicator: row.creditDebitIndicator,
+    debtorName: row.debtorName,
+    creditorName: row.creditorName,
+  })
+
+  const transactionType = resolveTransactionType({
+    provider: row.provider,
+    bkTxCdProprietary: row.bkTxCdProprietary,
+    bkTxCdDomain: row.bkTxCdDomain,
+    bkTxCdFamily: row.bkTxCdFamily,
+    bkTxCdSubFamily: row.bkTxCdSubFamily,
+    catalogByProviderCodeKey,
+  })
+
+  const referenceDetails = buildReferenceDetails({
+    remittanceUstrd: row.remittanceUstrd,
+    remittanceAdditional: row.remittanceAdditional,
+    remittanceCreditorReference: row.remittanceCreditorReference,
+    entryAdditionalInfo: row.entryAdditionalInfo,
+    txAdditionalInfo: row.txAdditionalInfo,
+    refsEndToEndId: row.refsEndToEndId,
+    refsInstrId: row.refsInstrId,
+    refsPmtInfId: row.refsPmtInfId,
+    uetr: row.uetr,
+    txAcctSvcrRef: row.txAcctSvcrRef,
+    ntryAcctSvcrRef: row.ntryAcctSvcrRef,
+    ntryRef: row.ntryRef,
+  })
+
+  const signedAmount = toSignedAmount(row.amount, row.creditDebitIndicator)
+
+  const input: OpenTransactionInput = {
+    id: row.id,
+    runId: row.runId,
+    groupKey,
+    bookingDate: createUtcIsoString(row.bookingDate),
+    amount: signedAmount,
+    accountId: row.accountId ?? 'Ukendt konto',
+    bankAccountName: row.bankAccountName,
+    status: row.processingStatus,
+    ruleApplied: row.ruleApplied,
+    draftNote: row.draftNote,
+    transactionType: transactionType.value,
+    transactionTypeCode: transactionType.code,
+    transactionTypeHint: transactionType.hint,
+    counterpart: counterpart.counterpart,
+    counterpartHint: counterpart.counterpartHint,
+    references: referenceDetails.map((entry) => entry.value),
+    referenceDetails,
+  }
+
+  return presentOpenTransaction(input)
+}
+
+function stackIdFromGroupKey(groupKey: string | null, id: string): string {
+  return groupKey ? `group:${groupKey}` : `single:${id}`
+}
+
+function uniqueStackOrderFromSamlepostIds(ids: string[]): string[] {
+  const seen = new Set<string>()
+  const order: string[] = []
+
+  for (const id of ids) {
+    if (seen.has(id)) continue
+    seen.add(id)
+    order.push(id)
+  }
+
+  return order
+}
+
+export default defineEventHandler(async (event) => {
+  setHeader(event, 'Cache-Control', 'no-store')
+
+  const query = getQuery(event)
+  const mode = parseMode((query as any).mode)
+
+  const limit = Math.min(500, parsePositiveIntParam((query as any).limit, 200))
+  const page = Math.max(1, parsePositiveIntParam((query as any).page, 1))
+  const pageSize = Math.min(200, parsePositiveIntParam((query as any).pageSize, 50))
+  const offset = (page - 1) * pageSize
+
+  const start = parseDateParam((query as any).start)
+  const end = parseDateParam((query as any).end)
+  const search = parseStringParam((query as any).search ?? (query as any).q)
+
+  const accountIds = parseStringArrayParam(
+    (query as any).accountIds
+      ?? (query as any)['accountIds[]']
+      ?? (query as any).accounts
+      ?? (query as any)['accounts[]']
+      ?? (query as any).accountId,
+  )
+
+  const baseConditions = [] as Array<any>
+  if (start) baseConditions.push(sql`${transaction.bookingDate} >= ${start}::date`)
+  if (end) baseConditions.push(sql`${transaction.bookingDate} <= ${end}::date`)
+  if (accountIds.length) baseConditions.push(inArray(transaction.accountId, accountIds))
+
+  const processingFilter = mode === 'open-items'
+    ? or(eq(transactionProcessing.status, 'åben'), isNull(transactionProcessing.status))
+    : undefined
+
+  const whereConditions = processingFilter
+    ? [processingFilter, ...baseConditions]
+    : baseConditions
+
+  const whereClause = whereConditions.length ? and(...whereConditions) : undefined
+
+  const rows = await db
     .select({
       id: transaction.id,
+      runId: transaction.runId,
       accountId: transaction.accountId,
+      provider: account.provider,
+      bankAccountName: account.name,
+
       statementId: transaction.statementId,
       entryIndex: transaction.entryIndex,
-      bookingDate: transaction.bookingDate,
+      entrySubIndex: transaction.entrySubIndex,
+
+      amount: transaction.amount,
+      currency: transaction.currency,
       creditDebitIndicator: transaction.creditDebitIndicator,
+      status: transaction.status,
+      bookingDate: transaction.bookingDate,
+      valueDate: transaction.valueDate,
+
       ntryRef: transaction.ntryRef,
-      entryAdditionalInfo: transaction.entryAdditionalInfo,
       ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,
+      entryAdditionalInfo: transaction.entryAdditionalInfo,
+
+      txAcctSvcrRef: transaction.txAcctSvcrRef,
+      refsEndToEndId: transaction.refsEndToEndId,
+      refsInstrId: transaction.refsInstrId,
+      refsPmtInfId: transaction.refsPmtInfId,
+      uetr: transaction.uetr,
+      txAdditionalInfo: transaction.txAdditionalInfo,
+
+      bkTxCdDomain: transaction.bkTxCdDomain,
+      bkTxCdFamily: transaction.bkTxCdFamily,
+      bkTxCdSubFamily: transaction.bkTxCdSubFamily,
+      bkTxCdProprietary: transaction.bkTxCdProprietary,
+
+      debtorName: transaction.debtorName,
+      debtorId: transaction.debtorId,
+      debtorAccountIban: transaction.debtorAccountIban,
+      creditorName: transaction.creditorName,
+      creditorId: transaction.creditorId,
+      creditorAccountIban: transaction.creditorAccountIban,
+      ultimateDebtorName: transaction.ultimateDebtorName,
+      ultimateCreditorName: transaction.ultimateCreditorName,
+
+      remittanceUstrd: transaction.remittanceUstrd,
+      remittanceCreditorReference: transaction.remittanceCreditorReference,
+      remittanceAdditional: transaction.remittanceAdditional,
+
+      processingStatus: transactionProcessing.status,
+      ruleApplied: transactionProcessing.ruleApplied,
+      draftNote: manualBookingDraft.note,
     })
     .from(transaction)
     .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
-    .where(openTransactionCondition)
+    .leftJoin(account, eq(account.id, transaction.accountId))
+    .leftJoin(manualBookingDraft, eq(manualBookingDraft.transactionId, transaction.id))
+    .where(whereClause)
     .orderBy(desc(transaction.bookingDate), desc(transaction.id))
 
-  const entryGroupSizeByEntryKey = new Map<string, number>()
-  for (const row of openRowsForGrouping) {
-    const entryKey = toStatementEntryKey(row.statementId, row.entryIndex)
-    if (!entryKey) continue
-    entryGroupSizeByEntryKey.set(entryKey, (entryGroupSizeByEntryKey.get(entryKey) ?? 0) + 1)
-  }
+  const filteredRows = filterRowsByFuzzySearch(rows as BaseRow[], search)
 
-  const entryGroupSizeByTransactionId = new Map<string, number>()
-  for (const row of openRowsForGrouping) {
-    const transactionId = String(row.id ?? '').trim()
-    if (!transactionId) continue
-    const entryKey = toStatementEntryKey(row.statementId, row.entryIndex)
-    const entryGroupSize = entryKey ? (entryGroupSizeByEntryKey.get(entryKey) ?? 0) : 0
-    entryGroupSizeByTransactionId.set(transactionId, entryGroupSize)
-  }
+  const providers = Array.from(
+    new Set(
+      filteredRows
+        .map((row) => normalizeString(row.provider)?.toLowerCase())
+        .filter((value): value is string => Boolean(value)),
+    ),
+  )
 
-  const stackIdByTransactionId = new Map<string, string>()
-  for (const row of openRowsForGrouping) {
-    const transactionId = String(row.id ?? '').trim()
-    if (!transactionId) continue
-    stackIdByTransactionId.set(transactionId, toTopTransactionStackId({
-      id: row.id,
-      accountId: row.accountId,
-      entryGroupSize: entryGroupSizeByTransactionId.get(transactionId) ?? 0,
-      bookingDate: row.bookingDate,
-      creditDebitIndicator: row.creditDebitIndicator,
-      ntryRef: row.ntryRef,
-      entryAdditionalInfo: row.entryAdditionalInfo,
-      ntryAcctSvcrRef: row.ntryAcctSvcrRef,
-    }))
-  }
-
-  const totalTopTransactions = new Set(stackIdByTransactionId.values()).size
-
-  const shownTopStackIds = new Set<string>()
-  const shownTransactionIds: string[] = []
-  for (const row of openRowsForGrouping) {
-    const transactionId = String(row.id ?? '').trim()
-    if (!transactionId) continue
-    const stackId = stackIdByTransactionId.get(transactionId)
-    if (!stackId) continue
-
-    if (shownTopStackIds.size >= maxTopTransactions && !shownTopStackIds.has(stackId)) {
-      continue
-    }
-
-    shownTopStackIds.add(stackId)
-    shownTransactionIds.push(transactionId)
-  }
-
-  const rows = shownTransactionIds.length
+  const catalogRows = providers.length
     ? await db
-        .select({
-          id: transaction.id,
-          runId: transaction.runId,
-          statementId: transaction.statementId,
-          entryIndex: transaction.entryIndex,
-          bookingDate: transaction.bookingDate,
-          amount: transaction.amount,
-          creditDebitIndicator: transaction.creditDebitIndicator,
-          accountId: transaction.accountId,
-          bankAccountName: account.name,
-          bankProvider: account.provider,
-          status: transactionProcessing.status,
-          ruleApplied: transactionProcessing.ruleApplied,
-          bkTxCdDomain: transaction.bkTxCdDomain,
-          bkTxCdFamily: transaction.bkTxCdFamily,
-          bkTxCdSubFamily: transaction.bkTxCdSubFamily,
-          bkTxCdProprietary: transaction.bkTxCdProprietary,
-          ntryRef: transaction.ntryRef,
-          ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,
-          txAcctSvcrRef: transaction.txAcctSvcrRef,
-          refsEndToEndId: transaction.refsEndToEndId,
-          refsInstrId: transaction.refsInstrId,
-          refsPmtInfId: transaction.refsPmtInfId,
-          uetr: transaction.uetr,
-          entryAdditionalInfo: transaction.entryAdditionalInfo,
-          txAdditionalInfo: transaction.txAdditionalInfo,
-          remittanceUstrd: transaction.remittanceUstrd,
-          remittanceCreditorReference: transaction.remittanceCreditorReference,
-          remittanceAdditional: transaction.remittanceAdditional,
-          debtorName: transaction.debtorName,
-          debtorId: transaction.debtorId,
-          ultimateDebtorName: transaction.ultimateDebtorName,
-          creditorName: transaction.creditorName,
-          creditorId: transaction.creditorId,
-          ultimateCreditorName: transaction.ultimateCreditorName,
-          draftNote: manualBookingDraft.note,
-        })
-        .from(transaction)
-        .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
-        .leftJoin(account, eq(transaction.accountId, account.id))
-        .leftJoin(manualBookingDraft, eq(manualBookingDraft.transactionId, transaction.id))
-        .where(inArray(transaction.id, shownTransactionIds))
-        .orderBy(desc(transaction.bookingDate), desc(transaction.id))
-    : []
-
-  const transactionIds = rows
-    .map((row) => row.id)
-    .filter((id): id is string => typeof id === 'string' && id.length > 0)
-
-  let v2ReferenceRows: Array<{
-    transactionId: string
-    value: string
-    source: string
-    sequenceNo: number
-  }> = []
-
-  let v2PartyRows: Array<{
-    transactionId: string
-    role: string
-    displayName: string | null
-    identifier: string | null
-    accountIban: string | null
-    sequenceNo: number
-  }> = []
-
-  if (transactionIds.length) {
-    try {
-      v2ReferenceRows = await db
-        .select({
-          transactionId: transactionReference.transactionId,
-          value: transactionReference.valueNormalized,
-          source: transactionReference.xmlPath,
-          sequenceNo: transactionReference.sequenceNo,
-        })
-        .from(transactionReference)
-        .where(inArray(transactionReference.transactionId, transactionIds))
-        .orderBy(asc(transactionReference.transactionId), asc(transactionReference.sequenceNo)) as typeof v2ReferenceRows
-    } catch {
-      v2ReferenceRows = []
-    }
-
-    try {
-      v2PartyRows = await db
-        .select({
-          transactionId: transactionParty.transactionId,
-          role: transactionParty.role,
-          displayName: transactionParty.displayName,
-          identifier: transactionParty.identifier,
-          accountIban: transactionParty.accountIban,
-          sequenceNo: transactionParty.sequenceNo,
-        })
-        .from(transactionParty)
-        .where(inArray(transactionParty.transactionId, transactionIds))
-        .orderBy(asc(transactionParty.transactionId), asc(transactionParty.sequenceNo)) as typeof v2PartyRows
-    } catch {
-      v2PartyRows = []
-    }
-  }
-
-  const catalogCodeKeys = new Set<string>()
-  const catalogProviders = new Set<'danskebank' | 'nordea' | 'bankconnect'>()
-  for (const row of rows) {
-    const key = buildTransactionCodeKey(row)
-    if (key) catalogCodeKeys.add(key)
-    const provider = normalizeProvider(row.bankProvider)
-    if (provider) catalogProviders.add(provider)
-  }
-
-  let txCodeCatalogRows: Array<{
-    provider: 'danskebank' | 'nordea' | 'bankconnect'
-    codeKey: string
-    displayName: string
-  }> = []
-  if (catalogCodeKeys.size && catalogProviders.size && await hasTransactionCodeCatalogTable()) {
-    try {
-      txCodeCatalogRows = await db
         .select({
           provider: transactionCodeCatalog.provider,
           codeKey: transactionCodeCatalog.codeKey,
@@ -241,435 +661,115 @@ export default defineEventHandler(async (event) => {
         })
         .from(transactionCodeCatalog)
         .where(and(
-          inArray(transactionCodeCatalog.provider, Array.from(catalogProviders)),
-          inArray(transactionCodeCatalog.codeKey, Array.from(catalogCodeKeys)),
-        )) as typeof txCodeCatalogRows
-    } catch {
-      txCodeCatalogRows = []
+          inArray(transactionCodeCatalog.provider, providers as any),
+          eq(transactionCodeCatalog.isActive, true),
+        ))
+    : []
+
+  const catalogByProviderCodeKey: TransactionCodeCatalogMap = new Map()
+  for (const row of catalogRows) {
+    const provider = normalizeString(row.provider)?.toLowerCase()
+    const codeKey = normalizeString(row.codeKey)
+    const displayName = normalizeString(row.displayName)
+    if (!provider || !codeKey || !displayName) continue
+    catalogByProviderCodeKey.set(`${provider}:${normalizeCodeKey(codeKey)}`, displayName)
+  }
+
+  const entryGroupSizeByEntryKey = new Map<string, number>()
+  for (const row of filteredRows) {
+    const entryKey = toStatementEntryKey(row.statementId, row.entryIndex)
+    if (!entryKey) continue
+    entryGroupSizeByEntryKey.set(entryKey, (entryGroupSizeByEntryKey.get(entryKey) ?? 0) + 1)
+  }
+
+  const statementRows = filteredRows.map((row) => {
+    const samlepostId = toSamlepostId({
+      id: row.id,
+      accountId: row.accountId,
+      entryGroupSize: entryGroupSizeByEntryKey.get(toStatementEntryKey(row.statementId, row.entryIndex) ?? '') ?? 0,
+      bookingDate: row.bookingDate,
+      creditDebitIndicator: row.creditDebitIndicator,
+      ntryRef: row.ntryRef,
+      entryAdditionalInfo: row.entryAdditionalInfo,
+      ntryAcctSvcrRef: row.ntryAcctSvcrRef,
+    })
+
+    return mapRowToStatementTransaction(row, samlepostId, catalogByProviderCodeKey)
+  })
+
+  const samlepostOrder = uniqueStackOrderFromSamlepostIds(statementRows.map((row) => row.samlepostId ?? `single:${row.id}`))
+
+  if (mode === 'statement') {
+    const pageStackIds = new Set(samlepostOrder.slice(offset, offset + pageSize))
+    const pagedRows = statementRows.filter((row) => pageStackIds.has(row.samlepostId ?? `single:${row.id}`))
+
+    const response: StatementPageResponse = {
+      rows: pagedRows,
+      total: samlepostOrder.length,
+      totalSamleposter: samlepostOrder.length,
+      page,
+      pageSize,
     }
+
+    return response
   }
 
-  const txCodeDisplayNameByCodeKey = new Map<string, string>()
-  for (const row of txCodeCatalogRows) {
-    const provider = normalizeProvider(row.provider)
-    const key = String(row.codeKey ?? '').trim()
-    const name = String(row.displayName ?? '').trim()
-    if (!provider || !key || !name) continue
-    txCodeDisplayNameByCodeKey.set(`${provider}:${key.toUpperCase()}`, name)
-  }
+  const visibleStackIds = new Set(samlepostOrder.slice(0, limit))
+  const visibleStatementRows = statementRows.filter((row) => visibleStackIds.has(row.samlepostId ?? `single:${row.id}`))
+  const visibleItems = visibleStatementRows.map((row) => mapRowToOpenTransaction(
+    filteredRows.find((r) => r.id === row.id) as BaseRow,
+    row.samlepostId ?? `single:${row.id}`,
+    catalogByProviderCodeKey,
+  ))
 
-  const referenceDetailsByTransactionId = new Map<string, TransactionReferenceDetail[]>()
-  for (const row of v2ReferenceRows) {
-    const transactionId = String(row.transactionId)
-    const bucket = referenceDetailsByTransactionId.get(transactionId) ?? []
-    bucket.push({
-      value: String(row.value ?? '').trim(),
-      source: String(row.source ?? '').trim() || 'Ukendt XML-felt',
-    })
-    referenceDetailsByTransactionId.set(transactionId, bucket)
-  }
+  const stackMap = new Map<string, {
+    stackId: string
+    groupKey: string | null
+    items: OpenTransaction[]
+    representative: OpenTransaction
+    totalAmount: number
+    isGrouped: boolean
+  }>()
 
-  type V2PartyRow = {
-    role: 'debtor' | 'creditor' | 'ultimateDebtor' | 'ultimateCreditor'
-    displayName: string | null
-    identifier: string | null
-    accountIban: string | null
-  }
-
-  const partiesByTransactionId = new Map<string, V2PartyRow[]>()
-  for (const row of v2PartyRows) {
-    const transactionId = String(row.transactionId)
-    const bucket = partiesByTransactionId.get(transactionId) ?? []
-    bucket.push({
-      role: row.role as V2PartyRow['role'],
-      displayName: row.displayName,
-      identifier: row.identifier,
-      accountIban: row.accountIban,
-    })
-    partiesByTransactionId.set(transactionId, bucket)
-  }
-
-  const normalized = rows
-    .filter((row) => row.id && row.runId)
-    .map((row) => {
-      const amountAbs = Math.abs(parseNumeric(row.amount));
-      const isOutgoing = String(row.creditDebitIndicator ?? '').toUpperCase() === 'DBIT'
-      const amount = isOutgoing ? -amountAbs : amountAbs;
-
-      const bookingDateIso = toIsoDate(row.bookingDate)
-      const bookingDate = new Date(bookingDateIso)
-      const groupKey = buildNordeaDeterministicGroupKey({
-        accountId: row.accountId ?? '',
-        bookingDate,
-        creditDebitIndicator: row.creditDebitIndicator ?? null,
-        entryGroupSize: entryGroupSizeByTransactionId.get(String(row.id ?? '').trim()) ?? 0,
-        ntryRef: row.ntryRef ?? null,
-        entryAdditionalInfo: row.entryAdditionalInfo ?? null,
-        ntryAcctSvcrRef: row.ntryAcctSvcrRef ?? null,
-      })
-
-      const referenceDetails = referenceDetailsByTransactionId.get(row.id!) ?? buildReferenceDetails(row)
-      const counterpart = resolveCounterpart({
-        isOutgoing,
-        row,
-        parties: partiesByTransactionId.get(row.id!) ?? [],
-      })
-
-      const base: OpenTransactionInput = {
-        id: row.id!,
-        runId: row.runId!,
-        groupKey,
-        bookingDate: bookingDateIso,
-        amount,
-        accountId: row.accountId ?? "",
-        bankAccountName: row.bankAccountName ?? null,
-        status: row.status ?? null,
-        ruleApplied: row.ruleApplied ?? null,
-        draftNote: row.draftNote ?? null,
-        transactionTypeCode: buildTransactionCodeKey(row),
-        transactionTypeHint: resolveTransactionTypeHint(row),
-        transactionType: resolveTransactionType({
-          row,
-          catalogDisplayNameByCodeKey: txCodeDisplayNameByCodeKey,
-        }) ?? "Ukendt",
-        counterpart: counterpart.value,
-        counterpartHint: counterpart.hint,
-        referenceDetails,
-        references: referenceDetails.map((entry) => entry.value),
-      };
-      return base
-    });
-
-  const payload = normalized.map<OpenTransaction>((entry) => presentOpenTransaction(entry));
-
-  const stackById = new Map<string, OpenTransactionStack>()
-  const stackOrder: string[] = []
-  for (const entry of payload) {
-    const stackId = entry.groupKey ? `group:${entry.groupKey}` : `single:${entry.id}`
-    const existing = stackById.get(stackId)
-    if (!existing) {
-      stackById.set(stackId, {
-        stackId,
-        groupKey: entry.groupKey,
-        items: [entry],
-        representative: entry,
-        totalAmount: entry.amount,
-        isGrouped: Boolean(entry.groupKey),
-      })
-      stackOrder.push(stackId)
+  for (const tx of visibleItems) {
+    const stackId = stackIdFromGroupKey(tx.groupKey, tx.id)
+    const existing = stackMap.get(stackId)
+    if (existing) {
+      existing.items.push(tx)
+      existing.totalAmount += tx.amount
       continue
     }
 
-    existing.items.push(entry)
-    existing.totalAmount += entry.amount
+    stackMap.set(stackId, {
+      stackId,
+      groupKey: tx.groupKey,
+      items: [tx],
+      representative: tx,
+      totalAmount: tx.amount,
+      isGrouped: Boolean(tx.groupKey),
+    })
   }
 
-  const stacks = stackOrder
-    .map((stackId) => stackById.get(stackId))
-    .filter((stack): stack is OpenTransactionStack => Boolean(stack))
+  const stacks = samlepostOrder
+    .slice(0, limit)
+    .map((stackId) => stackMap.get(stackId))
+    .filter((stack): stack is NonNullable<typeof stack> => Boolean(stack))
 
-  const groupedStacksByAccount: Record<string, OpenTransactionStack[]> = {}
+  const groupedStacksByAccount: Record<string, typeof stacks> = {}
   for (const stack of stacks) {
-    const accountKey = stack.representative.bankAccountName || 'Ukendt konto'
-    const bucket = groupedStacksByAccount[accountKey] ?? []
-    bucket.push(stack)
-    groupedStacksByAccount[accountKey] = bucket
+    const accountKey = stack.representative.bankAccountName ?? stack.representative.accountId
+    if (!groupedStacksByAccount[accountKey]) groupedStacksByAccount[accountKey] = []
+    groupedStacksByAccount[accountKey]?.push(stack)
   }
 
   const response: OpenTransactionsResponse = {
-    items: payload,
+    items: visibleItems,
     stacks,
     groupedStacksByAccount,
-    total,
-    limit: maxTopTransactions,
-    totalTopTransactions,
+    total: filteredRows.length,
+    limit,
+    totalSamleposter: samlepostOrder.length,
   }
 
-  if (OPEN_TRANSACTIONS_CACHE_TTL_SECONDS > 0) {
-    openTransactionsCache = {
-      expiresAtMs: nowMs + OPEN_TRANSACTIONS_CACHE_TTL_SECONDS * 1000,
-      payload: response,
-    }
-  }
-
-  setHeader(event, "X-Data-Source", "db");
-  return response;
-});
-
-function parseNumeric(value: unknown): number {
-  return parseAmount(value)
-}
-
-function toIsoDate(value: Date | string | null): string {
-  if (!value) {
-    return new Date().toISOString();
-  }
-  if (value instanceof Date) {
-    return value.toISOString();
-  }
-  return new Date(value).toISOString();
-}
-
-function toDateOnlyDate(value: Date | string | null): Date {
-  if (value instanceof Date) return value
-  const parsed = value ? new Date(value) : new Date()
-  return Number.isNaN(parsed.getTime()) ? new Date() : parsed
-}
-
-function toTopTransactionStackId(input: {
-  id: string | null
-  accountId: string | null
-  entryGroupSize: number | null
-  bookingDate: Date | string | null
-  creditDebitIndicator: string | null
-  ntryRef: string | null
-  entryAdditionalInfo: string | null
-  ntryAcctSvcrRef: string | null
-}): string {
-  const groupKey = buildNordeaDeterministicGroupKey({
-    accountId: input.accountId ?? '',
-    bookingDate: toDateOnlyDate(input.bookingDate),
-    creditDebitIndicator: input.creditDebitIndicator ?? null,
-    entryGroupSize: input.entryGroupSize ?? 0,
-    ntryRef: input.ntryRef ?? null,
-    entryAdditionalInfo: input.entryAdditionalInfo ?? null,
-    ntryAcctSvcrRef: input.ntryAcctSvcrRef ?? null,
-  })
-
-  if (groupKey) return `group:${groupKey}`
-  return `single:${String(input.id ?? '')}`
-}
-
-function toStatementEntryKey(statementId: string | null, entryIndex: number | null): string | null {
-  const normalizedStatementId = String(statementId ?? '').trim()
-  if (!normalizedStatementId) return null
-
-  const normalizedEntryIndex = Number(entryIndex)
-  if (!Number.isInteger(normalizedEntryIndex) || normalizedEntryIndex < 1) return null
-
-  return `${normalizedStatementId}:${normalizedEntryIndex}`
-}
-
-type TransactionRow = {
-  bankProvider: string | null;
-  bkTxCdProprietary: string | null;
-  bkTxCdDomain: string | null;
-  bkTxCdFamily: string | null;
-  bkTxCdSubFamily: string | null;
-}
-
-function buildTransactionCodeKey(row: TransactionRow): string | null {
-  if (row.bkTxCdProprietary && row.bkTxCdProprietary.trim().length) {
-    return `PRTRY:${row.bkTxCdProprietary.trim()}`
-  }
-
-  const parts = [row.bkTxCdDomain, row.bkTxCdFamily, row.bkTxCdSubFamily]
-    .map((value) => (value ? value.trim() : ''))
-    .filter(Boolean)
-
-  return parts.length ? parts.join('/') : null
-}
-
-function normalizeProvider(value: string | null | undefined): 'danskebank' | 'nordea' | 'bankconnect' | null {
-  const normalized = String(value ?? '').trim().toLowerCase()
-  if (normalized === 'danskebank') return 'danskebank'
-  if (normalized === 'nordea') return 'nordea'
-  if (normalized === 'bankconnect') return 'bankconnect'
-  return null
-}
-
-function resolveTransactionType(input: {
-  row: TransactionRow
-  catalogDisplayNameByCodeKey: Map<string, string>
-}): string | null {
-  const codeKey = buildTransactionCodeKey(input.row)
-  if (!codeKey) return null
-
-  const provider = normalizeProvider(input.row.bankProvider)
-  const displayName = provider
-    ? input.catalogDisplayNameByCodeKey.get(`${provider}:${codeKey.toUpperCase()}`)
-    : undefined
-  if (displayName) return displayName
-
-  if (codeKey.startsWith('PRTRY:')) {
-    return codeKey.slice('PRTRY:'.length)
-  }
-
-  return codeKey
-}
-
-type TransactionPartyRow = {
-  debtorName: string | null;
-  debtorId: string | null;
-  ultimateDebtorName: string | null;
-  creditorName: string | null;
-  creditorId: string | null;
-  ultimateCreditorName: string | null;
-}
-
-function resolveCounterpart(input: {
-  isOutgoing: boolean
-  row: TransactionPartyRow
-  parties: Array<{
-    role: 'debtor' | 'creditor' | 'ultimateDebtor' | 'ultimateCreditor'
-    displayName: string | null
-    identifier: string | null
-    accountIban: string | null
-  }>
-}): { value: string | null; hint: string | null } {
-  const { isOutgoing, row, parties } = input
-
-  const fromParties = resolveCounterpartFromV2Parties({ isOutgoing, parties })
-  if (fromParties) return fromParties
-
-  if (isOutgoing) {
-    const candidates: Array<{ value: string | null; hint: string }> = [
-      { value: row.creditorName, hint: 'creditorName' },
-      { value: row.ultimateCreditorName, hint: 'ultimateCreditorName' },
-      { value: row.creditorId, hint: 'creditorId' },
-      { value: row.debtorName, hint: 'debtorName' },
-      { value: row.ultimateDebtorName, hint: 'ultimateDebtorName' },
-      { value: row.debtorId, hint: 'debtorId' },
-    ]
-    for (const candidate of candidates) {
-      const normalized = normalizePartyValue(candidate.value)
-      if (normalized) return { value: normalized, hint: candidate.hint }
-    }
-    return { value: null, hint: null }
-  }
-
-  const candidates: Array<{ value: string | null; hint: string }> = [
-    { value: row.debtorName, hint: 'debtorName' },
-    { value: row.ultimateDebtorName, hint: 'ultimateDebtorName' },
-    { value: row.debtorId, hint: 'debtorId' },
-    { value: row.creditorName, hint: 'creditorName' },
-    { value: row.ultimateCreditorName, hint: 'ultimateCreditorName' },
-    { value: row.creditorId, hint: 'creditorId' },
-  ]
-  for (const candidate of candidates) {
-    const normalized = normalizePartyValue(candidate.value)
-    if (normalized) return { value: normalized, hint: candidate.hint }
-  }
-  return { value: null, hint: null }
-}
-
-function normalizePartyValue(value: string | null | undefined): string | null {
-  const normalized = String(value ?? '').trim()
-  return normalized.length ? normalized : null
-}
-
-function resolveCounterpartFromV2Parties(input: {
-  isOutgoing: boolean
-  parties: Array<{
-    role: 'debtor' | 'creditor' | 'ultimateDebtor' | 'ultimateCreditor'
-    displayName: string | null
-    identifier: string | null
-    accountIban: string | null
-  }>
-}): { value: string; hint: string } | null {
-  if (!input.parties.length) return null
-
-  const roleOrder = input.isOutgoing
-    ? ['creditor', 'ultimateCreditor', 'debtor', 'ultimateDebtor'] as const
-    : ['debtor', 'ultimateDebtor', 'creditor', 'ultimateCreditor'] as const
-
-  for (const role of roleOrder) {
-    const candidates = input.parties.filter((party) => party.role === role)
-    for (const candidate of candidates) {
-      const displayName = normalizePartyValue(candidate.displayName)
-      if (displayName) {
-        if (role === 'creditor') return { value: displayName, hint: 'creditorName' }
-        if (role === 'ultimateCreditor') return { value: displayName, hint: 'ultimateCreditorName' }
-        if (role === 'debtor') return { value: displayName, hint: 'debtorName' }
-        return { value: displayName, hint: 'ultimateDebtorName' }
-      }
-      const identifier = normalizePartyValue(candidate.identifier)
-      if (identifier) {
-        if (role === 'creditor') return { value: identifier, hint: 'creditorId' }
-        if (role === 'ultimateCreditor') return { value: identifier, hint: 'ultimateCreditorName' }
-        if (role === 'debtor') return { value: identifier, hint: 'debtorId' }
-        return { value: identifier, hint: 'ultimateDebtorName' }
-      }
-      const accountIban = normalizePartyValue(candidate.accountIban)
-      if (accountIban) {
-        if (role === 'creditor') return { value: accountIban, hint: 'creditorAccountIban' }
-        if (role === 'ultimateCreditor') return { value: accountIban, hint: 'ultimateCreditorName' }
-        if (role === 'debtor') return { value: accountIban, hint: 'debtorAccountIban' }
-        return { value: accountIban, hint: 'ultimateDebtorName' }
-      }
-    }
-  }
-
-  return null
-}
-
-function resolveTransactionTypeHint(row: TransactionRow): string | null {
-  if (row.bkTxCdProprietary && row.bkTxCdProprietary.trim().length) {
-    return 'bkTxCdProprietary'
-  }
-
-  const sourceParts: string[] = []
-  if (row.bkTxCdDomain?.trim()) sourceParts.push('bkTxCdDomain')
-  if (row.bkTxCdFamily?.trim()) sourceParts.push('bkTxCdFamily')
-  if (row.bkTxCdSubFamily?.trim()) sourceParts.push('bkTxCdSubFamily')
-
-  return sourceParts.length ? sourceParts.join(' + ') : null
-}
-
-type TransactionReferenceRow = {
-  ntryRef: string | null;
-  ntryAcctSvcrRef: string | null;
-  txAcctSvcrRef: string | null;
-  refsEndToEndId: string | null;
-  refsInstrId: string | null;
-  refsPmtInfId: string | null;
-  uetr: string | null;
-  entryAdditionalInfo: string | null;
-  txAdditionalInfo: string | null;
-  remittanceUstrd: string[] | null;
-  remittanceCreditorReference: string | null;
-  remittanceAdditional: string[] | null;
-}
-
-function buildReferenceDetails(row: TransactionReferenceRow): TransactionReferenceDetail[] {
-  const refs = new Map<string, TransactionReferenceDetail>();
-  const maybeAdd = (source: string, value?: string | null) => {
-    if (!value || !value.trim().length) return
-    const normalized = value.trim()
-    const key = normalized.toLowerCase()
-    if (refs.has(key)) return
-    refs.set(key, { value: normalized, source })
-  };
-
-  maybeAdd('Ntry/NtryRef', row.ntryRef)
-  maybeAdd('Ntry/AcctSvcrRef', row.ntryAcctSvcrRef)
-  maybeAdd('Ntry/NtryDtls/TxDtls/Refs/AcctSvcrRef', row.txAcctSvcrRef)
-  maybeAdd('Ntry/NtryDtls/TxDtls/Refs/EndToEndId', row.refsEndToEndId)
-  maybeAdd('Ntry/NtryDtls/TxDtls/Refs/InstrId', row.refsInstrId)
-  maybeAdd('Ntry/NtryDtls/TxDtls/Refs/PmtInfId', row.refsPmtInfId)
-  maybeAdd('Ntry/NtryDtls/TxDtls/Refs/UETR', row.uetr)
-  maybeAdd('Ntry/AddtlNtryInf', row.entryAdditionalInfo)
-  maybeAdd('Ntry/NtryDtls/TxDtls/AddtlTxInf', row.txAdditionalInfo)
-  maybeAdd('Ntry/NtryDtls/TxDtls/RmtInf/Strd/CdtrRefInf/Ref', row.remittanceCreditorReference)
-
-  if (Array.isArray(row.remittanceUstrd)) {
-    row.remittanceUstrd.forEach((value) => maybeAdd('Ntry/NtryDtls/TxDtls/RmtInf/Ustrd', value))
-  }
-  if (Array.isArray(row.remittanceAdditional)) {
-    row.remittanceAdditional.forEach((value) => maybeAdd('Ntry/NtryDtls/TxDtls/RmtInf/AddtlRmtInf', value))
-  }
-
-  return Array.from(refs.values());
-}
-
-async function hasTransactionCodeCatalogTable(): Promise<boolean> {
-  try {
-    const result = await db.execute(sql`
-      SELECT to_regclass('public.transaction_code_catalog') AS table_name
-    `)
-    const row = result.rows[0] as { table_name?: string | null } | undefined
-    return Boolean(row?.table_name)
-  } catch {
-    return false
-  }
-}
+  return response
+})

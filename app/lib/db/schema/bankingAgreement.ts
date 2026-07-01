@@ -26,8 +26,8 @@ export const bankingAgreement = pgTable('banking_agreement', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
-export const bankingAgreementInsertSchema = createInsertSchema(bankingAgreement)
-export const bankingAgreementUpdateSchema = createUpdateSchema(bankingAgreement)
+export const bankingAgreementInsertSchema = createInsertSchema(bankingAgreement).omit({ updatedAt: true })
+export const bankingAgreementUpdateSchema = createUpdateSchema(bankingAgreement).omit({ provider: true, createdAt: true })
 export const bankingAgreementSelectSchema = createSelectSchema(bankingAgreement)
 
 export type BankingAgreementInsertSchema = z.infer<typeof bankingAgreementInsertSchema>

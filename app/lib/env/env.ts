@@ -3,6 +3,37 @@ import { z } from "zod";
 import tryParseEnv from "./try-parse-env";
 import { erpSupplierValues } from "../db/schema/enums";
 
+const requiredFilenameMaskPlaceholders = [
+  '{municipalityCode}',
+  '{integrationId}',
+  '{docDate}',
+  '{docTime}',
+] as const
+
+const forbiddenLegacyFilenameTokens = ['xxx', 'zzzz', 'yyyymmdd', 'hhmmss'] as const
+
+function validateErpIntegrationFilenameMask(mask: string) {
+  const normalizedMask = mask.trim()
+
+  if (!normalizedMask) {
+    throw new Error('Missing required values in .env:\nERP_INTEGRATION_FILENAME_MASK')
+  }
+
+  const missingPlaceholders = requiredFilenameMaskPlaceholders.filter(token => !normalizedMask.includes(token))
+  if (missingPlaceholders.length > 0) {
+    throw new Error(
+      `Invalid ERP_INTEGRATION_FILENAME_MASK: missing placeholders ${missingPlaceholders.join(', ')}`,
+    )
+  }
+
+  const usedLegacyTokens = forbiddenLegacyFilenameTokens.filter(token => normalizedMask.includes(token))
+  if (usedLegacyTokens.length > 0) {
+    throw new Error(
+      `Invalid ERP_INTEGRATION_FILENAME_MASK: legacy tokens are not allowed (${usedLegacyTokens.join(', ')})`,
+    )
+  }
+}
+
 const baseCommonSchema = z.object({
   APP_ROLE: z.enum(["web", "scheduler", "worker"]).optional().default("web"),
   // These are primarily for docker-compose / local dev.
@@ -55,13 +86,6 @@ const baseCommonSchema = z.object({
   // Keep stateless: this only changes runtime behavior based on env.
   DEV_AUTH_BYPASS: z.enum(['true', 'false']).optional().default('false').transform(v => v === 'true'),
 
-  // Controls whether members of deterministic grouped open items can be processed individually in UI.
-  OPEN_ITEMS_ALLOW_GROUP_MEMBER_PROCESSING: z
-    .enum(['true', 'false'])
-    .optional()
-    .default('false')
-    .transform(v => v === 'true'),
-
   // Retention policy for deleting sensitive/history tables.
   // Default is 90 days if unset.
   DATA_RETENTION_DAYS: z.coerce.number().int().min(1).max(3650).default(90),
@@ -110,6 +134,7 @@ export type EnvSchema = z.infer<typeof EnvSchema>;
 const normalizedEnv = withNormalizedEnv({ ...process.env, APP_ROLE: process.env.APP_ROLE ?? "web" })
 tryParseEnv(EnvSchema, normalizedEnv);
 const parsedEnv = EnvSchema.parse(normalizedEnv);
+validateErpIntegrationFilenameMask(parsedEnv.ERP_INTEGRATION_FILENAME_MASK)
 
 export const erpIntegrationMetadata = {
   erpSupplier: parsedEnv.ERP_SUPPLIER,

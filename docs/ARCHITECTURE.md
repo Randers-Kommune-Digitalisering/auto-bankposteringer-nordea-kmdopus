@@ -12,6 +12,52 @@ This repo is a stateless financial integration engine:
 3) Match transactions against deterministic rules
 4) Generate ERP posting payloads and execute ERP integration
 
+## ERP request identity vs transport filename
+
+- `requestId` is an internal, persistent identity key for ERP request tracking/idempotency.
+- The physical filename used during ERP transport is an explicit payload field (`filename`) and must not be inferred from `requestId`.
+- For KMD, filename rendering is deterministic from the configured mask placeholders:
+  - `{municipalityCode}`
+  - `{integrationId}`
+  - `{docDate}`
+  - `{docTime}`
+- Retry/resend creates a new internal `requestId` and also a new valid transport filename derived from the same deterministic mask logic.
+
+## Samlepost semantics (ISO 20022)
+
+- Stacking is a backend concern and follows ISO 20022 entry/batch semantics.
+- Transactions are counted and paginated by samleposter across UI/API/dashboard.
+- The canonical samlepost identity is computed in shared server utilities to avoid duplicated per-endpoint logic:
+  - server/utils/iso20022Samlepost.ts
+- UI clients may temporarily receive both legacy and new names during migration:
+  - New: samlepostId, totalSamleposter, openSamleposter
+  - Legacy compatibility: topStackId, totalTopTransactions, openTransactions
+
+## Unified transactions API
+
+- The UI reads transaction views through a single endpoint: `/api/transactions`.
+- The endpoint is mode-based and transaction-first:
+  - `mode=open-items`: returns open-item payload (`OpenTransactionsResponse`) with stacks and grouped stacks.
+  - `mode=statement`: returns statement/list payload (`rows`, `totalSamleposter`, page metadata).
+- The legacy route `/api/transactions/statement` is a compatibility shim that forwards to `/api/transactions?mode=statement`.
+
+### Server-side fuzzy filtering contract
+
+- Query parameter: `search` (or alias `q`).
+- Filtering is performed server-side before stack pagination/counts are calculated.
+- Matching strategy is deterministic and token-based:
+  - direct substring matches score highest,
+  - compact subsequence matches score lower,
+  - multi-token contains fallback scores lowest.
+- If all tokens are not matched, the row is excluded.
+- This keeps TanStack client state simple while preserving a single authoritative filter result on the backend.
+
+## Banking document retention
+
+- banking_document remains the ingestion/audit anchor, but raw payload retention can be trimmed.
+- If payload trimming is enabled, statement metadata and normalized transaction rows remain the deterministic source for runtime behavior.
+- Retention policy must be explicit and environment-aware (for example shorter retention in dev, longer in production).
+
 ## Authentication and Authorization (v1)
 
 - Authentication/session lifecycle is handled by `nuxt-oidc-auth`.
@@ -102,6 +148,20 @@ This is modeled as `banking_agreement_account_allowlist` and stores IBANs per pr
 The allowlist is **not** modeled per channel; it is provider-scoped configuration that the selected adapter may choose to enforce.
 
 Bank accounts are not manually created by end users. Instead, accounts are discovered from ingested CAMT.053 statements and upserted deterministically using the statement's IBAN + currency (e.g. `DKxxxxxxxxxxxxxx-DKK`).
+
+When an agreement is enabled, the system performs a best-effort sync of the provider transaction code catalog from `resources/banking/<provider>/transaction-code-catalog.dk.csv`.
+This sync is non-blocking for activation: missing/invalid catalog data is logged and skipped, while the agreement remains enabled.
+
+Account discovery is modeled as a persisted lifecycle (`banking_agreement_discovery_run`) and executed via the worker queue.
+Activation schedules discovery and returns operation metadata immediately; discovery results are only considered final when the persisted status reaches a terminal state (`completed` or `failed`).
+The lifecycle states are:
+
+- `started`: activation accepted and discovery run created
+- `running`: worker has claimed and started processing
+- `completed`: terminal success with persisted counters (`discoveredAccounts`, `inspectedDocuments`, `skippedDays`)
+- `failed`: terminal failure with persisted error message
+
+This avoids request-coupled false positives (for example returning `0` while discovery still runs) and keeps behavior deterministic from database state.
 
 ## Key concepts (domain)
 

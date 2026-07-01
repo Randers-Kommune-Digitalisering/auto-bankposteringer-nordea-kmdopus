@@ -1,6 +1,9 @@
+// This endpoint is used in interactive UI where the user can handle errors
+
 import { desc, eq, inArray } from "drizzle-orm";
 import { setHeader } from "h3";
 import db from "~/lib/db";
+import { createUtcIsoString, inferMimeType } from "~~/utils/function";
 import { account } from "~/lib/db/schema/account";
 import { document } from "~/lib/db/schema/document";
 import { erpRequest, erpResponse } from "~/lib/db/schema/erp";
@@ -20,54 +23,18 @@ import type {
 } from "~/types/runs";
 import { parseAmount } from "#engine/matching/domain/amount";
 
-const formatDate = (value: Date | string | null): string => {
-  if (!value) {
-    return new Date().toISOString().slice(0, 10)
-  }
-
-  if (typeof value === "string") {
-    if (value.length >= 10) return value.slice(0, 10)
-    return new Date(value).toISOString().slice(0, 10)
-  }
-
-  return value.toISOString().slice(0, 10)
-};
-
 function parseNumeric(value: unknown): number {
   return parseAmount(value)
 }
 
-function inferMimeType(fileExtension: string | null | undefined, filename?: string | null): string | null {
-  const ext = (fileExtension ?? filename?.split(".").pop() ?? "").toLowerCase().trim();
-  if (!ext) {
-    return null;
-  }
-  if (ext === "pdf") {
-    return "application/pdf";
-  }
-  if (ext === "csv") {
-    return "text/csv";
-  }
-  if (ext === "xml") {
-    return "application/xml";
-  }
-  if (ext === "txt") {
-    return "text/plain";
-  }
-  if (ext === "json") {
-    return "application/json";
-  }
-  return "application/octet-stream";
-}
-
-type TransactionRow = {
+type TransactionTypeRow = {
   bkTxCdProprietary: string | null;
   bkTxCdDomain: string | null;
   bkTxCdFamily: string | null;
   bkTxCdSubFamily: string | null;
 }
 
-function resolveTransactionType(row: TransactionRow): string | null {
+function resolveTransactionType(row: TransactionTypeRow): string | null {
   if (row.bkTxCdProprietary && row.bkTxCdProprietary.trim().length) {
     return row.bkTxCdProprietary.trim()
   }
@@ -169,7 +136,7 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
 
   const runIds = runRows.map((row) => row.id);
 
-  const [transactionRows, documentRows, errorRows, erpResponseRows, jobRows, outboxRows] = await Promise.all([
+  const [TransactionTypeRows, documentRows, errorRows, erpResponseRows, jobRows, outboxRows] = await Promise.all([
     db
       .select({
         id: transaction.id,
@@ -215,7 +182,6 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
         id: document.id,
         runId: document.runId,
         type: document.type,
-        content: document.content,
         filename: document.filename,
         fileExtension: document.fileExtension,
       })
@@ -260,7 +226,8 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
   ]);
 
   const transactionsByRun = new Map<string, TransactionListItem[]>();
-  transactionRows.forEach((row) => {
+
+  TransactionTypeRows.forEach((row) => {
     if (!row.runId) {
       return;
     }
@@ -273,7 +240,7 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
       runId: row.runId,
       accountId: row.accountId,
       amount: row.amount,
-      bookingDate: formatDate(row.bookingDate),
+      bookingDate: createUtcIsoString(row.bookingDate),
       bankAccountLabel: row.bankAccountLabel,
       status: row.status,
       ruleApplied: row.ruleApplied,
@@ -365,7 +332,7 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
 
   return runRows.map<RunListItem>((row) => ({
     ...row,
-    bookingDate: formatDate(row.bookingDate),
+    bookingDate: createUtcIsoString(row.bookingDate),
     status: resolveEffectiveRunStatus(String(row.id), row.status),
     transactions: transactionsByRun.get(row.id) ?? [],
     documents: documentsByRun.get(row.id) ?? [],

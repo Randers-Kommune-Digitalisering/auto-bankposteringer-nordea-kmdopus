@@ -1,11 +1,20 @@
-import { computed } from 'vue'
+import { computed, toValue, type MaybeRefOrGetter } from 'vue'
 import type {
   OpenTransaction,
   OpenTransactionStack,
   OpenTransactionsResponse,
 } from '~/types/transactions'
+import { useStackedTransactions } from '~/composables/useStackedTransactions'
 
 type AccountStackBuckets = Record<string, OpenTransactionStack[]>
+
+type OpenTransactionsQueryOptions = {
+  start?: MaybeRefOrGetter<Date | string | null | undefined>
+  end?: MaybeRefOrGetter<Date | string | null | undefined>
+  accountIds?: MaybeRefOrGetter<string[] | null | undefined>
+  limit?: MaybeRefOrGetter<number | null | undefined>
+  search?: MaybeRefOrGetter<string | null | undefined>
+}
 
 function toStackId(tx: OpenTransaction): string {
   return tx.groupKey ? `group:${tx.groupKey}` : `single:${tx.id}`
@@ -21,7 +30,7 @@ function normalizeResponse(
       groupedStacksByAccount: undefined,
       total: 0,
       limit: 0,
-      totalTopTransactions: 0,
+      totalSamleposter: 0,
     }
   }
 
@@ -32,7 +41,7 @@ function normalizeResponse(
       groupedStacksByAccount: undefined,
       total: v.length,
       limit: v.length,
-      totalTopTransactions: new Set(v.map(toStackId)).size,
+      totalSamleposter: new Set(v.map(toStackId)).size,
     }
   }
 
@@ -42,83 +51,77 @@ function normalizeResponse(
     groupedStacksByAccount: v.groupedStacksByAccount,
     total: v.total ?? 0,
     limit: v.limit ?? 0,
-    totalTopTransactions: v.totalTopTransactions,
+    totalSamleposter: v.totalSamleposter,
   }
 }
 
-export function useOpenTransactions() {
+function toDateOnlyParam(value: Date | string | null | undefined): string | undefined {
+  if (!value) return undefined
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) return undefined
+    return value.toISOString().slice(0, 10)
+  }
+
+  const trimmed = String(value).trim()
+  if (!trimmed) return undefined
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed
+
+  const parsed = new Date(trimmed)
+  if (Number.isNaN(parsed.getTime())) return undefined
+  return parsed.toISOString().slice(0, 10)
+}
+
+export function useOpenTransactions(options: OpenTransactionsQueryOptions = {}) {
   const { data: rawData, pending, refresh } = useFetch<
     OpenTransactionsResponse | OpenTransaction[]
   >('/api/transactions', {
-    key: 'open-transactions',
+    key: computed(() => {
+      const start = toDateOnlyParam(toValue(options.start)) ?? 'none'
+      const end = toDateOnlyParam(toValue(options.end)) ?? 'none'
+      const accountIds = (toValue(options.accountIds) ?? []).join(',') || 'all'
+      const limit = Number(toValue(options.limit) ?? 200)
+        const search = String(toValue(options.search) ?? '').trim() || 'none'
+        return `open-transactions:${start}:${end}:${accountIds}:l${limit}:q:${search}`
+    }),
     server: false,
     lazy: false,
     dedupe: 'cancel',
-    staleTime: 30_000,
-    default: () => normalizeResponse(undefined),
+    query: computed(() => ({
+      mode: 'open-items',
+      start: toDateOnlyParam(toValue(options.start)),
+      end: toDateOnlyParam(toValue(options.end)),
+      accountIds: (toValue(options.accountIds) ?? []).length
+        ? (toValue(options.accountIds) ?? []).join(',')
+        : undefined,
+      limit: Number(toValue(options.limit) ?? 200),
+      search: String(toValue(options.search) ?? '').trim() || undefined,
+    })),
+    default: () => undefined,
   })
 
   const data = computed<OpenTransactionsResponse>(() =>
     normalizeResponse(rawData.value),
   )
 
+  const stacked = useStackedTransactions({
+    source: 'open-items',
+    openItems: data,
+  })
+
   /**
    * 1. BASE ITEMS (single source of truth)
    */
-  const items = computed<OpenTransaction[]>(() => data.value.items ?? [])
+  const items = computed<OpenTransaction[]>(() => stacked.value.items)
 
   /**
    * 2. STACKS (either backend or client fallback)
    */
-  const stacks = computed<OpenTransactionStack[]>(() => {
-    if (data.value.stacks?.length) {
-      return data.value.stacks
-    }
-
-    const map = new Map<string, OpenTransactionStack>()
-
-    for (const tx of items.value) {
-      const id = toStackId(tx)
-
-      const existing = map.get(id)
-      if (existing) {
-        existing.items.push(tx)
-        existing.totalAmount += tx.amount
-        continue
-      }
-
-      map.set(id, {
-        stackId: id,
-        groupKey: tx.groupKey,
-        items: [tx],
-        representative: tx,
-        totalAmount: tx.amount,
-        isGrouped: !!tx.groupKey,
-      })
-    }
-
-    return [...map.values()]
-  })
+  const stacks = computed<OpenTransactionStack[]>(() => stacked.value.stacks)
 
   /**
    * 3. BUCKETS (group by account)
    */
-  const stacksByAccount = computed<AccountStackBuckets>(() => {
-    if (data.value.groupedStacksByAccount) {
-      return data.value.groupedStacksByAccount
-    }
-
-    const buckets: AccountStackBuckets = {}
-
-    for (const stack of stacks.value) {
-      const key = stack.representative.bankAccountName ?? 'Ukendt konto'
-
-      if (!buckets[key]) buckets[key] = []
-      buckets[key].push(stack)
-    }
-
-    return buckets
-  })
+  const stacksByAccount = computed<AccountStackBuckets>(() => stacked.value.stacksByAccount)
 
   /**
    * 4. FLAT VIEW (only when needed)
@@ -138,14 +141,14 @@ export function useOpenTransactions() {
   /**
    * 5. METRICS (cheap derivations)
    */
-  const shownTopTransactions = computed(() => stacks.value.length)
+  const shownSamleposter = computed(() => stacked.value.shownSamleposter)
 
-  const totalTopTransactions = computed(() =>
-    data.value.totalTopTransactions ?? shownTopTransactions.value,
+  const totalSamleposter = computed(() =>
+    stacked.value.totalSamleposter,
   )
 
   const totalTransactions = computed(() =>
-    data.value.total ?? transactions.value.length,
+    stacked.value.totalTransactions,
   )
 
   const pageLimit = computed(() =>
@@ -153,8 +156,8 @@ export function useOpenTransactions() {
   )
 
   const isCapped = computed(() =>
-    totalTopTransactions.value > shownTopTransactions.value &&
-    shownTopTransactions.value >= pageLimit.value,
+    totalSamleposter.value > shownSamleposter.value &&
+    shownSamleposter.value >= pageLimit.value,
   )
 
   return {
@@ -169,8 +172,8 @@ export function useOpenTransactions() {
 
     // meta
     totalTransactions,
-    totalTopTransactions,
-    shownTopTransactions,
+    totalSamleposter,
+    shownSamleposter,
     pageLimit,
     isCapped,
   }

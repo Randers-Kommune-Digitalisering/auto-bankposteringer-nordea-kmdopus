@@ -2,12 +2,13 @@ import { z } from 'zod'
 import { and, asc, desc, eq, gte, inArray, isNull, lte, or, sql } from 'drizzle-orm'
 import { getQuery, setHeader } from 'h3'
 import db from '~/lib/db'
+import { createUtcIsoString } from '~~/utils/function'
 import { errorLog } from '~/lib/db/schema/error'
 import { run } from '~/lib/db/schema/run'
 import { rule } from '~/lib/db/schema/rule'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import type { DashboardResponse } from '~/types/dashboard'
-import { buildNordeaDeterministicGroupKey } from '#engine/banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo'
+import { toSamlepostId, toStatementEntryKey } from '~~/server/utils/iso20022Samlepost'
 
 const querySchema = z.object({
   start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
@@ -35,10 +36,6 @@ function parseStringArrayParam(value: unknown): string[] {
 
 function accountInSql(accountIds: string[]) {
   return sql`(${sql.join(accountIds.map((id) => sql`${id}`), sql`, `)})`
-}
-
-function formatDate(value: Date): string {
-  return value.toISOString().slice(0, 10)
 }
 
 function parseDate(value: string): Date {
@@ -72,51 +69,11 @@ function buildDateRange(start: Date, end: Date): string[] {
   endCopy.setHours(12, 0, 0, 0)
 
   while (cursor <= endCopy) {
-    dates.push(formatDate(cursor))
+    dates.push(createUtcIsoString(cursor))
     cursor.setDate(cursor.getDate() + 1)
   }
 
   return dates
-}
-
-function toDateOnlyDate(value: Date | string | null): Date {
-  if (value instanceof Date) return value
-  const parsed = value ? new Date(value) : new Date()
-  return Number.isNaN(parsed.getTime()) ? new Date() : parsed
-}
-
-function toTopTransactionStackId(input: {
-  id: string | null
-  accountId: string | null
-  entryGroupSize: number | null
-  bookingDate: Date | string | null
-  creditDebitIndicator: string | null
-  ntryRef: string | null
-  entryAdditionalInfo: string | null
-  ntryAcctSvcrRef: string | null
-}): string {
-  const groupKey = buildNordeaDeterministicGroupKey({
-    accountId: input.accountId ?? '',
-    bookingDate: toDateOnlyDate(input.bookingDate),
-    creditDebitIndicator: input.creditDebitIndicator ?? null,
-    entryGroupSize: input.entryGroupSize ?? 0,
-    ntryRef: input.ntryRef ?? null,
-    entryAdditionalInfo: input.entryAdditionalInfo ?? null,
-    ntryAcctSvcrRef: input.ntryAcctSvcrRef ?? null,
-  })
-
-  if (groupKey) return `group:${groupKey}`
-  return `single:${String(input.id ?? '')}`
-}
-
-function toStatementEntryKey(statementId: string | null, entryIndex: number | null): string | null {
-  const normalizedStatementId = String(statementId ?? '').trim()
-  if (!normalizedStatementId) return null
-
-  const normalizedEntryIndex = Number(entryIndex)
-  if (!Number.isInteger(normalizedEntryIndex) || normalizedEntryIndex < 1) return null
-
-  return `${normalizedStatementId}:${normalizedEntryIndex}`
 }
 
 export default defineEventHandler(async (event): Promise<DashboardResponse> => {
@@ -142,8 +99,8 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
   const endDateExclusive = new Date(endDate)
   endDateExclusive.setDate(endDateExclusive.getDate() + 1)
 
-  const start = formatDate(startDate)
-  const end = formatDate(endDate)
+  const start = createUtcIsoString(startDate)
+  const end = createUtcIsoString(endDate)
 
   const dateKeys = buildDateRange(startDate, endDate)
 
@@ -288,7 +245,7 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
 
   const rawSeriesByDate = new Map<string, { total: number; matched: number; autoBooked: number }>()
   for (const row of seriesRows) {
-    const dateKey = row.date instanceof Date ? formatDate(row.date) : String(row.date).slice(0, 10)
+    const dateKey = row.date instanceof Date ? createUtcIsoString(row.date) : String(row.date).slice(0, 10)
     rawSeriesByDate.set(dateKey, {
       total: clampNumber(row.totalTransactions),
       matched: clampNumber(row.matchedTransactions),
@@ -311,7 +268,7 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
   const matchedTransactions = automationSeries.reduce((acc, p) => acc + p.matchedTransactions, 0)
   const autoBookedTransactions = automationSeries.reduce((acc, p) => acc + p.autoBookedTransactions, 0)
 
-  const openTopStackIds = new Set<string>()
+  const openSamlepostIds = new Set<string>()
   const entryGroupSizeByEntryKey = new Map<string, number>()
   for (const row of openRowsForTopTx) {
     const entryKey = toStatementEntryKey(row.statementId, row.entryIndex)
@@ -322,7 +279,7 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
   for (const row of openRowsForTopTx) {
     const entryKey = toStatementEntryKey(row.statementId, row.entryIndex)
     const entryGroupSize = entryKey ? (entryGroupSizeByEntryKey.get(entryKey) ?? 0) : 0
-    const stackId = toTopTransactionStackId({
+    const stackId = toSamlepostId({
       id: row.id,
       accountId: row.accountId,
       entryGroupSize,
@@ -333,7 +290,7 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
       ntryAcctSvcrRef: row.ntryAcctSvcrRef,
     })
 
-    openTopStackIds.add(stackId)
+    openSamlepostIds.add(stackId)
   }
 
   const ruleAgg = ruleRows[0] ?? {
@@ -352,7 +309,7 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
       matchedTransactions,
       autoBookedTransactions,
       automationRatePercent: percent(matchedTransactions, totalTransactions),
-      openTransactions: openTopStackIds.size,
+      openSamleposter: openSamlepostIds.size,
 
       activeRules: clampNumber(ruleAgg.activeRules),
       inactiveRules: clampNumber(ruleAgg.inactiveRules),
@@ -368,7 +325,7 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
     automationSeries,
     latestRuns: latestRuns.map((entry) => ({
       id: entry.id,
-      bookingDate: entry.bookingDate instanceof Date ? formatDate(entry.bookingDate) : String(entry.bookingDate).slice(0, 10),
+      bookingDate: entry.bookingDate instanceof Date ? createUtcIsoString(entry.bookingDate) : String(entry.bookingDate).slice(0, 10),
       status: entry.status ?? null,
       transactionsCount: txCountByRunId.get(entry.id) ?? 0,
       errorsCount: errorCountByRunId.get(entry.id) ?? 0,

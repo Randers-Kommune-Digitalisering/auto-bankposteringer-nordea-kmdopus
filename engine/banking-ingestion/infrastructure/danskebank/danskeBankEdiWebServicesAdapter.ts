@@ -39,7 +39,7 @@ export const danskeBankEdiWsConfigSchema = z.object({
   softwareId: z.string().min(1).max(80),
   environment: z.enum(['TEST', 'PRODUCTION']).default('TEST'),
   downloadStatus: z.enum(['NEW', 'DLD', 'ALL']).default('NEW'),
-  lookbackDays: z.number().int().min(1).max(365).default(7),
+  lookbackDays: z.number().int().min(1).max(31).default(7),
   maxFilesPerRun: z.number().int().min(1).max(100).default(25),
 
   // PKIWS RequestHeader (often equals customer id)
@@ -66,9 +66,11 @@ export type DanskeBankEdiWsConfig = z.infer<typeof danskeBankEdiWsConfigSchema>
 
 export class DanskeBankEdiWebServicesAdapter implements BankAdapter {
   public readonly key = 'danskebank-edi-ws'
+  public readonly lookbackDays: number
 
   constructor(private readonly config: DanskeBankEdiWsConfig) {
-    danskeBankEdiWsConfigSchema.parse(config)
+    const parsed = danskeBankEdiWsConfigSchema.parse(config)
+    this.lookbackDays = parsed.lookbackDays
   }
 
   async fetchDocuments(input: FetchBankDocumentsInput): Promise<FetchBankDocumentsOutput> {

@@ -31,7 +31,7 @@ const schema = z.object({
   DANSKE_BANK_SOFTWARE_ID: z.string().min(1).max(80),
   DANSKE_BANK_ENVIRONMENT: z.enum(['TEST', 'PRODUCTION']).optional().default('TEST'),
   DANSKE_BANK_FILE_STATUS: z.enum(['NEW', 'DLD', 'ALL']).optional().default('NEW'),
-  DANSKE_BANK_LOOKBACK_DAYS: z.coerce.number().int().min(1).max(365).optional().default(7),
+  DANSKE_BANK_LOOKBACK_DAYS: z.coerce.number().int().min(1).max(31).optional().default(7),
   DANSKE_BANK_MAX_FILES_PER_RUN: z.coerce.number().int().min(1).max(100).optional().default(25),
 
   // PKIWS RequestHeader
