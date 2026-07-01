@@ -8,6 +8,7 @@ import { bankingAgreement } from './bankingAgreement'
 /**
  * Persisted cursor/state for provider-level fetching (agreement-scoped).
  */
+
 export const bankingAgreementCursor = pgTable(
   'banking_agreement_cursor',
   {

@@ -12,21 +12,23 @@ import {
 import { parseAmount } from '#engine/matching/domain/amount'
 
 export default defineEventHandler(async (event) => {
-  const transactionIdParam = event.context.params?.id
-  if (!transactionIdParam) {
+  const txId = event.context.params?.id
+  
+  if (!txId) {
     throw createError({ statusCode: 400, statusMessage: 'Mangler transaktions-id' })
   }
 
-  const transactionIdResult = z.string().uuid().safeParse(transactionIdParam)
-  if (!transactionIdResult.success) {
+  const parsedTxId = z.uuid().safeParse(txId)
+  if (!parsedTxId.success) {
     throw createError({
       statusCode: 400,
       statusMessage: 'Ugyldigt transaktions-id',
     })
   }
 
-  const transactionId = transactionIdResult.data
+  const transactionId = parsedTxId.data
 
+  // Check transaction state
   const [tx] = await db
     .select({
       id: transaction.id,
@@ -45,6 +47,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 409, statusMessage: 'Transaktionen er allerede behandlet' })
   }
 
+  // Get draft content
   const [header] = await db
     .select()
     .from(manualBookingDraft)

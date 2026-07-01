@@ -21,6 +21,12 @@ import * as transactionCodeCatalogSchema from './schema/transactionCodeCatalog'
 import * as bankingAdapterCursorSchema from './schema/bankingAdapterCursor'
 import * as manualBookingDraftSchema from './schema/manualBookingDraft'
 
+/*
+--------------------
+Expose db connection
+--------------------
+*/
+
 const schema = {
   ...accountSchema,
   ...bankingSchema,
@@ -41,7 +47,6 @@ const schema = {
   ...bankingAdapterCursorSchema,
   ...manualBookingDraftSchema,
 } as const
-
 
 export const pool = new Pool({
   connectionString: dbEnv.DATABASE_URL,

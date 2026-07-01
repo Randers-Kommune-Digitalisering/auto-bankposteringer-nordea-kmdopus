@@ -9,7 +9,7 @@ export type DashboardKpis = {
   autoBookedTransactions: number
   automationRatePercent: number
 
-  openTransactions: number
+  openSamleposter: number
 
   activeRules: number
   inactiveRules: number

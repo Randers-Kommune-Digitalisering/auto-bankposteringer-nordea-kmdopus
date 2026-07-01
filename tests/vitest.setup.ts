@@ -20,7 +20,7 @@ setIfMissing('ERP_PROD_ENVIRONMENT', 'P04')
 setIfMissing('ERP_MUNICIPALITY_CODE', '730')
 setIfMissing('ERP_COMP_CODE', '0020')
 setIfMissing('ERP_INTEGRATION_ID', 'TEST')
-setIfMissing('ERP_INTEGRATION_FILENAME_MASK', 'TEST.xml')
+setIfMissing('ERP_INTEGRATION_FILENAME_MASK', 'ZFIR_KMD_Opus_Posteringer_IND_{municipalityCode}_{integrationId}_{docDate}_{docTime}.xml')
 
 setIfMissing('SFTP_URL', 'sftp://example.invalid')
 setIfMissing('SFTP_USERNAME', 'dummy')

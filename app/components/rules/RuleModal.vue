@@ -11,7 +11,7 @@ import type { MatchField, MatchCategory } from '~/lib/rules/match-config'
 import { ruleTypeValues, ruleStatusValues, cprTypeValues } from '~/lib/db/schema/enums'
 import { matchFieldOptionsByCategory, matchCategories, matchCategoryColumns } from '~/lib/rules/match-config'
 import { ruleBasicSchema, ruleMatchingSchema, ruleAccountingSchema } from '~/lib/db/schema/rule'
-import { DEFAULT_TIME_ZONE } from '~/lib/timeZone'
+import { DEFAULT_TIME_ZONE } from '~/utils'
 import { accountingDimensionFormatHint } from '~/lib/presenters/accountingDimensionFormatHints'
 
 const appConfig = useAppConfig()

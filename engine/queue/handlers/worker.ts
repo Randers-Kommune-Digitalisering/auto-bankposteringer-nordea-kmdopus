@@ -22,7 +22,7 @@ export type WorkerRunOptions = {
 }
 
 // For validating job types
-const knownJobTypes = ['banking.ingest', 'erp.ingestResponses', 'ops.dbCleanup'] as const
+const knownJobTypes = ['banking.ingest', 'banking.accountDiscovery', 'erp.ingestResponses', 'ops.dbCleanup'] as const
 type KnownJobType = (typeof knownJobTypes)[number]
 
 const workerId = `${process.env.WORKER_ID ?? ''}`.trim() || `${process.pid}-${crypto.randomUUID()}`
@@ -79,7 +79,10 @@ async function processJobs(limit: number, allowedTypes?: string[]): Promise<numb
       await db.execute(sql`
         update job
         set
-          status = case when attempts + 1 >= max_attempts then 'failed' else 'pending' end,
+          status = case
+            when attempts + 1 >= max_attempts then 'failed'::job_status
+            else 'pending'::job_status
+          end,
           attempts = attempts + 1,
           locked_at = null,
           locked_by = null,
@@ -190,6 +193,17 @@ async function handleJob(type: string, payload: any, context: { runId?: string }
     return
   }
 
+  if (type === 'banking.accountDiscovery') {
+    const discoveryRunId = String(payload?.discoveryRunId ?? '')
+    if (!discoveryRunId) {
+      throw new Error('banking.accountDiscovery payload mangler discoveryRunId')
+    }
+
+    const { runAgreementAccountDiscovery } = await import('../../banking-ingestion/handlers/runAgreementAccountDiscovery')
+    await runAgreementAccountDiscovery({ discoveryRunId })
+    return
+  }
+
   if (type === 'erp.ingestResponses') {
     const { ingestErpResponses } = await import('../../erp-integration/handlers/ingestErpResponses')
     await ingestErpResponses({
@@ -216,8 +230,17 @@ async function handleOutbox(topic: string, payload: any): Promise<any> {
       throw new Error('Outbox payload mangler requestId')
     }
 
+    const payloadFilename = typeof payload?.filename === 'string' ? payload.filename.trim() : ''
+    if (!payloadFilename) {
+      logger.warn('worker.outbox.erpUpload.filenameMissing', { requestId, topic })
+    }
+
     const { uploadErpRequestPayload } = await import('../../erp-integration/infrastructure/erpOutbox')
-    return await uploadErpRequestPayload({ requestId, erpSupplier: payload?.erpSupplier })
+    return await uploadErpRequestPayload({
+      requestId,
+      filename: payloadFilename || undefined,
+      erpSupplier: payload?.erpSupplier,
+    })
   }
 
   throw new Error(`Ukendt outbox-topic: ${topic}`)

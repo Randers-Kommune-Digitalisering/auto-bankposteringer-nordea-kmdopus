@@ -2,6 +2,7 @@ import { defineEventHandler, createError } from 'h3'
 import { desc, eq, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import db from '~/lib/db'
+import { createUtcIsoString } from '~~/utils/function'
 import { run } from '~/lib/db/schema/run'
 import { job } from '~/lib/db/schema/job'
 import { outbox } from '~/lib/db/schema/outbox'
@@ -10,14 +11,8 @@ import { errorLog } from '~/lib/db/schema/error'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import type { RunTimelineResponse } from '~/types/runTimeline'
 
-function toIso(value: unknown): string {
-  if (!value) return ''
-  if (value instanceof Date) return value.toISOString()
-  return String(value)
-}
-
 export default defineEventHandler(async (event) => {
-  const runId = z.string().uuid().parse(event.context.params?.runId)
+  const runId = z.uuid().parse(event.context.params?.runId)
 
   const runRow = await db.select().from(run).where(eq(run.id, runId)).limit(1)
   const r = runRow?.[0]
@@ -45,7 +40,9 @@ export default defineEventHandler(async (event) => {
     (async () => {
       const requestIdExpr = sql<string>`${outbox.payload} ->> 'requestId'`
 
-      return await db
+      return await
+      // Get outbox items related to the run, along with their request and response IDs and response status text
+      db
         .select({
           id: outbox.id,
           topic: outbox.topic,
@@ -66,6 +63,7 @@ export default defineEventHandler(async (event) => {
         .limit(500)
     })(),
 
+    // Get ERP requests and their responses for the run, along with line counts
     db
       .select({
         requestId: erpRequest.id,
@@ -81,6 +79,7 @@ export default defineEventHandler(async (event) => {
       .orderBy(desc(erpRequest.id))
       .limit(200),
 
+    // Get error logs for the run
     db
       .select({
         id: errorLog.id,
@@ -94,12 +93,14 @@ export default defineEventHandler(async (event) => {
       .orderBy(desc(errorLog.createdAt))
       .limit(200),
 
+    // Get total transaction count and processing status counts for the run
     db
       .select({ count: sql<number>`count(*)` })
       .from(transaction)
       .where(eq(transaction.runId, runId))
       .limit(1),
 
+    // Get processing status for transactions in the run, grouped by status
     db
       .select({
         status: transactionProcessing.status,
@@ -134,7 +135,7 @@ export default defineEventHandler(async (event) => {
   return {
     run: {
       id: String(r.id),
-      bookingDate: r.bookingDate instanceof Date ? r.bookingDate.toISOString().slice(0, 10) : String(r.bookingDate),
+      bookingDate: createUtcIsoString(r.bookingDate),
       status: r.status ? String(r.status) : null,
     },
     jobs: (jobRows ?? []).map<RunTimelineResponse['jobs'][number]>((j) => ({
@@ -143,22 +144,22 @@ export default defineEventHandler(async (event) => {
       status: String(j.status),
       runId: j.runId ? String(j.runId) : null,
       attempts: Number(j.attempts ?? 0),
-      runAt: toIso(j.runAt),
+      runAt: createUtcIsoString(j.runAt),
       lastError: j.lastError ? String(j.lastError) : null,
-      updatedAt: toIso(j.updatedAt),
+      updatedAt: createUtcIsoString(j.updatedAt),
     })),
     outbox: (outboxRows ?? []).map<RunTimelineResponse['outbox'][number]>((o) => ({
       id: String(o.id),
       topic: String(o.topic),
       status: String(o.status),
       attempts: Number(o.attempts ?? 0),
-      nextAttemptAt: toIso(o.nextAttemptAt),
+      nextAttemptAt: o.nextAttemptAt ? createUtcIsoString(o.nextAttemptAt) : null,
       lastError: o.lastError ? String(o.lastError) : null,
       requestId: o.requestId ? String(o.requestId) : null,
       responseId: o.responseId ? String(o.responseId) : null,
       responseStatusText: o.responseStatusText ? String(o.responseStatusText) : null,
-      createdAt: toIso(o.createdAt),
-      processedAt: o.processedAt ? toIso(o.processedAt) : null,
+      createdAt: createUtcIsoString(o.createdAt),
+      processedAt: o.processedAt ? createUtcIsoString(o.processedAt) : null,
     })),
     erpRequests: (requestRows ?? []).map<RunTimelineResponse['erpRequests'][number]>((req) => ({
       requestId: String(req.requestId),
@@ -171,7 +172,7 @@ export default defineEventHandler(async (event) => {
       source: e.source ? String(e.source) : null,
       errorCode: e.errorCode != null ? Number(e.errorCode) : null,
       errorString: e.errorString ? String(e.errorString) : null,
-      createdAt: toIso(e.createdAt),
+      createdAt: createUtcIsoString(e.createdAt),
     })),
     matching,
   } satisfies RunTimelineResponse

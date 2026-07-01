@@ -14,7 +14,7 @@ export const bankingReference = pgTable("banking_reference", {
   text: text("text"),
   primaryReference: text("primary_reference"),
   bankingId: text("banking_id"),
-  batch: text("batch"),
+  batch: text("batch"), // Transactions stack based on whether or not this value is defined
   endToEndId: text("end_to_end_id"),
   ocrReference: text("ocr_reference"),
   debtorsPaymentId: text("debtors_payment_id"),

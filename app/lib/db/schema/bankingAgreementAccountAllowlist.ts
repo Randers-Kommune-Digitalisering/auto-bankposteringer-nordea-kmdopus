@@ -9,8 +9,8 @@ import { bankingAgreement } from './bankingAgreement'
  * Provider-level allowlist for which bank accounts may be fetched via API-based channels.
  *
  * Stored as a deterministic, auditable configuration in DB.
- * Secrets remain in env.
  */
+
 export const bankingAgreementAccountAllowlist = pgTable(
   'banking_agreement_account_allowlist',
   {

@@ -10,7 +10,6 @@ type BankingAccountUnionDto = {
   iban: string
   currency: string | null
   name: string | null
-  artskonto: string | null
   statuskonto: string | null
   ignoreIngestion: boolean
   observed: boolean
@@ -18,7 +17,7 @@ type BankingAccountUnionDto = {
   observedAccountId: string | null
 }
 
-type AllowlistAccount = { iban: string; name: string | null; artskonto: string | null; statuskonto: string | null; ignoreIngestion: boolean }
+type AllowlistAccount = { iban: string; name: string | null; statuskonto: string | null; ignoreIngestion: boolean }
 
 type NordeaRestAuthStatus = {
   provider: 'nordea'
@@ -95,16 +94,32 @@ type BankingAgreement = {
         }
       }
     | { status: 'not_implemented'; message: string; env?: any }
+  latestDiscovery?: {
+    id: string
+    status: 'started' | 'running' | 'completed' | 'failed'
+    channel: 'iso20022' | 'rest'
+    requestedAt: string | null
+    startedAt: string | null
+    finishedAt: string | null
+    updatedAt: string | null
+    discoveredAccounts: number
+    inspectedDocuments: number
+    skippedDays: number
+    errorMessage: string | null
+  } | null
 }
 
 type AgreementToggleResponse = {
   success: boolean
   agreement?: BankingAgreement
-  accountDiscovery?: {
-    discoveredAccounts: number
-    inspectedDocuments: number
-    error?: string
-  }
+  discoveryOperation?: {
+    id: string
+    status: 'started'
+    provider: BankingAgreement['provider']
+    channel: BankingAgreement['channel']
+    requestedAt: string
+    jobId: string
+  } | null
 }
 
 const BANKING_ACCOUNTS_QUERY_KEY = 'banking-accounts' as const
@@ -133,7 +148,7 @@ const accountModalOpen = ref(false)
 const accountModalMode = ref<'observed' | 'configured'>('observed')
 const editingObservedAccountId = ref<string | null>(null)
 const configuredDraft = ref<
-  | { provider: 'danskebank' | 'nordea' | 'bankconnect'; iban: string; name?: string | null; artskonto?: string | null; statuskonto?: string | null }
+  | { provider: 'danskebank' | 'nordea' | 'bankconnect'; iban: string; name?: string | null; statuskonto?: string | null; ignoreIngestion?: boolean }
   | null
 >(null)
 
@@ -159,7 +174,8 @@ function formatHttpErrorBrief(err: any): { titleSuffix?: string; description: st
   const upstreamSnippet =
     err?.data?.data?.upstream?.responseTextSnippet ?? err?.data?.upstream?.responseTextSnippet ?? null
 
-  const shortText = typeof statusText === 'string' ? statusText.split('\n')[0].trim().slice(0, 180) : ''
+  const shortText =
+    typeof statusText === 'string' ? (statusText.split('\n')[0] ?? '').trim().slice(0, 180) : ''
   const failureText =
     typeof upstreamFailureDescription === 'string'
       ? upstreamFailureDescription.replace(/\s+/g, ' ').trim().slice(0, 220)
@@ -224,6 +240,7 @@ async function requestNordeaRestReauth() {
 
 const refreshingAccounts = ref(false)
 const sorting = ref<SortingState>([])
+const discoveryPollingByProvider = ref<Record<string, boolean>>({})
 
 const envModalOpen = ref(false)
 const envModalProvider = ref<BankingAgreement['provider'] | null>(null)
@@ -252,39 +269,111 @@ const { data: agreements, refresh: refreshAgreements } = useFetch<BankingAgreeme
 
 // Keep Nuxt's client-side cache for these endpoints; explicit refreshes are triggered after mutations.
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+type DiscoveryRunResponse = {
+  id: string
+  provider: BankingAgreement['provider']
+  channel: BankingAgreement['channel']
+  status: 'started' | 'running' | 'completed' | 'failed'
+  requestedAt: string | null
+  startedAt: string | null
+  finishedAt: string | null
+  updatedAt: string | null
+  discoveredAccounts: number
+  inspectedDocuments: number
+  skippedDays: number
+  errorMessage: string | null
+}
+
+async function pollDiscoveryUntilTerminal(provider: BankingAgreement['provider'], discoveryRunId: string) {
+  if (discoveryPollingByProvider.value[provider]) {
+    return
+  }
+
+  discoveryPollingByProvider.value[provider] = true
+  try {
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      const run = await $fetch<DiscoveryRunResponse | null>(`/api/banking-agreements/${provider}/discovery`, {
+        query: { id: discoveryRunId },
+      })
+
+      if (!run) {
+        await sleep(1000)
+        continue
+      }
+
+      if (run.status === 'completed') {
+        toast.add({
+          title: 'Kontohentning færdig',
+          description: `Fandt ${run.discoveredAccounts} konti i ${run.inspectedDocuments} dokumenter. Skippede ${run.skippedDays} datoer.`,
+          color: 'success',
+        })
+        await Promise.all([
+          refreshAgreements(),
+          refreshBankAccounts(),
+        ])
+        return
+      }
+
+      if (run.status === 'failed') {
+        toast.add({
+          title: 'Kontohentning fejlede',
+          description: run.errorMessage || 'Ukendt fejl under kontohentning',
+          color: 'warning',
+        })
+        await refreshAgreements()
+        return
+      }
+
+      await sleep(attempt < 10 ? 1000 : 3000)
+    }
+
+    toast.add({
+      title: 'Kontohentning kører stadig',
+      description: 'Status opdateres fortsat i baggrunden. Du kan opdatere siden senere.',
+      color: 'neutral',
+    })
+  } catch (err: any) {
+    toast.add({
+      title: 'Kunne ikke hente discovery-status',
+      description: String(err?.data?.statusMessage ?? err?.statusMessage ?? err?.message ?? err),
+      color: 'warning',
+    })
+  } finally {
+    discoveryPollingByProvider.value[provider] = false
+  }
+}
+
 const providerLabel = (p: BankingAgreement['provider']) => {
   if (p === 'danskebank') return 'Danske Bank'
   if (p === 'nordea') return 'Nordea'
   return 'Bank Connect'
 }
 
-async function toggleAgreement(provider: BankingAgreement['provider'], enabled: boolean) {
+async function toggleAgreement(provider: BankingAgreement['provider'], enabled: boolean, channel?: BankingAgreement['channel']) {
   try {
     const response = await $fetch<AgreementToggleResponse>(`/api/banking-agreements/${provider}`, {
       method: 'PUT',
-      body: { enabled },
+      body: { enabled, channel },
     })
 
-    await Promise.all([
-      refreshAgreements(),
-      refreshBankAccounts(),
-    ])
+    await refreshAgreements()
 
     if (enabled) {
-      const discovery = response?.accountDiscovery
-      if (discovery?.error) {
+      const operation = response?.discoveryOperation
+      if (operation?.status === 'started') {
         toast.add({
-          title: 'Aktiveret, men kontohentning fejlede',
-          description: discovery.error,
-          color: 'warning',
-        })
-      } else if (discovery) {
-        toast.add({
-          title: 'Konti opdateret',
-          description: `Fandt ${discovery.discoveredAccounts} konti i ${discovery.inspectedDocuments} dokumenter.`,
+          title: 'Kontohentning startet',
+          description: 'Aftalen er aktiveret. Kontohentning kører i baggrunden og giver besked ved færdig status.',
           color: 'success',
         })
+        void pollDiscoveryUntilTerminal(provider, operation.id)
+      } else {
+        await refreshBankAccounts()
       }
+    } else {
+      await refreshBankAccounts()
     }
 
     return true
@@ -360,7 +449,7 @@ function openEnvModal(provider: BankingAgreement['provider']) {
 
 async function activateSelectedAgreement() {
   if (!envModalProvider.value) return
-  const ok = await toggleAgreement(envModalProvider.value, true)
+  const ok = await toggleAgreement(envModalProvider.value, true, selectedAgreement.value?.channel)
   if (ok) {
     envModalOpen.value = false
     envModalProvider.value = null
@@ -407,7 +496,6 @@ function openEditConfiguredAccountModal(row: BankingAccountUnionDto) {
     provider: row.provider,
     iban: row.iban,
     name: row.name,
-    artskonto: row.artskonto ?? row.statuskonto,
     statuskonto: row.statuskonto,
     ignoreIngestion: row.ignoreIngestion,
   }

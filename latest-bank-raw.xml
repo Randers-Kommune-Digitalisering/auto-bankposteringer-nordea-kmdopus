@@ -1,0 +1,2241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt>
+    <GrpHdr>
+      <MsgId>XML99102026070100111291358932727713</MsgId>
+      <CreDtTm>2026-07-01T00:11:12.913+02:00</CreDtTm>
+      <MsgRcpt>
+        <Id>
+          <OrgId>
+            <Othr>
+              <Id>1231263194</Id>
+              <SchmeNm>
+                <Cd>CUST</Cd>
+              </SchmeNm>
+            </Othr>
+            <Othr>
+              <Id>NDEAPROD</Id>
+              <SchmeNm>
+                <Cd>BANK</Cd>
+              </SchmeNm>
+            </Othr>
+          </OrgId>
+        </Id>
+      </MsgRcpt>
+    </GrpHdr>
+    <Stmt>
+      <Id>2026-07-01-00.11.12-DKK5315</Id>
+      <ElctrncSeqNb>35</ElctrncSeqNb>
+      <LglSeqNb>21</LglSeqNb>
+      <CreDtTm>2026-07-01T00:11:12.913+02:00</CreDtTm>
+      <Acct>
+        <Id>
+          <IBAN>DK3620009035615315</IBAN>
+        </Id>
+        <Ccy>DKK</Ccy>
+        <Ownr>
+          <Nm>RANDERS KOMMUNE</Nm>
+        </Ownr>
+        <Svcr>
+          <FinInstnId>
+            <BIC>NDEADKKK</BIC>
+            <PstlAdr>
+              <Ctry>DK</Ctry>
+            </PstlAdr>
+          </FinInstnId>
+        </Svcr>
+      </Acct>
+      <Bal>
+        <Tp>
+          <CdOrPrtry>
+            <Cd>OPBD</Cd>
+          </CdOrPrtry>
+        </Tp>
+        <Amt Ccy="DKK">4283170.97</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt>
+          <Dt>2026-06-30</Dt>
+        </Dt>
+      </Bal>
+      <Bal>
+        <Tp>
+          <CdOrPrtry>
+            <Cd>CLBD</Cd>
+          </CdOrPrtry>
+        </Tp>
+        <Amt Ccy="DKK">4286170.97</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt>
+          <Dt>2026-06-30</Dt>
+        </Dt>
+      </Bal>
+      <Ntry>
+        <NtryRef>1</NtryRef>
+        <Amt Ccy="DKK">3000.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-06-30</Dt>
+        </ValDt>
+        <AcctSvcrRef>5010567026181</AcctSvcrRef>
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>RCDT</Cd>
+              <SubFmlyCd>DMCT</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>1527102438</AcctSvcrRef>
+            </Refs>
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">3000.00</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>PMNT</Cd>
+                <Fmly>
+                  <Cd>RCDT</Cd>
+                  <SubFmlyCd>DMCT</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+            <RltdPties>
+              <Dbtr>
+                <PstlAdr>
+                  <AdrLine>RANDERS KOMMUNE</AdrLine>
+                  <AdrLine>PENSION BORGERSERVICE 3</AdrLine>
+                  <AdrLine>LAKSETORVET 1</AdrLine>
+                  <AdrLine>8900 RANDERS C</AdrLine>
+                </PstlAdr>
+              </Dbtr>
+            </RltdPties>
+            <Purp>
+              <Prtry>290568-2205</Prtry>
+            </Purp>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>502:REFERENCE:290568-2205;821:ADVICE REFERENCE:05010567026181;555:FILE
+          INFORMATION:30062026 1527102438;502:REFERENCE:KON konto 0970205918</AddtlNtryInf>
+      </Ntry>
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt>
+    <GrpHdr>
+      <MsgId>XML99102026070100111291352127067394</MsgId>
+      <CreDtTm>2026-07-01T00:11:12.913+02:00</CreDtTm>
+      <MsgRcpt>
+        <Id>
+          <OrgId>
+            <Othr>
+              <Id>1231263194</Id>
+              <SchmeNm>
+                <Cd>CUST</Cd>
+              </SchmeNm>
+            </Othr>
+            <Othr>
+              <Id>NDEAPROD</Id>
+              <SchmeNm>
+                <Cd>BANK</Cd>
+              </SchmeNm>
+            </Othr>
+          </OrgId>
+        </Id>
+      </MsgRcpt>
+    </GrpHdr>
+    <Stmt>
+      <Id>2026-07-01-00.11.12-DKK8087</Id>
+      <ElctrncSeqNb>35</ElctrncSeqNb>
+      <LglSeqNb>1</LglSeqNb>
+      <CreDtTm>2026-07-01T00:11:12.913+02:00</CreDtTm>
+      <Acct>
+        <Id>
+          <IBAN>DK8220006297188087</IBAN>
+        </Id>
+        <Ccy>DKK</Ccy>
+        <Ownr>
+          <Nm>Randers Kommune</Nm>
+        </Ownr>
+        <Svcr>
+          <FinInstnId>
+            <BIC>NDEADKKK</BIC>
+            <PstlAdr>
+              <Ctry>DK</Ctry>
+            </PstlAdr>
+          </FinInstnId>
+        </Svcr>
+      </Acct>
+      <Bal>
+        <Tp>
+          <CdOrPrtry>
+            <Cd>OPBD</Cd>
+          </CdOrPrtry>
+        </Tp>
+        <Amt Ccy="DKK">144870192.77</Amt>
+        <CdtDbtInd>DBIT</CdtDbtInd>
+        <Dt>
+          <Dt>2026-06-30</Dt>
+        </Dt>
+      </Bal>
+      <Bal>
+        <Tp>
+          <CdOrPrtry>
+            <Cd>CLBD</Cd>
+          </CdOrPrtry>
+        </Tp>
+        <Amt Ccy="DKK">147634038.21</Amt>
+        <CdtDbtInd>DBIT</CdtDbtInd>
+        <Dt>
+          <Dt>2026-06-30</Dt>
+        </Dt>
+      </Bal>
+      <Ntry>
+        <NtryRef>1</NtryRef>
+        <Amt Ccy="DKK">2763845.44</Amt>
+        <CdtDbtInd>DBIT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-07-01</Dt>
+        </ValDt>
+        <BkTxCd>
+          <Domn>
+            <Cd>ACMT</Cd>
+            <Fmly>
+              <Cd>MDOP</Cd>
+              <SubFmlyCd>INTR</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs />
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">2763845.44</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>ACMT</Cd>
+                <Fmly>
+                  <Cd>MDOP</Cd>
+                  <SubFmlyCd>INTR</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+            <RltdAgts>
+              <DbtrAgt>
+                <FinInstnId>
+                  <BIC>NDEADKKK</BIC>
+                  <PstlAdr>
+                    <Ctry>DK</Ctry>
+                  </PstlAdr>
+                </FinInstnId>
+              </DbtrAgt>
+            </RltdAgts>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>903:FROM THE:31.03.2026;904:TO THE:30.06.2026</AddtlNtryInf>
+      </Ntry>
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt>
+    <GrpHdr>
+      <MsgId>XML99102026070100111291398031070412</MsgId>
+      <CreDtTm>2026-07-01T00:11:12.913+02:00</CreDtTm>
+      <MsgRcpt>
+        <Id>
+          <OrgId>
+            <Othr>
+              <Id>1231263194</Id>
+              <SchmeNm>
+                <Cd>CUST</Cd>
+              </SchmeNm>
+            </Othr>
+            <Othr>
+              <Id>NDEAPROD</Id>
+              <SchmeNm>
+                <Cd>BANK</Cd>
+              </SchmeNm>
+            </Othr>
+          </OrgId>
+        </Id>
+      </MsgRcpt>
+    </GrpHdr>
+    <Stmt>
+      <Id>2026-07-01-00.11.12-DKK1789</Id>
+      <ElctrncSeqNb>35</ElctrncSeqNb>
+      <LglSeqNb>1</LglSeqNb>
+      <CreDtTm>2026-07-01T00:11:12.913+02:00</CreDtTm>
+      <Acct>
+        <Id>
+          <IBAN>DK8420009033611789</IBAN>
+        </Id>
+        <Ccy>DKK</Ccy>
+        <Ownr>
+          <Nm>RANDERS BOLIG</Nm>
+        </Ownr>
+        <Svcr>
+          <FinInstnId>
+            <BIC>NDEADKKK</BIC>
+            <PstlAdr>
+              <Ctry>DK</Ctry>
+            </PstlAdr>
+          </FinInstnId>
+        </Svcr>
+      </Acct>
+      <Bal>
+        <Tp>
+          <CdOrPrtry>
+            <Cd>OPBD</Cd>
+          </CdOrPrtry>
+        </Tp>
+        <Amt Ccy="DKK">38153736.59</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt>
+          <Dt>2026-06-30</Dt>
+        </Dt>
+      </Bal>
+      <Bal>
+        <Tp>
+          <CdOrPrtry>
+            <Cd>CLBD</Cd>
+          </CdOrPrtry>
+        </Tp>
+        <Amt Ccy="DKK">38310898.63</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt>
+          <Dt>2026-06-30</Dt>
+        </Dt>
+      </Bal>
+      <Ntry>
+        <NtryRef>1</NtryRef>
+        <Amt Ccy="DKK">157162.04</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-07-01</Dt>
+        </ValDt>
+        <BkTxCd>
+          <Domn>
+            <Cd>ACMT</Cd>
+            <Fmly>
+              <Cd>MCOP</Cd>
+              <SubFmlyCd>INTR</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs />
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">157162.04</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>ACMT</Cd>
+                <Fmly>
+                  <Cd>MCOP</Cd>
+                  <SubFmlyCd>INTR</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>903:FROM THE:31.03.2026;904:TO THE:30.06.2026</AddtlNtryInf>
+      </Ntry>
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt>
+    <GrpHdr>
+      <MsgId>XML99102026070100111291309326332385</MsgId>
+      <CreDtTm>2026-07-01T00:11:12.913+02:00</CreDtTm>
+      <MsgRcpt>
+        <Id>
+          <OrgId>
+            <Othr>
+              <Id>1231263194</Id>
+              <SchmeNm>
+                <Cd>CUST</Cd>
+              </SchmeNm>
+            </Othr>
+            <Othr>
+              <Id>NDEAPROD</Id>
+              <SchmeNm>
+                <Cd>BANK</Cd>
+              </SchmeNm>
+            </Othr>
+          </OrgId>
+        </Id>
+      </MsgRcpt>
+    </GrpHdr>
+    <Stmt>
+      <Id>2026-07-01-00.11.12-DKK6751</Id>
+      <ElctrncSeqNb>35</ElctrncSeqNb>
+      <LglSeqNb>6</LglSeqNb>
+      <CreDtTm>2026-07-01T00:11:12.913+02:00</CreDtTm>
+      <Acct>
+        <Id>
+          <IBAN>DK5720009023146751</IBAN>
+        </Id>
+        <Ccy>DKK</Ccy>
+        <Ownr>
+          <Nm>RANDERS KOMMUNE</Nm>
+        </Ownr>
+        <Svcr>
+          <FinInstnId>
+            <BIC>NDEADKKK</BIC>
+            <PstlAdr>
+              <Ctry>DK</Ctry>
+            </PstlAdr>
+          </FinInstnId>
+        </Svcr>
+      </Acct>
+      <Bal>
+        <Tp>
+          <CdOrPrtry>
+            <Cd>OPBD</Cd>
+          </CdOrPrtry>
+        </Tp>
+        <Amt Ccy="DKK">30284.07</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt>
+          <Dt>2026-06-30</Dt>
+        </Dt>
+      </Bal>
+      <Bal>
+        <Tp>
+          <CdOrPrtry>
+            <Cd>CLBD</Cd>
+          </CdOrPrtry>
+        </Tp>
+        <Amt Ccy="DKK">32692.47</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt>
+          <Dt>2026-06-30</Dt>
+        </Dt>
+      </Bal>
+      <Ntry>
+        <NtryRef>1</NtryRef>
+        <Amt Ccy="DKK">76.00</Amt>
+        <CdtDbtInd>DBIT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-06-30</Dt>
+        </ValDt>
+        <AcctSvcrRef>5612918182</AcctSvcrRef>
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>ICDT</Cd>
+              <SubFmlyCd>DMCT</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>5612918182</AcctSvcrRef>
+            </Refs>
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">76.00</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>PMNT</Cd>
+                <Fmly>
+                  <Cd>ICDT</Cd>
+                  <SubFmlyCd>DMCT</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+            <RltdPties>
+              <CdtrAcct>
+                <Id>
+                  <Othr>
+                    <Id>30983098352473</Id>
+                    <SchmeNm>
+                      <Cd>BBAN</Cd>
+                    </SchmeNm>
+                  </Othr>
+                </Id>
+              </CdtrAcct>
+            </RltdPties>
+            <RltdAgts>
+              <DbtrAgt>
+                <FinInstnId>
+                  <BIC>NDEADKKK</BIC>
+                  <PstlAdr>
+                    <Ctry>DK</Ctry>
+                  </PstlAdr>
+                </FinInstnId>
+              </DbtrAgt>
+            </RltdAgts>
+            <RmtInf>
+              <Ustrd>McDonalds d. 26/6-26</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>502:REFERENCE:Udlæg - Thomas;555:FILE INFORMATION:30062026
+          5612918182;502:REFERENCE:KON konto 0970205918</AddtlNtryInf>
+      </Ntry>
+      <Ntry>
+        <NtryRef>2</NtryRef>
+        <Amt Ccy="DKK">2356.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-06-30</Dt>
+        </ValDt>
+        <AcctSvcrRef>7008620926180</AcctSvcrRef>
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>RCDT</Cd>
+              <SubFmlyCd>DMCT</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>3612133590</AcctSvcrRef>
+              <EndToEndId>3261770079727</EndToEndId>
+            </Refs>
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">2356.00</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>PMNT</Cd>
+                <Fmly>
+                  <Cd>RCDT</Cd>
+                  <SubFmlyCd>DMCT</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+            <RltdPties>
+              <Dbtr>
+                <PstlAdr>
+                  <AdrLine>RANDERS KOMMUNE</AdrLine>
+                  <AdrLine>LAKSETORVET 1</AdrLine>
+                  <AdrLine>8900 RANDERS C</AdrLine>
+                </PstlAdr>
+              </Dbtr>
+            </RltdPties>
+            <Purp>
+              <Prtry>regnskab@randers.dk</Prtry>
+            </Purp>
+            <RmtInf>
+              <Ustrd>Ref.: 261770079727</Ustrd>
+              <Ustrd>Fnr:26062026</Ustrd>
+              <Ustrd>Lommepenge og beklædning juli mdr.</Ustrd>
+              <Ustrd>Beløb 2.356,00</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>502:REFERENCE:regnskab@randers.dk;804:NOTICE NUMBER:07008620926180;555:FILE
+          INFORMATION:29062026 3612133590;502:REFERENCE:KON konto 0970205918</AddtlNtryInf>
+      </Ntry>
+      <Ntry>
+        <NtryRef>3</NtryRef>
+        <Amt Ccy="DKK">128.40</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-07-01</Dt>
+        </ValDt>
+        <BkTxCd>
+          <Domn>
+            <Cd>ACMT</Cd>
+            <Fmly>
+              <Cd>MCOP</Cd>
+              <SubFmlyCd>INTR</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs />
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">128.40</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>ACMT</Cd>
+                <Fmly>
+                  <Cd>MCOP</Cd>
+                  <SubFmlyCd>INTR</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>903:FROM THE:31.03.2026;904:TO THE:30.06.2026</AddtlNtryInf>
+      </Ntry>
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt>
+    <GrpHdr>
+      <MsgId>XML99102026070100111291316190207398</MsgId>
+      <CreDtTm>2026-07-01T00:11:12.913+02:00</CreDtTm>
+      <MsgRcpt>
+        <Id>
+          <OrgId>
+            <Othr>
+              <Id>1231263194</Id>
+              <SchmeNm>
+                <Cd>CUST</Cd>
+              </SchmeNm>
+            </Othr>
+            <Othr>
+              <Id>NDEAPROD</Id>
+              <SchmeNm>
+                <Cd>BANK</Cd>
+              </SchmeNm>
+            </Othr>
+          </OrgId>
+        </Id>
+      </MsgRcpt>
+    </GrpHdr>
+    <Stmt>
+      <Id>2026-07-01-00.11.12-DKK2910</Id>
+      <ElctrncSeqNb>35</ElctrncSeqNb>
+      <LglSeqNb>3</LglSeqNb>
+      <CreDtTm>2026-07-01T00:11:12.913+02:00</CreDtTm>
+      <Acct>
+        <Id>
+          <IBAN>DK7120000747102910</IBAN>
+        </Id>
+        <Ccy>DKK</Ccy>
+        <Ownr>
+          <Nm>Mellerup Skolehjem</Nm>
+        </Ownr>
+        <Svcr>
+          <FinInstnId>
+            <BIC>NDEADKKK</BIC>
+            <PstlAdr>
+              <Ctry>DK</Ctry>
+            </PstlAdr>
+          </FinInstnId>
+        </Svcr>
+      </Acct>
+      <Bal>
+        <Tp>
+          <CdOrPrtry>
+            <Cd>OPBD</Cd>
+          </CdOrPrtry>
+        </Tp>
+        <Amt Ccy="DKK">91446.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt>
+          <Dt>2026-06-30</Dt>
+        </Dt>
+      </Bal>
+      <Bal>
+        <Tp>
+          <CdOrPrtry>
+            <Cd>CLBD</Cd>
+          </CdOrPrtry>
+        </Tp>
+        <Amt Ccy="DKK">91816.49</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt>
+          <Dt>2026-06-30</Dt>
+        </Dt>
+      </Bal>
+      <Ntry>
+        <NtryRef>1</NtryRef>
+        <Amt Ccy="DKK">370.49</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-07-01</Dt>
+        </ValDt>
+        <BkTxCd>
+          <Domn>
+            <Cd>ACMT</Cd>
+            <Fmly>
+              <Cd>MCOP</Cd>
+              <SubFmlyCd>INTR</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs />
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">370.49</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>ACMT</Cd>
+                <Fmly>
+                  <Cd>MCOP</Cd>
+                  <SubFmlyCd>INTR</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>903:FROM THE:31.03.2026;904:TO THE:30.06.2026</AddtlNtryInf>
+      </Ntry>
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt>
+    <GrpHdr>
+      <MsgId>XML99102026070100111291353145909723</MsgId>
+      <CreDtTm>2026-07-01T00:11:12.913+02:00</CreDtTm>
+      <MsgRcpt>
+        <Id>
+          <OrgId>
+            <Othr>
+              <Id>1231263194</Id>
+              <SchmeNm>
+                <Cd>CUST</Cd>
+              </SchmeNm>
+            </Othr>
+            <Othr>
+              <Id>NDEAPROD</Id>
+              <SchmeNm>
+                <Cd>BANK</Cd>
+              </SchmeNm>
+            </Othr>
+          </OrgId>
+        </Id>
+      </MsgRcpt>
+    </GrpHdr>
+    <Stmt>
+      <Id>2026-07-01-00.11.12-DKK5936</Id>
+      <ElctrncSeqNb>35</ElctrncSeqNb>
+      <LglSeqNb>10</LglSeqNb>
+      <CreDtTm>2026-07-01T00:11:12.913+02:00</CreDtTm>
+      <Acct>
+        <Id>
+          <IBAN>DK8620009045565936</IBAN>
+        </Id>
+        <Ccy>DKK</Ccy>
+        <Ownr>
+          <Nm>RANDERS KOMMUNE</Nm>
+        </Ownr>
+        <Svcr>
+          <FinInstnId>
+            <BIC>NDEADKKK</BIC>
+            <PstlAdr>
+              <Ctry>DK</Ctry>
+            </PstlAdr>
+          </FinInstnId>
+        </Svcr>
+      </Acct>
+      <Bal>
+        <Tp>
+          <CdOrPrtry>
+            <Cd>OPBD</Cd>
+          </CdOrPrtry>
+        </Tp>
+        <Amt Ccy="DKK">231517.92</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt>
+          <Dt>2026-06-30</Dt>
+        </Dt>
+      </Bal>
+      <Bal>
+        <Tp>
+          <CdOrPrtry>
+            <Cd>CLBD</Cd>
+          </CdOrPrtry>
+        </Tp>
+        <Amt Ccy="DKK">263586.89</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt>
+          <Dt>2026-06-30</Dt>
+        </Dt>
+      </Bal>
+      <Ntry>
+        <NtryRef>1</NtryRef>
+        <Amt Ccy="DKK">24612.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-06-30</Dt>
+        </ValDt>
+        <AcctSvcrRef>2712557926181</AcctSvcrRef>
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>RCDT</Cd>
+              <SubFmlyCd>DMCT</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>3922334462</AcctSvcrRef>
+              <EndToEndId>14572557054368472020260627023643939</EndToEndId>
+            </Refs>
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">24612.00</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>PMNT</Cd>
+                <Fmly>
+                  <Cd>RCDT</Cd>
+                  <SubFmlyCd>DMCT</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+            <RltdPties>
+              <Dbtr>
+                <PstlAdr>
+                  <AdrLine>ARB.GIVERNES UDDANNELSESBIDRAG</AdrLine>
+                  <AdrLine>KONGENS VÆNGE 8</AdrLine>
+                  <AdrLine>3400 HILLERØD</AdrLine>
+                </PstlAdr>
+              </Dbtr>
+            </RltdPties>
+            <Purp>
+              <Prtry>AUBlønref 3005971178</Prtry>
+            </Purp>
+            <RmtInf>
+              <Ustrd>Lønrefusion fra AUB</Ustrd>
+              <Ustrd>CPR-nr. 3005971178</Ustrd>
+              <Ustrd>For skoleperiode:</Ustrd>
+              <Ustrd>12.05.26 - 15.06.26</Ustrd>
+              <Ustrd>I kan se mere på</Ustrd>
+              <Ustrd>www.virk.dk/aub-udbetalinger</Ustrd>
+              <Strd>
+                <RfrdDocInf>
+                  <Tp>
+                    <CdOrPrtry>
+                      <Prtry>DEBI</Prtry>
+                    </CdOrPrtry>
+                  </Tp>
+                  <Nb>14572557054368472020</Nb>
+                </RfrdDocInf>
+              </Strd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>500:REFERENCE:AUBlønref 3005971178;804:NOTICE NUMBER:02712557926181;555:FILE
+          INFORMATION:29062026 3922334462;502:REFERENCE:KON konto 0970205918</AddtlNtryInf>
+      </Ntry>
+      <Ntry>
+        <NtryRef>2</NtryRef>
+        <Amt Ccy="DKK">4688.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-06-30</Dt>
+        </ValDt>
+        <AcctSvcrRef>2712558026181</AcctSvcrRef>
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>RCDT</Cd>
+              <SubFmlyCd>DMCT</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>3922334463</AcctSvcrRef>
+              <EndToEndId>14572557054368472120260627023643941</EndToEndId>
+            </Refs>
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">4688.00</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>PMNT</Cd>
+                <Fmly>
+                  <Cd>RCDT</Cd>
+                  <SubFmlyCd>DMCT</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+            <RltdPties>
+              <Dbtr>
+                <PstlAdr>
+                  <AdrLine>ARB.GIVERNES UDDANNELSESBIDRAG</AdrLine>
+                  <AdrLine>KONGENS VÆNGE 8</AdrLine>
+                  <AdrLine>3400 HILLERØD</AdrLine>
+                </PstlAdr>
+              </Dbtr>
+            </RltdPties>
+            <Purp>
+              <Prtry>AUBlønref 3005971178</Prtry>
+            </Purp>
+            <RmtInf>
+              <Ustrd>Lønrefusion fra AUB</Ustrd>
+              <Ustrd>CPR-nr. 3005971178</Ustrd>
+              <Ustrd>For skoleperiode:</Ustrd>
+              <Ustrd>16.06.26 - 19.06.26</Ustrd>
+              <Ustrd>I kan se mere på</Ustrd>
+              <Ustrd>www.virk.dk/aub-udbetalinger</Ustrd>
+              <Strd>
+                <RfrdDocInf>
+                  <Tp>
+                    <CdOrPrtry>
+                      <Prtry>DEBI</Prtry>
+                    </CdOrPrtry>
+                  </Tp>
+                  <Nb>14572557054368472120</Nb>
+                </RfrdDocInf>
+              </Strd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>500:REFERENCE:AUBlønref 3005971178;804:NOTICE NUMBER:02712558026181;555:FILE
+          INFORMATION:29062026 3922334463;502:REFERENCE:KON konto 0970205918</AddtlNtryInf>
+      </Ntry>
+      <Ntry>
+        <NtryRef>3</NtryRef>
+        <Amt Ccy="DKK">315.56</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-06-30</Dt>
+        </ValDt>
+        <AcctSvcrRef>2712518126181</AcctSvcrRef>
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>RCDT</Cd>
+              <SubFmlyCd>DMCT</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>3922332826</AcctSvcrRef>
+              <EndToEndId>14572556054368471820260627023643925</EndToEndId>
+            </Refs>
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">315.56</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>PMNT</Cd>
+                <Fmly>
+                  <Cd>RCDT</Cd>
+                  <SubFmlyCd>DMCT</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+            <RltdPties>
+              <Dbtr>
+                <PstlAdr>
+                  <AdrLine>ARB.GIVERNES UDDANNELSESBIDRAG</AdrLine>
+                  <AdrLine>KONGENS VÆNGE 8</AdrLine>
+                  <AdrLine>3400 HILLERØD</AdrLine>
+                </PstlAdr>
+              </Dbtr>
+            </RltdPties>
+            <Purp>
+              <Prtry>AUBpenref 3005971178</Prtry>
+            </Purp>
+            <RmtInf>
+              <Ustrd>Refusion af pension fra AUB</Ustrd>
+              <Ustrd>CPR-nr. 3005971178</Ustrd>
+              <Ustrd>For skoleperiode:</Ustrd>
+              <Ustrd>16.06.26 - 19.06.26</Ustrd>
+              <Ustrd>I kan se mere på</Ustrd>
+              <Ustrd>www.virk.dk/aub-udbetalinger</Ustrd>
+              <Strd>
+                <RfrdDocInf>
+                  <Tp>
+                    <CdOrPrtry>
+                      <Prtry>DEBI</Prtry>
+                    </CdOrPrtry>
+                  </Tp>
+                  <Nb>14572556054368471820</Nb>
+                </RfrdDocInf>
+              </Strd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>500:REFERENCE:AUBpenref 3005971178;804:NOTICE NUMBER:02712518126181;555:FILE
+          INFORMATION:29062026 3922332826;502:REFERENCE:KON konto 0970205918</AddtlNtryInf>
+      </Ntry>
+      <Ntry>
+        <NtryRef>4</NtryRef>
+        <Amt Ccy="DKK">1647.66</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-06-30</Dt>
+        </ValDt>
+        <AcctSvcrRef>2712518226181</AcctSvcrRef>
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>RCDT</Cd>
+              <SubFmlyCd>DMCT</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>3922332827</AcctSvcrRef>
+              <EndToEndId>14572556054368471920260627023643938</EndToEndId>
+            </Refs>
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">1647.66</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>PMNT</Cd>
+                <Fmly>
+                  <Cd>RCDT</Cd>
+                  <SubFmlyCd>DMCT</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+            <RltdPties>
+              <Dbtr>
+                <PstlAdr>
+                  <AdrLine>ARB.GIVERNES UDDANNELSESBIDRAG</AdrLine>
+                  <AdrLine>KONGENS VÆNGE 8</AdrLine>
+                  <AdrLine>3400 HILLERØD</AdrLine>
+                </PstlAdr>
+              </Dbtr>
+            </RltdPties>
+            <Purp>
+              <Prtry>AUBpenref 3005971178</Prtry>
+            </Purp>
+            <RmtInf>
+              <Ustrd>Refusion af pension fra AUB</Ustrd>
+              <Ustrd>CPR-nr. 3005971178</Ustrd>
+              <Ustrd>For skoleperiode:</Ustrd>
+              <Ustrd>12.05.26 - 15.06.26</Ustrd>
+              <Ustrd>I kan se mere på</Ustrd>
+              <Ustrd>www.virk.dk/aub-udbetalinger</Ustrd>
+              <Strd>
+                <RfrdDocInf>
+                  <Tp>
+                    <CdOrPrtry>
+                      <Prtry>DEBI</Prtry>
+                    </CdOrPrtry>
+                  </Tp>
+                  <Nb>14572556054368471920</Nb>
+                </RfrdDocInf>
+              </Strd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>500:REFERENCE:AUBpenref 3005971178;804:NOTICE NUMBER:02712518226181;555:FILE
+          INFORMATION:29062026 3922332827;502:REFERENCE:KON konto 0970205918</AddtlNtryInf>
+      </Ntry>
+      <Ntry>
+        <NtryRef>5</NtryRef>
+        <Amt Ccy="DKK">676.83</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-06-30</Dt>
+        </ValDt>
+        <AcctSvcrRef>2712540126181</AcctSvcrRef>
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>RCDT</Cd>
+              <SubFmlyCd>DMCT</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>3922331339</AcctSvcrRef>
+              <EndToEndId>14572555054368472220260627023643942</EndToEndId>
+            </Refs>
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">676.83</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>PMNT</Cd>
+                <Fmly>
+                  <Cd>RCDT</Cd>
+                  <SubFmlyCd>DMCT</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+            <RltdPties>
+              <Dbtr>
+                <PstlAdr>
+                  <AdrLine>ARB.GIVERNES UDDANNELSESBIDRAG</AdrLine>
+                  <AdrLine>KONGENS VÆNGE 8</AdrLine>
+                  <AdrLine>3400 HILLERØD</AdrLine>
+                </PstlAdr>
+              </Dbtr>
+            </RltdPties>
+            <Purp>
+              <Prtry>Fh.lønref 3005971178</Prtry>
+            </Purp>
+            <RmtInf>
+              <Ustrd>Forhøjet lønrefusion fra AUB</Ustrd>
+              <Ustrd>CPR-nr. 3005971178</Ustrd>
+              <Ustrd>For skoleperiode:</Ustrd>
+              <Ustrd>12.05.26 - 15.06.26</Ustrd>
+              <Ustrd>I får forhøjet lønrefusion for</Ustrd>
+              <Ustrd>jeres elev.</Ustrd>
+              <Ustrd>Læs brev fra AUB i Digital Post.</Ustrd>
+              <Ustrd>*</Ustrd>
+              <Strd>
+                <RfrdDocInf>
+                  <Tp>
+                    <CdOrPrtry>
+                      <Prtry>DEBI</Prtry>
+                    </CdOrPrtry>
+                  </Tp>
+                  <Nb>14572555054368472220</Nb>
+                </RfrdDocInf>
+              </Strd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>500:REFERENCE:Fh.lønref 3005971178;804:NOTICE NUMBER:02712540126181;555:FILE
+          INFORMATION:29062026 3922331339;502:REFERENCE:KON konto 0970205918</AddtlNtryInf>
+      </Ntry>
+      <Ntry>
+        <NtryRef>6</NtryRef>
+        <Amt Ccy="DKK">128.92</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-06-30</Dt>
+        </ValDt>
+        <AcctSvcrRef>2712540226181</AcctSvcrRef>
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>RCDT</Cd>
+              <SubFmlyCd>DMCT</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>3922331340</AcctSvcrRef>
+              <EndToEndId>14572555054368472320260627023643943</EndToEndId>
+            </Refs>
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">128.92</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>PMNT</Cd>
+                <Fmly>
+                  <Cd>RCDT</Cd>
+                  <SubFmlyCd>DMCT</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+            <RltdPties>
+              <Dbtr>
+                <PstlAdr>
+                  <AdrLine>ARB.GIVERNES UDDANNELSESBIDRAG</AdrLine>
+                  <AdrLine>KONGENS VÆNGE 8</AdrLine>
+                  <AdrLine>3400 HILLERØD</AdrLine>
+                </PstlAdr>
+              </Dbtr>
+            </RltdPties>
+            <Purp>
+              <Prtry>Fh.lønref 3005971178</Prtry>
+            </Purp>
+            <RmtInf>
+              <Ustrd>Forhøjet lønrefusion fra AUB</Ustrd>
+              <Ustrd>CPR-nr. 3005971178</Ustrd>
+              <Ustrd>For skoleperiode:</Ustrd>
+              <Ustrd>16.06.26 - 19.06.26</Ustrd>
+              <Ustrd>I får forhøjet lønrefusion for</Ustrd>
+              <Ustrd>jeres elev.</Ustrd>
+              <Ustrd>Læs brev fra AUB i Digital Post.</Ustrd>
+              <Ustrd>*</Ustrd>
+              <Strd>
+                <RfrdDocInf>
+                  <Tp>
+                    <CdOrPrtry>
+                      <Prtry>DEBI</Prtry>
+                    </CdOrPrtry>
+                  </Tp>
+                  <Nb>14572555054368472320</Nb>
+                </RfrdDocInf>
+              </Strd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>500:REFERENCE:Fh.lønref 3005971178;804:NOTICE NUMBER:02712540226181;555:FILE
+          INFORMATION:29062026 3922331340;502:REFERENCE:KON konto 0970205918</AddtlNtryInf>
+      </Ntry>
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt>
+    <GrpHdr>
+      <MsgId>XML99102026070100111291356668981476</MsgId>
+      <CreDtTm>2026-07-01T00:11:12.913+02:00</CreDtTm>
+      <MsgRcpt>
+        <Id>
+          <OrgId>
+            <Othr>
+              <Id>1231263194</Id>
+              <SchmeNm>
+                <Cd>CUST</Cd>
+              </SchmeNm>
+            </Othr>
+            <Othr>
+              <Id>NDEAPROD</Id>
+              <SchmeNm>
+                <Cd>BANK</Cd>
+              </SchmeNm>
+            </Othr>
+          </OrgId>
+        </Id>
+      </MsgRcpt>
+    </GrpHdr>
+    <Stmt>
+      <Id>2026-07-01-00.11.12-DKK0942</Id>
+      <ElctrncSeqNb>35</ElctrncSeqNb>
+      <LglSeqNb>8</LglSeqNb>
+      <CreDtTm>2026-07-01T00:11:12.913+02:00</CreDtTm>
+      <Acct>
+        <Id>
+          <IBAN>DK3220009044860942</IBAN>
+        </Id>
+        <Ccy>DKK</Ccy>
+        <Ownr>
+          <Nm>HJØRNESTENEN</Nm>
+        </Ownr>
+        <Svcr>
+          <FinInstnId>
+            <BIC>NDEADKKK</BIC>
+            <PstlAdr>
+              <Ctry>DK</Ctry>
+            </PstlAdr>
+          </FinInstnId>
+        </Svcr>
+      </Acct>
+      <Bal>
+        <Tp>
+          <CdOrPrtry>
+            <Cd>OPBD</Cd>
+          </CdOrPrtry>
+        </Tp>
+        <Amt Ccy="DKK">596969.72</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt>
+          <Dt>2026-06-30</Dt>
+        </Dt>
+      </Bal>
+      <Bal>
+        <Tp>
+          <CdOrPrtry>
+            <Cd>CLBD</Cd>
+          </CdOrPrtry>
+        </Tp>
+        <Amt Ccy="DKK">599551.06</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt>
+          <Dt>2026-06-30</Dt>
+        </Dt>
+      </Bal>
+      <Ntry>
+        <NtryRef>1</NtryRef>
+        <Amt Ccy="DKK">2581.34</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-06-30</Dt>
+        </ValDt>
+        <AcctSvcrRef>2701518826181</AcctSvcrRef>
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>RCDT</Cd>
+              <SubFmlyCd>DMCT</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>3922159956</AcctSvcrRef>
+              <EndToEndId>145719890018400308001260627DMR0</EndToEndId>
+            </Refs>
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">2581.34</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>PMNT</Cd>
+                <Fmly>
+                  <Cd>RCDT</Cd>
+                  <SubFmlyCd>DMCT</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+            <RltdPties>
+              <Dbtr>
+                <PstlAdr>
+                  <AdrLine>SKATTEFORVALTNINGEN</AdrLine>
+                  <AdrLine>BRÆNDGÅRDVEJ 10</AdrLine>
+                  <AdrLine>7400 HERNING</AdrLine>
+                </PstlAdr>
+              </Dbtr>
+            </RltdPties>
+            <Purp>
+              <Prtry>Overf. Skattestyrels</Prtry>
+            </Purp>
+            <RmtInf>
+              <Ustrd>Grøn ejer/Vægtafgift</Ustrd>
+              <Ustrd>CVR/SE-nr. 18400308 Dkk 2.581,34</Ustrd>
+              <Ustrd>registreringsnummer ZP57422</Ustrd>
+              <Ustrd>FORDRINGID SAP38600425028334782026</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>500:REFERENCE:Overf. Skattestyrels;804:NOTICE NUMBER:02701518826181;555:FILE
+          INFORMATION:29062026 3922159956;502:REFERENCE:KON konto 0970205918</AddtlNtryInf>
+      </Ntry>
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt>
+    <GrpHdr>
+      <MsgId>XML99102026070100111291360672762409</MsgId>
+      <CreDtTm>2026-07-01T00:11:12.913+02:00</CreDtTm>
+      <MsgRcpt>
+        <Id>
+          <OrgId>
+            <Othr>
+              <Id>1231263194</Id>
+              <SchmeNm>
+                <Cd>CUST</Cd>
+              </SchmeNm>
+            </Othr>
+            <Othr>
+              <Id>NDEAPROD</Id>
+              <SchmeNm>
+                <Cd>BANK</Cd>
+              </SchmeNm>
+            </Othr>
+          </OrgId>
+        </Id>
+      </MsgRcpt>
+    </GrpHdr>
+    <Stmt>
+      <Id>2026-07-01-00.11.12-DKK3860</Id>
+      <ElctrncSeqNb>35</ElctrncSeqNb>
+      <LglSeqNb>23</LglSeqNb>
+      <CreDtTm>2026-07-01T00:11:12.913+02:00</CreDtTm>
+      <Acct>
+        <Id>
+          <IBAN>DK2920006269313860</IBAN>
+        </Id>
+        <Ccy>DKK</Ccy>
+        <Ownr>
+          <Nm>LADEGÅRDEN</Nm>
+        </Ownr>
+        <Svcr>
+          <FinInstnId>
+            <BIC>NDEADKKK</BIC>
+            <PstlAdr>
+              <Ctry>DK</Ctry>
+            </PstlAdr>
+          </FinInstnId>
+        </Svcr>
+      </Acct>
+      <Bal>
+        <Tp>
+          <CdOrPrtry>
+            <Cd>OPBD</Cd>
+          </CdOrPrtry>
+        </Tp>
+        <Amt Ccy="DKK">15783.77</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt>
+          <Dt>2026-06-30</Dt>
+        </Dt>
+      </Bal>
+      <Bal>
+        <Tp>
+          <CdOrPrtry>
+            <Cd>CLBD</Cd>
+          </CdOrPrtry>
+        </Tp>
+        <Amt Ccy="DKK">46460.48</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt>
+          <Dt>2026-06-30</Dt>
+        </Dt>
+      </Bal>
+      <Ntry>
+        <NtryRef>1</NtryRef>
+        <Amt Ccy="DKK">4500.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-06-30</Dt>
+        </ValDt>
+        <AcctSvcrRef>5035521426181</AcctSvcrRef>
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>RCDT</Cd>
+              <SubFmlyCd>DMCT</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>1612351928</AcctSvcrRef>
+            </Refs>
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">4500.00</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>PMNT</Cd>
+                <Fmly>
+                  <Cd>RCDT</Cd>
+                  <SubFmlyCd>DMCT</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+            <RltdPties>
+              <Dbtr>
+                <PstlAdr>
+                  <AdrLine>RANDERS KOMMUNE</AdrLine>
+                  <AdrLine>PENSION BORGERSERVICE 2</AdrLine>
+                  <AdrLine>ODINSGADE 14</AdrLine>
+                  <AdrLine>8900 RANDERS C</AdrLine>
+                </PstlAdr>
+              </Dbtr>
+            </RltdPties>
+            <Purp>
+              <Prtry>Fredags penge - Clau</Prtry>
+            </Purp>
+            <RmtInf>
+              <Ustrd>s Kvistgaard</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>502:REFERENCE:Fredags penge - Clau;802:REFERENCE:s Kvistgaard;821:ADVICE
+          REFERENCE:05035521426181;555:FILE INFORMATION:30062026 1612351928;502:REFERENCE:KON konto
+          0970205918</AddtlNtryInf>
+      </Ntry>
+      <Ntry>
+        <NtryRef>2</NtryRef>
+        <Amt Ccy="DKK">2200.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-06-30</Dt>
+        </ValDt>
+        <AcctSvcrRef>5035521526181</AcctSvcrRef>
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>RCDT</Cd>
+              <SubFmlyCd>DMCT</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>8452250765</AcctSvcrRef>
+            </Refs>
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">2200.00</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>PMNT</Cd>
+                <Fmly>
+                  <Cd>RCDT</Cd>
+                  <SubFmlyCd>DMCT</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+            <RltdPties>
+              <Dbtr>
+                <PstlAdr>
+                  <AdrLine>RANDERS KOMMUNE</AdrLine>
+                  <AdrLine>PENSION BORGERSERVICE 2</AdrLine>
+                  <AdrLine>ODINSGADE 14</AdrLine>
+                  <AdrLine>8900 RANDERS C</AdrLine>
+                </PstlAdr>
+              </Dbtr>
+            </RltdPties>
+            <Purp>
+              <Prtry>Indkøbsordning Claus</Prtry>
+            </Purp>
+            <RmtInf>
+              <Ustrd>Kvistgaard Andersen</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>502:REFERENCE:Indkøbsordning Claus;802:REFERENCE:Kvistgaard
+          Andersen;821:ADVICE REFERENCE:05035521526181;555:FILE INFORMATION:30062026
+          8452250765;502:REFERENCE:KON konto 0970205918</AddtlNtryInf>
+      </Ntry>
+      <Ntry>
+        <NtryRef>3</NtryRef>
+        <Amt Ccy="DKK">5500.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-06-30</Dt>
+        </ValDt>
+        <AcctSvcrRef>5029316226181</AcctSvcrRef>
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>RCDT</Cd>
+              <SubFmlyCd>DMCT</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>6409095304</AcctSvcrRef>
+            </Refs>
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">5500.00</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>PMNT</Cd>
+                <Fmly>
+                  <Cd>RCDT</Cd>
+                  <SubFmlyCd>DMCT</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+            <RltdPties>
+              <Dbtr>
+                <PstlAdr>
+                  <AdrLine>IB VAGN KALLEGÅRD</AdrLine>
+                  <AdrLine>MARIENBORGVEJ 8,-19</AdrLine>
+                  <AdrLine>8930 RANDERS NØ</AdrLine>
+                </PstlAdr>
+              </Dbtr>
+            </RltdPties>
+            <Purp>
+              <Prtry>Mad og købmandsordni</Prtry>
+            </Purp>
+            <RmtInf>
+              <Ustrd>ng</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>502:REFERENCE:Mad og købmandsordni;802:REFERENCE:ng;821:ADVICE
+          REFERENCE:05029316226181;555:FILE INFORMATION:30062026 6409095304;502:REFERENCE:KON konto
+          0970205918</AddtlNtryInf>
+      </Ntry>
+      <Ntry>
+        <NtryRef>4</NtryRef>
+        <Amt Ccy="DKK">6900.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-06-30</Dt>
+        </ValDt>
+        <AcctSvcrRef>5038158126181</AcctSvcrRef>
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>RCDT</Cd>
+              <SubFmlyCd>DMCT</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>7696796864</AcctSvcrRef>
+            </Refs>
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">6900.00</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>PMNT</Cd>
+                <Fmly>
+                  <Cd>RCDT</Cd>
+                  <SubFmlyCd>DMCT</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+            <RltdPties>
+              <Dbtr>
+                <PstlAdr>
+                  <AdrLine>RANDERS KOMMUNE</AdrLine>
+                  <AdrLine>PENSION BORGERSERVICE 2</AdrLine>
+                  <AdrLine>ODINSGADE 14</AdrLine>
+                  <AdrLine>8900 RANDERS C</AdrLine>
+                </PstlAdr>
+              </Dbtr>
+            </RltdPties>
+            <Purp>
+              <Prtry>Pension, Robert B.E.</Prtry>
+            </Purp>
+            <RmtInf>
+              <Ustrd>S</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>502:REFERENCE:Pension, Robert B.E.;802:REFERENCE:S;821:ADVICE
+          REFERENCE:05038158126181;555:FILE INFORMATION:30062026 7696796864;502:REFERENCE:KON konto
+          0970205918</AddtlNtryInf>
+      </Ntry>
+      <Ntry>
+        <NtryRef>5</NtryRef>
+        <Amt Ccy="DKK">3500.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-06-30</Dt>
+        </ValDt>
+        <AcctSvcrRef>5015571826181</AcctSvcrRef>
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>RCDT</Cd>
+              <SubFmlyCd>DMCT</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>6610783113</AcctSvcrRef>
+            </Refs>
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">3500.00</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>PMNT</Cd>
+                <Fmly>
+                  <Cd>RCDT</Cd>
+                  <SubFmlyCd>DMCT</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+            <RltdPties>
+              <Dbtr>
+                <PstlAdr>
+                  <AdrLine>RANDERS KOMMUNE</AdrLine>
+                  <AdrLine>PENSION BORGERSERVICE 1</AdrLine>
+                  <AdrLine>ODINSGADE 14</AdrLine>
+                  <AdrLine>8900 RANDERS C</AdrLine>
+                </PstlAdr>
+              </Dbtr>
+            </RltdPties>
+            <Purp>
+              <Prtry>Pia Birgittte - Over</Prtry>
+            </Purp>
+            <RmtInf>
+              <Ustrd>skud sommer</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>502:REFERENCE:Pia Birgittte - Over;802:REFERENCE:skud sommer;821:ADVICE
+          REFERENCE:05015571826181;555:FILE INFORMATION:30062026 6610783113;502:REFERENCE:KON konto
+          0970205918</AddtlNtryInf>
+      </Ntry>
+      <Ntry>
+        <NtryRef>6</NtryRef>
+        <Amt Ccy="DKK">6000.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-06-30</Dt>
+        </ValDt>
+        <AcctSvcrRef>5015571726181</AcctSvcrRef>
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>RCDT</Cd>
+              <SubFmlyCd>DMCT</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>1525826628</AcctSvcrRef>
+            </Refs>
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">6000.00</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>PMNT</Cd>
+                <Fmly>
+                  <Cd>RCDT</Cd>
+                  <SubFmlyCd>DMCT</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+            <RltdPties>
+              <Dbtr>
+                <PstlAdr>
+                  <AdrLine>RANDERS KOMMUNE</AdrLine>
+                  <AdrLine>PENSION BORGERSERVICE 1</AdrLine>
+                  <AdrLine>ODINSGADE 14</AdrLine>
+                  <AdrLine>8900 RANDERS C</AdrLine>
+                </PstlAdr>
+              </Dbtr>
+            </RltdPties>
+            <Purp>
+              <Prtry>Restpension Pia B. G</Prtry>
+            </Purp>
+            <RmtInf>
+              <Ustrd>.</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>502:REFERENCE:Restpension Pia B. G;802:REFERENCE:.;821:ADVICE
+          REFERENCE:05015571726181;555:FILE INFORMATION:30062026 1525826628;502:REFERENCE:KON konto
+          0970205918</AddtlNtryInf>
+      </Ntry>
+      <Ntry>
+        <NtryRef>7</NtryRef>
+        <Amt Ccy="DKK">1740.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-06-30</Dt>
+        </ValDt>
+        <AcctSvcrRef>5038157926181</AcctSvcrRef>
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>RCDT</Cd>
+              <SubFmlyCd>DMCT</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>0424954408</AcctSvcrRef>
+            </Refs>
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">1740.00</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>PMNT</Cd>
+                <Fmly>
+                  <Cd>RCDT</Cd>
+                  <SubFmlyCd>DMCT</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+            <RltdPties>
+              <Dbtr>
+                <PstlAdr>
+                  <AdrLine>RANDERS KOMMUNE</AdrLine>
+                  <AdrLine>PENSION BORGERSERVICE 2</AdrLine>
+                  <AdrLine>ODINSGADE 14</AdrLine>
+                  <AdrLine>8900 RANDERS C</AdrLine>
+                </PstlAdr>
+              </Dbtr>
+            </RltdPties>
+            <Purp>
+              <Prtry>Robert Pedersen</Prtry>
+            </Purp>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>502:REFERENCE:Robert Pedersen;821:ADVICE REFERENCE:05038157926181;555:FILE
+          INFORMATION:30062026 0424954408;502:REFERENCE:KON konto 0970205918</AddtlNtryInf>
+      </Ntry>
+      <Ntry>
+        <NtryRef>8</NtryRef>
+        <Amt Ccy="DKK">336.71</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-07-01</Dt>
+        </ValDt>
+        <BkTxCd>
+          <Domn>
+            <Cd>ACMT</Cd>
+            <Fmly>
+              <Cd>MCOP</Cd>
+              <SubFmlyCd>INTR</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs />
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">336.71</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>ACMT</Cd>
+                <Fmly>
+                  <Cd>MCOP</Cd>
+                  <SubFmlyCd>INTR</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>903:FROM THE:31.03.2026;904:TO THE:30.06.2026</AddtlNtryInf>
+      </Ntry>
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt>
+    <GrpHdr>
+      <MsgId>XML99102026070100111291362950431316</MsgId>
+      <CreDtTm>2026-07-01T00:11:12.913+02:00</CreDtTm>
+      <MsgRcpt>
+        <Id>
+          <OrgId>
+            <Othr>
+              <Id>1231263194</Id>
+              <SchmeNm>
+                <Cd>CUST</Cd>
+              </SchmeNm>
+            </Othr>
+            <Othr>
+              <Id>NDEAPROD</Id>
+              <SchmeNm>
+                <Cd>BANK</Cd>
+              </SchmeNm>
+            </Othr>
+          </OrgId>
+        </Id>
+      </MsgRcpt>
+    </GrpHdr>
+    <Stmt>
+      <Id>2026-07-01-00.11.12-DKK9784</Id>
+      <ElctrncSeqNb>35</ElctrncSeqNb>
+      <LglSeqNb>4</LglSeqNb>
+      <CreDtTm>2026-07-01T00:11:12.913+02:00</CreDtTm>
+      <Acct>
+        <Id>
+          <IBAN>DK3220005499179784</IBAN>
+        </Id>
+        <Ccy>DKK</Ccy>
+        <Ownr>
+          <Nm>LADEGÅRDEN</Nm>
+        </Ownr>
+        <Svcr>
+          <FinInstnId>
+            <BIC>NDEADKKK</BIC>
+            <PstlAdr>
+              <Ctry>DK</Ctry>
+            </PstlAdr>
+          </FinInstnId>
+        </Svcr>
+      </Acct>
+      <Bal>
+        <Tp>
+          <CdOrPrtry>
+            <Cd>OPBD</Cd>
+          </CdOrPrtry>
+        </Tp>
+        <Amt Ccy="DKK">0.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt>
+          <Dt>2026-06-30</Dt>
+        </Dt>
+      </Bal>
+      <Bal>
+        <Tp>
+          <CdOrPrtry>
+            <Cd>CLBD</Cd>
+          </CdOrPrtry>
+        </Tp>
+        <Amt Ccy="DKK">0.61</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt>
+          <Dt>2026-06-30</Dt>
+        </Dt>
+      </Bal>
+      <Ntry>
+        <NtryRef>1</NtryRef>
+        <Amt Ccy="DKK">0.61</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-07-01</Dt>
+        </ValDt>
+        <BkTxCd>
+          <Domn>
+            <Cd>ACMT</Cd>
+            <Fmly>
+              <Cd>MCOP</Cd>
+              <SubFmlyCd>INTR</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs />
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">0.61</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>ACMT</Cd>
+                <Fmly>
+                  <Cd>MCOP</Cd>
+                  <SubFmlyCd>INTR</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>903:FROM THE:31.03.2026;904:TO THE:30.06.2026</AddtlNtryInf>
+      </Ntry>
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt>
+    <GrpHdr>
+      <MsgId>XML99102026070100111291304602966039</MsgId>
+      <CreDtTm>2026-07-01T00:11:12.913+02:00</CreDtTm>
+      <MsgRcpt>
+        <Id>
+          <OrgId>
+            <Othr>
+              <Id>1231263194</Id>
+              <SchmeNm>
+                <Cd>CUST</Cd>
+              </SchmeNm>
+            </Othr>
+            <Othr>
+              <Id>NDEAPROD</Id>
+              <SchmeNm>
+                <Cd>BANK</Cd>
+              </SchmeNm>
+            </Othr>
+          </OrgId>
+        </Id>
+      </MsgRcpt>
+    </GrpHdr>
+    <Stmt>
+      <Id>2026-07-01-00.11.12-DKK3205</Id>
+      <ElctrncSeqNb>35</ElctrncSeqNb>
+      <LglSeqNb>11</LglSeqNb>
+      <CreDtTm>2026-07-01T00:11:12.913+02:00</CreDtTm>
+      <Acct>
+        <Id>
+          <IBAN>DK3620009039143205</IBAN>
+        </Id>
+        <Ccy>DKK</Ccy>
+        <Ownr>
+          <Nm>RANDERS KOMMUNE</Nm>
+        </Ownr>
+        <Svcr>
+          <FinInstnId>
+            <BIC>NDEADKKK</BIC>
+            <PstlAdr>
+              <Ctry>DK</Ctry>
+            </PstlAdr>
+          </FinInstnId>
+        </Svcr>
+      </Acct>
+      <Bal>
+        <Tp>
+          <CdOrPrtry>
+            <Cd>OPBD</Cd>
+          </CdOrPrtry>
+        </Tp>
+        <Amt Ccy="DKK">4839777.92</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt>
+          <Dt>2026-06-30</Dt>
+        </Dt>
+      </Bal>
+      <Bal>
+        <Tp>
+          <CdOrPrtry>
+            <Cd>CLBD</Cd>
+          </CdOrPrtry>
+        </Tp>
+        <Amt Ccy="DKK">4875543.14</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt>
+          <Dt>2026-06-30</Dt>
+        </Dt>
+      </Bal>
+      <Ntry>
+        <NtryRef>1</NtryRef>
+        <Amt Ccy="DKK">16639.92</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-06-30</Dt>
+        </ValDt>
+        <AcctSvcrRef>7008471726180</AcctSvcrRef>
+        <BkTxCd>
+          <Domn>
+            <Cd>PMNT</Cd>
+            <Fmly>
+              <Cd>RCDT</Cd>
+              <SubFmlyCd>DMCT</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>3612121980</AcctSvcrRef>
+              <EndToEndId>202606262US7OJ1ZULY1CTDZ64T</EndToEndId>
+            </Refs>
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">16639.92</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>PMNT</Cd>
+                <Fmly>
+                  <Cd>RCDT</Cd>
+                  <SubFmlyCd>DMCT</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+            <RltdPties>
+              <Dbtr>
+                <PstlAdr>
+                  <AdrLine>RANDERS KOMMUNE</AdrLine>
+                  <AdrLine>LAKSETORVET 1</AdrLine>
+                  <AdrLine>8900 RANDERS C</AdrLine>
+                </PstlAdr>
+              </Dbtr>
+            </RltdPties>
+            <Purp>
+              <Prtry>Kommunernes ydelsess</Prtry>
+            </Purp>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>502:REFERENCE:Kommunernes ydelsess;821:ADVICE
+          REFERENCE:07008471726180;555:FILE INFORMATION:29062026 3612121980;502:REFERENCE:KON konto
+          0970205918</AddtlNtryInf>
+      </Ntry>
+      <Ntry>
+        <NtryRef>2</NtryRef>
+        <Amt Ccy="DKK">19125.30</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-06-30</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-07-01</Dt>
+        </ValDt>
+        <BkTxCd>
+          <Domn>
+            <Cd>ACMT</Cd>
+            <Fmly>
+              <Cd>MCOP</Cd>
+              <SubFmlyCd>INTR</SubFmlyCd>
+            </Fmly>
+          </Domn>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs />
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="DKK">19125.30</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <BkTxCd>
+              <Domn>
+                <Cd>ACMT</Cd>
+                <Fmly>
+                  <Cd>MCOP</Cd>
+                  <SubFmlyCd>INTR</SubFmlyCd>
+                </Fmly>
+              </Domn>
+            </BkTxCd>
+          </TxDtls>
+        </NtryDtls>
+        <AddtlNtryInf>903:FROM THE:31.03.2026;904:TO THE:30.06.2026</AddtlNtryInf>
+      </Ntry>
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>

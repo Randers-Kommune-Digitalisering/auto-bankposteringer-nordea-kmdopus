@@ -1,6 +1,6 @@
 <script setup lang="ts">
     import { onBeforeUnmount } from 'vue'
-    import type { RunListItem } from '~/types/runs'
+    import type { DocumentContentItem, RunListItem } from '~/types/runs'
 
     interface Props {
         type: 'error' | 'docs' | 'erpResponses'
@@ -18,9 +18,10 @@
     const emit = defineEmits<Emits>()
 
     const docUrlMap = new Map<string, string>()
+    const loadingDocIds = ref<Record<string, boolean>>({})
     const isClient = import.meta.client
 
-    const attemptCreateBlobFromContent = (doc: RunListItem['documents'][number]) => {
+    const attemptCreateBlobFromContent = (doc: { content?: string | Blob | null; mimeType?: string | null }) => {
         const content: any = doc.content
         if (content instanceof Blob) {
             return content as Blob
@@ -49,19 +50,45 @@
         return null
     }
 
-    const getDocUrl = (doc: RunListItem['documents'][number]): string | null => {
-        if (!isClient || !doc.content) return null
-        
-        let url = docUrlMap.get(doc.id)
-        if (!url) {
-            const blob = attemptCreateBlobFromContent(doc)
-            if (!blob) {
-                return null
-            }
-            url = URL.createObjectURL(blob)
-            docUrlMap.set(doc.id, url)
+    const fetchDocumentContent = async (documentId: string): Promise<DocumentContentItem | null> => {
+        try {
+            return await $fetch<DocumentContentItem>(`/api/runs/documents/${documentId}`)
+        } catch {
+            return null
         }
-        return url
+    }
+
+    async function downloadDoc(doc: RunListItem['documents'][number]) {
+        if (!isClient) {
+            return
+        }
+
+        loadingDocIds.value[doc.id] = true
+        try {
+            let url = docUrlMap.get(doc.id) ?? null
+            if (!url) {
+                const withContent = await fetchDocumentContent(doc.id)
+                if (!withContent?.content) {
+                    return
+                }
+                const blob = attemptCreateBlobFromContent(withContent)
+                if (!blob) {
+                    return
+                }
+                url = URL.createObjectURL(blob)
+                docUrlMap.set(doc.id, url)
+            }
+
+            const anchor = window.document.createElement('a')
+            anchor.href = url
+            anchor.download = doc.filename
+            anchor.rel = 'noopener'
+            window.document.body.appendChild(anchor)
+            anchor.click()
+            window.document.body.removeChild(anchor)
+        } finally {
+            loadingDocIds.value[doc.id] = false
+        }
     }
 
     onBeforeUnmount(() => {
@@ -163,18 +190,14 @@
                                 <h4 class="font-medium text-sm mb-2 capitalize">{{ docType }}</h4>
                                 <ul class="list-disc pl-5 space-y-1">
                                     <li v-for="doc in docsOfType" :key="doc.id" class="text-sm">
-                                        <template v-if="doc.content && isClient">
-                                            <a
-                                                :href="getDocUrl(doc) ?? undefined"
-                                                :download="doc.filename"
-                                                class="text-blue-600 hover:underline font-medium"
-                                            >
-                                                {{ doc.filename }}
-                                            </a>
-                                        </template>
-                                        <template v-else>
-                                            <span class="text-muted">{{ doc.filename }}</span>
-                                        </template>
+                                        <button
+                                            type="button"
+                                            class="text-blue-600 hover:underline font-medium disabled:text-muted disabled:no-underline"
+                                            :disabled="loadingDocIds[doc.id]"
+                                            @click="downloadDoc(doc)"
+                                        >
+                                            {{ loadingDocIds[doc.id] ? 'Henter…' : doc.filename }}
+                                        </button>
                                         <span class="text-muted text-xs ml-1">({{ doc.mimeType ?? doc.fileExtension }})</span>
                                     </li>
                                 </ul>

@@ -1,7 +1,6 @@
 import { XMLParser } from 'fast-xml-parser'
 import {
   parseNordeaAdditionalEntryInfo,
-  findNordeaAdditionalEntryInfoValueByCode,
   type NordeaAdditionalEntryInfoSegment,
 } from './nordeaAdditionalEntryInfo'
 
@@ -164,9 +163,10 @@ export function parseCamt053Xml(xml: string): Camt053ParsedDocument {
         const txFamily = asTrimmedString(txBkTxCd?.Domn?.Fmly?.Cd) ?? entryFamily
         const txSubFamily = asTrimmedString(txBkTxCd?.Domn?.Fmly?.SubFmlyCd) ?? entrySubFamily
 
+        const purposePrtry = normalizeStringArray(tx?.Purp?.Prtry)
         const remittanceUstrd = normalizeStringArray(txRmtInf?.Ustrd)
         const structuredCreditorRef = asTrimmedString(txRmtInf?.Strd?.CdtrRefInf?.Ref)
-        const additionalRemittance = normalizeStringArray(txRmtInf?.AddtlRmtInf)
+        const additionalRemittance = purposePrtry
 
         const debtor = txRltdPties?.Dbtr
         const debtorAcct = txRltdPties?.DbtrAcct
@@ -181,9 +181,8 @@ export function parseCamt053Xml(xml: string): Camt053ParsedDocument {
 
         const entryAdditionalInfo = asTrimmedString(entry?.AddtlNtryInf)
         const entryAdditionalInfoSegments = parseNordeaAdditionalEntryInfo(entryAdditionalInfo)
-        const creditorFromAdditionalEntryInfo = findNordeaAdditionalEntryInfoValueByCode(entryAdditionalInfoSegments, '510')
 
-        const creditorName = extractPartyDisplayName(creditor) ?? creditorFromAdditionalEntryInfo
+        const creditorName = extractPartyDisplayName(creditor)
         const creditorId = extractPartyId(creditor)
         const creditorAccountIban = asTrimmedString(creditorAcct?.Id?.IBAN)
 
@@ -350,16 +349,10 @@ function extractPartyId(party: any): string | null {
 function extractPartyDisplayName(party: any): string | null {
   if (!party || typeof party !== 'object') return null
 
+  // Nordea CAMT counterpart display should be derived from address lines.
   const adrLines = normalizeStringArray(party?.PstlAdr?.AdrLine)
   const preferredAdrLine = pickPreferredPartyAdrLine(adrLines)
-  if (preferredAdrLine) {
-    return preferredAdrLine
-  }
-
-  const directName = asTrimmedString(party?.Nm)
-  if (directName) return directName
-
-  return null
+  return preferredAdrLine ?? null
 }
 
 function pickPreferredPartyAdrLine(lines: string[]): string | null {

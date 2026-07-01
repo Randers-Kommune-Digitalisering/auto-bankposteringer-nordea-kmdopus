@@ -38,7 +38,7 @@ export const nordeaCorporateAccessWsConfigSchema = z.object({
 
   /** Daily default is unread files only. */
   downloadStatus: z.enum(['NEW', 'DLD', 'ALL']).default('NEW'),
-  lookbackDays: z.number().int().min(1).max(365).default(7),
+  lookbackDays: z.number().int().min(1).max(31).default(7),
   maxFilesPerRun: z.number().int().min(1).max(100).default(25),
 
   /** Whether DownloadFile should request compressed payloads. */
@@ -62,9 +62,11 @@ export type NordeaCorporateAccessWsConfig = z.infer<typeof nordeaCorporateAccess
 
 export class NordeaCorporateAccessWebServicesAdapter implements BankAdapter {
   public readonly key = 'nordea-corporate-access-ws'
+  public readonly lookbackDays: number
 
   constructor(private readonly config: NordeaCorporateAccessWsConfig) {
-    nordeaCorporateAccessWsConfigSchema.parse(config)
+    const parsed = nordeaCorporateAccessWsConfigSchema.parse(config)
+    this.lookbackDays = parsed.lookbackDays
   }
 
   async fetchDocuments(

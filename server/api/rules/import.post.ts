@@ -137,12 +137,6 @@ function toOptionalString(value: unknown): string | undefined {
   return s.length ? s : undefined
 }
 
-function toOptionalEmailInput(value: unknown): string | undefined {
-  if (value == null) return undefined
-  const s = String(value).trim()
-  return s.length ? s : undefined
-}
-
 function toOptionalNumber(value: unknown): number | undefined {
   if (value == null) return undefined
   const s = String(value).trim()

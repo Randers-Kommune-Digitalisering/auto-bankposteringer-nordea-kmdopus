@@ -14,7 +14,7 @@ export type TimelineOutbox = {
   topic: string
   status: string
   attempts: number
-  nextAttemptAt: string
+  nextAttemptAt: string | null
   lastError: string | null
   requestId: string | null
   responseId: string | null

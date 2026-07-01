@@ -11,7 +11,6 @@ export type BankingAccountUnionDto = {
   iban: string
   currency: string | null
   name: string | null
-  artskonto: string | null
   statuskonto: string | null
   ignoreIngestion: boolean
   observed: boolean
@@ -110,7 +109,6 @@ export default defineEventHandler(async (event) => {
       iban,
       currency: row.currency ? String(row.currency) : null,
       name: row.name ? String(row.name) : null,
-      artskonto: artskontoByProviderIban.get(key) ?? null,
       statuskonto: artskontoByProviderIban.get(key) ?? null,
       ignoreIngestion: ignoreIngestionByProviderIban.get(key) ?? false,
       observed: true,
@@ -141,9 +139,8 @@ export default defineEventHandler(async (event) => {
         row.configuredForApi = true
         // Prefer explicit configured name over observed bank owner name.
         if (cfg.name) row.name = String(cfg.name)
-        if (!row.artskonto) {
+        if (!row.statuskonto) {
           const mapped = artskontoByProviderIban.get(key) ?? null
-          row.artskonto = mapped
           row.statuskonto = mapped
         }
       }
@@ -155,7 +152,6 @@ export default defineEventHandler(async (event) => {
       iban,
       currency: null,
       name: cfg.name ? String(cfg.name) : null,
-      artskonto: artskontoByProviderIban.get(key) ?? null,
       statuskonto: artskontoByProviderIban.get(key) ?? null,
       ignoreIngestion: ignoreIngestionByProviderIban.get(key) ?? false,
       observed: false,

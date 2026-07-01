@@ -4,7 +4,6 @@ import { nextTick, watch } from 'vue'
 import BookingSummaryCard from '~/components/open-items/BookingSummaryCard.vue'
 import RulesFileUpload from '~/components/rules/FileUpload.vue'
 import { useManualBookingForm } from '~/composables/useManualBookingForm'
-import { formatTransactionFieldHint } from '~/lib/presenters/transactionFieldHints'
 import type { OpenTransaction, TransactionSummary } from '~/types/transactions'
 import type { ManualBookingFormState as ManualFormState } from '#engine/manual-booking/domain/manualBooking'
 
@@ -87,144 +86,10 @@ const {
 })
 
 const summary = computed<TransactionSummary | null>(() => transaction.value?.summary ?? null)
-const summaryReferenceKeys = computed<Set<string>>(() => {
-	const sections = (summary.value?.sections ?? []) as Array<{ key: string; chips?: Array<{ value: string; source?: string }> }>
-	const chipSections = sections.filter((section) => ['reference', 'teknisk'].includes(section.key))
-	if (!chipSections.length) return new Set<string>()
-
-	const keys = new Set<string>()
-	for (const section of chipSections) {
-		for (const token of splitTriadTokens((section.chips ?? []).map((entry) => entry.value))) {
-		const normalized = normalizeReferenceToken(token)
-		if (!normalized) continue
-		keys.add(normalized.toLowerCase())
-		}
-	}
-
-	return keys
-})
-const rawReferences = computed<string[]>(() => {
-	const refs = transaction.value?.references
-	if (!Array.isArray(refs)) return []
-	return refs
-		.filter((entry): entry is string => typeof entry === 'string')
-		.map((entry) => entry.trim())
-		.filter(Boolean)
-})
 const groupTransactions = computed<OpenTransaction[]>(() => props.groupTransactions ?? [])
 const isGroupMode = computed(() => groupTransactions.value.length > 1)
 const groupTransactionIds = computed(() => groupTransactions.value.map((entry) => entry.id))
-
-type TriadBadge = {
-	value: string
-	hint: string
-}
-
-type ReferenceBadge = {
-	value: string
-	hint?: string
-}
-
-function splitTriadTokens(values: string[]): string[] {
-	return values
-		.flatMap((value) => String(value ?? '').split(';'))
-		.map((value) => value.trim())
-		.filter(Boolean)
-}
-
-function parseTriadToken(token: string): { code: string; label: string; value: string } | null {
-	const match = /^(\d{2,3}):([^:]+):(.*)$/.exec(token)
-	if (!match) return null
-	const code = String(match[1] ?? '').trim()
-	const label = String(match[2] ?? '').trim()
-	const value = String(match[3] ?? '').trim()
-	if (!code || !label || !value) return null
-	return { code, label, value }
-}
-
-const triadBadges = computed<TriadBadge[]>(() => {
-	if (!rawReferences.value.length) return []
-
-	const seen = new Set<string>()
-	const badges: TriadBadge[] = []
-	for (const token of splitTriadTokens(rawReferences.value)) {
-		const triad = parseTriadToken(token)
-		if (!triad) continue
-		if (triad.code === '500' || triad.code === '502') continue
-		if (isNoisyTriad(triad)) continue
-		const key = `${triad.code}:${triad.label}:${triad.value}`.toLowerCase()
-		if (seen.has(key)) continue
-		seen.add(key)
-		badges.push({
-			value: triad.value,
-			hint: `${triad.code}: ${triad.label}`,
-		})
-	}
-	return badges
-})
-
-const referenceBadges = computed<ReferenceBadge[]>(() => {
-	if (!rawReferences.value.length) return []
-
-	const seen = new Set<string>()
-	const badges: ReferenceBadge[] = []
-	for (const token of splitTriadTokens(rawReferences.value)) {
-		const triad = parseTriadToken(token)
-		if (triad) continue
-		const normalized = normalizeReferenceToken(token)
-		if (!normalized) continue
-		if (summaryReferenceKeys.value.has(normalized.toLowerCase())) continue
-		const dedupKey = normalized.toLowerCase()
-		if (seen.has(dedupKey)) continue
-		seen.add(dedupKey)
-		badges.push({ value: normalized, hint: 'Reference' })
-	}
-
-	return badges
-})
-
-const combinedReferenceBadges = computed<ReferenceBadge[]>(() => {
-	const seen = new Set<string>()
-	const merged: ReferenceBadge[] = []
-
-	for (const entry of triadBadges.value) {
-		const key = `triad:${entry.value}:${entry.hint}`.toLowerCase()
-		if (seen.has(key)) continue
-		seen.add(key)
-		merged.push({ value: entry.value, hint: entry.hint })
-	}
-
-	for (const entry of referenceBadges.value) {
-		const key = `ref:${entry.value}`.toLowerCase()
-		if (seen.has(key)) continue
-		seen.add(key)
-		merged.push(entry)
-	}
-
-	return merged
-})
-
-function isNoisyTriad(triad: { code: string; label: string; value: string }): boolean {
-	const label = triad.label.trim().toUpperCase()
-	const value = triad.value.trim().toUpperCase()
-	if (!label || !value) return true
-
-	if (label === 'FILE INFORMATION') return true
-	if (label === 'TRANSACTION-DETAILKEY') return true
-	if (label === 'ADVICE REFERENCE') return true
-	if (label === 'NOTICE NUMBER') return true
-	if (label === 'REFERENCE' && /^(KON|KIM)\s+KONTO\b/.test(value)) return true
-
-	return false
-}
-
-function normalizeReferenceToken(token: string): string | null {
-	const value = token.trim()
-	if (!value) return null
-	if (/^(KON|KIM)\s+KONTO\b/i.test(value)) return null
-	if (/^\d{1,4}$/.test(value)) return null
-	return value
-}
+const isGroupLinesOpen = ref(false)
 
 const dimensionLabel = (key: string) => key.charAt(0).toUpperCase() + key.slice(1)
 
@@ -232,6 +97,13 @@ const currency = new Intl.NumberFormat('da-DK', {
 	style: 'currency',
 	currency: 'DKK'
 })
+
+function formatSignedAmount(amount: number): string {
+	const value = Number(amount) || 0
+	if (value < 0) return `-${currency.format(Math.abs(value))}`
+	if (value > 0) return `+${currency.format(value)}`
+	return currency.format(0)
+}
 
 const sumOre = computed(() => Math.round((totalLinesAmount.value ?? 0) * 100))
 const txOre = computed(() => Math.round((transactionAmountAbs.value ?? 0) * 100))
@@ -437,7 +309,19 @@ function collapseAllLines() {
 					:icon="appConfig.ui.icons.layers"
 					:title="`Samlepost med ${groupTransactionIds.length} transaktioner`"
 					description="Hver transaktion er forudfyldt som en finanslinje. Justér linjer efter behov før afsendelse."
-				/>
+				>
+					<template #actions>
+						<UButton
+							size="xs"
+							variant="soft"
+							color="primary"
+							:icon="appConfig.ui.icons.arrowRight"
+							@click="isGroupLinesOpen = true"
+						>
+							Vis linjer
+						</UButton>
+					</template>
+				</UAlert>
 				<UAlert
 					v-if="accountingDimensionError"
 					variant="soft"
@@ -447,21 +331,7 @@ function collapseAllLines() {
 				/>
 				<BookingSummaryCard v-if="summary" :summary="summary" />
 
-				<UCard v-if="combinedReferenceBadges.length || transaction?.id || transaction?.runId" variant="soft" :ui="{ body: 'space-y-3 p-4' }">
-					<div v-if="combinedReferenceBadges.length" class="text-xs font-semibold uppercase tracking-wide text-muted">Supplerende systemfelter</div>
-					<div v-if="combinedReferenceBadges.length" class="flex flex-wrap gap-2">
-						<UBadge
-							v-for="(entry, index) in combinedReferenceBadges"
-							:key="`ref-${index}`"
-							variant="soft"
-							color="warning"
-							size="lg"
-							:title="formatTransactionFieldHint(entry.hint)"
-							class="max-w-full min-w-0 whitespace-normal break-all"
-						>
-							{{ entry.value }}
-						</UBadge>
-					</div>
+				<UCard v-if="transaction?.id || transaction?.runId" variant="soft" :ui="{ body: 'space-y-3 p-4' }">
 
 					<div v-if="transaction?.id" class="text-xs font-semibold uppercase tracking-wide text-muted">Transaktions-ID</div>
 					<div v-if="transaction?.id" class="flex flex-wrap gap-2">
@@ -654,6 +524,25 @@ function collapseAllLines() {
 						</div>
 					</UForm>
 				</div>
+		</template>
+	</UModal>
+
+	<UModal v-model:open="isGroupLinesOpen" title="Linjer i samlepost" :ui="{ body: 'space-y-3' }">
+		<template #body>
+			<div v-if="!groupTransactions.length" class="text-sm text-muted">Ingen linjer at vise.</div>
+			<div v-else class="max-h-[60vh] space-y-2 overflow-auto pr-1">
+				<div
+					v-for="entry in groupTransactions"
+					:key="entry.id"
+					class="rounded-md border border-default/70 bg-default px-3 py-2"
+				>
+					<div class="flex items-center justify-between gap-2">
+						<div class="text-sm font-medium">{{ formatSignedAmount(entry.amount) }}</div>
+						<UBadge variant="soft" color="neutral" size="sm">{{ entry.id }}</UBadge>
+					</div>
+					<div class="mt-1 text-xs text-muted">{{ entry.counterpart ?? 'Ukendt modpart' }}</div>
+				</div>
+			</div>
 		</template>
 	</UModal>
 </template>

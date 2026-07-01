@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { h } from 'vue'
+import { today } from '@internationalized/date'
 import type { TableColumn } from '@nuxt/ui'
+import { DEFAULT_TIME_ZONE } from '~/utils'
 import BookingModal from '~/components/open-items/BookingModal.vue'
 import BookingSummaryCard from '~/components/open-items/BookingSummaryCard.vue'
 import { TRANSACTION_BADGE_COLUMN_CLASS, TRANSACTION_BADGE_STYLE } from '~/lib/presenters/transactionBadgeStyles'
@@ -12,35 +14,68 @@ import type { OpenTransaction, TransactionSummary } from '~/types/transactions'
 const appConfig = useAppConfig()
 const UBadge = resolveComponent('UBadge')
 
+const endDefault = today(DEFAULT_TIME_ZONE)
+const startDefault = endDefault.subtract({ days: 29 })
+
+const defaultRange = {
+  start: startDefault,
+  end: endDefault
+}
+
+const dateRange = ref<any>(defaultRange)
+
+function toDateOnlyParam(value: unknown): string | undefined {
+  if (!value) return undefined
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) return undefined
+    return value.toISOString().slice(0, 10)
+  }
+  if (typeof value === 'object' && value && 'toString' in (value as any)) {
+    const asText = String((value as any).toString?.() ?? '').trim()
+    if (/^\d{4}-\d{2}-\d{2}$/.test(asText)) return asText
+  }
+  const trimmed = String(value).trim()
+  if (!trimmed.length) return undefined
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed
+
+  const parsed = new Date(trimmed)
+  if (Number.isNaN(parsed.getTime())) return undefined
+  return parsed.toISOString().slice(0, 10)
+}
+
+const start = computed(() => toDateOnlyParam(dateRange.value?.start))
+const end = computed(() => toDateOnlyParam(dateRange.value?.end))
+
+// Source of truth: selected account IDs (strings)
+const selectedAccountIds = ref<string[]>([])
+const tableSearchValue = ref('')
+const openItemsSearch = computed(() => tableSearchValue.value.trim())
+
+const page = ref(1)
+const pageSize = ref(25)
+const pageSizeOptions = [5, 10, 25, 50].map((value) => ({
+  label: `${value} pr. side`,
+  value,
+}))
+
 const {
   pending,
   refresh,
   transactions,
-  totalTransactions,
-  shownTopTransactions,
-  totalTopTransactions,
-  pageLimit,
+  shownSamleposter,
+  totalSamleposter,
   isCapped,
   stacksByAccount
-} = useOpenTransactions()
-
-const { data: openItemsSettings } = useFetch<{ allowIndividualGroupedProcessing: boolean }>(
-  '/api/settings/open-items',
-  {
-    key: 'open-items-settings',
-    default: () => ({ allowIndividualGroupedProcessing: false }),
-  },
-)
+} = useOpenTransactions({
+  start,
+  end,
+  accountIds: selectedAccountIds,
+  search: openItemsSearch,
+})
 
 const isBookingOpen = ref(false)
 const useTableView = ref(false)
-const tableSearchValue = ref('')
-const tablePage = ref(1)
-const tablePageSize = ref(25)
-const tablePageSizeOptions = [5, 10, 25, 50].map((value) => ({
-  label: `${value} pr. side`,
-  value,
-}))
+
 const expandedTableStackIds = ref<Record<string, boolean>>({})
 const selectedTransactionId = ref<string | null>(null)
 const selectedGroupTransactions = ref<OpenTransaction[] | null>(null)
@@ -56,10 +91,6 @@ const modalTransaction = computed<OpenTransaction | null>(() => {
   return selectedTransaction.value
 })
 
-const allowIndividualGroupedProcessing = computed(
-  () => openItemsSettings.value?.allowIndividualGroupedProcessing ?? false,
-)
-
 type OpenTransactionStack = {
   stackId: string
   groupKey: string | null
@@ -67,16 +98,6 @@ type OpenTransactionStack = {
   representative: OpenTransaction
   totalAmount: number
   isGrouped: boolean
-}
-
-const expandedStackIds = ref<Record<string, boolean>>({})
-
-function toggleStack(stackId: string) {
-  expandedStackIds.value[stackId] = !expandedStackIds.value[stackId]
-}
-
-function isStackExpanded(stackId: string): boolean {
-  return expandedStackIds.value[stackId] ?? false
 }
 
 function toggleTableStack(stackId: string) {
@@ -87,10 +108,12 @@ function isTableStackExpanded(stackId: string): boolean {
   return expandedTableStackIds.value[stackId] ?? false
 }
 
-const dkkFormatter = new Intl.NumberFormat('da-DK', {
-  style: 'currency',
-  currency: 'DKK',
-})
+function formatSignedDkk(amount: number): string {
+  const value = Number(amount) || 0
+  if (value < 0) return `-${dkkFormatter.format(Math.abs(value))}`
+  if (value > 0) return `+${dkkFormatter.format(value)}`
+  return dkkFormatter.format(0)
+}
 
 type OpenItemsTableRow = {
   stackId: string
@@ -149,72 +172,46 @@ const tableRows = computed<OpenItemsTableRow[]>(() => {
     })
 })
 
-function buildSearchFlatValue(row: OpenItemsTableRow): string {
-  return [
-    row.bookingDate,
-    row.account,
-    String(row.amount),
-    row.counterpartEntries.map((entry) => entry.value).join(' '),
-    row.transactionTypeEntries.map((entry) => entry.value).join(' '),
-    row.referenceEntries.map((entry) => entry.value).join(' '),
-    row.notePreview,
-    row.category,
-    String(row.lineCount),
-  ]
-    .map((value) => String(value ?? '').trim())
-    .filter((value) => Boolean(value))
-    .join(' ')
-}
-
-const normalizedTableSearch = computed(() => tableSearchValue.value.trim().toLowerCase())
-
-const filteredTableRows = computed<OpenItemsTableRow[]>(() => {
-  if (!normalizedTableSearch.value.length) {
-    return tableRows.value
-  }
-
-  return tableRows.value.filter((row) =>
-    buildSearchFlatValue(row).toLowerCase().includes(normalizedTableSearch.value),
-  )
-})
-
 const pagedTableRows = computed<OpenItemsTableRow[]>(() => {
-  const start = (tablePage.value - 1) * tablePageSize.value
-  const end = start + tablePageSize.value
-  return filteredTableRows.value.slice(start, end)
+  const start = (page.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return tableRows.value.slice(start, end)
 })
 
-const tablePageCount = computed<number>(() => Math.max(1, Math.ceil(filteredTableRows.value.length / tablePageSize.value)))
+const filteredTableRows = computed<OpenItemsTableRow[]>(() => tableRows.value)
 
-watch([tableSearchValue, tablePageSize], () => {
-  tablePage.value = 1
+const tablePageCount = computed<number>(() => Math.max(1, Math.ceil(tableRows.value.length / pageSize.value)))
+
+watch([tableSearchValue, pageSize], () => {
+  page.value = 1
 })
 
 watch(tablePageCount, (count) => {
-  if (tablePage.value > count) {
-    tablePage.value = count
+  if (page.value > count) {
+    page.value = count
   }
 })
 
 watch(useTableView, (enabled) => {
   if (enabled) {
-    tablePage.value = 1
+    page.value = 1
   }
   expandedTableStackIds.value = {}
 })
 
 const expandedTableRows = computed<OpenItemsTableRow[]>(() => {
-  if (!allowIndividualGroupedProcessing.value) {
-    return []
-  }
-
   return pagedTableRows.value.filter((row) => row.stack.items.length > 1 && isTableStackExpanded(row.stackId))
 })
 
 const skeletonTableRows = Array.from({ length: 8 }, (_, index) => `skeleton-table-row-${index + 1}`)
 const skeletonCardRows = Array.from({ length: 6 }, (_, index) => `skeleton-card-${index + 1}`)
 
-const tableColumns: TableColumn<OpenItemsTableRow>[] = [
+const dkkFormatter = new Intl.NumberFormat('da-DK', {
+  style: 'currency',
+  currency: 'DKK',
+})
+
+const columns: TableColumn<OpenItemsTableRow>[] = [
   { // Banking date
     accessorKey: 'bookingDate',
     header: 'Dato',
@@ -241,7 +238,8 @@ const tableColumns: TableColumn<OpenItemsTableRow>[] = [
   { // Amount
     accessorKey: 'amount',
     header: 'Beløb',
-    cell: ({ row }) => h('span', { class: 'font-bold' }, dkkFormatter.format(row.original.amount)),
+    size: 140,
+    cell: ({ row }) => h('span', { class: 'font-bold' }, formatSignedDkk(row.original.amount)),
   },
   { // Counterparty
     accessorKey: 'counterpartEntries',
@@ -309,7 +307,7 @@ const tableColumns: TableColumn<OpenItemsTableRow>[] = [
       )
     },
   },
-  { // Kategori (samlepost vs. enkeltpost)
+  { // Category (samlepost vs. enkeltpost)
     accessorKey: 'category',
     header: 'Kategori',
     cell: ({ row }) => h('div', { class: 'flex items-center gap-2' }, [
@@ -354,31 +352,10 @@ const tableColumns: TableColumn<OpenItemsTableRow>[] = [
             openBookingModal(stack.representative)
           },
         }, () => 'Behandl'),
-        isGrouped && allowIndividualGroupedProcessing.value
-          ? h(resolveComponent('UButton'), {
-            size: 'xs',
-            color: 'neutral',
-            variant: 'outline',
-            icon: isTableStackExpanded(row.original.stackId)
-              ? appConfig.ui.icons.arrowUp
-              : appConfig.ui.icons.arrowDown,
-            onClick: () => toggleTableStack(row.original.stackId),
-          }, () => (isTableStackExpanded(row.original.stackId) ? 'Skjul linjer' : 'Vis linjer'))
-          : null,
       ])
     },
   },
 ]
-
-const tableUi = {
-  base: 'border-separate border-spacing-0',
-  thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
-  tbody: '[&>tr]:last:[&>td]:border-b-0',
-  tr: 'group',
-  th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
-  td: 'align-top group-has-[td:not(:empty)]:border-b border-default',
-  separator: 'h-0',
-}
 
 function toStackSummary(stack: OpenTransactionStack): TransactionSummary {
   if (!stack.isGrouped || stack.items.length <= 1) {
@@ -394,7 +371,7 @@ function toStackSummary(stack: OpenTransactionStack): TransactionSummary {
     amount: {
       ...base.amount,
       raw: stack.totalAmount,
-      value: dkkFormatter.format(stack.totalAmount),
+      value: formatSignedDkk(stack.totalAmount),
     },
     transactionId: {
       ...base.transactionId,
@@ -422,7 +399,7 @@ function toGroupedModalTransaction(items: OpenTransaction[]): OpenTransaction | 
       amount: {
         ...base.amount,
         raw: totalAmount,
-        value: dkkFormatter.format(totalAmount),
+        value: formatSignedDkk(totalAmount),
       },
       transactionId: {
         ...base.transactionId,
@@ -477,6 +454,16 @@ function handleDraftSaved(payload: { transactionId: string; note: string | null 
     }
   }
 }
+
+const tableUi = {
+  base: 'border-separate border-spacing-0',
+  thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
+  tbody: '[&>tr]:last:[&>td]:border-b-0',
+  tr: 'group',
+  th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
+  td: 'align-top group-has-[td:not(:empty)]:border-b border-default',
+  separator: 'h-0',
+}
 </script>
 
 <template>
@@ -501,6 +488,7 @@ function handleDraftSaved(payload: { transactionId: string; note: string | null 
           Der er ingen åbne transaktioner at behandle.
         </div>
         <template v-else>
+          <!-- Transaction amount info -->
           <div v-if="isCapped && !useTableView" class="relative z-40 mb-6 w-full">
             <UAlert
               class="w-full"
@@ -510,33 +498,35 @@ function handleDraftSaved(payload: { transactionId: string; note: string | null 
               :ui="{ title: 'text-left', description: 'text-left' }"
             >
               <template #title>
-                Viser {{ shownTopTransactions }} af {{ totalTopTransactions }} posteringer
+                Viser {{ shownSamleposter }} af {{ totalSamleposter }} posteringer
               </template>
             </UAlert>
           </div>
 
           <template v-if="useTableView">
             <FiltersRow
+              v-model:account-ids="selectedAccountIds"
               v-model:search="tableSearchValue"
+              v-model:date-range="dateRange"
+              :reset-date-range="defaultRange"
+              :time-zone="DEFAULT_TIME_ZONE"
               :show-search="true"
-              :show-accounts="false"
-              :show-date="false"
               search-placeholder="Søg i åbne poster..."
             />
 
-            <div class="mb-3 mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div v-if="dateRange?.start && dateRange?.end" class="mb-3 mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div class="text-sm text-muted">
                 <template v-if="pending">
                   <USkeleton class="h-4 w-56" />
                 </template>
                 <template v-else>
-                  Viser {{ pagedTableRows.length }} af {{ totalTopTransactions }} posteringer
+                  Viser {{ pagedTableRows.length }} af {{ totalSamleposter }} posteringer
                 </template>
               </div>
 
               <USelect
-                v-model="tablePageSize"
-                :items="tablePageSizeOptions"
+                v-model="pageSize"
+                :items="pageSizeOptions"
                 labelKey="label"
                 valueKey="value"
                 class="w-full sm:w-28"
@@ -561,71 +551,25 @@ function handleDraftSaved(payload: { transactionId: string; note: string | null 
             <UTable
               v-else
               :data="pagedTableRows"
-              :columns="tableColumns"
+              :columns="columns"
               :ui="tableUi"
             />
 
-            <div v-if="expandedTableRows.length" class="mt-4 space-y-3">
-              <UCard
-                v-for="row in expandedTableRows"
-                :key="`expanded-${row.stackId}`"
-                variant="soft"
-                :ui="{ body: 'space-y-3 p-4' }"
-              >
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                  <div class="text-sm font-semibold">
-                    {{ row.account }} · {{ row.lineCount }} linjer
-                  </div>
-                  <UBadge color="neutral" variant="subtle" size="sm">
-                    Samlepost
-                  </UBadge>
-                </div>
-
-                <UAlert
-                  v-if="stackNotePreview(row.stack)"
-                  color="primary"
-                  variant="soft"
-                  :icon="appConfig.ui.icons.notes"
-                  title="Notat"
-                  :description="stackNotePreview(row.stack) ?? ''"
-                />
-
-                <div class="space-y-2">
-                  <div
-                    v-for="member in row.stack.items"
-                    :key="member.id"
-                    class="flex items-center justify-between gap-2 rounded-md border border-default/60 bg-default px-3 py-2"
-                  >
-                    <div class="text-sm">
-                      {{ member.summary.amount.value }}
-                    </div>
-                    <UButton
-                      size="xs"
-                      color="primary"
-                      variant="soft"
-                      @click="openBookingModal(member)"
-                    >
-                      Behandl linje
-                    </UButton>
-                  </div>
-                </div>
-              </UCard>
-            </div>
-
-            <div v-if="filteredTableRows.length > tablePageSize" class="mt-4 flex items-center border-t border-default pt-4">
+            <div v-if="filteredTableRows.length > pageSize" class="mt-4 flex items-center border-t border-default pt-4">
               <div class="flex-1" />
               <div class="flex flex-1 justify-center">
                 <UPagination
-                  :default-page="tablePage"
-                  :items-per-page="tablePageSize"
+                  :default-page="page"
+                  :items-per-page="pageSize"
                   :total="filteredTableRows.length"
-                  @update:page="(value) => (tablePage = value)"
+                  @update:page="(value) => (page = value)"
                 />
               </div>
               <div class="flex-1" />
             </div>
           </template>
 
+          <!-- Card view -->
           <template v-else>
             <template v-if="pending">
               <div class="columns-1 md:columns-2 xl:columns-3 [column-gap:1.5rem]">
@@ -689,19 +633,7 @@ function handleDraftSaved(payload: { transactionId: string; note: string | null 
 
                             <div
                               class="grid grid-cols-1 gap-2"
-                              :class="allowIndividualGroupedProcessing ? 'sm:grid-cols-2' : ''"
                             >
-                              <UButton
-                                v-if="allowIndividualGroupedProcessing"
-                                class="w-full justify-center font-semibold"
-                                color="neutral"
-                                variant="outline"
-                                size="lg"
-                                :icon="isStackExpanded(stack.stackId) ? appConfig.ui.icons.arrowUp : appConfig.ui.icons.arrowDown"
-                                @click="toggleStack(stack.stackId)"
-                              >
-                                {{ isStackExpanded(stack.stackId) ? 'Skjul poster' : 'Vis poster' }}
-                              </UButton>
                               <UButton
                                 class="font-bold"
                                 color="primary"
@@ -716,14 +648,6 @@ function handleDraftSaved(payload: { transactionId: string; note: string | null 
                             </div>
                           </div>
 
-                          <UAlert
-                            v-if="stack.items.length > 1 && !allowIndividualGroupedProcessing"
-                            color="warning"
-                            variant="soft"
-                            :icon="appConfig.ui.icons.lock"
-                            title="Individuel behandling er slået fra"
-                          />
-
                           <div v-if="stack.items.length <= 1" class="grid grid-cols-1 gap-2">
                             <UButton
                               class="w-full justify-center font-bold"
@@ -732,34 +656,12 @@ function handleDraftSaved(payload: { transactionId: string; note: string | null 
                               size="lg"
                               block
                               :trailing-icon="appConfig.ui.icons.edit"
-                              @click="stack.items.length > 1 && allowIndividualGroupedProcessing ? openGroupedBookingModal(stack.items) : openBookingModal(stack.representative)"
+                              @click="openBookingModal(stack.representative)"
                             >
                               Behandl
                             </UButton>
                           </div>
 
-                          <UCard
-                            v-if="stack.items.length > 1 && allowIndividualGroupedProcessing && isStackExpanded(stack.stackId)"
-                            variant="soft"
-                            :ui="{ body: 'space-y-2 p-2' }"
-                          >
-                            <div
-                              v-for="member in stack.items"
-                              :key="member.id"
-                              class="flex items-center justify-between gap-2"
-                            >
-                              <span class="text-sm font-medium">{{ member.summary.amount.value }}</span>
-                              <UButton
-                                size="xs"
-                                color="primary"
-                                variant="soft"
-                                :disabled="!allowIndividualGroupedProcessing"
-                                @click="openBookingModal(member)"
-                              >
-                                Behandl linje
-                              </UButton>
-                            </div>
-                          </UCard>
                         </div>
                       </template>
                       </BookingSummaryCard>
