@@ -33,7 +33,7 @@ const schema = z.object({
 
   /** File list selection strategy for XML channel. */
   NORDEA_CA_FILE_STATUS: z.enum(['NEW', 'DLD', 'ALL']).default('NEW'),
-  NORDEA_CA_LOOKBACK_DAYS: z.coerce.number().int().min(1).max(365).default(7),
+  NORDEA_CA_LOOKBACK_DAYS: z.coerce.number().int().min(1).max(31).default(7),
   NORDEA_CA_MAX_FILES_PER_RUN: z.coerce.number().int().min(1).max(100).default(25),
 })
 

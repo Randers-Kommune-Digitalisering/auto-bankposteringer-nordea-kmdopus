@@ -1,9 +1,15 @@
 <script setup lang="ts">
-import { DEFAULT_TIME_ZONE } from '~/lib/timeZone'
+import { today, type DateValue } from '@internationalized/date'
+import { DEFAULT_TIME_ZONE } from '~/utils'
 
 const appConfig = useAppConfig()
 
-type DateRangeValue = any
+// TODO(refactor): Move shared rows-per-page selection into this component.
+
+type DateRangeValue = {
+  start: DateValue;
+  end: DateValue;
+}
 
 const props = withDefaults(
   defineProps<{
@@ -52,8 +58,13 @@ const emit = defineEmits<{
 }>()
 
 const dateRangeModel = computed<DateRangeValue>({
-  get: () => props.dateRange,
-  set: (next) => emit('update:dateRange', next),
+  get: () => {
+    if (props.dateRange) return props.dateRange
+    if (props.resetDateRange) return props.resetDateRange
+    const defaultDate = today(props.timeZone ?? DEFAULT_TIME_ZONE)
+    return { start: defaultDate, end: defaultDate }
+  },
+  set: (next: DateRangeValue) => emit('update:dateRange', next),
 })
 
 const accountIdsModel = computed<string[]>({

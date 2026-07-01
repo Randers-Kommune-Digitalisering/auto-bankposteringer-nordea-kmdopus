@@ -29,6 +29,8 @@ import { bankingDocument, bankingStatement, bankingStatementBalance } from "./st
 import { bankingAdapterCursor } from "./bankingAdapterCursor";
 import { erpRequest, erpResponse, erpRequestLine } from "./erp";
 import { errorLog } from "./error";
+import { job } from './job';
+import { bankingAgreementDiscoveryRun } from './bankingAgreementDiscoveryRun';
 
 export const accountRelations = relations(account, ({ many }) => ({
   rules: many(ruleBankAccount),
@@ -197,4 +199,8 @@ export const bankingAdapterCursorRelations = relations(bankingAdapterCursor, ({ 
 
 export const errorRelations = relations(errorLog, ({ one }) => ({
   run: one(run, { fields: [errorLog.runId], references: [run.id] }),
+}));
+
+export const bankingAgreementDiscoveryRunRelations = relations(bankingAgreementDiscoveryRun, ({ one }) => ({
+  job: one(job, { fields: [bankingAgreementDiscoveryRun.jobId], references: [job.id] }),
 }));

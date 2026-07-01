@@ -1,26 +1,16 @@
 import { join } from 'node:path'
 import { eq } from 'drizzle-orm'
 import db from '~/lib/db'
+import { createUtcIsoString, shiftDaysBack } from '~~/utils/function'
 import { account } from '~/lib/db/schema/account'
 import type { BankProvider, BankChannel } from '~/lib/db/schema/bankingAgreement'
 import { logger } from '~/lib/logger'
 import { parseCamt053Xml } from './camt053/parseCamt053Xml'
 import { LocalFileBankAdapter } from '../infrastructure/localFileBankAdapter'
-import { DanskeBankEdiWebServicesAdapter } from '../infrastructure/danskebank/danskeBankEdiWebServicesAdapter'
-import { loadDanskeBankEdiEnvConfig } from '../infrastructure/danskebank/danskeBankEdiEnvConfig'
-import { loadDanskeBankEnvSecrets } from '../infrastructure/danskebank/danskeBankEnvSecrets'
-import { NordeaCorporateAccessWebServicesAdapter } from '../infrastructure/nordea/nordeaCorporateAccessWebServicesAdapter'
-import { loadNordeaCorporateAccessEnvConfig } from '../infrastructure/nordea/nordeaCorporateAccessEnvConfig'
-import { loadNordeaEnvSecrets } from '../infrastructure/nordea/nordeaEnvSecrets'
+import { buildBankMeta } from '~~/utils/function'
 import type { BankAdapter } from '../ports/bankAdapter'
 
-function toDateOnlyUtc(value: Date): string {
-  return value.toISOString().slice(0, 10)
-}
-
-function shiftDaysUtc(value: Date, daysBack: number): Date {
-  return new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate() - daysBack, 0, 0, 0, 0))
-}
+const DISCOVERY_FETCH_TIMEOUT_MS = 20_000
 
 function isRecoverableContentNotFound(provider: BankProvider, error: unknown): boolean {
   if (provider !== 'nordea') return false
@@ -42,93 +32,39 @@ function buildIso20022Adapter(provider: BankProvider): BankAdapter {
       key: 'nordea-example-file',
       filePath: join(process.cwd(), 'resources', 'banking', 'nordea', 'examples', 'camt.053e.xml'),
       filename: 'camt.053e.xml',
+      lookbackDays: 7,
     })
   }
 
-  if (provider === 'danskebank') {
-    const config = loadDanskeBankEdiEnvConfig()
-    const secrets = loadDanskeBankEnvSecrets()
-    return new DanskeBankEdiWebServicesAdapter({
-      ediEndpointUrl: config.DANSKE_BANK_EDI_ENDPOINT_URL,
-      pkiEndpointUrl: config.DANSKE_BANK_PKI_ENDPOINT_URL,
-      senderId: config.DANSKE_BANK_EDI_SENDER_ID,
-      receiverId: config.DANSKE_BANK_EDI_RECEIVER_ID,
-      language: config.DANSKE_BANK_EDI_LANGUAGE,
-      customerId: config.DANSKE_BANK_CUSTOMER_ID,
-      signerId: config.DANSKE_BANK_SIGNER_ID,
-      softwareId: config.DANSKE_BANK_SOFTWARE_ID,
-      environment: config.DANSKE_BANK_ENVIRONMENT,
-      downloadStatus: config.DANSKE_BANK_FILE_STATUS,
-      lookbackDays: config.DANSKE_BANK_LOOKBACK_DAYS,
-      maxFilesPerRun: config.DANSKE_BANK_MAX_FILES_PER_RUN,
-      pkiSenderId: config.DANSKE_BANK_PKI_SENDER_ID,
-      pkiCustomerId: config.DANSKE_BANK_PKI_CUSTOMER_ID,
-      pkiInterfaceVersion: config.DANSKE_BANK_PKI_INTERFACE_VERSION,
-      pkiBankRootCertificateSerialNo: config.DANSKE_BANK_PKI_BANK_ROOT_CERT_SERIAL,
-      applicationRequestPrivateKeyPem: secrets.applicationRequestPrivateKeyPem,
-      applicationRequestCertificatePem: secrets.applicationRequestCertificatePem,
-      trustedBankSigningCertFingerprintSha256Hex: secrets.trustedSigningCertificateFingerprintSha256Hex,
-      mtlsClientCertificatePem: secrets.mtlsClientCertificatePem,
-      mtlsClientPrivateKeyPem: secrets.mtlsClientPrivateKeyPem,
-      httpTimeoutMs: 30_000,
-    })
-  }
+  return buildBankMeta(provider) // throws if provider is unknown
 
-  if (provider === 'nordea') {
-    const config = loadNordeaCorporateAccessEnvConfig()
-    const secrets = loadNordeaEnvSecrets()
-    return new NordeaCorporateAccessWebServicesAdapter({
-      endpointUrl: config.NORDEA_CA_WS_ENDPOINT_URL,
-      senderId: config.NORDEA_CA_WS_SENDER_ID,
-      receiverId: config.NORDEA_CA_WS_RECEIVER_ID,
-      userAgent: config.NORDEA_CA_WS_USER_AGENT,
-      language: config.NORDEA_CA_WS_LANGUAGE,
-      customerId: config.NORDEA_CA_CUSTOMER_ID,
-      signerId: config.NORDEA_CA_SIGNER_ID,
-      softwareId: config.NORDEA_CA_SOFTWARE_ID,
-      environment: config.NORDEA_CA_ENVIRONMENT,
-      statementFileType: config.NORDEA_CA_STATEMENT_FILE_TYPE,
-      downloadStatus: config.NORDEA_CA_FILE_STATUS,
-      lookbackDays: config.NORDEA_CA_LOOKBACK_DAYS,
-      maxFilesPerRun: config.NORDEA_CA_MAX_FILES_PER_RUN,
-      requestCompressed: config.NORDEA_CA_REQUEST_COMPRESSED === '1',
-      applicationRequestPrivateKeyPem: secrets.NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM,
-      applicationRequestCertificatePem: secrets.NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM,
-      trustedNordeaCertificateFingerprintSha256Hex: secrets.NORDEA_TRUSTED_SIGNING_CERT_SHA256,
-      mtlsClientCertificatePem: secrets.NORDEA_MTLS_CLIENT_CERTIFICATE_PEM ?? secrets.NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM,
-      mtlsClientPrivateKeyPem: secrets.NORDEA_MTLS_CLIENT_PRIVATE_KEY_PEM ?? secrets.NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM,
-      timeoutMs: 30_000,
-    })
-  }
-
-  throw new Error(`Account discovery ikke implementeret for provider=${provider}`)
-}
-
-function getProviderLookbackDays(provider: BankProvider): number {
-  if (provider === 'danskebank') {
-    return loadDanskeBankEdiEnvConfig().DANSKE_BANK_LOOKBACK_DAYS
-  }
-
-  if (provider === 'nordea') {
-    return loadNordeaCorporateAccessEnvConfig().NORDEA_CA_LOOKBACK_DAYS
-  }
-
-  return 1
 }
 
 export async function discoverAgreementAccounts(options: {
   provider: BankProvider
   channel: BankChannel
   bookingDate: Date
-}): Promise<{ discoveredAccounts: number; inspectedDocuments: number }> {
+}): Promise<{ discoveredAccounts: number; inspectedDocuments: number; skippedDays: number }> {
   const log = logger.child({ scope: 'banking.discoverAgreementAccounts', provider: options.provider, channel: options.channel })
 
   if (options.channel !== 'iso20022') {
-    return { discoveredAccounts: 0, inspectedDocuments: 0 }
+    return { discoveredAccounts: 0, inspectedDocuments: 0, skippedDays: 0 }
   }
 
   const adapter = buildIso20022Adapter(options.provider)
-  const lookbackDays = Math.max(1, getProviderLookbackDays(options.provider))
+  const lookbackRaw = Number(adapter.lookbackDays)
+  const lookbackDays = Number.isFinite(lookbackRaw) && lookbackRaw >= 1
+    ? Math.min(Math.trunc(lookbackRaw), 31)
+    : 7
+
+  const anchorBookingDate = createUtcIsoString(options.bookingDate)
+  log.info('Account discovery started', {
+    provider: options.provider,
+    channel: options.channel,
+    adapterKey: adapter.key,
+    anchorBookingDate,
+    lookbackDays,
+  })
 
   const knownIds = new Set<string>()
   let discoveredAccounts = 0
@@ -136,23 +72,40 @@ export async function discoverAgreementAccounts(options: {
   let skippedDays = 0
 
   for (let daysBack = 0; daysBack < lookbackDays; daysBack += 1) {
-    const bookingDate = toDateOnlyUtc(shiftDaysUtc(options.bookingDate, daysBack))
+    const bookingDate = createUtcIsoString(shiftDaysBack(options.bookingDate, daysBack))
     let fetched: Awaited<ReturnType<BankAdapter['fetchDocuments']>>
     try {
-      fetched = await adapter.fetchDocuments({
-        accountId: `provider:${options.provider}`,
-        cursor: null,
-        limit: 25,
-        bookingDate,
-      })
+      fetched = await Promise.race([
+        adapter.fetchDocuments({
+          accountId: `provider:${options.provider}`,
+          cursor: null,
+          limit: 25,
+          bookingDate,
+        }),
+        new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error(`Account discovery timeout after ${DISCOVERY_FETCH_TIMEOUT_MS}ms`)), DISCOVERY_FETCH_TIMEOUT_MS)
+        }),
+      ])
     } catch (error) {
       if (!isRecoverableContentNotFound(options.provider, error)) {
-        throw error
+        skippedDays += 1
+        log.warn('Account discovery skipped date due to adapter error', {
+          bookingDate,
+          anchorBookingDate,
+          lookbackDays,
+          adapterKey: adapter.key,
+          provider: options.provider,
+          reason: String((error as any)?.message ?? error),
+        })
+        continue
       }
 
       skippedDays += 1
       log.warn('Account discovery skipped date due to no content', {
         bookingDate,
+        anchorBookingDate,
+        lookbackDays,
+        adapterKey: adapter.key,
         provider: options.provider,
         reason: String((error as any)?.message ?? error),
       })
@@ -191,7 +144,8 @@ export async function discoverAgreementAccounts(options: {
   }
 
   log.info('Account discovery completed', {
-    bookingDate: toDateOnlyUtc(options.bookingDate),
+    bookingDate: anchorBookingDate,
+    adapterKey: adapter.key,
     lookbackDays,
     skippedDays,
     inspectedDocuments,
@@ -201,5 +155,6 @@ export async function discoverAgreementAccounts(options: {
   return {
     discoveredAccounts,
     inspectedDocuments,
+    skippedDays,
   }
 }

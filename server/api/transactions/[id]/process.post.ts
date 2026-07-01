@@ -26,34 +26,36 @@ import {
 } from '~~/server/utils/accountingDimensions'
 import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
 import { parseAmount } from '#engine/matching/domain/amount'
-import env from '~/lib/env/env'
 import { buildNordeaDeterministicGroupKey } from '#engine/banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo'
 
 export default defineEventHandler(async (event) => {
   await requireWriteAccess(event)
-  const transactionIdParam = event.context.params?.id;
-  if (!transactionIdParam) {
+
+  const txId = event.context.params?.id;
+
+  const parsedBody = manualBookingPayloadSchema.parse(await readBody(event));
+
+  if (!txId) {
     throw createError({ statusCode: 400, statusMessage: "Mangler transaktions-id" });
   }
 
-  const transactionIdResult = z.string().uuid().safeParse(transactionIdParam);
-  if (!transactionIdResult.success) {
+  const parsedTxId = z.uuid().safeParse(txId);
+  if (!parsedTxId.success) {
     throw createError({
       statusCode: 400,
       statusMessage: "Transaktionen kan ikke behandles (ugyldigt id eller mock-data)",
     });
   }
-  const transactionId = transactionIdResult.data;
+  const transactionId = parsedTxId.data;
 
-  const body = manualBookingPayloadSchema.parse(await readBody(event));
-
-  if (body.cprType === "statisk" && !normalizeDigits(body.cprNumber)) {
+  if (parsedBody.cprType === "statisk" && !normalizeDigits(parsedBody.cprNumber)) {
     throw createError({
       statusCode: 422,
       statusMessage: "CPR-nummer er påkrævet, når CPR-type er statisk",
     });
   }
-
+  
+  // Get transaction and include state
   const [row] = await db
     .select({
       id: transaction.id,
@@ -94,77 +96,76 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 409, statusMessage: "Transaktionen er allerede behandlet" });
   }
 
-  if (!env.OPEN_ITEMS_ALLOW_GROUP_MEMBER_PROCESSING) {
-    const bookingDate = toDate(row.bookingDate)
-    const creditDebitCondition = row.creditDebitIndicator == null
-      ? isNull(transaction.creditDebitIndicator)
-      : eq(transaction.creditDebitIndicator, row.creditDebitIndicator)
+  const bookingDate = toDate(row.bookingDate)
 
-    const groupCandidates = await db
-      .select({
-        id: transaction.id,
-        statementId: transaction.statementId,
-        entryIndex: transaction.entryIndex,
-        accountId: transaction.accountId,
-        bookingDate: transaction.bookingDate,
-        creditDebitIndicator: transaction.creditDebitIndicator,
-        ntryRef: transaction.ntryRef,
-        ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,
-        entryAdditionalInfo: transaction.entryAdditionalInfo,
-        processingStatus: transactionProcessing.status,
-      })
-      .from(transaction)
-      .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
-      .where(and(
-        eq(transaction.accountId, row.accountId),
-        eq(transaction.bookingDate, bookingDate),
-        creditDebitCondition,
-      ))
+  const creditDebitCondition = row.creditDebitIndicator == null
+    ? isNull(transaction.creditDebitIndicator)
+    : eq(transaction.creditDebitIndicator, row.creditDebitIndicator)
 
-    const entryGroupSizeByEntryKey = new Map<string, number>()
-    for (const candidate of groupCandidates) {
-      const entryKey = toStatementEntryKey(candidate.statementId, candidate.entryIndex)
-      if (!entryKey) continue
-      entryGroupSizeByEntryKey.set(entryKey, (entryGroupSizeByEntryKey.get(entryKey) ?? 0) + 1)
-    }
-
-    const rowGroupKey = buildNordeaDeterministicGroupKey({
-      accountId: row.accountId,
-      bookingDate,
-      creditDebitIndicator: row.creditDebitIndicator ?? null,
-      entryGroupSize: entryGroupSizeByEntryKey.get(toStatementEntryKey(row.statementId, row.entryIndex) ?? '') ?? 0,
-      ntryRef: row.ntryRef ?? null,
-      entryAdditionalInfo: row.entryAdditionalInfo ?? null,
-      ntryAcctSvcrRef: row.ntryAcctSvcrRef ?? null,
+  const groupCandidates = await db
+    .select({
+      id: transaction.id,
+      statementId: transaction.statementId,
+      entryIndex: transaction.entryIndex,
+      accountId: transaction.accountId,
+      bookingDate: transaction.bookingDate,
+      creditDebitIndicator: transaction.creditDebitIndicator,
+      ntryRef: transaction.ntryRef,
+      ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,
+      entryAdditionalInfo: transaction.entryAdditionalInfo,
+      processingStatus: transactionProcessing.status,
     })
+    .from(transaction)
+    .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
+    .where(and(
+      eq(transaction.accountId, row.accountId),
+      eq(transaction.bookingDate, bookingDate),
+      creditDebitCondition,
+    ))
 
-    if (rowGroupKey) {
-      const openMembers = groupCandidates.filter(
-        (candidate) => !candidate.processingStatus || candidate.processingStatus === 'åben',
-      )
-      const groupedOpenCount = openMembers.filter((candidate) => {
-        const candidateKey = buildNordeaDeterministicGroupKey({
-          accountId: candidate.accountId,
-          bookingDate: toDate(candidate.bookingDate),
-          creditDebitIndicator: candidate.creditDebitIndicator ?? null,
-          entryGroupSize: entryGroupSizeByEntryKey.get(toStatementEntryKey(candidate.statementId, candidate.entryIndex) ?? '') ?? 0,
-          ntryRef: candidate.ntryRef ?? null,
-          entryAdditionalInfo: candidate.entryAdditionalInfo ?? null,
-          ntryAcctSvcrRef: candidate.ntryAcctSvcrRef ?? null,
-        })
-        return candidateKey === rowGroupKey
-      }).length
+  const entryGroupSizeByEntryKey = new Map<string, number>()
+  for (const candidate of groupCandidates) {
+    const entryKey = toStatementEntryKey(candidate.statementId, candidate.entryIndex)
+    if (!entryKey) continue
+    entryGroupSizeByEntryKey.set(entryKey, (entryGroupSizeByEntryKey.get(entryKey) ?? 0) + 1)
+  }
 
-      if (groupedOpenCount > 1) {
-        throw createError({
-          statusCode: 409,
-          statusMessage: 'Individuel behandling af linjer i samlepost er slået fra',
-        })
-      }
+  const rowGroupKey = buildNordeaDeterministicGroupKey({
+    accountId: row.accountId,
+    bookingDate,
+    creditDebitIndicator: row.creditDebitIndicator ?? null,
+    entryGroupSize: entryGroupSizeByEntryKey.get(toStatementEntryKey(row.statementId, row.entryIndex) ?? '') ?? 0,
+    ntryRef: row.ntryRef ?? null,
+    entryAdditionalInfo: row.entryAdditionalInfo ?? null,
+    ntryAcctSvcrRef: row.ntryAcctSvcrRef ?? null,
+  })
+
+  if (rowGroupKey) {
+    const openMembers = groupCandidates.filter(
+      (candidate) => !candidate.processingStatus || candidate.processingStatus === 'åben',
+    )
+    const groupedOpenCount = openMembers.filter((candidate) => {
+      const candidateKey = buildNordeaDeterministicGroupKey({
+        accountId: candidate.accountId,
+        bookingDate: toDate(candidate.bookingDate),
+        creditDebitIndicator: candidate.creditDebitIndicator ?? null,
+        entryGroupSize: entryGroupSizeByEntryKey.get(toStatementEntryKey(candidate.statementId, candidate.entryIndex) ?? '') ?? 0,
+        ntryRef: candidate.ntryRef ?? null,
+        entryAdditionalInfo: candidate.entryAdditionalInfo ?? null,
+        ntryAcctSvcrRef: candidate.ntryAcctSvcrRef ?? null,
+      })
+      return candidateKey === rowGroupKey
+    }).length
+
+    if (groupedOpenCount > 1) {
+      throw createError({
+        statusCode: 409,
+        statusMessage: 'Individuel behandling af linjer i samlepost er slået fra',
+      })
     }
   }
 
-  const amount = parseNumeric(row.amount);
+  const amount = parseAmount(row.amount);
   const provider = row.accountProvider ? String(row.accountProvider) : ''
   const iban = row.accountIban ? String(row.accountIban) : ''
 
@@ -179,25 +180,23 @@ export default defineEventHandler(async (event) => {
         ))
     : []
 
-  const artskonto = (() => {
-    const preferred = dimRows.find((d) => String(d.key) === 'artskonto')
+  const statuskonto = (() => {
+    const preferred = dimRows.find((d) => String(d.key) === 'statuskonto')
     if (preferred?.value) return String(preferred.value)
-    const legacy = dimRows.find((d) => String(d.key) === 'statuskonto')
-    if (legacy?.value) return String(legacy.value)
     return null
   })()
 
-  if (!artskonto) {
+  if (!statuskonto) {
     throw createError({
       statusCode: 409,
-      statusMessage: `Mangler artskonto-kontering for bankkonto (IBAN=${row.accountIban ?? row.accountId})`,
+      statusMessage: `Mangler statuskonto for bankkonto (IBAN=${row.accountIban ?? row.accountId})`,
     })
   }
 
   const txContext: PostingTransactionContext = {
     transactionId: row.id,
     amount,
-    statusDimensions: { artskonto },
+    statusDimensions: { statuskonto },
     debtorName: row.debtorName,
     debtorId: row.debtorId,
     creditorName: row.creditorName,
@@ -209,13 +208,18 @@ export default defineEventHandler(async (event) => {
     remittanceAdditional: row.remittanceAdditional,
   };
 
-  const supplier = await getActiveErpSupplier()
-  const definitions = await listAccountingDimensionDefinitions(supplier)
-  const defaultTextTemplate = normalizeOptionalString(body.text) ?? undefined
-  const landingLines = body.lines.map((line) => {
+  const accDimDefinitions = await listAccountingDimensionDefinitions(
+    await getActiveErpSupplier()
+  )
+
+  const defaultTextTemplate = normalizeOptionalString(parsedBody.text) ?? undefined
+
+  const landingLines = parsedBody.lines.map((line) => {
     const normalizedDimensions = normalizeDimensionInput(line.dimensions)
-    validateDimensionsAgainstDefinitions(normalizedDimensions, definitions)
+
+    validateDimensionsAgainstDefinitions(normalizedDimensions, accDimDefinitions)
     const dimensions = Object.fromEntries(normalizedDimensions.map((d) => [d.key, d.value]))
+
     return {
       amount: Number(line.amount),
       dimensions,
@@ -223,26 +227,22 @@ export default defineEventHandler(async (event) => {
     }
   })
 
-  const postingText = resolvePostingText(defaultTextTemplate, txContext);
-  const attachments = (body.attachments ?? []).map<PostingAttachment>((attachment) => ({
+  const attachments = (parsedBody.attachments ?? []).map<PostingAttachment>((attachment) => ({
     name: attachment.name,
     type: attachment.type,
     data: attachment.data,
   }));
-
-  const resolvedCpr = resolveManualCpr(body.cprType, normalizeDigits(body.cprNumber), txContext);
 
   validateLineAmounts(landingLines, amount)
 
   const command = buildPostingCommand({
     transaction: txContext,
     landingLines,
-    text: postingText,
-    cpr: resolvedCpr,
+    text: resolvePostingText(defaultTextTemplate, txContext),
+    cpr: resolveManualCpr(parsedBody.cprType, normalizeDigits(parsedBody.cprNumber), txContext),
     attachments: attachments.length ? attachments : undefined,
   });
 
-  const bookingDate = toDate(row.bookingDate);
   const submission = await executePostingCommand(command, {
     runId: row.runId,
     bookingDate,
@@ -273,28 +273,30 @@ export default defineEventHandler(async (event) => {
 });
 
 async function clearManualBookingDraft(transactionId: string) {
-  await db.transaction(async (trx) => {
-    const lines = await trx
+  await db.transaction(async (tx) => {
+    const lines = await tx
       .select({ id: manualBookingDraftLine.id })
       .from(manualBookingDraftLine)
       .where(eq(manualBookingDraftLine.transactionId, transactionId))
 
     const lineIds = lines.map((l) => l.id)
     if (lineIds.length) {
-      await trx
+      await tx
         .delete(manualBookingDraftLineDimension)
         .where(inArray(manualBookingDraftLineDimension.lineId, lineIds))
     }
 
-    await trx.delete(manualBookingDraftAttachment).where(eq(manualBookingDraftAttachment.transactionId, transactionId))
-    await trx.delete(manualBookingDraftLine).where(eq(manualBookingDraftLine.transactionId, transactionId))
-    await trx.delete(manualBookingDraft).where(eq(manualBookingDraft.transactionId, transactionId))
+    await tx.delete(manualBookingDraftAttachment).where(eq(manualBookingDraftAttachment.transactionId, transactionId))
+    await tx.delete(manualBookingDraftLine).where(eq(manualBookingDraftLine.transactionId, transactionId))
+    await tx.delete(manualBookingDraft).where(eq(manualBookingDraft.transactionId, transactionId))
   })
 }
 
-function parseNumeric(value: unknown): number {
-  return parseAmount(value)
-}
+/*
+----------------
+Helper functions
+----------------
+*/ 
 
 function normalizeOptionalString(value?: string | null): string | null {
   if (!value) {
@@ -314,9 +316,9 @@ function normalizeDigits(value?: string | null): string | null {
 
 function validateDimensionsAgainstDefinitions(
   dimensions: Array<{ key: string; value: string }>,
-  definitions: Array<{ key: string; required: boolean }>,
+  accDimDefinitions: Array<{ key: string; required: boolean }>,
 ) {
-  const allowedKeys = new Set(definitions.map((d) => d.key))
+  const allowedKeys = new Set(accDimDefinitions.map((d) => d.key))
   for (const d of dimensions) {
     if (!allowedKeys.has(d.key)) {
       throw createError({
@@ -325,7 +327,7 @@ function validateDimensionsAgainstDefinitions(
       })
     }
   }
-  for (const def of definitions) {
+  for (const def of accDimDefinitions) {
     if (def.required && !dimensions.some((d) => d.key === def.key)) {
       throw createError({
         statusCode: 422,

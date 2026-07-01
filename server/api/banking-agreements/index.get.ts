@@ -1,11 +1,10 @@
-import { and, asc, eq, inArray } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray } from 'drizzle-orm'
 import db from '~/lib/db'
 import { bankingAgreement, bankProviderValues } from '~/lib/db/schema/bankingAgreement'
-import { ZodError } from 'zod'
+import { bankingAgreementDiscoveryRun } from '~/lib/db/schema/bankingAgreementDiscoveryRun'
 import { bankingAgreementAccountAllowlist } from '~/lib/db/schema/bankingAgreementAccountAllowlist'
 import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreementAccountDimension'
 import {
-  extractKeysFromZod,
   nonEmpty,
   providerEnvRequirements,
 } from '~/../engine/banking-ingestion/infrastructure/providerEnv'
@@ -72,7 +71,10 @@ function computeProviderCertificateInfo(input: {
       return {
         provider: input.provider,
         channel: input.channel,
-        ...getCertificateStatusFromPem({ certificatePem: secrets.applicationRequestCertificatePem, expiresSoonDays: 7 }),
+        ...getCertificateStatusFromPem({
+          certificatePem: secrets.applicationRequestCertificatePem,
+          expiresSoonDays: 7,
+        }),
       }
     } catch (e) {
       return { provider: input.provider, channel: input.channel, status: 'invalid', message: String((e as any)?.message ?? e) }
@@ -170,6 +172,17 @@ export default defineEventHandler(async (event) => {
     .onConflictDoNothing({ target: bankingAgreement.provider })
 
   const agreements = await db.select().from(bankingAgreement).orderBy(asc(bankingAgreement.provider))
+  const discoveryRows = await db
+    .select()
+    .from(bankingAgreementDiscoveryRun)
+    .orderBy(asc(bankingAgreementDiscoveryRun.provider), desc(bankingAgreementDiscoveryRun.requestedAt))
+
+  const latestDiscoveryByProvider = new Map<string, typeof discoveryRows[number]>()
+  for (const row of discoveryRows) {
+    const key = String(row.provider)
+    if (latestDiscoveryByProvider.has(key)) continue
+    latestDiscoveryByProvider.set(key, row)
+  }
   const allowlistRows = await db
     .select({
       provider: bankingAgreementAccountAllowlist.provider,
@@ -241,6 +254,23 @@ export default defineEventHandler(async (event) => {
       allowlistAccounts: allowlistByProvider.get(providerKey) ?? [],
       readiness,
       certificate: computeProviderCertificateInfo({ provider: providerKey, channel, enabled: Boolean(a.enabled), readiness }),
+      latestDiscovery: (() => {
+        const run = latestDiscoveryByProvider.get(providerKey)
+        if (!run) return null
+        return {
+          id: run.id,
+          status: run.status,
+          channel: run.channel,
+          requestedAt: run.requestedAt?.toISOString() ?? null,
+          startedAt: run.startedAt?.toISOString() ?? null,
+          finishedAt: run.finishedAt?.toISOString() ?? null,
+          updatedAt: run.updatedAt?.toISOString() ?? null,
+          discoveredAccounts: run.discoveredAccounts,
+          inspectedDocuments: run.inspectedDocuments,
+          skippedDays: run.skippedDays,
+          errorMessage: run.errorMessage,
+        }
+      })(),
     }
   })
 })

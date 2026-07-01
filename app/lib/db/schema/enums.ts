@@ -87,6 +87,10 @@ export const jobStatusValues = ['pending', 'in_progress', 'succeeded', 'failed']
 export const jobStatusEnum = pgEnum('job_status', jobStatusValues)
 export type JobStatus = typeof jobStatusValues[number]
 
+export const bankingAgreementDiscoveryStatusValues = ['started', 'running', 'completed', 'failed'] as const
+export const bankingAgreementDiscoveryStatusEnum = pgEnum('banking_agreement_discovery_status', bankingAgreementDiscoveryStatusValues)
+export type BankingAgreementDiscoveryStatus = typeof bankingAgreementDiscoveryStatusValues[number]
+
 export const outboxStatusValues = ['pending', 'processing', 'sent', 'failed'] as const
 export const outboxStatusEnum = pgEnum('outbox_status', outboxStatusValues)
 export type OutboxStatus = typeof outboxStatusValues[number]

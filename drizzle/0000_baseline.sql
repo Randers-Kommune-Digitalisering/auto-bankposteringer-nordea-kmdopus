@@ -1,6 +1,7 @@
 CREATE TYPE "public"."bank_provider" AS ENUM('danskebank', 'nordea', 'bankconnect');--> statement-breakpoint
 CREATE TYPE "public"."accounting_dimension_constraint_kind" AS ENUM('requires_any_of', 'requires_all_of', 'requires_exactly_one_of', 'forbids_any_of');--> statement-breakpoint
 CREATE TYPE "public"."bank_channel" AS ENUM('iso20022', 'rest');--> statement-breakpoint
+CREATE TYPE "public"."banking_agreement_discovery_status" AS ENUM('started', 'running', 'completed', 'failed');--> statement-breakpoint
 CREATE TYPE "public"."banking_document_format" AS ENUM('camt053', 'unknown');--> statement-breakpoint
 CREATE TYPE "public"."booking_status" AS ENUM('åben', 'bogført', 'undtaget');--> statement-breakpoint
 CREATE TYPE "public"."cpr_type" AS ENUM('ingen', 'statisk', 'dynamisk');--> statement-breakpoint
@@ -141,6 +142,23 @@ CREATE TABLE "banking_agreement_cursor" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "banking_agreement_cursor_provider_adapter_unique" UNIQUE("provider","adapter_key")
+);
+--> statement-breakpoint
+CREATE TABLE "banking_agreement_discovery_run" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"provider" "bank_provider" NOT NULL,
+	"channel" "bank_channel" NOT NULL,
+	"status" "banking_agreement_discovery_status" DEFAULT 'started' NOT NULL,
+	"job_id" uuid,
+	"trigger_source" text DEFAULT 'agreement_activation' NOT NULL,
+	"requested_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"started_at" timestamp with time zone,
+	"finished_at" timestamp with time zone,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"discovered_accounts" integer DEFAULT 0 NOT NULL,
+	"inspected_documents" integer DEFAULT 0 NOT NULL,
+	"skipped_days" integer DEFAULT 0 NOT NULL,
+	"error_message" text
 );
 --> statement-breakpoint
 CREATE TABLE "document" (
@@ -391,7 +409,7 @@ CREATE TABLE "banking_statement_balance" (
 CREATE TABLE "transaction" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"run_id" uuid NOT NULL,
-	"account" text,
+	"account" text NOT NULL,
 	"statement_id" uuid,
 	"entry_index" integer,
 	"entry_sub_index" integer,
@@ -489,6 +507,7 @@ ALTER TABLE "banking_adapter_cursor" ADD CONSTRAINT "banking_adapter_cursor_acco
 ALTER TABLE "banking_agreement_account_allowlist" ADD CONSTRAINT "banking_agreement_account_allowlist_provider_banking_agreement_provider_fk" FOREIGN KEY ("provider") REFERENCES "public"."banking_agreement"("provider") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "banking_agreement_account_dimension" ADD CONSTRAINT "banking_agreement_account_dimension_provider_banking_agreement_provider_fk" FOREIGN KEY ("provider") REFERENCES "public"."banking_agreement"("provider") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "banking_agreement_cursor" ADD CONSTRAINT "banking_agreement_cursor_provider_banking_agreement_provider_fk" FOREIGN KEY ("provider") REFERENCES "public"."banking_agreement"("provider") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "banking_agreement_discovery_run" ADD CONSTRAINT "banking_agreement_discovery_run_job_id_job_id_fk" FOREIGN KEY ("job_id") REFERENCES "public"."job"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "document" ADD CONSTRAINT "document_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "erp_request" ADD CONSTRAINT "erp_request_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "erp_request_line" ADD CONSTRAINT "erp_request_line_request_id_erp_request_id_fk" FOREIGN KEY ("request_id") REFERENCES "public"."erp_request"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -524,6 +543,9 @@ ALTER TABLE "transaction_reference" ADD CONSTRAINT "transaction_reference_transa
 CREATE INDEX "account_iban_currency_provider_idx" ON "account" USING btree ("iban","currency","provider");--> statement-breakpoint
 CREATE INDEX "erp_accounting_dimension_constraint_supplier_idx" ON "erp_accounting_dimension_constraint" USING btree ("erp_supplier");--> statement-breakpoint
 CREATE INDEX "banking_agreement_account_allowlist_iban_provider_idx" ON "banking_agreement_account_allowlist" USING btree ("iban","provider");--> statement-breakpoint
+CREATE INDEX "banking_agreement_discovery_run_provider_requested_at_idx" ON "banking_agreement_discovery_run" USING btree ("provider","requested_at");--> statement-breakpoint
+CREATE INDEX "banking_agreement_discovery_run_status_updated_at_idx" ON "banking_agreement_discovery_run" USING btree ("status","updated_at");--> statement-breakpoint
+CREATE INDEX "banking_agreement_discovery_run_job_id_idx" ON "banking_agreement_discovery_run" USING btree ("job_id");--> statement-breakpoint
 CREATE INDEX "document_run_id_idx" ON "document" USING btree ("run_id");--> statement-breakpoint
 CREATE INDEX "erp_request_run_id_idx" ON "erp_request" USING btree ("run_id");--> statement-breakpoint
 CREATE INDEX "erp_request_line_transaction_id_idx" ON "erp_request_line" USING btree ("transaction_id");--> statement-breakpoint

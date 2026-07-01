@@ -138,7 +138,7 @@ export function buildErpPostingXml(postings: PostingLineInput[], options: BuildP
       CONTROL_FIELDS: {
         SENDERID: `${environmentCode}CLNT${municipalityCode}`,
         RECEIVER: `${environmentCode}CLNT${municipalityCode}`,
-        FILE_NAME: buildFileName(
+        FILE_NAME: buildKmdFileName(
           metadata.integrationFileNameMask,
           municipalityCode,
           metadata.integrationId,
@@ -245,15 +245,13 @@ function deriveDocId(documentId?: string, runUid?: string, integrationId?: strin
   return hash.substring(0, 16)
 }
 
-function buildFileName(
+export function buildKmdFileName(
   mask: string,
   municipalityCode: string,
   integrationId: string,
   docDate: string,
   docTime: string,
 ): string {
-  // Support both the newer {token} style and the legacy KMD mask style
-  // used historically in municipal configurations.
   return mask
     .replaceAll('{municipalityCode}', municipalityCode)
     .replaceAll('{integrationId}', integrationId)

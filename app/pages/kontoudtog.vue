@@ -4,9 +4,10 @@ import { today } from '@internationalized/date'
 import type { TableColumn } from '@nuxt/ui'
 import type { StatementTransaction } from '~/types/transactions'
 import { TRANSACTION_BADGE_COLUMN_CLASS, TRANSACTION_BADGE_STYLE } from '~/lib/presenters/transactionBadgeStyles'
-import { DEFAULT_TIME_ZONE } from '~/lib/timeZone'
+import { DEFAULT_TIME_ZONE } from '~/utils'
 import { formatTransactionFieldHint } from '~/lib/presenters/transactionFieldHints'
 import { buildReferenceBadgeEntries, dedupeBadgeEntries, type BadgeEntry } from '~/lib/presenters/referenceBadgeEntries'
+import { useStackedTransactions } from '~/composables/useStackedTransactions'
 
 const appConfig = useAppConfig()
 const UBadge = resolveComponent('UBadge')
@@ -15,23 +16,20 @@ definePageMeta({
   path: '/kontoudtog'
 })
 
-// Use a fixed timezone to keep SSR + client hydration deterministic.
-// (Node SSR often runs in UTC while the browser is local time.)
-const timeZone = DEFAULT_TIME_ZONE
-
-const endDefault = today(timeZone)
+const endDefault = today(DEFAULT_TIME_ZONE)
 const startDefault = endDefault.subtract({ days: 29 })
 
 const defaultRange = {
   start: startDefault,
-  end: endDefault
+  end: endDefault,
 }
 
 const dateRange = ref<any>(defaultRange)
+
 const globalFilterValue = ref('')
 
 const page = ref(1)
-const pageSize = ref(50)
+const pageSize = ref(25)
 const pageSizeOptions = [5, 10, 25, 50].map((value) => ({
   label: `${value} pr. side`,
   value,
@@ -40,21 +38,14 @@ const pageSizeOptions = [5, 10, 25, 50].map((value) => ({
 // Source of truth: selected account IDs (strings)
 const selectedAccountIds = ref<string[]>([])
 
-function toDateOnlyParam(value: any, fallback: any): string {
-  const candidate = value ?? fallback
-  return typeof candidate?.toString === 'function'
-    ? candidate.toString()
-    : String(candidate)
-}
-
 const start = computed(() => {
   const v = dateRange.value?.start ?? startDefault
-  return toDateOnlyParam(v, startDefault)
+  return v.toString()
 })
 
 const end = computed(() => {
   const v = dateRange.value?.end ?? endDefault
-  return toDateOnlyParam(v, endDefault)
+  return v.toString()
 })
 
 const search = computed(() => globalFilterValue.value.trim())
@@ -64,14 +55,15 @@ type StatementPage = {
   total: number
   page: number
   pageSize: number
-  totalTopTransactions?: number
+  totalSamleposter?: number
 }
 
-const { data, status, refresh } = await useFetch<StatementPage>('/api/transactions/statement', {
+const { data, status, refresh } = await useFetch<StatementPage>('/api/transactions', {
   // Key intentionally excludes accountIds so fast toggles don't create multiple keys.
   // This allows `dedupe: 'cancel'` to cancel in-flight requests and prevents "1 tick behind".
   key: computed(() => `statement:${start.value}:${end.value}:q:${search.value}:p${page.value}:s${pageSize.value}`),
   query: computed(() => ({
+    mode: 'statement',
     start: start.value,
     end: end.value,
     // Always pass primitive IDs as a comma-separated string to avoid query serialization pitfalls.
@@ -98,31 +90,32 @@ watch([start, end, selectedAccountIds, search], () => {
   page.value = 1
 })
 
-const fetchedRows = computed<StatementTransaction[]>(() => data.value?.rows ?? [])
+const pending = computed<boolean>(() => status.value === 'pending')
+
+const statementPayload = computed<StatementPage>(() => ({
+  rows: data.value?.rows ?? [],
+  total: data.value?.total ?? 0,
+  page: data.value?.page ?? 1,
+  pageSize: data.value?.pageSize ?? pageSize.value,
+  totalSamleposter: data.value?.totalSamleposter,
+}))
+
+const stacked = useStackedTransactions({
+  source: 'statement',
+  statement: statementPayload,
+})
+
+const fetchedRows = computed<StatementTransaction[]>(() => stacked.value.items)
 const totalRows = computed<number>(() => data.value?.total ?? 0)
-const shownTopTransactions = computed<number>(() => new Set(
-  fetchedRows.value.map((row) => String(row.topStackId ?? row.id)),
-).size)
-const totalTopTransactions = computed<number>(() => Number(data.value?.totalTopTransactions ?? shownTopTransactions.value))
+const shownSamleposter = computed<number>(() => stacked.value.shownSamleposter)
+const totalSamleposter = computed<number>(() => stacked.value.totalSamleposter)
 
 const visibleRows = computed<StatementTransaction[]>(() => fetchedRows.value)
 
 const groupedVisibleRows = computed<StatementStackRow[]>(() => {
-  const byStack = new Map<string, StatementTransaction[]>()
-  const stackOrder: string[] = []
-
-  for (const row of visibleRows.value) {
-    const stackId = String(row.topStackId ?? row.id)
-    if (!byStack.has(stackId)) {
-      byStack.set(stackId, [])
-      stackOrder.push(stackId)
-    }
-    byStack.get(stackId)!.push(row)
-  }
-
-  return stackOrder.map((stackId) => {
-    const items = byStack.get(stackId) ?? []
-    const representative = items[0]!
+  return stacked.value.stacks.map((stack) => {
+    const items = stack.items
+    const representative = stack.representative
 
     const counterpartEntries = dedupeBadgeEntries(
       [resolveCounterpartEntry(representative)].filter((entry): entry is BadgeEntry => Boolean(entry)),
@@ -139,7 +132,7 @@ const groupedVisibleRows = computed<StatementStackRow[]>(() => {
     const amount = items.reduce((sum, entry) => sum + Number(entry.amount ?? 0), 0)
 
     return {
-      stackId,
+      stackId: stack.stackId,
       representative,
       items,
       bookingDate: representative.bookingDate,
@@ -350,48 +343,23 @@ function buildReference(row: StatementTransaction): string[] {
   return buildReferenceEntries(row).map((entry) => entry.value)
 }
 
-function formatMoney(amount: string | number | null | undefined, currency: string | null | undefined): string {
-  const ccy = currency ?? 'DKK'
-  if (amount === null || amount === undefined) return `-`
-  const n = Number(String(amount).replace(/,/g, '.'))
-  if (Number.isFinite(n)) {
-    return n.toLocaleString('da-DK', { style: 'currency', currency: ccy })
-  }
-  return `${amount} ${ccy}`
-}
+const skeletonTableRows = Array.from({ length: 8 }, (_, index) => `skeleton-table-row-${index + 1}`)
+const skeletonCardRows = Array.from({ length: 6 }, (_, index) => `skeleton-card-${index + 1}`)
 
-const formatAmount = (row: StatementStackRow): string => {
-  return formatMoney(row.amount, row.representative.currency)
+const dkkFormatter = new Intl.NumberFormat('da-DK', {
+  style: 'currency',
+  currency: 'DKK',
+})
+
+function formatSignedDkk(amount: number): string {
+  const value = Number(amount) || 0
+  if (value < 0) return `-${dkkFormatter.format(Math.abs(value))}`
+  if (value > 0) return `+${dkkFormatter.format(value)}`
+  return dkkFormatter.format(0)
 }
 
 const columns: TableColumn<StatementStackRow>[] = [
-  { // Søgeværktøj
-    id: 'search_flat',
-    accessorFn: (row) => {
-      const parts: Array<string | number | null | undefined> = [
-        row.bookingDate,
-        row.account,
-        row.amount,
-        row.runningBalance,
-        row.counterpartEntries.map((entry) => entry.value).join(' '),
-        row.referenceEntries.map((entry) => entry.value).join(' '),
-        row.transactionTypeEntries.map((entry) => entry.value).join(' '),
-        row.items.map((entry) => entry.id).join(' '),
-        row.items.map((entry) => entry.runId).join(' '),
-        row.category,
-        row.lineCount,
-      ]
-
-      return parts
-        .filter((v) => v !== null && v !== undefined)
-        .map((v) => String(v))
-        .join(' ')
-    },
-    enableHiding: false,
-    enableSorting: false,
-    cell: () => undefined
-  },
-  { // Bogføringsdato
+  { // Banking date
     accessorKey: 'bookingDate',
     header: 'Dato',
     size: 120,
@@ -403,7 +371,7 @@ const columns: TableColumn<StatementStackRow>[] = [
       })
     }
   },
-  { // Konto
+  { // Bank account
     id: 'account',
     header: 'Konto',
     size: 180,
@@ -416,13 +384,11 @@ const columns: TableColumn<StatementStackRow>[] = [
       ])
     }
   },
-  { // Beløb
+  { // Amount
     id: 'amount',
     header: 'Beløb',
     size: 140,
-    cell: ({ row }) => {
-      return h('span', { class: 'font-bold' }, formatAmount(row.original))
-    }
+    cell: ({ row }) => h('span', { class: 'font-bold' }, formatSignedDkk(row.original.amount)),
   },
   { // Counterparty
     id: 'counterpart',
@@ -469,7 +435,7 @@ const columns: TableColumn<StatementStackRow>[] = [
       )
     }
   },
-  { // Transaktionstype (aggregated from multiple fields)
+  { // Transaction type (aggregated from multiple fields)
     id: 'type',
     header: 'Transaktionstype',
     size: 180,
@@ -556,20 +522,28 @@ const tableUi = {
     </template>
 
     <template #body>
-      <div class="space-y-4">
+      <div v-if="status !== 'pending' && !totalRows" class="py-10 text-center text-gray-500">
+          Der er ingen transaktioner at vise.
+      </div>
+      <template class="space-y-4" v-else>
         <FiltersRow
-          v-model:date-range="dateRange"
-          :reset-date-range="defaultRange"
-          :time-zone="timeZone"
           v-model:account-ids="selectedAccountIds"
           v-model:search="globalFilterValue"
+          v-model:date-range="dateRange"
+          :reset-date-range="defaultRange"
+          :time-zone="DEFAULT_TIME_ZONE"
           :show-search="true"
           search-placeholder="Søg i kontoudtog..."
         />
 
         <div v-if="dateRange?.start && dateRange?.end" class="mb-3 mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div class="text-sm text-muted">
-            Viser {{ groupedVisibleRows.length }} af {{ totalTopTransactions }} posteringer
+            <template v-if="pending">
+              <USkeleton class="h-4 w-56" />
+            </template>
+            <template v-else>
+              Viser {{ groupedVisibleRows.length }} af {{ totalSamleposter }} posteringer
+            </template>
           </div>
 
           <USelect
@@ -578,6 +552,7 @@ const tableUi = {
             labelKey="label"
             valueKey="value"
             class="w-full sm:w-34"
+            :disabled="pending"
           />
         </div>
 
@@ -619,7 +594,7 @@ const tableUi = {
           </div>
           <div class="flex-1" />
         </div>
-      </div>
+      </template>
     </template>
   </UDashboardPanel>
 </template>

@@ -63,7 +63,7 @@ export function buildTransactionSummaryView(input: TransactionSummaryInput): Tra
   const technicalSection: TransactionSummarySection | null = summaryReferences.teknisk.length
     ? {
       key: 'teknisk',
-      label: 'Systemfelter',
+      label: 'Øvrige oplysninger',
       chips: summaryReferences.teknisk,
     }
     : null
@@ -98,7 +98,7 @@ export function buildTransactionSummaryView(input: TransactionSummaryInput): Tra
   return {
     amount: {
       label: 'Beløb',
-      value: currencyFormatter.format(amountValue),
+      value: formatSignedAmount(amountValue),
       raw: amountValue,
     },
     bookingDate: {
@@ -115,6 +115,13 @@ export function buildTransactionSummaryView(input: TransactionSummaryInput): Tra
   }
 }
 
+function formatSignedAmount(amount: number): string {
+  const value = Number(amount) || 0
+  if (value < 0) return `-${currencyFormatter.format(Math.abs(value))}`
+  if (value > 0) return `+${currencyFormatter.format(value)}`
+  return currencyFormatter.format(0)
+}
+
 function splitReferenceTokens(values: TransactionReferenceDetail[]): TransactionReferenceDetail[] {
   const tokens: TransactionReferenceDetail[] = []
   for (const entry of values) {
@@ -128,20 +135,6 @@ function splitReferenceTokens(values: TransactionReferenceDetail[]): Transaction
   return tokens
 }
 
-function isAdditionalEntryTriadToken(token: string): boolean {
-  return /^(\d{2,3}):([^:]+):(.*)$/.test(token)
-}
-
-function parseAdditionalEntryTriadToken(token: string): { code: string; label: string; value: string } | null {
-  const match = /^(\d{2,3}):([^:]+):(.*)$/.exec(token)
-  if (!match) return null
-  const code = String(match[1] ?? '').trim()
-  const label = String(match[2] ?? '').trim()
-  const value = String(match[3] ?? '').trim()
-  if (!code || !label || !value) return null
-  return { code, label, value }
-}
-
 type ReferenceBuckets = {
   reference: TransactionSummaryChip[]
   teknisk: TransactionSummaryChip[]
@@ -149,16 +142,15 @@ type ReferenceBuckets = {
 
 function classifyReferenceToken(input: TransactionReferenceDetail): keyof ReferenceBuckets {
   const source = String(input.source ?? '').toLowerCase()
-  const value = String(input.value ?? '')
-  const triad = parseAdditionalEntryTriadToken(value)
-
-  if (triad?.code === '500' || triad?.code === '502') return 'reference'
-  if (triad) return 'teknisk'
 
   if (source.includes('/rmtinf/ustrd')) return 'reference'
+  if (source.includes('/purp/prtry')) return 'reference'
   if (source.includes('/rmtinf/addtlrmtinf')) return 'reference'
   if (source.includes('/addtltxinf')) return 'reference'
-  if (source.endsWith('/addtlntryinf')) return 'reference'
+
+  // Nordea AddtlNtryInf triads are treated as supplementary system fields.
+  if (source.endsWith('/addtlntryinf')) return 'teknisk'
+
   return 'teknisk'
 }
 

@@ -30,6 +30,8 @@ Internal representation must mirror ISO structure as closely as possible.
 
 No reinterpretation or restructuring of ISO concepts.
 
+Transactions from CAMT.053 XML should stack if `<BkToCstmrStmt><Stmt><Ntry><Btch>` is defined.
+
 ---
 
 ## Lowest Common Denominator

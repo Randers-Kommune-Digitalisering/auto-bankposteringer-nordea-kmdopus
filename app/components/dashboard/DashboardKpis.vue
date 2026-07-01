@@ -58,7 +58,7 @@ const stats = computed<DashboardStat[]>(() => {
       title: 'Åbne poster',
       icon: appConfig.ui.icons.inbox,
       to: '/aabne-poster',
-      value: formatInt(kpis.openTransactions)
+      value: formatInt(kpis.openSamleposter)
     },
     {
       key: 'rules',

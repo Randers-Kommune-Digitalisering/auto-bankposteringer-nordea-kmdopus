@@ -6,12 +6,7 @@ import { run } from '~/lib/db/schema/run'
 import { errorLog } from '~/lib/db/schema/error'
 import { logger } from '~/lib/logger'
 import { LocalFileBankAdapter } from '../infrastructure/localFileBankAdapter'
-import { DanskeBankEdiWebServicesAdapter } from '../infrastructure/danskebank/danskeBankEdiWebServicesAdapter'
-import { loadDanskeBankEdiEnvConfig } from '../infrastructure/danskebank/danskeBankEdiEnvConfig'
-import { loadDanskeBankEnvSecrets } from '../infrastructure/danskebank/danskeBankEnvSecrets'
-import { NordeaCorporateAccessWebServicesAdapter } from '../infrastructure/nordea/nordeaCorporateAccessWebServicesAdapter'
-import { loadNordeaCorporateAccessEnvConfig } from '../infrastructure/nordea/nordeaCorporateAccessEnvConfig'
-import { loadNordeaEnvSecrets } from '../infrastructure/nordea/nordeaEnvSecrets'
+import { buildBankMeta } from '~~/utils/function'
 import { ingestCamt053Document } from './ingestCamt053Document'
 import { bankingAgreement } from '~/lib/db/schema/bankingAgreement'
 import { transaction } from '~/lib/db/schema/transaction'
@@ -113,36 +108,6 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
         }
 
         const adapter = (() => {
-          if (adapterKeyOverride === 'danskebank-edi-ws') {
-            const config = loadDanskeBankEdiEnvConfig()
-            const secrets = loadDanskeBankEnvSecrets()
-
-            return new DanskeBankEdiWebServicesAdapter({
-              ediEndpointUrl: config.DANSKE_BANK_EDI_ENDPOINT_URL,
-              pkiEndpointUrl: config.DANSKE_BANK_PKI_ENDPOINT_URL,
-              senderId: config.DANSKE_BANK_EDI_SENDER_ID,
-              receiverId: config.DANSKE_BANK_EDI_RECEIVER_ID,
-              language: config.DANSKE_BANK_EDI_LANGUAGE,
-              customerId: config.DANSKE_BANK_CUSTOMER_ID,
-              signerId: config.DANSKE_BANK_SIGNER_ID,
-              softwareId: config.DANSKE_BANK_SOFTWARE_ID,
-              environment: config.DANSKE_BANK_ENVIRONMENT,
-              downloadStatus: config.DANSKE_BANK_FILE_STATUS,
-              lookbackDays: config.DANSKE_BANK_LOOKBACK_DAYS,
-              maxFilesPerRun: config.DANSKE_BANK_MAX_FILES_PER_RUN,
-              pkiSenderId: config.DANSKE_BANK_PKI_SENDER_ID,
-              pkiCustomerId: config.DANSKE_BANK_PKI_CUSTOMER_ID,
-              pkiInterfaceVersion: config.DANSKE_BANK_PKI_INTERFACE_VERSION,
-              pkiBankRootCertificateSerialNo: config.DANSKE_BANK_PKI_BANK_ROOT_CERT_SERIAL,
-              applicationRequestPrivateKeyPem: secrets.applicationRequestPrivateKeyPem,
-              applicationRequestCertificatePem: secrets.applicationRequestCertificatePem,
-              trustedBankSigningCertFingerprintSha256Hex: secrets.trustedSigningCertificateFingerprintSha256Hex,
-              mtlsClientCertificatePem: secrets.mtlsClientCertificatePem,
-              mtlsClientPrivateKeyPem: secrets.mtlsClientPrivateKeyPem,
-              httpTimeoutMs: 30_000,
-            })
-          }
-
           if (adapterKeyOverride === 'local-file') {
             return new LocalFileBankAdapter({
               key: 'nordea-example-file',
@@ -151,94 +116,12 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
             })
           }
 
-          if (adapterKeyOverride === 'nordea-corporate-access-ws') {
-            const config = loadNordeaCorporateAccessEnvConfig()
-            const secrets = loadNordeaEnvSecrets()
-
-            return new NordeaCorporateAccessWebServicesAdapter({
-              endpointUrl: config.NORDEA_CA_WS_ENDPOINT_URL,
-              senderId: config.NORDEA_CA_WS_SENDER_ID,
-              receiverId: config.NORDEA_CA_WS_RECEIVER_ID,
-              userAgent: config.NORDEA_CA_WS_USER_AGENT,
-              language: config.NORDEA_CA_WS_LANGUAGE,
-              customerId: config.NORDEA_CA_CUSTOMER_ID,
-              signerId: config.NORDEA_CA_SIGNER_ID,
-              softwareId: config.NORDEA_CA_SOFTWARE_ID,
-              environment: config.NORDEA_CA_ENVIRONMENT,
-              statementFileType: config.NORDEA_CA_STATEMENT_FILE_TYPE,
-              downloadStatus: config.NORDEA_CA_FILE_STATUS,
-              lookbackDays: config.NORDEA_CA_LOOKBACK_DAYS,
-              maxFilesPerRun: config.NORDEA_CA_MAX_FILES_PER_RUN,
-              requestCompressed: config.NORDEA_CA_REQUEST_COMPRESSED === '1',
-              applicationRequestPrivateKeyPem: secrets.NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM,
-              applicationRequestCertificatePem: secrets.NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM,
-              trustedNordeaCertificateFingerprintSha256Hex: secrets.NORDEA_TRUSTED_SIGNING_CERT_SHA256,
-              mtlsClientCertificatePem:
-                secrets.NORDEA_MTLS_CLIENT_CERTIFICATE_PEM ?? secrets.NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM,
-              mtlsClientPrivateKeyPem:
-                secrets.NORDEA_MTLS_CLIENT_PRIVATE_KEY_PEM ?? secrets.NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM,
-              timeoutMs: 30_000,
-            })
+          if (adapterKeyOverride === 'danskebank-edi-ws' || r.provider === 'danskebank') {
+            return buildBankMeta('danskebank') // throws if provider is unknown
           }
 
-          if (r.provider === 'danskebank') {
-            const config = loadDanskeBankEdiEnvConfig()
-            const secrets = loadDanskeBankEnvSecrets()
-
-            return new DanskeBankEdiWebServicesAdapter({
-              ediEndpointUrl: config.DANSKE_BANK_EDI_ENDPOINT_URL,
-              pkiEndpointUrl: config.DANSKE_BANK_PKI_ENDPOINT_URL,
-              senderId: config.DANSKE_BANK_EDI_SENDER_ID,
-              receiverId: config.DANSKE_BANK_EDI_RECEIVER_ID,
-              language: config.DANSKE_BANK_EDI_LANGUAGE,
-              customerId: config.DANSKE_BANK_CUSTOMER_ID,
-              signerId: config.DANSKE_BANK_SIGNER_ID,
-              softwareId: config.DANSKE_BANK_SOFTWARE_ID,
-              environment: config.DANSKE_BANK_ENVIRONMENT,
-              downloadStatus: config.DANSKE_BANK_FILE_STATUS,
-              lookbackDays: config.DANSKE_BANK_LOOKBACK_DAYS,
-              maxFilesPerRun: config.DANSKE_BANK_MAX_FILES_PER_RUN,
-              pkiSenderId: config.DANSKE_BANK_PKI_SENDER_ID,
-              pkiCustomerId: config.DANSKE_BANK_PKI_CUSTOMER_ID,
-              pkiInterfaceVersion: config.DANSKE_BANK_PKI_INTERFACE_VERSION,
-              pkiBankRootCertificateSerialNo: config.DANSKE_BANK_PKI_BANK_ROOT_CERT_SERIAL,
-              applicationRequestPrivateKeyPem: secrets.applicationRequestPrivateKeyPem,
-              applicationRequestCertificatePem: secrets.applicationRequestCertificatePem,
-              trustedBankSigningCertFingerprintSha256Hex: secrets.trustedSigningCertificateFingerprintSha256Hex,
-              mtlsClientCertificatePem: secrets.mtlsClientCertificatePem,
-              mtlsClientPrivateKeyPem: secrets.mtlsClientPrivateKeyPem,
-              httpTimeoutMs: 30_000,
-            })
-          }
-
-          if (r.provider === 'nordea') {
-            const config = loadNordeaCorporateAccessEnvConfig()
-            const secrets = loadNordeaEnvSecrets()
-
-            return new NordeaCorporateAccessWebServicesAdapter({
-              endpointUrl: config.NORDEA_CA_WS_ENDPOINT_URL,
-              senderId: config.NORDEA_CA_WS_SENDER_ID,
-              receiverId: config.NORDEA_CA_WS_RECEIVER_ID,
-              userAgent: config.NORDEA_CA_WS_USER_AGENT,
-              language: config.NORDEA_CA_WS_LANGUAGE,
-              customerId: config.NORDEA_CA_CUSTOMER_ID,
-              signerId: config.NORDEA_CA_SIGNER_ID,
-              softwareId: config.NORDEA_CA_SOFTWARE_ID,
-              environment: config.NORDEA_CA_ENVIRONMENT,
-              statementFileType: config.NORDEA_CA_STATEMENT_FILE_TYPE,
-              downloadStatus: config.NORDEA_CA_FILE_STATUS,
-              lookbackDays: config.NORDEA_CA_LOOKBACK_DAYS,
-              maxFilesPerRun: config.NORDEA_CA_MAX_FILES_PER_RUN,
-              requestCompressed: config.NORDEA_CA_REQUEST_COMPRESSED === '1',
-              applicationRequestPrivateKeyPem: secrets.NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM,
-              applicationRequestCertificatePem: secrets.NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM,
-              trustedNordeaCertificateFingerprintSha256Hex: secrets.NORDEA_TRUSTED_SIGNING_CERT_SHA256,
-              mtlsClientCertificatePem:
-                secrets.NORDEA_MTLS_CLIENT_CERTIFICATE_PEM ?? secrets.NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM,
-              mtlsClientPrivateKeyPem:
-                secrets.NORDEA_MTLS_CLIENT_PRIVATE_KEY_PEM ?? secrets.NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM,
-              timeoutMs: 30_000,
-            })
+          if (adapterKeyOverride === 'nordea-corporate-access-ws' || r.provider === 'nordea') {
+            return buildBankMeta('nordea') // throws if provider is unknown
           }
 
           if (r.provider === 'bankconnect') {

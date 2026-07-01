@@ -115,7 +115,11 @@ export async function submitErpPostingViaOutbox(
   })
 
   try {
-    const result = await uploadErpRequestPayload({ requestId, erpSupplier: adapter.supplier })
+    const result = await uploadErpRequestPayload({
+      requestId,
+      filename: built.filename,
+      erpSupplier: adapter.supplier,
+    })
 
     await db
       .update(outbox)
@@ -157,6 +161,7 @@ export async function submitErpPostingViaOutbox(
 
 export async function uploadErpRequestPayload(options: {
   requestId: string
+  filename?: string
   erpSupplier?: string
 }): Promise<{ requestId: string; remotePath: string }> {
   const log = logger.child({ scope: 'erp.uploadErpRequestPayload', requestId: options.requestId })
@@ -173,13 +178,31 @@ export async function uploadErpRequestPayload(options: {
     throw new Error(`ERP request payload ikke fundet for requestId=${options.requestId}`)
   }
 
+  const filename = resolveUploadFilename({
+    requestId: row.id,
+    payloadFilename: options.filename,
+  })
+
   const adapter = getErpAdapter(options.erpSupplier)
   try {
-    const { remotePath } = await adapter.uploadRequestPayload({ filename: row.id, content: row.payload })
-    log.info('ERP upload done', { remotePath })
+    const { remotePath } = await adapter.uploadRequestPayload({ filename, content: row.payload })
+    log.info('ERP upload done', { remotePath, filename })
     return { requestId: row.id, remotePath }
   } catch (error: unknown) {
     log.error('ERP upload failed', { error })
     throw error
   }
+}
+
+function resolveUploadFilename(input: { requestId: string; payloadFilename?: string }): string {
+  const normalized = typeof input.payloadFilename === 'string' ? input.payloadFilename.trim() : ''
+  const filename = normalized || input.requestId
+
+  const forbiddenLegacyTokens = ['xxx', 'zzzz', 'yyyymmdd', 'hhmmss'] as const
+  const foundLegacyTokens = forbiddenLegacyTokens.filter(token => filename.includes(token))
+  if (foundLegacyTokens.length > 0) {
+    throw new Error(`Ugyldigt ERP filnavn: legacy tokens ikke tilladt (${foundLegacyTokens.join(', ')})`)
+  }
+
+  return filename
 }

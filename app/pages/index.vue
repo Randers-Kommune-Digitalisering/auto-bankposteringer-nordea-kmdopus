@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { today } from '@internationalized/date'
 import type { DashboardResponse } from '~/types/dashboard'
-import { DEFAULT_TIME_ZONE } from '~/lib/timeZone'
+import { DEFAULT_TIME_ZONE } from '~/utils'
 
 const appConfig = useAppConfig()
 

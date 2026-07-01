@@ -15,11 +15,13 @@ export class LocalFileBankAdapter implements BankAdapter {
   public readonly key: string
   private readonly filePath: string
   private readonly filename: string
+  public readonly lookbackDays: number
 
-  constructor(options: { key?: string; filePath: string; filename?: string }) {
+  constructor(options: { key?: string; filePath: string; filename?: string; lookbackDays?: number }) {
     this.key = options.key ?? 'local-file'
     this.filePath = options.filePath
     this.filename = options.filename ?? this.filePath.split('/').pop() ?? 'document.xml'
+    this.lookbackDays = options.lookbackDays ?? 7
   }
 
   async fetchDocuments(
