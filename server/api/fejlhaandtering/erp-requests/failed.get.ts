@@ -1,6 +1,7 @@
 import { defineEventHandler } from 'h3'
 import { sql } from 'drizzle-orm'
 import db from '~/lib/db'
+import { requireErrorHandlingReadAccess } from '~~/server/auth/requireAppRoles'
 
 export type FailedErpRequestListItem = {
   requestId: string
@@ -18,7 +19,9 @@ function toStringOrEmpty(value: unknown): string {
  * List ERP requests with a negative outcome in the ERP response.
  * "Negative" is defined as status_text NOT starting with "OK".
  */
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
+  await requireErrorHandlingReadAccess(event)
+
   const result = await db.execute(sql`
     select
       r.id as request_id,

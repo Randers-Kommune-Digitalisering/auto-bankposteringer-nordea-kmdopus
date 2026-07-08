@@ -4,6 +4,7 @@ import { z } from 'zod'
 import db from '~/lib/db'
 import { outbox } from '~/lib/db/schema/outbox'
 import { erpResponse } from '~/lib/db/schema/erp'
+import { requireErrorHandlingReadAccess } from '~~/server/auth/requireAppRoles'
 
 type OutboxListItem = {
   id: string
@@ -35,6 +36,8 @@ function parseRunIds(query: Record<string, any>): string[] {
 }
 
 export default defineEventHandler(async (event) => {
+  await requireErrorHandlingReadAccess(event)
+
   const query = getQuery(event)
   const runIds = parseRunIds(query)
   if (!runIds.length) {

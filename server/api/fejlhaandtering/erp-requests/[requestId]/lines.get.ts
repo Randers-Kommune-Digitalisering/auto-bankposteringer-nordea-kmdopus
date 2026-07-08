@@ -4,8 +4,11 @@ import { z } from 'zod'
 import db from '~/lib/db'
 import { erpRequestLine } from '~/lib/db/schema/erp'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
+import { requireErrorHandlingReadAccess } from '~~/server/auth/requireAppRoles'
 
 export default defineEventHandler(async (event) => {
+  await requireErrorHandlingReadAccess(event)
+
   const requestId = z.string().min(1).parse(event.context.params?.requestId)
 
   const existing = await db.query.erpRequest.findFirst({

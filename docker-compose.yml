@@ -3,29 +3,126 @@ services:
     build:
       context: .
       target: dev
-    container_name: nuxt_app
     init: true
-    restart: unless-stopped
+    restart: "no"
     ports:
       - "3000:3000"
     entrypoint: ["sh", "./docker-entrypoint.sh"]
-    command: ["pnpm", "dev", "--host", "0.0.0.0"]
+    command: ["pnpm", "--config.confirmModulesPurge=false", "--config.strict-dep-builds=false", "--config.verify-deps-before-run=false", "dev", "--host", "0.0.0.0"]
     volumes:
       - .:/app:cached
+      - app_node_modules:/app/node_modules
+      - app_nuxt:/app/.nuxt
     env_file:
       - .env
     environment:
+      APP_ROLE: web
       NODE_ENV: development
+      CI: "true"
+      NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM_B64: ${NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM_B64:-}
+      NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM_B64: ${NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM_B64:-}
+      NORDEA_CA_CUSTOMER_ID: ${NORDEA_CA_CUSTOMER_ID:-}
+      NORDEA_CA_SIGNER_ID: ${NORDEA_CA_SIGNER_ID:-}
+      PNPM_CONFIG_CONFIRM_MODULES_PURGE: "false"
+      PNPM_CONFIG_STRICT_DEP_BUILDS: "false"
+      PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false"
+      DB_RESET_ON_START: "0"
+      DB_MIGRATE_ON_START: "0"
+      DB_SEED_SYSTEM_ON_START: "0"
       COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
       CODESPACE_NAME: ${CODESPACE_NAME:-}
       GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN: ${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN:-}
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - app_net
+
+  worker:
+    profiles: ["workers"]
+    image: auto-bankposteringer-nordea-kmdopus-role-runtime
+    build:
+      context: .
+      target: role-runtime
+    init: true
+    restart: "no"
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /run
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
+    mem_limit: 768m
+    cpus: "1.0"
+    env_file:
+      - .env
+    environment:
+      APP_ROLE: worker
+      NODE_ENV: production
+      CI: "true"
+      NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM_B64: ${NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM_B64:-}
+      NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM_B64: ${NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM_B64:-}
+      NORDEA_CA_CUSTOMER_ID: ${NORDEA_CA_CUSTOMER_ID:-}
+      NORDEA_CA_SIGNER_ID: ${NORDEA_CA_SIGNER_ID:-}
+      PNPM_CONFIG_CONFIRM_MODULES_PURGE: "false"
+      PNPM_CONFIG_STRICT_DEP_BUILDS: "false"
+      PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false"
+      DB_RESET_ON_START: "0"
+      DB_MIGRATE_ON_START: "0"
+      DB_SEED_SYSTEM_ON_START: "0"
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+      CODESPACE_NAME: ${CODESPACE_NAME:-}
+      GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN: ${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN:-}
+    command: ["node", "node_modules/tsx/dist/cli.mjs", "--tsconfig", "tsconfig.scripts.json", "scripts/runtime/worker.ts"]
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app_net
+
+  scheduler:
+    profiles: ["workers"]
+    image: auto-bankposteringer-nordea-kmdopus-role-runtime
+    init: true
+    restart: "no"
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /run
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
+    mem_limit: 512m
+    cpus: "0.75"
+    env_file:
+      - .env
+    environment:
+      APP_ROLE: scheduler
+      NODE_ENV: production
+      CI: "true"
+      PNPM_CONFIG_CONFIRM_MODULES_PURGE: "false"
+      PNPM_CONFIG_STRICT_DEP_BUILDS: "false"
+      PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false"
+      DB_RESET_ON_START: "0"
+      DB_MIGRATE_ON_START: "0"
+      DB_SEED_SYSTEM_ON_START: "0"
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+      CODESPACE_NAME: ${CODESPACE_NAME:-}
+      GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN: ${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN:-}
+    command: ["node", "node_modules/tsx/dist/cli.mjs", "--tsconfig", "tsconfig.scripts.json", "scripts/runtime/scheduler.ts"]
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app_net
 
   db:
     image: postgres
-    container_name: postgres_dev
     restart: unless-stopped
     ports:
       - "5432:5432"
@@ -38,10 +135,11 @@ services:
       interval: 2s
       timeout: 3s
       retries: 30
+    networks:
+      - app_net
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.0
-    container_name: keycloak_dev
     profiles: ["keycloak"]
     command: ["start-dev", "--http-port=8080"]
     ports:
@@ -51,17 +149,26 @@ services:
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_BOOTSTRAP_ADMIN_PASSWORD:-admin}
     volumes:
       - keycloak_data:/opt/keycloak/data
+    networks:
+      - app_net
 
   sftp:
     image: atmoz/sftp:alpine
-    container_name: sftp_dev
     ports:
       - "2223:22"
     # Creates user "test" with password "pass" and two directories inside the chroot:
     #   /test-from-randers
     #   /test-to-randers
     command: "test:pass:1001:100:test-from-randers,test-to-randers"
+    networks:
+      - app_net
 
 volumes:
+  app_node_modules:
+  app_nuxt:
   postgres_data:
   keycloak_data:
+
+networks:
+  app_net:
+    name: auto-bankposteringer-nordea-kmdopus-net

@@ -241,6 +241,7 @@ async function requestNordeaRestReauth() {
 const refreshingAccounts = ref(false)
 const sorting = ref<SortingState>([])
 const discoveryPollingByProvider = ref<Record<string, boolean>>({})
+const seenCompletedDiscoveryByProvider = ref<Record<string, string>>({})
 
 const envModalOpen = ref(false)
 const envModalProvider = ref<BankingAgreement['provider'] | null>(null)
@@ -284,6 +285,21 @@ type DiscoveryRunResponse = {
   inspectedDocuments: number
   skippedDays: number
   errorMessage: string | null
+  diagnostics?: {
+    queuedMs: number
+    workerLikelyMissing: boolean
+    workerHint: string | null
+    job: {
+      status: 'pending' | 'in_progress' | 'succeeded' | 'failed'
+      attempts: number
+      maxAttempts: number
+      runAt: string | null
+      lockedAt: string | null
+      lockedBy: string | null
+      lastError: string | null
+      updatedAt: string | null
+    } | null
+  }
 }
 
 async function pollDiscoveryUntilTerminal(provider: BankingAgreement['provider'], discoveryRunId: string) {
@@ -297,6 +313,10 @@ async function pollDiscoveryUntilTerminal(provider: BankingAgreement['provider']
       const run = await $fetch<DiscoveryRunResponse | null>(`/api/banking-agreements/${provider}/discovery`, {
         query: { id: discoveryRunId },
       })
+
+      if (attempt % 3 === 0) {
+        await refreshAgreements()
+      }
 
       if (!run) {
         await sleep(1000)
@@ -326,6 +346,16 @@ async function pollDiscoveryUntilTerminal(provider: BankingAgreement['provider']
         return
       }
 
+      if (run.diagnostics?.workerLikelyMissing) {
+        toast.add({
+          title: 'Kontohentning er ikke startet af worker',
+          description: run.diagnostics.workerHint || 'Discovery-jobbet er queue’et, men ingen worker har claimet det endnu.',
+          color: 'warning',
+        })
+        await refreshAgreements()
+        return
+      }
+
       await sleep(attempt < 10 ? 1000 : 3000)
     }
 
@@ -344,6 +374,36 @@ async function pollDiscoveryUntilTerminal(provider: BankingAgreement['provider']
     discoveryPollingByProvider.value[provider] = false
   }
 }
+
+watch(
+  agreements,
+  async (value) => {
+    const rows = Array.isArray(value) ? value : []
+    let shouldRefreshAccounts = false
+
+    for (const row of rows) {
+      const latest = row.latestDiscovery
+      if (!latest) continue
+
+      if (latest.status === 'completed') {
+        const key = row.provider
+        if (seenCompletedDiscoveryByProvider.value[key] !== latest.id) {
+          seenCompletedDiscoveryByProvider.value[key] = latest.id
+          shouldRefreshAccounts = true
+        }
+      }
+
+      if (latest.status !== 'started' && latest.status !== 'running') continue
+      if (discoveryPollingByProvider.value[row.provider]) continue
+      void pollDiscoveryUntilTerminal(row.provider, latest.id)
+    }
+
+    if (shouldRefreshAccounts) {
+      await refreshBankAccounts()
+    }
+  },
+  { immediate: true, deep: true },
+)
 
 const providerLabel = (p: BankingAgreement['provider']) => {
   if (p === 'danskebank') return 'Danske Bank'

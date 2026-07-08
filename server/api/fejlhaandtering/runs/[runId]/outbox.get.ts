@@ -4,6 +4,7 @@ import { z } from 'zod'
 import db from '~/lib/db'
 import { outbox } from '~/lib/db/schema/outbox'
 import { erpResponse } from '~/lib/db/schema/erp'
+import { requireErrorHandlingReadAccess } from '~~/server/auth/requireAppRoles'
 
 type OutboxListItem = {
   id: string
@@ -27,6 +28,8 @@ function toIso(value: unknown): string {
 }
 
 export default defineEventHandler(async (event) => {
+  await requireErrorHandlingReadAccess(event)
+
   const runId = z.string().uuid().parse(event.context.params?.runId)
 
   const requestIdExpr = sql<string>`${outbox.payload} ->> 'requestId'`

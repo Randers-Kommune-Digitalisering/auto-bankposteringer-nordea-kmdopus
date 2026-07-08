@@ -344,23 +344,7 @@ export const ruleAccountingSchema = z.object({
   }
 })
 
-export const ruleSelectSchema = createSelectSchema(rule)
-
-export const ruleUpdateSchema = createUpdateSchema(rule).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-})
-
-export const ruleMatchingSelectSchema = createSelectSchema(rule).pick({
-  matchAmountMin: true,
-  matchAmountMax: true,
-})
-
 export type RuleDraftSchema = z.infer<typeof ruleDraftSchema>
-export type RuleUpdateSchema = z.infer<typeof ruleUpdateSchema>
-export type RuleSelectSchema = z.infer<typeof ruleSelectSchema>
-export type RuleMatchingSelectSchema = z.infer<typeof ruleMatchingSelectSchema>
 
 export type Rule = {
   id: number

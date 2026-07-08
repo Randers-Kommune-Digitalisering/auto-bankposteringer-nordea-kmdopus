@@ -3,6 +3,7 @@ import { createError, defineEventHandler, getQuery, setHeader } from 'h3'
 import db from '~/lib/db'
 import { bankProviderValues } from '~/lib/db/schema/bankingAgreement'
 import { bankingAgreementDiscoveryRun } from '~/lib/db/schema/bankingAgreementDiscoveryRun'
+import { job } from '~/lib/db/schema/job'
 
 export default defineEventHandler(async (event) => {
   setHeader(event, 'Cache-Control', 'no-store')
@@ -37,6 +38,27 @@ export default defineEventHandler(async (event) => {
     return null
   }
 
+  const jobRow = row.jobId
+    ? await db
+        .select({
+          status: job.status,
+          attempts: job.attempts,
+          maxAttempts: job.maxAttempts,
+          runAt: job.runAt,
+          lockedAt: job.lockedAt,
+          lockedBy: job.lockedBy,
+          lastError: job.lastError,
+          updatedAt: job.updatedAt,
+        })
+        .from(job)
+        .where(eq(job.id, row.jobId))
+        .limit(1)
+        .then((rows) => rows[0] ?? null)
+    : null
+
+  const queuedMs = Date.now() - new Date(row.requestedAt).getTime()
+  const workerLikelyMissing = row.status === 'started' && queuedMs > 15_000 && !!jobRow && jobRow.status === 'pending' && !jobRow.lockedAt
+
   return {
     id: row.id,
     provider: row.provider,
@@ -52,5 +74,24 @@ export default defineEventHandler(async (event) => {
     skippedDays: row.skippedDays,
     errorMessage: row.errorMessage,
     triggerSource: row.triggerSource,
+    diagnostics: {
+      queuedMs,
+      workerLikelyMissing,
+      workerHint: workerLikelyMissing
+        ? 'Discovery-job er stadig pending og ikke claimed af en worker. Start worker-service og check worker-logs.'
+        : null,
+      job: jobRow
+        ? {
+            status: jobRow.status,
+            attempts: jobRow.attempts,
+            maxAttempts: jobRow.maxAttempts,
+            runAt: jobRow.runAt?.toISOString() ?? null,
+            lockedAt: jobRow.lockedAt?.toISOString() ?? null,
+            lockedBy: jobRow.lockedBy ?? null,
+            lastError: jobRow.lastError ?? null,
+            updatedAt: jobRow.updatedAt?.toISOString() ?? null,
+          }
+        : null,
+    },
   }
 })

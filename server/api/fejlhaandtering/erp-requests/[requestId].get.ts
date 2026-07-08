@@ -3,8 +3,11 @@ import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import db from '~/lib/db'
 import { erpRequest, erpResponse } from '~/lib/db/schema/erp'
+import { requireErrorHandlingReadAccess } from '~~/server/auth/requireAppRoles'
 
 export default defineEventHandler(async (event) => {
+  await requireErrorHandlingReadAccess(event)
+
   const requestId = z.string().min(1).parse(event.context.params?.requestId)
 
   const [row] = await db
