@@ -4,8 +4,11 @@ import { z } from 'zod'
 import db from '~/lib/db'
 import { erpRequestLine } from '~/lib/db/schema/erp'
 import { transactionProcessing } from '~/lib/db/schema/transaction'
+import { requireErrorHandlingWriteAccess } from '~~/server/auth/requireAppRoles'
 
 export default defineEventHandler(async (event) => {
+  await requireErrorHandlingWriteAccess(event)
+
   const requestId = z.string().min(1).parse(event.context.params?.requestId)
   const body = z
     .object({

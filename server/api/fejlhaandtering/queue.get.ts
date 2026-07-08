@@ -3,6 +3,7 @@ import { desc, eq } from 'drizzle-orm'
 import db from '~/lib/db'
 import { job } from '~/lib/db/schema/job'
 import { outbox } from '~/lib/db/schema/outbox'
+import { requireErrorHandlingReadAccess } from '~~/server/auth/requireAppRoles'
 
 type QueueListItem = {
   id: string
@@ -20,7 +21,9 @@ function toIso(value: unknown): string {
   return String(value)
 }
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
+  await requireErrorHandlingReadAccess(event)
+
   const [failedJobs, failedOutbox] = await Promise.all([
     db
       .select({

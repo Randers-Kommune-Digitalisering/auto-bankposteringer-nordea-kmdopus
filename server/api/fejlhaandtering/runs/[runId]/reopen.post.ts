@@ -2,8 +2,11 @@ import { defineEventHandler } from 'h3'
 import { sql } from 'drizzle-orm'
 import { z } from 'zod'
 import db from '~/lib/db'
+import { requireErrorHandlingWriteAccess } from '~~/server/auth/requireAppRoles'
 
 export default defineEventHandler(async (event) => {
+  await requireErrorHandlingWriteAccess(event)
+
   const runId = z.string().uuid().parse(event.context.params?.runId)
 
   const result = await db.execute(sql`

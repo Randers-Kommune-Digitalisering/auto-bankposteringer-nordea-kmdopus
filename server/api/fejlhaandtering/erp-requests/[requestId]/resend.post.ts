@@ -6,9 +6,12 @@ import db from '~/lib/db'
 import { erpRequest, erpRequestLine } from '~/lib/db/schema/erp'
 import { outbox } from '~/lib/db/schema/outbox'
 import { erpIntegrationMetadata } from '~/lib/env/env'
-import { buildKmdFileName } from '~/engine/erp-integration/infrastructure/adapters/kmd/postingXmlBuilder'
+import { buildKmdFileName } from '~~/engine/erp-integration/infrastructure/adapters/kmd/postingXmlBuilder'
+import { requireErrorHandlingWriteAccess } from '../../../../auth/requireAppRoles'
 
 export default defineEventHandler(async (event) => {
+  await requireErrorHandlingWriteAccess(event)
+
   const requestId = z.string().min(1).parse(event.context.params?.requestId)
 
   const bodySchema = z

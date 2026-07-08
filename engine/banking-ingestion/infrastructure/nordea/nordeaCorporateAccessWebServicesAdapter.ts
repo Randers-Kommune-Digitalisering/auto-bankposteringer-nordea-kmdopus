@@ -4,6 +4,7 @@ import type {
   FetchBankDocumentsOutput,
 } from '../../ports/bankAdapter'
 import { z } from 'zod'
+import { logger } from '~/lib/logger'
 
 import { nordeaDownloadFile, nordeaDownloadFileList, nordeaCorporateAccessWsClientConfigSchema } from './nordeaCorporateAccessWsClient'
 
@@ -73,6 +74,7 @@ export class NordeaCorporateAccessWebServicesAdapter implements BankAdapter {
     input: FetchBankDocumentsInput,
   ): Promise<FetchBankDocumentsOutput> {
     const config = nordeaCorporateAccessWsConfigSchema.parse(this.config)
+    const log = logger.child({ scope: 'banking.nordeaCA.fetchDocuments', adapterKey: this.key })
 
     const clientConfig = nordeaCorporateAccessWsClientConfigSchema.parse({
       endpointUrl: config.endpointUrl,
@@ -105,13 +107,46 @@ export class NordeaCorporateAccessWebServicesAdapter implements BankAdapter {
     listInput.startDate = startDate
     listInput.endDate = endDate
 
+    log.info('Nordea DownloadFileList request prepared', {
+      requestedBookingDate,
+      status: listInput.status,
+      fileType: listInput.fileType,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      limit: input.limit ?? config.maxFilesPerRun,
+      timeoutMs: config.timeoutMs,
+    })
+
     const list = await nordeaDownloadFileList(clientConfig, listInput)
+
+    const allTypes = Array.from(new Set(
+      list.fileDescriptors
+        .map((d) => String(d.fileType ?? '').trim())
+        .filter(Boolean),
+    ))
+
+    log.info('Nordea DownloadFileList response received', {
+      requestedBookingDate,
+      totalDescriptors: list.fileDescriptors.length,
+      descriptorTypes: allTypes,
+    })
 
     const requestedLimit = input.limit ?? config.maxFilesPerRun
     const limit = Math.max(1, Math.min(requestedLimit, config.maxFilesPerRun))
-    const refs = list.fileDescriptors
+    const matchingRefs = list.fileDescriptors
       .filter((d) => !d.fileType || d.fileType === config.statementFileType)
+
+    const refs = (matchingRefs.length ? matchingRefs : list.fileDescriptors)
       .slice(0, limit)
+
+    if (!matchingRefs.length && list.fileDescriptors.length) {
+      log.warn('Nordea descriptors did not match configured file type; using unfiltered fallback', {
+        requestedBookingDate,
+        configuredFileType: config.statementFileType,
+        totalDescriptors: list.fileDescriptors.length,
+        descriptorTypes: allTypes,
+      })
+    }
 
     const documents: FetchBankDocumentsOutput['documents'] = []
 
@@ -121,6 +156,13 @@ export class NordeaCorporateAccessWebServicesAdapter implements BankAdapter {
         requestCompressed: config.requestCompressed,
         fileType: d.fileType ?? config.statementFileType,
         serviceId: d.serviceId ?? undefined,
+      })
+
+      log.info('Nordea DownloadFile completed', {
+        requestedBookingDate,
+        fileType: d.fileType ?? config.statementFileType,
+        serviceId: d.serviceId ?? null,
+        payloadBytes: dl.payload.byteLength,
       })
 
       documents.push({

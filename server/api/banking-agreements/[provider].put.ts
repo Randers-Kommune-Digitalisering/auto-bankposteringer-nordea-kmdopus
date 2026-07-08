@@ -204,6 +204,18 @@ export default defineEventHandler(async (event) => {
       discoveryRunId: created.id,
       jobId,
     })
+
+    const appRole = String(process.env.APP_ROLE ?? 'web')
+    if (appRole !== 'worker') {
+      log.warn('Account discovery job queued from non-worker process', {
+        provider,
+        channel: nextChannel,
+        discoveryRunId: created.id,
+        jobId,
+        appRole,
+        hint: 'Sørg for at en worker-service/proces kører for at claime og udføre discovery-jobbet.',
+      })
+    }
   } else {
     log.info('Account discovery skipped after agreement update', {
       provider,
