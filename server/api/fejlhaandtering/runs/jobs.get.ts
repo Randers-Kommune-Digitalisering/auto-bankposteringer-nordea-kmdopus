@@ -3,6 +3,7 @@ import { desc, inArray } from 'drizzle-orm'
 import { z } from 'zod'
 import db from '~/lib/db'
 import { job } from '~/lib/db/schema/job'
+import { requireErrorHandlingReadAccess } from '~~/server/auth/requireAppRoles'
 
 type JobListItem = {
   id: string
@@ -29,6 +30,8 @@ function parseRunIds(query: Record<string, any>): string[] {
 }
 
 export default defineEventHandler(async (event) => {
+  await requireErrorHandlingReadAccess(event)
+
   const query = getQuery(event)
   const runIds = parseRunIds(query)
   if (!runIds.length) {

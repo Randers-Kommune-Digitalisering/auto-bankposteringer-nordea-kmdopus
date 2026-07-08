@@ -3,6 +3,7 @@ import { desc, eq } from 'drizzle-orm'
 import { z } from 'zod'
 import db from '~/lib/db'
 import { job } from '~/lib/db/schema/job'
+import { requireErrorHandlingReadAccess } from '~~/server/auth/requireAppRoles'
 
 type JobListItem = {
   id: string
@@ -22,6 +23,8 @@ function toIso(value: unknown): string {
 }
 
 export default defineEventHandler(async (event) => {
+  await requireErrorHandlingReadAccess(event)
+
   const runId = z.string().uuid().parse(event.context.params?.runId)
 
   const rows = await db

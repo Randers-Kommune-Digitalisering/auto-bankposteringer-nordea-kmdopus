@@ -3,8 +3,11 @@ import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import db from '~/lib/db'
 import { outbox } from '~/lib/db/schema/outbox'
+import { requireErrorHandlingWriteAccess } from '~~/server/auth/requireAppRoles'
 
 export default defineEventHandler(async (event) => {
+  await requireErrorHandlingWriteAccess(event)
+
   const id = z.string().uuid().parse(event.context.params?.id)
 
   const [updated] = await db

@@ -10,8 +10,6 @@ import { LocalFileBankAdapter } from '../infrastructure/localFileBankAdapter'
 import { buildBankMeta } from '~~/utils/function'
 import type { BankAdapter } from '../ports/bankAdapter'
 
-const DISCOVERY_FETCH_TIMEOUT_MS = 20_000
-
 function isRecoverableContentNotFound(provider: BankProvider, error: unknown): boolean {
   if (provider !== 'nordea') return false
   const message = String((error as any)?.message ?? error)
@@ -75,17 +73,12 @@ export async function discoverAgreementAccounts(options: {
     const bookingDate = createUtcIsoString(shiftDaysBack(options.bookingDate, daysBack))
     let fetched: Awaited<ReturnType<BankAdapter['fetchDocuments']>>
     try {
-      fetched = await Promise.race([
-        adapter.fetchDocuments({
-          accountId: `provider:${options.provider}`,
-          cursor: null,
-          limit: 25,
-          bookingDate,
-        }),
-        new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error(`Account discovery timeout after ${DISCOVERY_FETCH_TIMEOUT_MS}ms`)), DISCOVERY_FETCH_TIMEOUT_MS)
-        }),
-      ])
+      fetched = await adapter.fetchDocuments({
+        accountId: `provider:${options.provider}`,
+        cursor: null,
+        limit: 25,
+        bookingDate,
+      })
     } catch (error) {
       if (!isRecoverableContentNotFound(options.provider, error)) {
         skippedDays += 1

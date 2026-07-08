@@ -313,6 +313,16 @@ The app can run in multiple operational “roles” using the same container ima
 - **scheduler** (scheduled tasks / cron): should typically be a single replica to avoid duplicate scheduling
 - **worker** (queue/outbox processing): can be scaled independently of web
 
+### Runtime split by role (container process model)
+
+To reduce runtime overhead and avoid loading unnecessary web runtime components in background roles, deployments can use two runtime process models:
+
+- **web role**: runs the Nitro web server (UI/API)
+- **worker role**: runs a dedicated headless worker loop script (`scripts/runtime/worker.ts`)
+- **scheduler role**: runs a dedicated headless scheduler script (`scripts/runtime/scheduler.ts`)
+
+This keeps repository/domain code shared while separating process responsibilities. Worker and scheduler do not need to expose HTTP or run the web request pipeline.
+
 To keep deployments simple and reproducible, scheduling and DB setup are controlled via explicit env toggles:
 
 - `APP_ROLE`: selects the operational role (`web`, `scheduler`, `worker`).

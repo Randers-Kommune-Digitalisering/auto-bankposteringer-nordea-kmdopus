@@ -10,6 +10,8 @@ type OidcSession = {
 }
 
 const WRITE_ROLES: readonly AppRole[] = ['bookkeeper', 'admin', 'rule_admin', 'dev']
+const ERROR_HANDLING_READ_ROLES: readonly AppRole[] = ['admin', 'dev']
+const ERROR_HANDLING_WRITE_ROLES: readonly AppRole[] = ['admin', 'dev']
 
 function extractSessionRoles(session: OidcSession, clientId?: string, includeDevRole?: boolean): string[] {
   return extractRolesFromOidcUser(session, { clientId, includeDevRole })
@@ -65,4 +67,12 @@ export async function requireAnyAppRole(event: H3Event, requiredRoles: readonly 
 
 export async function requireWriteAccess(event: H3Event): Promise<void> {
   return requireAnyAppRole(event, WRITE_ROLES)
+}
+
+export async function requireErrorHandlingReadAccess(event: H3Event): Promise<void> {
+  return requireAnyAppRole(event, ERROR_HANDLING_READ_ROLES)
+}
+
+export async function requireErrorHandlingWriteAccess(event: H3Event): Promise<void> {
+  return requireAnyAppRole(event, ERROR_HANDLING_WRITE_ROLES)
 }

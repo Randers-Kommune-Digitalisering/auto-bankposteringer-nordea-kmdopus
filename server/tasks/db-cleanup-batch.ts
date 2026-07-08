@@ -1,8 +1,7 @@
 import { defineTask } from 'nitropack/runtime'
 import { logger } from '~/lib/logger'
-import { enqueueJob } from '#engine/queue/handlers/enqueueJob'
-import { withPgAdvisoryLock } from '~/lib/db/advisoryLock'
 import { allowRoleGatedWork } from '../utils/appRole'
+import { enqueueDbCleanupBatch } from '~/lib/scheduler/batches'
 
 export default defineTask({
   meta: {
@@ -13,17 +12,18 @@ export default defineTask({
     if (!allowRoleGatedWork('scheduler')) return { result: { skipped: true } }
 
     const log = logger.child({ scope: 'task.db-cleanup-batch' })
+    const scheduledTimeIso =
+      typeof payload?.scheduledTime === 'string' ? payload.scheduledTime : new Date().toISOString()
 
-    const locked = await withPgAdvisoryLock('task:db-cleanup-batch', async () => {
-      log.info('Starter db cleanup batch', { scheduledTime: payload?.scheduledTime })
-      const jobId = await enqueueJob('ops.dbCleanup', {}, {})
-      log.info('DB cleanup queued', { jobId, scheduledTime: payload?.scheduledTime })
-    })
+    log.info('Starter db cleanup batch', { scheduledTime: scheduledTimeIso })
+    const result = await enqueueDbCleanupBatch()
 
-    if (!locked.acquired) {
-      log.info('DB cleanup skipped (lock not acquired)', { scheduledTime: payload?.scheduledTime })
+    if (result.skipped) {
+      log.info('DB cleanup skipped (lock not acquired)', { scheduledTime: scheduledTimeIso })
       return { result: { skipped: true } }
     }
+
+    log.info('DB cleanup queued', { jobId: result.jobId, scheduledTime: scheduledTimeIso })
 
     return { result: { skipped: false } }
   },

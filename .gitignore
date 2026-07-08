@@ -11,6 +11,7 @@ node_modules
 
 # pnpm patch working directories
 .pnpm-patch
+.pnpm-store
 
 # Logs
 logs

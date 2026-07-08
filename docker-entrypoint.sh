@@ -14,8 +14,14 @@ wait_for_db() {
 const { Client } = require('pg');
 
 const url = process.env.DATABASE_URL;
-const maxAttemptsRaw = Number.parseInt(process.env.DB_WAIT_MAX_ATTEMPTS || '0', 10);
-const maxAttempts = Number.isFinite(maxAttemptsRaw) && maxAttemptsRaw > 0 ? maxAttemptsRaw : 0;
+const maxAttemptsEnv = (process.env.DB_WAIT_MAX_ATTEMPTS || '').trim();
+const maxAttemptsRaw = Number.parseInt(maxAttemptsEnv, 10);
+const maxAttempts =
+  maxAttemptsEnv === ''
+    ? 60
+    : Number.isFinite(maxAttemptsRaw) && maxAttemptsRaw >= 0
+      ? maxAttemptsRaw
+      : 60;
 const delayMsRaw = Number.parseInt(process.env.DB_WAIT_RETRY_MS || '1000', 10);
 const delayMs = Number.isFinite(delayMsRaw) && delayMsRaw > 0 ? delayMsRaw : 1000;
 const maxAttemptsLabel = maxAttempts > 0 ? String(maxAttempts) : '∞';

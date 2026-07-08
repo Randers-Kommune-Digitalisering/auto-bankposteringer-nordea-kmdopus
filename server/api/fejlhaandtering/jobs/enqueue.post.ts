@@ -1,6 +1,7 @@
 import { defineEventHandler, readBody, createError } from 'h3'
 import { z } from 'zod'
 import { enqueueJob } from '#engine/queue/handlers/enqueueJob'
+import { requireErrorHandlingWriteAccess } from '~~/server/auth/requireAppRoles'
 
 const bodySchema = z.object({
   type: z.string().min(1),
@@ -10,6 +11,8 @@ const bodySchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
+  await requireErrorHandlingWriteAccess(event)
+
   const body = bodySchema.parse(await readBody(event))
 
   // Keep it intentionally conservative; extend as the engine grows.

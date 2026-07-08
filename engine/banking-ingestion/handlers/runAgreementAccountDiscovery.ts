@@ -37,7 +37,20 @@ export async function runAgreementAccountDiscovery(options: { discoveryRunId: st
       eq(bankingAgreementDiscoveryRun.status, row.status),
     ))
 
+  log.info('Discovery run moved to running', {
+    provider: row.provider,
+    channel: row.channel,
+    jobId: row.jobId,
+    requestedAt: row.requestedAt?.toISOString?.() ?? row.requestedAt,
+  })
+
   try {
+    log.info('Starting bank adapter calls for account discovery', {
+      provider: row.provider,
+      channel: row.channel,
+      discoveryRunId: row.id,
+    })
+
     const result = await discoverAgreementAccounts({
       provider: row.provider,
       channel: row.channel,
