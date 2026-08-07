@@ -9,6 +9,7 @@ Core principles:
 - The architecture must support multiple ERPs, even though only KMD Opus is currently implemented.
 - Rules must be deterministic, auditable, and relationally modeled.
 - Avoid hidden state, implicit logic, or denormalized shortcuts.
+- Legacy behavior must be prevented from creeping into the system, even if it is convenient or expedient.
 
 Technology stack (ordered by importance):
 - Nuxt 4 (including Nuxt UI library)
@@ -36,3 +37,5 @@ Database migrations policy:
 - Your code changes should assume that workflow (i.e. update schema code, but do not create new migration files).
 
 When the architecture or design is changed, update the ARCHITECTURE.md markdown-file to reflect the new design.
+The ARCHITECTURE.md file is not meant as a complete specification, but rather a living document that captures the current state of the system's architecture and design decisions.
+It should include diagrams, explanations of key components, and rationale for design choices.

@@ -44,6 +44,7 @@ export default defineNitroPlugin((nitroApp) => {
 
   const idleSleepMs = parseNonNegativeInt(process.env.WORKER_IDLE_SLEEP_MS) ?? 1000
   const errorSleepMs = parseNonNegativeInt(process.env.WORKER_ERROR_SLEEP_MS) ?? 5000
+  const jobCooldownMs = parseNonNegativeInt(process.env.WORKER_JOB_COOLDOWN_MS) ?? 0
 
   const maxJobsOverride = parsePositiveInt(process.env.WORKER_MAX_JOBS)
   const maxOutboxOverride = parseNonNegativeInt(process.env.WORKER_MAX_OUTBOX)
@@ -66,7 +67,7 @@ export default defineNitroPlugin((nitroApp) => {
   })
 
   ;(async () => {
-    log.info('Worker loop started', { profile, idleSleepMs, errorSleepMs, workerOptions })
+    log.info('Worker loop started', { profile, idleSleepMs, errorSleepMs, jobCooldownMs, workerOptions })
 
     while (!stopped) {
       try {
@@ -75,6 +76,8 @@ export default defineNitroPlugin((nitroApp) => {
         const didWork = Boolean(result.jobs || result.outbox)
         if (!didWork) {
           await sleep(idleSleepMs)
+        } else if (jobCooldownMs > 0) {
+          await sleep(jobCooldownMs)
         }
       } catch (err) {
         log.error('Worker loop iteration failed', { err })

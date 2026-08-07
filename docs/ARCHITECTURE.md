@@ -424,6 +424,7 @@ Optional tuning (applies to all profiles):
 - `WORKER_MAX_OUTBOX`: max outbox items processed per loop iteration (default: profile-dependent)
 - `WORKER_IDLE_SLEEP_MS`: sleep when no work was found (default 1000)
 - `WORKER_ERROR_SLEEP_MS`: sleep after an iteration error (default 5000)
+- `WORKER_JOB_COOLDOWN_MS`: optional cooldown sleep after an iteration that processed work (default 0)
 
 Profile defaults:
 

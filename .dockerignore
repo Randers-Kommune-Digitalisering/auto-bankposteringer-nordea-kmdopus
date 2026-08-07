@@ -4,3 +4,23 @@ node_modules
 .gitignore
 README.md
 LICENSE
+
+# Local/editor/cache artifacts
+.vscode
+.idea
+*.log
+*.tmp
+
+# Test/docs/ops artifacts not required in container build context
+docs
+tests
+smoke
+OS2bankintegration_governance_report.md
+THIRD_PARTY_LICENSES.md
+latest-bank-raw.xml
+
+# Runtime/build outputs
+.output
+coverage
+dist
+.DS_Store
