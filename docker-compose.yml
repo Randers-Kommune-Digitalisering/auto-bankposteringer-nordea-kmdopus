@@ -4,7 +4,7 @@ services:
       context: .
       target: dev
     init: true
-    restart: "no"
+    restart: unless-stopped
     ports:
       - "3000:3000"
     entrypoint: ["sh", "./docker-entrypoint.sh"]
@@ -36,11 +36,11 @@ services:
     networks:
       - app_net
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/settings/erp-metadata').then(r=>process.exit(r.status===200?0:1)).catch(()=>process.exit(1))"]
-      interval: 5s
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.status===200?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
       timeout: 3s
-      retries: 30
-      start_period: 20s
+      retries: 18
+      start_period: 25s
 
   worker:
     image: auto-bankposteringer-nordea-kmdopus-role-runtime
@@ -48,7 +48,7 @@ services:
       context: .
       target: role-runtime
     init: true
-    restart: "no"
+    restart: unless-stopped
     read_only: true
     tmpfs:
       - /tmp
@@ -65,7 +65,12 @@ services:
     environment:
       APP_ROLE: worker
       NODE_ENV: production
-      NODE_OPTIONS: "--max-old-space-size=4096"
+      NODE_OPTIONS: "--max-old-space-size=${WORKER_NODE_MAX_OLD_SPACE_MB:-768}"
+      WORKER_MAX_JOBS: ${WORKER_MAX_JOBS:-4}
+      WORKER_MAX_OUTBOX: ${WORKER_MAX_OUTBOX:-20}
+      WORKER_IDLE_SLEEP_MS: ${WORKER_IDLE_SLEEP_MS:-1500}
+      WORKER_ERROR_SLEEP_MS: ${WORKER_ERROR_SLEEP_MS:-5000}
+      WORKER_JOB_COOLDOWN_MS: ${WORKER_JOB_COOLDOWN_MS:-300}
       CI: "true"
       NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM_B64: ${NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM_B64:-}
       NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM_B64: ${NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM_B64:-}
@@ -91,11 +96,8 @@ services:
 
   scheduler:
     image: auto-bankposteringer-nordea-kmdopus-role-runtime
-    build:
-      context: .
-      target: role-runtime
     init: true
-    restart: "no"
+    restart: unless-stopped
     read_only: true
     tmpfs:
       - /tmp

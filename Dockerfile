@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.7
+
 # -------------------------
 # Base
 # -------------------------
@@ -12,7 +14,8 @@ FROM base AS deps
 COPY package.json pnpm-lock.yaml ./
 COPY pnpm-workspace.yaml ./
 COPY patches ./patches
-RUN pnpm install --frozen-lockfile --config.strict-dep-builds=false
+RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
+	pnpm install --frozen-lockfile --config.strict-dep-builds=false
 
 # -------------------------
 # Dev
@@ -35,11 +38,8 @@ RUN pnpm build
 # -------------------------
 # Role runtime dependencies (worker/scheduler)
 # -------------------------
-FROM base AS role-deps
-COPY package.json pnpm-lock.yaml ./
-COPY pnpm-workspace.yaml ./
-COPY patches ./patches
-RUN pnpm install --prod --frozen-lockfile --config.strict-dep-builds=false
+FROM deps AS role-deps
+RUN pnpm prune --prod
 
 # -------------------------
 # Role runtime (worker/scheduler)
@@ -78,7 +78,7 @@ COPY --from=build /app/.output ./.output
 COPY package.json pnpm-lock.yaml ./
 COPY pnpm-workspace.yaml ./
 COPY patches ./patches
-RUN corepack enable && pnpm install --prod --frozen-lockfile --config.strict-dep-builds=false
+COPY --from=role-deps /app/node_modules ./node_modules
 
 EXPOSE 3000
 ENTRYPOINT ["docker-entrypoint.sh"]

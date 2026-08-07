@@ -1,6 +1,6 @@
-import env from '~/lib/env/env'
-import { logger } from '~/lib/logger'
-import { runWorker } from '#engine/queue/handlers/worker'
+import env from '../../app/lib/env/env'
+import { logger } from '../../app/lib/logger'
+import { runWorker } from '../../engine/queue/handlers/worker'
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -32,6 +32,7 @@ async function main() {
   const profile = `${process.env.WORKER_PROFILE ?? 'all'}`.trim()
   const idleSleepMs = parseNonNegativeInt(process.env.WORKER_IDLE_SLEEP_MS) ?? 1000
   const errorSleepMs = parseNonNegativeInt(process.env.WORKER_ERROR_SLEEP_MS) ?? 5000
+  const jobCooldownMs = parseNonNegativeInt(process.env.WORKER_JOB_COOLDOWN_MS) ?? 0
 
   const maxJobsOverride = parsePositiveInt(process.env.WORKER_MAX_JOBS)
   const maxOutboxOverride = parseNonNegativeInt(process.env.WORKER_MAX_OUTBOX)
@@ -56,13 +57,17 @@ async function main() {
   process.on('SIGINT', stop)
   process.on('SIGTERM', stop)
 
-  log.info('worker.runtime.started', { profile, idleSleepMs, errorSleepMs, workerOptions })
+  log.info('worker.runtime.started', { profile, idleSleepMs, errorSleepMs, jobCooldownMs, workerOptions })
 
   while (!stopped) {
     try {
       const result = await runWorker(workerOptions)
       const didWork = Boolean(result.jobs || result.outbox)
-      if (!didWork) await sleep(idleSleepMs)
+      if (!didWork) {
+        await sleep(idleSleepMs)
+      } else if (jobCooldownMs > 0) {
+        await sleep(jobCooldownMs)
+      }
     } catch (err) {
       log.error('worker.runtime.iterationFailed', { err })
       await sleep(errorSleepMs)
