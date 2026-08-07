@@ -89,8 +89,6 @@ const defaultRange = {
 
 const dateRange = ref<any>(defaultRange)
 
-const selectedAccountIds = ref<string[]>([])
-
 // Popover state
 const openPopovers = ref<Record<string, string | null>>({})
 
@@ -113,6 +111,7 @@ const getColorByStatus = (status: RunStatus): StatusColor => {
     case 'indlæser':
       return 'warning'
     case 'afventer':
+      return 'warning'
     default:
       return 'neutral'
   }
@@ -165,16 +164,8 @@ const filteredRows = computed<RunListItem[]>(() => {
   })
 })
 
-const accountFilteredRows = computed<RunListItem[]>(() => {
-  if (!selectedAccountIds.value.length) return filteredRows.value
-
-  return filteredRows.value.filter((run) => {
-    return (run.transactions ?? []).some((tx) => tx.accountId && selectedAccountIds.value.includes(tx.accountId))
-  })
-})
-
 const rows = computed<RunListItem[]>(() => {
-  return [...accountFilteredRows.value].sort((a, b) => {
+  return [...filteredRows.value].sort((a, b) => {
     return new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime()
   })
 })
@@ -305,7 +296,7 @@ const columns: TableColumn<RunListItem>[] = [
 
     <template #body>
       <div class="space-y-4">
-        <FiltersRow v-model:account-ids="selectedAccountIds">
+        <FiltersRow :show-accounts="false">
           <template #date>
             <div class="w-full flex justify-end">
               <div class="w-full sm:w-[16rem] flex flex-col gap-4">
@@ -338,7 +329,7 @@ const columns: TableColumn<RunListItem>[] = [
                             </template>
                           </UCalendar>
                           <div v-if="dateRange?.start && dateRange?.end" class="mt-4 flex gap-2">
-                            <UButton variant="ghost" size="sm" label="Nulstil" @click="dateRange = defaultRange"
+                            <UButton variant="ghost" size="sm" label="Nulstil" @click="() => { dateRange = defaultRange }"
                               class="flex-1" />
                           </div>
                         </div>

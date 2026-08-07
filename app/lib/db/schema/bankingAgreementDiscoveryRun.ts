@@ -43,7 +43,3 @@ export const bankingAgreementDiscoveryRunUpdateSchema = createUpdateSchema(banki
   requestedAt: true,
 })
 export const bankingAgreementDiscoveryRunSelectSchema = createSelectSchema(bankingAgreementDiscoveryRun)
-
-export type BankingAgreementDiscoveryRunInsertSchema = z.infer<typeof bankingAgreementDiscoveryRunInsertSchema>
-export type BankingAgreementDiscoveryRunUpdateSchema = z.infer<typeof bankingAgreementDiscoveryRunUpdateSchema>
-export type BankingAgreementDiscoveryRunSelectSchema = z.infer<typeof bankingAgreementDiscoveryRunSelectSchema>

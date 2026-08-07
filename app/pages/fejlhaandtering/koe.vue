@@ -175,6 +175,7 @@ const getColorByStatus = (status: string | null | undefined): StatusColor => {
     case 'indlæser':
       return 'warning'
     case 'afventer':
+      return 'warning'
     default:
       return 'neutral'
   }
@@ -322,7 +323,12 @@ async function enqueue(type: 'banking.ingest' | 'erp.ingestResponses') {
         ...(selectedSingleRunId.value ? { runId: selectedSingleRunId.value } : {}),
       },
     })
-    toast.add({ title: 'Opgave oprettet', description: type })
+    toast.add({
+      title: 'Opgave oprettet',
+      description: type === 'banking.ingest'
+        ? 'Run er sat til genbehandling. Kræver aktiv worker-proces for at blive udført.'
+        : 'ERP-svar poll er sat i kø. Kræver aktiv worker-proces for at blive udført.',
+    })
     await refreshPageData()
   } catch (error) {
     console.error('Enqueue fejlede', error)
@@ -653,6 +659,9 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
                     <span class="font-medium text-default">Fejlede behandlingsopgaver</span>: tryk “Genkør” på den konkrete række.
                   </li>
                   <li>
+                    <span class="font-medium text-default">Run pauset pga. manglende statuskonto-kontering</span>: ret statuskonto på kontoen. Systemet forsøger automatisk igen via køen.
+                  </li>
+                  <li>
                     <span class="font-medium text-default">Dagens behandling er ikke startet</span>: brug nød-knapperne til at få arbejdet i gang igen.
                   </li>
                   <li>
@@ -765,7 +774,7 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
           />
           <UButton
             :icon="appConfig.ui.icons.download"
-            label='Hent bankdata'
+            label='Forsøg kørsel igen'
             color="neutral"
             variant="soft"
             :disabled="selectedRunIds.length !== 1"

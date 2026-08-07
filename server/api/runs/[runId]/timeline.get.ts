@@ -11,8 +11,27 @@ import { errorLog } from '~/lib/db/schema/error'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import type { RunTimelineResponse } from '~/types/runTimeline'
 
+const MISSING_MAPPING_ERROR_PATTERN = /Mangler konterings-mapping \((artskonto|statuskonto)\) for bankkonto:/i
+const MAPPING_RECOVERY_SUCCESS_PATTERN = /^Genkørsel efter statuskonto-mapping lykkedes\./i
+
+function toEpochMs(value: unknown): number {
+  const d = value instanceof Date ? value : new Date(String(value ?? ''))
+  const ms = d.getTime()
+  return Number.isFinite(ms) ? ms : 0
+}
+
+function isMissingMappingError(message: unknown): boolean {
+  return MISSING_MAPPING_ERROR_PATTERN.test(String(message ?? ''))
+}
+
+function isMappingRecoverySuccessEvent(row: { errorCode: unknown; errorString: unknown }): boolean {
+  const code = Number(row.errorCode)
+  if (Number.isFinite(code) && code !== 200) return false
+  return MAPPING_RECOVERY_SUCCESS_PATTERN.test(String(row.errorString ?? ''))
+}
+
 export default defineEventHandler(async (event) => {
-  const runId = z.uuid().parse(event.context.params?.runId)
+  const runId = z.string().uuid().parse(event.context.params?.runId)
 
   const runRow = await db.select().from(run).where(eq(run.id, runId)).limit(1)
   const r = runRow?.[0]
@@ -132,6 +151,15 @@ export default defineEventHandler(async (event) => {
     open: byStatus.get('åben') ?? 0,
   }
 
+  const filteredErrors = (errorRows ?? []).filter((e) => {
+    if (!isMissingMappingError(e.errorString)) return true
+    const errorMs = toEpochMs(e.createdAt)
+    return !(errorRows ?? []).some((candidate) => (
+      isMappingRecoverySuccessEvent(candidate)
+      && toEpochMs(candidate.createdAt) >= errorMs
+    ))
+  })
+
   return {
     run: {
       id: String(r.id),
@@ -167,7 +195,7 @@ export default defineEventHandler(async (event) => {
       responseStatusText: req.responseStatusText ? String(req.responseStatusText) : null,
       lineCount: Number(req.lineCount ?? 0),
     })),
-    errors: (errorRows ?? []).map<RunTimelineResponse['errors'][number]>((e) => ({
+    errors: filteredErrors.map<RunTimelineResponse['errors'][number]>((e) => ({
       id: String(e.id),
       source: e.source ? String(e.source) : null,
       errorCode: e.errorCode != null ? Number(e.errorCode) : null,

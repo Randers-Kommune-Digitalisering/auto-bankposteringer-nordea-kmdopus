@@ -4,7 +4,7 @@ import { today } from '@internationalized/date'
 import type { TableColumn } from '@nuxt/ui'
 import type { StatementTransaction } from '~/types/transactions'
 import { TRANSACTION_BADGE_COLUMN_CLASS, TRANSACTION_BADGE_STYLE } from '~/lib/presenters/transactionBadgeStyles'
-import { DEFAULT_TIME_ZONE } from '~/utils'
+import { DEFAULT_TIME_ZONE, formatSignedDkk } from '~/utils'
 import { formatTransactionFieldHint } from '~/lib/presenters/transactionFieldHints'
 import { buildReferenceBadgeEntries, dedupeBadgeEntries, type BadgeEntry } from '~/lib/presenters/referenceBadgeEntries'
 import { useStackedTransactions } from '~/composables/useStackedTransactions'
@@ -111,6 +111,8 @@ const shownSamleposter = computed<number>(() => stacked.value.shownSamleposter)
 const totalSamleposter = computed<number>(() => stacked.value.totalSamleposter)
 
 const visibleRows = computed<StatementTransaction[]>(() => fetchedRows.value)
+const isRawTransactionOpen = ref(false)
+const selectedRawTransaction = ref<StatementTransaction | null>(null)
 
 const groupedVisibleRows = computed<StatementStackRow[]>(() => {
   return stacked.value.stacks.map((stack) => {
@@ -343,20 +345,38 @@ function buildReference(row: StatementTransaction): string[] {
   return buildReferenceEntries(row).map((entry) => entry.value)
 }
 
-const skeletonTableRows = Array.from({ length: 8 }, (_, index) => `skeleton-table-row-${index + 1}`)
-const skeletonCardRows = Array.from({ length: 6 }, (_, index) => `skeleton-card-${index + 1}`)
+function openRawTransaction(row: StatementStackRow): void {
+  selectedRawTransaction.value = row.representative
+  isRawTransactionOpen.value = true
+}
 
-const dkkFormatter = new Intl.NumberFormat('da-DK', {
-  style: 'currency',
-  currency: 'DKK',
+function extract500TriadValues(value: string | null): string[] {
+  const text = String(value ?? '')
+  if (!text.trim().length) return []
+
+  const seen = new Set<string>()
+  const values: string[] = []
+  for (const token of text.split(';')) {
+    const match = /^500:[^:]*:(.*)$/i.exec(token.trim())
+    const triadValue = String(match?.[1] ?? '').trim()
+    if (!triadValue.length) continue
+    const dedupeKey = triadValue.toLowerCase()
+    if (seen.has(dedupeKey)) continue
+    seen.add(dedupeKey)
+    values.push(triadValue)
+  }
+
+  return values
+}
+
+const rawReferenceEntries = computed<BadgeEntry[]>(() => {
+  if (!selectedRawTransaction.value) return []
+  return dedupeBadgeEntries(buildReferenceEntries(selectedRawTransaction.value))
 })
 
-function formatSignedDkk(amount: number): string {
-  const value = Number(amount) || 0
-  if (value < 0) return `-${dkkFormatter.format(Math.abs(value))}`
-  if (value > 0) return `+${dkkFormatter.format(value)}`
-  return dkkFormatter.format(0)
-}
+const rawTriad500Values = computed<string[]>(() =>
+  extract500TriadValues(selectedRawTransaction.value?.entryAdditionalInfo ?? null),
+)
 
 const columns: TableColumn<StatementStackRow>[] = [
   { // Banking date
@@ -473,6 +493,17 @@ const columns: TableColumn<StatementStackRow>[] = [
         h('span', { class: 'text-xs text-muted' }, `${lineCount} linje${lineCount === 1 ? '' : 'r'}`),
       ])
     },
+  },
+  {
+    id: 'actions',
+    header: 'Handling',
+    cell: ({ row }) => h(resolveComponent('UButton'), {
+      size: 'sm',
+      color: 'primary',
+      variant: 'soft',
+      trailingIcon: appConfig.ui.icons.leftAlign,
+      onClick: () => openRawTransaction(row.original),
+    }, () => 'Rå visning'),
   },
 ]
 
@@ -594,6 +625,93 @@ const tableUi = {
           </div>
           <div class="flex-1" />
         </div>
+
+        <UModal v-model:open="isRawTransactionOpen" title="Rå transaktion (repræsentantlinje)" :ui="{ body: 'space-y-4' }">
+          <template #body>
+            <div v-if="!selectedRawTransaction" class="text-sm text-muted">Ingen transaktion valgt.</div>
+            <div v-else class="space-y-4">
+              <UCard variant="soft" :ui="{ body: 'space-y-3 p-4' }">
+                <div class="grid gap-2 sm:grid-cols-2">
+                  <div>
+                    <div class="text-xs font-semibold uppercase tracking-wide text-muted">Transaktions-ID</div>
+                    <div class="text-sm break-all">{{ selectedRawTransaction.id }}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs font-semibold uppercase tracking-wide text-muted">Kørsel</div>
+                    <div class="text-sm break-all">{{ selectedRawTransaction.runId }}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs font-semibold uppercase tracking-wide text-muted">Beløb</div>
+                    <div class="text-sm">{{ formatSignedDkk(Number(selectedRawTransaction.amount ?? 0)) }}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs font-semibold uppercase tracking-wide text-muted">Modpart</div>
+                    <div class="text-sm">{{ resolveCounterpart(selectedRawTransaction) ?? '-' }}</div>
+                  </div>
+                </div>
+              </UCard>
+
+              <UCard variant="soft" :ui="{ body: 'space-y-2 p-4' }">
+                <div class="text-xs font-semibold uppercase tracking-wide text-muted">Reference (afledt)</div>
+                <div v-if="rawReferenceEntries.length" class="space-y-1">
+                  <UBadge
+                    v-for="(entry, index) in rawReferenceEntries"
+                    :key="`raw-ref-${index}`"
+                    variant="soft"
+                    color="success"
+                    size="sm"
+                    :title="formatTransactionFieldHint(entry.hint)"
+                    class="block max-w-full whitespace-normal break-all"
+                  >
+                    {{ entry.value }}
+                  </UBadge>
+                </div>
+                <div v-else class="text-xs text-muted">-</div>
+              </UCard>
+
+              <UCard variant="soft" :ui="{ body: 'space-y-2 p-4' }">
+                <div class="text-xs font-semibold uppercase tracking-wide text-muted">500-triader fra AddtlNtryInf</div>
+                <div v-if="rawTriad500Values.length" class="space-y-1">
+                  <UBadge
+                    v-for="(value, index) in rawTriad500Values"
+                    :key="`raw-500-${index}`"
+                    variant="soft"
+                    color="warning"
+                    size="sm"
+                    class="block max-w-full whitespace-normal break-all"
+                  >
+                    {{ value }}
+                  </UBadge>
+                </div>
+                <div v-else class="text-xs text-muted">-</div>
+              </UCard>
+
+              <UCard variant="soft" :ui="{ body: 'space-y-2 p-4' }">
+                <div class="text-xs font-semibold uppercase tracking-wide text-muted">Rå felter</div>
+                <div class="grid gap-2 sm:grid-cols-2">
+                  <div class="text-xs text-muted">entryAdditionalInfo</div>
+                  <div class="text-xs break-all">{{ selectedRawTransaction.entryAdditionalInfo || '-' }}</div>
+                  <div class="text-xs text-muted">txAdditionalInfo</div>
+                  <div class="text-xs break-all">{{ selectedRawTransaction.txAdditionalInfo || '-' }}</div>
+                  <div class="text-xs text-muted">remittanceCreditorReference</div>
+                  <div class="text-xs break-all">{{ selectedRawTransaction.remittanceCreditorReference || '-' }}</div>
+                  <div class="text-xs text-muted">remittanceUstrd</div>
+                  <div class="text-xs break-all">{{ (selectedRawTransaction.remittanceUstrd || []).join(' | ') || '-' }}</div>
+                  <div class="text-xs text-muted">remittanceAdditional</div>
+                  <div class="text-xs break-all">{{ (selectedRawTransaction.remittanceAdditional || []).join(' | ') || '-' }}</div>
+                  <div class="text-xs text-muted">BkTxCd</div>
+                  <div class="text-xs break-all">{{ [selectedRawTransaction.bkTxCdDomain, selectedRawTransaction.bkTxCdFamily, selectedRawTransaction.bkTxCdSubFamily].filter(Boolean).join('/') || '-' }}</div>
+                  <div class="text-xs text-muted">BkTxCd Proprietary</div>
+                  <div class="text-xs break-all">{{ selectedRawTransaction.bkTxCdProprietary || '-' }}</div>
+                  <div class="text-xs text-muted">NtryRef / AcctSvcrRef</div>
+                  <div class="text-xs break-all">{{ [selectedRawTransaction.ntryRef, selectedRawTransaction.ntryAcctSvcrRef].filter(Boolean).join(' / ') || '-' }}</div>
+                  <div class="text-xs text-muted">Refs (EndToEnd, Instr, PmtInf, UETR)</div>
+                  <div class="text-xs break-all">{{ [selectedRawTransaction.refsEndToEndId, selectedRawTransaction.refsInstrId, selectedRawTransaction.refsPmtInfId, selectedRawTransaction.uetr].filter(Boolean).join(' | ') || '-' }}</div>
+                </div>
+              </UCard>
+            </div>
+          </template>
+        </UModal>
       </template>
     </template>
   </UDashboardPanel>

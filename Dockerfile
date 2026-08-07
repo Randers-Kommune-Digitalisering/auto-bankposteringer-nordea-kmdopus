@@ -20,6 +20,7 @@ RUN pnpm install --frozen-lockfile --config.strict-dep-builds=false
 FROM base AS dev
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+ENV NODE_OPTIONS=--max-old-space-size=4096
 EXPOSE 3000
 CMD ["pnpm", "dev"]
 
@@ -29,7 +30,6 @@ CMD ["pnpm", "dev"]
 FROM base AS build
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-ENV NODE_OPTIONS=--max-old-space-size=3072
 RUN pnpm build
 
 # -------------------------

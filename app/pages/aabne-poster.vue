@@ -2,7 +2,7 @@
 import { h } from 'vue'
 import { today } from '@internationalized/date'
 import type { TableColumn } from '@nuxt/ui'
-import { DEFAULT_TIME_ZONE } from '~/utils'
+import { DEFAULT_TIME_ZONE, formatSignedDkk } from '~/utils'
 import BookingModal from '~/components/open-items/BookingModal.vue'
 import BookingSummaryCard from '~/components/open-items/BookingSummaryCard.vue'
 import { TRANSACTION_BADGE_COLUMN_CLASS, TRANSACTION_BADGE_STYLE } from '~/lib/presenters/transactionBadgeStyles'
@@ -108,13 +108,6 @@ function isTableStackExpanded(stackId: string): boolean {
   return expandedTableStackIds.value[stackId] ?? false
 }
 
-function formatSignedDkk(amount: number): string {
-  const value = Number(amount) || 0
-  if (value < 0) return `-${dkkFormatter.format(Math.abs(value))}`
-  if (value > 0) return `+${dkkFormatter.format(value)}`
-  return dkkFormatter.format(0)
-}
-
 type OpenItemsTableRow = {
   stackId: string
   bookingDate: string
@@ -205,11 +198,6 @@ const expandedTableRows = computed<OpenItemsTableRow[]>(() => {
 
 const skeletonTableRows = Array.from({ length: 8 }, (_, index) => `skeleton-table-row-${index + 1}`)
 const skeletonCardRows = Array.from({ length: 6 }, (_, index) => `skeleton-card-${index + 1}`)
-
-const dkkFormatter = new Intl.NumberFormat('da-DK', {
-  style: 'currency',
-  currency: 'DKK',
-})
 
 const columns: TableColumn<OpenItemsTableRow>[] = [
   { // Banking date
@@ -367,7 +355,7 @@ function toStackSummary(stack: OpenTransactionStack): TransactionSummary {
 
   return {
     ...base,
-    sections: base.sections.filter((section) => section.key !== 'reference' && section.key !== 'teknisk'),
+    sections: base.sections.filter((section) => section.key !== 'teknisk'),
     amount: {
       ...base.amount,
       raw: stack.totalAmount,
@@ -395,7 +383,7 @@ function toGroupedModalTransaction(items: OpenTransaction[]): OpenTransaction | 
     amount: totalAmount,
     summary: {
       ...base,
-      sections: base.sections.filter((section) => section.key !== 'reference' && section.key !== 'teknisk'),
+      sections: base.sections.filter((section) => section.key !== 'teknisk'),
       amount: {
         ...base.amount,
         raw: totalAmount,

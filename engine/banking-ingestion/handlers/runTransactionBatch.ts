@@ -29,6 +29,29 @@ function toDateOnly(value: Date | string): string {
   return toDateOnlyUtc(new Date(value))
 }
 
+function extractErrorDetails(err: unknown): {
+  message: string
+  name?: string
+  code?: string
+  causeMessage?: string
+} {
+  const anyErr = err as {
+    message?: unknown
+    name?: unknown
+    code?: unknown
+    cause?: { message?: unknown } | unknown
+  }
+
+  const message = String(anyErr?.message ?? err)
+  const name = typeof anyErr?.name === 'string' ? anyErr.name : undefined
+  const code = typeof anyErr?.code === 'string' ? anyErr.code : undefined
+  const causeMessage = typeof (anyErr?.cause as any)?.message === 'string'
+    ? String((anyErr.cause as any).message)
+    : undefined
+
+  return { message, name, code, causeMessage }
+}
+
 // Main function
 export async function runTransactionBatch(options: { runId?: string; bookingDate?: Date } = {}): Promise<{ runId: string; insertedCount: number }> {
   const log = logger.child({ scope: 'banking.runTransactionBatch' })
@@ -86,13 +109,48 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
         set: { bookingDate, status: 'indlæser' },
       })
 
+    const existingRunTxCountRows = await trx
+      .select({ total: sql<number>`count(*)` })
+      .from(transaction)
+      .where(eq(transaction.runId, runId))
+      .limit(1)
+
+    const existingRunTxCount = Number(existingRunTxCountRows[0]?.total ?? 0)
+
+    const existingBookingDateTxCountRows = await trx.execute(sql`
+      select count(*)::int as total
+      from "transaction" t
+      inner join run r on r.id = t.run_id
+      where r.booking_date = ${bookingDateOnly}::date
+    `)
+
+    const existingBookingDateTxCount = Number((existingBookingDateTxCountRows.rows?.[0] as any)?.total ?? 0)
+
+    const shouldFetchFromBank = existingRunTxCount === 0
+
     let insertedStatements = 0
     let insertedBalances = 0
     let insertedTransactions = 0
     let deduplicated = false
     let providerErrors = 0
 
-    for (const r of runs) {
+    if (!shouldFetchFromBank) {
+      deduplicated = true
+      await trx.insert(errorLog).values({
+        runId,
+        source: 'banking',
+        errorCode: 208,
+        errorString: `Genbruger eksisterende bankdata i DB for bogføringsdato ${bookingDateOnly}. Bankkald er sprunget over.`,
+      } as any).catch(() => {})
+      log.info('Genbruger eksisterende transaktioner i DB for run - springer bankkald over', {
+        runId,
+        bookingDate: bookingDateOnly,
+        existingRunTxCount,
+        existingBookingDateTxCount,
+      })
+    }
+
+    for (const r of shouldFetchFromBank ? runs : []) {
       try {
         if (r.channel === 'rest') {
           if (r.provider !== 'nordea') {
@@ -169,19 +227,31 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
         }
       } catch (err) {
         providerErrors += 1
-        const message = String((err as any)?.message ?? err)
+        const errorDetails = extractErrorDetails(err)
         log.error('Bank ingestion fejlede for provider', {
           runId,
           provider: r.provider,
           channel: r.channel,
-          message,
+          message: errorDetails.message,
+          errorName: errorDetails.name,
+          errorCode: errorDetails.code,
+          errorCauseMessage: errorDetails.causeMessage,
+          error: err,
         })
+
+        const diagnosticParts = [
+          errorDetails.message,
+          errorDetails.name ? `name=${errorDetails.name}` : null,
+          errorDetails.code ? `code=${errorDetails.code}` : null,
+          errorDetails.causeMessage ? `cause=${errorDetails.causeMessage}` : null,
+        ].filter(Boolean)
+
         await trx
           .insert(errorLog)
           .values({
             runId,
             source: 'banking',
-            errorString: `provider=${r.provider} channel=${r.channel}: ${message}`,
+            errorString: `provider=${r.provider} channel=${r.channel}: ${diagnosticParts.join(' | ')}`,
           })
           .catch(() => {})
         continue

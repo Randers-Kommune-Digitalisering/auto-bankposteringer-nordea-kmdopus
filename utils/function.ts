@@ -98,7 +98,7 @@ if (!provider) {
           secrets.NORDEA_MTLS_CLIENT_CERTIFICATE_PEM ?? secrets.NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM,
         mtlsClientPrivateKeyPem:
           secrets.NORDEA_MTLS_CLIENT_PRIVATE_KEY_PEM ?? secrets.NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM,
-        timeoutMs: 30_000,
+        timeoutMs: config.NORDEA_CA_TIMEOUT_MS,
       })
     } else if (provider === "danskebank") {
       const config = loadDanskeBankEdiEnvConfig()

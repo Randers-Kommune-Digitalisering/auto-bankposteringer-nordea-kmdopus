@@ -13,6 +13,8 @@ import { runTransactionBatch } from './runTransactionBatch'
 
 const REQUIRED_ACCOUNT_DIMENSION_KEY = 'artskonto'
 const LEGACY_REQUIRED_ACCOUNT_DIMENSION_KEY = 'statuskonto'
+const BANK_ACCOUNT_MAPPING_LABEL = 'statuskonto'
+const MISSING_MAPPING_ERROR_PATTERN = /Mangler konterings-mapping \((artskonto|statuskonto)\) for bankkonto:/i
 
 async function pauseRunIfMissingAccountMappings(runId: string): Promise<{
   paused: boolean
@@ -73,7 +75,7 @@ async function pauseRunIfMissingAccountMappings(runId: string): Promise<{
       runId,
       source: 'application',
       errorCode: 409,
-      errorString: `Mangler konterings-mapping (${REQUIRED_ACCOUNT_DIMENSION_KEY}) for bankkonto: ${missingUnique.join(', ')}`,
+      errorString: `Mangler konterings-mapping (${BANK_ACCOUNT_MAPPING_LABEL}) for bankkonto: ${missingUnique.join(', ')}`,
     } as any)
   })
 
@@ -106,6 +108,15 @@ export async function runBankIngestionAndPosting(options: {
   }
 
   const ingest = await runTransactionBatch({ runId: options.runId, bookingDate })
+
+  const priorMissingMappingErrorRows = await db
+    .select({ id: errorLog.id, errorString: errorLog.errorString })
+    .from(errorLog)
+    .where(eq(errorLog.runId, ingest.runId))
+    .limit(200)
+
+  const hadMissingMappingError = (priorMissingMappingErrorRows ?? [])
+    .some((row) => MISSING_MAPPING_ERROR_PATTERN.test(String(row.errorString ?? '')))
 
   const pauseCheck = await pauseRunIfMissingAccountMappings(ingest.runId)
   if (pauseCheck.paused) {
@@ -145,6 +156,15 @@ export async function runBankIngestionAndPosting(options: {
 
   // Mark run as completed (ingestion sets 'udført'; keep it consistent)
   await db.update(run).set({ status: 'udført' }).where(eq(run.id, ingest.runId))
+
+  if (hadMissingMappingError) {
+    await db.insert(errorLog).values({
+      runId: ingest.runId,
+      source: 'application',
+      errorCode: 200,
+      errorString: `Genkørsel efter statuskonto-mapping lykkedes. Matching: bogført=${summary.matchedTransactions}, undtaget=${summary.exceptionTransactions}, åben=${summary.unmatchedTransactions}.`,
+    } as any).catch(() => {})
+  }
 
   log.info('Run udført', {
     runId: ingest.runId,
