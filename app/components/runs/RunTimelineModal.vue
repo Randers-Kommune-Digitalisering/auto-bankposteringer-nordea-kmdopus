@@ -274,8 +274,12 @@ function erpDeliveryState(delivery: ErpDelivery): { color: StatusColor; label: s
 
 const errorsState = computed(() => {
   const errs = data.value?.errors ?? []
-  if (!errs.length) return { color: 'success' as StatusColor, label: 'OK', description: 'Ingen registrerede fejl' }
-  return { color: 'error' as StatusColor, label: 'Fejl', description: `${errs.length} fejl` }
+  const severityErrors = errs.filter((e) => e.errorCode == null || Number(e.errorCode) >= 400)
+  if (!severityErrors.length) {
+    if (!errs.length) return { color: 'success' as StatusColor, label: 'OK', description: 'Ingen registrerede fejl' }
+    return { color: 'success' as StatusColor, label: 'OK', description: 'Ingen aktive fejl (kun hændelser)' }
+  }
+  return { color: 'error' as StatusColor, label: 'Fejl', description: `${severityErrors.length} fejl` }
 })
 
 const bankingEvents = computed(() => {
@@ -294,8 +298,9 @@ const erpEvents = computed(() => {
 })
 
 const overallState = computed(() => {
+  const severityErrors = (data.value?.errors ?? []).filter((e) => e.errorCode == null || Number(e.errorCode) >= 400)
   const anyError =
-    (data.value?.errors?.length ?? 0) > 0 ||
+    severityErrors.length > 0 ||
     erpDeliveries.value.some((d) => Boolean(d.responseStatusText && !isOkErpStatusText(d.responseStatusText))) ||
     erpDeliveries.value.some((d) => d.rows.some((r) => r.status === 'failed')) ||
     (data.value?.jobs ?? []).some((j) => j.status === 'failed')

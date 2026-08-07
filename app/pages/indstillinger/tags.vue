@@ -181,7 +181,7 @@ const pagination = ref({ pageIndex: 0, pageSize: 20 })
 <template>
 	<UDashboardPanel id="settings-ruletags">
 		<template #header>
-			<UDashboardNavbar title="Ruletags">
+			<UDashboardNavbar title="Tags til regler">
 				<template #leading>
 					<UDashboardSidebarCollapse />
 				</template>

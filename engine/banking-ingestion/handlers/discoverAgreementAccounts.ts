@@ -52,7 +52,7 @@ export async function discoverAgreementAccounts(options: {
   const adapter = buildIso20022Adapter(options.provider)
   const lookbackRaw = Number(adapter.lookbackDays)
   const lookbackDays = Number.isFinite(lookbackRaw) && lookbackRaw >= 1
-    ? Math.min(Math.trunc(lookbackRaw), 31)
+    ? Math.min(Math.trunc(lookbackRaw), 7)
     : 7
 
   const anchorBookingDate = createUtcIsoString(options.bookingDate)

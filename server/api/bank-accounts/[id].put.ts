@@ -8,18 +8,19 @@ import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreeme
 import { erpRequestLine } from '~/lib/db/schema/erp'
 import { manualBookingDraft } from '~/lib/db/schema/manualBookingDraft'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
+import { logger } from '~/lib/logger'
+import { retryRunsAfterAccountMapping } from '~~/server/utils/recovery/retryRunsAfterAccountMapping'
 import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
 
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
-  artskonto: z.string().trim().min(1).max(32).optional(),
-  ignoreIngestion: z.boolean().optional(),
-  // Legacy input
   statuskonto: z.string().trim().min(1).max(32).optional(),
+  ignoreIngestion: z.boolean().optional(),
 })
 
 export default defineEventHandler(async (event) => {
   await requireWriteAccess(event)
+  const log = logger.child({ scope: 'api.bank-accounts.update' })
   const id = event.context.params?.id
   if (!id) {
     throw createError({ statusCode: 400, statusMessage: 'Manglende konto-id' })
@@ -45,6 +46,8 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Bankkonto ikke fundet' })
   }
 
+  const normalizedStatuskonto = typeof payload.statuskonto === 'string' ? payload.statuskonto.trim() : undefined
+
   const updated = await db.transaction(async (trx) => {
     if (typeof payload.name !== 'undefined') {
       await trx.update(account).set({ name: payload.name }).where(eq(account.id, id))
@@ -59,15 +62,14 @@ export default defineEventHandler(async (event) => {
         ))
     }
 
-    const incomingArtskonto = (payload.artskonto ?? payload.statuskonto)
-    if (typeof incomingArtskonto !== 'undefined') {
+    if (typeof normalizedStatuskonto !== 'undefined' && normalizedStatuskonto.length > 0) {
       await trx
         .insert(bankingAgreementAccountDimension)
         .values({
           provider: existing.provider as any,
           iban: existing.iban,
-          dimensionKey: 'artskonto',
-          dimensionValue: incomingArtskonto,
+          dimensionKey: 'statuskonto',
+          dimensionValue: normalizedStatuskonto,
           updatedAt: new Date(),
         } as any)
         .onConflictDoUpdate({
@@ -76,7 +78,7 @@ export default defineEventHandler(async (event) => {
             bankingAgreementAccountDimension.iban,
             bankingAgreementAccountDimension.dimensionKey,
           ],
-          set: { dimensionValue: incomingArtskonto, updatedAt: new Date() } as any,
+          set: { dimensionValue: normalizedStatuskonto, updatedAt: new Date() } as any,
         })
     }
 
@@ -168,7 +170,7 @@ export default defineEventHandler(async (event) => {
         inArray(bankingAgreementAccountDimension.dimensionKey, ['artskonto', 'statuskonto', 'ignore_ingestion']),
       ))
 
-    const artskonto = (() => {
+    const statuskonto = (() => {
       const preferred = dims.find((d) => String(d.key) === 'artskonto')
       if (preferred?.value) return String(preferred.value)
       const legacy = dims.find((d) => String(d.key) === 'statuskonto')
@@ -182,11 +184,30 @@ export default defineEventHandler(async (event) => {
       return /^(1|true|yes)$/i.test(String(raw).trim())
     })()
 
-    return { ...base, artskonto, statuskonto: artskonto, ignoreIngestion }
+    return { ...base, statuskonto, artskonto: statuskonto, ignoreIngestion }
   })
 
   const storage = useStorage('bank-accounts')
   await storage.removeItem('list')
+
+  if (normalizedStatuskonto && normalizedStatuskonto.length > 0) {
+    try {
+      const provider = String(existing.provider ?? '').toLowerCase()
+      if (provider === 'danskebank' || provider === 'nordea' || provider === 'bankconnect') {
+        await retryRunsAfterAccountMapping({
+          provider,
+          iban: String(existing.iban ?? ''),
+        })
+      }
+    } catch (error) {
+      log.warn('Auto-retry efter konto-mapping fejlede', {
+        accountId: id,
+        provider: existing.provider,
+        iban: existing.iban,
+        err: error,
+      })
+    }
+  }
 
   return { success: true, account: updated }
 })

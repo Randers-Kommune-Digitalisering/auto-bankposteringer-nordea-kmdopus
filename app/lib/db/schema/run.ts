@@ -19,9 +19,4 @@ export const runInsertSchema = z.object({
     .describe('ISO date (YYYY-MM-DD)')
 })
 
-export const runUpdateSchema = createUpdateSchema(run)
-export const runSelectSchema = createSelectSchema(run)
-
 export type RunInsertSchema = z.infer<typeof runInsertSchema>
-export type RunUpdateSchema = z.infer<typeof runUpdateSchema>
-export type RunSelectSchema = z.infer<typeof runSelectSchema>

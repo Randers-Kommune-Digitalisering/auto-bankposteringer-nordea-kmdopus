@@ -1,7 +1,9 @@
-import env from '~/lib/env/env'
-import { logger } from '~/lib/logger'
+import env from '../../app/lib/env/env'
+import { logger } from '../../app/lib/logger'
 import { allowRoleGatedWork } from '../../server/utils/appRole'
-import { enqueueBankTransactionsBatch, enqueueDbCleanupBatch } from '~/lib/scheduler/batches'
+import { enqueueBankTransactionsBatch, enqueueDbCleanupBatch } from '../../app/lib/scheduler/batches'
+
+// terminationGracePeriodSeconds needs to be set higher than the pollMs to ensure that the scheduler has time to finish its current work before being terminated by Kubernetes.
 
 type ScheduleEntry = {
   name: string

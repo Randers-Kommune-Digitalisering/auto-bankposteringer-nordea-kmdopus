@@ -179,6 +179,25 @@ This avoids request-coupled false positives (for example returning `0` while dis
 - `banking_agreement_cursor`: opaque cursor per (provider agreement, adapter) for incremental fetching
 - `run`: batch execution unit (audit/logging)
 
+## Auto-recovery ved manglende konto-kontering
+
+Hvis en run bliver sat på pause med status `afventer` pga. manglende artskonto-kontering, kan recovery ske uden manuel databearbejdning:
+
+- Trigger: når en konto får oprettet/opdateret artskonto-mapping via konto-endpoints.
+- Scope: kun runs der både
+  - er relateret til den konkrete `provider + iban`,
+  - står i `run.status = afventer`,
+  - og har en `application`-fejl med manglende konterings-mapping for kontoen.
+- Handling: systemet enqueue'er `banking.ingest` for runId.
+- Idempotens: hvis der allerede findes `banking.ingest` i `pending`/`in_progress` for runId, enqueue springes over.
+- Tidslinje/audit: systemet logger både at mapping er oprettet (genkørsel planlagt) og at genkørslen lykkedes.
+- Aktiv fejltilstand: historiske manglende-mapping fejl markeres ikke som aktive, når en senere `banking.ingest` er lykkedes for samme run.
+
+Designvalg:
+
+- Recovery køres asynkront via worker-køen (ingen tung sync-behandling i konto-write requests).
+- Konto-opdateringen forbliver succesfuld selv hvis enqueue fejler; enqueue-fejl logges struktureret for drift.
+
 ## Database indexing strategy
 
 The database remains the single source of truth, so read performance is achieved by explicit, deterministic indexes in Drizzle schema definitions.

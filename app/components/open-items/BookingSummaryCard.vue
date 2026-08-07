@@ -120,7 +120,7 @@ const sectionEntries = computed<SectionEntry[]>(() => orderedSections.value.map(
 				<header class="text-xs font-semibold uppercase tracking-wide">
 					{{ section.label }}
 				</header>
-				<div v-if="section.values.length" class="flex flex-wrap gap-2">
+				<div v-if="section.values.length" class="space-y-2">
 					<UBadge
 						v-for="(entry, index) in section.values"
 						:key="section.key + index"
@@ -128,7 +128,7 @@ const sectionEntries = computed<SectionEntry[]>(() => orderedSections.value.map(
 						:color="section.color"
 						size="lg"
 						:title="formatTransactionFieldHint(entry.hint)"
-						class="max-w-full min-w-0 whitespace-normal break-all"
+						class="block max-w-full min-w-0 whitespace-normal break-all"
 					>
 						{{ entry.value }}
 					</UBadge>

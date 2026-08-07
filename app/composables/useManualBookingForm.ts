@@ -43,10 +43,10 @@ const defaultState = (transactionAmount?: number): ManualFormState => ({
 		{
 			amount: typeof transactionAmount === 'number' ? Math.abs(transactionAmount) : 0,
 			dimensions: [],
-			text: 'Tekst fra bank'
+			text: ''
 		}
 	],
-	text: 'Tekst fra bank',
+	text: '',
 	cprType: 'ingen' as CprType,
 	cprNumber: '',
 	note: ''
@@ -315,7 +315,7 @@ export function useManualBookingForm(options: {
 		formState.lines.push({
 			amount: remaining > 0 ? remaining : 0,
 			dimensions: [],
-			text: 'Tekst fra bank'
+			text: ''
 		})
 		ensureLineDimensionValues(formState.lines.length - 1)
 	}
@@ -377,7 +377,7 @@ export function useManualBookingForm(options: {
 		formState.lines.splice(0, formState.lines.length, ...nextLines.map((l) => ({
 			amount: Number(l.amount) || 0,
 			dimensions: (l.dimensions ?? []).map((d) => ({ key: d.key, value: d.value })),
-			text: l.text ?? 'Tekst fra bank',
+			text: l.text ?? '',
 		})))
 
 		dimensionValuesByLine.splice(0, dimensionValuesByLine.length)

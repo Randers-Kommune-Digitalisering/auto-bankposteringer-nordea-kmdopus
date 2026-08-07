@@ -20,6 +20,7 @@ const getColorByStatus = (status: RunStatus | string | null): StatusColor => {
     case 'indlæser':
       return 'warning'
     case 'afventer':
+      return 'warning'
     default:
       return 'neutral'
   }

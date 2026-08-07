@@ -8,7 +8,7 @@ const props = defineProps<{
   open: boolean
   accountId: string | null
   mode?: 'observed' | 'configured'
-  configuredDraft?: { provider: BankProvider; iban: string; name?: string | null; artskonto?: string | null; statuskonto?: string | null; ignoreIngestion?: boolean } | null
+  configuredDraft?: { provider: BankProvider; iban: string; name?: string | null; statuskonto?: string | null; ignoreIngestion?: boolean } | null
   configuredProviders?: BankProvider[]
 }>()
 
@@ -58,8 +58,10 @@ const isAccountingDimensionConfigReady = computed(() =>
   !accountingDimensionPending.value && !accountingDimensionError.value,
 )
 
-const artskontoDefinition = computed(() =>
-  (accountingDimensionConfig.value?.dimensions ?? []).find((d) => d.key === 'artskonto') ?? null,
+const statuskontoDefinition = computed(() =>
+  (accountingDimensionConfig.value?.dimensions ?? []).find((d) => d.key === 'statuskonto')
+    ?? (accountingDimensionConfig.value?.dimensions ?? []).find((d) => d.key === 'artskonto')
+    ?? null,
 )
 
 function normalizeIban(input: string): string {
@@ -78,15 +80,15 @@ const ibanSchema = z
     return /^[A-Z]{2}[0-9A-Z]{13,32}$/.test(v)
   }, 'Ugyldig IBAN format')
 
-const artskontoSchema = computed(() => {
+const statuskontoSchema = computed(() => {
   let schema = z
     .string()
     .trim()
-    .min(1, 'Artskonto er påkrævet')
-    .max(32, 'Artskonto er for langt')
-    .refine((v) => !/\s/.test(v), 'Artskonto må ikke indeholde mellemrum')
+    .min(1, 'Statuskonto er påkrævet')
+    .max(32, 'Statuskonto er for langt')
+    .refine((v) => !/\s/.test(v), 'Statuskonto må ikke indeholde mellemrum')
 
-  const def = artskontoDefinition.value
+  const def = statuskontoDefinition.value
   const reSource = def?.valueRegex ?? null
   if (!reSource) return schema
 
@@ -98,13 +100,13 @@ const artskontoSchema = computed(() => {
     return schema
   }
 
-  return schema.refine((v) => re.test(v), 'Ugyldigt format for artskonto (valideres mod ERP)')
+  return schema.refine((v) => re.test(v), 'Ugyldigt format for statuskonto (valideres mod ERP)')
 })
 
 const observedUpdateSchema = computed(() =>
   z.object({
     name: z.string().trim().max(80, 'Kaldenavn er for langt').optional(),
-    artskonto: artskontoSchema.value.optional(),
+    statuskonto: statuskontoSchema.value.optional(),
     ignoreIngestion: z.boolean().optional(),
   }),
 )
@@ -114,7 +116,7 @@ const configuredSchema = computed(() =>
     provider: z.enum(['danskebank', 'nordea', 'bankconnect'], { message: 'Vælg bankudbyder' }),
     iban: ibanSchema,
     name: z.string().trim().max(80, 'Kaldenavn er for langt').optional(),
-    artskonto: artskontoSchema.value.optional(),
+    statuskonto: statuskontoSchema.value.optional(),
     ignoreIngestion: z.boolean().optional(),
   }),
 )
@@ -123,7 +125,7 @@ const formSchema = computed(() => (isConfiguredMode.value ? configuredSchema.val
 
 type FormState = {
   name: string | undefined
-  artskonto: string | undefined
+  statuskonto: string | undefined
   provider: BankProvider | undefined
   iban: string | undefined
   ignoreIngestion: boolean
@@ -131,7 +133,7 @@ type FormState = {
 
 const state = reactive<FormState>({
   name: undefined,
-  artskonto: undefined,
+  statuskonto: undefined,
   provider: undefined,
   iban: undefined,
   ignoreIngestion: false,
@@ -139,7 +141,7 @@ const state = reactive<FormState>({
 
 function resetForm() {
   state.name = undefined
-  state.artskonto = undefined
+  state.statuskonto = undefined
   state.provider = undefined
   state.iban = undefined
   state.ignoreIngestion = false
@@ -147,15 +149,15 @@ function resetForm() {
 
 function hydrateDraft(account: AccountSelectSchema) {
   state.name = account.name ?? undefined
-  state.artskonto = String((account as any).artskonto ?? (account as any).statuskonto ?? '') || undefined
+  state.statuskonto = String((account as any).statuskonto ?? (account as any).artskonto ?? '') || undefined
   state.ignoreIngestion = Boolean((account as any).ignoreIngestion)
 }
 
-function hydrateConfiguredDraft(draft: { provider: BankProvider; iban: string; name?: string | null; artskonto?: string | null; statuskonto?: string | null; ignoreIngestion?: boolean }) {
+function hydrateConfiguredDraft(draft: { provider: BankProvider; iban: string; name?: string | null; statuskonto?: string | null; ignoreIngestion?: boolean }) {
   state.provider = draft.provider
   state.iban = draft.iban
   state.name = draft.name ?? undefined
-  state.artskonto = (draft.artskonto ?? draft.statuskonto) ?? undefined
+  state.statuskonto = draft.statuskonto ?? undefined
   state.ignoreIngestion = Boolean(draft.ignoreIngestion)
 }
 
@@ -213,7 +215,7 @@ async function onSubmit() {
         provider: state.provider,
         iban: state.iban,
         name: state.name?.trim() || undefined,
-        artskonto: state.artskonto?.trim() || undefined,
+        statuskonto: state.statuskonto?.trim() || undefined,
         ignoreIngestion: Boolean(state.ignoreIngestion),
       }
 
@@ -241,7 +243,7 @@ async function onSubmit() {
 
       const payload = {
         name: state.name?.trim() || undefined,
-        artskonto: state.artskonto?.trim() || undefined,
+        statuskonto: state.statuskonto?.trim() || undefined,
         ignoreIngestion: Boolean(state.ignoreIngestion),
       }
 
@@ -256,7 +258,7 @@ async function onSubmit() {
         method: 'PUT',
         body: {
           name: result.data.name,
-          artskonto: result.data.artskonto,
+          statuskonto: result.data.statuskonto,
           ignoreIngestion: result.data.ignoreIngestion,
         },
       })
@@ -336,10 +338,10 @@ async function onSubmit() {
             />
           </UFormField>
 
-          <UFormField name="artskonto">
+          <UFormField name="statuskonto">
             <UiFloatingLabelInput
-              v-model="state.artskonto"
-              label="Artskonto"
+              v-model="state.statuskonto"
+              label="Statuskonto"
               color="neutral"
               class="w-full"
             />

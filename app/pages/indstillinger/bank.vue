@@ -653,11 +653,11 @@ const columns: TableColumn<BankingAccountUnionDto>[] = [
     }
   },
   {
-    accessorKey: 'artskonto',
-    id: 'artskonto',
-    header: createSortableHeader('Artskonto'),
+    accessorKey: 'statuskonto',
+    id: 'statuskonto',
+    header: createSortableHeader('Statuskonto'),
     enableSorting: true,
-    cell: ({ row }) => String((row.original as any).artskonto ?? (row.original as any).statuskonto ?? '—')
+    cell: ({ row }) => String((row.original as any).statuskonto ?? (row.original as any).artskonto ?? '—')
   },
   {
     accessorKey: 'ignoreIngestion',

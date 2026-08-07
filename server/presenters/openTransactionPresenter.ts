@@ -75,7 +75,7 @@ export function buildTransactionSummaryView(input: TransactionSummaryInput): Tra
       items: [
         {
           label: counterpartRole,
-          value: input.counterpart ?? 'Ukendt',
+          value: input.counterpart ?? '-',
           hint: input.counterpartHint?.trim() || undefined,
         },
       ],
@@ -118,7 +118,7 @@ export function buildTransactionSummaryView(input: TransactionSummaryInput): Tra
 function formatSignedAmount(amount: number): string {
   const value = Number(amount) || 0
   if (value < 0) return `-${currencyFormatter.format(Math.abs(value))}`
-  if (value > 0) return `+${currencyFormatter.format(value)}`
+  if (value > 0) return `${currencyFormatter.format(value)}`
   return currencyFormatter.format(0)
 }
 
@@ -138,6 +138,10 @@ function splitReferenceTokens(values: TransactionReferenceDetail[]): Transaction
 type ReferenceBuckets = {
   reference: TransactionSummaryChip[]
   teknisk: TransactionSummaryChip[]
+}
+
+function is500ReferenceTriad(value: string): boolean {
+  return /^500:[^:]*:.+/i.test(String(value ?? '').trim())
 }
 
 function classifyReferenceToken(input: TransactionReferenceDetail): keyof ReferenceBuckets {
@@ -170,6 +174,16 @@ function buildSummaryReferences(references: TransactionReferenceDetail[]): Refer
     if (seen[bucket].has(dedupKey)) continue
     seen[bucket].add(dedupKey)
     chips[bucket].push({ value: token.value, source: token.source })
+  }
+
+  // Bypass for sparse Nordea payloads: if no dedicated reference values exist,
+  // treat triad 500 from AddtlNtryInf as reference instead of technical.
+  if (!chips.reference.length) {
+    const promoted = chips.teknisk.filter((chip) => is500ReferenceTriad(chip.value))
+    if (promoted.length) {
+      chips.reference = promoted
+      chips.teknisk = chips.teknisk.filter((chip) => !is500ReferenceTriad(chip.value))
+    }
   }
 
   return chips

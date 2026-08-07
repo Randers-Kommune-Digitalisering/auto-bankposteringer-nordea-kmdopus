@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: "Mangler transaktions-id" });
   }
 
-  const parsedTxId = z.uuid().safeParse(txId);
+  const parsedTxId = z.string().uuid().safeParse(txId);
   if (!parsedTxId.success) {
     throw createError({
       statusCode: 400,

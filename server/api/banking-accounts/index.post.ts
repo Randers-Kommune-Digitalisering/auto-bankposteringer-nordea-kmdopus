@@ -8,6 +8,8 @@ import { bankingAgreement } from '~/lib/db/schema/bankingAgreement'
 import { bankingAgreementAccountAllowlist } from '~/lib/db/schema/bankingAgreementAccountAllowlist'
 import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreementAccountDimension'
 import { getActiveErpSupplier, listAccountingDimensionDefinitions } from '~~/server/utils/accountingDimensions'
+import { retryRunsAfterAccountMapping } from '~~/server/utils/recovery/retryRunsAfterAccountMapping'
+import { logger } from '~/lib/logger'
 
 function normalizeIban(input: string): string {
   return input.replace(/\s+/g, '').toUpperCase()
@@ -22,6 +24,7 @@ const bodySchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
+  const log = logger.child({ scope: 'api.banking-accounts.create' })
   const body = await readBody(event)
   const parsed = bodySchema.safeParse(body)
   if (!parsed.success) {
@@ -37,7 +40,7 @@ export default defineEventHandler(async (event) => {
   // Validate statuskonto format against active ERP dimension definitions (data-driven).
   const supplier = await getActiveErpSupplier()
   const definitions = await listAccountingDimensionDefinitions(supplier)
-  const statuskontoDef = definitions.find((d) => d.key === 'statuskonto')
+  const statuskontoDef = definitions.find((d) => d.key === 'statuskonto') ?? definitions.find((d) => d.key === 'artskonto')
   if (statuskonto && statuskontoDef?.valueRegex) {
     let re: RegExp
     try {
@@ -120,6 +123,14 @@ export default defineEventHandler(async (event) => {
         ))
     }
   })
+
+  if (statuskonto) {
+    try {
+      await retryRunsAfterAccountMapping({ provider, iban })
+    } catch (error) {
+      log.warn('Auto-retry efter konto-oprettelse fejlede', { provider, iban, err: error })
+    }
+  }
 
   return { success: true }
 })

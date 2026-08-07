@@ -49,7 +49,8 @@ async function postSoap(options: {
   mtls?: { certPem: string; keyPem: string } | null
 }): Promise<string> {
   const controller = new AbortController()
-  const id = setTimeout(() => controller.abort(), options.timeoutMs)
+  const timeoutReason = new Error(`Nordea SOAP request timed out after ${options.timeoutMs}ms`)
+  const id = setTimeout(() => controller.abort(timeoutReason), options.timeoutMs)
 
   try {
     const dispatcher = options.mtls
@@ -61,21 +62,38 @@ async function postSoap(options: {
         })
       : undefined
 
-    const res = await fetch(options.endpointUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/xml; charset=utf-8',
-      },
-      body: options.soapXml,
-      signal: controller.signal,
-      dispatcher: dispatcher as any,
-    })
+    try {
+      const res = await fetch(options.endpointUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/xml; charset=utf-8',
+        },
+        body: options.soapXml,
+        signal: controller.signal,
+        dispatcher: dispatcher as any,
+      })
 
-    const text = await res.text()
-    if (!res.ok) {
-      throw new Error(`Nordea CorporateFileService HTTP ${res.status} ${res.statusText}: ${text.slice(0, 500)}`)
+      const text = await res.text()
+      if (!res.ok) {
+        throw new Error(`Nordea CorporateFileService HTTP ${res.status} ${res.statusText}: ${text.slice(0, 500)}`)
+      }
+      return text
+    } catch (err) {
+      const isAbort = controller.signal.aborted || (err as any)?.name === 'AbortError'
+      if (isAbort) {
+        const reasonText = (() => {
+          const reason = controller.signal.reason
+          if (!reason) return null
+          if (typeof reason === 'string') return reason
+          if (typeof (reason as any)?.message === 'string') return String((reason as any).message)
+          return String(reason)
+        })()
+        const message = reasonText ?? `Nordea SOAP request aborted after ${options.timeoutMs}ms`
+        throw new Error(`${message} (endpoint=${options.endpointUrl})`, { cause: err })
+      }
+
+      throw err
     }
-    return text
   } finally {
     clearTimeout(id)
   }

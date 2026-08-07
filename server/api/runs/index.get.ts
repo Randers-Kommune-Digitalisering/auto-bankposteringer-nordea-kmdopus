@@ -23,6 +23,32 @@ import type {
 } from "~/types/runs";
 import { parseAmount } from "#engine/matching/domain/amount";
 
+const MISSING_MAPPING_ERROR_PATTERN = /Mangler konterings-mapping \((artskonto|statuskonto)\) for bankkonto:/i
+const MAPPING_RECOVERY_SUCCESS_PATTERN = /^Genkørsel efter statuskonto-mapping lykkedes\./i
+
+function toEpochMs(value: unknown): number {
+  const d = value instanceof Date ? value : new Date(String(value ?? ''))
+  const ms = d.getTime()
+  return Number.isFinite(ms) ? ms : 0
+}
+
+function isMissingMappingError(message: unknown): boolean {
+  return MISSING_MAPPING_ERROR_PATTERN.test(String(message ?? ''))
+}
+
+function isMappingRecoverySuccessEvent(row: { errorCode: unknown; errorString: unknown }): boolean {
+  const code = Number(row.errorCode)
+  if (Number.isFinite(code) && code !== 200) return false
+  return MAPPING_RECOVERY_SUCCESS_PATTERN.test(String(row.errorString ?? ''))
+}
+
+function isSeverityError(code: unknown): boolean {
+  if (code == null) return true
+  const num = Number(code)
+  if (!Number.isFinite(num)) return true
+  return num >= 400
+}
+
 function parseNumeric(value: unknown): number {
   return parseAmount(value)
 }
@@ -210,7 +236,9 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
     db
       .select({
         runId: job.runId,
+        type: job.type,
         status: job.status,
+        updatedAt: job.updatedAt,
       })
       .from(job)
       .where(inArray(job.runId, runIds as any))
@@ -258,11 +286,36 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
     documentsByRun.set(row.runId, list);
   });
 
+  const rawErrorsByRun = new Map<string, Array<{ errorCode: unknown; errorString: unknown; createdAt: unknown }>>()
+  for (const row of errorRows ?? []) {
+    const runId = row.runId ? String(row.runId) : ''
+    if (!runId) continue
+    const bucket = rawErrorsByRun.get(runId) ?? []
+    bucket.push({ errorCode: row.errorCode, errorString: row.errorString, createdAt: row.createdAt })
+    rawErrorsByRun.set(runId, bucket)
+  }
+
   const errorsByRun = new Map<string, ErrorListItem[]>();
   errorRows.forEach((row) => {
     if (!row.runId) {
       return;
     }
+
+    const runId = String(row.runId)
+    const errorCreatedAtMs = toEpochMs(row.createdAt)
+    const recoveredAfterError = (rawErrorsByRun.get(runId) ?? []).some((e) => (
+      isMappingRecoverySuccessEvent(e)
+      && toEpochMs(e.createdAt) >= errorCreatedAtMs
+    ))
+
+    if (isMissingMappingError(row.errorString) && recoveredAfterError) {
+      return
+    }
+
+    if (!isSeverityError(row.errorCode)) {
+      return
+    }
+
     const list = errorsByRun.get(row.runId) ?? [];
     const normalized: ErrorListItem = {
       ...row,

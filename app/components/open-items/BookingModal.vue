@@ -105,6 +105,63 @@ function formatSignedAmount(amount: number): string {
 	return currency.format(0)
 }
 
+type SourceValue = {
+	value: string
+	source: string
+}
+
+function toSourceTokens(entry: OpenTransaction): SourceValue[] {
+	const details = Array.isArray(entry.referenceDetails) ? entry.referenceDetails : []
+	const tokens: SourceValue[] = []
+
+	for (const detail of details) {
+		const source = String(detail?.source ?? '').trim() || 'Ukendt XML-felt'
+		for (const rawToken of String(detail?.value ?? '').split(';')) {
+			const value = rawToken.trim()
+			if (!value.length) continue
+			tokens.push({ value, source })
+		}
+	}
+
+	return tokens
+}
+
+function extractTriad500Values(entry: OpenTransaction): string[] {
+	const values: string[] = []
+	const seen = new Set<string>()
+
+	for (const token of toSourceTokens(entry)) {
+		if (!token.source.toLowerCase().endsWith('/addtlntryinf')) continue
+		const match = /^500:[^:]*:(.*)$/i.exec(token.value)
+		const value = String(match?.[1] ?? '').trim()
+		if (!value.length) continue
+		const dedupeKey = value.toLowerCase()
+		if (seen.has(dedupeKey)) continue
+		seen.add(dedupeKey)
+		values.push(value)
+	}
+
+	return values
+}
+
+function extractRmtInfValues(entry: OpenTransaction): SourceValue[] {
+	const values: SourceValue[] = []
+	const seen = new Set<string>()
+
+	for (const token of toSourceTokens(entry)) {
+		const source = token.source.toLowerCase()
+		const isRmtInf = source.includes('/rmtinf/') || source.includes('/purp/prtry')
+		if (!isRmtInf) continue
+
+		const dedupeKey = `${token.value.toLowerCase()}|${source}`
+		if (seen.has(dedupeKey)) continue
+		seen.add(dedupeKey)
+		values.push(token)
+	}
+
+	return values
+}
+
 const sumOre = computed(() => Math.round((totalLinesAmount.value ?? 0) * 100))
 const txOre = computed(() => Math.round((transactionAmountAbs.value ?? 0) * 100))
 const diffOre = computed(() => sumOre.value - txOre.value)
@@ -281,7 +338,7 @@ function collapseAllLines() {
 		lines: [
 			{
 				amount: mergedAmount,
-				text: firstLineText ?? 'Tekst fra bank',
+				text: firstLineText ?? '',
 				dimensions: [],
 			},
 		],
@@ -540,7 +597,40 @@ function collapseAllLines() {
 						<div class="text-sm font-medium">{{ formatSignedAmount(entry.amount) }}</div>
 						<UBadge variant="soft" color="neutral" size="sm">{{ entry.id }}</UBadge>
 					</div>
-					<div class="mt-1 text-xs text-muted">{{ entry.counterpart ?? 'Ukendt modpart' }}</div>
+					<div class="mt-1 text-xs text-muted">{{ entry.counterpart ?? '-' }}</div>
+
+					<div class="mt-2 space-y-2">
+						<div class="text-[11px] font-semibold uppercase tracking-wide text-muted">Reference (500)</div>
+						<div v-if="extractTriad500Values(entry).length" class="space-y-1">
+							<UBadge
+								v-for="(value, index) in extractTriad500Values(entry)"
+								:key="`triad500-${entry.id}-${index}`"
+								variant="soft"
+								color="success"
+								size="sm"
+								class="block max-w-full whitespace-normal break-all"
+							>
+								{{ value }}
+							</UBadge>
+						</div>
+						<div v-else class="text-xs text-muted">-</div>
+
+						<div class="text-[11px] font-semibold uppercase tracking-wide text-muted">RmtInf</div>
+						<div v-if="extractRmtInfValues(entry).length" class="space-y-1">
+							<UBadge
+								v-for="(token, index) in extractRmtInfValues(entry)"
+								:key="`rmtinf-${entry.id}-${index}`"
+								variant="soft"
+								color="secondary"
+								size="sm"
+								:title="token.source"
+								class="block max-w-full whitespace-normal break-all"
+							>
+								{{ token.value }}
+							</UBadge>
+						</div>
+						<div v-else class="text-xs text-muted">-</div>
+					</div>
 				</div>
 			</div>
 		</template>

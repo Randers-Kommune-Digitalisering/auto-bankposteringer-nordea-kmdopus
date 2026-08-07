@@ -8,6 +8,8 @@ import { bankProviderValues } from '~/lib/db/schema/bankingAgreement'
 import { bankingAgreementAccountAllowlist } from '~/lib/db/schema/bankingAgreementAccountAllowlist'
 import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreementAccountDimension'
 import { getActiveErpSupplier } from '~~/server/utils/accountingDimensions'
+import { retryRunsAfterAccountMapping } from '~~/server/utils/recovery/retryRunsAfterAccountMapping'
+import { logger } from '~/lib/logger'
 
 function normalizeIban(input: string): string {
   return input.replace(/\s+/g, '').toUpperCase()
@@ -16,10 +18,8 @@ function normalizeIban(input: string): string {
 const bodySchema = z.object({
   iban: z.string().min(1),
   name: z.string().trim().min(1).max(80).optional(),
-  artskonto: z.string().trim().min(1).max(32).optional(),
-  ignoreIngestion: z.boolean().optional(),
-  // Legacy input
   statuskonto: z.string().trim().min(1).max(32).optional(),
+  ignoreIngestion: z.boolean().optional(),
 })
 
 const ibanSchema = z
@@ -29,6 +29,7 @@ const ibanSchema = z
   .regex(/^[A-Z]{2}[0-9A-Z]{13,32}$/, 'Ugyldig IBAN format')
 
 export default defineEventHandler(async (event) => {
+  const log = logger.child({ scope: 'api.banking-agreements.allowlist.create' })
   const provider = event.context.params?.provider
   if (!provider || !bankProviderValues.includes(provider as any)) {
     throw createError({ statusCode: 400, statusMessage: 'Ugyldig provider' })
@@ -42,17 +43,17 @@ export default defineEventHandler(async (event) => {
 
   const iban = normalizeIban(parsed.data.iban)
   const name = typeof parsed.data.name === 'string' && parsed.data.name.trim().length ? parsed.data.name.trim() : null
-  const artskonto = (parsed.data.artskonto ?? parsed.data.statuskonto ?? '').trim() || null
+  const statuskonto = (parsed.data.statuskonto ?? '').trim() || null
   const ignoreIngestion = Boolean(parsed.data.ignoreIngestion)
 
   const supplier = await getActiveErpSupplier()
-  if (supplier === 'kmd' && artskonto) {
-    // KMD Opus: account mapping used for posting must be an artskonto: 905XXXXX.
+  if (supplier === 'kmd' && statuskonto) {
+    // KMD Opus: bank account statuskonto mapping follows format 905XXXXX.
     // (We keep this server-side so it remains deterministic and independent of UI.)
-    if (!/^905\d{5}$/.test(artskonto)) {
+    if (!/^905\d{5}$/.test(statuskonto)) {
       throw createError({
         statusCode: 422,
-        statusMessage: 'Artskonto skal være i formatet 905XXXXX (kun tal efter 905)',
+        statusMessage: 'Statuskonto skal være i formatet 905XXXXX (kun tal efter 905)',
       })
     }
   }
@@ -70,14 +71,14 @@ export default defineEventHandler(async (event) => {
         set: { name, updatedAt: new Date() } as any,
       })
 
-    if (artskonto) {
+    if (statuskonto) {
       await trx
         .insert(bankingAgreementAccountDimension)
         .values({
           provider: provider as any,
           iban,
-          dimensionKey: 'artskonto',
-          dimensionValue: artskonto,
+          dimensionKey: 'statuskonto',
+          dimensionValue: statuskonto,
           updatedAt: new Date(),
         } as any)
         .onConflictDoUpdate({
@@ -86,7 +87,7 @@ export default defineEventHandler(async (event) => {
             bankingAgreementAccountDimension.iban,
             bankingAgreementAccountDimension.dimensionKey,
           ],
-          set: { dimensionValue: artskonto, updatedAt: new Date() } as any,
+          set: { dimensionValue: statuskonto, updatedAt: new Date() } as any,
         })
     }
 
@@ -118,6 +119,17 @@ export default defineEventHandler(async (event) => {
         ))
     }
   })
+
+  if (statuskonto) {
+    try {
+      await retryRunsAfterAccountMapping({
+        provider: provider as 'danskebank' | 'nordea' | 'bankconnect',
+        iban,
+      })
+    } catch (error) {
+      log.warn('Auto-retry efter allowlist-mapping fejlede', { provider, iban, err: error })
+    }
+  }
 
   const rows = await db
     .select()
