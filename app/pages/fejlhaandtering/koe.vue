@@ -550,7 +550,7 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
 <template>
   <UDashboardPanel id="recovery-queue">
     <template #header>
-      <UDashboardNavbar title="Kø og genkørsel">
+      <UDashboardNavbar title="Kørsler">
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
@@ -670,7 +670,7 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
                 </ul>
                 <div class="mt-2">
                   Se også <NuxtLink to="/koersler" class="underline">Kørsler</NuxtLink> for run-overblik,
-                  og <NuxtLink to="/fejlhaandtering/erp" class="underline">ERP-fejl</NuxtLink> for request/resend.
+                  og <NuxtLink to="/fejlhaandtering/erp" class="underline">ERP-integration</NuxtLink> for request/resend.
                 </div>
               </div>
             </div>

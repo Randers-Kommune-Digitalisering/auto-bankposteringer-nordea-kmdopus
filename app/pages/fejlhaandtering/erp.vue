@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
-import { prettyPrintXml } from '~/lib/prettyPrintXml'
+import { formatSignedDkk } from '~/utils'
 
 const appConfig = useAppConfig()
 
@@ -15,41 +15,41 @@ type FailedErpRequestsResponse = {
   items: FailedErpRequestListItem[]
 }
 
-type ErpRequestDetails = {
+type ErpRequestViewResponse = {
   requestId: string
   runId: string
-  requestPayload: string | null
   response: null | {
     id: string
     statusText: string | null
-    payload: string | null
   }
-}
-
-type ErpRequestLinesResponse = {
-  requestId: string
-  lines: Array<{
-    lineNo: number
-    transactionId: string | null
-    transaction: null | {
-      amount: string
-      currency: string | null
-      bookingDate: string
-      accountId: string | null
-      creditorName: string | null
-      debtorName: string | null
-      remittanceUstrd: string[] | null
-      processing: {
-        status: string | null
-        ruleApplied: number | null
-      }
-    }
+  header: {
+    bookingDate: string | null
+    currencies: string[]
+    lineCount: number
+    transactionCount: number
+    unmappedLineCount: number
+    totalAmount: string
+  }
+  transactions: Array<{
+    transactionId: string
+    lineNos: number[]
+    amount: string
+    currency: string | null
+    bookingDate: string
+    creditDebitIndicator: string | null
+    status: string | null
+    ruleApplied: number | null
+    postingText: string
+    counterparty: string | null
+    reference: string | null
   }>
 }
 
 const toast = useToast()
 const UCheckbox = resolveComponent('UCheckbox')
 const UButton = resolveComponent('UButton')
+const UBadge = resolveComponent('UBadge')
+const UIcon = resolveComponent('UIcon')
 const route = useRoute()
 
 const { data: failedList, pending: failedPending, refresh: refreshFailed } = await useFetch<FailedErpRequestsResponse>(
@@ -63,100 +63,52 @@ const { data: failedList, pending: failedPending, refresh: refreshFailed } = awa
 
 const failedTableKey = computed(() => (failedList.value?.items ?? []).map((i) => String(i.requestId)).join('|'))
 
-const erpLinesTableKey = computed(() => (erpLines.value?.lines ?? []).map((l) => `${l.lineNo}:${l.transactionId ?? ''}`).join('|'))
+const erpRequestId = ref('')
+const erpLoading = ref(false)
+const erpView = ref<ErpRequestViewResponse | null>(null)
+const selectedTransactionIds = ref<Record<string, boolean>>({})
+
+const selectedTransactionIdList = computed(() =>
+  Object.entries(selectedTransactionIds.value)
+    .filter(([, checked]) => checked)
+    .map(([transactionId]) => transactionId)
+    .filter((transactionId) => transactionId.trim().length > 0),
+)
+
+const transactionTableKey = computed(() =>
+  (erpView.value?.transactions ?? [])
+    .map((row) => `${row.transactionId}:${row.lineNos.join(',')}`)
+    .join('|'),
+)
 
 async function refreshAll() {
   await refreshFailed()
-  if (erpDetails.value?.requestId) {
+  if (erpView.value?.requestId) {
     await loadErpRequest()
-  }
-}
-
-const erpRequestId = ref('')
-const erpLoading = ref(false)
-const erpDetails = ref<ErpRequestDetails | null>(null)
-const erpPayloadDraft = ref('')
-
-const erpLinesLoading = ref(false)
-const erpLines = ref<ErpRequestLinesResponse | null>(null)
-const selectedLineNos = ref<Record<number, boolean>>({})
-
-function formatErpPayloadXml() {
-  const raw = erpPayloadDraft.value
-  if (!raw.trim()) return
-
-  if (!raw.trimStart().startsWith('<')) {
-    toast.add({
-      title: 'Payload ligner ikke XML',
-      description: 'Formatér XML virker kun når payload starter med "<".',
-      color: 'neutral',
-    })
-    return
-  }
-
-  try {
-    erpPayloadDraft.value = prettyPrintXml(raw)
-  } catch (error) {
-    console.error('Kunne ikke formatere XML', error)
-    toast.add({
-      title: 'Kunne ikke formatere XML',
-      description: 'Kontrollér at payload er gyldig XML.',
-      color: 'error',
-    })
-  }
-}
-
-const selectedLineNoList = computed(() =>
-  Object.entries(selectedLineNos.value)
-    .filter(([, checked]) => checked)
-    .map(([lineNo]) => Number(lineNo))
-    .filter((n) => Number.isFinite(n))
-    .sort((a, b) => a - b),
-)
-
-async function loadErpLines(requestId: string) {
-  erpLinesLoading.value = true
-  try {
-    const data = await $fetch<ErpRequestLinesResponse>(
-      `/api/fejlhaandtering/erp-requests/${encodeURIComponent(requestId)}/lines`,
-      { method: 'GET' },
-    )
-    erpLines.value = data
-    selectedLineNos.value = {}
-  } catch (error) {
-    console.error('Kunne ikke hente ERP request linjer', error)
-    erpLines.value = null
-    selectedLineNos.value = {}
-  } finally {
-    erpLinesLoading.value = false
   }
 }
 
 async function loadErpRequest() {
   const id = erpRequestId.value.trim()
   if (!id) {
-    erpDetails.value = null
-    erpPayloadDraft.value = ''
-    erpLines.value = null
-    selectedLineNos.value = {}
+    erpView.value = null
+    selectedTransactionIds.value = {}
     return
   }
 
   erpLoading.value = true
   try {
-    const data = await $fetch<ErpRequestDetails>(`/api/fejlhaandtering/erp-requests/${encodeURIComponent(id)}`, {
-      method: 'GET',
-    })
-    erpDetails.value = data
-    erpPayloadDraft.value = data.requestPayload ?? ''
-    await loadErpLines(data.requestId)
+    const data = await $fetch<ErpRequestViewResponse>(
+      `/api/fejlhaandtering/erp-requests/${encodeURIComponent(id)}/view`,
+      { method: 'GET' },
+    )
+    erpView.value = data
+    selectedTransactionIds.value = {}
   } catch (error) {
-    console.error('Kunne ikke hente ERP request', error)
+    console.error('Kunne ikke hente ERP request view', error)
     toast.add({ title: 'ERP request ikke fundet', color: 'error' })
-    erpDetails.value = null
-    erpPayloadDraft.value = ''
-    erpLines.value = null
-    selectedLineNos.value = {}
+    erpView.value = null
+    selectedTransactionIds.value = {}
   } finally {
     erpLoading.value = false
   }
@@ -176,18 +128,13 @@ watch(
 )
 
 async function resendErpRequest() {
-  if (!erpDetails.value) return
-  const payload = erpPayloadDraft.value
-  if (!payload.trim().length) {
-    toast.add({ title: 'Payload kan ikke være tom', color: 'error' })
-    return
-  }
+  if (!erpView.value) return
+
   erpLoading.value = true
   try {
-    const url = `/api/fejlhaandtering/erp-requests/${encodeURIComponent(erpDetails.value.requestId)}/resend` as any
-    const res = await $fetch<{ success: boolean; requestId: string; sourceRequestId: string }>(url, {
+    const url = `/api/fejlhaandtering/erp-requests/${encodeURIComponent(erpView.value.requestId)}/resend`
+    const res = await $fetch<{ success: boolean; requestId: string; sourceRequestId: string; filename: string }>(url, {
       method: 'POST',
-      body: { payload },
     })
     toast.add({ title: 'Ny ERP-request oprettet', description: res.requestId })
     erpRequestId.value = res.requestId
@@ -230,106 +177,160 @@ const failedColumns: TableColumn<FailedErpRequestListItem>[] = [
   },
 ]
 
-const reopeningLines = ref(false)
-async function reopenSelectedLines() {
-  if (!erpDetails.value) return
-  const lineNos = selectedLineNoList.value
-  if (!lineNos.length) {
-    toast.add({ title: 'Vælg mindst én linje', color: 'error' })
+const reopeningTransactions = ref(false)
+async function reopenSelectedTransactions() {
+  if (!erpView.value) return
+
+  const transactionIds = selectedTransactionIdList.value
+  if (!transactionIds.length) {
+    toast.add({ title: 'Vælg mindst én transaktion', color: 'error' })
     return
   }
 
   const ok = window.confirm(
-    `Vil du genåbne bogførte transaktioner for ${lineNos.length} valgte linje(r) i dette ERP-request?\n\nSystemet bruger den persisted kobling (requestId → lineNo → transactionId).`,
+    `Vil du genåbne ${transactionIds.length} valgte transaktion(er) i dette ERP-request?\n\nGenåbning sker på transaktionsniveau og omfatter alle relaterede posteringer.`,
   )
   if (!ok) return
 
-  reopeningLines.value = true
+  reopeningTransactions.value = true
   try {
     const res = (await $fetch(
-      `/api/fejlhaandtering/erp-requests/${encodeURIComponent(erpDetails.value.requestId)}/reopen`,
+      `/api/fejlhaandtering/erp-requests/${encodeURIComponent(erpView.value.requestId)}/reopen`,
       {
         method: 'POST',
-        body: { lineNos },
+        body: { transactionIds },
       },
     )) as {
       success: boolean
       reopened: number
       eligibleTransactions: number
-      missingLineNos: number[]
-      unmappedLineNos: number[]
       skippedNotBooked: number
     }
     toast.add({
       title: 'Genåbning udført',
       description: `Genåbnede ${res.reopened}/${res.eligibleTransactions} transaktion(er).`,
     })
-    await loadErpLines(erpDetails.value.requestId)
+    await loadErpRequest()
   } catch (error) {
     console.error('Genåbning fejlede', error)
     toast.add({ title: 'Kunne ikke genåbne valgte', color: 'error' })
   } finally {
-    reopeningLines.value = false
+    reopeningTransactions.value = false
   }
 }
 
-const linesColumns: TableColumn<ErpRequestLinesResponse['lines'][number]>[] = [
+const transactionColumns: TableColumn<ErpRequestViewResponse['transactions'][number]>[] = [
   {
     id: 'select',
     header: '',
     enableSorting: false,
     size: 40,
     cell: ({ row }) => {
-      const lineNo = row.original.lineNo
-      const hasTx = Boolean(row.original.transactionId)
-      return h(UCheckbox as any, {
-        modelValue: Boolean(selectedLineNos.value[lineNo]),
-        disabled: !hasTx || erpLinesLoading.value || reopeningLines.value,
+      const transactionId = row.original.transactionId
+      return h(UCheckbox, {
+        modelValue: Boolean(selectedTransactionIds.value[transactionId]),
+        disabled: erpLoading.value || reopeningTransactions.value,
         'onUpdate:modelValue': (value: boolean) => {
-          selectedLineNos.value = { ...selectedLineNos.value, [lineNo]: value }
+          selectedTransactionIds.value = { ...selectedTransactionIds.value, [transactionId]: value }
         },
       })
     },
   },
-  { accessorKey: 'lineNo', header: 'Linje', size: 80, cell: ({ row }) => String(row.original.lineNo) },
-  {
-    accessorKey: 'transactionId',
-    header: 'Transaktion',
-    cell: ({ row }) => row.original.transactionId ?? '—',
-  },
   {
     id: 'status',
     header: 'Status',
-    cell: ({ row }) => row.original.transaction?.processing.status ?? '—',
     size: 110,
+    cell: ({ row }) => {
+      const label = formatStatusLabel(row.original.status)
+      if (!label) return '—'
+
+      return h(
+        UBadge,
+        {
+          variant: 'soft',
+          color: resolveStatusColor(row.original.status),
+        },
+        () => label,
+      )
+    },
+  },
+  {
+    id: 'direction',
+    header: 'Retning',
+    size: 120,
+    cell: ({ row }) => {
+      const tx = row.original
+      const label = resolveDirectionLabel(tx.creditDebitIndicator, parseAmount(tx.amount))
+      const icon = label === 'Indbetaling' ? appConfig.ui.icons.arrowAngleUp : appConfig.ui.icons.arrowAngleDown
+
+      return h('div', { class: 'inline-flex items-center gap-1.5' }, [
+        h(UIcon, { name: icon, class: 'h-4 w-4' }),
+        h('span', label),
+      ])
+    },
   },
   {
     id: 'amount',
     header: 'Beløb',
+    size: 160,
     cell: ({ row }) => {
-      const t = row.original.transaction
-      if (!t) return '—'
-      return `${t.amount}${t.currency ? ` ${t.currency}` : ''}`
+      const tx = row.original
+      const amount = toSignedAmount(tx.amount, tx.creditDebitIndicator)
+      return formatSignedDkk(amount)
     },
-    size: 140,
   },
   {
-    id: 'bookingDate',
-    header: 'Bogføringsdato',
-    cell: ({ row }) => row.original.transaction?.bookingDate ?? '—',
-    size: 140,
+    id: 'counterparty',
+    header: 'Modpart',
+    size: 180,
+    cell: ({ row }) => row.original.counterparty ?? '—',
   },
   {
-    id: 'text',
-    header: 'Tekst',
-    cell: ({ row }) => {
-      const t = row.original.transaction
-      const ustrd = t?.remittanceUstrd?.filter(Boolean)?.join(' ') ?? ''
-      const name = t?.creditorName ?? t?.debtorName ?? ''
-      return [name, ustrd].filter(Boolean).join(' — ')
-    },
+    id: 'reference',
+    header: 'Reference',
+    size: 220,
+    cell: ({ row }) => row.original.reference ?? '—',
+  },
+  {
+    id: 'postingText',
+    header: 'Posteringstekst',
+    cell: ({ row }) => row.original.postingText || '—',
+  },
+  {
+    id: 'lineNos',
+    header: 'Linjenumre',
+    size: 120,
+    cell: ({ row }) => row.original.lineNos.join(', '),
   },
 ]
+
+function parseAmount(value: string | number): number {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+function resolveDirectionLabel(indicator: string | null, amount: number): 'Indbetaling' | 'Udbetaling' {
+  if (indicator === 'CRDT') return 'Indbetaling'
+  if (indicator === 'DBIT') return 'Udbetaling'
+  return amount < 0 ? 'Udbetaling' : 'Indbetaling'
+}
+
+function toSignedAmount(amount: string | number, indicator: string | null): number {
+  const parsed = parseAmount(amount)
+  if (indicator === 'DBIT') return -Math.abs(parsed)
+  if (indicator === 'CRDT') return Math.abs(parsed)
+  return parsed
+}
+
+function formatStatusLabel(status: string | null): string {
+  const normalized = String(status ?? '').trim()
+  if (!normalized) return ''
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1)
+}
+
+function resolveStatusColor(status: string | null): 'warning' | 'success' {
+  return String(status ?? '').trim().toLowerCase() === 'åben' ? 'warning' : 'success'
+}
 
 const reopenRunId = ref('')
 const reopening = ref(false)
@@ -337,7 +338,7 @@ async function reopenBookedTransactions() {
   const runId = reopenRunId.value.trim()
   if (!runId) return
   const ok = window.confirm(
-    'Vil du sætte alle bogførte transaktioner i denne run tilbage til åbne poster?\n\nBemærk: dette er et groft greb (alt i run). Brug linje-værktøjet ovenfor for en mere granulær genåbning.',
+    'Vil du sætte alle bogførte transaktioner i denne run tilbage til åbne poster?\n\nBemærk: dette er et groft greb (alt i run). Brug transaktionsværktøjet ovenfor for en mere granulær genåbning.',
   )
   if (!ok) return
 
@@ -359,7 +360,7 @@ async function reopenBookedTransactions() {
 <template>
   <UDashboardPanel id="recovery-erp">
     <template #header>
-      <UDashboardNavbar title="ERP-afvisninger">
+      <UDashboardNavbar title="ERP-integration">
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
@@ -369,7 +370,7 @@ async function reopenBookedTransactions() {
             variant="ghost"
             color="primary"
             label="Opdater"
-            :loading="failedPending || erpLoading || erpLinesLoading"
+            :loading="failedPending || erpLoading"
             @click="refreshAll"
           />
         </template>
@@ -383,8 +384,8 @@ async function reopenBookedTransactions() {
             <div class="flex flex-col gap-1">
               <div class="font-medium">Afviste ERP-svar</div>
               <div class="text-sm text-muted">
-                Her vises ERP-requests hvor vi har modtaget et negativt udfald. Åbn en request for at se/redigere payload og genfremsende som en ny request.
-                Hvis et svar mangler helt (outbox/request uden kvittering), så brug <NuxtLink to="/fejlhaandtering/koe" class="underline">Kø og genkørsel</NuxtLink>.
+                Her vises ERP-requests hvor vi har modtaget et negativt udfald. Åbn en request for at arbejde transaktionsbaseret med genåbning og genfremsendelse.
+                Hvis et svar mangler helt (outbox/request uden kvittering), så brug <NuxtLink to="/fejlhaandtering/koe" class="underline">Kørsler</NuxtLink>.
               </div>
             </div>
           </template>
@@ -422,131 +423,84 @@ async function reopenBookedTransactions() {
         <UCard>
           <template #header>
             <div class="flex flex-col gap-1">
-              <div class="font-medium">Redigér og genfremsend ERP-request</div>
+              <div class="font-medium">Transaktioner i ERP-request</div>
               <div class="text-sm text-muted">
-                Redigering her opretter en ny ERP-request ved genfremsendelse (originalen ændres ikke).
+                Visningen er transaktionsbaseret og bruger samme persisted kobling som integrationen (request → linjer → transaktioner).
               </div>
             </div>
           </template>
 
           <UEmpty
-            v-if="!erpDetails"
+            v-if="!erpView"
             :icon="appConfig.ui.icons.doc"
             title="Vælg en ERP request"
-            description="Åbn en request fra listen ovenfor for at se payload, linjer og genfremsende."
+            description="Åbn en request fra listen ovenfor for at se transaktioner og handlinger."
             class="border border-dashed border-default rounded-lg"
           />
 
-          <div v-else class="grid gap-4 lg:grid-cols-2 lg:items-stretch">
-            <div class="flex h-full min-h-0 flex-col gap-4">
-              <div class="space-y-2">
-                <div class="text-sm">
-                  <span class="text-muted">Request: </span>
-                  <span class="font-mono">{{ erpDetails.requestId }}</span>
-                </div>
-                <div class="text-sm">
-                  <span class="text-muted">Run: </span>
-                  <span class="font-mono">{{ erpDetails.runId }}</span>
-                </div>
-                <div class="text-sm" v-if="erpDetails.response">
-                  <span class="text-muted">Bilag: </span>
-                  <span class="font-mono">{{ erpDetails.response.id }}</span>
-                </div>
-                <div class="text-sm" v-if="erpDetails.response?.statusText">
-                  <span class="text-muted">Status: </span>
-                  <span>{{ erpDetails.response.statusText }}</span>
-                </div>
+          <div v-else class="space-y-4">
+            <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <div class="text-sm">
+                <span class="text-muted">Run: </span>
+                <span class="font-mono">{{ erpView.runId }}</span>
               </div>
-
-              <UFormField label="Request payload (rå tekst/XML)" class="flex min-h-0 flex-1 flex-col">
-                <div class="flex min-h-0 flex-1 flex-col gap-2">
-                  <div class="flex justify-end">
-                    <UButton
-                      :icon="appConfig.ui.icons.wand"
-                      label="Formatér XML"
-                      color="neutral"
-                      variant="ghost"
-                      size="sm"
-                      :disabled="erpLoading || !erpPayloadDraft.trim().length"
-                      @click="formatErpPayloadXml"
-                    />
-                  </div>
-
-                  <UTextarea
-                    v-model="erpPayloadDraft"
-                    :rows="16"
-                    placeholder="Indsæt/redigér request payload..."
-                    :disabled="erpLoading"
-                    class="h-full min-h-80 font-mono"
-                  />
-                </div>
-              </UFormField>
-
-              <div class="flex flex-wrap gap-2">
-                <UButton
-                  :icon="appConfig.ui.icons.send"
-                  label="Genfremsend til ERP (ny request)"
-                  color="primary"
-                  variant="soft"
-                  :disabled="!erpDetails"
-                  :loading="erpLoading"
-                  @click="resendErpRequest"
-                />
+              <div class="text-sm">
+                <span class="text-muted">Bogføringsdato: </span>
+                <span class="font-mono">{{ erpView.header.bookingDate ?? 'Flere datoer' }}</span>
+              </div>
+              <div class="text-sm">
+                <span class="text-muted">Transaktioner: </span>
+                <span class="font-mono">{{ erpView.header.transactionCount }}</span>
+              </div>
+              <div class="text-sm">
+                <span class="text-muted">Netto-beløb: </span>
+                <span class="font-mono">{{ formatSignedDkk(toSignedAmount(erpView.header.totalAmount, null)) }}</span>
+              </div>
+              <div v-if="erpView.response" class="text-sm">
+                <span class="text-muted">Bilag: </span>
+                <span class="font-mono">{{ erpView.response.id }}</span>
+              </div>
+              <div v-if="erpView.response?.statusText" class="text-sm">
+                <span class="text-muted">Status: </span>
+                <span>{{ erpView.response.statusText }}</span>
               </div>
             </div>
 
-            <div class="flex h-full min-h-0 flex-col gap-4">
-              <UAlert
-                color="neutral"
+            <UTable
+              :key="transactionTableKey"
+              :data="erpView.transactions"
+              :columns="transactionColumns"
+              :loading="erpLoading"
+              :ui="{
+                base: 'border-separate border-spacing-0',
+                thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
+                tbody: '[&>tr]:last:[&>td]:border-b-0',
+                th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
+                td: 'border-b border-default',
+                separator: 'h-0'
+              }"
+            />
+
+            <div class="flex flex-wrap gap-2">
+              <UButton
+                :icon="appConfig.ui.icons.undo"
+                label="Genåbn valgte transaktioner"
+                color="warning"
                 variant="soft"
-                :icon="appConfig.ui.icons.info"
-                class="text-sm"
-              >
-                Du kan nu se den persisted kobling mellem ERP requestId → postering(lineNo) → transactionId og genåbne udvalgte bogførte transaktioner.
-              </UAlert>
-
-              <div class="space-y-2">
-                <div class="flex items-center justify-between">
-                  <div class="font-medium">Posteringslinjer i request</div>
-                </div>
-
-                <UTable
-                  v-if="erpLines"
-                  :key="erpLinesTableKey"
-                  :data="erpLines.lines"
-                  :columns="linesColumns"
-                  :loading="erpLinesLoading"
-                  :ui="{
-                    base: 'border-separate border-spacing-0',
-                    thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
-                    tbody: '[&>tr]:last:[&>td]:border-b-0',
-                    th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
-                    td: 'border-b border-default',
-                    separator: 'h-0'
-                  }"
-                />
-                <UEmpty
-                  v-else
-                  :icon="appConfig.ui.icons.list"
-                  title="Ingen linjer"
-                  description="Der blev ikke fundet linjer for dette request."
-                  class="border border-dashed border-default rounded-lg"
-                />
-
-                <div class="flex flex-wrap gap-2">
-                  <UButton
-                    :icon="appConfig.ui.icons.undo"
-                    label="Genåbn valgte transaktioner"
-                    color="warning"
-                    variant="soft"
-                    :disabled="!selectedLineNoList.length"
-                    :loading="reopeningLines"
-                    @click="reopenSelectedLines"
-                  />
-                  <div class="text-sm text-muted" v-if="selectedLineNoList.length">
-                    Valgt: {{ selectedLineNoList.length }} linje(r)
-                  </div>
-                </div>
+                :disabled="!selectedTransactionIdList.length"
+                :loading="reopeningTransactions"
+                @click="reopenSelectedTransactions"
+              />
+              <UButton
+                :icon="appConfig.ui.icons.send"
+                label="Genfremsend ERP-request"
+                color="primary"
+                variant="soft"
+                :loading="erpLoading"
+                @click="resendErpRequest"
+              />
+              <div v-if="selectedTransactionIdList.length" class="text-sm text-muted">
+                Valgt: {{ selectedTransactionIdList.length }} transaktion(er)
               </div>
             </div>
           </div>

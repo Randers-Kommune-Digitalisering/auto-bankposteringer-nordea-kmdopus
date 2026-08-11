@@ -12,6 +12,7 @@ import type {
   StatementTransaction,
 } from '~/types/transactions'
 import { presentOpenTransaction } from '~~/server/presenters/openTransactionPresenter'
+import { projectCanonicalTransactionFields } from '~~/server/presenters/transactionCanonicalFields'
 import { createUtcIsoString, parseIsoDateToUtcDate } from '~~/utils/function'
 import { toSamlepostId, toStatementEntryKey } from '~~/server/utils/iso20022Samlepost'
 
@@ -203,27 +204,6 @@ function fuzzyScore(haystack: string, query: string): number {
   return score
 }
 
-function resolveCounterpartAndHint(input: {
-  creditDebitIndicator: string | null
-  debtorName: string | null
-  creditorName: string | null
-}): { counterpart: string | null; counterpartHint: string | null } {
-  const isOutgoing = input.creditDebitIndicator === 'DBIT'
-
-  const selected = normalizeString(isOutgoing ? input.creditorName : input.debtorName)
-  if (selected) {
-    return {
-      counterpart: selected,
-      counterpartHint: isOutgoing ? 'creditorName' : 'debtorName',
-    }
-  }
-
-  return {
-    counterpart: null,
-    counterpartHint: null,
-  }
-}
-
 function normalizeCodeKey(raw: string): string {
   const normalized = raw.trim().toUpperCase()
   return normalized.replace(/\s+/g, '')
@@ -271,65 +251,6 @@ function resolveTransactionType(input: {
     code: null,
     hint: null,
   }
-}
-
-function buildReferenceDetails(input: {
-  remittanceUstrd: string[] | null
-  remittanceAdditional: string[] | null
-  remittanceCreditorReference: string | null
-  entryAdditionalInfo: string | null
-  txAdditionalInfo: string | null
-  refsEndToEndId: string | null
-  refsInstrId: string | null
-  refsPmtInfId: string | null
-  uetr: string | null
-  txAcctSvcrRef: string | null
-  ntryAcctSvcrRef: string | null
-  ntryRef: string | null
-}) {
-  const details: Array<{ value: string; source: string }> = []
-
-  // Deterministic free-text composition for Nordea-style CAMT:
-  // 1) Prtry-originated values (stored in remittanceAdditional)
-  // 2) RmtInf/Ustrd values
-  for (const value of input.remittanceAdditional ?? []) {
-    const normalized = normalizeString(value)
-    if (!normalized) continue
-    details.push({ value: normalized, source: '/Purp/Prtry' })
-  }
-
-  for (const value of input.remittanceUstrd ?? []) {
-    const normalized = normalizeString(value)
-    if (!normalized) continue
-    details.push({ value: normalized, source: '/RmtInf/Ustrd' })
-  }
-
-  const singleFieldCandidates: Array<{ value: string | null; source: string }> = [
-    { value: input.remittanceCreditorReference, source: '/RmtInf/Strd/CdtrRefInf/Ref' },
-    { value: input.entryAdditionalInfo, source: '/Ntry/AddtlNtryInf' },
-    { value: input.txAdditionalInfo, source: '/TxDtls/AddtlTxInf' },
-    { value: input.refsEndToEndId, source: '/TxDtls/Refs/EndToEndId' },
-    { value: input.refsInstrId, source: '/TxDtls/Refs/InstrId' },
-    { value: input.refsPmtInfId, source: '/TxDtls/Refs/PmtInfId' },
-    { value: input.uetr, source: '/TxDtls/Refs/UETR' },
-    { value: input.txAcctSvcrRef, source: '/TxDtls/Refs/AcctSvcrRef' },
-    { value: input.ntryAcctSvcrRef, source: '/Ntry/AcctSvcrRef' },
-    { value: input.ntryRef, source: '/Ntry/NtryRef' },
-  ]
-
-  for (const candidate of singleFieldCandidates) {
-    const normalized = normalizeString(candidate.value)
-    if (!normalized) continue
-    details.push({ value: normalized, source: candidate.source })
-  }
-
-  const seen = new Set<string>()
-  return details.filter((entry) => {
-    const key = `${entry.source}:${entry.value}`.toLowerCase()
-    if (seen.has(key)) return false
-    seen.add(key)
-    return true
-  })
 }
 
 function buildSearchText(row: BaseRow): string {
@@ -473,22 +394,17 @@ function mapRowToOpenTransaction(
   catalogByProviderCodeKey: TransactionCodeCatalogMap,
 ): OpenTransaction {
   const groupKey = samlepostId.startsWith('group:') ? samlepostId.slice('group:'.length) : null
-  const counterpart = resolveCounterpartAndHint({
+  const signedAmount = toSignedAmount(row.amount, row.creditDebitIndicator)
+  const canonicalFields = projectCanonicalTransactionFields({
+    id: row.id,
+    runId: row.runId,
+    bookingDate: createUtcIsoString(row.bookingDate),
+    amount: signedAmount,
     creditDebitIndicator: row.creditDebitIndicator,
     debtorName: row.debtorName,
+    debtorId: row.debtorId,
     creditorName: row.creditorName,
-  })
-
-  const transactionType = resolveTransactionType({
-    provider: row.provider,
-    bkTxCdProprietary: row.bkTxCdProprietary,
-    bkTxCdDomain: row.bkTxCdDomain,
-    bkTxCdFamily: row.bkTxCdFamily,
-    bkTxCdSubFamily: row.bkTxCdSubFamily,
-    catalogByProviderCodeKey,
-  })
-
-  const referenceDetails = buildReferenceDetails({
+    creditorId: row.creditorId,
     remittanceUstrd: row.remittanceUstrd,
     remittanceAdditional: row.remittanceAdditional,
     remittanceCreditorReference: row.remittanceCreditorReference,
@@ -503,7 +419,14 @@ function mapRowToOpenTransaction(
     ntryRef: row.ntryRef,
   })
 
-  const signedAmount = toSignedAmount(row.amount, row.creditDebitIndicator)
+  const transactionType = resolveTransactionType({
+    provider: row.provider,
+    bkTxCdProprietary: row.bkTxCdProprietary,
+    bkTxCdDomain: row.bkTxCdDomain,
+    bkTxCdFamily: row.bkTxCdFamily,
+    bkTxCdSubFamily: row.bkTxCdSubFamily,
+    catalogByProviderCodeKey,
+  })
 
   const input: OpenTransactionInput = {
     id: row.id,
@@ -519,10 +442,10 @@ function mapRowToOpenTransaction(
     transactionType: transactionType.value,
     transactionTypeCode: transactionType.code,
     transactionTypeHint: transactionType.hint,
-    counterpart: counterpart.counterpart,
-    counterpartHint: counterpart.counterpartHint,
-    references: referenceDetails.map((entry) => entry.value),
-    referenceDetails,
+    counterpart: canonicalFields.counterpart,
+    counterpartHint: canonicalFields.counterpartHint,
+    references: canonicalFields.references,
+    referenceDetails: canonicalFields.referenceDetails,
   }
 
   return presentOpenTransaction(input)
