@@ -7,6 +7,10 @@ import { loadNordeaEnvSecrets } from '~~/engine/banking-ingestion/infrastructure
 import { NordeaCorporateAccessWebServicesAdapter } from '~~/engine/banking-ingestion/infrastructure/nordea/nordeaCorporateAccessWebServicesAdapter'
 
 export function createUtcIsoString(value: Date | string | null | undefined): string {
+  return createUtcDateString(value)
+}
+
+export function createUtcDateString(value: Date | string | null | undefined): string {
   if (!value) {
     return new Date().toISOString().slice(0, 10)
   }
@@ -17,6 +21,19 @@ export function createUtcIsoString(value: Date | string | null | undefined): str
   }
 
   return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`
+}
+
+export function createUtcDateTimeString(value: Date | string | null | undefined): string {
+  if (!value) {
+    return new Date().toISOString()
+  }
+
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    throw new TypeError('Ugyldig dato modtaget i createUtcDateTimeString')
+  }
+
+  return date.toISOString()
 }
 
 export function parseIsoDateToUtcDate(value: string | null | undefined): Date | null {

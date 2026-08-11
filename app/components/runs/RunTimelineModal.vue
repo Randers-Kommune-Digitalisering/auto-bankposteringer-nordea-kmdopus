@@ -80,23 +80,6 @@ function formatMaybeIso(value: string | null | undefined): string {
   return dtf.format(d)
 }
 
-function isoDateToLocalMidnight(value: string): Date | null {
-  const m = String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/)
-  if (!m) return null
-  const year = Number(m[1])
-  const month = Number(m[2])
-  const day = Number(m[3])
-  if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) return null
-  return new Date(year, month - 1, day, 0, 0, 0, 0)
-}
-
-function formatRunBookingDateWithTime(value: string | null | undefined): string {
-  if (!value) return '—'
-  const midnight = isoDateToLocalMidnight(value)
-  if (!midnight) return formatMaybeIso(value)
-  return dtf.format(midnight)
-}
-
 function jobStatusLabel(status: string): string {
   if (status === 'pending') return 'Afventer'
   if (status === 'in_progress') return 'Kører'
@@ -320,14 +303,12 @@ const overallState = computed(() => {
 type RunTimelineItem = TimelineItem & { slot: string }
 
 const timelineItems = computed<RunTimelineItem[]>(() => {
-  const bookingDate = props.run?.bookingDate ? formatRunBookingDateWithTime(props.run.bookingDate) : undefined
-
   const base: RunTimelineItem[] = [
     {
       slot: 'banking',
       value: 'banking',
       title: 'Hentning af bankdata',
-      date: bankingJob.value?.runAt ? formatMaybeIso(bankingJob.value.runAt) : bookingDate,
+      date: bankingJob.value?.runAt ? formatMaybeIso(bankingJob.value.runAt) : undefined,
       description: bankingJobState.value.description,
       icon: appConfig.ui.icons.download,
     },
@@ -339,7 +320,7 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
         ? formatMaybeIso(bankingJob.value.updatedAt)
         : bankingJob.value?.runAt
           ? formatMaybeIso(bankingJob.value.runAt)
-          : bookingDate,
+          : undefined,
       description: matchingState.value.description,
       icon: appConfig.ui.icons.wand,
     },
@@ -351,7 +332,7 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
       slot: 'erpDelivery',
       value: d.requestId ? `erp-${d.requestId}` : `erp-unknown-${d.firstCreatedAt ?? ''}`,
       title: 'Aflevering til ERP',
-      date: d.firstCreatedAt ? formatMaybeIso(d.firstCreatedAt) : bookingDate,
+      date: d.firstCreatedAt ? formatMaybeIso(d.firstCreatedAt) : undefined,
       description: state.description,
       icon: appConfig.ui.icons.upload,
       _delivery: d,

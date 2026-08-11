@@ -13,6 +13,7 @@
     }
 
     const appConfig = useAppConfig()
+    const dtf = new Intl.DateTimeFormat('da-DK', { dateStyle: 'medium', timeStyle: 'short' })
 
     const props = defineProps<Props>()
     const emit = defineEmits<Emits>()
@@ -153,6 +154,13 @@
                 return props.run.erpResponses?.length || 0
         }
     }
+
+    const formatDateTime = (value: string | null | undefined) => {
+        if (!value) return '—'
+        const d = new Date(value)
+        if (Number.isNaN(d.getTime())) return String(value)
+        return dtf.format(d)
+    }
 </script>
 
 <template>
@@ -177,7 +185,8 @@
                 <template v-if="type === 'error' && run.errors">
                     <ul class="list-disc pl-5 space-y-2">
                         <li v-for="err in run.errors" :key="err.id" class="text-sm text-error">
-                            {{ err.message ?? err.errorString ?? 'Ukendt fejl' }}
+                            <span class="text-muted">{{ formatDateTime(err.createdAt) }}:</span>
+                            <span class="ml-1">{{ err.message ?? err.errorString ?? 'Ukendt fejl' }}</span>
                         </li>
                     </ul>
                 </template>

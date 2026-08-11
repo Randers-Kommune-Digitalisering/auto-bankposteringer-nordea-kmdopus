@@ -3,7 +3,7 @@
 import { desc, eq, inArray } from "drizzle-orm";
 import { setHeader } from "h3";
 import db from "~/lib/db";
-import { createUtcIsoString, inferMimeType } from "~~/utils/function";
+import { createUtcDateString, createUtcDateTimeString, inferMimeType } from "~~/utils/function";
 import { account } from "~/lib/db/schema/account";
 import { document } from "~/lib/db/schema/document";
 import { erpRequest, erpResponse } from "~/lib/db/schema/erp";
@@ -268,7 +268,7 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
       runId: row.runId,
       accountId: row.accountId,
       amount: row.amount,
-      bookingDate: createUtcIsoString(row.bookingDate),
+      bookingDate: createUtcDateString(row.bookingDate),
       bankAccountLabel: row.bankAccountLabel,
       status: row.status,
       ruleApplied: row.ruleApplied,
@@ -319,6 +319,7 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
     const list = errorsByRun.get(row.runId) ?? [];
     const normalized: ErrorListItem = {
       ...row,
+      createdAt: createUtcDateTimeString(row.createdAt),
       message: row.errorString,
     };
     list.push(normalized);
@@ -385,7 +386,7 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
 
   return runRows.map<RunListItem>((row) => ({
     ...row,
-    bookingDate: createUtcIsoString(row.bookingDate),
+    bookingDate: createUtcDateString(row.bookingDate),
     status: resolveEffectiveRunStatus(String(row.id), row.status),
     transactions: transactionsByRun.get(row.id) ?? [],
     documents: documentsByRun.get(row.id) ?? [],
