@@ -7,6 +7,7 @@ import type {
   TransactionSummaryInput,
   TransactionSummarySection,
 } from '~/types/transactions'
+import { buildTransactionReferenceBuckets } from '~~/engine/matching/domain/transactionTextProjection'
 
 const currencyFormatter = new Intl.NumberFormat('da-DK', {
   style: 'currency',
@@ -122,71 +123,17 @@ function formatSignedAmount(amount: number): string {
   return currencyFormatter.format(0)
 }
 
-function splitReferenceTokens(values: TransactionReferenceDetail[]): TransactionReferenceDetail[] {
-  const tokens: TransactionReferenceDetail[] = []
-  for (const entry of values) {
-    const source = String(entry.source ?? '').trim() || 'Ukendt XML-felt'
-    for (const token of String(entry.value ?? '').split(';')) {
-      const normalized = token.trim()
-      if (!normalized) continue
-      tokens.push({ value: normalized, source })
-    }
-  }
-  return tokens
-}
-
 type ReferenceBuckets = {
   reference: TransactionSummaryChip[]
   teknisk: TransactionSummaryChip[]
 }
 
-function is500ReferenceTriad(value: string): boolean {
-  return /^500:[^:]*:.+/i.test(String(value ?? '').trim())
-}
-
-function classifyReferenceToken(input: TransactionReferenceDetail): keyof ReferenceBuckets {
-  const source = String(input.source ?? '').toLowerCase()
-
-  if (source.includes('/rmtinf/ustrd')) return 'reference'
-  if (source.includes('/purp/prtry')) return 'reference'
-  if (source.includes('/rmtinf/addtlrmtinf')) return 'reference'
-  if (source.includes('/addtltxinf')) return 'reference'
-
-  // Nordea AddtlNtryInf triads are treated as supplementary system fields.
-  if (source.endsWith('/addtlntryinf')) return 'teknisk'
-
-  return 'teknisk'
-}
-
 function buildSummaryReferences(references: TransactionReferenceDetail[]): ReferenceBuckets {
-  const seen = {
-    reference: new Set<string>(),
-    teknisk: new Set<string>(),
+  const buckets = buildTransactionReferenceBuckets(references)
+  return {
+    reference: buckets.reference.map((chip) => ({ value: chip.value, source: chip.source })),
+    teknisk: buckets.teknisk.map((chip) => ({ value: chip.value, source: chip.source })),
   }
-  const chips: ReferenceBuckets = {
-    reference: [],
-    teknisk: [],
-  }
-
-  for (const token of splitReferenceTokens(references)) {
-    const bucket = classifyReferenceToken(token)
-    const dedupKey = token.value.toLowerCase()
-    if (seen[bucket].has(dedupKey)) continue
-    seen[bucket].add(dedupKey)
-    chips[bucket].push({ value: token.value, source: token.source })
-  }
-
-  // Bypass for sparse Nordea payloads: if no dedicated reference values exist,
-  // treat triad 500 from AddtlNtryInf as reference instead of technical.
-  if (!chips.reference.length) {
-    const promoted = chips.teknisk.filter((chip) => is500ReferenceTriad(chip.value))
-    if (promoted.length) {
-      chips.reference = promoted
-      chips.teknisk = chips.teknisk.filter((chip) => !is500ReferenceTriad(chip.value))
-    }
-  }
-
-  return chips
 }
 
 function formatDate(value: string): string {

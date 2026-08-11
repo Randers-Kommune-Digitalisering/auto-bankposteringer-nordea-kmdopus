@@ -126,14 +126,14 @@ const primaryLinks: NavigationMenuItem[] = [
     type: 'trigger',
     children: [
       {
-        label: 'Kø og genkørsel',
+        label: 'Kørsler',
         to: '/fejlhaandtering/koe',
         onSelect: () => {
           open.value = false
         }
       },
       {
-        label: 'ERP-afvisninger',
+        label: 'ERP-integration',
         to: '/fejlhaandtering/erp',
         onSelect: () => {
           open.value = false

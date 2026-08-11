@@ -1,4 +1,8 @@
 import type { PostingAttachment, PostingLineInput } from '../../posting/domain/posting'
+import {
+  projectCanonicalTransactionText,
+  resolveBankMessage as resolveCanonicalBankMessage,
+} from './transactionTextProjection'
 
 export type PostingTransactionContext = {
   transactionId: string
@@ -62,59 +66,59 @@ export function resolvePostingText(
   textTemplate: string | null | undefined,
   tx: PostingTransactionContext,
 ): string {
-  const message =
-    tx.entryAdditionalInfo ||
-    tx.txAdditionalInfo ||
-    tx.remittanceCreditorReference ||
-    tx.remittanceUstrd?.find(Boolean) ||
-    tx.remittanceAdditional?.find(Boolean) ||
-    ''
-  // Special domain rule for Randers Kommune - should not live here
-  if (message.includes('BDP')) {
-    const start = message.indexOf('BDP')
-    return message
-      .substring(start, start + 18)
-      .replace(/\s+/g, '')
-  }
-
-  // Special domain rule for Randers Kommune - should not live here
-  if (message.includes('KSD')) {
-    const start = message.indexOf('KSD')
-    const counterpart = resolveCounterpartyName(tx)
-    return `${message.substring(start, start + 21)}${counterpart ?? ''}`.trim()
-  }
+  const projection = projectCanonicalTransactionText({
+    transactionId: tx.transactionId,
+    amount: tx.amount,
+    creditDebitIndicator: tx.amount < 0 ? 'DBIT' : 'CRDT',
+    debtorName: tx.debtorName,
+    debtorId: tx.debtorId,
+    creditorName: tx.creditorName,
+    creditorId: tx.creditorId,
+    remittanceUstrd: tx.remittanceUstrd,
+    remittanceAdditional: tx.remittanceAdditional,
+    remittanceCreditorReference: tx.remittanceCreditorReference,
+    entryAdditionalInfo: tx.entryAdditionalInfo,
+    txAdditionalInfo: tx.txAdditionalInfo,
+  })
 
   if (!textTemplate) {
-    return message || tx.transactionId
+    return projection.postingText || tx.transactionId
   }
 
   const normalized = textTemplate.trim().toLowerCase()
   if (normalized === 'tekst fra bank') {
-    return message || tx.transactionId
+    return projection.postingText || tx.transactionId
   }
 
   if (normalized === 'afsender fra bank') {
-    return (resolveCounterpartyName(tx) ?? message) || tx.transactionId
+    return (projection.counterpart ?? projection.bankMessage) || tx.transactionId
   }
 
   return textTemplate
 }
 
-export function resolveCounterpartyName(tx: PostingTransactionContext): string | undefined {
-  const isOutgoing = tx.amount < 0
-  if (isOutgoing) {
-    return (
-      tx.creditorName ??
-      tx.creditorId ??
-      undefined
-    )
-  }
+export function resolveBankMessage(tx: PostingTransactionContext): string {
+  return resolveCanonicalBankMessage({
+    txAdditionalInfo: tx.txAdditionalInfo ?? null,
+    remittanceCreditorReference: tx.remittanceCreditorReference ?? null,
+    remittanceUstrd: tx.remittanceUstrd ?? null,
+    remittanceAdditional: tx.remittanceAdditional ?? null,
+    entryAdditionalInfo: tx.entryAdditionalInfo ?? null,
+  })
+}
 
-  return (
-    tx.debtorName ??
-    tx.debtorId ??
-    undefined
-  )
+export function resolveCounterpartyName(tx: PostingTransactionContext): string | undefined {
+  const projection = projectCanonicalTransactionText({
+    transactionId: tx.transactionId,
+    amount: tx.amount,
+    creditDebitIndicator: tx.amount < 0 ? 'DBIT' : 'CRDT',
+    debtorName: tx.debtorName,
+    debtorId: tx.debtorId,
+    creditorName: tx.creditorName,
+    creditorId: tx.creditorId,
+  })
+
+  return projection.counterpart ?? undefined
 }
 
 const CPR_REGEX =

@@ -12,6 +12,15 @@ This repo is a stateless financial integration engine:
 3) Match transactions against deterministic rules
 4) Generate ERP posting payloads and execute ERP integration
 
+## Posting text policy (matching -> ERP)
+
+- Posting text derivation is deterministic and split in two responsibilities:
+  - base bank message/counterparty resolution (`postingUtils`)
+  - policy overrides (`postingTextPolicy`) for municipality-specific formats
+- A shared transaction text projection (`engine/matching/domain/transactionTextProjection.ts`) is reused by matching and server presenters to keep counterpart/reference/posting text semantics aligned.
+- Override rules (currently BDP/KSD) are configured as ordered policy rules, not hardcoded branches inside the generic resolver.
+- The same derived posting text is used for posting commands and ERP `ITEM_TEXT`, reducing drift between UI interpretation and outbound payload.
+
 ## ERP request identity vs transport filename
 
 - `requestId` is an internal, persistent identity key for ERP request tracking/idempotency.
@@ -22,6 +31,19 @@ This repo is a stateless financial integration engine:
   - `{docDate}`
   - `{docTime}`
 - Retry/resend creates a new internal `requestId` and also a new valid transport filename derived from the same deterministic mask logic.
+
+## ERP integration recovery view (canonical model)
+
+- The ERP recovery/integration UI is transaction-based, not line-based.
+- Canonical source for the view is persisted relational state:
+  - `erp_request`
+  - `erp_request_line`
+  - `transaction`
+  - `transaction_processing`
+- UI header metadata (booking date, counts, currencies, totals, response status) and table rows are derived from the same server-side model.
+- Raw XML editing is intentionally removed from the UI to avoid dual sources of truth.
+- Resend still persists and uploads XML payloads, but payload generation/usage is controlled server-side and remains auditable via `erp_request.payload`.
+- Reopen is transaction-oriented: operators choose transactions, and the system resets processing state for those transaction ids (covering all related request lines).
 
 ## Samlepost semantics (ISO 20022)
 
