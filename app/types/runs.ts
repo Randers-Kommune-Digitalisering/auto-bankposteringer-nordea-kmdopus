@@ -1,8 +1,8 @@
-import type { ErrorSelectSchema } from "~/lib/db/schema/error";
 import type { BookingStatus } from "~/lib/db/schema/enums";
 import type { RunSelectSchema } from "~/lib/db/schema/run";
 
 type IsoDateString = string;
+type IsoDateTimeString = string;
 
 export type TransactionListItem = {
 	id: string;
@@ -40,7 +40,13 @@ export type ErpResponseListItem = {
 	id: string;
 };
 
-export type ErrorListItem = ErrorSelectSchema & {
+export type ErrorListItem = {
+	id: string;
+	runId: string | null;
+	source: 'banking' | 'application' | 'erp' | null;
+	errorCode: number | null;
+	errorString: string | null;
+	createdAt: IsoDateTimeString;
 	message?: string | null;
 };
 

@@ -2,6 +2,7 @@ import { createError, defineEventHandler } from 'h3'
 import { asc, eq } from 'drizzle-orm'
 import { z } from 'zod'
 import db from '~/lib/db'
+import { account } from '~/lib/db/schema/account'
 import { erpRequest, erpRequestLine, erpResponse } from '~/lib/db/schema/erp'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import { requireErrorHandlingReadAccess } from '~~/server/auth/requireAppRoles'
@@ -9,6 +10,7 @@ import { projectCanonicalTransactionFields } from '~~/server/presenters/transact
 
 type GroupedTransaction = {
   transactionId: string
+  bankAccountName: string | null
   lineNos: number[]
   amount: string
   currency: string | null
@@ -23,6 +25,7 @@ type GroupedTransaction = {
 
 type GroupAccumulator = {
   transactionId: string
+  bankAccountName: string | null
   lineNos: Set<number>
   amount: string
   currency: string | null
@@ -60,6 +63,7 @@ export default defineEventHandler(async (event) => {
     .select({
       lineNo: erpRequestLine.lineNo,
       transactionId: erpRequestLine.transactionId,
+      bankAccountName: account.name,
       amount: transaction.amount,
       currency: transaction.currency,
       bookingDate: transaction.bookingDate,
@@ -85,6 +89,7 @@ export default defineEventHandler(async (event) => {
     })
     .from(erpRequestLine)
     .leftJoin(transaction, eq(transaction.id, erpRequestLine.transactionId))
+    .leftJoin(account, eq(account.id, transaction.accountId))
     .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
     .where(eq(erpRequestLine.requestId, requestId))
     .orderBy(asc(erpRequestLine.lineNo))
@@ -134,6 +139,7 @@ export default defineEventHandler(async (event) => {
 
       groups.set(transactionId, {
         transactionId,
+        bankAccountName: row.bankAccountName ?? null,
         lineNos: new Set([row.lineNo]),
         amount: String(row.amount),
         currency: row.currency,
@@ -154,6 +160,7 @@ export default defineEventHandler(async (event) => {
   const transactions: GroupedTransaction[] = Array.from(groups.values())
     .map((group) => ({
       transactionId: group.transactionId,
+      bankAccountName: group.bankAccountName,
       lineNos: Array.from(group.lineNos).sort((a, b) => a - b),
       amount: group.amount,
       currency: group.currency,

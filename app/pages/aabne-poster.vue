@@ -580,8 +580,8 @@ const tableUi = {
               v-else
               v-for="(stacks, accountKey) in stacksByAccount"
               :key="accountKey"
-              :title="stacks[0]?.representative.accountId ?? accountKey"
-              :headline="stacks[0]?.representative.bankAccountName ?? 'Nordea'"
+              :headline="stacks[0]?.representative.accountId ?? accountKey"
+              :title="stacks[0]?.representative.bankAccountName ?? 'Nordea'"
             >
               <template #description>
                 {{ stacks.length }} {{ stacks.length === 1 ? 'poster' : 'poster' }}

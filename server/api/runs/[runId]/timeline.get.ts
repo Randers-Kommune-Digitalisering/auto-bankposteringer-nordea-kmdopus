@@ -2,7 +2,7 @@ import { defineEventHandler, createError } from 'h3'
 import { desc, eq, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import db from '~/lib/db'
-import { createUtcIsoString } from '~~/utils/function'
+import { createUtcDateString, createUtcDateTimeString } from '~~/utils/function'
 import { run } from '~/lib/db/schema/run'
 import { job } from '~/lib/db/schema/job'
 import { outbox } from '~/lib/db/schema/outbox'
@@ -163,7 +163,7 @@ export default defineEventHandler(async (event) => {
   return {
     run: {
       id: String(r.id),
-      bookingDate: createUtcIsoString(r.bookingDate),
+      bookingDate: createUtcDateString(r.bookingDate),
       status: r.status ? String(r.status) : null,
     },
     jobs: (jobRows ?? []).map<RunTimelineResponse['jobs'][number]>((j) => ({
@@ -172,22 +172,22 @@ export default defineEventHandler(async (event) => {
       status: String(j.status),
       runId: j.runId ? String(j.runId) : null,
       attempts: Number(j.attempts ?? 0),
-      runAt: createUtcIsoString(j.runAt),
+      runAt: createUtcDateTimeString(j.runAt),
       lastError: j.lastError ? String(j.lastError) : null,
-      updatedAt: createUtcIsoString(j.updatedAt),
+      updatedAt: createUtcDateTimeString(j.updatedAt),
     })),
     outbox: (outboxRows ?? []).map<RunTimelineResponse['outbox'][number]>((o) => ({
       id: String(o.id),
       topic: String(o.topic),
       status: String(o.status),
       attempts: Number(o.attempts ?? 0),
-      nextAttemptAt: o.nextAttemptAt ? createUtcIsoString(o.nextAttemptAt) : null,
+      nextAttemptAt: o.nextAttemptAt ? createUtcDateTimeString(o.nextAttemptAt) : null,
       lastError: o.lastError ? String(o.lastError) : null,
       requestId: o.requestId ? String(o.requestId) : null,
       responseId: o.responseId ? String(o.responseId) : null,
       responseStatusText: o.responseStatusText ? String(o.responseStatusText) : null,
-      createdAt: createUtcIsoString(o.createdAt),
-      processedAt: o.processedAt ? createUtcIsoString(o.processedAt) : null,
+      createdAt: createUtcDateTimeString(o.createdAt),
+      processedAt: o.processedAt ? createUtcDateTimeString(o.processedAt) : null,
     })),
     erpRequests: (requestRows ?? []).map<RunTimelineResponse['erpRequests'][number]>((req) => ({
       requestId: String(req.requestId),
@@ -200,7 +200,7 @@ export default defineEventHandler(async (event) => {
       source: e.source ? String(e.source) : null,
       errorCode: e.errorCode != null ? Number(e.errorCode) : null,
       errorString: e.errorString ? String(e.errorString) : null,
-      createdAt: createUtcIsoString(e.createdAt),
+      createdAt: createUtcDateTimeString(e.createdAt),
     })),
     matching,
   } satisfies RunTimelineResponse

@@ -12,6 +12,13 @@ This repo is a stateless financial integration engine:
 3) Match transactions against deterministic rules
 4) Generate ERP posting payloads and execute ERP integration
 
+## Temporal model for runs
+
+- `run.bookingDate` is a business date (`YYYY-MM-DD`) used for deterministic day scoping, not an event timestamp.
+- Event timestamps related to runs are stored/transmitted as UTC datetimes (`ISO-8601` with `Z`) on server-side contracts.
+- Local time conversion is a UI-only concern; APIs must not localize timestamps.
+- If a run-related event timestamp is unknown from persisted state, API responses return `null`/missing date fields instead of synthesizing time from `bookingDate`.
+
 ## Posting text policy (matching -> ERP)
 
 - Posting text derivation is deterministic and split in two responsibilities:

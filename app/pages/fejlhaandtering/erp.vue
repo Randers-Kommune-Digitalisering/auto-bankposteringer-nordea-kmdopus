@@ -32,6 +32,7 @@ type ErpRequestViewResponse = {
   }
   transactions: Array<{
     transactionId: string
+    bankAccountName: string | null
     lineNos: number[]
     amount: string
     currency: string | null
@@ -255,9 +256,13 @@ const transactionColumns: TableColumn<ErpRequestViewResponse['transactions'][num
     },
   },
   {
+    id: 'bankAccountName',
+    header: 'Konto',
+    cell: ({ row }) => row.original.bankAccountName ?? '—',
+  },
+  {
     id: 'direction',
     header: 'Retning',
-    size: 120,
     cell: ({ row }) => {
       const tx = row.original
       const label = resolveDirectionLabel(tx.creditDebitIndicator, parseAmount(tx.amount))
@@ -272,7 +277,6 @@ const transactionColumns: TableColumn<ErpRequestViewResponse['transactions'][num
   {
     id: 'amount',
     header: 'Beløb',
-    size: 160,
     cell: ({ row }) => {
       const tx = row.original
       const amount = toSignedAmount(tx.amount, tx.creditDebitIndicator)
@@ -282,13 +286,11 @@ const transactionColumns: TableColumn<ErpRequestViewResponse['transactions'][num
   {
     id: 'counterparty',
     header: 'Modpart',
-    size: 180,
     cell: ({ row }) => row.original.counterparty ?? '—',
   },
   {
     id: 'reference',
     header: 'Reference',
-    size: 220,
     cell: ({ row }) => row.original.reference ?? '—',
   },
   {
@@ -299,7 +301,6 @@ const transactionColumns: TableColumn<ErpRequestViewResponse['transactions'][num
   {
     id: 'lineNos',
     header: 'Linjenumre',
-    size: 120,
     cell: ({ row }) => row.original.lineNos.join(', '),
   },
 ]
