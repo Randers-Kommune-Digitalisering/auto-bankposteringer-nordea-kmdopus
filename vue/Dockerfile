@@ -12,10 +12,7 @@ RUN npm install
 # build app for production with minification
 RUN npm run build
 
-# install project dependencies
-RUN cd express && npm install
-
 # Build express server
-RUN cd express && npm ci --only=production
+RUN cd express && npm install --omit=dev
 
 CMD [ "node", "express/server.js" ]

@@ -9,7 +9,7 @@ const Node = {
       "t": "set",
       "p": "payload",
       "pt": "msg",
-      "to": "$globalContext(\"transactions\").unmatched[transactionID = $$.uid]",
+      "to": "(  $transactions := $globalContext(\"transactions\").unmatched[transactionID = $$.uid];  $map($transactions, function($transaction) {    $merge([      $transaction,      {        \"bankAccountName\": ($globalContext(\"masterData\").bankAccounts[bankAccount = $transaction.bankAccount].bankAccountName)[0]      }    ])  }))",
       "tot": "jsonata",
       "dc": true
     }
