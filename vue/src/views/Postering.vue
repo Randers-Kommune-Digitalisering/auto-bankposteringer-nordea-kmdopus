@@ -45,7 +45,7 @@
 
     const keyMap = {
         "Bogføringsdato": { "key": "bookingDate", "group": "Transaktionsoplysninger" , "mutable": false },
-        "Konto": { "key": "bankAccount", "group": "Transaktionsoplysninger" , "mutable": false },
+        "Konto": { "key": "bankAccountName", "group": "Transaktionsoplysninger" , "mutable": false },
         "Beløb": { "key": "amount", "group": "Transaktionsoplysninger" , "mutable": false },
         "Posteringstype": { "key": "typeDescription", "group": "Transaktionsoplysninger" , "mutable": false },
         "Afsender": { "key": "sender", "group": "Transaktionsoplysninger" , "mutable": false },

@@ -2,8 +2,8 @@ FROM nodered/node-red
 
 # Copy package.json to the WORKDIR so npm builds all
 # of your added nodes modules for Node-RED
-COPY node-red/package.json .
-RUN npm install --unsafe-perm --no-update-notifier --no-fund --only=production
+COPY node-red/package.json /data/package.json
+RUN cd /data && npm install --no-update-notifier --no-fund --omit=dev
 
 # Copy _your_ Node-RED project files into place
 # NOTE: This will only work if you DO NOT later mount /data as an external volume.
@@ -31,11 +31,8 @@ RUN cd /app && npm install
 # Build app for production with minification
 RUN cd /app && npm run build
 
-# install project dependencies
-RUN cd /app/express && npm install
-
 # Build express server
-RUN cd /app/express && npm ci --only=production
+RUN cd /app/express && npm install --omit=dev
 
 USER node-red
 
