@@ -1,5 +1,16 @@
 import "./app/lib/env/env"
+import { createRequire } from 'node:module'
+import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+const requireFromConfig = createRequire(import.meta.url)
+
+// pnpm hoists h3 v2 (pulled in by devtools) to the root, so bare "h3" imports would resolve to
+// another instance than the h3 v1 Nitro actually runs on.
+const nitroH3Dir = dirname(requireFromConfig.resolve('h3/package.json', {
+  paths: [dirname(requireFromConfig.resolve('nitropack/package.json'))],
+}))
+const nitroH3Entry = join(nitroH3Dir, 'dist/index.mjs')
 
 function resolveAppOrigin(): string | undefined {
   const explicitOrigin = process.env.OIDC_APP_ORIGIN?.trim()
@@ -20,11 +31,12 @@ function resolveAppOrigin(): string | undefined {
 const appOrigin = resolveAppOrigin()
 const isCodespaces = Boolean(process.env.CODESPACE_NAME?.trim())
 const devtoolsEnv = process.env.NUXT_DEVTOOLS?.trim().toLowerCase()
-const enableNuxtDevtools = devtoolsEnv === 'true' || (devtoolsEnv !== 'false' && !isCodespaces)
+const enableNuxtDevtools = devtoolsEnv === 'true' && !isCodespaces
 
 export default defineNuxtConfig({
   alias: {
     '#engine': fileURLToPath(new URL('./engine', import.meta.url)),
+    h3: nitroH3Entry,
   },
 
   vite: {

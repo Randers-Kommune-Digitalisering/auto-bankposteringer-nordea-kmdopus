@@ -5,7 +5,9 @@ import type { Column, Row, SortingFn, SortingState } from '@tanstack/table-core'
 import { getPaginationRowModel } from '@tanstack/table-core'
 import type { RuleListDto } from '~/lib/db/schema/rule'
 import { ruleTypeEnum, ruleStatusEnum } from '~/lib/db/schema/enums'
+import { useDebouncedString } from '~/composables/useDebouncedString'
 import useFlattenArray from '~/composables/useFlattenArray'
+import { fuzzyRankRows } from '~/lib/search/fuzzyRanking'
 
 const appConfig = useAppConfig()
 const UButton = resolveComponent('UButton')
@@ -21,6 +23,7 @@ const table = useTemplateRef('table')
 const modalOpen = ref(false)
 const editingRuleId = ref<number | null>(null)
 const globalFilterValue = ref('')
+const debouncedGlobalFilterValue = useDebouncedString(globalFilterValue, { delayMs: 300 })
 const deletingRuleId = ref<number | null>(null)
 
 const selectedAccountIds = ref<string[]>([])
@@ -49,9 +52,9 @@ function normalizeSearchText(value: string): string {
 }
 
 const visibleRows = computed<RuleListDto[]>(() => {
-  const q = normalizeSearchText(globalFilterValue.value)
+  const q = normalizeSearchText(debouncedGlobalFilterValue.value)
 
-  return fetchedRows.value
+  const baseRows = fetchedRows.value
     .filter((rule) => {
       if (statusFilter.value !== 'alle' && rule.status !== statusFilter.value) return false
       if (typeFilter.value !== 'alle' && rule.type !== typeFilter.value) return false
@@ -61,27 +64,25 @@ const visibleRows = computed<RuleListDto[]>(() => {
         if (!hasMatch) return false
       }
 
-      if (!q.length) return true
-
-      const parts: Array<string | number | null | undefined> = [
-        rule.id,
-        rule.type,
-        rule.status,
-        ...(rule.relatedBankAccounts || []),
-        ...(rule.ruleTags || []),
-        ...(rule.matching?.references || []),
-        ...(rule.matching?.counterparties || []),
-        ...(rule.matching?.classification || []),
-      ]
-
-      const haystack = parts
-        .filter((v) => v !== null && v !== undefined)
-        .map((v) => String(v).toLowerCase())
-        .join(' ')
-
-      return haystack.includes(q)
+      return true
     })
     .slice()
+
+  return fuzzyRankRows({
+    rows: baseRows,
+    query: q,
+    getValues: (rule) => [
+      rule.id,
+      rule.type,
+      rule.status,
+      ...(rule.relatedBankAccounts || []),
+      ...(rule.ruleTags || []),
+      ...(rule.matching?.references || []),
+      ...(rule.matching?.counterparties || []),
+      ...(rule.matching?.classification || []),
+    ],
+    tieBreaker: (a, b) => Number(a.id) - Number(b.id),
+  })
 })
 
   const rulesTableKey = computed(() => visibleRows.value.map((r) => String(r.id)).join('|'))

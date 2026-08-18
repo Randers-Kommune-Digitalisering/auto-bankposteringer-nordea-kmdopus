@@ -86,6 +86,36 @@ configure_oidc_origin() {
 
 configure_oidc_origin
 
+sync_dependencies_if_needed() {
+  if [ "$NODE_ENV" = "production" ]; then
+    return 0
+  fi
+
+  if [ ! -f "package.json" ] || [ ! -f "pnpm-lock.yaml" ]; then
+    return 0
+  fi
+
+  lock_hash="$(cat package.json pnpm-lock.yaml | sha256sum | awk '{print $1}')"
+  state_file="node_modules/.deps-lock-hash"
+  current_hash=""
+
+  if [ -f "$state_file" ]; then
+    current_hash="$(cat "$state_file" 2>/dev/null || true)"
+  fi
+
+  if [ "$lock_hash" = "$current_hash" ]; then
+    echo "Dependency sync: lock hash unchanged; skipping pnpm install"
+    return 0
+  fi
+
+  echo "Dependency sync: lock hash changed; running pnpm install"
+  pnpm install --frozen-lockfile --config.strict-dep-builds=false --config.verify-deps-before-run=false
+  mkdir -p "$(dirname "$state_file")"
+  printf '%s' "$lock_hash" > "$state_file"
+}
+
+sync_dependencies_if_needed
+
 seed_system_if_enabled() {
   # System seed is idempotent and safe to run on each startup.
   if [ "${DB_SEED_SYSTEM_ON_START:-1}" = "1" ]; then

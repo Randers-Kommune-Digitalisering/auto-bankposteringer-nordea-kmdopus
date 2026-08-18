@@ -70,16 +70,13 @@ This repo is a stateless financial integration engine:
   - `mode=statement`: returns statement/list payload (`rows`, `totalSamleposter`, page metadata).
 - The legacy route `/api/transactions/statement` is a compatibility shim that forwards to `/api/transactions?mode=statement`.
 
-### Server-side fuzzy filtering contract
+### Hybrid search contract (SQL prefilter + TanStack ranking)
 
 - Query parameter: `search` (or alias `q`).
-- Filtering is performed server-side before stack pagination/counts are calculated.
-- Matching strategy is deterministic and token-based:
-  - direct substring matches score highest,
-  - compact subsequence matches score lower,
-  - multi-token contains fallback scores lowest.
-- If all tokens are not matched, the row is excluded.
-- This keeps TanStack client state simple while preserving a single authoritative filter result on the backend.
+- For transaction-heavy views (`mode=open-items`, `mode=statement`), the backend applies SQL-based candidate filtering before stack pagination/counts are calculated.
+- SQL prefilter uses deterministic token matching over selected transaction/reference/counterparty fields and is only activated for meaningful search input.
+- The client applies TanStack fuzzy ranking on the returned candidate rows to improve relevance and typo tolerance while preserving deterministic fallback ordering.
+- Result: authoritative totals/pagination stay backend-driven, while perceived relevance is tuned in the UI layer.
 
 ## Banking document retention
 
@@ -207,6 +204,16 @@ This avoids request-coupled false positives (for example returning `0` while dis
 - `manual_booking_draft` (+ lines/dimensions/attachments): user-edited draft state for open transactions (supports saving notes and multi-line manual postings without sending to ERP)
 - `banking_agreement_cursor`: opaque cursor per (provider agreement, adapter) for incremental fetching
 - `run`: batch execution unit (audit/logging)
+
+### Run status projection
+
+Run status shown in operational views is derived from persisted run state, error logs, jobs, outbox items, and ERP responses. The shared server utility `server/utils/runs/runStatus.ts` applies the same deterministic priority in the dashboard and runs list:
+
+1. Active errors, rejected ERP responses, or failed I/O means `fejl`.
+2. Pending or in-progress I/O means `indlæser`.
+3. Otherwise the persisted run status is used, falling back to `afventer`.
+
+Informational and successful error-log events are kept as events but are not counted as active errors. Recovered missing-mapping errors are likewise excluded from the active-error count. Summary tables expose counts and status; detailed messages remain in the run timeline.
 
 ## Auto-recovery ved manglende konto-kontering
 

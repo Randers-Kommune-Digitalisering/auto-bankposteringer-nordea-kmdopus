@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { h } from 'vue'
-import { today } from '@internationalized/date'
+import { today, type DateValue } from '@internationalized/date'
 import type { TableColumn } from '@nuxt/ui'
 import type { StatementTransaction } from '~/types/transactions'
 import { TRANSACTION_BADGE_COLUMN_CLASS, TRANSACTION_BADGE_STYLE } from '~/lib/presenters/transactionBadgeStyles'
 import { DEFAULT_TIME_ZONE, formatSignedDkk } from '~/utils'
 import { formatTransactionFieldHint } from '~/lib/presenters/transactionFieldHints'
-import { buildReferenceBadgeEntries, dedupeBadgeEntries, type BadgeEntry } from '~/lib/presenters/referenceBadgeEntries'
+import { buildReferenceBadgeEntries, dedupeBadgeEntries, toCanonicalReferenceBadgeEntries, toCanonicalValueBadgeEntries, type BadgeEntry } from '~/lib/presenters/referenceBadgeEntries'
 import { useStackedTransactions } from '~/composables/useStackedTransactions'
+import { useDebouncedString } from '~/composables/useDebouncedString'
+import { fuzzyRankRows } from '~/lib/search/fuzzyRanking'
 
 const appConfig = useAppConfig()
 const UBadge = resolveComponent('UBadge')
@@ -24,9 +26,11 @@ const defaultRange = {
   end: endDefault,
 }
 
-const dateRange = ref<any>(defaultRange)
+// shallowRef keeps CalendarDate class identity, which deep ref unwrapping would strip.
+const dateRange = shallowRef<{ start: DateValue; end: DateValue }>(defaultRange)
 
 const globalFilterValue = ref('')
+const debouncedGlobalFilterValue = useDebouncedString(globalFilterValue, { delayMs: 500 })
 
 const page = ref(1)
 const pageSize = ref(25)
@@ -48,7 +52,7 @@ const end = computed(() => {
   return v.toString()
 })
 
-const search = computed(() => globalFilterValue.value.trim())
+const search = computed(() => debouncedGlobalFilterValue.value.trim())
 
 type StatementPage = {
   rows: StatementTransaction[]
@@ -59,9 +63,9 @@ type StatementPage = {
 }
 
 const { data, status, refresh } = await useFetch<StatementPage>('/api/transactions', {
-  // Key intentionally excludes accountIds so fast toggles don't create multiple keys.
-  // This allows `dedupe: 'cancel'` to cancel in-flight requests and prevents "1 tick behind".
-  key: computed(() => `statement:${start.value}:${end.value}:q:${search.value}:p${page.value}:s${pageSize.value}`),
+  // A single stable key keeps one cache entry; per-filter keys would replay stale payloads when a
+  // previously used filter combination is revisited.
+  key: 'statement-transactions',
   query: computed(() => ({
     mode: 'statement',
     start: start.value,
@@ -76,12 +80,12 @@ const { data, status, refresh } = await useFetch<StatementPage>('/api/transactio
   // Avoid "1 tick behind" behavior caused by out-of-order responses when filters change quickly.
   dedupe: 'cancel',
   deep: true,
-  transform: (v) => {
-    const rows = Array.isArray((v as any)?.rows) ? (v as any).rows.slice() : []
+  transform: (v: StatementPage) => {
+    const rows = Array.isArray(v.rows) ? v.rows.slice() : []
     return {
-      ...(v as any),
+      ...v,
       rows,
-    } as any
+    }
   },
   default: () => ({ rows: [], total: 0, page: 1, pageSize: pageSize.value }),
 })
@@ -107,31 +111,66 @@ const stacked = useStackedTransactions({
 
 const fetchedRows = computed<StatementTransaction[]>(() => stacked.value.items)
 const totalRows = computed<number>(() => data.value?.total ?? 0)
-const shownSamleposter = computed<number>(() => stacked.value.shownSamleposter)
-const totalSamleposter = computed<number>(() => stacked.value.totalSamleposter)
-
 const visibleRows = computed<StatementTransaction[]>(() => fetchedRows.value)
 const isRawTransactionOpen = ref(false)
 const selectedRawTransaction = ref<StatementTransaction | null>(null)
+type StatementSortKey = 'bookingDate' | 'account' | 'counterpart' | 'amount' | 'transactionType'
+const sortKey = ref<StatementSortKey>('bookingDate')
+const sortDirection = ref<'asc' | 'desc'>('desc')
+const transactionTypeFilter = ref<string | undefined>(undefined)
+
+function toggleSort(key: StatementSortKey): void {
+  if (sortKey.value === key) {
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+    return
+  }
+
+  sortKey.value = key
+  sortDirection.value = key === 'bookingDate' ? 'desc' : 'asc'
+}
+
+function sortIndicator(key: StatementSortKey): string {
+  if (sortKey.value !== key) return ''
+  return sortDirection.value === 'asc' ? ' ↑' : ' ↓'
+}
+
+function sortableHeader(label: string, key: StatementSortKey) {
+  return h('button', {
+    type: 'button',
+    class: 'font-semibold hover:text-primary',
+    onClick: () => toggleSort(key),
+  }, `${label}${sortIndicator(key)}`)
+}
+
+const transactionTypeFilterOptions = computed(() => [
+  ...Array.from(new Set(
+    stacked.value.stacks
+      .map((stack) => resolveTransactionType(stack.representative))
+      .filter((value): value is string => Boolean(value)),
+  ))
+    .sort((left, right) => left.localeCompare(right, 'da'))
+    .map((value) => ({ label: value, value })),
+])
 
 const groupedVisibleRows = computed<StatementStackRow[]>(() => {
-  return stacked.value.stacks.map((stack) => {
+  const rows = stacked.value.stacks.map((stack) => {
     const items = stack.items
     const representative = stack.representative
 
-    const counterpartEntries = dedupeBadgeEntries(
-      [resolveCounterpartEntry(representative)].filter((entry): entry is BadgeEntry => Boolean(entry)),
+    const counterpartEntries = toCanonicalValueBadgeEntries(
+      representative.counterpart ?? resolveCounterpart(representative),
+      representative.counterpartHint,
     )
 
-    const referenceEntries = items.length > 1
-      ? []
-      : dedupeBadgeEntries(buildReferenceEntries(representative))
+    const referenceEntries = toCanonicalReferenceBadgeEntries(representative.referenceDetails)
 
-    const transactionTypeEntries = dedupeBadgeEntries(
-      [resolveTransactionTypeEntry(representative)].filter((entry): entry is BadgeEntry => Boolean(entry)),
+    const transactionTypeEntries = toCanonicalValueBadgeEntries(
+      resolveTransactionType(representative),
+      representative.transactionTypeHint,
     )
 
     const amount = items.reduce((sum, entry) => sum + Number(entry.amount ?? 0), 0)
+    const category: StatementStackRow['category'] = items.length > 1 ? 'Samlepost' : 'Enkeltpost'
 
     return {
       stackId: stack.stackId,
@@ -144,9 +183,60 @@ const groupedVisibleRows = computed<StatementStackRow[]>(() => {
       counterpartEntries,
       referenceEntries,
       transactionTypeEntries,
-      category: items.length > 1 ? 'Samlepost' : 'Enkeltpost',
+      category,
       lineCount: items.length,
     }
+  })
+
+  const filteredRows = transactionTypeFilter.value
+    ? rows.filter((row) => row.transactionTypeEntries.some((entry) => entry.value === transactionTypeFilter.value))
+    : rows
+
+  const rankedRows = fuzzyRankRows({
+    rows: filteredRows,
+    query: search.value,
+    getValues: (row) => [
+      row.stackId,
+      row.representative.id,
+      row.representative.runId,
+      row.account,
+      row.category,
+      row.amount,
+      row.bookingDate,
+      ...row.counterpartEntries.map((entry) => entry.value),
+      ...row.referenceEntries.map((entry) => entry.value),
+      ...row.transactionTypeEntries.map((entry) => entry.value),
+    ],
+    tieBreaker: (a, b) => {
+      const dateDiff = new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime()
+      if (dateDiff !== 0) return dateDiff
+      return String(b.representative.id).localeCompare(String(a.representative.id), 'da', { sensitivity: 'base' })
+    },
+  })
+
+  const direction = sortDirection.value === 'asc' ? 1 : -1
+  return rankedRows.sort((left, right) => {
+    let comparison = 0
+    if (sortKey.value === 'bookingDate') {
+      comparison = new Date(left.bookingDate).getTime() - new Date(right.bookingDate).getTime()
+    } else if (sortKey.value === 'amount') {
+      comparison = left.amount - right.amount
+    } else {
+      const leftValue = sortKey.value === 'account'
+        ? left.account
+        : sortKey.value === 'counterpart'
+          ? left.counterpartEntries[0]?.value ?? ''
+          : left.transactionTypeEntries[0]?.value ?? ''
+      const rightValue = sortKey.value === 'account'
+        ? right.account
+        : sortKey.value === 'counterpart'
+          ? right.counterpartEntries[0]?.value ?? ''
+          : right.transactionTypeEntries[0]?.value ?? ''
+      comparison = leftValue.localeCompare(rightValue, 'da', { sensitivity: 'base' })
+    }
+
+    if (comparison !== 0) return comparison * direction
+    return String(left.stackId).localeCompare(String(right.stackId), 'da', { sensitivity: 'base' })
   })
 })
 
@@ -160,7 +250,11 @@ watch(pageSize, () => {
   page.value = 1
 })
 
-type CsvColumn = { header: string; value: (row: StatementTransaction) => string | number | null | undefined }
+watch(transactionTypeFilter, () => {
+  page.value = 1
+})
+
+type CsvColumn = { header: string; value: (row: StatementStackRow) => string | number | null | undefined }
 
 function escapeCsvValue(value: unknown): string {
   if (value === null || value === undefined) return ''
@@ -170,36 +264,51 @@ function escapeCsvValue(value: unknown): string {
   return needsQuotes ? `"${escaped}"` : escaped
 }
 
-function toCsv(rows: StatementTransaction[], columns: CsvColumn[]): string {
+function toCsv(rows: StatementStackRow[], columns: CsvColumn[]): string {
   const delimiter = ';'
   const headerLine = columns.map((c) => escapeCsvValue(c.header)).join(delimiter)
   const lines = rows.map((row) => columns.map((c) => escapeCsvValue(c.value(row))).join(delimiter))
   return [headerLine, ...lines].join('\n')
 }
 
+function formatDanishAmount(value: unknown): string {
+  const amount = Number(value)
+  if (!Number.isFinite(amount)) return ''
+
+  return new Intl.NumberFormat('da-DK', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount)
+}
+
+function lastEntryDetail(stack: StatementStackRow): StatementTransaction {
+  return stack.items.reduce((latest, item) => {
+    if ((item.entrySubIndex ?? 0) > (latest.entrySubIndex ?? 0)) return item
+    return latest
+  }, stack.representative)
+}
+
 function downloadStatementCsv(): void {
-  if (!process.client) return
-  if (!visibleRows.value.length) return
+  if (!import.meta.client) return
+  if (!groupedVisibleRows.value.length) return
 
   const columns: CsvColumn[] = [
     { header: 'Bogføringsdato', value: (r) => r.bookingDate },
-    { header: 'Kontonavn', value: (r) => r.bankAccountName ?? '' },
-    { header: 'Konto-id', value: (r) => r.accountId },
-    { header: 'Beløb', value: (r) => r.amount },
-    { header: 'Saldo', value: (r) => r.runningBalance ?? '' },
-    { header: 'Valuta', value: (r) => r.currency ?? 'DKK' },
-    { header: 'Kredit/debet', value: (r) => r.creditDebitIndicator },
-    { header: 'Modpart', value: (r) => resolveCounterpart(r) ?? '' },
-    { header: 'Reference', value: (r) => buildReference(r).join(' · ') },
-    { header: 'Transaktionstype', value: (r) => resolveTransactionType(r) ?? '' },
-    { header: 'Transaktions-id', value: (r) => r.id },
-    { header: 'Kørsel', value: (r) => r.runId },
-    { header: 'Status', value: (r) => r.status ?? '' },
-    { header: 'Behandlingsstatus', value: (r) => r.processingStatus ?? '' },
-    { header: 'Regel-id', value: (r) => r.ruleApplied ?? '' }
+    { header: 'Kontonavn', value: (r) => r.account },
+    { header: 'Konto-id', value: (r) => r.representative.accountId ?? '' },
+    { header: 'Beløb', value: (r) => formatDanishAmount(r.amount) },
+    { header: 'Saldo', value: (r) => formatDanishAmount(lastEntryDetail(r).runningBalance) },
+    { header: 'Valuta', value: (r) => r.representative.currency ?? 'DKK' },
+    { header: 'Kredit/debet', value: (r) => r.representative.creditDebitIndicator === 'CRDT' ? 'K' : r.representative.creditDebitIndicator === 'DBIT' ? 'D' : '' },
+    { header: 'Modpart', value: (r) => r.counterpartEntries[0]?.value ?? '' },
+    { header: 'Posteringstekst', value: (r) => r.representative.postingText ?? r.referenceEntries.map((entry) => entry.value).join(' · ') },
+    { header: 'EntryRef', value: (r) => r.representative.ntryRef ?? '' },
+    { header: 'Transaktionstype', value: (r) => r.transactionTypeEntries[0]?.value ?? '' },
+    { header: 'Kategori', value: (r) => r.category },
+    { header: 'Antal linjer', value: (r) => r.lineCount },
   ]
 
-  const csv = toCsv(visibleRows.value, columns)
+  const csv = toCsv(groupedVisibleRows.value, columns)
   const bom = '\ufeff'
   const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8' })
   const url = URL.createObjectURL(blob)
@@ -258,68 +367,6 @@ type StatementStackRow = {
   lineCount: number
 }
 
-function resolveCounterpartEntry(row: StatementTransaction): BadgeEntry | null {
-  const isOutgoing = row.creditDebitIndicator === 'DBIT'
-
-  const outgoingCandidates: Array<{ value: string | null; hint: string }> = [
-    { value: row.creditorName, hint: 'creditorName' },
-    { value: row.ultimateCreditorName, hint: 'ultimateCreditorName' },
-    { value: row.creditorId, hint: 'creditorId' },
-    { value: row.creditorAccountIban, hint: 'creditorAccountIban' },
-  ]
-
-  const incomingCandidates: Array<{ value: string | null; hint: string }> = [
-    { value: row.debtorName, hint: 'debtorName' },
-    { value: row.ultimateDebtorName, hint: 'ultimateDebtorName' },
-    { value: row.debtorId, hint: 'debtorId' },
-    { value: row.debtorAccountIban, hint: 'debtorAccountIban' },
-  ]
-
-  const selected = isOutgoing ? outgoingCandidates : incomingCandidates
-  for (const candidate of selected) {
-    const value = String(candidate.value ?? '').trim()
-    if (value.length) {
-      return { value, hint: candidate.hint }
-    }
-  }
-
-  return null
-}
-
-function resolveTransactionTypeEntry(row: StatementTransaction): BadgeEntry | null {
-  if (row.transactionType && row.transactionType.trim().length) {
-    return {
-      value: row.transactionType.trim(),
-      hint: row.transactionTypeHint ?? 'transactionType',
-    }
-  }
-
-  const parts: string[] = []
-  const sourceParts: string[] = []
-
-  if (row.bkTxCdDomain?.trim()) {
-    parts.push(row.bkTxCdDomain.trim())
-    sourceParts.push('bkTxCdDomain')
-  }
-  if (row.bkTxCdFamily?.trim()) {
-    parts.push(row.bkTxCdFamily.trim())
-    sourceParts.push('bkTxCdFamily')
-  }
-  if (row.bkTxCdSubFamily?.trim()) {
-    parts.push(row.bkTxCdSubFamily.trim())
-    sourceParts.push('bkTxCdSubFamily')
-  }
-
-  if (!parts.length) {
-    return null
-  }
-
-  return {
-    value: parts.join('/'),
-    hint: sourceParts.join(' + '),
-  }
-}
-
 function buildReferenceEntries(row: StatementTransaction): BadgeEntry[] {
   return buildReferenceBadgeEntries([
     ...(Array.isArray(row.remittanceUstrd)
@@ -339,10 +386,6 @@ function buildReferenceEntries(row: StatementTransaction): BadgeEntry[] {
     { value: row.ntryAcctSvcrRef, hint: 'ntryAcctSvcrRef' },
     { value: row.ntryRef, hint: 'ntryRef' },
   ])
-}
-
-function buildReference(row: StatementTransaction): string[] {
-  return buildReferenceEntries(row).map((entry) => entry.value)
 }
 
 function openRawTransaction(row: StatementStackRow): void {
@@ -381,7 +424,7 @@ const rawTriad500Values = computed<string[]>(() =>
 const columns: TableColumn<StatementStackRow>[] = [
   { // Banking date
     accessorKey: 'bookingDate',
-    header: 'Dato',
+    header: () => sortableHeader('Dato', 'bookingDate'),
     size: 120,
     cell: ({ row }) => {
       return new Date(row.original.bookingDate).toLocaleString('da-DK', {
@@ -393,7 +436,7 @@ const columns: TableColumn<StatementStackRow>[] = [
   },
   { // Bank account
     id: 'account',
-    header: 'Konto',
+    header: () => sortableHeader('Konto', 'account'),
     size: 180,
     cell: ({ row }) => {
       const value = row.original.account
@@ -406,13 +449,29 @@ const columns: TableColumn<StatementStackRow>[] = [
   },
   { // Amount
     id: 'amount',
-    header: 'Beløb',
+    header: () => sortableHeader('Beløb', 'amount'),
     size: 140,
     cell: ({ row }) => h('span', { class: 'font-bold' }, formatSignedDkk(row.original.amount)),
   },
+  { // Category (samlepost vs. enkeltpost)
+    id: 'category',
+    header: 'Kategori',
+    cell: ({ row }) => {
+      const lineCount = row.original.lineCount
+      const category = row.original.category
+
+      return h('div', { class: 'flex items-center gap-2' }, [
+        h(UBadge, {
+          variant: 'subtle',
+          color: 'neutral',
+        }, () => category),
+        h('span', { class: 'text-xs text-muted' }, `${lineCount} linje${lineCount === 1 ? '' : 'r'}`),
+      ])
+    },
+  },
   { // Counterparty
     id: 'counterpart',
-    header: 'Modpart',
+    header: () => sortableHeader('Modpart', 'counterpart'),
     size: 220,
     cell: ({ row }) => {
       const entries = row.original.counterpartEntries
@@ -457,7 +516,7 @@ const columns: TableColumn<StatementStackRow>[] = [
   },
   { // Transaction type (aggregated from multiple fields)
     id: 'type',
-    header: 'Transaktionstype',
+    header: () => sortableHeader('Transaktionstype', 'transactionType'),
     size: 180,
     cell: ({ row }) => {
       const entries = row.original.transactionTypeEntries
@@ -478,25 +537,8 @@ const columns: TableColumn<StatementStackRow>[] = [
       )
     }
   },
-  { // Category (samlepost vs. enkeltpost)
-    id: 'category',
-    header: 'Kategori',
-    cell: ({ row }) => {
-      const lineCount = row.original.lineCount
-      const category = row.original.category
-
-      return h('div', { class: 'flex items-center gap-2' }, [
-        h(UBadge, {
-          variant: 'subtle',
-          color: 'neutral',
-        }, () => category),
-        h('span', { class: 'text-xs text-muted' }, `${lineCount} linje${lineCount === 1 ? '' : 'r'}`),
-      ])
-    },
-  },
   {
     id: 'actions',
-    header: 'Handling',
     cell: ({ row }) => h(resolveComponent('UButton'), {
       size: 'sm',
       color: 'primary',
@@ -507,9 +549,13 @@ const columns: TableColumn<StatementStackRow>[] = [
   },
 ]
 
-const columnVisibility = ref({
+const columnVisibility = ref<Record<string, boolean>>({
   search_flat: false,
 })
+
+function updateColumnVisibility(value: Record<string, boolean>): void {
+  columnVisibility.value = value
+}
 
 const tableUi = {
   base: 'border-separate border-spacing-0',
@@ -553,78 +599,42 @@ const tableUi = {
     </template>
 
     <template #body>
-      <div v-if="status !== 'pending' && !totalRows" class="py-10 text-center text-gray-500">
-          Der er ingen transaktioner at vise.
-      </div>
-      <template class="space-y-4" v-else>
+      <div class="space-y-4">
         <FiltersRow
           v-model:account-ids="selectedAccountIds"
           v-model:search="globalFilterValue"
           v-model:date-range="dateRange"
+          v-model:transaction-type="transactionTypeFilter"
+          v-model:page-size="pageSize"
           :reset-date-range="defaultRange"
           :time-zone="DEFAULT_TIME_ZONE"
           :show-search="true"
+          :show-transaction-type="true"
+          :transaction-type-options="transactionTypeFilterOptions"
+          :show-page-size="true"
+          :page-size-options="pageSizeOptions"
           search-placeholder="Søg i kontoudtog..."
         />
 
-        <div v-if="dateRange?.start && dateRange?.end" class="mb-3 mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div class="text-sm text-muted">
-            <template v-if="pending">
-              <USkeleton class="h-4 w-56" />
-            </template>
-            <template v-else>
-              Viser {{ groupedVisibleRows.length }} af {{ totalSamleposter }} posteringer
-            </template>
-          </div>
-
-          <USelect
-            v-model="pageSize"
-            :items="pageSizeOptions"
-            labelKey="label"
-            valueKey="value"
-            class="w-full sm:w-34"
-            :disabled="pending"
-          />
-        </div>
-
-        <UEmpty
-          v-if="!visibleRows.length && status !== 'pending'"
-          :icon="appConfig.ui.icons.archive"
-          :title="fetchedRows.length ? 'Ingen resultater' : 'Ingen transaktioner'"
-          :description="fetchedRows.length
-            ? 'Ingen transaktioner matcher den valgte søgning/konto i perioden.'
-            : 'Der er ingen transaktioner i den valgte periode endnu.'"
-          class="border border-dashed border-default rounded-lg"
-        >
-          <template #actions>
-            <UButton size="sm" variant="solid" @click="refresh()">
-              Opdater
-            </UButton>
-          </template>
-        </UEmpty>
-
-        <UTable
-          v-else
-          :key="statementTableKey"
-          v-model:column-visibility="columnVisibility"
-          :data="groupedVisibleRows"
+        <TransactionsStackedTransactionsTable
+          :table-key="statementTableKey"
+          :rows="groupedVisibleRows"
           :columns="columns"
           :loading="status === 'pending'"
+          :column-visibility="columnVisibility"
+          empty-label="Der er ingen transaktioner at vise."
           :ui="tableUi"
+          @update:column-visibility="updateColumnVisibility"
         />
 
-        <div v-if="totalRows > pageSize" class="flex items-center border-t border-default pt-4 mt-auto">
-          <div class="flex-1" />
-          <div class="flex justify-center flex-1">
-            <UPagination
-              :default-page="page"
-              :items-per-page="pageSize"
-              :total="totalRows"
-              @update:page="setPage"
-            />
-          </div>
-          <div class="flex-1" />
-        </div>
+        <TransactionsTablePagination
+          :page="page"
+          :page-size="pageSize"
+          :total="totalRows"
+          :shown="groupedVisibleRows.length"
+          :pending="pending"
+          @update:page="setPage"
+        />
 
         <UModal v-model:open="isRawTransactionOpen" title="Rå transaktion (repræsentantlinje)" :ui="{ body: 'space-y-4' }">
           <template #body>
@@ -712,7 +722,7 @@ const tableUi = {
             </div>
           </template>
         </UModal>
-      </template>
+      </div>
     </template>
   </UDashboardPanel>
 </template>

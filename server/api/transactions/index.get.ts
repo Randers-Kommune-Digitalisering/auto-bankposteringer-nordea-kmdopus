@@ -5,6 +5,7 @@ import { account } from '~/lib/db/schema/account'
 import { manualBookingDraft } from '~/lib/db/schema/manualBookingDraft'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import { transactionCodeCatalog } from '~/lib/db/schema/transactionCodeCatalog'
+import { bankingStatementBalance } from '~/lib/db/schema/statement'
 import type {
   OpenTransaction,
   OpenTransactionInput,
@@ -76,6 +77,7 @@ type BaseRow = {
   processingStatus: 'åben' | 'bogført' | 'undtaget' | null
   ruleApplied: number | null
   draftNote: string | null
+  runningBalance?: string | null
 }
 
 type TransactionCodeCatalogMap = Map<string, string>
@@ -152,56 +154,58 @@ function dedupeStrings(values: Array<string | null | undefined>): string[] {
   return result
 }
 
-function escapeRegExp(input: string): string {
-  return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-}
-
-function isSubsequence(needle: string, haystack: string): boolean {
-  if (!needle.length) return true
-  let i = 0
-  let j = 0
-  while (i < needle.length && j < haystack.length) {
-    if (needle[i] === haystack[j]) i += 1
-    j += 1
-  }
-  return i === needle.length
-}
-
-function fuzzyTokenScore(token: string, haystack: string): number {
-  const directIndex = haystack.indexOf(token)
-  if (directIndex >= 0) return 400 - Math.min(directIndex, 350)
-
-  const compactToken = token.replace(/\s+/g, '')
-  if (compactToken.length >= 3 && isSubsequence(compactToken, haystack.replace(/\s+/g, ''))) {
-    return 120
-  }
-
-  const tokenParts = token.split(/\s+/).filter(Boolean)
-  if (tokenParts.length > 1 && tokenParts.every((part) => haystack.includes(part))) {
-    return 90
-  }
-
-  return -1
-}
-
-function fuzzyScore(haystack: string, query: string): number {
-  const normalizedHaystack = haystack.toLowerCase()
-  const tokens = query
-    .toLowerCase()
+function parseSearchTokens(search: string): string[] {
+  return search
+    .trim()
     .split(/\s+/)
     .map((token) => token.trim())
-    .filter(Boolean)
+    .filter((token) => token.length >= 2)
+}
 
-  if (!tokens.length) return 0
+function buildSearchTokenCondition(token: string) {
+  const pattern = `%${token}%`
 
-  let score = 0
-  for (const token of tokens) {
-    const tokenScore = fuzzyTokenScore(token, normalizedHaystack)
-    if (tokenScore < 0) return -1
-    score += tokenScore
-  }
+  return or(
+    sql`${transaction.id}::text ILIKE ${pattern}`,
+    sql`${transaction.runId}::text ILIKE ${pattern}`,
+    sql`${transaction.accountId}::text ILIKE ${pattern}`,
+    sql`${account.name} ILIKE ${pattern}`,
 
-  return score
+    sql`${transaction.amount}::text ILIKE ${pattern}`,
+    sql`${transaction.currency} ILIKE ${pattern}`,
+    sql`${transaction.creditDebitIndicator}::text ILIKE ${pattern}`,
+    sql`${transaction.status} ILIKE ${pattern}`,
+    sql`${transactionProcessing.status}::text ILIKE ${pattern}`,
+    sql`${transactionProcessing.ruleApplied}::text ILIKE ${pattern}`,
+
+    sql`${transaction.ntryRef} ILIKE ${pattern}`,
+    sql`${transaction.ntryAcctSvcrRef} ILIKE ${pattern}`,
+    sql`${transaction.entryAdditionalInfo} ILIKE ${pattern}`,
+    sql`${transaction.txAcctSvcrRef} ILIKE ${pattern}`,
+    sql`${transaction.refsEndToEndId} ILIKE ${pattern}`,
+    sql`${transaction.refsInstrId} ILIKE ${pattern}`,
+    sql`${transaction.refsPmtInfId} ILIKE ${pattern}`,
+    sql`${transaction.uetr} ILIKE ${pattern}`,
+    sql`${transaction.txAdditionalInfo} ILIKE ${pattern}`,
+
+    sql`${transaction.bkTxCdDomain} ILIKE ${pattern}`,
+    sql`${transaction.bkTxCdFamily} ILIKE ${pattern}`,
+    sql`${transaction.bkTxCdSubFamily} ILIKE ${pattern}`,
+    sql`${transaction.bkTxCdProprietary} ILIKE ${pattern}`,
+
+    sql`${transaction.debtorName} ILIKE ${pattern}`,
+    sql`${transaction.debtorId} ILIKE ${pattern}`,
+    sql`${transaction.debtorAccountIban} ILIKE ${pattern}`,
+    sql`${transaction.creditorName} ILIKE ${pattern}`,
+    sql`${transaction.creditorId} ILIKE ${pattern}`,
+    sql`${transaction.creditorAccountIban} ILIKE ${pattern}`,
+    sql`${transaction.ultimateDebtorName} ILIKE ${pattern}`,
+    sql`${transaction.ultimateCreditorName} ILIKE ${pattern}`,
+
+    sql`array_to_string(coalesce(${transaction.remittanceUstrd}, ARRAY[]::text[]), ' ') ILIKE ${pattern}`,
+    sql`${transaction.remittanceCreditorReference} ILIKE ${pattern}`,
+    sql`array_to_string(coalesce(${transaction.remittanceAdditional}, ARRAY[]::text[]), ' ') ILIKE ${pattern}`,
+  )
 }
 
 function normalizeCodeKey(raw: string): string {
@@ -253,69 +257,6 @@ function resolveTransactionType(input: {
   }
 }
 
-function buildSearchText(row: BaseRow): string {
-  const chunks: string[] = []
-
-  const push = (value: unknown) => {
-    const normalized = normalizeString(value)
-    if (!normalized) return
-    chunks.push(normalized)
-  }
-
-  push(row.id)
-  push(row.runId)
-  push(row.accountId)
-  push(row.bankAccountName)
-  push(String(row.amount ?? ''))
-  push(row.currency)
-  push(row.creditDebitIndicator)
-  push(row.status)
-  push(row.processingStatus)
-  push(String(row.ruleApplied ?? ''))
-
-  push(row.ntryRef)
-  push(row.ntryAcctSvcrRef)
-  push(row.entryAdditionalInfo)
-  push(row.txAcctSvcrRef)
-  push(row.refsEndToEndId)
-  push(row.refsInstrId)
-  push(row.refsPmtInfId)
-  push(row.uetr)
-  push(row.txAdditionalInfo)
-
-  push(row.bkTxCdProprietary)
-  push(row.bkTxCdDomain)
-  push(row.bkTxCdFamily)
-  push(row.bkTxCdSubFamily)
-
-  push(row.debtorName)
-  push(row.debtorId)
-  push(row.debtorAccountIban)
-  push(row.creditorName)
-  push(row.creditorId)
-  push(row.creditorAccountIban)
-  push(row.ultimateDebtorName)
-  push(row.ultimateCreditorName)
-
-  for (const value of row.remittanceUstrd ?? []) push(value)
-  for (const value of row.remittanceAdditional ?? []) push(value)
-  push(row.remittanceCreditorReference)
-
-  return chunks.join(' ')
-}
-
-function filterRowsByFuzzySearch(rows: BaseRow[], search: string): BaseRow[] {
-  const query = search.trim()
-  if (!query.length) return rows
-
-  const ranked = rows
-    .map((row) => ({ row, score: fuzzyScore(buildSearchText(row), query) }))
-    .filter((entry) => entry.score >= 0)
-    .sort((a, b) => b.score - a.score)
-
-  return ranked.map((entry) => entry.row)
-}
-
 function mapRowToStatementTransaction(
   row: BaseRow,
   samlepostId: string,
@@ -330,6 +271,30 @@ function mapRowToStatementTransaction(
     bkTxCdFamily: row.bkTxCdFamily,
     bkTxCdSubFamily: row.bkTxCdSubFamily,
     catalogByProviderCodeKey,
+  })
+
+  const canonicalFields = projectCanonicalTransactionFields({
+    id: row.id,
+    runId: row.runId,
+    bookingDate: createUtcIsoString(row.bookingDate),
+    amount: signedAmount,
+    creditDebitIndicator: row.creditDebitIndicator,
+    debtorName: row.debtorName,
+    debtorId: row.debtorId,
+    creditorName: row.creditorName,
+    creditorId: row.creditorId,
+    remittanceUstrd: row.remittanceUstrd,
+    remittanceAdditional: row.remittanceAdditional,
+    remittanceCreditorReference: row.remittanceCreditorReference,
+    entryAdditionalInfo: row.entryAdditionalInfo,
+    txAdditionalInfo: row.txAdditionalInfo,
+    refsEndToEndId: row.refsEndToEndId,
+    refsInstrId: row.refsInstrId,
+    refsPmtInfId: row.refsPmtInfId,
+    uetr: row.uetr,
+    txAcctSvcrRef: row.txAcctSvcrRef,
+    ntryAcctSvcrRef: row.ntryAcctSvcrRef,
+    ntryRef: row.ntryRef,
   })
 
   return {
@@ -368,6 +333,10 @@ function mapRowToStatementTransaction(
     transactionType: transactionType.value,
     transactionTypeCode: transactionType.code,
     transactionTypeHint: transactionType.hint,
+    postingText: canonicalFields.postingText,
+    counterpart: canonicalFields.counterpart,
+    counterpartHint: canonicalFields.counterpartHint,
+    referenceDetails: canonicalFields.referenceDetails,
 
     debtorName: row.debtorName,
     debtorId: row.debtorId,
@@ -384,7 +353,7 @@ function mapRowToStatementTransaction(
 
     processingStatus: row.processingStatus,
     ruleApplied: row.ruleApplied,
-    runningBalance: null,
+    runningBalance: row.runningBalance ?? null,
   }
 }
 
@@ -481,7 +450,9 @@ export default defineEventHandler(async (event) => {
 
   const start = parseDateParam((query as any).start)
   const end = parseDateParam((query as any).end)
-  const search = parseStringParam((query as any).search ?? (query as any).q)
+  const rawSearch = parseStringParam((query as any).search ?? (query as any).q)
+  const search = rawSearch.length >= 2 ? rawSearch : ''
+  const searchTokens = parseSearchTokens(search)
 
   const accountIds = parseStringArrayParam(
     (query as any).accountIds
@@ -495,6 +466,18 @@ export default defineEventHandler(async (event) => {
   if (start) baseConditions.push(sql`${transaction.bookingDate} >= ${start}::date`)
   if (end) baseConditions.push(sql`${transaction.bookingDate} <= ${end}::date`)
   if (accountIds.length) baseConditions.push(inArray(transaction.accountId, accountIds))
+
+  if (searchTokens.length) {
+    const tokenConditions = searchTokens
+      .map((token) => buildSearchTokenCondition(token))
+      .filter((condition): condition is NonNullable<typeof condition> => Boolean(condition))
+
+    if (tokenConditions.length === 1) {
+      baseConditions.push(tokenConditions[0])
+    } else if (tokenConditions.length > 1) {
+      baseConditions.push(and(...tokenConditions))
+    }
+  }
 
   const processingFilter = mode === 'open-items'
     ? or(eq(transactionProcessing.status, 'åben'), isNull(transactionProcessing.status))
@@ -565,7 +548,7 @@ export default defineEventHandler(async (event) => {
     .where(whereClause)
     .orderBy(desc(transaction.bookingDate), desc(transaction.id))
 
-  const filteredRows = filterRowsByFuzzySearch(rows as BaseRow[], search)
+  const filteredRows = rows as BaseRow[]
 
   const providers = Array.from(
     new Set(
@@ -598,6 +581,69 @@ export default defineEventHandler(async (event) => {
     catalogByProviderCodeKey.set(`${provider}:${normalizeCodeKey(codeKey)}`, displayName)
   }
 
+  const statementIds = Array.from(new Set(
+    filteredRows
+      .map((row) => row.statementId)
+      .filter((value): value is string => Boolean(value)),
+  ))
+  const runningBalanceByTransactionId = new Map<string, string>()
+
+  if (mode === 'statement' && statementIds.length) {
+    const openingBalances = await db
+      .select({
+        statementId: bankingStatementBalance.statementId,
+        amount: bankingStatementBalance.amount,
+        creditDebitIndicator: bankingStatementBalance.creditDebitIndicator,
+      })
+      .from(bankingStatementBalance)
+      .where(and(
+        inArray(bankingStatementBalance.statementId, statementIds),
+        eq(bankingStatementBalance.typeCode, 'OPBD'),
+      ))
+
+    const openingBalanceByStatementId = new Map<string, number>()
+    for (const row of openingBalances) {
+      openingBalanceByStatementId.set(
+        row.statementId,
+        toSignedAmount(row.amount, row.creditDebitIndicator),
+      )
+    }
+
+    const statementTransactions = await db
+      .select({
+        id: transaction.id,
+        statementId: transaction.statementId,
+        entryIndex: transaction.entryIndex,
+        entrySubIndex: transaction.entrySubIndex,
+        amount: transaction.amount,
+        creditDebitIndicator: transaction.creditDebitIndicator,
+      })
+      .from(transaction)
+      .where(inArray(transaction.statementId, statementIds))
+
+    const transactionsByStatementId = new Map<string, typeof statementTransactions>()
+    for (const row of statementTransactions) {
+      if (!row.statementId) continue
+      const rowsForStatement = transactionsByStatementId.get(row.statementId) ?? []
+      rowsForStatement.push(row)
+      transactionsByStatementId.set(row.statementId, rowsForStatement)
+    }
+
+    for (const [statementId, rowsForStatement] of transactionsByStatementId) {
+      rowsForStatement.sort((left, right) =>
+        (left.entryIndex ?? Number.MAX_SAFE_INTEGER) - (right.entryIndex ?? Number.MAX_SAFE_INTEGER)
+        || (left.entrySubIndex ?? Number.MAX_SAFE_INTEGER) - (right.entrySubIndex ?? Number.MAX_SAFE_INTEGER)
+        || left.id.localeCompare(right.id),
+      )
+
+      let balance = openingBalanceByStatementId.get(statementId) ?? 0
+      for (const row of rowsForStatement) {
+        balance += toSignedAmount(row.amount, row.creditDebitIndicator)
+        runningBalanceByTransactionId.set(row.id, String(balance))
+      }
+    }
+  }
+
   const entryGroupSizeByEntryKey = new Map<string, number>()
   for (const row of filteredRows) {
     const entryKey = toStatementEntryKey(row.statementId, row.entryIndex)
@@ -617,7 +663,10 @@ export default defineEventHandler(async (event) => {
       ntryAcctSvcrRef: row.ntryAcctSvcrRef,
     })
 
-    return mapRowToStatementTransaction(row, samlepostId, catalogByProviderCodeKey)
+    return mapRowToStatementTransaction({
+      ...row,
+      runningBalance: runningBalanceByTransactionId.get(row.id) ?? null,
+    }, samlepostId, catalogByProviderCodeKey)
   })
 
   const samlepostOrder = uniqueStackOrderFromSamlepostIds(statementRows.map((row) => row.samlepostId ?? `single:${row.id}`))

@@ -1,7 +1,10 @@
 .nuxt
 node_modules
+.pnpm-store
 .git
 .gitignore
+.secrets
+.env*
 README.md
 LICENSE
 

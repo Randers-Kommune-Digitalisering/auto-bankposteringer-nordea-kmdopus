@@ -36,7 +36,14 @@ export type DashboardLatestRun = {
   bookingDate: string
   status: string | null
   transactionsCount: number
-  errorsCount: number
+  processedTransactionsCount: number
+  bookedTransactionsCount: number
+  openTransactionsCount: number
+  exceptionTransactionsCount: number
+  activeErrorsCount: number
+  eventCount: number
+  erpRejected: boolean
+  lastActivityAt: string | null
 }
 
 export type DashboardResponse = {
