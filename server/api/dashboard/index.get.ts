@@ -4,11 +4,15 @@ import { getQuery, setHeader } from 'h3'
 import db from '~/lib/db'
 import { createUtcIsoString } from '~~/utils/function'
 import { errorLog } from '~/lib/db/schema/error'
+import { erpRequest, erpResponse } from '~/lib/db/schema/erp'
+import { job } from '~/lib/db/schema/job'
+import { outbox } from '~/lib/db/schema/outbox'
 import { run } from '~/lib/db/schema/run'
 import { rule } from '~/lib/db/schema/rule'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import type { DashboardResponse } from '~/types/dashboard'
 import { toSamlepostId, toStatementEntryKey } from '~~/server/utils/iso20022Samlepost'
+import { filterActiveRunErrors, resolveEffectiveRunStatus } from '~~/server/utils/runs/runStatus'
 
 const querySchema = z.object({
   start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
@@ -208,39 +212,109 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
   ])
 
   const runIds = latestRuns.map((entry) => entry.id)
-  const [txCounts, errorCounts] = runIds.length
+  const [txRows, errorRowsForRuns, jobRows, outboxRows, erpResponseRows] = runIds.length
     ? await Promise.all([
         db
           .select({
             runId: transaction.runId,
             transactionsCount: sql<number>`count(*)::int`,
+            status: transactionProcessing.status,
           })
           .from(transaction)
-          .where(and(
-            inArray(transaction.runId, runIds),
-            ...(txAccountFilter ? [txAccountFilter] : []),
-          ))
-          .groupBy(transaction.runId),
+          .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
+          .where(and(inArray(transaction.runId, runIds), ...(txAccountFilter ? [txAccountFilter] : [])))
+          .groupBy(transaction.runId, transactionProcessing.status),
 
         db
           .select({
             runId: errorLog.runId,
-            errorsCount: sql<number>`count(*)::int`,
+            errorCode: errorLog.errorCode,
+            errorString: errorLog.errorString,
+            createdAt: errorLog.createdAt,
           })
           .from(errorLog)
           .where(inArray(errorLog.runId, runIds))
-          .groupBy(errorLog.runId),
+          .orderBy(asc(errorLog.createdAt)),
+
+        db
+          .select({ runId: job.runId, status: job.status, updatedAt: job.updatedAt })
+          .from(job)
+          .where(inArray(job.runId, runIds)),
+
+        db
+          .select({ runId: outbox.runId, status: outbox.status, createdAt: outbox.createdAt, processedAt: outbox.processedAt })
+          .from(outbox)
+          .where(inArray(outbox.runId, runIds)),
+
+        db
+          .select({ runId: erpRequest.runId, statusText: erpResponse.statusText })
+          .from(erpRequest)
+          .innerJoin(erpResponse, eq(erpResponse.requestId, erpRequest.id))
+          .where(inArray(erpRequest.runId, runIds)),
       ])
-    : [[], []]
+    : [[], [], [], [], []]
 
   const txCountByRunId = new Map<string, number>()
-  for (const entry of txCounts) {
-    if (entry.runId) txCountByRunId.set(entry.runId, clampNumber(entry.transactionsCount))
+  const txStatusCountsByRunId = new Map<string, Record<string, number>>()
+  for (const entry of txRows) {
+    if (!entry.runId) continue
+    txCountByRunId.set(entry.runId, (txCountByRunId.get(entry.runId) ?? 0) + clampNumber(entry.transactionsCount))
+    const statusCounts = txStatusCountsByRunId.get(entry.runId) ?? {}
+    const status = String(entry.status ?? 'åben')
+    statusCounts[status] = (statusCounts[status] ?? 0) + clampNumber(entry.transactionsCount)
+    txStatusCountsByRunId.set(entry.runId, statusCounts)
   }
 
-  const errorCountByRunId = new Map<string, number>()
-  for (const entry of errorCounts) {
-    if (entry.runId) errorCountByRunId.set(entry.runId, clampNumber(entry.errorsCount))
+  const activeErrorsByRunId = new Map<string, number>()
+  const eventCountByRunId = new Map<string, number>()
+  const hasFailedIoByRunId = new Map<string, boolean>()
+  const hasInFlightIoByRunId = new Map<string, boolean>()
+  const hasNegativeErpResponseByRunId = new Map<string, boolean>()
+  const lastActivityByRunId = new Map<string, Date>()
+
+  const updateLastActivity = (runId: string | null, value: unknown) => {
+    if (!runId || !value) return
+    const date = value instanceof Date ? value : new Date(String(value))
+    if (Number.isNaN(date.getTime())) return
+    const current = lastActivityByRunId.get(runId)
+    if (!current || date > current) lastActivityByRunId.set(runId, date)
+  }
+
+  const errorsByRunId = new Map<string, typeof errorRowsForRuns>()
+  for (const entry of errorRowsForRuns) {
+    if (!entry.runId) continue
+    const rows = errorsByRunId.get(entry.runId) ?? []
+    rows.push(entry)
+    errorsByRunId.set(entry.runId, rows)
+    updateLastActivity(entry.runId, entry.createdAt)
+  }
+  for (const [runId, rows] of errorsByRunId) {
+    eventCountByRunId.set(runId, rows.length)
+    activeErrorsByRunId.set(runId, filterActiveRunErrors(rows).length)
+  }
+
+  for (const entry of jobRows) {
+    if (!entry.runId) continue
+    const status = String(entry.status)
+    if (status === 'failed') hasFailedIoByRunId.set(entry.runId, true)
+    if (status === 'pending' || status === 'in_progress') hasInFlightIoByRunId.set(entry.runId, true)
+    updateLastActivity(entry.runId, entry.updatedAt)
+  }
+
+  for (const entry of outboxRows) {
+    if (!entry.runId) continue
+    const status = String(entry.status)
+    if (status === 'failed') hasFailedIoByRunId.set(entry.runId, true)
+    if (status === 'pending' || status === 'processing') hasInFlightIoByRunId.set(entry.runId, true)
+    updateLastActivity(entry.runId, entry.processedAt ?? entry.createdAt)
+  }
+
+  for (const entry of erpResponseRows) {
+    if (!entry.runId) continue
+    const statusText = String(entry.statusText ?? '')
+    if (statusText && !statusText.trim().toUpperCase().startsWith('OK')) {
+      hasNegativeErpResponseByRunId.set(entry.runId, true)
+    }
   }
 
   const rawSeriesByDate = new Map<string, { total: number; matched: number; autoBooked: number }>()
@@ -326,9 +400,25 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
     latestRuns: latestRuns.map((entry) => ({
       id: entry.id,
       bookingDate: entry.bookingDate instanceof Date ? createUtcIsoString(entry.bookingDate) : String(entry.bookingDate).slice(0, 10),
-      status: entry.status ?? null,
+      status: resolveEffectiveRunStatus({
+        baseStatus: entry.status,
+        hasActiveErrors: (activeErrorsByRunId.get(entry.id) ?? 0) > 0,
+        hasNegativeErpResponse: hasNegativeErpResponseByRunId.get(entry.id) ?? false,
+        hasFailedIo: hasFailedIoByRunId.get(entry.id) ?? false,
+        hasInFlightIo: hasInFlightIoByRunId.get(entry.id) ?? false,
+      }),
       transactionsCount: txCountByRunId.get(entry.id) ?? 0,
-      errorsCount: errorCountByRunId.get(entry.id) ?? 0,
+      processedTransactionsCount: (txStatusCountsByRunId.get(entry.id)?.bogført ?? 0) +
+        (txStatusCountsByRunId.get(entry.id)?.undtaget ?? 0),
+      bookedTransactionsCount: txStatusCountsByRunId.get(entry.id)?.bogført ?? 0,
+      openTransactionsCount: txStatusCountsByRunId.get(entry.id)?.åben ?? 0,
+      exceptionTransactionsCount: txStatusCountsByRunId.get(entry.id)?.undtaget ?? 0,
+      activeErrorsCount: activeErrorsByRunId.get(entry.id) ?? 0,
+      eventCount: eventCountByRunId.get(entry.id) ?? 0,
+      erpRejected: hasNegativeErpResponseByRunId.get(entry.id) ?? false,
+      lastActivityAt: lastActivityByRunId.has(entry.id)
+        ? lastActivityByRunId.get(entry.id)!.toISOString()
+        : null,
     })),
   }
 

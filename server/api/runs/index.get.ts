@@ -22,6 +22,7 @@ import type {
   TransactionListItem,
 } from "~/types/runs";
 import { parseAmount } from "#engine/matching/domain/amount";
+import { resolveEffectiveRunStatus } from "~~/server/utils/runs/runStatus";
 
 const MISSING_MAPPING_ERROR_PATTERN = /Mangler konterings-mapping \((artskonto|statuskonto)\) for bankkonto:/i
 const MAPPING_RECOVERY_SUCCESS_PATTERN = /^Genkørsel efter statuskonto-mapping lykkedes\./i
@@ -373,21 +374,21 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
     }
   }
 
-  function resolveEffectiveRunStatus(runId: string, base: unknown): RunStatus {
+  function resolveRunStatus(runId: string, base: unknown): RunStatus {
     const hasErrors = (errorsByRun.get(runId)?.length ?? 0) > 0
-    if (hasErrors) return 'fejl'
-    if (hasNegativeErpResponseByRun.get(runId)) return 'fejl'
-    if (hasFailedIoByRun.get(runId)) return 'fejl'
-    if (hasInFlightByRun.get(runId)) return 'indlæser'
-
-    const baseStatus = (base ?? null) as RunStatus | null
-    return baseStatus ?? 'afventer'
+    return resolveEffectiveRunStatus({
+      baseStatus: base,
+      hasActiveErrors: hasErrors,
+      hasNegativeErpResponse: hasNegativeErpResponseByRun.get(runId) ?? false,
+      hasFailedIo: hasFailedIoByRun.get(runId) ?? false,
+      hasInFlightIo: hasInFlightByRun.get(runId) ?? false,
+    })
   }
 
   return runRows.map<RunListItem>((row) => ({
     ...row,
     bookingDate: createUtcDateString(row.bookingDate),
-    status: resolveEffectiveRunStatus(String(row.id), row.status),
+    status: resolveRunStatus(String(row.id), row.status),
     transactions: transactionsByRun.get(row.id) ?? [],
     documents: documentsByRun.get(row.id) ?? [],
     errors: errorsByRun.get(row.id) ?? [],

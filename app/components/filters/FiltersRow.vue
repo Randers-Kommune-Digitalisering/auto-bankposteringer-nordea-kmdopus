@@ -4,11 +4,14 @@ import { DEFAULT_TIME_ZONE } from '~/utils'
 
 const appConfig = useAppConfig()
 
-// TODO(refactor): Move shared rows-per-page selection into this component.
-
 type DateRangeValue = {
   start: DateValue;
   end: DateValue;
+}
+
+type SelectOption = {
+  label: string
+  value: string | number
 }
 
 const props = withDefaults(
@@ -32,6 +35,15 @@ const props = withDefaults(
     searchLabel?: string
     searchPlaceholder?: string
     showSearch?: boolean
+
+    transactionType?: string
+    transactionTypeOptions?: SelectOption[]
+    transactionTypePlaceholder?: string
+    showTransactionType?: boolean
+
+    pageSize?: number
+    pageSizeOptions?: SelectOption[]
+    showPageSize?: boolean
   }>(),
   {
     timeZone: DEFAULT_TIME_ZONE,
@@ -48,6 +60,13 @@ const props = withDefaults(
     searchLabel: 'Søg',
     searchPlaceholder: 'Søg...',
     showSearch: false,
+    transactionType: undefined,
+    transactionTypeOptions: () => [],
+    transactionTypePlaceholder: 'Alle transaktionstyper',
+    showTransactionType: false,
+    pageSize: undefined,
+    pageSizeOptions: () => [],
+    showPageSize: false,
   },
 )
 
@@ -55,6 +74,8 @@ const emit = defineEmits<{
   (e: 'update:dateRange', value: DateRangeValue): void
   (e: 'update:accountIds', value: string[]): void
   (e: 'update:search', value: string): void
+  (e: 'update:transactionType', value: string | undefined): void
+  (e: 'update:pageSize', value: number): void
 }>()
 
 const dateRangeModel = computed<DateRangeValue>({
@@ -75,6 +96,18 @@ const accountIdsModel = computed<string[]>({
 const searchModel = computed<string>({
   get: () => props.search,
   set: (next) => emit('update:search', next),
+})
+
+const transactionTypeModel = computed<string | undefined>({
+  get: () => props.transactionType,
+  set: (next) => emit('update:transactionType', next),
+})
+
+const pageSizeModel = computed<number | undefined>({
+  get: () => props.pageSize,
+  set: (next) => {
+    if (typeof next === 'number') emit('update:pageSize', next)
+  },
 })
 
 </script>
@@ -99,6 +132,20 @@ const searchModel = computed<string>({
         />
       </div>
 
+      <UFormField v-if="props.showTransactionType" label="Transaktionstype" class="min-w-64 max-w-sm">
+        <USelectMenu
+          v-model="transactionTypeModel"
+          :items="props.transactionTypeOptions"
+          multiple
+          labelKey="label"
+          valueKey="value"
+          :placeholder="props.transactionTypePlaceholder"
+          color="primary"
+          variant="subtle"
+          class="w-full"
+        />
+      </UFormField>
+
       <UFormField v-if="showSearch && props.showSearchLabel" :label="props.searchLabel" class="min-w-64 max-w-sm">
         <UInput
           v-model="searchModel"
@@ -121,6 +168,16 @@ const searchModel = computed<string>({
         :trailing-icon="appConfig.ui.icons.search"
         :placeholder="searchPlaceholder"
       />
+
+      <UFormField v-if="props.showPageSize" label="Antal pr. side" class="w-40">
+        <USelect
+          v-model="pageSizeModel"
+          :items="props.pageSizeOptions"
+          label-key="label"
+          value-key="value"
+          class="w-full"
+        />
+      </UFormField>
     </div>
 
     <div v-if="$slots.date || props.showDate" class="w-full sm:w-auto">

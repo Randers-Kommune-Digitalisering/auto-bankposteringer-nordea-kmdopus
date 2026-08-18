@@ -1,14 +1,16 @@
 <script lang="ts" setup>
 import { h } from 'vue'
-import { today } from '@internationalized/date'
+import { today, type DateValue } from '@internationalized/date'
 import type { TableColumn } from '@nuxt/ui'
 import { DEFAULT_TIME_ZONE, formatSignedDkk } from '~/utils'
 import BookingModal from '~/components/open-items/BookingModal.vue'
 import BookingSummaryCard from '~/components/open-items/BookingSummaryCard.vue'
 import { TRANSACTION_BADGE_COLUMN_CLASS, TRANSACTION_BADGE_STYLE } from '~/lib/presenters/transactionBadgeStyles'
 import { formatTransactionFieldHint } from '~/lib/presenters/transactionFieldHints'
-import { extractSummaryCategoryEntries, type TransactionSummaryCategoryKey } from '~/lib/presenters/transactionSummaryEntries'
+import { toCanonicalReferenceBadgeEntries, toCanonicalValueBadgeEntries } from '~/lib/presenters/referenceBadgeEntries'
+import { useDebouncedString } from '~/composables/useDebouncedString'
 import { useOpenTransactions } from '~/composables/useOpenTransactions'
+import { fuzzyRankRows } from '~/lib/search/fuzzyRanking'
 import type { OpenTransaction, TransactionSummary } from '~/types/transactions'
 
 const appConfig = useAppConfig()
@@ -22,7 +24,8 @@ const defaultRange = {
   end: endDefault
 }
 
-const dateRange = ref<any>(defaultRange)
+// shallowRef keeps CalendarDate class identity, which deep ref unwrapping would strip.
+const dateRange = shallowRef<{ start: DateValue; end: DateValue }>(defaultRange)
 
 function toDateOnlyParam(value: unknown): string | undefined {
   if (!value) return undefined
@@ -30,8 +33,8 @@ function toDateOnlyParam(value: unknown): string | undefined {
     if (Number.isNaN(value.getTime())) return undefined
     return value.toISOString().slice(0, 10)
   }
-  if (typeof value === 'object' && value && 'toString' in (value as any)) {
-    const asText = String((value as any).toString?.() ?? '').trim()
+  if (typeof value === 'object') {
+    const asText = String(value).trim()
     if (/^\d{4}-\d{2}-\d{2}$/.test(asText)) return asText
   }
   const trimmed = String(value).trim()
@@ -49,10 +52,12 @@ const end = computed(() => toDateOnlyParam(dateRange.value?.end))
 // Source of truth: selected account IDs (strings)
 const selectedAccountIds = ref<string[]>([])
 const tableSearchValue = ref('')
-const openItemsSearch = computed(() => tableSearchValue.value.trim())
+const debouncedTableSearchValue = useDebouncedString(tableSearchValue, { delayMs: 500 })
+const openItemsSearch = computed(() => debouncedTableSearchValue.value.trim())
 
 const page = ref(1)
 const pageSize = ref(25)
+const transactionTypeFilter = ref<string | undefined>(undefined)
 const pageSizeOptions = [5, 10, 25, 50].map((value) => ({
   label: `${value} pr. side`,
   value,
@@ -76,7 +81,6 @@ const {
 const isBookingOpen = ref(false)
 const useTableView = ref(false)
 
-const expandedTableStackIds = ref<Record<string, boolean>>({})
 const selectedTransactionId = ref<string | null>(null)
 const selectedGroupTransactions = ref<OpenTransaction[] | null>(null)
 
@@ -100,14 +104,6 @@ type OpenTransactionStack = {
   isGrouped: boolean
 }
 
-function toggleTableStack(stackId: string) {
-  expandedTableStackIds.value[stackId] = !expandedTableStackIds.value[stackId]
-}
-
-function isTableStackExpanded(stackId: string): boolean {
-  return expandedTableStackIds.value[stackId] ?? false
-}
-
 type OpenItemsTableRow = {
   stackId: string
   bookingDate: string
@@ -122,19 +118,6 @@ type OpenItemsTableRow = {
   stack: OpenTransactionStack
 }
 
-type OpenItemsListCategory = 'counterpart' | 'transactionType' | 'reference'
-
-const openItemsCategoryMap: Record<OpenItemsListCategory, TransactionSummaryCategoryKey> = {
-  counterpart: 'part',
-  transactionType: 'transaktionstype',
-  reference: 'reference',
-}
-
-function extractEntriesForCategory(summary: TransactionSummary, category: OpenItemsListCategory): Array<{ value: string; hint?: string }> {
-  const sectionKey = openItemsCategoryMap[category]
-  return extractSummaryCategoryEntries(summary, sectionKey)
-}
-
 const tableRows = computed<OpenItemsTableRow[]>(() => {
   const buckets = Object.values(stacksByAccount.value) as OpenTransactionStack[][]
 
@@ -142,12 +125,9 @@ const tableRows = computed<OpenItemsTableRow[]>(() => {
     .flatMap((stacks) => stacks)
     .map((stack) => {
       const representative = stack.representative
-      const summary = toStackSummary(stack)
-      const referenceEntries = stack.items.length > 1
-        ? []
-        : extractEntriesForCategory(summary, 'reference')
-      const counterpartEntries = extractEntriesForCategory(summary, 'counterpart')
-      const transactionTypeEntries = extractEntriesForCategory(summary, 'transactionType')
+      const referenceEntries = toCanonicalReferenceBadgeEntries(representative.referenceDetails)
+      const counterpartEntries = toCanonicalValueBadgeEntries(representative.counterpart, representative.counterpartHint)
+      const transactionTypeEntries = toCanonicalValueBadgeEntries(representative.transactionType, representative.transactionTypeHint)
 
       return {
         stackId: stack.stackId,
@@ -165,17 +145,52 @@ const tableRows = computed<OpenItemsTableRow[]>(() => {
     })
 })
 
+const transactionTypeFilterOptions = computed(() =>
+  Array.from(new Set(
+    tableRows.value.flatMap((row) => row.transactionTypeEntries.map((entry) => entry.value)),
+  ))
+    .sort((left, right) => left.localeCompare(right, 'da'))
+    .map((value) => ({ label: value, value })),
+)
+
+const filteredTableRows = computed<OpenItemsTableRow[]>(() => {
+  const rows = transactionTypeFilter.value
+    ? tableRows.value.filter((row) => row.transactionTypeEntries.some((entry) => entry.value === transactionTypeFilter.value))
+    : tableRows.value
+
+  return fuzzyRankRows({
+    rows,
+    query: openItemsSearch.value,
+    getValues: (row) => [
+      row.stackId,
+      row.account,
+      row.bookingDate,
+      row.category,
+      row.amount,
+      row.notePreview,
+      ...row.counterpartEntries.map((entry) => entry.value),
+      ...row.transactionTypeEntries.map((entry) => entry.value),
+      ...row.referenceEntries.map((entry) => entry.value),
+      ...row.stack.items.map((item) => item.id),
+      ...row.stack.items.map((item) => item.runId),
+    ],
+    tieBreaker: (a, b) => {
+      const dateDiff = new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime()
+      if (dateDiff !== 0) return dateDiff
+      return String(b.stackId).localeCompare(String(a.stackId), 'da', { sensitivity: 'base' })
+    },
+  })
+})
+
 const pagedTableRows = computed<OpenItemsTableRow[]>(() => {
   const start = (page.value - 1) * pageSize.value
   const end = start + pageSize.value
-  return tableRows.value.slice(start, end)
+  return filteredTableRows.value.slice(start, end)
 })
-
-const filteredTableRows = computed<OpenItemsTableRow[]>(() => tableRows.value)
 
 const tablePageCount = computed<number>(() => Math.max(1, Math.ceil(tableRows.value.length / pageSize.value)))
 
-watch([tableSearchValue, pageSize], () => {
+watch([tableSearchValue, pageSize, transactionTypeFilter], () => {
   page.value = 1
 })
 
@@ -189,11 +204,6 @@ watch(useTableView, (enabled) => {
   if (enabled) {
     page.value = 1
   }
-  expandedTableStackIds.value = {}
-})
-
-const expandedTableRows = computed<OpenItemsTableRow[]>(() => {
-  return pagedTableRows.value.filter((row) => row.stack.items.length > 1 && isTableStackExpanded(row.stackId))
 })
 
 const skeletonTableRows = Array.from({ length: 8 }, (_, index) => `skeleton-table-row-${index + 1}`)
@@ -472,10 +482,7 @@ const tableUi = {
       </template>
 
       <template #body>
-        <div v-if="!pending && !transactions.length" class="py-10 text-center text-gray-500">
-          Der er ingen åbne transaktioner at behandle.
-        </div>
-        <template v-else>
+        <div class="space-y-4">
           <!-- Transaction amount info -->
           <div v-if="isCapped && !useTableView" class="relative z-40 mb-6 w-full">
             <UAlert
@@ -486,7 +493,7 @@ const tableUi = {
               :ui="{ title: 'text-left', description: 'text-left' }"
             >
               <template #title>
-                Viser {{ shownSamleposter }} af {{ totalSamleposter }} posteringer
+                Viser {{ shownSamleposter }} af {{ totalSamleposter }} transaktioner
               </template>
             </UAlert>
           </div>
@@ -496,31 +503,17 @@ const tableUi = {
               v-model:account-ids="selectedAccountIds"
               v-model:search="tableSearchValue"
               v-model:date-range="dateRange"
+              v-model:transaction-type="transactionTypeFilter"
+              v-model:page-size="pageSize"
               :reset-date-range="defaultRange"
               :time-zone="DEFAULT_TIME_ZONE"
               :show-search="true"
+              :show-transaction-type="true"
+              :transaction-type-options="transactionTypeFilterOptions"
+              :show-page-size="true"
+              :page-size-options="pageSizeOptions"
               search-placeholder="Søg i åbne poster..."
             />
-
-            <div v-if="dateRange?.start && dateRange?.end" class="mb-3 mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div class="text-sm text-muted">
-                <template v-if="pending">
-                  <USkeleton class="h-4 w-56" />
-                </template>
-                <template v-else>
-                  Viser {{ pagedTableRows.length }} af {{ totalSamleposter }} posteringer
-                </template>
-              </div>
-
-              <USelect
-                v-model="pageSize"
-                :items="pageSizeOptions"
-                labelKey="label"
-                valueKey="value"
-                class="w-full sm:w-28"
-                :disabled="pending"
-              />
-            </div>
 
             <template v-if="pending">
               <UCard variant="subtle" :ui="{ body: 'p-0 overflow-hidden' }">
@@ -536,25 +529,24 @@ const tableUi = {
                 </div>
               </UCard>
             </template>
-            <UTable
+            <TransactionsStackedTransactionsTable
               v-else
-              :data="pagedTableRows"
+              :table-key="pagedTableRows.map((row) => row.stackId).join('|')"
+              :rows="pagedTableRows"
               :columns="columns"
+              :loading="pending"
+              empty-label="Der er ingen åbne transaktioner at behandle."
               :ui="tableUi"
             />
 
-            <div v-if="filteredTableRows.length > pageSize" class="mt-4 flex items-center border-t border-default pt-4">
-              <div class="flex-1" />
-              <div class="flex flex-1 justify-center">
-                <UPagination
-                  :default-page="page"
-                  :items-per-page="pageSize"
-                  :total="filteredTableRows.length"
-                  @update:page="(value) => (page = value)"
-                />
-              </div>
-              <div class="flex-1" />
-            </div>
+            <TransactionsTablePagination
+              :page="page"
+              :page-size="pageSize"
+              :total="filteredTableRows.length"
+              :shown="pagedTableRows.length"
+              :pending="pending"
+              @update:page="(value: number) => (page = value)"
+            />
           </template>
 
           <!-- Card view -->
@@ -576,6 +568,9 @@ const tableUi = {
                 </UCard>
               </div>
             </template>
+            <div v-else-if="!transactions.length" class="py-10 text-center text-gray-500">
+              Der er ingen åbne transaktioner at behandle.
+            </div>
             <UPageSection
               v-else
               v-for="(stacks, accountKey) in stacksByAccount"
@@ -659,7 +654,7 @@ const tableUi = {
               </div>
             </UPageSection>
           </template>
-        </template>
+        </div>
       </template>
   </UDashboardPanel>
   <BookingModal

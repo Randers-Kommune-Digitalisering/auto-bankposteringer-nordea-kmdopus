@@ -1,3 +1,6 @@
+import { buildTransactionReferenceBuckets } from '#engine/matching/domain/transactionTextProjection'
+import type { TransactionReferenceDetail } from '~/types/transactions'
+
 export type BadgeEntry = {
   value: string
   hint?: string
@@ -6,6 +9,40 @@ export type BadgeEntry = {
 type SourceValue = {
   value: string | null | undefined
   hint: string
+}
+
+// Presenter placeholders must never be rendered as badges.
+const PLACEHOLDER_BADGE_VALUES = new Set(['-', '–', 'ukendt type', 'ukendt'])
+
+function isPlaceholderValue(value: string): boolean {
+  return PLACEHOLDER_BADGE_VALUES.has(value.trim().toLowerCase())
+}
+
+/**
+ * Canonical badge entries shared by every transaction table, so that the same
+ * transaction renders identically regardless of which page displays it.
+ */
+export function toCanonicalReferenceBadgeEntries(
+  referenceDetails: TransactionReferenceDetail[] | null | undefined,
+): BadgeEntry[] {
+  const buckets = buildTransactionReferenceBuckets(referenceDetails ?? [])
+
+  return dedupeBadgeEntries(
+    buckets.reference
+      .map((entry) => ({ value: normalizeText(entry.value), hint: entry.source }))
+      .filter((entry) => entry.value.length > 0 && !isPlaceholderValue(entry.value)),
+  )
+}
+
+export function toCanonicalValueBadgeEntries(
+  value: string | null | undefined,
+  hint: string | null | undefined,
+): BadgeEntry[] {
+  const normalized = normalizeText(String(value ?? ''))
+  if (!normalized.length || isPlaceholderValue(normalized)) return []
+
+  const normalizedHint = normalizeText(String(hint ?? ''))
+  return [{ value: normalized, hint: normalizedHint.length ? normalizedHint : undefined }]
 }
 
 type TriadToken = {

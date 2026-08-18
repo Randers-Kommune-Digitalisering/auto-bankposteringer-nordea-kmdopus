@@ -54,22 +54,49 @@ const columns: TableColumn<DashboardLatestRun>[] = [
   },
   {
     accessorKey: 'transactionsCount',
-    header: 'Transaktioner',
-    size: 130,
+    header: 'Behandling',
+    size: 150,
+    cell: ({ row }) => {
+      const run = row.original
+      return h('span', {
+        title: `Åbne: ${run.openTransactionsCount}, undtagne: ${run.exceptionTransactionsCount}`,
+      }, `${run.processedTransactionsCount}/${run.transactionsCount}`)
+    },
   },
   {
-    accessorKey: 'errorsCount',
-    header: 'Fejl',
-    size: 100,
+    accessorKey: 'activeErrorsCount',
+    header: 'Aktive fejl',
+    size: 110,
     cell: ({ row }) => {
-      const val = row.getValue('errorsCount') as number
-      if (!val) return ''
-      return String(val)
+      return String(row.getValue('activeErrorsCount') as number)
+    },
+  },
+  {
+    accessorKey: 'eventCount',
+    header: 'Hændelser',
+    size: 110,
+    cell: ({ row }) => {
+      return String(row.getValue('eventCount') as number)
+    },
+  },
+  {
+    accessorKey: 'lastActivityAt',
+    header: 'Senest aktivitet',
+    size: 160,
+    cell: ({ row }) => {
+      const value = row.getValue('lastActivityAt') as string | null
+      if (!value) return '—'
+      return new Date(value).toLocaleString('da-DK', {
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
     },
   },
 ]
 
-const latestRunsTableKey = computed(() => props.runs.map((r) => `${String((r as any).bookingDate ?? '')}:${String((r as any).status ?? '')}`).join('|'))
+const latestRunsTableKey = computed(() => props.runs.map((r) => `${r.id}:${r.bookingDate}:${r.status}:${r.activeErrorsCount}`).join('|'))
 </script>
 
 <template>

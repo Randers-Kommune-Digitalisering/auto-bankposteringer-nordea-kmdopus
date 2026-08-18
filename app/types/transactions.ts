@@ -54,6 +54,13 @@ export type OpenTransaction = {
 
 export type OpenTransactionInput = Omit<OpenTransaction, "summary">;
 
+export type StackedTransactionsTableRow = {
+  stackId: string;
+  lineCount: number;
+  category: "Samlepost" | "Enkeltpost";
+  [key: string]: unknown;
+};
+
 export type OpenTransactionStack = {
   stackId: string;
   groupKey: string | null;
@@ -145,6 +152,10 @@ export type StatementTransaction = {
   transactionType: string | null;
   transactionTypeCode?: string | null;
   transactionTypeHint?: string | null;
+  postingText?: string | null;
+  counterpart?: string | null;
+  counterpartHint?: string | null;
+  referenceDetails?: TransactionReferenceDetail[];
 
   debtorName: string | null;
   debtorId: string | null;

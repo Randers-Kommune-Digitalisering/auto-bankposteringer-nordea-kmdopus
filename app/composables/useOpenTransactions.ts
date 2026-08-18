@@ -75,14 +75,16 @@ export function useOpenTransactions(options: OpenTransactionsQueryOptions = {}) 
   const { data: rawData, pending, refresh } = useFetch<
     OpenTransactionsResponse | OpenTransaction[]
   >('/api/transactions', {
-    key: computed(() => {
-      const start = toDateOnlyParam(toValue(options.start)) ?? 'none'
-      const end = toDateOnlyParam(toValue(options.end)) ?? 'none'
-      const accountIds = (toValue(options.accountIds) ?? []).join(',') || 'all'
-      const limit = Number(toValue(options.limit) ?? 200)
-        const search = String(toValue(options.search) ?? '').trim() || 'none'
-        return `open-transactions:${start}:${end}:${accountIds}:l${limit}:q:${search}`
-    }),
+    // A single stable key keeps one cache entry; per-filter keys would replay stale payloads when a
+    // previously used filter combination is revisited.
+    key: 'open-transactions',
+    watch: [
+      () => toDateOnlyParam(toValue(options.start)),
+      () => toDateOnlyParam(toValue(options.end)),
+      () => (toValue(options.accountIds) ?? []).join(','),
+      () => Number(toValue(options.limit) ?? 200),
+      () => String(toValue(options.search) ?? '').trim(),
+    ],
     server: false,
     lazy: false,
     dedupe: 'cancel',
