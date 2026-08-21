@@ -117,7 +117,7 @@ const selectedRawTransaction = ref<StatementTransaction | null>(null)
 type StatementSortKey = 'bookingDate' | 'account' | 'counterpart' | 'amount' | 'transactionType'
 const sortKey = ref<StatementSortKey>('bookingDate')
 const sortDirection = ref<'asc' | 'desc'>('desc')
-const transactionTypeFilter = ref<string | undefined>(undefined)
+const transactionTypeFilter = ref<string[]>([])
 
 function toggleSort(key: StatementSortKey): void {
   if (sortKey.value === key) {
@@ -188,8 +188,9 @@ const groupedVisibleRows = computed<StatementStackRow[]>(() => {
     }
   })
 
-  const filteredRows = transactionTypeFilter.value
-    ? rows.filter((row) => row.transactionTypeEntries.some((entry) => entry.value === transactionTypeFilter.value))
+  const selectedTransactionTypes = transactionTypeFilter.value
+  const filteredRows = selectedTransactionTypes.length
+    ? rows.filter((row) => row.transactionTypeEntries.some((entry) => selectedTransactionTypes.includes(entry.value)))
     : rows
 
   const rankedRows = fuzzyRankRows({

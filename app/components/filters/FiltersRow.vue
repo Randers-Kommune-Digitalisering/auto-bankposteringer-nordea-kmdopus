@@ -36,7 +36,7 @@ const props = withDefaults(
     searchPlaceholder?: string
     showSearch?: boolean
 
-    transactionType?: string
+    transactionType?: string[]
     transactionTypeOptions?: SelectOption[]
     transactionTypePlaceholder?: string
     showTransactionType?: boolean
@@ -60,7 +60,7 @@ const props = withDefaults(
     searchLabel: 'Søg',
     searchPlaceholder: 'Søg...',
     showSearch: false,
-    transactionType: undefined,
+    transactionType: () => [],
     transactionTypeOptions: () => [],
     transactionTypePlaceholder: 'Alle transaktionstyper',
     showTransactionType: false,
@@ -74,7 +74,7 @@ const emit = defineEmits<{
   (e: 'update:dateRange', value: DateRangeValue): void
   (e: 'update:accountIds', value: string[]): void
   (e: 'update:search', value: string): void
-  (e: 'update:transactionType', value: string | undefined): void
+  (e: 'update:transactionType', value: string[]): void
   (e: 'update:pageSize', value: number): void
 }>()
 
@@ -98,8 +98,8 @@ const searchModel = computed<string>({
   set: (next) => emit('update:search', next),
 })
 
-const transactionTypeModel = computed<string | undefined>({
-  get: () => props.transactionType,
+const transactionTypeModel = computed<string[]>({
+  get: () => props.transactionType ?? [],
   set: (next) => emit('update:transactionType', next),
 })
 
