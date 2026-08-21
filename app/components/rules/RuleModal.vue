@@ -366,6 +366,10 @@ function hydrateDraft(rule: RuleDraftSchema & { matches?: MatchEntry[] }) {
   syncAccountingDimensionsToState()
 
   matches.value = rule.matches ?? []
+  for (const category of matchCategories) {
+    const categoryMatch = matches.value.find(match => match.category === category)
+    matchCategoryGates[category] = categoryMatch?.fields?.length ? categoryMatch.gate : 'ELLER'
+  }
 
   if (open.value) {
     void nextTick().then(() => {
@@ -413,8 +417,13 @@ const matchInputs = reactive(
 )
 
 const matchCategoryGates = reactive(
-  initCategoryRecord<MatchGate>(() => 'OG')
+  initCategoryRecord<MatchGate>(() => 'ELLER')
 )
+
+const matchGateOptions = [
+  { label: 'Alle valgte felter skal matche', value: 'OG' as const },
+  { label: 'Mindst ét valgt felt skal matche', value: 'ELLER' as const },
+]
 
 const matchModes = reactive(
   initCategoryRecord<'Alle felter' | 'Vælg felter'>(() => 'Alle felter')
@@ -438,7 +447,7 @@ const matchOperatorItemsByCategory = computed(() => {
 
   const record = {} as Record<MatchCategory, Array<{ label: string; value: MatchOperatorUi }>>
   for (const category of matchCategories) {
-    record[category] = (category === 'Fritekst' || category === 'Part')
+    record[category] = (category === 'Reference' || category === 'Modpart')
       ? withRegex
       : base
   }
@@ -455,18 +464,11 @@ const addMatchEntry = (category: MatchCategory, mode: 'Alle felter' | 'Vælg fel
   const value = matchInputs[category].trim()
   if (!value) return
 
-  // Sæt gate baseret på mode
-  if (mode === 'Alle felter' || (mode === 'Vælg felter' && selectedColumns[category].length > 1)) {
-    matchCategoryGates[category] = 'ELLER'
-  } else if (mode === 'Vælg felter' && selectedColumns[category].length === 1) {
-    matchCategoryGates[category] = 'OG'
-  }
-
   const entry: MatchEntry = {
     category,
     value,
     operator: matchOperators[category],
-    gate: matchCategoryGates[category],
+    gate: mode === 'Alle felter' ? 'ELLER' : matchCategoryGates[category],
     ...(mode === 'Vælg felter' && selectedColumns[category].length > 0 ? { fields: selectedColumns[category] } : {})
   }
 
@@ -485,8 +487,20 @@ const getMatchesForCategory = (category: MatchCategory) => {
 }
 
 const shouldShowGateToggle = (category: MatchCategory) => {
-  return getMatchesForCategory(category).length > 1
+  return getMatchesForCategory(category).some(match => match.fields?.length)
 }
+
+const updateCategoryGate = (category: MatchCategory, gate: MatchGate) => {
+  matchCategoryGates[category] = gate
+  for (const match of matches.value) {
+    if (match.category === category) match.gate = gate
+  }
+}
+
+const gateDescription = (gate: MatchGate) =>
+  gate === 'ELLER'
+    ? 'Mindst ét valgt felt skal matche'
+    : 'Alle valgte felter skal matche'
 
 // ------------------
 // Attachment helpers
@@ -1074,14 +1088,22 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                     </template>
                   </div>
 
-                  <!-- Badge liste med gate info -->
+                  <!-- Kriteriegruppe og gate -->
                   <div v-if="getMatchesForCategory(category).length > 0" class="mt-4">
                     <div class="flex items-center gap-2 mb-3">
-                      <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Matches</p>
-                      <span v-if="shouldShowGateToggle(category)" class="text-xs font-medium px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 rounded">(OG)</span>
+                      <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Kriteriegruppe</p>
                     </div>
                     <div v-if="shouldShowGateToggle(category)" class="mb-3 p-2 bg-amber-50 dark:bg-amber-900/10 rounded border border-amber-200 dark:border-amber-800">
-                      <p class="text-xs text-amber-700 dark:text-amber-300">Alle matches skal være opfyldt samtidigt</p>
+                      <USelect
+                        :model-value="matchCategoryGates[category]"
+                        :items="matchGateOptions"
+                        value-key="value"
+                        label-key="label"
+                        class="w-full"
+                        :aria-label="`Logisk gate for ${category}`"
+                        @update:model-value="value => updateCategoryGate(category, value as MatchGate)"
+                      />
+                      <p class="text-xs text-amber-700 dark:text-amber-300 mt-2">{{ gateDescription(matchCategoryGates[category]) }}</p>
                     </div>
                     <div class="flex flex-wrap gap-2">
                       <UBadge

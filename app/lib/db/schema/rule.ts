@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { pgTable, text, date, numeric, integer, uuid, primaryKey, bigint, boolean, unique, index } from "drizzle-orm/pg-core"
 import { createUpdateSchema, createSelectSchema } from "drizzle-zod"
-import type { RuleType, RuleStatus, RuleConditionOperator } from "./enums"
+import type { RuleType, RuleStatus, RuleConditionOperator, RuleConditionGate } from "./enums"
 import {
   ruleTypeEnum,
   ruleStatusEnum,
@@ -12,7 +12,8 @@ import {
   cprTypeValues,
   ruleConditionFieldEnum,
   ruleConditionOperatorEnum,
-  ruleConditionOperatorValues
+  ruleConditionOperatorValues,
+  ruleConditionGateEnum
 } from "./enums"
 import { account } from "./account"
 import { ruleTag } from "./ruleTag"
@@ -102,6 +103,7 @@ export const ruleBankingCondition = pgTable('rule_banking_condition', {
   ruleId: integer('rule_id').notNull().references(() => rule.id, { onDelete: 'cascade' }),
   field: ruleConditionFieldEnum('field').notNull(),
   operator: ruleConditionOperatorEnum('operator').notNull().default('eq'),
+  gate: ruleConditionGateEnum('gate').notNull().default('OG'),
   value: text('value').notNull(),
 }, (t) => ({
   ruleIdIdx: index('rule_banking_condition_rule_id_idx').on(t.ruleId),
@@ -136,12 +138,12 @@ export const matchEntrySchema = z.object({
   const operator = data.operator ?? 'eq'
   if (operator !== 'regex') return
 
-  const allowedCategories = ['Fritekst', 'Part'] as const
+  const allowedCategories = ['Reference', 'Modpart'] as const
   if (!allowedCategories.includes(data.category as (typeof allowedCategories)[number])) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ['operator'],
-      message: 'Regex-match er kun understøttet for Fritekst og Modpart',
+      message: 'Regex-match er kun understøttet for Reference og Modpart',
     })
     return
   }
@@ -168,7 +170,11 @@ export const matchEntrySchema = z.object({
       message: 'Ugyldig regex-mønster',
     })
   }
-})
+}).transform((data) => ({
+  ...data,
+  // Omitting fields means "search the whole category", which is always OR.
+  gate: data.fields?.length ? data.gate : 'ELLER' as const,
+}))
 
 export type MatchGate = 'OG' | 'ELLER'
 export type MatchEntry = z.infer<typeof matchEntrySchema>
@@ -184,30 +190,32 @@ export function mapMatchesToConditionRows(matches: MatchEntry[]): RuleConditionI
   return matches.flatMap((entry) => {
     const operator: RuleConditionOperator = entry.operator ?? 'eq'
     const fields = entry.fields?.length ? entry.fields : matchCategoryColumns[entry.category]
+    const gate = entry.fields?.length ? entry.gate : 'ELLER'
 
     return fields.map((field) => ({
       field,
       operator,
+      gate,
       value: entry.value
     }))
   })
 }
 
 export function mapConditionsToMatches(conditions: RuleConditionRow[]): MatchEntry[] {
-  const byCategory = new Map<MatchCategory, Map<string, { fields: Set<MatchField>; operator: RuleConditionOperator; value: string }>>()
+  const byCategory = new Map<MatchCategory, Map<string, { fields: Set<MatchField>; operator: RuleConditionOperator; value: string; gate: MatchGate }>>()
 
   for (const condition of conditions) {
     const category = fieldToCategory[condition.field]
     if (!category) continue
 
-    const key = `${condition.operator}:${condition.value}`
+    const key = `${condition.gate ?? 'OG'}:${condition.operator}:${condition.value}`
     if (!byCategory.has(category)) {
       byCategory.set(category, new Map())
     }
 
     const categoryMap = byCategory.get(category)!
     if (!categoryMap.has(key)) {
-      categoryMap.set(key, { fields: new Set(), operator: condition.operator, value: condition.value })
+      categoryMap.set(key, { fields: new Set(), operator: condition.operator, value: condition.value, gate: condition.gate ?? 'OG' })
     }
 
     categoryMap.get(key)!.fields.add(condition.field)
@@ -222,7 +230,7 @@ export function mapConditionsToMatches(conditions: RuleConditionRow[]): MatchEnt
         value: meta.value,
         fields: fields.length === matchCategoryColumns[category].length ? undefined : (fields as MatchField[]),
         operator: meta.operator,
-        gate: 'ELLER'
+        gate: fields.length === matchCategoryColumns[category].length ? 'ELLER' : meta.gate
       })
     }
   }
@@ -430,8 +438,8 @@ function summarizeConditions(conditions: RuleConditionRow[]): RuleListDto['match
     const category = fieldToCategory[condition.field]
     if (!category) continue
 
-    if (category === 'Fritekst') summary.references.add(condition.value)
-    else if (category === 'Part') summary.counterparties.add(condition.value)
+    if (category === 'Reference') summary.references.add(condition.value)
+    else if (category === 'Modpart') summary.counterparties.add(condition.value)
     else summary.classification.add(condition.value)
   }
 

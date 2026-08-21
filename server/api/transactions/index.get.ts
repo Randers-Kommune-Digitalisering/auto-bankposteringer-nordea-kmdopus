@@ -14,6 +14,7 @@ import type {
 } from '~/types/transactions'
 import { presentOpenTransaction } from '~~/server/presenters/openTransactionPresenter'
 import { projectCanonicalTransactionFields } from '~~/server/presenters/transactionCanonicalFields'
+import { buildTransactionCodeCatalogMap, resolveTransactionType, type TransactionCodeCatalogMap } from '~~/server/presenters/transactionTypePresenter'
 import { createUtcIsoString, parseIsoDateToUtcDate } from '~~/utils/function'
 import { toSamlepostId, toStatementEntryKey } from '~~/server/utils/iso20022Samlepost'
 
@@ -80,7 +81,6 @@ type BaseRow = {
   runningBalance?: string | null
 }
 
-type TransactionCodeCatalogMap = Map<string, string>
 
 function parseDateParam(value: unknown): string | null {
   if (typeof value !== 'string') return null
@@ -206,55 +206,6 @@ function buildSearchTokenCondition(token: string) {
     sql`${transaction.remittanceCreditorReference} ILIKE ${pattern}`,
     sql`array_to_string(coalesce(${transaction.remittanceAdditional}, ARRAY[]::text[]), ' ') ILIKE ${pattern}`,
   )
-}
-
-function normalizeCodeKey(raw: string): string {
-  const normalized = raw.trim().toUpperCase()
-  return normalized.replace(/\s+/g, '')
-}
-
-function resolveTransactionType(input: {
-  provider: string | null
-  bkTxCdProprietary: string | null
-  bkTxCdDomain: string | null
-  bkTxCdFamily: string | null
-  bkTxCdSubFamily: string | null
-  catalogByProviderCodeKey: TransactionCodeCatalogMap
-}): { value: string | null; code: string | null; hint: string | null } {
-  const provider = normalizeString(input.provider)?.toLowerCase() ?? null
-
-  const proprietary = normalizeString(input.bkTxCdProprietary)
-  if (proprietary) {
-    const codeKey = normalizeCodeKey(`PRTRY:${proprietary}`)
-    const catalogHit = provider ? input.catalogByProviderCodeKey.get(`${provider}:${codeKey}`) : undefined
-    return {
-      value: catalogHit ?? proprietary,
-      code: codeKey,
-      hint: 'bkTxCdProprietary',
-    }
-  }
-
-  const parts = dedupeStrings([
-    input.bkTxCdDomain,
-    input.bkTxCdFamily,
-    input.bkTxCdSubFamily,
-  ])
-
-  if (parts.length) {
-    const codeKey = normalizeCodeKey(parts.join('/'))
-    const catalogHit = provider ? input.catalogByProviderCodeKey.get(`${provider}:${codeKey}`) : undefined
-    return {
-      value: catalogHit ?? parts.join('/'),
-      code: codeKey,
-      hint: ['bkTxCdDomain', 'bkTxCdFamily', 'bkTxCdSubFamily'].join(' + '),
-    }
-  }
-
-  return {
-    value: null,
-    code: null,
-    hint: null,
-  }
 }
 
 function mapRowToStatementTransaction(
@@ -572,14 +523,7 @@ export default defineEventHandler(async (event) => {
         ))
     : []
 
-  const catalogByProviderCodeKey: TransactionCodeCatalogMap = new Map()
-  for (const row of catalogRows) {
-    const provider = normalizeString(row.provider)?.toLowerCase()
-    const codeKey = normalizeString(row.codeKey)
-    const displayName = normalizeString(row.displayName)
-    if (!provider || !codeKey || !displayName) continue
-    catalogByProviderCodeKey.set(`${provider}:${normalizeCodeKey(codeKey)}`, displayName)
-  }
+  const catalogByProviderCodeKey: TransactionCodeCatalogMap = buildTransactionCodeCatalogMap(catalogRows)
 
   const statementIds = Array.from(new Set(
     filteredRows
