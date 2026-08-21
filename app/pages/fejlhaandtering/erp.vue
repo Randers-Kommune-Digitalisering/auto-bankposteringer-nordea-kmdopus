@@ -1,18 +1,28 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
-import { formatSignedDkk } from '~/utils'
+import { today, type DateValue } from '@internationalized/date'
+import FiltersRow from '~/components/filters/FiltersRow.vue'
+import { useDebouncedString } from '~/composables/useDebouncedString'
+import { fuzzyRankRows } from '~/lib/search/fuzzyRanking'
+import BookingSummaryCard from '~/components/open-items/BookingSummaryCard.vue'
+import type { TransactionSummary } from '~/types/transactions'
+import { DEFAULT_TIME_ZONE, formatSignedDkk } from '~/utils'
 
 const appConfig = useAppConfig()
 
 type FailedErpRequestListItem = {
   requestId: string
   runId: string
-  responseId: string
-  statusText: string
+  responseId: string | null
+  statusText: string | null
+  bookingDate: string | null
 }
 
 type FailedErpRequestsResponse = {
   items: FailedErpRequestListItem[]
+  total: number
+  page: number
+  pageSize: number
 }
 
 type ErpRequestViewResponse = {
@@ -43,8 +53,19 @@ type ErpRequestViewResponse = {
     postingText: string
     counterparty: string | null
     reference: string | null
+    accountingLines: Array<{
+      lineNo: number
+      amount: string | null
+      debetOrCredit: string | null
+      dimensions: Record<string, string>
+      postingText: string | null
+      cpr: string | null
+    }>
+    summary: TransactionSummary
   }>
 }
+
+type ErpTransaction = ErpRequestViewResponse['transactions'][number]
 
 const toast = useToast()
 const UCheckbox = resolveComponent('UCheckbox')
@@ -52,22 +73,51 @@ const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
 const UIcon = resolveComponent('UIcon')
 const route = useRoute()
+const endDefault = today(DEFAULT_TIME_ZONE)
+const startDefault = endDefault.subtract({ days: 29 })
+const dateRange = shallowRef<{ start: DateValue; end: DateValue }>({ start: startDefault, end: endDefault })
+const page = ref(1)
+const pageSize = ref(25)
+const pageSizeOptions = [10, 25, 50, 100].map((value) => ({ label: `${value} pr. side`, value }))
+const start = computed(() => dateRange.value.start.toString())
+const end = computed(() => dateRange.value.end.toString())
 
 const { data: failedList, pending: failedPending, refresh: refreshFailed } = await useFetch<FailedErpRequestsResponse>(
   '/api/fejlhaandtering/erp-requests/failed',
   {
-    key: 'failed-erp-requests',
+    key: 'control-erp-requests',
+    query: computed(() => ({ start: start.value, end: end.value, page: page.value, pageSize: pageSize.value })),
+    watch: [start, end, page, pageSize],
+    dedupe: 'cancel',
     deep: true,
-    default: () => ({ items: [] }),
+    default: () => ({ items: [], total: 0, page: 1, pageSize: pageSize.value }),
   },
 )
+
+watch([start, end], () => { page.value = 1 })
 
 const failedTableKey = computed(() => (failedList.value?.items ?? []).map((i) => String(i.requestId)).join('|'))
 
 const erpRequestId = ref('')
 const erpLoading = ref(false)
 const erpView = ref<ErpRequestViewResponse | null>(null)
+const transactionSearchInput = ref('')
+const debouncedTransactionSearch = useDebouncedString(transactionSearchInput, { delayMs: 300 })
 const selectedTransactionIds = ref<Record<string, boolean>>({})
+const selectedTransaction = ref<ErpTransaction | null>(null)
+const selectedTransactionSummary = computed(() => selectedTransaction.value?.summary ?? null)
+const isTransactionSummaryOpen = ref(false)
+
+function openTransactionSummary(transaction: ErpTransaction) {
+  selectedTransaction.value = transaction
+  isTransactionSummaryOpen.value = true
+}
+
+const filteredTransactions = computed(() => fuzzyRankRows({
+  rows: erpView.value?.transactions ?? [],
+  query: debouncedTransactionSearch.value,
+  getValues: (row) => [row.postingText],
+}))
 
 const selectedTransactionIdList = computed(() =>
   Object.entries(selectedTransactionIds.value)
@@ -104,6 +154,9 @@ async function loadErpRequest() {
       { method: 'GET' },
     )
     erpView.value = data
+    transactionSearchInput.value = ''
+    selectedTransaction.value = null
+    isTransactionSummaryOpen.value = false
     selectedTransactionIds.value = {}
   } catch (error) {
     console.error('Kunne ikke hente ERP request view', error)
@@ -152,7 +205,8 @@ async function resendErpRequest() {
 const failedColumns: TableColumn<FailedErpRequestListItem>[] = [
   { accessorKey: 'requestId', header: 'Request', cell: ({ row }) => row.original.requestId },
   { accessorKey: 'runId', header: 'Run', size: 240, cell: ({ row }) => row.original.runId },
-  { accessorKey: 'statusText', header: 'Status', cell: ({ row }) => row.original.statusText },
+  { accessorKey: 'bookingDate', header: 'Bogføringsdato', cell: ({ row }) => row.original.bookingDate ?? '—' },
+  { accessorKey: 'statusText', header: 'Status', cell: ({ row }) => row.original.statusText ?? 'Intet svar' },
   {
     id: 'open',
     header: '',
@@ -284,24 +338,26 @@ const transactionColumns: TableColumn<ErpRequestViewResponse['transactions'][num
     },
   },
   {
-    id: 'counterparty',
-    header: 'Modpart',
-    cell: ({ row }) => row.original.counterparty ?? '—',
-  },
-  {
-    id: 'reference',
-    header: 'Reference',
-    cell: ({ row }) => row.original.reference ?? '—',
-  },
-  {
     id: 'postingText',
     header: 'Posteringstekst',
     cell: ({ row }) => row.original.postingText || '—',
   },
   {
-    id: 'lineNos',
-    header: 'Linjenumre',
-    cell: ({ row }) => row.original.lineNos.join(', '),
+    id: 'openTransaction',
+    header: '',
+    enableSorting: false,
+    size: 150,
+    cell: ({ row }) => h(
+      UButton,
+      {
+        size: 'sm',
+        color: 'primary',
+        variant: 'soft',
+        icon: appConfig.ui.icons.doc,
+        onClick: () => openTransactionSummary(row.original),
+      },
+      () => 'Se transaktion',
+    ),
   },
 ]
 
@@ -321,6 +377,11 @@ function toSignedAmount(amount: string | number, indicator: string | null): numb
   if (indicator === 'DBIT') return -Math.abs(parsed)
   if (indicator === 'CRDT') return Math.abs(parsed)
   return parsed
+}
+
+function formatAccountingAmount(line: { amount: string | null; debetOrCredit: string | null }): string {
+  const indicator = line.debetOrCredit === 'Debet' ? 'DBIT' : line.debetOrCredit === 'Kredit' ? 'CRDT' : null
+  return formatSignedDkk(toSignedAmount(line.amount ?? '0', indicator))
 }
 
 function formatStatusLabel(status: string | null): string {
@@ -383,25 +444,29 @@ async function reopenBookedTransactions() {
         <UCard>
           <template #header>
             <div class="flex flex-col gap-1">
-              <div class="font-medium">Afviste ERP-svar</div>
+              <div class="font-medium">ERP-forløb</div>
               <div class="text-sm text-muted">
-                Her vises ERP-requests hvor vi har modtaget et negativt udfald. Åbn en request for at arbejde transaktionsbaseret med genåbning og genfremsendelse.
+                Her vises ERP-requests og responses. Brug bogføringsdato og posteringstekst til at finde et forløb, og åbn en request for at arbejde transaktionsbaseret med genåbning og genfremsendelse.
                 Hvis et svar mangler helt (outbox/request uden kvittering), så brug <NuxtLink to="/fejlhaandtering/koe" class="underline">Kørsler</NuxtLink>.
               </div>
             </div>
           </template>
 
-          <div class="flex items-center justify-between mb-2">
-            <div class="text-sm text-muted">Seneste 50</div>
-            <UBadge color="neutral" variant="subtle">{{ (failedList?.items?.length ?? 0) }}</UBadge>
-          </div>
+          <FiltersRow
+            v-model:date-range="dateRange"
+            v-model:page-size="pageSize"
+            :show-accounts="false"
+            :show-page-size="true"
+            :page-size-options="pageSizeOptions"
+            date-label="Bogføringsdato"
+          />
 
           <UEmpty
             v-if="!failedList?.items?.length"
             :icon="appConfig.ui.icons.check"
-            title="Ingen afviste ERP-svar"
-            description="Der er ingen ERP responses med negativ status i databasen."
-            class="border border-dashed border-default rounded-lg"
+            title="Ingen ERP-forløb fundet"
+            description="Der er ingen ERP-forløb, som matcher de valgte filtre."
+            class="mt-4 border border-dashed border-default rounded-lg"
           />
 
           <UTable
@@ -410,6 +475,7 @@ async function reopenBookedTransactions() {
             :data="failedList.items"
             :columns="failedColumns"
             :loading="failedPending"
+            class="mt-4"
             :ui="{
               base: 'border-separate border-spacing-0',
               thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
@@ -419,6 +485,14 @@ async function reopenBookedTransactions() {
               separator: 'h-0'
             }"
           />
+
+          <div v-if="failedList?.items?.length" class="flex items-center justify-center border-t border-default pt-4 mt-4">
+            <UPagination
+              v-model:page="page"
+              :items-per-page="pageSize"
+              :total="failedList?.total ?? 0"
+            />
+          </div>
         </UCard>
 
         <UCard>
@@ -458,7 +532,7 @@ async function reopenBookedTransactions() {
                 <span class="font-mono">{{ formatSignedDkk(toSignedAmount(erpView.header.totalAmount, null)) }}</span>
               </div>
               <div v-if="erpView.response" class="text-sm">
-                <span class="text-muted">Bilag: </span>
+                <span class="text-muted">Response-ID: </span>
                 <span class="font-mono">{{ erpView.response.id }}</span>
               </div>
               <div v-if="erpView.response?.statusText" class="text-sm">
@@ -467,9 +541,32 @@ async function reopenBookedTransactions() {
               </div>
             </div>
 
+            <div class="flex flex-wrap items-end justify-between gap-3">
+              <UFormField label="Posteringstekst" class="min-w-64 max-w-sm">
+                <UInput
+                  v-model="transactionSearchInput"
+                  :trailing-icon="appConfig.ui.icons.search"
+                  placeholder="Søg i posteringstekst..."
+                  class="w-full"
+                />
+              </UFormField>
+              <div class="text-sm text-muted">
+                Viser {{ filteredTransactions.length }} af {{ erpView.transactions.length }} transaktioner
+              </div>
+            </div>
+
+            <UEmpty
+              v-if="!filteredTransactions.length"
+              :icon="appConfig.ui.icons.search"
+              title="Ingen transaktioner fundet"
+              description="Ingen af de indlæste transaktioner matcher posteringsteksten."
+              class="border border-dashed border-default rounded-lg"
+            />
+
             <UTable
+              v-else
               :key="transactionTableKey"
-              :data="erpView.transactions"
+              :data="filteredTransactions"
               :columns="transactionColumns"
               :loading="erpLoading"
               :ui="{
@@ -531,6 +628,48 @@ async function reopenBookedTransactions() {
           </div>
         </UCard>
       </div>
+
+      <UModal v-model:open="isTransactionSummaryOpen" title="Transaktion fra banken">
+        <template #body>
+          <BookingSummaryCard
+            v-if="selectedTransactionSummary"
+            :summary="selectedTransactionSummary"
+            :hide-section-keys="['teknisk']"
+          />
+          <section v-if="selectedTransaction?.accountingLines.length" class="mt-5 space-y-3">
+            <h3 class="text-sm font-semibold">Sendt kontering</h3>
+            <div class="overflow-x-auto rounded-lg border border-default">
+              <table class="min-w-full text-sm">
+                <thead class="bg-elevated/50 text-left">
+                  <tr>
+                    <th class="px-3 py-2 font-medium">Linje</th>
+                    <th class="px-3 py-2 font-medium">Beløb</th>
+                    <th class="px-3 py-2 font-medium">Dimensioner</th>
+                    <th class="px-3 py-2 font-medium">Tekst</th>
+                    <th class="px-3 py-2 font-medium">CPR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="line in selectedTransaction.accountingLines" :key="line.lineNo" class="border-t border-default align-top">
+                    <td class="px-3 py-2 font-mono">{{ line.lineNo }}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">{{ formatAccountingAmount(line) }}</td>
+                    <td class="px-3 py-2">
+                      <div v-if="Object.keys(line.dimensions).length" class="space-y-1">
+                        <div v-for="([key, value]) in Object.entries(line.dimensions)" :key="key" class="break-all">
+                          <span class="text-muted">{{ key }}:</span> {{ value }}
+                        </div>
+                      </div>
+                      <span v-else class="text-muted">—</span>
+                    </td>
+                    <td class="px-3 py-2 break-all">{{ line.postingText || '—' }}</td>
+                    <td class="px-3 py-2 font-mono">{{ line.cpr || '—' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </template>
+      </UModal>
     </template>
   </UDashboardPanel>
 </template>

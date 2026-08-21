@@ -12,6 +12,7 @@ CREATE TYPE "public"."job_status" AS ENUM('pending', 'in_progress', 'succeeded',
 CREATE TYPE "public"."outbox_status" AS ENUM('pending', 'processing', 'sent', 'failed');--> statement-breakpoint
 CREATE TYPE "public"."rule_condition_field" AS ENUM('ntry_ref', 'ntry_acct_svcr_ref', 'tx_acct_svcr_ref', 'refs_end_to_end_id', 'refs_instr_id', 'refs_pmt_inf_id', 'uetr', 'dbtr_name', 'dbtr_id', 'dbtr_acct_iban', 'cdtr_name', 'cdtr_id', 'cdtr_acct_iban', 'ultmt_dbtr_name', 'ultmt_cdtr_name', 'bk_tx_cd_domain', 'bk_tx_cd_family', 'bk_tx_cd_sub_family', 'bk_tx_cd_proprietary', 'cdt_dbt_ind', 'entry_additional_info', 'tx_additional_info', 'rmt_ustrd', 'rmt_cdtr_ref', 'rmt_addtl');--> statement-breakpoint
 CREATE TYPE "public"."rule_condition_operator" AS ENUM('eq', 'neq', 'like', 'ilike', 'regex', 'gt', 'gte', 'lt', 'lte', 'in');--> statement-breakpoint
+CREATE TYPE "public"."rule_condition_gate" AS ENUM('OG', 'ELLER');--> statement-breakpoint
 CREATE TYPE "public"."rule_status" AS ENUM('aktiv', 'inaktiv');--> statement-breakpoint
 CREATE TYPE "public"."rule_type" AS ENUM('standard', 'undtagelse', 'engangs');--> statement-breakpoint
 CREATE TYPE "public"."run_error_source" AS ENUM('banking', 'application', 'erp');--> statement-breakpoint
@@ -333,6 +334,7 @@ CREATE TABLE "rule_banking_condition" (
 	"rule_id" integer NOT NULL,
 	"field" "rule_condition_field" NOT NULL,
 	"operator" "rule_condition_operator" DEFAULT 'eq' NOT NULL,
+	"gate" "rule_condition_gate" DEFAULT 'OG' NOT NULL,
 	"value" text NOT NULL
 );
 --> statement-breakpoint

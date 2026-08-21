@@ -120,7 +120,7 @@ const primaryLinks: NavigationMenuItem[] = [
     ]
   },
   {
-    label: 'Fejlhåndtering',
+    label: 'Kontrol',
     to: '/fejlhaandtering',
     icon: appConfig.ui.icons.warning,
     type: 'trigger',

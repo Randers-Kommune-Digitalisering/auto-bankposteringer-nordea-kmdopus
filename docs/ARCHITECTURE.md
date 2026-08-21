@@ -50,6 +50,8 @@ This repo is a stateless financial integration engine:
 - UI header metadata (booking date, counts, currencies, totals, response status) and table rows are derived from the same server-side model.
 - Raw XML editing is intentionally removed from the UI to avoid dual sources of truth.
 - Resend still persists and uploads XML payloads, but payload generation/usage is controlled server-side and remains auditable via `erp_request.payload`.
+- Each `erp_request_line` also stores the accounting input snapshot used for that line: amount, debit/credit, posting text, CPR, and dynamic dimension key/value pairs. The recovery view displays this snapshot rather than re-evaluating the current rule configuration.
+- Accounting dimensions remain dynamic and supplier-agnostic in the persistence model. Any schema change to add these snapshot fields follows the repository's single-baseline migration workflow; no incremental migration is added.
 - Reopen is transaction-oriented: operators choose transactions, and the system resets processing state for those transaction ids (covering all related request lines).
 
 ## Samlepost semantics (ISO 20022)
@@ -196,7 +198,7 @@ This avoids request-coupled false positives (for example returning `0` while dis
 - `banking_statement_balance`: statement balances (OPBD/CLBD/CLAV, etc.)
 - `transaction`: normalized entry/tx details (Refs, Parties, BkTxCd, remittance)
 - `transaction_code_catalog`: provider-scoped code/name catalog for human-readable BkTxCd/proprietary labels (deterministic lookup)
-- `rule` + `rule_banking_condition`: deterministic matching rules (CAMT-keyed). Conditions include an explicit operator (e.g. `eq`, `ilike`, `regex`). Regex is only allowed for selected text/counterparty fields and is validated on input/import.
+- `rule` + `rule_banking_condition`: deterministic matching rules (CAMT-keyed). Conditions include an explicit operator (e.g. `eq`, `ilike`, `regex`) and one logical gate per flat criterion group (`OG` or `ELLER`). Fields in a group use that group gate; all criterion groups on a rule must pass. Nested groups and mixed gates within one group are not supported. Regex is only allowed for selected reference/counterparty fields and is validated on input/import.
 - `erp_accounting_dimension_definition`: supplier-scoped definition of accounting dimensions (domain key, required/optional, ordering)
 - `erp_accounting_dimension_constraint` + `erp_accounting_dimension_constraint_member`: supplier-scoped dependency rules between dimensions (used for deterministic validation across UI/API/import). Constraints may be conditional on the triggering dimension value via regex (e.g. different rules for `artskonto` prefixes).
 - `rule_accounting_dimension_value`: per-rule values for accounting dimensions (normalized; no hardcoded primary/secondary/tertiary)

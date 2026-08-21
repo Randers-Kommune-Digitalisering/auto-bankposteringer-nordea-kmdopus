@@ -91,7 +91,7 @@ function splitMultiValueCell(value: unknown): string[] {
 
 function isRegexAllowedForField(fieldKey: string): boolean {
   const category = (fieldToCategory as any)[fieldKey] as string | undefined
-  return category === 'Fritekst' || category === 'Part'
+  return category === 'Reference' || category === 'Modpart'
 }
 
 function parseAdvancedFieldToken(
@@ -114,7 +114,7 @@ function parseAdvancedFieldToken(
 
       if (prefix === 'regex') {
         if (!isRegexAllowedForField(fieldKey)) {
-          throw new Error('Regex er kun understøttet for felter i Fritekst og Modpart')
+          throw new Error('Regex er kun understøttet for felter i Reference og Modpart')
         }
         try {
           // eslint-disable-next-line no-new
@@ -213,8 +213,8 @@ function buildMatches(row: any, operator: string): MatchEntry[] | undefined {
   const classification = splitMultiValueCell(row.matchClassification)
 
   const matches: MatchEntry[] = []
-  for (const v of references) matches.push({ category: 'Fritekst', value: v, operator: operator as any, gate: 'ELLER' })
-  for (const v of counterparties) matches.push({ category: 'Part', value: v, operator: operator as any, gate: 'ELLER' })
+  for (const v of references) matches.push({ category: 'Reference', value: v, operator: operator as any, gate: 'ELLER' })
+  for (const v of counterparties) matches.push({ category: 'Modpart', value: v, operator: operator as any, gate: 'ELLER' })
   for (const v of classification) matches.push({ category: 'Transaktionstype', value: v, operator: operator as any, gate: 'ELLER' })
 
   // Advanced template: allow pinning values to a specific transaction field.

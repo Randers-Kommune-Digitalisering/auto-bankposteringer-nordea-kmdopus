@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { pgTable, text, uuid, integer, primaryKey, index } from "drizzle-orm/pg-core";
+import { pgTable, text, uuid, integer, numeric, jsonb, primaryKey, index } from "drizzle-orm/pg-core";
 import { run } from "./run";
 import { transaction } from "./transaction";
 
@@ -29,6 +29,11 @@ export const erpRequestLine = pgTable(
     requestId: text("request_id").notNull().references(() => erpRequest.id, { onDelete: 'cascade' }),
     lineNo: integer("line_no").notNull(),
     transactionId: uuid("transaction_id").references(() => transaction.id),
+    amount: numeric("amount"),
+    debetOrCredit: text("debet_or_credit"),
+    dimensions: jsonb("dimensions").$type<Record<string, string>>(),
+    postingText: text("posting_text"),
+    cpr: text("cpr"),
   },
   (table) => ([
     primaryKey({ columns: [table.requestId, table.lineNo] }),

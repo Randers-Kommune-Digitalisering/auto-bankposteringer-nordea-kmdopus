@@ -102,8 +102,8 @@ const columnVisibilityLabelById: Record<string, string> = {
   id: 'ID',
   ruleTags: 'Tags',
   Stamdata: 'Stamdata',
-  'matching.references': 'Fritekst',
-  'matching.counterparties': 'Part',
+  'matching.references': 'Reference',
+  'matching.counterparties': 'Modpart',
   'matching.classification': 'Transaktionstype',
   Datoer: 'Datoer'
 }
@@ -301,7 +301,7 @@ const columns: TableColumn<RuleListDto>[] = [
   },
   { // Matching references
     id: 'matching.references',
-    header: ({ column }) => getHeader(column, 'Fritekst'),
+    header: ({ column }) => getHeader(column, 'Reference'),
     accessorFn: row => row.matching.references,
     sortingFn: stringArraySortingFn,
     cell: ({ row }) =>
@@ -313,7 +313,7 @@ const columns: TableColumn<RuleListDto>[] = [
   },
   { // Matching counterparties
     id: 'matching.counterparties',
-    header: ({ column }) => getHeader(column, 'Part'),
+    header: ({ column }) => getHeader(column, 'Modpart'),
     accessorFn: row => row.matching.counterparties,
     sortingFn: stringArraySortingFn,
     cell: ({ row }) =>

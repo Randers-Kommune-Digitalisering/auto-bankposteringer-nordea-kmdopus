@@ -10,7 +10,7 @@ export type MatchFieldMeta = {
 
 const matchCatalog = [
   {
-    category: "Fritekst",
+    category: "Reference",
     fields: [
       { key: "ntry_ref", label: "Entry reference (NtryRef)" },
       { key: "ntry_acct_svcr_ref", label: "Entry AcctSvcrRef" },
@@ -27,7 +27,7 @@ const matchCatalog = [
     ],
   },
   {
-    category: "Part",
+    category: "Modpart",
     fields: [
       { key: "dbtr_id", label: "Debitor id" },
       { key: "dbtr_name", label: "Debitor navn" },

@@ -73,6 +73,11 @@ export async function submitErpPostingViaOutbox(
           requestId,
           lineNo: index + 1,
           transactionId: posting.transactionId ?? null,
+          amount: String(posting.amount),
+          debetOrCredit: posting.debetOrCredit,
+          dimensions: posting.dimensions,
+          postingText: posting.text ?? null,
+          cpr: posting.cpr ?? null,
         })),
       )
       .onConflictDoNothing()

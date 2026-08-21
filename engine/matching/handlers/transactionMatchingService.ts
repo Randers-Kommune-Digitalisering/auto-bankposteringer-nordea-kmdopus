@@ -8,6 +8,7 @@ import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import type {
   BookingStatus,
   RuleConditionField,
+  RuleConditionGate,
   RuleConditionOperator,
   RuleStatus,
   RuleType,
@@ -29,6 +30,7 @@ import {
   parseAmountOrUndefined,
 } from '../domain/amount'
 import { buildNordeaDeterministicGroupKey } from '../../banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo'
+import { fieldToCategory } from '~/lib/rules/match-config'
 
 export interface MatchSummary {
   postings: PostingLineInput[]
@@ -489,9 +491,7 @@ function evaluateTransaction(tx: MatchableTransaction, rules: HydratedRule[]): M
       continue
     }
 
-    const matchesConditions = (candidate.conditions ?? []).every(condition =>
-      evaluateCondition(tx, condition),
-    )
+    const matchesConditions = evaluateConditionGroups(tx, candidate.conditions ?? [])
 
     if (!matchesConditions) {
       continue
@@ -526,6 +526,33 @@ function evaluateTransaction(tx: MatchableTransaction, rules: HydratedRule[]): M
   })
 
   return { kind: 'unmatched', command: fallbackCommand }
+}
+
+export function evaluateConditionGroups(
+  tx: MatchableTransaction,
+  conditions: RuleConditionRow[],
+): boolean {
+  const groups = new Map<string, { gate: RuleConditionGate; conditions: RuleConditionRow[] }>()
+
+  for (const condition of conditions) {
+    const category = fieldToCategory[condition.field as RuleConditionField] ?? condition.field
+    const group = groups.get(category)
+    if (group) {
+      if (group.gate !== (condition.gate ?? 'OG')) return false
+      group.conditions.push(condition)
+      continue
+    }
+    groups.set(category, {
+      gate: condition.gate ?? 'OG',
+      conditions: [condition],
+    })
+  }
+
+  return Array.from(groups.values()).every(({ gate, conditions: groupConditions }) =>
+    gate === 'ELLER'
+      ? groupConditions.some(condition => evaluateCondition(tx, condition))
+      : groupConditions.every(condition => evaluateCondition(tx, condition)),
+  )
 }
 
 function evaluateCondition(tx: MatchableTransaction, condition: RuleConditionRow): boolean {

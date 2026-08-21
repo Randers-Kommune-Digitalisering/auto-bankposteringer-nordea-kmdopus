@@ -1,12 +1,16 @@
 import { createError, defineEventHandler } from 'h3'
-import { asc, eq } from 'drizzle-orm'
+import { and, asc, eq, inArray } from 'drizzle-orm'
 import { z } from 'zod'
 import db from '~/lib/db'
 import { account } from '~/lib/db/schema/account'
 import { erpRequest, erpRequestLine, erpResponse } from '~/lib/db/schema/erp'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
+import { transactionCodeCatalog } from '~/lib/db/schema/transactionCodeCatalog'
 import { requireErrorHandlingReadAccess } from '~~/server/auth/requireAppRoles'
+import { buildTransactionSummaryView } from '~~/server/presenters/openTransactionPresenter'
 import { projectCanonicalTransactionFields } from '~~/server/presenters/transactionCanonicalFields'
+import type { TransactionSummary } from '~/types/transactions'
+import { buildTransactionCodeCatalogMap, resolveTransactionType, type TransactionCodeCatalogMap } from '~~/server/presenters/transactionTypePresenter'
 
 type GroupedTransaction = {
   transactionId: string
@@ -21,6 +25,17 @@ type GroupedTransaction = {
   postingText: string
   counterparty: string | null
   reference: string | null
+  accountingLines: AccountingLine[]
+  summary: TransactionSummary
+}
+
+type AccountingLine = {
+  lineNo: number
+  amount: string | null
+  debetOrCredit: string | null
+  dimensions: Record<string, string>
+  postingText: string | null
+  cpr: string | null
 }
 
 type GroupAccumulator = {
@@ -36,6 +51,8 @@ type GroupAccumulator = {
   postingText: string
   counterparty: string | null
   reference: string | null
+  accountingLines: AccountingLine[]
+  summary: TransactionSummary
 }
 
 export default defineEventHandler(async (event) => {
@@ -63,7 +80,13 @@ export default defineEventHandler(async (event) => {
     .select({
       lineNo: erpRequestLine.lineNo,
       transactionId: erpRequestLine.transactionId,
+      accountingAmount: erpRequestLine.amount,
+      accountingDebetOrCredit: erpRequestLine.debetOrCredit,
+      accountingDimensions: erpRequestLine.dimensions,
+      accountingPostingText: erpRequestLine.postingText,
+      accountingCpr: erpRequestLine.cpr,
       bankAccountName: account.name,
+      provider: account.provider,
       amount: transaction.amount,
       currency: transaction.currency,
       bookingDate: transaction.bookingDate,
@@ -76,6 +99,10 @@ export default defineEventHandler(async (event) => {
       creditorId: transaction.creditorId,
       entryAdditionalInfo: transaction.entryAdditionalInfo,
       txAdditionalInfo: transaction.txAdditionalInfo,
+      bkTxCdDomain: transaction.bkTxCdDomain,
+      bkTxCdFamily: transaction.bkTxCdFamily,
+      bkTxCdSubFamily: transaction.bkTxCdSubFamily,
+      bkTxCdProprietary: transaction.bkTxCdProprietary,
       remittanceUstrd: transaction.remittanceUstrd,
       remittanceCreditorReference: transaction.remittanceCreditorReference,
       remittanceAdditional: transaction.remittanceAdditional,
@@ -94,6 +121,26 @@ export default defineEventHandler(async (event) => {
     .where(eq(erpRequestLine.requestId, requestId))
     .orderBy(asc(erpRequestLine.lineNo))
 
+  const providers = Array.from(new Set(
+    rows
+      .map((row) => row.provider?.trim().toLowerCase())
+      .filter((value): value is string => Boolean(value)),
+  ))
+  const catalogRows = providers.length
+    ? await db
+        .select({
+          provider: transactionCodeCatalog.provider,
+          codeKey: transactionCodeCatalog.codeKey,
+          displayName: transactionCodeCatalog.displayName,
+        })
+        .from(transactionCodeCatalog)
+        .where(and(
+          inArray(transactionCodeCatalog.provider, providers as any),
+          eq(transactionCodeCatalog.isActive, true),
+        ))
+    : []
+  const catalogByProviderCodeKey: TransactionCodeCatalogMap = buildTransactionCodeCatalogMap(catalogRows)
+
   const groups = new Map<string, GroupAccumulator>()
   const currencies = new Set<string>()
   const bookingDates = new Set<string>()
@@ -108,6 +155,22 @@ export default defineEventHandler(async (event) => {
     const transactionId = String(row.transactionId)
     const signedAmount = toSignedAmount(row.amount, row.creditDebitIndicator)
     const bookingDate = toIsoDate(row.bookingDate)
+    const transactionType = resolveTransactionType({
+      provider: row.provider,
+      bkTxCdProprietary: row.bkTxCdProprietary,
+      bkTxCdDomain: row.bkTxCdDomain,
+      bkTxCdFamily: row.bkTxCdFamily,
+      bkTxCdSubFamily: row.bkTxCdSubFamily,
+      catalogByProviderCodeKey,
+    })
+    const accountingLine: AccountingLine = {
+      lineNo: row.lineNo,
+      amount: row.accountingAmount == null ? null : String(row.accountingAmount),
+      debetOrCredit: row.accountingDebetOrCredit ?? null,
+      dimensions: normalizeDimensions(row.accountingDimensions),
+      postingText: row.accountingPostingText ?? null,
+      cpr: row.accountingCpr ?? null,
+    }
     const canonicalFields = projectCanonicalTransactionFields({
       id: transactionId,
       runId: String(requestRow.runId),
@@ -150,11 +213,26 @@ export default defineEventHandler(async (event) => {
         postingText: canonicalFields.postingText,
         counterparty: canonicalFields.counterpart,
         reference: canonicalFields.preferredReference,
+        accountingLines: [accountingLine],
+        summary: buildTransactionSummaryView({
+          id: transactionId,
+          runId: String(requestRow.runId),
+          bookingDate: bookingDate || '1970-01-01',
+          amount: signedAmount,
+          transactionType: transactionType.value,
+          transactionTypeCode: transactionType.code,
+          transactionTypeHint: transactionType.hint,
+          counterpart: canonicalFields.counterpart,
+          counterpartHint: canonicalFields.counterpartHint,
+          references: canonicalFields.references,
+          referenceDetails: canonicalFields.referenceDetails,
+        }),
       })
       continue
     }
 
     existing.lineNos.add(row.lineNo)
+    existing.accountingLines.push(accountingLine)
   }
 
   const transactions: GroupedTransaction[] = Array.from(groups.values())
@@ -171,6 +249,8 @@ export default defineEventHandler(async (event) => {
       postingText: group.postingText,
       counterparty: group.counterparty,
       reference: group.reference,
+      accountingLines: group.accountingLines,
+      summary: group.summary,
     }))
     .sort((a, b) => {
       const byDate = a.bookingDate.localeCompare(b.bookingDate)
@@ -225,4 +305,14 @@ function toIsoDate(input: Date | string | null): string {
   const month = String(input.getMonth() + 1).padStart(2, '0')
   const day = String(input.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
+}
+
+function normalizeDimensions(value: unknown): Record<string, string> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key, entry]) => key.trim().length > 0 && typeof entry === 'string' && entry.trim().length > 0)
+      .map(([key, entry]) => [key.trim(), entry.trim()]),
+  )
 }

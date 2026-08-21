@@ -27,6 +27,7 @@ nordea,LDAS/MCOP/INTR,Renter,LDAS,MCOP,INTR,,DK=Y from MIG camt.053.001.02 Accou
 nordea,LDAS/MDOP/CHRG,Gebyrer,LDAS,MDOP,CHRG,,DK=Y from MIG camt.053.001.02 Account Statement Extended,https://www.nordea.com/en/doc/nordea-caar-camt.053.001.02-account-statement-extended-0.pdf,true
 nordea,LDAS/MDOP/INTR,Renter,LDAS,MDOP,INTR,,DK=Y from MIG camt.053.001.02 Account Statement Extended,https://www.nordea.com/en/doc/nordea-caar-camt.053.001.02-account-statement-extended-0.pdf,true
 nordea,LDAS/NTAV/NTAV,Ikke tilgængelig,LDAS,NTAV,NTAV,,DK=Y from MIG camt.053.001.02 Account Statement Extended,https://www.nordea.com/en/doc/nordea-caar-camt.053.001.02-account-statement-extended-0.pdf,true
+nordea,PMNT/CCRD/CDPT,Kortindbetaling,PMNT,CCRD,CDPT,,DK=Y from MIG camt.053.001.02 Account Statement Extended,https://www.nordea.com/en/doc/nordea-caar-camt.053.001.02-account-statement-extended-0.pdf,true
 nordea,PMNT/CCRD/CHRG,Gebyrer,PMNT,CCRD,CHRG,,DK=Y from MIG camt.053.001.02 Account Statement Extended,https://www.nordea.com/en/doc/nordea-caar-camt.053.001.02-account-statement-extended-0.pdf,true
 nordea,PMNT/CCRD/CWDL,Kontanthævning,PMNT,CCRD,CWDL,,DK=Y from MIG camt.053.001.02 Account Statement Extended,https://www.nordea.com/en/doc/nordea-caar-camt.053.001.02-account-statement-extended-0.pdf,true
 nordea,PMNT/CCRD/NTAV,Ikke tilgængelig,PMNT,CCRD,NTAV,,DK=Y from MIG camt.053.001.02 Account Statement Extended,https://www.nordea.com/en/doc/nordea-caar-camt.053.001.02-account-statement-extended-0.pdf,true

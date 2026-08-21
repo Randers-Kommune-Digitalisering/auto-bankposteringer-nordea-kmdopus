@@ -12,6 +12,10 @@ export const ruleConditionOperatorValues = ['eq', 'neq', 'like', 'ilike', 'regex
 export const ruleConditionOperatorEnum = pgEnum('rule_condition_operator', ruleConditionOperatorValues)
 export type RuleConditionOperator = typeof ruleConditionOperatorValues[number]
 
+export const ruleConditionGateValues = ['OG', 'ELLER'] as const
+export const ruleConditionGateEnum = pgEnum('rule_condition_gate', ruleConditionGateValues)
+export type RuleConditionGate = typeof ruleConditionGateValues[number]
+
 // NOTE: This enum is intentionally CAMT.053-specific.
 // It is used both in DB (rule_banking_condition.field) and in the UI match catalog.
 export const ruleConditionFieldValues = [
