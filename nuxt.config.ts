@@ -44,6 +44,7 @@ export default defineNuxtConfig({
       include: [
         '@internationalized/date',
         '@tanstack/table-core',
+        '@tanstack/match-sorter-utils',
         'drizzle-orm/pg-core',
         'drizzle-zod',
         'zod',

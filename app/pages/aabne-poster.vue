@@ -57,7 +57,7 @@ const openItemsSearch = computed(() => debouncedTableSearchValue.value.trim())
 
 const page = ref(1)
 const pageSize = ref(25)
-const transactionTypeFilter = ref<string | undefined>(undefined)
+const transactionTypeFilter = ref<string[]>([])
 const pageSizeOptions = [5, 10, 25, 50].map((value) => ({
   label: `${value} pr. side`,
   value,
@@ -154,8 +154,9 @@ const transactionTypeFilterOptions = computed(() =>
 )
 
 const filteredTableRows = computed<OpenItemsTableRow[]>(() => {
-  const rows = transactionTypeFilter.value
-    ? tableRows.value.filter((row) => row.transactionTypeEntries.some((entry) => entry.value === transactionTypeFilter.value))
+  const selectedTransactionTypes = transactionTypeFilter.value
+  const rows = selectedTransactionTypes.length
+    ? tableRows.value.filter((row) => row.transactionTypeEntries.some((entry) => selectedTransactionTypes.includes(entry.value)))
     : tableRows.value
 
   return fuzzyRankRows({
