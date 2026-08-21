@@ -21,6 +21,8 @@ import {
 import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
 import { parseAmount } from '#engine/matching/domain/amount'
 import { buildNordeaDeterministicGroupKey } from '#engine/banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo'
+import { bookingPeriodRebookingAudit } from '~/lib/db/schema/bookingPeriod'
+import { resolveManualBookingDate } from '~~/server/utils/bookingPeriod'
 
 const groupProcessSchema = z.object({
   transactionIds: z.array(z.string().uuid()).min(2),
@@ -94,6 +96,11 @@ export default defineEventHandler(async (event) => {
   const accountId = first.accountId
   const creditDebitIndicator = first.creditDebitIndicator ?? null
   const bookingDate = toDate(first.bookingDate)
+  const originalBookingDate = bookingDate.toISOString().slice(0, 10)
+  const effectiveBookingDate = await resolveManualBookingDate(
+    originalBookingDate,
+    body.confirmClosedPeriodRebooking === true,
+  )
 
   const entryGroupSizeByEntryKey = new Map<string, number>()
   for (const row of rows) {
@@ -225,8 +232,18 @@ export default defineEventHandler(async (event) => {
 
   const submission = await executePostingCommand(command, {
     runId: first.runId,
-    bookingDate,
+    bookingDate: toDate(effectiveBookingDate),
   })
+
+  if (effectiveBookingDate !== originalBookingDate) {
+    await db.insert(bookingPeriodRebookingAudit).values(
+      rows.map((row) => ({
+        transactionId: row.id,
+        originalBookingDate,
+        effectiveBookingDate,
+      })),
+    )
+  }
 
   const withProcessingRow = rows.filter((r) => r.processingId).map((r) => r.id)
   const withoutProcessingRow = rows.filter((r) => !r.processingId).map((r) => r.id)

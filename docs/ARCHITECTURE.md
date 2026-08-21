@@ -205,6 +205,21 @@ This avoids request-coupled false positives (for example returning `0` while dis
 - `banking_agreement_cursor`: opaque cursor per (provider agreement, adapter) for incremental fetching
 - `run`: batch execution unit (audit/logging)
 
+### Bogføringsperioder
+
+Tenant-konfigurationen indeholder `booking_period_close_day`, som seedes fra
+`ERP_BOOKING_PERIOD_CLOSE_DAY` og valideres som en dag fra 1 til 31. Dagen er
+den sidste åbne dag for foregående måneds bogføring. Beregningen bruger
+`Europe/Copenhagen` som kalender og begrænser konfigurationsdagen til den
+sidste faktiske dag i måneden.
+
+Reglen håndhæves kun ved manuel enkeltpost og manuel samlepost. Serveren
+afviser et forsøg i en lukket periode med en stabil 409-kode, indtil brugeren
+eksplicit bekræfter, at posteringen skal sendes med dags dato. Den oprindelige
+bankdato ændres ikke. Bekræftede datoændringer gemmes i
+`booking_period_rebooking_audit` med de to datoer og tidspunktet for
+bekræftelsen. Automatisk regelbogføring følger fortsat den oprindelige dato.
+
 ### Run status projection
 
 Run status shown in operational views is derived from persisted run state, error logs, jobs, outbox items, and ERP responses. The shared server utility `server/utils/runs/runStatus.ts` applies the same deterministic priority in the dashboard and runs list:
@@ -359,6 +374,19 @@ If you feel the system is getting "too many things":
 - Keep ingestion deterministic and central: document hash + canonical tables.
 - Keep matching/posting free of vendor logic: only use canonical CAMT columns.
 - Keep ERP accounting dimensions data-driven: definitions + ERP-target mapping live in the database, not in code or `.env`.
+
+## Local development
+
+The development database is automatically cleared when Docker Compose shuts
+down the database with `docker compose stop` or `docker compose down`. The
+cleanup drops and recreates the `drizzle` and `public` schemas, but does not
+delete the Docker volume.
+
+On the next `docker compose up`, the app automatically runs migrations and the
+system seed. This feature requires a Docker Compose version with support for
+service hooks, against which the local Compose configuration is validated.
+Cleanup cannot be guaranteed in the event of a crash, OOM, `SIGKILL`, or host
+failure.
 
 ## Deployment considerations (production)
 

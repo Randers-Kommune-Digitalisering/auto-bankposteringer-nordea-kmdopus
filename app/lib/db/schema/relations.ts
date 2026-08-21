@@ -31,6 +31,7 @@ import { erpRequest, erpResponse, erpRequestLine } from "./erp";
 import { errorLog } from "./error";
 import { job } from './job';
 import { bankingAgreementDiscoveryRun } from './bankingAgreementDiscoveryRun';
+import { bookingPeriodRebookingAudit } from './bookingPeriod';
 
 export const accountRelations = relations(account, ({ many }) => ({
   rules: many(ruleBankAccount),
@@ -135,8 +136,16 @@ export const transactionRelations = relations(transaction, ({ one, many }) => ({
   statement: one(bankingStatement, { fields: [transaction.statementId], references: [bankingStatement.id] }),
   processing: one(transactionProcessing, { fields: [transaction.id], references: [transactionProcessing.transactionId] }),
   manualBookingDraft: one(manualBookingDraft, { fields: [transaction.id], references: [manualBookingDraft.transactionId] }),
+  bookingPeriodRebookingAudits: many(bookingPeriodRebookingAudit),
   references: many(transactionReference),
   parties: many(transactionParty),
+}));
+
+export const bookingPeriodRebookingAuditRelations = relations(bookingPeriodRebookingAudit, ({ one }) => ({
+  transaction: one(transaction, {
+    fields: [bookingPeriodRebookingAudit.transactionId],
+    references: [transaction.id],
+  }),
 }));
 
 export const transactionReferenceRelations = relations(transactionReference, ({ one }) => ({

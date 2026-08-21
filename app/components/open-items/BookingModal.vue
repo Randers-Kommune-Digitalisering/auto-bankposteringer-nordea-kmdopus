@@ -63,6 +63,8 @@ const formRef = ref()
 const isSubmitting = ref(false)
 const isSavingDraft = ref(false)
 const isLoadingDraft = ref(false)
+const closedPeriodWarning = ref<{ originalBookingDate: string; effectiveBookingDate: string } | null>(null)
+const pendingClosedPeriodPayload = ref<ComparableManualBookingPayload | null>(null)
 
 const {
 	manualBookingFormSchema,
@@ -240,7 +242,10 @@ async function handleSubmit(event?: FormSubmitEvent<ManualFormState>) {
 	}
 
 	const payload = buildManualBookingPayload(event?.data ?? formState)
+	await submitBooking(payload)
+}
 
+async function submitBooking(payload: ComparableManualBookingPayload) {
 	try {
 		isSubmitting.value = true
 		if (isGroupMode.value) {
@@ -268,6 +273,15 @@ async function handleSubmit(event?: FormSubmitEvent<ManualFormState>) {
 		savedSnapshot.value = currentSnapshot.value
 		emit('processed')
 	} catch (error: any) {
+		const warning = error?.data?.data?.code === 'BOOKING_PERIOD_CLOSED'
+		if (warning && !payload.confirmClosedPeriodRebooking) {
+			pendingClosedPeriodPayload.value = payload
+			closedPeriodWarning.value = {
+				originalBookingDate: error.data.data.originalBookingDate,
+				effectiveBookingDate: error.data.data.effectiveBookingDate,
+			}
+			return
+		}
 		const description = error?.data?.message ?? error?.message ?? 'Uventet fejl'
 		toast.add({
 			title: 'Kunne ikke bogføre',
@@ -277,6 +291,14 @@ async function handleSubmit(event?: FormSubmitEvent<ManualFormState>) {
 	} finally {
 		isSubmitting.value = false
 	}
+}
+
+async function confirmClosedPeriodRebooking() {
+	const payload = pendingClosedPeriodPayload.value
+	closedPeriodWarning.value = null
+	pendingClosedPeriodPayload.value = null
+	if (!payload) return
+	await submitBooking({ ...payload, confirmClosedPeriodRebooking: true })
 }
 
 async function handleSaveDraft() {
@@ -631,6 +653,27 @@ function collapseAllLines() {
 						</div>
 						<div v-else class="text-xs text-muted">-</div>
 					</div>
+				</div>
+			</div>
+		</template>
+	</UModal>
+
+	<UModal :open="!!closedPeriodWarning" title="Bogføringsperioden er afsluttet" @update:open="(value) => { if (!value) closedPeriodWarning = null }">
+		<template #body>
+			<div class="space-y-4">
+				<p class="text-sm text-muted">
+					Posteringen har bogføringsdato {{ closedPeriodWarning?.originalBookingDate }}, som ligger i en afsluttet periode.
+				</p>
+				<p class="text-sm text-muted">
+					Hvis du fortsætter, bliver den bogført med dato {{ closedPeriodWarning?.effectiveBookingDate }}.
+				</p>
+				<div class="flex justify-end gap-2">
+					<UButton color="neutral" variant="soft" @click="closedPeriodWarning = null">
+						Annuller
+					</UButton>
+					<UButton color="primary" :loading="isSubmitting" @click="confirmClosedPeriodRebooking">
+						Fortsæt med dags dato
+					</UButton>
 				</div>
 			</div>
 		</template>

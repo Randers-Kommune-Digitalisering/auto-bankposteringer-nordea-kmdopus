@@ -1,6 +1,6 @@
 {
-  "id": "087b3bad-3dcd-4894-b2a9-4543db9ea435",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "cf6ea8e9-ae2e-487f-b6bc-313ec656ad96",
+  "prevId": "087b3bad-3dcd-4894-b2a9-4543db9ea435",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1105,6 +1105,81 @@
           "tableTo": "job",
           "columnsFrom": [
             "job_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.booking_period_rebooking_audit": {
+      "name": "booking_period_rebooking_audit",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "transaction_id": {
+          "name": "transaction_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "original_booking_date": {
+          "name": "original_booking_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "effective_booking_date": {
+          "name": "effective_booking_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "confirmed_at": {
+          "name": "confirmed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "booking_period_rebooking_audit_transaction_id_idx": {
+          "name": "booking_period_rebooking_audit_transaction_id_idx",
+          "columns": [
+            {
+              "expression": "transaction_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "booking_period_rebooking_audit_transaction_id_transaction_id_fk": {
+          "name": "booking_period_rebooking_audit_transaction_id_transaction_id_fk",
+          "tableFrom": "booking_period_rebooking_audit",
+          "tableTo": "transaction",
+          "columnsFrom": [
+            "transaction_id"
           ],
           "columnsTo": [
             "id"
@@ -2838,6 +2913,12 @@
           "name": "active_erp_supplier",
           "type": "erp_supplier",
           "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "booking_period_close_day": {
+          "name": "booking_period_close_day",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
         },

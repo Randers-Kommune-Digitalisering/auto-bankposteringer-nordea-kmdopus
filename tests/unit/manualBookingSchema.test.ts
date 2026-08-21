@@ -26,6 +26,26 @@ describe('manualBookingPayloadSchema', () => {
     expect(result.success).toBe(true)
   })
 
+  it('accepts an explicit closed-period rebooking confirmation', () => {
+    const result = manualBookingPayloadSchema.safeParse({
+      lines: [{ amount: 100 }],
+      cprType: 'ingen',
+      confirmClosedPeriodRebooking: true,
+    })
+
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects a false closed-period rebooking confirmation', () => {
+    const result = manualBookingPayloadSchema.safeParse({
+      lines: [{ amount: 100 }],
+      cprType: 'ingen',
+      confirmClosedPeriodRebooking: false,
+    })
+
+    expect(result.success).toBe(false)
+  })
+
   it('rejects invalid CPR when provided', () => {
     const result = manualBookingPayloadSchema.safeParse({
       lines: [

@@ -128,6 +128,9 @@ services:
       - .env
     volumes:
       - postgres_data:/var/lib/postgresql
+      - ./scripts/db/clear-dev-database.sh:/usr/local/bin/clear-dev-database.sh:ro
+    pre_stop:
+      - command: ["/usr/local/bin/clear-dev-database.sh"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 2s

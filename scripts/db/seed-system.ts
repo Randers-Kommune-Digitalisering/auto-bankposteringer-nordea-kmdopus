@@ -36,14 +36,19 @@ const TENANT_CONFIG_ID = 1
 
 const SeedEnvSchema = z.object({
   ERP_SUPPLIER: z.string(),
+  ERP_BOOKING_PERIOD_CLOSE_DAY: z.coerce.number().int().min(1).max(31),
 })
 
 tryParseEnv(SeedEnvSchema)
 const seedEnv = SeedEnvSchema.parse(process.env)
 
-async function ensureTenantConfiguration(desiredSupplier: ErpSupplier) {
+async function ensureTenantConfiguration(desiredSupplier: ErpSupplier, desiredCloseDay: number) {
   const [existing] = await db
-    .select({ id: tenantConfiguration.id, activeErpSupplier: tenantConfiguration.activeErpSupplier })
+    .select({
+      id: tenantConfiguration.id,
+      activeErpSupplier: tenantConfiguration.activeErpSupplier,
+      bookingPeriodCloseDay: tenantConfiguration.bookingPeriodCloseDay,
+    })
     .from(tenantConfiguration)
     .where(eq(tenantConfiguration.id, TENANT_CONFIG_ID))
     .limit(1)
@@ -51,7 +56,7 @@ async function ensureTenantConfiguration(desiredSupplier: ErpSupplier) {
   if (!existing) {
     await db
       .insert(tenantConfiguration)
-      .values({ id: TENANT_CONFIG_ID, activeErpSupplier: desiredSupplier })
+      .values({ id: TENANT_CONFIG_ID, activeErpSupplier: desiredSupplier, bookingPeriodCloseDay: desiredCloseDay })
     return
   }
 
@@ -59,6 +64,13 @@ async function ensureTenantConfiguration(desiredSupplier: ErpSupplier) {
     throw new Error(
       `ERP supplier mismatch (policy A): env=${desiredSupplier} db=${existing.activeErpSupplier}. ` +
         'Skift af ERP supplier kræver eksplicit migration/reset.',
+    )
+  }
+
+  if (existing.bookingPeriodCloseDay !== desiredCloseDay) {
+    throw new Error(
+      `Booking period close day mismatch (policy A): env=${desiredCloseDay} db=${existing.bookingPeriodCloseDay}. ` +
+        'Skift af lukkedag kræver eksplicit migration/reset.',
     )
   }
 }
@@ -138,7 +150,7 @@ async function ensureDimensionConstraints() {
 
 async function main() {
   const desiredSupplier = seedEnv.ERP_SUPPLIER as ErpSupplier
-  await ensureTenantConfiguration(desiredSupplier)
+  await ensureTenantConfiguration(desiredSupplier, seedEnv.ERP_BOOKING_PERIOD_CLOSE_DAY)
   await ensureDimensionDefinitions()
   await ensureDimensionConstraints()
   // eslint-disable-next-line no-console

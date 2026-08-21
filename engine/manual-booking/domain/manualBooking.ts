@@ -47,6 +47,7 @@ export const manualBookingFormSchema = z.object(baseManualBookingShape).superRef
 export const manualBookingPayloadSchema = z.object({
   ...baseManualBookingShape,
   attachments: z.array(attachmentSchema).optional(),
+  confirmClosedPeriodRebooking: z.literal(true).optional(),
 }).superRefine((data, ctx) => {
   if (!data.cprNumber) return
 
