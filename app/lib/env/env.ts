@@ -43,6 +43,7 @@ const baseCommonSchema = z.object({
   DATABASE_URL: z.string(),
 
   ERP_SUPPLIER: z.enum(erpSupplierValues),
+  ERP_BOOKING_PERIOD_CLOSE_DAY: z.coerce.number().int().min(1).max(31),
   ERP_ERROR_ACCOUNT: z.string(),
   ERP_ACTIVE_INTEGRATION: z.enum(["true", "false"]).transform((value) => value === "true"),
   ERP_PROD_ENVIRONMENT: z.string(),

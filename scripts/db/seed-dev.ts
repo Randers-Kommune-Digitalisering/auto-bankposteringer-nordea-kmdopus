@@ -154,10 +154,15 @@ function sha256(value: string): string {
 
 const TENANT_CONFIG_ID = 1
 const erpSupplier = (process.env.ERP_SUPPLIER ?? 'kmd') as ErpSupplier
+const bookingPeriodCloseDay = Number(process.env.ERP_BOOKING_PERIOD_CLOSE_DAY ?? 7)
 
 async function ensureTenantConfiguration(tx: any) {
   const existing = await tx
-    .select({ id: tenantConfiguration.id, activeErpSupplier: tenantConfiguration.activeErpSupplier })
+    .select({
+      id: tenantConfiguration.id,
+      activeErpSupplier: tenantConfiguration.activeErpSupplier,
+      bookingPeriodCloseDay: tenantConfiguration.bookingPeriodCloseDay,
+    })
     .from(tenantConfiguration)
     .where(eq(tenantConfiguration.id, TENANT_CONFIG_ID))
     .limit(1)
@@ -165,7 +170,7 @@ async function ensureTenantConfiguration(tx: any) {
   if (!existing[0]) {
     await tx
       .insert(tenantConfiguration)
-      .values({ id: TENANT_CONFIG_ID, activeErpSupplier: erpSupplier })
+      .values({ id: TENANT_CONFIG_ID, activeErpSupplier: erpSupplier, bookingPeriodCloseDay })
     return
   }
 
@@ -174,6 +179,10 @@ async function ensureTenantConfiguration(tx: any) {
       `ERP supplier mismatch (policy A): env=${erpSupplier} db=${existing[0].activeErpSupplier}. ` +
         'Reset DB/seed explicitly to switch supplier.',
     )
+  }
+
+  if (existing[0].bookingPeriodCloseDay !== bookingPeriodCloseDay) {
+    throw new Error('Booking period close day mismatch. Reset DB/seed explicitly to change it.')
   }
 }
 

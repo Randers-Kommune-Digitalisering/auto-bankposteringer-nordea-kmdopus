@@ -27,6 +27,8 @@ import {
 import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
 import { parseAmount } from '#engine/matching/domain/amount'
 import { buildNordeaDeterministicGroupKey } from '#engine/banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo'
+import { bookingPeriodRebookingAudit } from '~/lib/db/schema/bookingPeriod'
+import { resolveManualBookingDate } from '~~/server/utils/bookingPeriod'
 
 export default defineEventHandler(async (event) => {
   await requireWriteAccess(event)
@@ -97,6 +99,11 @@ export default defineEventHandler(async (event) => {
   }
 
   const bookingDate = toDate(row.bookingDate)
+  const originalBookingDate = bookingDate.toISOString().slice(0, 10)
+  const effectiveBookingDate = await resolveManualBookingDate(
+    originalBookingDate,
+    parsedBody.confirmClosedPeriodRebooking === true,
+  )
 
   const creditDebitCondition = row.creditDebitIndicator == null
     ? isNull(transaction.creditDebitIndicator)
@@ -245,8 +252,16 @@ export default defineEventHandler(async (event) => {
 
   const submission = await executePostingCommand(command, {
     runId: row.runId,
-    bookingDate,
+    bookingDate: toDate(effectiveBookingDate),
   });
+
+  if (effectiveBookingDate !== originalBookingDate) {
+    await db.insert(bookingPeriodRebookingAudit).values({
+      transactionId: row.id,
+      originalBookingDate,
+      effectiveBookingDate,
+    })
+  }
 
   if (row.processingId) {
     await db

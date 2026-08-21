@@ -14,6 +14,7 @@ setIfMissing('POSTGRES_DB', 'mydb')
 setIfMissing('DATABASE_URL', 'postgres://root:pass@localhost:5432/mydb')
 
 setIfMissing('ERP_SUPPLIER', 'kmd')
+setIfMissing('ERP_BOOKING_PERIOD_CLOSE_DAY', '7')
 setIfMissing('ERP_ERROR_ACCOUNT', '95999999')
 setIfMissing('ERP_ACTIVE_INTEGRATION', 'false')
 setIfMissing('ERP_PROD_ENVIRONMENT', 'P04')

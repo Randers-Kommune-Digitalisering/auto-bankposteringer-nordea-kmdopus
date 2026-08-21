@@ -345,6 +345,7 @@ CREATE TABLE "rule_rule_tag" (
 CREATE TABLE "tenant_configuration" (
 	"id" integer PRIMARY KEY NOT NULL,
 	"active_erp_supplier" "erp_supplier" NOT NULL,
+	"booking_period_close_day" integer NOT NULL,
 	"created_at" date DEFAULT now(),
 	"updated_at" date DEFAULT now()
 );
@@ -578,4 +579,13 @@ CREATE INDEX "transaction_statement_order_idx" ON "transaction" USING btree ("st
 CREATE INDEX "transaction_processing_status_transaction_id_idx" ON "transaction_processing" USING btree ("status","transaction_id");--> statement-breakpoint
 CREATE INDEX "transaction_processing_rule_applied_idx" ON "transaction_processing" USING btree ("rule_applied");--> statement-breakpoint
 CREATE INDEX "transaction_party_transaction_sequence_idx" ON "transaction_party" USING btree ("transaction_id","sequence_no");--> statement-breakpoint
-CREATE INDEX "transaction_reference_transaction_sequence_idx" ON "transaction_reference" USING btree ("transaction_id","sequence_no");
+CREATE INDEX "transaction_reference_transaction_sequence_idx" ON "transaction_reference" USING btree ("transaction_id","sequence_no");--> statement-breakpoint
+CREATE TABLE "booking_period_rebooking_audit" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"transaction_id" uuid NOT NULL,
+	"original_booking_date" date NOT NULL,
+	"effective_booking_date" date NOT NULL,
+	"confirmed_at" timestamp with time zone DEFAULT now() NOT NULL
+);--> statement-breakpoint
+ALTER TABLE "booking_period_rebooking_audit" ADD CONSTRAINT "booking_period_rebooking_audit_transaction_id_transaction_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."transaction"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "booking_period_rebooking_audit_transaction_id_idx" ON "booking_period_rebooking_audit" USING btree ("transaction_id");

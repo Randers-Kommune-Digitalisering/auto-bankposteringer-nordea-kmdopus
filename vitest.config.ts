@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { defineVitestConfig } from '@nuxt/test-utils/config'
 import { fileURLToPath } from 'node:url'
 

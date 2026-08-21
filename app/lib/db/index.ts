@@ -20,6 +20,7 @@ import * as transactionSchema from './schema/transaction'
 import * as transactionCodeCatalogSchema from './schema/transactionCodeCatalog'
 import * as bankingAdapterCursorSchema from './schema/bankingAdapterCursor'
 import * as manualBookingDraftSchema from './schema/manualBookingDraft'
+import * as bookingPeriodSchema from './schema/bookingPeriod'
 
 /*
 --------------------
@@ -46,6 +47,7 @@ const schema = {
   ...transactionCodeCatalogSchema,
   ...bankingAdapterCursorSchema,
   ...manualBookingDraftSchema,
+  ...bookingPeriodSchema,
 } as const
 
 export const pool = new Pool({
