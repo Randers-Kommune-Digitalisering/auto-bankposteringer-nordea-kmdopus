@@ -1,5 +1,5 @@
 const ACCOUNT_REGEX = /^(S|9|\d)\d{7}$/;
-const ACCOUNTSECONDARY_REGEX = /^X[A-Z]-\d{1,10}-\d{1,5}$/i;
+const ACCOUNTSECONDARY_REGEX = /^[A-Za-z0-9\-.\/]{1,24}$/;
 const ACCOUNTTERTIARY_REGEX = /^[a-zA-Z0-9]{1,10}$/;
 const CPR_REGEX = /^(?:(?:0[1-9]|[12][0-9]|3[01])(?:0[13578]|1[02])|(?:0[1-9]|[12][0-9]|30)(?:0[469]|11)|(?:0[1-9]|1[0-9]|2[0-8])02|29(?:02)(?:00|(?:[2468][048]|[13579][26])))(\d{2})(\d{4})$/;
 const EMAIL_REGEX = /^[A-Za-z0-9._%+-]+@randers\.dk$/i;
@@ -23,7 +23,7 @@ export function validateAccountSecondary(value, errors) {
         return true;
     }
     if (!ACCOUNTSECONDARY_REGEX.test(value)) {
-        errors.accountSecondary = 'PSP-element skal matche formatet X*-**********-*****';
+        errors.accountSecondary = 'PSP-element skal være 1-24 tegn og kun indeholde bogstaver, tal, bindestreg, punktum eller skråstreg';
         return false;
     } else {
         errors.accountSecondary = null;
