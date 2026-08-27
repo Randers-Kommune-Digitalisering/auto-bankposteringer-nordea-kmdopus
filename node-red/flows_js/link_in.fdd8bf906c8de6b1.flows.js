@@ -4,9 +4,7 @@ const Node = {
   "z": "88c6307a5ee1dd81",
   "g": "0fc5db670402470f",
   "name": "kmd xml file creation",
-  "links": [
-    "60b663923937136d"
-  ],
+  "links": [],
   "x": 55,
   "y": 220,
   "wires": [

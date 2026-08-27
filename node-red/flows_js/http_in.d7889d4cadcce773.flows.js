@@ -7,6 +7,7 @@ const Node = {
   "url": "/bankaccounts",
   "method": "put",
   "upload": false,
+  "skipBodyParsing": false,
   "swaggerDoc": "",
   "x": 930,
   "y": 400,
