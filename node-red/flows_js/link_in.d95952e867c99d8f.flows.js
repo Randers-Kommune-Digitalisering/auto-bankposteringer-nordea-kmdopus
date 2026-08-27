@@ -5,7 +5,6 @@ const Node = {
   "g": "18ec65b7f9e9459e",
   "name": "link in route bank first",
   "links": [
-    "bb207e6f42067d51",
     "f31638598b396871",
     "6c2d2361da8e071c"
   ],

@@ -2,6 +2,7 @@
 .env-development
 .npm
 .log
+.nuxt
 node_modules
 .flows.json.backup
 .config.nodes.json

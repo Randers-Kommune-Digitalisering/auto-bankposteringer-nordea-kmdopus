@@ -4,10 +4,7 @@ const Node = {
   "z": "88c6307a5ee1dd81",
   "g": "474faa1bf813b5a8",
   "name": "kmd recon file creation",
-  "links": [
-    "46beaf4a64b6f64a",
-    "60b663923937136d"
-  ],
+  "links": [],
   "x": 55,
   "y": 360,
   "wires": [

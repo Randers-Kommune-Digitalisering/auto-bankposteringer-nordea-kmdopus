@@ -6,7 +6,6 @@ const Node = {
   "name": "auth steps",
   "links": [
     "50d6dad2d4c4015c",
-    "ca1cdecf509205dd",
     "9d33be9522a2ba30"
   ],
   "x": 55,
