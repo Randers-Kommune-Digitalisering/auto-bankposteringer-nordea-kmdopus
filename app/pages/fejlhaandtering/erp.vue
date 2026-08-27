@@ -428,7 +428,7 @@ async function reopenBookedTransactions() {
         </template>
         <template #right>
           <UButton
-            :icon="appConfig.ui.icons.refresh"
+            :icon="appConfig.ui.icons.reload"
             variant="ghost"
             color="primary"
             label="Opdater"

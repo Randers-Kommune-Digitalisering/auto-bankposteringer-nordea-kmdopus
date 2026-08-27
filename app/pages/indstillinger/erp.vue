@@ -8,6 +8,7 @@ interface ErpMetadataResponse {
   compCode: string
   integrationId: string
   integrationFileNameMask: string
+  bookingPeriodCloseDate: number
 }
 
 type AccountingDimensionDefinition = {
@@ -41,6 +42,7 @@ const { data: erpMetadata } = await useFetch<ErpMetadataResponse>(
       compCode: '',
       integrationId: '',
       integrationFileNameMask: '',
+      bookingPeriodCloseDate: 0,
     })
   }
 )
@@ -56,12 +58,12 @@ const { data: accountingDimensions } = await useFetch<AccountingDimensionsRespon
 const metadataFields = computed(() => [
   { label: 'ERP Leverandør', value: erpMetadata.value?.erpSupplier ?? '—' },
   { label: 'Fejlkonto', value: erpMetadata.value?.erpErrorAccount ?? '—' },
-  { label: 'Integration aktiv', value: (erpMetadata.value?.activeIntegration ?? false) ? 'Aktiv' : 'Inaktiv' },
+  { label: 'Integration', value: (erpMetadata.value?.activeIntegration ?? false) ? 'Aktiv' : 'Inaktiv' },
   { label: 'Miljø', value: erpMetadata.value?.prodEnvironment ?? '—' },
   { label: 'Kommunekode', value: erpMetadata.value?.municipalityCode ?? '—' },
-  { label: 'Comp kode', value: erpMetadata.value?.compCode ?? '—' },
+  { label: 'Firmakode', value: erpMetadata.value?.compCode ?? '—' },
   { label: 'Integration ID', value: erpMetadata.value?.integrationId ?? '—' },
-  { label: 'Filnavn-mask', value: erpMetadata.value?.integrationFileNameMask ?? '—' },
+  { label: 'Bogføringsperioder lukker d.', value: erpMetadata.value?.bookingPeriodCloseDate ?? '-' },
 ])
 
 const dimensionFields = computed(() => {

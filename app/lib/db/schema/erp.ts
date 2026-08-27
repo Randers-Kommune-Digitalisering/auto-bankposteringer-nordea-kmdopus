@@ -40,17 +40,3 @@ export const erpRequestLine = pgTable(
     index('erp_request_line_transaction_id_idx').on(table.transactionId),
   ]),
 );
-
-export const erpRequestInsertSchema = createInsertSchema(erpRequest);
-export type ErpRequestInsertSchema = z.infer<typeof erpRequestInsertSchema>;
-
-export const erpResponseInsertSchema = createInsertSchema(erpResponse);
-export const erpResponseSelectSchema = createSelectSchema(erpResponse);
-export type ErpResponseInsertSchema = z.infer<typeof erpResponseInsertSchema>;
-export type ErpResponseSelectSchema = z.infer<typeof erpResponseSelectSchema>;
-
-export const erpRequestLineInsertSchema = createInsertSchema(erpRequestLine);
-export const erpRequestLineSelectSchema = createSelectSchema(erpRequestLine);
-
-export type ErpRequestLineInsertSchema = z.infer<typeof erpRequestLineInsertSchema>;
-export type ErpRequestLineSelectSchema = z.infer<typeof erpRequestLineSelectSchema>;
