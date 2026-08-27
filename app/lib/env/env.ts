@@ -146,6 +146,7 @@ export const erpIntegrationMetadata = {
   compCode: parsedEnv.ERP_COMP_CODE,
   integrationId: parsedEnv.ERP_INTEGRATION_ID,
   integrationFileNameMask: parsedEnv.ERP_INTEGRATION_FILENAME_MASK,
+  bookingPeriodCloseDate: parsedEnv.ERP_BOOKING_PERIOD_CLOSE_DAY,
 };
 
 export type ErpIntegrationMetadata = typeof erpIntegrationMetadata;
