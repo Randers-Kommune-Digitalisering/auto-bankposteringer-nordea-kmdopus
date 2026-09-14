@@ -14,8 +14,8 @@ wait_for_db() {
 const { Client } = require('pg');
 
 const url = process.env.DATABASE_URL;
-const maxAttemptsRaw = Number.parseInt(process.env.DB_WAIT_MAX_ATTEMPTS || '0', 10);
-const maxAttempts = Number.isFinite(maxAttemptsRaw) && maxAttemptsRaw > 0 ? maxAttemptsRaw : 0;
+const maxAttemptsRaw = Number.parseInt(process.env.DB_WAIT_MAX_ATTEMPTS || '60', 10);
+const maxAttempts = Number.isFinite(maxAttemptsRaw) && maxAttemptsRaw > 0 ? maxAttemptsRaw : 60;
 const delayMsRaw = Number.parseInt(process.env.DB_WAIT_RETRY_MS || '1000', 10);
 const delayMs = Number.isFinite(delayMsRaw) && delayMsRaw > 0 ? delayMsRaw : 1000;
 const maxAttemptsLabel = maxAttempts > 0 ? String(maxAttempts) : '∞';
@@ -53,7 +53,8 @@ function sleep(ms) {
 
       process.stdout.write(`DB not ready yet (attempt ${attempt}/${maxAttemptsLabel})${code ? ` code=${code}` : ''}\n`);
       if (!transient) {
-        // Still retry a few times; network/DNS can be flaky during compose boot.
+        process.stderr.write(`Database connection failed with a non-transient error${code ? ` code=${code}` : ''}: ${msg}\n`);
+        process.exit(1);
       }
       await sleep(delayMs);
     }
@@ -128,7 +129,9 @@ seed_system_if_enabled() {
 
 wait_for_db
 
-if [ "$NODE_ENV" = "production" ]; then
+if [ "${APP_ROLE:-}" = "db-init" ]; then
+  exec "$@"
+elif [ "$NODE_ENV" = "production" ]; then
   if [ "${DB_MIGRATE_ON_START:-}" = "1" ]; then
     echo "Running database migrations (production)..."
     pnpm db:migrate

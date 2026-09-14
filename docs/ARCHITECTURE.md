@@ -431,7 +431,7 @@ To keep deployments simple and reproducible, scheduling and DB setup are control
   - `"1"`: run `pnpm db:seed:system` on container start
   - anything else: skip system seed
 
-Recommended practice is to run migrations/seeding as a separate, explicit “run once” step per rollout **per database** (rather than at every pod start). If you deploy multiple Helm releases (web/scheduler/worker) pointing at the same Postgres database, you still run migrations/seed once for that shared database.
+Recommended practice is to run migrations/seeding as a separate, explicit “run once” step per rollout **per database** (rather than at every pod start). If you deploy multiple Helm releases (web/scheduler/worker) pointing at the same Postgres database, you still run migrations/seed once for that shared database. The repository provides the `db-init` container target and `db:init` command for this purpose; production deployments should run it as a Kubernetes Job, Helm hook, or CI/CD deployment gate.
 
 ## Runbook (production)
 
@@ -528,13 +528,15 @@ Run-once step (interface):
 - Run the application’s DB migration script: `db:migrate`
 - Run the application’s system seed script: `db:seed:system` (idempotent; safe to run repeatedly)
 
-How you trigger that step depends on the deployment vendor (Kubernetes Job, CI/CD step, Helm hook, etc.).
+How you trigger that step depends on the deployment vendor (Kubernetes Job, CI/CD step, Helm hook, etc.). The init image must use the same release artifact as the runtime images and contains the Drizzle configuration, baseline migration, and system seed script. It must not run the destructive development reset.
 The production image is expected to contain the tooling needed to run these scripts.
 
 Minimal env required for the run-once step:
 
 - `DATABASE_URL`
 - `ERP_SUPPLIER` (for system seed)
+
+Database connectivity is checked before the command runs. The check retries transient DNS/connection failures with a bounded timeout and fails immediately on permanent authentication or configuration errors. This addresses database readiness for the init job, but does not make DNS available by itself: the job must still run in the same network/namespace as the database service.
 
 Emergency-only:
 
