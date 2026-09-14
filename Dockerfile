@@ -65,6 +65,22 @@ ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["node", "node_modules/tsx/dist/cli.mjs", "--tsconfig", "tsconfig.scripts.json", "scripts/runtime/worker.ts"]
 
 # -------------------------
+# Database init runtime
+# -------------------------
+FROM role-runtime AS db-init
+ENV APP_ROLE=db-init
+COPY drizzle.config.ts ./
+COPY drizzle ./drizzle
+COPY scripts/db/seed-system.ts ./scripts/db/seed-system.ts
+COPY engine/erp-integration/domain ./engine/erp-integration/domain
+COPY engine/erp-integration/registry.ts ./engine/erp-integration/registry.ts
+COPY app/lib/db ./app/lib/db
+COPY app/lib/env ./app/lib/env
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["sh", "-c", "node_modules/.bin/drizzle-kit migrate --config drizzle.config.ts && node node_modules/tsx/dist/cli.mjs scripts/db/seed-system.ts"]
+
+# -------------------------
 # Production
 # -------------------------
 FROM node:22-bookworm-slim AS prod
