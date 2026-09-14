@@ -709,15 +709,18 @@ const ruleSubmitSchema = computed(() =>
 // Options to USelect og USelectMenu elements
 // ------------------------------------------
 type AccountOption = { label: string; value: string }
-const { data: rawAccounts } = await useFetch<AccountSelectSchema[]>('/api/bank-accounts', {
+type AccountOptionSource = AccountSelectSchema & { ignoreIngestion?: boolean }
+const { data: rawAccounts } = await useFetch<AccountOptionSource[]>('/api/bank-accounts', {
   key: 'bank-accounts',
   default: () => ([]),
 })
 const accountOptions = computed<AccountOption[]>(() =>
-  (rawAccounts.value ?? []).map(acc => ({
-    label: acc.name,
-    value: acc.id
-  }))
+  (rawAccounts.value ?? [])
+    .filter(acc => !acc.ignoreIngestion)
+    .map(acc => ({
+      label: acc.name,
+      value: acc.id,
+    }))
 )
 
 const typeOptions = computed(() =>

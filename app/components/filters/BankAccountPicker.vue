@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import useFlattenArray from '~/composables/useFlattenArray'
 
-type BankAccount = { id: string; name: string | null }
+type BankAccount = { id: string; name: string | null; ignoreIngestion?: boolean }
 
 type Option = { value: string; label: string }
 
@@ -54,7 +54,17 @@ const { data: bankAccountsData, status: bankAccountsStatus } = await useFetch<Ba
 
 const options = computed<Option[]>(() => {
   const accounts = useFlattenArray<BankAccount>(bankAccountsData)
-  return accounts.map((a) => ({ value: a.id, label: a.name ?? a.id }))
+  return accounts
+    .filter((account) => !account.ignoreIngestion)
+    .map((account) => ({ value: account.id, label: account.name ?? account.id }))
+})
+
+watch(bankAccountsData, (accounts) => {
+  if (!Array.isArray(accounts)) return
+
+  const allowedIds = new Set(accounts.filter((account) => !account.ignoreIngestion).map((account) => account.id))
+  const filteredIds = model.value.filter((id) => allowedIds.has(id))
+  if (filteredIds.length !== model.value.length) emit('update:modelValue', filteredIds)
 })
 
 const isLoading = computed(() => props.loading || bankAccountsStatus.value === 'pending')

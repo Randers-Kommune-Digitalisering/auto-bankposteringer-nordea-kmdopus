@@ -61,7 +61,7 @@ export default defineEventHandler(async (event) => {
     artskonto: mapped.get(`${String(r.provider)}:${String(r.iban)}`) ?? null,
     statuskonto: mapped.get(`${String(r.provider)}:${String(r.iban)}`) ?? null,
     ignoreIngestion: ignored.get(`${String(r.provider)}:${String(r.iban)}`) ?? false,
-  }))
+  })).filter((row) => !row.ignoreIngestion)
 
   return accounts
 })

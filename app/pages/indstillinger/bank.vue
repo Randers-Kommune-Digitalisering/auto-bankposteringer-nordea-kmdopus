@@ -268,6 +268,14 @@ const { data: agreements, refresh: refreshAgreements } = useFetch<BankingAgreeme
   },
 )
 
+async function refreshBankingData() {
+  await Promise.all([
+    refreshBankAccounts(),
+    refreshAgreements(),
+    refreshNuxtData('bank-accounts'),
+  ])
+}
+
 // Keep Nuxt's client-side cache for these endpoints; explicit refreshes are triggered after mutations.
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -329,10 +337,7 @@ async function pollDiscoveryUntilTerminal(provider: BankingAgreement['provider']
           description: `Fandt ${run.discoveredAccounts} konti i ${run.inspectedDocuments} dokumenter. Skippede ${run.skippedDays} datoer.`,
           color: 'success',
         })
-        await Promise.all([
-          refreshAgreements(),
-          refreshBankAccounts(),
-        ])
+        await refreshBankingData()
         return
       }
 
@@ -418,7 +423,7 @@ async function toggleAgreement(provider: BankingAgreement['provider'], enabled: 
       body: { enabled, channel },
     })
 
-    await refreshAgreements()
+    await refreshBankingData()
 
     if (enabled) {
       const operation = response?.discoveryOperation
@@ -430,10 +435,10 @@ async function toggleAgreement(provider: BankingAgreement['provider'], enabled: 
         })
         void pollDiscoveryUntilTerminal(provider, operation.id)
       } else {
-        await refreshBankAccounts()
+        await refreshBankingData()
       }
     } else {
-      await refreshBankAccounts()
+      await refreshBankingData()
     }
 
     return true
@@ -453,7 +458,7 @@ async function updateAgreementChannel(provider: BankingAgreement['provider'], ch
       method: 'PUT',
       body: { channel },
     })
-    await refreshAgreements()
+    await refreshBankingData()
     return true
   } catch (err: any) {
     toast.add({
@@ -516,18 +521,18 @@ async function activateSelectedAgreement() {
   }
 }
 
-const refreshAccounts = async () => {
-  refreshingAccounts.value = true
-  try {
-    await refreshBankAccounts()
-  } finally {
-    refreshingAccounts.value = false
-  }
-}
-
 const rows = computed(() => [...(accounts.value ?? [])])
 
-const accountsTableKey = computed(() => rows.value.map((r) => `${String((r as any).provider ?? '')}:${String((r as any).iban ?? '')}`).join('|'))
+const accountsTableKey = computed(() => rows.value.map((row) => [
+  row.provider,
+  row.iban,
+  row.currency ?? '',
+  row.name ?? '',
+  row.statuskonto ?? '',
+  row.ignoreIngestion,
+  row.observed,
+  row.configuredForApi,
+].join(':')).join('|'))
 
 const configuredProviders = computed(() =>
   (agreements.value ?? [])
@@ -569,9 +574,7 @@ async function removeConfiguredAccount(row: BankingAccountUnionDto) {
     await $fetch(`/api/banking-agreements/${row.provider}/allowlist/${encodeURIComponent(row.iban)}`, {
       method: 'DELETE',
     })
-    await refreshBankAccounts()
-    await refreshAgreements()
-    await refreshNuxtData('bank-accounts')
+    await refreshBankingData()
     toast.add({ title: 'Konto fjernet', description: `${row.iban} er fjernet fra allowlist.` })
   } catch (err: any) {
     toast.add({
@@ -586,8 +589,7 @@ async function handleAccountModalSaved() {
   editingObservedAccountId.value = null
   configuredDraft.value = null
   accountModalOpen.value = false
-  await refreshAccounts()
-  await refreshAgreements()
+  await refreshBankingData()
 }
 
 const createSortableHeader = (label: string) => ({ column }: { column: any }) => {
@@ -662,7 +664,7 @@ const columns: TableColumn<BankingAccountUnionDto>[] = [
   {
     accessorKey: 'ignoreIngestion',
     id: 'ignoreIngestion',
-    header: createSortableHeader('Ingestion'),
+    header: createSortableHeader('Anvendelse'),
     enableSorting: true,
     cell: ({ row }) => row.original.ignoreIngestion ? 'Ignoreres' : 'Aktiv',
   },
@@ -674,7 +676,7 @@ const columns: TableColumn<BankingAccountUnionDto>[] = [
       const r = row.original
       const labels: string[] = []
       if (r.configuredForApi) labels.push('API')
-      if (r.observed) labels.push('Observeret')
+      if (r.observed) labels.push('ISO 20022')
       return labels.length ? labels.join(' • ') : '—'
     }
   },
