@@ -205,7 +205,7 @@ export default defineEventHandler(async (event) => {
     })
 
     const storage = useStorage('rules')
-    await storage.removeItem('rule-list')
+    await storage.removeItem('rule-list-v2')
     log.debug('Cache invalidated', { cacheKey: 'rule-list' })
 
     return { success: true, ruleId }

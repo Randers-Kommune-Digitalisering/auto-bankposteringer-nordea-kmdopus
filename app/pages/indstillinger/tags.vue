@@ -4,8 +4,7 @@ import type { Row, SortingState } from '@tanstack/table-core'
 import { getPaginationRowModel } from '@tanstack/table-core'
 import type { RuleTagSelectSchema } from '~/lib/db/schema/ruleTag'
 import { capitalizeFirst } from '~/lib/text/capitalizeFirst'
-
-const RULE_TAGS_QUERY_KEY = 'rule-tags' as const
+import { useRuleTags } from '~/composables/useRuleTags'
 
 const appConfig = useAppConfig()
 const toast = useToast()
@@ -21,21 +20,12 @@ const deletingTagId = ref<string | null>(null)
 const refreshingTags = ref(false)
 const sorting = ref<SortingState>([])
 
-const { data: ruleTags, pending, refresh: refreshRuleTags } = await useFetch<RuleTagSelectSchema[]>(
-	'/api/rule-tags',
-	{
-		key: RULE_TAGS_QUERY_KEY,
-		deep: true,
-		dedupe: 'cancel',
-		transform: (v) => Array.isArray(v) ? v.slice() : [],
-		default: () => []
-	}
-)
+const { ruleTags, loading: pending, fetchRuleTags } = useRuleTags()
 
 const refreshTags = async () => {
 	refreshingTags.value = true
 	try {
-		await refreshRuleTags()
+		await fetchRuleTags()
 	} finally {
 		refreshingTags.value = false
 	}
@@ -108,7 +98,7 @@ async function handleDeleteTag(row: Row<RuleTagSelectSchema>) {
 			description: `${capitalizeFirst(tagId)} er blevet fjernet.`
 		})
 
-		await refreshNuxtData(RULE_TAGS_QUERY_KEY)
+		await fetchRuleTags()
 	} catch (error) {
 		console.error('Fejl ved sletning af tag', error)
 		toast.add({

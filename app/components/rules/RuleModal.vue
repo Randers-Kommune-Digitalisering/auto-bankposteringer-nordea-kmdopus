@@ -10,9 +10,12 @@ import type { RuleStatus, RuleType, CprType } from '~/lib/db/schema/enums'
 import type { MatchField, MatchCategory } from '~/lib/rules/match-config'
 import { ruleTypeValues, ruleStatusValues, cprTypeValues } from '~/lib/db/schema/enums'
 import { matchFieldOptionsByCategory, matchCategories, matchCategoryColumns } from '~/lib/rules/match-config'
-import { ruleBasicSchema, ruleMatchingSchema, ruleAccountingSchema } from '~/lib/db/schema/rule'
+import { matchEntrySchema, ruleBasicSchema, ruleMatchingSchema, ruleAccountingSchema } from '~/lib/db/schema/rule'
 import { DEFAULT_TIME_ZONE } from '~/utils'
 import { accountingDimensionFormatHint } from '~/lib/presenters/accountingDimensionFormatHints'
+import { useRuleTags } from '~/composables/useRuleTags'
+import { useTransactionTypeCatalog } from '~/composables/useTransactionTypeCatalog'
+import { encodeTransactionTypeCatalogReference, transactionTypeCatalogValueLabel, transactionTypeCategory } from '~/lib/rules/transactionTypeCatalog'
 
 const appConfig = useAppConfig()
 
@@ -389,8 +392,8 @@ watchEffect(async () => {
 // ---------------
 // Fetch rule tags
 // ---------------
-type RuleTag = { id: string }
-const { data: ruleTagsData } = await useFetch<RuleTag[]>('/api/rule-tags', { key: 'rule-tags' })
+const { ruleTags: ruleTagsData } = useRuleTags()
+const { options: transactionTypeOptions, pending: transactionTypeCatalogPending } = useTransactionTypeCatalog()
 const ruleTagOptions = computed(() =>
   (ruleTagsData.value ?? []).map(tag => ({
     label: tag.id,
@@ -416,6 +419,10 @@ const matchInputs = reactive(
   initCategoryRecord<string>(() => '')
 )
 
+const matchInputErrors = reactive(
+  initCategoryRecord<string>(() => '')
+)
+
 const matchCategoryGates = reactive(
   initCategoryRecord<MatchGate>(() => 'ELLER')
 )
@@ -432,13 +439,13 @@ const matchModes = reactive(
 type MatchOperatorUi = 'eq' | 'ilike' | 'regex'
 
 const matchOperators = reactive(
-  initCategoryRecord<MatchOperatorUi>(() => 'eq')
+  initCategoryRecord<MatchOperatorUi>(() => 'ilike')
 )
 
 const matchOperatorItemsByCategory = computed(() => {
   const base = [
-    { label: 'Eksakt', value: 'eq' as const },
     { label: 'Indeholder', value: 'ilike' as const },
+    { label: 'Eksakt', value: 'eq' as const },
   ]
   const withRegex = [
     ...base,
@@ -454,28 +461,59 @@ const matchOperatorItemsByCategory = computed(() => {
   return record
 })
 
+const usesOperator = (category: MatchCategory) => category !== transactionTypeCategory
+
 function matchOperatorLabel(value?: string | null): string {
-  if (value === 'ilike') return 'Indeholder'
+  if (value === 'eq') return 'Eksakt'
   if (value === 'regex') return 'Regex'
-  return 'Eksakt'
+  return 'Indeholder'
 }
 
 const addMatchEntry = (category: MatchCategory, mode: 'Alle felter' | 'Vælg felter') => {
-  const value = matchInputs[category].trim()
-  if (!value) return
+  let value = matchInputs[category].trim()
+  if (!value) {
+    matchInputErrors[category] = ''
+    return
+  }
+
+  let fields = mode === 'Vælg felter' && selectedColumns[category].length > 0
+    ? selectedColumns[category]
+    : undefined
+  let operator: MatchOperatorUi | undefined = matchOperators[category]
+
+  if (category === 'Transaktionstype') {
+    const option = transactionTypeOptions.value.find(item => item.value === value)
+    if (!option) {
+      matchInputErrors[category] = transactionTypeCatalogPending.value
+        ? 'Transaktionstyper indlæses stadig'
+        : 'Vælg en transaktionstype fra kataloget'
+      return
+    }
+
+    value = encodeTransactionTypeCatalogReference({ label: option.label, codeKeys: option.codeKeys })
+    fields = ['bk_tx_cd_domain']
+    operator = undefined
+  }
 
   const entry: MatchEntry = {
     category,
     value,
-    operator: matchOperators[category],
+    ...(operator ? { operator } : {}),
     gate: mode === 'Alle felter' ? 'ELLER' : matchCategoryGates[category],
-    ...(mode === 'Vælg felter' && selectedColumns[category].length > 0 ? { fields: selectedColumns[category] } : {})
+    ...(fields?.length ? { fields } : {})
   }
 
-  matches.value.push(entry)
+  const result = matchEntrySchema.safeParse(entry)
+  if (!result.success) {
+    matchInputErrors[category] = result.error.issues[0]?.message ?? 'Ugyldigt matchkriterium'
+    return
+  }
+
+  matches.value.push(result.data)
 
   matchInputs[category] = ''
   selectedColumns[category] = []
+  matchInputErrors[category] = ''
 }
 
 const removeMatchEntry = (index: number) => {
@@ -487,7 +525,7 @@ const getMatchesForCategory = (category: MatchCategory) => {
 }
 
 const shouldShowGateToggle = (category: MatchCategory) => {
-  return getMatchesForCategory(category).some(match => match.fields?.length)
+  return category !== transactionTypeCategory && getMatchesForCategory(category).some(match => match.fields?.length)
 }
 
 const updateCategoryGate = (category: MatchCategory, gate: MatchGate) => {
@@ -718,7 +756,7 @@ const accountOptions = computed<AccountOption[]>(() =>
   (rawAccounts.value ?? [])
     .filter(acc => !acc.ignoreIngestion)
     .map(acc => ({
-      label: acc.name,
+      label: acc.name ?? acc.id,
       value: acc.id,
     }))
 )
@@ -796,7 +834,12 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
 
   const result = ruleSubmitSchema.value.safeParse(payload)
   if (!result.success) {
-    console.error(result.error)
+    const matchIssue = result.error.issues.find(issue => issue.path[0] === 'matches')
+    toast.add({
+      title: 'Ugyldigt matchkriterium',
+      description: matchIssue?.message ?? result.error.issues[0]?.message ?? 'Ugyldigt input',
+      color: 'warning',
+    })
     return
   }
 
@@ -1019,13 +1062,25 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                   <template v-if="matchModes[category] === 'Alle felter'">
                     <div class="flex gap-2 mb-4">
                       <USelectMenu
+                        v-if="usesOperator(category)"
                         v-model="matchOperators[category]"
                         :items="matchOperatorItemsByCategory[category]"
                         class="min-w-fit"
                         labelKey="label"
                         valueKey="value"
                       />
+                      <USelectMenu
+                        v-if="category === 'Transaktionstype'"
+                        v-model="matchInputs[category]"
+                        :items="transactionTypeOptions"
+                        label-key="label"
+                        value-key="value"
+                        placeholder="Vælg transaktionstype"
+                        class="flex-1"
+                        :loading="transactionTypeCatalogPending"
+                      />
                       <UiFloatingLabelInput
+                        v-else
                         v-model="matchInputs[category]"
                         :label="`Søg i ${category.toLowerCase()}`"
                         color="neutral"
@@ -1042,13 +1097,25 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                   <template v-else>
                     <div class="flex gap-2 mb-4">
                       <USelectMenu
+                        v-if="usesOperator(category)"
                         v-model="matchOperators[category]"
                         :items="matchOperatorItemsByCategory[category]"
                         class="min-w-fit"
                         labelKey="label"
                         valueKey="value"
                       />
+                      <USelectMenu
+                        v-if="category === 'Transaktionstype'"
+                        v-model="matchInputs[category]"
+                        :items="transactionTypeOptions"
+                        label-key="label"
+                        value-key="value"
+                        placeholder="Vælg transaktionstype"
+                        class="flex-1"
+                        :loading="transactionTypeCatalogPending"
+                      />
                       <UiFloatingLabelInput
+                        v-else
                         v-model="matchInputs[category]"
                         :label="`Værdi for ${selectedColumns[category].length > 0 ? selectedColumns[category].join(', ') : 'valgte felter'}`"
                         color="neutral"
@@ -1062,6 +1129,13 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                       />
                     </div>
                   </template>
+
+                  <p v-if="matchInputErrors[category] && usesOperator(category) && matchOperators[category] === 'regex'" class="mb-2 text-sm text-error">
+                    {{ matchInputErrors[category] }}
+                  </p>
+                  <p v-if="usesOperator(category) && matchOperators[category] === 'regex'" class="mb-4 text-xs text-muted">
+                    Indtast et gyldigt regex-mønster, maks. 512 tegn. Brug "Indeholder" til almindelig tekst.
+                  </p>
 
                   <!-- Mode valg og feltvalg grupperet sammen -->
                   <div class="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 space-y-3">
@@ -1094,7 +1168,7 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                   <!-- Kriteriegruppe og gate -->
                   <div v-if="getMatchesForCategory(category).length > 0" class="mt-4">
                     <div class="flex items-center gap-2 mb-3">
-                      <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Kriteriegruppe</p>
+                      <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Kriterier</p>
                     </div>
                     <div v-if="shouldShowGateToggle(category)" class="mb-3 p-2 bg-amber-50 dark:bg-amber-900/10 rounded border border-amber-200 dark:border-amber-800">
                       <USelect
@@ -1118,13 +1192,13 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                         @click="removeMatchEntry(matches.indexOf(entry))"
                       >
                         <div class="text-xs">
-                          <div class="font-semibold">{{ entry.value }}</div>
-                          <div class="text-gray-600 dark:text-gray-400">{{ matchOperatorLabel(entry.operator) }}</div>
-                          <div v-if="entry.fields" class="text-gray-600 dark:text-gray-400">
+                          <div class="font-semibold">{{ transactionTypeCatalogValueLabel(entry.value) }}</div>
+                          <div v-if="entry.category !== transactionTypeCategory" class="text-gray-600 dark:text-gray-400">{{ matchOperatorLabel(entry.operator) }}</div>
+                          <div v-if="entry.category !== transactionTypeCategory && entry.fields" class="text-gray-600 dark:text-gray-400">
                             {{ entry.fields.join(', ') }}
                           </div>
                         </div>
-                        <UIcon :name="appConfig.ui.icons.delete" class="ml-2 w-3 h-3" />
+                        <UIcon :name="appConfig.ui.icons.delete" class="size-5" />
                       </UBadge>
                     </div>
                   </div>
@@ -1154,19 +1228,22 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                     title="Konteringsdimensioner"
                     description="Der er ingen konteringsdimensioner konfigureret for den aktive ERP-integration."
                   />
-                  <UFormField
-                    v-for="def in accountingDimensionDefinitions"
-                    :key="def.id"
-                    :name="`accountingDimensions.${def.key}`"
-                    :required="def.required"
-                  >
-                    <UiFloatingLabelInput
-                      v-model="accountingDimensionValues[def.key]"
-                      class="w-full"
-                      :label="dimensionLabel(def.key)"
-                      color="neutral"
-                    />
-                  </UFormField>
+                  <div v-if="accountingDimensionDefinitions.length" class="space-y-2">
+                    <div class="text-sm font-medium text-highlighted">Kontering</div>
+                    <UFormField
+                      v-for="def in accountingDimensionDefinitions"
+                      :key="def.id"
+                      :name="`accountingDimensions.${def.key}`"
+                      :required="def.required"
+                    >
+                      <UiFloatingLabelInput
+                        v-model="accountingDimensionValues[def.key]"
+                        class="w-full"
+                        :label="dimensionLabel(def.key)"
+                        color="neutral"
+                      />
+                    </UFormField>
+                  </div>
                   <UFormField name="accountingText">
                     <UiFloatingLabelInput v-model="state.accountingText" class="w-full" label="Posteringstekst" color="neutral" />
                   </UFormField>

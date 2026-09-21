@@ -251,7 +251,7 @@ export default defineEventHandler(async (event) => {
   if (withProcessingRow.length) {
     await db
       .update(transactionProcessing)
-      .set({ status: 'bogført', ruleApplied: null })
+      .set({ status: 'bogført', ruleApplied: null, source: 'manuel' })
       .where(inArray(transactionProcessing.transactionId, withProcessingRow))
   }
 
@@ -261,6 +261,7 @@ export default defineEventHandler(async (event) => {
         transactionId: id,
         status: 'bogført' as const,
         ruleApplied: null,
+        source: 'manuel' as const,
       })),
     )
   }

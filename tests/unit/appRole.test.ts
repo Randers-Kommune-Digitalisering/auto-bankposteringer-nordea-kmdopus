@@ -22,6 +22,7 @@ describe('appRole', () => {
 
   it('falls back to ENABLE_SCHEDULED_TASKS when APP_ROLE is unset', () => {
     expect(allowRoleGatedWork('scheduler', { ENABLE_SCHEDULED_TASKS: '1' } as any)).toBe(true)
+    expect(allowRoleGatedWork('worker', { ENABLE_SCHEDULED_TASKS: '1' } as any)).toBe(true)
     expect(allowRoleGatedWork('worker', { ENABLE_SCHEDULED_TASKS: '0' } as any)).toBe(false)
   })
 })

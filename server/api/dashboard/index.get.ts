@@ -109,11 +109,7 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
   const dateKeys = buildDateRange(startDate, endDate)
 
   const txAccountFilter = accountIds.length ? inArray(transaction.accountId, accountIds) : null
-  const runAccountExists = accountIds.length
-    ? sql`exists (select 1 from "transaction" t where t.run_id = ${run.id} and t.account in ${accountInSql(accountIds)})`
-    : null
-
-  const [seriesRows, openRowsForTopTx, ruleRows, runFailureRows, errorRows, latestRuns] = await Promise.all([
+  const [seriesRows, openRowsForTopTx, ruleRows, errorRowsForKpi, latestRuns] = await Promise.all([
     db
       .select({
         date: transaction.bookingDate,
@@ -164,19 +160,10 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
 
     db
       .select({
-        failedRuns: sql<number>`count(*)::int`,
-      })
-      .from(run)
-      .where(and(
-        eq(run.status, 'fejl'),
-        gte(run.bookingDate, startDate),
-        lte(run.bookingDate, endDate),
-        ...(runAccountExists ? [runAccountExists] : []),
-      )),
-
-    db
-      .select({
-        errorCount: sql<number>`count(*)::int`,
+        runId: errorLog.runId,
+        errorCode: errorLog.errorCode,
+        errorString: errorLog.errorString,
+        createdAt: errorLog.createdAt,
       })
       .from(errorLog)
       .where(and(
@@ -376,6 +363,16 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
     ruleDeactivations: 0,
   }
 
+  const errorsByRunForKpi = new Map<string, typeof errorRowsForKpi>()
+  for (const entry of errorRowsForKpi) {
+    if (!entry.runId) continue
+    const rows = errorsByRunForKpi.get(entry.runId) ?? []
+    rows.push(entry)
+    errorsByRunForKpi.set(entry.runId, rows)
+  }
+  const errorCount = [...errorsByRunForKpi.values()]
+    .reduce((count, rows) => count + filterActiveRunErrors(rows).length, 0)
+
   const payload: DashboardResponse = {
     range: { start, end },
     kpis: {
@@ -393,8 +390,7 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
       ruleUpdates: clampNumber(ruleAgg.ruleUpdates),
       ruleDeactivations: clampNumber(ruleAgg.ruleDeactivations),
 
-      failedRuns: clampNumber(runFailureRows[0]?.failedRuns ?? 0),
-      errorCount: clampNumber(errorRows[0]?.errorCount ?? 0),
+      errorCount,
     },
     automationSeries,
     latestRuns: latestRuns.map((entry) => ({

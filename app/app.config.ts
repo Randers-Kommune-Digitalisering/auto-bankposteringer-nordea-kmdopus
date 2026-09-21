@@ -34,7 +34,7 @@ export default defineAppConfig({
       menu: 'solar:hamburger-menu-bold-duotone',
       dotMenu: 'solar:menu-dots-bold-duotone',
       settings: 'solar:settings-bold-duotone',
-      delete: 'lucide:delete',
+      delete: 'lucide:x',
       plus: 'lucide:plus',
       minus: 'lucide:minus',
       trash: 'solar:trash-bin-trash-bold-duotone',

@@ -31,6 +31,7 @@ import {
 } from '../domain/amount'
 import { buildNordeaDeterministicGroupKey } from '../../banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo'
 import { fieldToCategory } from '~/lib/rules/match-config'
+import { decodeTransactionTypeCatalogReference, matchesTransactionTypeCatalogReference } from '~/lib/rules/transactionTypeCatalog'
 
 export interface MatchSummary {
   postings: PostingLineInput[]
@@ -153,15 +154,15 @@ export async function matchTransactionsForRun(runId: string): Promise<MatchSumma
         if (outcome.rule.type === 'engangs') {
           oneOffRuleIds.add(outcome.rule.id)
         }
-        await persistProcessing(trx, trxItem, 'bogført', outcome.rule.id)
+        await persistProcessing(trx, trxItem, 'bogført', outcome.rule.id, 'regel')
       } else if (outcome.kind === 'exception') {
         summary.exceptionTransactions += 1
         matchedRuleIds.add(outcome.rule.id)
-        await persistProcessing(trx, trxItem, 'undtaget', outcome.rule.id)
+        await persistProcessing(trx, trxItem, 'undtaget', outcome.rule.id, 'regel')
       } else {
         summary.postings.push(...outcome.command.postings)
         summary.unmatchedTransactions += 1
-        await persistProcessing(trx, trxItem, 'åben', null)
+        await persistProcessing(trx, trxItem, 'åben', null, 'ingen_regel')
       }
     }
 
@@ -556,6 +557,11 @@ export function evaluateConditionGroups(
 }
 
 function evaluateCondition(tx: MatchableTransaction, condition: RuleConditionRow): boolean {
+  const catalogReference = decodeTransactionTypeCatalogReference(condition.value ?? '')
+  if (catalogReference) {
+    return matchesTransactionTypeCatalogReference(catalogReference, tx)
+  }
+
   const actual = extractFieldValue(tx, condition.field as RuleConditionField)
   if (actual == null || actual === '') {
     return false
@@ -731,12 +737,13 @@ async function persistProcessing(
   tx: MatchableTransaction,
   status: BookingStatus,
   ruleId: number | null,
+  source: 'regel' | 'manuel' | 'ingen_regel',
 ): Promise<void> {
   for (const transactionId of tx.groupedTransactionIds) {
     if (tx.hasProcessingRow) {
       await executor
         .update(transactionProcessing)
-        .set({ status, ruleApplied: ruleId ?? null })
+        .set({ status, ruleApplied: ruleId ?? null, source })
         .where(eq(transactionProcessing.transactionId, transactionId))
       continue
     }
@@ -745,6 +752,7 @@ async function persistProcessing(
       transactionId,
       status,
       ruleApplied: ruleId ?? null,
+      source,
     })
   }
 }

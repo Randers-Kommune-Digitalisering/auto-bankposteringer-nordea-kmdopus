@@ -25,6 +25,8 @@ import {
 } from "../../rules/match-config"
 import type { MatchCategory, MatchField } from "../../rules/match-config"
 import { isValidCprStrict } from "../../text/cpr"
+import { isTransactionTypeCatalogValue, transactionTypeCategory } from "../../rules/transactionTypeCatalog"
+import { transactionTypeCatalogValueLabel } from "../../rules/transactionTypeCatalog"
 
 export const rule = pgTable('rule', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -135,6 +137,17 @@ export const matchEntrySchema = z.object({
   operator: z.enum(ruleConditionOperatorValues).default('eq').optional(),
   gate: z.enum(['OG', 'ELLER']).default('ELLER')
 }).superRefine((data, ctx) => {
+  if (data.category === transactionTypeCategory) {
+    if (!isTransactionTypeCatalogValue(data.value)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['value'],
+        message: 'Transaktionstype skal vælges fra kataloget',
+      })
+    }
+    return
+  }
+
   const operator = data.operator ?? 'eq'
   if (operator !== 'regex') return
 
@@ -172,8 +185,11 @@ export const matchEntrySchema = z.object({
   }
 }).transform((data) => ({
   ...data,
+  operator: data.category === transactionTypeCategory ? 'eq' as const : data.operator,
   // Omitting fields means "search the whole category", which is always OR.
-  gate: data.fields?.length ? data.gate : 'ELLER' as const,
+  gate: data.category === transactionTypeCategory
+    ? 'ELLER' as const
+    : data.fields?.length ? data.gate : 'ELLER' as const,
 }))
 
 export type MatchGate = 'OG' | 'ELLER'
@@ -188,9 +204,13 @@ export type RuleAccountingDimensionValueRow = typeof ruleAccountingDimensionValu
 
 export function mapMatchesToConditionRows(matches: MatchEntry[]): RuleConditionInsert[] {
   return matches.flatMap((entry) => {
-    const operator: RuleConditionOperator = entry.operator ?? 'eq'
+    const operator: RuleConditionOperator = entry.category === transactionTypeCategory
+      ? 'eq'
+      : entry.operator ?? 'eq'
     const fields = entry.fields?.length ? entry.fields : matchCategoryColumns[entry.category]
-    const gate = entry.fields?.length ? entry.gate : 'ELLER'
+    const gate = entry.category === transactionTypeCategory || !entry.fields?.length
+      ? 'ELLER'
+      : entry.gate
 
     return fields.map((field) => ({
       field,
@@ -215,7 +235,12 @@ export function mapConditionsToMatches(conditions: RuleConditionRow[]): MatchEnt
 
     const categoryMap = byCategory.get(category)!
     if (!categoryMap.has(key)) {
-      categoryMap.set(key, { fields: new Set(), operator: condition.operator, value: condition.value, gate: condition.gate ?? 'OG' })
+      categoryMap.set(key, {
+        fields: new Set(),
+        operator: condition.operator,
+        value: condition.value,
+        gate: category === transactionTypeCategory ? 'ELLER' : condition.gate ?? 'OG',
+      })
     }
 
     categoryMap.get(key)!.fields.add(condition.field)
@@ -378,6 +403,7 @@ export const ruleListDto = z.object({
   type: z.enum(ruleTypeValues),
   status: z.enum(ruleStatusValues),
   relatedBankAccounts: z.array(z.string()),
+  relatedBankAccountNames: z.array(z.string()),
   lastUsed: z.date().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -404,6 +430,14 @@ function extractRelatedBankAccountIds(row: any): string[] {
   }
 
   return []
+}
+
+function extractRelatedBankAccountNames(row: any): string[] {
+  if (!Array.isArray(row.bankAccounts)) return []
+
+  return row.bankAccounts
+    .map((entry: any) => entry?.account?.name)
+    .filter((name: any): name is string => typeof name === 'string' && name.trim().length > 0)
 }
 
 function extractRuleTagIds(row: any): string[] {
@@ -440,7 +474,7 @@ function summarizeConditions(conditions: RuleConditionRow[]): RuleListDto['match
 
     if (category === 'Reference') summary.references.add(condition.value)
     else if (category === 'Modpart') summary.counterparties.add(condition.value)
-    else summary.classification.add(condition.value)
+    else summary.classification.add(transactionTypeCatalogValueLabel(condition.value))
   }
 
   return {
@@ -452,6 +486,7 @@ function summarizeConditions(conditions: RuleConditionRow[]): RuleListDto['match
 
 export function mapRuleToListDto(r: any): RuleListDto {
   const relatedBankAccounts = extractRelatedBankAccountIds(r)
+  const relatedBankAccountNames = extractRelatedBankAccountNames(r)
   const ruleTags = extractRuleTagIds(r)
   const conditions: RuleConditionRow[] = Array.isArray(r.conditions) ? r.conditions : []
 
@@ -460,6 +495,7 @@ export function mapRuleToListDto(r: any): RuleListDto {
     type: r.type,
     status: r.status,
     relatedBankAccounts,
+    relatedBankAccountNames,
     lastUsed: r.lastUsed,
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,

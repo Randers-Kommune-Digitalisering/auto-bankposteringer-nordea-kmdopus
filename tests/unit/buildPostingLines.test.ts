@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { buildPostingLines, resolvePostingText } from '../../engine/matching/domain/postingUtils'
+import { buildPostingLines, extractCprFromTransaction, resolvePostingText } from '../../engine/matching/domain/postingUtils'
 
 describe('buildPostingLines', () => {
   it('propagates transactionId to all generated posting lines', () => {
@@ -106,5 +106,28 @@ describe('buildPostingLines', () => {
     })
 
     expect(text).toBe('Manuel posteringstekst')
+  })
+
+  it.each([
+    ['entryAdditionalInfo', { entryAdditionalInfo: 'NOTICE 0102031234' }],
+    ['txAdditionalInfo', { txAdditionalInfo: 'NOTICE 0102031234' }],
+    ['remittanceUstrd', { remittanceUstrd: ['NOTICE 0102031234'] }],
+    ['remittanceAdditional', { remittanceAdditional: ['NOTICE 0102031234'] }],
+  ])('extracts CPR from %s', (_field, fields) => {
+    expect(extractCprFromTransaction({
+      transactionId: '00000000-0000-0000-0000-00000000beef',
+      amount: 100,
+      statusDimensions: {},
+      ...fields,
+    })).toBe('0102031234')
+  })
+
+  it('does not scan structured creditor references for CPR', () => {
+    expect(extractCprFromTransaction({
+      transactionId: '00000000-0000-0000-0000-00000000beef',
+      amount: 100,
+      statusDimensions: {},
+      remittanceCreditorReference: '0102031234',
+    })).toBeUndefined()
   })
 })

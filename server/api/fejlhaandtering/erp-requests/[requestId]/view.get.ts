@@ -5,6 +5,7 @@ import db from '~/lib/db'
 import { account } from '~/lib/db/schema/account'
 import { erpRequest, erpRequestLine, erpResponse } from '~/lib/db/schema/erp'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
+import { rule } from '~/lib/db/schema/rule'
 import { transactionCodeCatalog } from '~/lib/db/schema/transactionCodeCatalog'
 import { requireErrorHandlingReadAccess } from '~~/server/auth/requireAppRoles'
 import { buildTransactionSummaryView } from '~~/server/presenters/openTransactionPresenter'
@@ -22,6 +23,8 @@ type GroupedTransaction = {
   creditDebitIndicator: string | null
   status: string | null
   ruleApplied: number | null
+  ruleType: string | null
+  provenance: 'regel' | 'manuel' | 'ingen_regel' | 'ukendt'
   postingText: string
   counterparty: string | null
   reference: string | null
@@ -48,6 +51,8 @@ type GroupAccumulator = {
   creditDebitIndicator: string | null
   status: string | null
   ruleApplied: number | null
+  ruleType: string | null
+  provenance: 'regel' | 'manuel' | 'ingen_regel' | 'ukendt'
   postingText: string
   counterparty: string | null
   reference: string | null
@@ -93,6 +98,8 @@ export default defineEventHandler(async (event) => {
       creditDebitIndicator: transaction.creditDebitIndicator,
       processingStatus: transactionProcessing.status,
       ruleApplied: transactionProcessing.ruleApplied,
+      processingSource: transactionProcessing.source,
+      ruleType: rule.type,
       debtorName: transaction.debtorName,
       debtorId: transaction.debtorId,
       creditorName: transaction.creditorName,
@@ -118,6 +125,7 @@ export default defineEventHandler(async (event) => {
     .leftJoin(transaction, eq(transaction.id, erpRequestLine.transactionId))
     .leftJoin(account, eq(account.id, transaction.accountId))
     .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
+    .leftJoin(rule, eq(rule.id, transactionProcessing.ruleApplied))
     .where(eq(erpRequestLine.requestId, requestId))
     .orderBy(asc(erpRequestLine.lineNo))
 
@@ -210,6 +218,8 @@ export default defineEventHandler(async (event) => {
         creditDebitIndicator: row.creditDebitIndicator ?? null,
         status: row.processingStatus ?? null,
         ruleApplied: row.ruleApplied ?? null,
+        ruleType: row.ruleType ?? null,
+        provenance: row.processingSource ?? (row.ruleApplied != null ? 'regel' : 'ukendt'),
         postingText: canonicalFields.postingText,
         counterparty: canonicalFields.counterpart,
         reference: canonicalFields.preferredReference,
@@ -246,6 +256,8 @@ export default defineEventHandler(async (event) => {
       creditDebitIndicator: group.creditDebitIndicator,
       status: group.status,
       ruleApplied: group.ruleApplied,
+      ruleType: group.ruleType,
+      provenance: group.provenance,
       postingText: group.postingText,
       counterparty: group.counterparty,
       reference: group.reference,

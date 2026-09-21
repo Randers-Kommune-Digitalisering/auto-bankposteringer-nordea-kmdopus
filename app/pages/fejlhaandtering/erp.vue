@@ -50,6 +50,8 @@ type ErpRequestViewResponse = {
     creditDebitIndicator: string | null
     status: string | null
     ruleApplied: number | null
+    ruleType: string | null
+    provenance: 'regel' | 'manuel' | 'ingen_regel' | 'ukendt'
     postingText: string
     counterparty: string | null
     reference: string | null
@@ -66,6 +68,16 @@ type ErpRequestViewResponse = {
 }
 
 type ErpTransaction = ErpRequestViewResponse['transactions'][number]
+
+function provenanceLabel(transaction: ErpTransaction): string {
+  if (transaction.provenance === 'manuel') return 'Manuel'
+  if (transaction.provenance === 'ingen_regel') return 'Ingen regel'
+  if (transaction.provenance === 'ukendt') return 'Ukendt'
+  if (transaction.ruleApplied == null) return 'Regel'
+  return transaction.ruleType
+    ? `Regel #${transaction.ruleApplied} (${transaction.ruleType})`
+    : `Regel #${transaction.ruleApplied}`
+}
 
 const toast = useToast()
 const UCheckbox = resolveComponent('UCheckbox')
@@ -310,6 +322,11 @@ const transactionColumns: TableColumn<ErpRequestViewResponse['transactions'][num
     },
   },
   {
+    id: 'rule',
+    header: 'Kilde',
+    cell: ({ row }) => provenanceLabel(row.original),
+  },
+  {
     id: 'bankAccountName',
     header: 'Konto',
     cell: ({ row }) => row.original.bankAccountName ?? '—',
@@ -356,7 +373,7 @@ const transactionColumns: TableColumn<ErpRequestViewResponse['transactions'][num
         icon: appConfig.ui.icons.doc,
         onClick: () => openTransactionSummary(row.original),
       },
-      () => 'Se transaktion',
+      () => 'Se detaljer',
     ),
   },
 ]
@@ -631,6 +648,10 @@ async function reopenBookedTransactions() {
 
       <UModal v-model:open="isTransactionSummaryOpen" title="Transaktion fra banken">
         <template #body>
+          <div v-if="selectedTransaction" class="mb-5 rounded-md border border-default bg-elevated/30 px-3 py-2 text-sm">
+            <span class="text-muted">Kilde: </span>
+            <span class="font-medium">{{ provenanceLabel(selectedTransaction) }}</span>
+          </div>
           <BookingSummaryCard
             v-if="selectedTransactionSummary"
             :summary="selectedTransactionSummary"

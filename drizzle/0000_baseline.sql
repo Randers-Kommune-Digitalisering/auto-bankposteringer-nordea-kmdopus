@@ -11,8 +11,8 @@ CREATE TYPE "public"."erp_supplier" AS ENUM('kmd', 'andet');--> statement-breakp
 CREATE TYPE "public"."job_status" AS ENUM('pending', 'in_progress', 'succeeded', 'failed');--> statement-breakpoint
 CREATE TYPE "public"."outbox_status" AS ENUM('pending', 'processing', 'sent', 'failed');--> statement-breakpoint
 CREATE TYPE "public"."rule_condition_field" AS ENUM('ntry_ref', 'ntry_acct_svcr_ref', 'tx_acct_svcr_ref', 'refs_end_to_end_id', 'refs_instr_id', 'refs_pmt_inf_id', 'uetr', 'dbtr_name', 'dbtr_id', 'dbtr_acct_iban', 'cdtr_name', 'cdtr_id', 'cdtr_acct_iban', 'ultmt_dbtr_name', 'ultmt_cdtr_name', 'bk_tx_cd_domain', 'bk_tx_cd_family', 'bk_tx_cd_sub_family', 'bk_tx_cd_proprietary', 'cdt_dbt_ind', 'entry_additional_info', 'tx_additional_info', 'rmt_ustrd', 'rmt_cdtr_ref', 'rmt_addtl');--> statement-breakpoint
-CREATE TYPE "public"."rule_condition_operator" AS ENUM('eq', 'neq', 'like', 'ilike', 'regex', 'gt', 'gte', 'lt', 'lte', 'in');--> statement-breakpoint
 CREATE TYPE "public"."rule_condition_gate" AS ENUM('OG', 'ELLER');--> statement-breakpoint
+CREATE TYPE "public"."rule_condition_operator" AS ENUM('eq', 'neq', 'like', 'ilike', 'regex', 'gt', 'gte', 'lt', 'lte', 'in');--> statement-breakpoint
 CREATE TYPE "public"."rule_status" AS ENUM('aktiv', 'inaktiv');--> statement-breakpoint
 CREATE TYPE "public"."rule_type" AS ENUM('standard', 'undtagelse', 'engangs');--> statement-breakpoint
 CREATE TYPE "public"."run_error_source" AS ENUM('banking', 'application', 'erp');--> statement-breakpoint
@@ -20,6 +20,7 @@ CREATE TYPE "public"."run_status" AS ENUM('afventer', 'indlæser', 'udført', 'f
 CREATE TYPE "public"."transaction_party_role" AS ENUM('debtor', 'creditor', 'ultimateDebtor', 'ultimateCreditor');--> statement-breakpoint
 CREATE TYPE "public"."transaction_reference_type" AS ENUM('reference', 'freetext', 'technical', 'remittance');--> statement-breakpoint
 CREATE TYPE "public"."transaction_source_scope" AS ENUM('entry', 'tx', 'remittance', 'party');--> statement-breakpoint
+CREATE TYPE "public"."transaction_processing_source" AS ENUM('regel', 'manuel', 'ingen_regel', 'ukendt');--> statement-breakpoint
 CREATE TABLE "account" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text,
@@ -162,6 +163,14 @@ CREATE TABLE "banking_agreement_discovery_run" (
 	"error_message" text
 );
 --> statement-breakpoint
+CREATE TABLE "booking_period_rebooking_audit" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"transaction_id" uuid NOT NULL,
+	"original_booking_date" date NOT NULL,
+	"effective_booking_date" date NOT NULL,
+	"confirmed_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "document" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"run_id" uuid NOT NULL,
@@ -181,6 +190,11 @@ CREATE TABLE "erp_request_line" (
 	"request_id" text NOT NULL,
 	"line_no" integer NOT NULL,
 	"transaction_id" uuid,
+	"amount" numeric,
+	"debet_or_credit" text,
+	"dimensions" jsonb,
+	"posting_text" text,
+	"cpr" text,
 	CONSTRAINT "erp_request_line_request_id_line_no_pk" PRIMARY KEY("request_id","line_no")
 );
 --> statement-breakpoint
@@ -453,6 +467,7 @@ CREATE TABLE "transaction_processing" (
 	"transaction_id" uuid PRIMARY KEY NOT NULL,
 	"status" "booking_status",
 	"rule_applied" integer,
+	"source" "transaction_processing_source",
 	"locked_at" date,
 	"locked_by" text
 );
@@ -511,6 +526,7 @@ ALTER TABLE "banking_agreement_account_allowlist" ADD CONSTRAINT "banking_agreem
 ALTER TABLE "banking_agreement_account_dimension" ADD CONSTRAINT "banking_agreement_account_dimension_provider_banking_agreement_provider_fk" FOREIGN KEY ("provider") REFERENCES "public"."banking_agreement"("provider") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "banking_agreement_cursor" ADD CONSTRAINT "banking_agreement_cursor_provider_banking_agreement_provider_fk" FOREIGN KEY ("provider") REFERENCES "public"."banking_agreement"("provider") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "banking_agreement_discovery_run" ADD CONSTRAINT "banking_agreement_discovery_run_job_id_job_id_fk" FOREIGN KEY ("job_id") REFERENCES "public"."job"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "booking_period_rebooking_audit" ADD CONSTRAINT "booking_period_rebooking_audit_transaction_id_transaction_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."transaction"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "document" ADD CONSTRAINT "document_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "erp_request" ADD CONSTRAINT "erp_request_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "erp_request_line" ADD CONSTRAINT "erp_request_line_request_id_erp_request_id_fk" FOREIGN KEY ("request_id") REFERENCES "public"."erp_request"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -549,6 +565,7 @@ CREATE INDEX "banking_agreement_account_allowlist_iban_provider_idx" ON "banking
 CREATE INDEX "banking_agreement_discovery_run_provider_requested_at_idx" ON "banking_agreement_discovery_run" USING btree ("provider","requested_at");--> statement-breakpoint
 CREATE INDEX "banking_agreement_discovery_run_status_updated_at_idx" ON "banking_agreement_discovery_run" USING btree ("status","updated_at");--> statement-breakpoint
 CREATE INDEX "banking_agreement_discovery_run_job_id_idx" ON "banking_agreement_discovery_run" USING btree ("job_id");--> statement-breakpoint
+CREATE INDEX "booking_period_rebooking_audit_transaction_id_idx" ON "booking_period_rebooking_audit" USING btree ("transaction_id");--> statement-breakpoint
 CREATE INDEX "document_run_id_idx" ON "document" USING btree ("run_id");--> statement-breakpoint
 CREATE INDEX "erp_request_run_id_idx" ON "erp_request" USING btree ("run_id");--> statement-breakpoint
 CREATE INDEX "erp_request_line_transaction_id_idx" ON "erp_request_line" USING btree ("transaction_id");--> statement-breakpoint
@@ -581,13 +598,4 @@ CREATE INDEX "transaction_statement_order_idx" ON "transaction" USING btree ("st
 CREATE INDEX "transaction_processing_status_transaction_id_idx" ON "transaction_processing" USING btree ("status","transaction_id");--> statement-breakpoint
 CREATE INDEX "transaction_processing_rule_applied_idx" ON "transaction_processing" USING btree ("rule_applied");--> statement-breakpoint
 CREATE INDEX "transaction_party_transaction_sequence_idx" ON "transaction_party" USING btree ("transaction_id","sequence_no");--> statement-breakpoint
-CREATE INDEX "transaction_reference_transaction_sequence_idx" ON "transaction_reference" USING btree ("transaction_id","sequence_no");--> statement-breakpoint
-CREATE TABLE "booking_period_rebooking_audit" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"transaction_id" uuid NOT NULL,
-	"original_booking_date" date NOT NULL,
-	"effective_booking_date" date NOT NULL,
-	"confirmed_at" timestamp with time zone DEFAULT now() NOT NULL
-);--> statement-breakpoint
-ALTER TABLE "booking_period_rebooking_audit" ADD CONSTRAINT "booking_period_rebooking_audit_transaction_id_transaction_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."transaction"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-CREATE INDEX "booking_period_rebooking_audit_transaction_id_idx" ON "booking_period_rebooking_audit" USING btree ("transaction_id");
+CREATE INDEX "transaction_reference_transaction_sequence_idx" ON "transaction_reference" USING btree ("transaction_id","sequence_no");

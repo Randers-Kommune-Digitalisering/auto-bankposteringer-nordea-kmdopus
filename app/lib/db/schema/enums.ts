@@ -87,6 +87,10 @@ export const bookingStatusValues = ['åben', 'bogført', 'undtaget'] as const
 export const bookingStatusEnum = pgEnum('booking_status', bookingStatusValues)
 export type BookingStatus = typeof bookingStatusValues[number]
 
+export const transactionProcessingSourceValues = ['regel', 'manuel', 'ingen_regel', 'ukendt'] as const
+export const transactionProcessingSourceEnum = pgEnum('transaction_processing_source', transactionProcessingSourceValues)
+export type TransactionProcessingSource = typeof transactionProcessingSourceValues[number]
+
 export const jobStatusValues = ['pending', 'in_progress', 'succeeded', 'failed'] as const
 export const jobStatusEnum = pgEnum('job_status', jobStatusValues)
 export type JobStatus = typeof jobStatusValues[number]
