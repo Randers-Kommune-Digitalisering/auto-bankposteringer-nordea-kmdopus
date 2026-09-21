@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
   setHeader(event, 'Cache-Control', 'no-store')
 
   const storage = useStorage('rules')
-  const cached = await storage.getItem<unknown>('rule-list')
+  const cached = await storage.getItem<unknown>('rule-list-v2')
 
   const maybeParseCached = (value: unknown): RuleListDto[] | null => {
     if (Array.isArray(value)) return reviveDates(value)
@@ -58,7 +58,14 @@ export default defineEventHandler(async (event) => {
       bankAccounts: {
         columns: {
           bankAccountId: true
-        }
+        },
+        with: {
+          account: {
+            columns: {
+              name: true,
+            },
+          },
+        },
       },
       tags: {
         columns: {
@@ -73,7 +80,7 @@ export default defineEventHandler(async (event) => {
   const dto = rows.map(mapRuleToListDto)
   const parsed = ruleListDtoArray.parse(dto)
 
-  await storage.setItem('rule-list', serializeDates(parsed), { ttl: 60 })
+  await storage.setItem('rule-list-v2', serializeDates(parsed), { ttl: 60 })
 
   return parsed
 })

@@ -266,13 +266,14 @@ export default defineEventHandler(async (event) => {
   if (row.processingId) {
     await db
       .update(transactionProcessing)
-      .set({ status: "bogført", ruleApplied: null })
+      .set({ status: "bogført", ruleApplied: null, source: 'manuel' })
       .where(eq(transactionProcessing.transactionId, row.id));
   } else {
     await db.insert(transactionProcessing).values({
       transactionId: row.id,
       status: "bogført",
       ruleApplied: null,
+        source: 'manuel',
     });
   }
 

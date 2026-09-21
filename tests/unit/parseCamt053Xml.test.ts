@@ -53,7 +53,7 @@ describe('parseCamt053Xml (Nordea example)', () => {
     expect(txWithStructured?.remittanceCreditorReference).toBeTruthy()
   })
 
-  it('prefers PstlAdr for counterpart name and keeps Purp/Prtry before remittance text', () => {
+  it('prefers the party name and falls back to PstlAdr, while keeping remittance text separate', () => {
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
   <BkToCstmrStmt>
@@ -81,7 +81,7 @@ describe('parseCamt053Xml (Nordea example)', () => {
           <TxDtls>
             <RltdPties>
               <Dbtr>
-                <Nm>Should not be picked</Nm>
+                <Nm>COUNTERPART NAME</Nm>
                 <PstlAdr>
                   <AdrLine>REAL COUNTERPART</AdrLine>
                   <AdrLine>EXAMPLEVEJ 10</AdrLine>
@@ -94,6 +94,7 @@ describe('parseCamt053Xml (Nordea example)', () => {
             </Purp>
             <RmtInf>
               <Ustrd>SECOND-FREETEXT</Ustrd>
+              <AddtlRmtInf>THIRD-FREETEXT</AddtlRmtInf>
             </RmtInf>
           </TxDtls>
         </NtryDtls>
@@ -105,8 +106,26 @@ describe('parseCamt053Xml (Nordea example)', () => {
     const parsed = parseCamt053Xml(xml)
     const tx = parsed.statements[0]!.transactions[0]!
 
-    expect(tx.debtorName).toBe('REAL COUNTERPART')
-    expect(tx.remittanceAdditional).toEqual(['FIRST-FREETEXT'])
+    expect(tx.debtorName).toBe('COUNTERPART NAME')
+    expect(tx.remittanceAdditional).toEqual(['FIRST-FREETEXT', 'THIRD-FREETEXT'])
     expect(tx.remittanceUstrd).toEqual(['SECOND-FREETEXT'])
+  })
+
+  it('falls back to a useful address line when a party name is absent', () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt><GrpHdr><MsgId>MSG-2</MsgId></GrpHdr><Stmt>
+    <Id>STMT-2</Id><Acct><Id><IBAN>DK0012345678900000</IBAN></Id><Ccy>DKK</Ccy></Acct>
+    <Ntry><NtryRef>1</NtryRef><Amt Ccy="DKK">100.00</Amt><CdtDbtInd>CRDT</CdtDbtInd>
+      <BookgDt><Dt>2026-06-30</Dt></BookgDt><NtryDtls><TxDtls><RltdPties>
+        <Dbtr><PstlAdr><AdrLine>REAL COUNTERPART</AdrLine><AdrLine>EXAMPLEVEJ 10</AdrLine></PstlAdr></Dbtr>
+      </RltdPties></TxDtls></NtryDtls>
+    </Ntry>
+  </Stmt></BkToCstmrStmt>
+</Document>`
+
+    const parsed = parseCamt053Xml(xml)
+
+    expect(parsed.statements[0]!.transactions[0]!.debtorName).toBe('REAL COUNTERPART')
   })
 })

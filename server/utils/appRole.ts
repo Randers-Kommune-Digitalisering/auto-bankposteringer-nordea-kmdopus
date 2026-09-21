@@ -16,7 +16,6 @@ export function allowRoleGatedWork(
   requiredRole: Exclude<AppRole, 'web'>,
   buildEnv: NodeJS.ProcessEnv = process.env,
 ): boolean {
-  // Role-gated work must be explicit to preserve deployment isolation.
-  if (!buildEnv.APP_ROLE) return false
+  if (!buildEnv.APP_ROLE) return buildEnv.ENABLE_SCHEDULED_TASKS === '1'
   return getAppRole(buildEnv) === requiredRole
 }

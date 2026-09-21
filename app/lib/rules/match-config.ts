@@ -8,9 +8,15 @@ export type MatchFieldMeta = {
   label: string;
 };
 
+export const matchCategoryLabels = {
+  reference: 'Reference',
+  counterparty: 'Modpart',
+  transactionType: 'Transaktionstype',
+} as const;
+
 const matchCatalog = [
   {
-    category: "Reference",
+    category: matchCategoryLabels.reference,
     fields: [
       { key: "ntry_ref", label: "Entry reference (NtryRef)" },
       { key: "ntry_acct_svcr_ref", label: "Entry AcctSvcrRef" },
@@ -27,7 +33,7 @@ const matchCatalog = [
     ],
   },
   {
-    category: "Modpart",
+    category: matchCategoryLabels.counterparty,
     fields: [
       { key: "dbtr_id", label: "Debitor id" },
       { key: "dbtr_name", label: "Debitor navn" },
@@ -40,7 +46,7 @@ const matchCatalog = [
     ],
   },
   {
-    category: "Transaktionstype",
+    category: matchCategoryLabels.transactionType,
     fields: [
       { key: "bk_tx_cd_domain", label: "Kode domæne" },
       { key: "bk_tx_cd_family", label: "Kode familie" },

@@ -8,6 +8,9 @@ import { ruleTypeEnum, ruleStatusEnum } from '~/lib/db/schema/enums'
 import { useDebouncedString } from '~/composables/useDebouncedString'
 import useFlattenArray from '~/composables/useFlattenArray'
 import { fuzzyRankRows } from '~/lib/search/fuzzyRanking'
+import { useRuleTags } from '~/composables/useRuleTags'
+import { useTransactionTypeCatalog } from '~/composables/useTransactionTypeCatalog'
+import { matchCategoryLabels } from '~/lib/rules/match-config'
 
 const appConfig = useAppConfig()
 const UButton = resolveComponent('UButton')
@@ -27,9 +30,14 @@ const debouncedGlobalFilterValue = useDebouncedString(globalFilterValue, { delay
 const deletingRuleId = ref<number | null>(null)
 
 const selectedAccountIds = ref<string[]>([])
+const selectedTransactionTypes = ref<string[]>([])
+const selectedRuleTags = ref<string[]>([])
 
 const statusFilter = ref('alle')
 const typeFilter = ref('alle')
+
+const { ruleTags } = useRuleTags()
+const { options: transactionTypeOptions } = useTransactionTypeCatalog()
 
 // API calls
 const { data: rules, status } = await useFetch<RuleListDto[]>('/api/rules', {
@@ -51,6 +59,22 @@ function normalizeSearchText(value: string): string {
   return value.trim().toLowerCase()
 }
 
+function ruleMatchesTransactionType(rule: RuleListDto, selectedLabel: string): boolean {
+  const option = transactionTypeOptions.value.find(item => item.value === selectedLabel)
+  if (!option) return false
+
+  const values = new Set(rule.matching.classification.map(value => value.trim().toLowerCase()))
+  if (values.has(option.label.trim().toLowerCase())) return true
+
+  return option.rows.some((row) => {
+    if (row.proprietary) return values.has(row.proprietary.trim().toLowerCase())
+
+    return [row.domain, row.family, row.subFamily]
+      .filter((value): value is string => Boolean(value?.trim()))
+      .every(value => values.has(value.trim().toLowerCase()))
+  })
+}
+
 const visibleRows = computed<RuleListDto[]>(() => {
   const q = normalizeSearchText(debouncedGlobalFilterValue.value)
 
@@ -58,6 +82,10 @@ const visibleRows = computed<RuleListDto[]>(() => {
     .filter((rule) => {
       if (statusFilter.value !== 'alle' && rule.status !== statusFilter.value) return false
       if (typeFilter.value !== 'alle' && rule.type !== typeFilter.value) return false
+
+      if (selectedTransactionTypes.value.length && !selectedTransactionTypes.value.some(value => ruleMatchesTransactionType(rule, value))) return false
+
+      if (selectedRuleTags.value.length && !selectedRuleTags.value.some(tag => (rule.ruleTags ?? []).includes(tag))) return false
 
       if (selectedAccountIds.value.length) {
         const hasMatch = (rule.relatedBankAccounts || []).some((id) => selectedAccountIds.value.includes(id))
@@ -102,9 +130,9 @@ const columnVisibilityLabelById: Record<string, string> = {
   id: 'ID',
   ruleTags: 'Tags',
   Stamdata: 'Stamdata',
-  'matching.references': 'Reference',
-  'matching.counterparties': 'Modpart',
-  'matching.classification': 'Transaktionstype',
+  'matching.references': matchCategoryLabels.reference,
+  'matching.counterparties': matchCategoryLabels.counterparty,
+  'matching.classification': matchCategoryLabels.transactionType,
   Datoer: 'Datoer'
 }
 
@@ -276,29 +304,6 @@ const columns: TableColumn<RuleListDto>[] = [
     sortingFn: stringArraySortingFn,
     cell: ({ row }) => row.original.relatedBankAccounts.join(', ')
   },
-  { // Stamdata
-    id: 'Stamdata',
-    header: 'Stamdata',
-    cell: ({ row }) => {
-      const statusColor = { aktiv: 'text-green-600', inaktiv: 'text-red-600' }[row.original.status]
-      const typeLabel = typeLabelMap[row.original.type]
-
-      return h('div', { class: classMultiplePropsColumn }, [
-        h('p', { class: 'font-medium' }, [
-          h('span', { class: 'text-highlighted' }, 'Status: '),
-          h('span', { class: statusColor }, row.original.status === 'aktiv' ? 'Aktiv' : 'Inaktiv')
-        ]),
-        h('p', { class: 'font-medium' }, [
-          h('span', { class: 'text-highlighted' }, 'Konti: '),
-          h('span', {}, row.original.relatedBankAccounts.join(', '))
-        ]),
-        h('p', { class: 'font-medium' }, [
-          h('span', { class: 'text-highlighted' }, 'Type: '),
-          h('span', {}, typeLabel)
-        ])
-      ])
-    }
-  },
   { // Matching references
     id: 'matching.references',
     header: ({ column }) => getHeader(column, 'Reference'),
@@ -335,9 +340,33 @@ const columns: TableColumn<RuleListDto>[] = [
         )
       )
   },
+  { // Stamdata
+    id: 'Stamdata',
+    cell: ({ row }) => {
+      const statusColor = { aktiv: 'text-green-600', inaktiv: 'text-red-600' }[row.original.status]
+      const typeLabel = typeLabelMap[row.original.type]
+
+      return h('div', { class: classMultiplePropsColumn }, [
+        h('p', { class: 'font-medium' }, [
+          h('span', { class: 'text-highlighted' }, 'Status: '),
+          h('span', { class: statusColor }, row.original.status === 'aktiv' ? 'Aktiv' : 'Inaktiv')
+        ]),
+        h('p', { class: 'font-medium' }, [
+          h('span', { class: 'text-highlighted' }, 'Konti: '),
+          h('span', {}, (row.original.relatedBankAccountNames.length
+            ? row.original.relatedBankAccountNames
+            : row.original.relatedBankAccounts
+          ).join(', ') || '-')
+        ]),
+        h('p', { class: 'font-medium' }, [
+          h('span', { class: 'text-highlighted' }, 'Type: '),
+          h('span', {}, typeLabel)
+        ])
+      ])
+    }
+  },
   { // Datoer
     id: 'Datoer',
-    header: 'Datoer',
     cell: ({ row }) => {
       const formatDate = (date: Date | undefined | null) => {
         if (!date) return 'N/A'
@@ -502,65 +531,78 @@ async function handleDeleteRule(row: Row<RuleListDto>) {
       <FiltersRow
         v-model:account-ids="selectedAccountIds"
         v-model:search="globalFilterValue"
+        v-model:transaction-type="selectedTransactionTypes"
+        v-model:rule-tags="selectedRuleTags"
         :show-search="true"
+        :show-transaction-type="true"
+        :transaction-type-options="transactionTypeOptions"
+        :show-rule-tags="true"
+        :rule-tag-options="ruleTags.map(tag => ({ label: tag.id, value: tag.id }))"
         search-placeholder="Søg efter en regel..."
         account-placeholder="Alle konti"
       >
-        <template #date>
-          <div class="flex flex-wrap items-end gap-1.5 justify-end">
-            <!-- Filtrering på status -->
+        <template #filters-secondary>
+          <UFormField label="Status" class="min-w-40">
             <UDropdownMenu
               :items="statusDropdownItems"
               :content="{ align: 'start' }"
             >
               <UButton
-                :label="`Status: ${statusItems.find(i => i.value === statusFilter)?.label}`"
+                :label="statusItems.find(i => i.value === statusFilter)?.label"
                 color="neutral"
                 variant="outline"
                 :trailing-icon="appConfig.ui.icons.arrowDown"
+                class="w-full justify-between"
               />
             </UDropdownMenu>
+          </UFormField>
 
-            <!-- Filtrering på type -->
+          <UFormField label="Type" class="min-w-40">
             <UDropdownMenu
               :items="typeDropdownItems"
               :content="{ align: 'start' }"
             >
               <UButton
-                :label="`Type: ${typeItems.find(i => i.value === typeFilter)?.label}`"
+                :label="typeItems.find(i => i.value === typeFilter)?.label"
                 color="neutral"
                 variant="outline"
                 :trailing-icon="appConfig.ui.icons.arrowDown"
+                class="w-full justify-between"
               />
             </UDropdownMenu>
+          </UFormField>
+        </template>
 
-            <!-- Tilføj/fjern kolonner i visningen -->
-            <UDropdownMenu
-              :items="
-                table?.tableApi
-                  ?.getAllColumns()
-                  .filter((column: any) => column.getCanHide())
-                  .map((column: any) => ({
-                    label: getColumnVisibilityLabel(column),
-                    type: 'checkbox' as const,
-                    checked: column.getIsVisible(),
-                    onUpdateChecked(checked: boolean) {
-                      table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
-                    },
-                    onSelect(e?: Event) {
-                      e?.preventDefault()
-                    }
-                  }))
-              "
-              :content="{ align: 'end' }"
-            >
-              <UButton
-                label="Vis kolonner"
-                color="neutral"
-                variant="outline"
-                :trailing-icon="appConfig.ui.icons.settings"
-              />
-            </UDropdownMenu>
+        <template #date>
+          <div class="flex flex-wrap items-end gap-2 justify-end">
+            <UFormField label="Tilpas visning">
+              <UDropdownMenu
+                :items="
+                  table?.tableApi
+                    ?.getAllColumns()
+                    .filter((column: any) => column.getCanHide())
+                    .map((column: any) => ({
+                      label: getColumnVisibilityLabel(column),
+                      type: 'checkbox' as const,
+                      checked: column.getIsVisible(),
+                      onUpdateChecked(checked: boolean) {
+                        table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
+                      },
+                      onSelect(e?: Event) {
+                        e?.preventDefault()
+                      }
+                    }))
+                "
+                :content="{ align: 'end' }"
+              >
+                <UButton
+                  label="Vis kolonner"
+                  color="neutral"
+                  variant="outline"
+                  :trailing-icon="appConfig.ui.icons.settings"
+                />
+              </UDropdownMenu>
+            </UFormField>
           </div>
         </template>
       </FiltersRow>

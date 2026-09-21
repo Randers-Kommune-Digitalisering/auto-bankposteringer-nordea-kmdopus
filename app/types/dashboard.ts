@@ -19,7 +19,6 @@ export type DashboardKpis = {
   ruleUpdates: number
   ruleDeactivations: number
 
-  failedRuns: number
   errorCount: number
 }
 

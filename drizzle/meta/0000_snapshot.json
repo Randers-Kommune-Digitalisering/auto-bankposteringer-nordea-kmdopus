@@ -1,6 +1,6 @@
 {
-  "id": "cf6ea8e9-ae2e-487f-b6bc-313ec656ad96",
-  "prevId": "087b3bad-3dcd-4894-b2a9-4543db9ea435",
+  "id": "41208603-446a-43cb-8361-f75830921e77",
+  "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1355,6 +1355,36 @@
         "transaction_id": {
           "name": "transaction_id",
           "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "amount": {
+          "name": "amount",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "debet_or_credit": {
+          "name": "debet_or_credit",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dimensions": {
+          "name": "dimensions",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "posting_text": {
+          "name": "posting_text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cpr": {
+          "name": "cpr",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         }
@@ -2794,6 +2824,14 @@
           "notNull": true,
           "default": "'eq'"
         },
+        "gate": {
+          "name": "gate",
+          "type": "rule_condition_gate",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'OG'"
+        },
         "value": {
           "name": "value",
           "type": "text",
@@ -3862,6 +3900,13 @@
           "primaryKey": false,
           "notNull": false
         },
+        "source": {
+          "name": "source",
+          "type": "transaction_processing_source",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
         "locked_at": {
           "name": "locked_at",
           "type": "date",
@@ -4424,6 +4469,14 @@
         "rmt_addtl"
       ]
     },
+    "public.rule_condition_gate": {
+      "name": "rule_condition_gate",
+      "schema": "public",
+      "values": [
+        "OG",
+        "ELLER"
+      ]
+    },
     "public.rule_condition_operator": {
       "name": "rule_condition_operator",
       "schema": "public",
@@ -4504,6 +4557,16 @@
         "tx",
         "remittance",
         "party"
+      ]
+    },
+    "public.transaction_processing_source": {
+      "name": "transaction_processing_source",
+      "schema": "public",
+      "values": [
+        "regel",
+        "manuel",
+        "ingen_regel",
+        "ukendt"
       ]
     }
   },

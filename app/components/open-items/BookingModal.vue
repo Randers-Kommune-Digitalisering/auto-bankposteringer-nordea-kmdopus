@@ -91,7 +91,15 @@ const summary = computed<TransactionSummary | null>(() => transaction.value?.sum
 const groupTransactions = computed<OpenTransaction[]>(() => props.groupTransactions ?? [])
 const isGroupMode = computed(() => groupTransactions.value.length > 1)
 const groupTransactionIds = computed(() => groupTransactions.value.map((entry) => entry.id))
+const largeGroupThreshold = 100
+const isGroupExpanded = ref(false)
+const isExpandingGroup = ref(false)
 const isGroupLinesOpen = ref(false)
+
+const groupTotalAmount = computed(() =>
+	groupTransactions.value.reduce((sum, entry) => sum + Math.abs(Number(entry.amount) || 0), 0),
+)
+const isLargeGroup = computed(() => groupTransactions.value.length > largeGroupThreshold)
 
 const dimensionLabel = (key: string) => key.charAt(0).toUpperCase() + key.slice(1)
 
@@ -190,23 +198,57 @@ const sumAlertDescription = computed(() => {
 		: `Linjesummen mangler ${formattedDiff.value} for at matche transaktionen`
 })
 
+function collapsedGroupPayload() {
+	return {
+		lines: [{
+			amount: groupTotalAmount.value,
+			text: '',
+			dimensions: [],
+		}],
+		text: '',
+		cprType: 'ingen' as const,
+		cprNumber: '',
+		note: '',
+	}
+}
+
+async function expandGroupLines() {
+	if (!isGroupMode.value || isGroupExpanded.value || isExpandingGroup.value) return
+
+	if (isLargeGroup.value && process.client) {
+		const confirmed = window.confirm(
+			`Samleposten indeholder ${groupTransactions.value.length} linjer. Hvis linjerne spredes ud, kan det forringe sidens performance betydeligt. Vil du fortsætte?`,
+		)
+		if (!confirmed) return
+	}
+
+	isExpandingGroup.value = true
+	try {
+		applyManualBookingPayload({
+			lines: groupTransactions.value.map((entry) => ({
+				amount: Math.abs(Number(entry.amount) || 0),
+				text: '',
+				dimensions: [],
+			})),
+			text: '',
+			cprType: 'ingen' as const,
+			cprNumber: '',
+			note: '',
+		})
+		isGroupExpanded.value = true
+		await nextTick()
+	} finally {
+		isExpandingGroup.value = false
+	}
+}
+
 watch(
 	() => [open.value, transaction.value?.id] as const,
 	async ([isOpen, txId]) => {
 		if (!isOpen || !txId) return
 		if (isGroupMode.value) {
-			const payload = {
-				lines: groupTransactions.value.map((entry) => ({
-					amount: Math.abs(Number(entry.amount) || 0),
-					text: '',
-					dimensions: [],
-				})),
-				text: '',
-				cprType: 'ingen' as const,
-				cprNumber: '',
-				note: '',
-			}
-			applyManualBookingPayload(payload)
+			isGroupExpanded.value = false
+			applyManualBookingPayload(collapsedGroupPayload())
 			await nextTick()
 			savedSnapshot.value = currentSnapshot.value
 			return
@@ -345,7 +387,10 @@ async function handleSaveDraft() {
 
 function collapseAllLines() {
 	if (!isGroupMode.value) return
-	if ((formState.lines?.length ?? 0) <= 1) return
+	if ((formState.lines?.length ?? 0) <= 1) {
+		isGroupExpanded.value = false
+		return
+	}
 
 	const mergedAmount = (formState.lines ?? []).reduce(
 		(acc, line) => acc + Math.abs(Number(line.amount) || 0),
@@ -365,6 +410,7 @@ function collapseAllLines() {
 			},
 		],
 	})
+	isGroupExpanded.value = false
 
 	toast.add({
 		title: 'Linjer samlet',
@@ -387,9 +433,22 @@ function collapseAllLines() {
 					color="primary"
 					:icon="appConfig.ui.icons.layers"
 					:title="`Samlepost med ${groupTransactionIds.length} transaktioner`"
-					description="Hver transaktion er forudfyldt som en finanslinje. Justér linjer efter behov før afsendelse."
+					:description="isGroupExpanded
+						? 'Linjerne er spredt ud, så de kan justeres individuelt før afsendelse.'
+						: 'Samleposten er samlet til én bogføringslinje. Spred kun linjerne ud, hvis individuel justering er nødvendig.'"
 				>
 					<template #actions>
+						<UButton
+							v-if="!isGroupExpanded"
+							size="xs"
+							variant="solid"
+							color="primary"
+							:icon="appConfig.ui.icons.layers"
+							:loading="isExpandingGroup"
+							@click="expandGroupLines"
+						>
+							Spred linjer
+						</UButton>
 						<UButton
 							size="xs"
 							variant="soft"

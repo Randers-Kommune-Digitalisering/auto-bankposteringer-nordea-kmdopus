@@ -3,7 +3,7 @@ import { pgTable, uuid, text, numeric, date, integer, unique, index } from "driz
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod"
 import { account } from "./account"
 import { run } from "./run"
-import { bookingStatusEnum, creditDebitIndicatorEnum } from "./enums"
+import { bookingStatusEnum, creditDebitIndicatorEnum, transactionProcessingSourceEnum } from "./enums"
 import { rule } from "./rule"
 import { bankingStatement } from "./statement"
 
@@ -78,6 +78,7 @@ export const transactionProcessing = pgTable('transaction_processing', {
   transactionId: uuid('transaction_id').primaryKey().references(() => transaction.id),
   status: bookingStatusEnum('status'),
   ruleApplied: integer('rule_applied').references(() => rule.id),
+  source: transactionProcessingSourceEnum('source'),
   lockedAt: date('locked_at', { mode: "date" }),
   lockedBy: text('locked_by'),
 }, (t) => [

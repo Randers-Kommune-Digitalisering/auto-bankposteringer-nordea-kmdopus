@@ -41,6 +41,11 @@ const props = withDefaults(
     transactionTypePlaceholder?: string
     showTransactionType?: boolean
 
+    ruleTags?: string[]
+    ruleTagOptions?: SelectOption[]
+    ruleTagPlaceholder?: string
+    showRuleTags?: boolean
+
     pageSize?: number
     pageSizeOptions?: SelectOption[]
     showPageSize?: boolean
@@ -64,6 +69,10 @@ const props = withDefaults(
     transactionTypeOptions: () => [],
     transactionTypePlaceholder: 'Alle transaktionstyper',
     showTransactionType: false,
+    ruleTags: () => [],
+    ruleTagOptions: () => [],
+    ruleTagPlaceholder: 'Alle tags',
+    showRuleTags: false,
     pageSize: undefined,
     pageSizeOptions: () => [],
     showPageSize: false,
@@ -75,6 +84,7 @@ const emit = defineEmits<{
   (e: 'update:accountIds', value: string[]): void
   (e: 'update:search', value: string): void
   (e: 'update:transactionType', value: string[]): void
+  (e: 'update:ruleTags', value: string[]): void
   (e: 'update:pageSize', value: number): void
 }>()
 
@@ -103,6 +113,11 @@ const transactionTypeModel = computed<string[]>({
   set: (next) => emit('update:transactionType', next),
 })
 
+const ruleTagsModel = computed<string[]>({
+  get: () => props.ruleTags ?? [],
+  set: (next) => emit('update:ruleTags', next),
+})
+
 const pageSizeModel = computed<number | undefined>({
   get: () => props.pageSize,
   set: (next) => {
@@ -113,71 +128,93 @@ const pageSizeModel = computed<number | undefined>({
 </script>
 
 <template>
-  <div class="flex flex-wrap gap-2 justify-between" :class="(props.showAccountLabel || props.showSearch) ? 'items-start' : 'items-center'">
-    <div class="flex flex-wrap gap-2" :class="(props.showAccountLabel || props.showSearch) ? 'items-start' : 'items-center'">
-      <div v-if="props.showAccounts" class="min-w-64">
-        <UFormField v-if="props.showAccountLabel" :label="props.accountLabel">
+  <div class="flex flex-wrap gap-2 justify-between items-start">
+    <div class="flex min-w-0 flex-col gap-2">
+      <div class="flex flex-wrap gap-2 items-end">
+        <div v-if="props.showAccounts" class="min-w-64">
+          <UFormField v-if="props.showAccountLabel" :label="props.accountLabel">
+            <FiltersBankAccountPicker
+              v-model="accountIdsModel"
+              :placeholder="accountPlaceholder"
+              class="min-w-64"
+            />
+          </UFormField>
+
           <FiltersBankAccountPicker
+            v-else
             v-model="accountIdsModel"
             :placeholder="accountPlaceholder"
             class="min-w-64"
           />
+        </div>
+
+        <UFormField v-if="props.showTransactionType" label="Transaktionstype" class="min-w-64 max-w-sm">
+          <USelectMenu
+            v-model="transactionTypeModel"
+            :items="props.transactionTypeOptions"
+            multiple
+            labelKey="label"
+            valueKey="value"
+            :placeholder="props.transactionTypePlaceholder"
+            color="primary"
+            variant="subtle"
+            class="w-full"
+          />
         </UFormField>
 
-        <FiltersBankAccountPicker
-          v-else
-          v-model="accountIdsModel"
-          :placeholder="accountPlaceholder"
-          class="min-w-64"
-        />
-      </div>
+        <UFormField v-if="props.showRuleTags" label="Tags" class="min-w-64 max-w-sm">
+          <USelectMenu
+            v-model="ruleTagsModel"
+            :items="props.ruleTagOptions"
+            multiple
+            labelKey="label"
+            valueKey="value"
+            :placeholder="props.ruleTagPlaceholder"
+            color="primary"
+            variant="subtle"
+            class="w-full"
+          />
+        </UFormField>
 
-      <UFormField v-if="props.showTransactionType" label="Transaktionstype" class="min-w-64 max-w-sm">
-        <USelectMenu
-          v-model="transactionTypeModel"
-          :items="props.transactionTypeOptions"
-          multiple
-          labelKey="label"
-          valueKey="value"
-          :placeholder="props.transactionTypePlaceholder"
-          color="primary"
-          variant="subtle"
-          class="w-full"
-        />
-      </UFormField>
+        <UFormField v-if="showSearch && props.showSearchLabel" :label="props.searchLabel" class="min-w-64 max-w-sm">
+          <UInput
+            v-model="searchModel"
+            class="w-full"
+            color="primary"
+            variant="outline"
+            :ui="{ base: 'ring-primary/50 text-primary focus-visible:ring-primary' }"
+            :trailing-icon="appConfig.ui.icons.search"
+            :placeholder="searchPlaceholder"
+          />
+        </UFormField>
 
-      <UFormField v-if="showSearch && props.showSearchLabel" :label="props.searchLabel" class="min-w-64 max-w-sm">
         <UInput
+          v-else-if="showSearch"
           v-model="searchModel"
-          class="w-full"
+          class="min-w-64 max-w-sm"
           color="primary"
           variant="outline"
           :ui="{ base: 'ring-primary/50 text-primary focus-visible:ring-primary' }"
           :trailing-icon="appConfig.ui.icons.search"
           :placeholder="searchPlaceholder"
         />
-      </UFormField>
 
-      <UInput
-        v-else-if="showSearch"
-        v-model="searchModel"
-        class="min-w-64 max-w-sm"
-        color="primary"
-        variant="outline"
-        :ui="{ base: 'ring-primary/50 text-primary focus-visible:ring-primary' }"
-        :trailing-icon="appConfig.ui.icons.search"
-        :placeholder="searchPlaceholder"
-      />
+        <UFormField v-if="props.showPageSize" label="Antal pr. side" class="w-40">
+          <USelect
+            v-model="pageSizeModel"
+            :items="props.pageSizeOptions"
+            label-key="label"
+            value-key="value"
+            class="w-full"
+          />
+        </UFormField>
 
-      <UFormField v-if="props.showPageSize" label="Antal pr. side" class="w-40">
-        <USelect
-          v-model="pageSizeModel"
-          :items="props.pageSizeOptions"
-          label-key="label"
-          value-key="value"
-          class="w-full"
-        />
-      </UFormField>
+        <slot name="filters" />
+      </div>
+
+      <div v-if="$slots['filters-secondary']" class="flex flex-wrap items-end gap-2">
+        <slot name="filters-secondary" />
+      </div>
     </div>
 
     <div v-if="$slots.date || props.showDate" class="w-full sm:w-auto">

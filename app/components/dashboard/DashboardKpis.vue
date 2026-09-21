@@ -18,7 +18,6 @@ type DashboardStat = {
   value: string
   badge?: string
   color?: "primary" | "secondary" | "success" | "info" | "warning" | "error" | "neutral"
-  sub?: string
 }
 
 const leadingColorClassesByColor: Record<NonNullable<DashboardStat['color']>, string> = {
@@ -50,8 +49,15 @@ const stats = computed<DashboardStat[]>(() => {
       title: 'Automatisering',
       icon: appConfig.ui.icons.wand,
       value: formatPct(kpis.automationRatePercent),
-      badge: `${formatInt(kpis.matchedTransactions)} / ${formatInt(kpis.totalTransactions)}`,
-      sub: `Auto: ${formatInt(kpis.autoBookedTransactions)}`
+      badge: `af ${formatInt(kpis.totalTransactions)} transaktioner`
+    },
+    {
+      key: 'rules',
+      title: 'Regler i brug',
+      icon: appConfig.ui.icons.notebook,
+      to: '/konteringsregler',
+      value: formatInt(kpis.activeRules - kpis.unusedActiveRules),
+      badge: `af ${formatInt(kpis.activeRules)} aktive`
     },
     {
       key: 'open-items',
@@ -61,23 +67,12 @@ const stats = computed<DashboardStat[]>(() => {
       value: formatInt(kpis.openSamleposter)
     },
     {
-      key: 'rules',
-      title: 'Regler',
-      icon: appConfig.ui.icons.notebook,
-      to: '/konteringsregler',
-      value: formatInt(kpis.activeRules),
-      badge: 'Aktive',
-      sub: `Ubrugte: ${formatInt(kpis.unusedActiveRules)}`
-    },
-    {
       key: 'errors',
-      title: 'Fejl',
+      title: 'Aktuelle fejl',
       icon: appConfig.ui.icons.warning,
       to: '/koersler',
       value: formatInt(kpis.errorCount),
-      badge: 'Fejl',
-      color: 'error',
-      sub: `Kørsler: ${formatInt(kpis.failedRuns)}`
+      color: 'error'
     }
   ]
 })
@@ -105,10 +100,6 @@ const stats = computed<DashboardStat[]>(() => {
         </UBadge>
       </div>
 
-      <div v-if="stat.sub" class="text-sm text-muted">
-        {{ stat.sub }}
-      </div>
-      <div v-else class="text-sm text-muted" aria-hidden="true">&nbsp;</div>
     </UPageCard>
   </UPageGrid>
 </template>

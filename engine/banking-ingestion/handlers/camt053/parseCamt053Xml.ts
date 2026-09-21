@@ -165,8 +165,9 @@ export function parseCamt053Xml(xml: string): Camt053ParsedDocument {
 
         const purposePrtry = normalizeStringArray(tx?.Purp?.Prtry)
         const remittanceUstrd = normalizeStringArray(txRmtInf?.Ustrd)
+        const remittanceAdditionalInfo = normalizeStringArray(txRmtInf?.AddtlRmtInf)
         const structuredCreditorRef = asTrimmedString(txRmtInf?.Strd?.CdtrRefInf?.Ref)
-        const additionalRemittance = purposePrtry
+        const additionalRemittance = [...purposePrtry, ...remittanceAdditionalInfo]
 
         const debtor = txRltdPties?.Dbtr
         const debtorAcct = txRltdPties?.DbtrAcct
@@ -349,7 +350,9 @@ function extractPartyId(party: any): string | null {
 function extractPartyDisplayName(party: any): string | null {
   if (!party || typeof party !== 'object') return null
 
-  // Nordea CAMT counterpart display should be derived from address lines.
+  const partyName = asTrimmedString(party?.Nm)
+  if (partyName) return partyName
+
   const adrLines = normalizeStringArray(party?.PstlAdr?.AdrLine)
   const preferredAdrLine = pickPreferredPartyAdrLine(adrLines)
   return preferredAdrLine ?? null

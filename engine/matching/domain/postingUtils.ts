@@ -128,7 +128,6 @@ export function extractCprFromTransaction(tx: PostingTransactionContext): string
   const haystacks = [
     tx.entryAdditionalInfo,
     tx.txAdditionalInfo,
-    tx.remittanceCreditorReference,
     ...(tx.remittanceUstrd ?? []),
     ...(tx.remittanceAdditional ?? []),
   ].filter(Boolean) as string[]

@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const storage = useStorage('rules')
-  await storage.removeItem('rule-list')
+  await storage.removeItem('rule-list-v2')
 
   return { success: true, ruleId: id }
 })
