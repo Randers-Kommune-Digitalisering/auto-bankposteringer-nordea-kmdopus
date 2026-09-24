@@ -1,15 +1,13 @@
 import { defineEventHandler, readBody, createError } from 'h3'
 import { z } from 'zod'
-import { and, eq, inArray, sql } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import db from '~/lib/db'
 import { account } from '~/lib/db/schema/account'
 import { bankingAgreementAccountAllowlist } from '~/lib/db/schema/bankingAgreementAccountAllowlist'
 import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreementAccountDimension'
-import { erpRequestLine } from '~/lib/db/schema/erp'
-import { manualBookingDraft } from '~/lib/db/schema/manualBookingDraft'
-import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import { logger } from '~/lib/logger'
-import { retryRunsAfterAccountMapping } from '~~/server/utils/recovery/retryRunsAfterAccountMapping'
+import { retryRunsAfterAccountChange } from '~~/server/utils/recovery/retryRunsAfterAccountChange'
+import { purgeIgnoredAccountTransactions } from '~~/server/utils/recovery/purgeIgnoredAccountTransactions'
 import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
 
 const updateSchema = z.object({
@@ -105,45 +103,7 @@ export default defineEventHandler(async (event) => {
         })
 
       if (payload.ignoreIngestion) {
-        const accountTxRows = await trx
-          .select({ id: transaction.id })
-          .from(transaction)
-          .where(eq(transaction.accountId, id))
-
-        const accountTxIds = accountTxRows.map((row) => row.id)
-        if (accountTxIds.length > 0) {
-          await trx.delete(transactionProcessing).where(inArray(transactionProcessing.transactionId, accountTxIds))
-          await trx.delete(manualBookingDraft).where(inArray(manualBookingDraft.transactionId, accountTxIds))
-          await trx.delete(erpRequestLine).where(inArray(erpRequestLine.transactionId, accountTxIds))
-          await trx.delete(transaction).where(inArray(transaction.id, accountTxIds))
-        }
-
-        // Keep statement/document storage clean after account-level purge.
-        await trx.execute(sql`
-          delete from banking_statement_balance b
-          where exists (
-            select 1
-            from banking_statement s
-            where s.id = b.statement_id
-              and not exists (
-                select 1 from "transaction" t where t.statement_id = s.id
-              )
-          )
-        `)
-
-        await trx.execute(sql`
-          delete from banking_statement s
-          where not exists (
-            select 1 from "transaction" t where t.statement_id = s.id
-          )
-        `)
-
-        await trx.execute(sql`
-          delete from banking_document d
-          where not exists (
-            select 1 from banking_statement s where s.document_id = d.id
-          )
-        `)
+        await purgeIgnoredAccountTransactions(trx, id)
       }
     }
 
@@ -190,20 +150,26 @@ export default defineEventHandler(async (event) => {
   const storage = useStorage('bank-accounts')
   await storage.removeItem('list')
 
-  if (normalizedStatuskonto && normalizedStatuskonto.length > 0) {
+  const recoveryReason = payload.ignoreIngestion === true
+    ? 'account-ignored'
+    : normalizedStatuskonto
+      ? 'account-mapping'
+      : null
+
+  if (recoveryReason) {
     try {
       const provider = String(existing.provider ?? '').toLowerCase()
       if (provider === 'danskebank' || provider === 'nordea' || provider === 'bankconnect') {
-        await retryRunsAfterAccountMapping({
+        await retryRunsAfterAccountChange({
           provider,
           iban: String(existing.iban ?? ''),
+          reason: recoveryReason,
         })
       }
     } catch (error) {
-      log.warn('Auto-retry efter konto-mapping fejlede', {
+      log.warn('Auto-retry efter kontoændring fejlede', {
         accountId: id,
         provider: existing.provider,
-        iban: existing.iban,
         err: error,
       })
     }

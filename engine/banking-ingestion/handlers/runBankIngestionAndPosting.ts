@@ -85,6 +85,7 @@ async function pauseRunIfMissingAccountMappings(runId: string): Promise<{
 export async function runBankIngestionAndPosting(options: {
   runId?: string
   bookingDate?: Date
+  recoveryReason?: 'account-mapping' | 'account-ignored'
 } = {}): Promise<{ runId: string; insertedCount: number }> {
   const log = logger.child({ scope: 'banking.runBankIngestionAndPosting' })
 
@@ -158,11 +159,14 @@ export async function runBankIngestionAndPosting(options: {
   await db.update(run).set({ status: 'udført' }).where(eq(run.id, ingest.runId))
 
   if (hadMissingMappingError) {
+    const recoveryLabel = options.recoveryReason === 'account-ignored'
+      ? 'ignorering af bankkonto'
+      : 'statuskonto-mapping'
     await db.insert(errorLog).values({
       runId: ingest.runId,
       source: 'application',
       errorCode: 200,
-      errorString: `Genkørsel efter statuskonto-mapping lykkedes. Matching: bogført=${summary.matchedTransactions}, undtaget=${summary.exceptionTransactions}, åben=${summary.unmatchedTransactions}.`,
+      errorString: `Genkørsel efter ${recoveryLabel} lykkedes. Matching: bogført=${summary.matchedTransactions}, undtaget=${summary.exceptionTransactions}, åben=${summary.unmatchedTransactions}.`,
     } as any).catch(() => {})
   }
 

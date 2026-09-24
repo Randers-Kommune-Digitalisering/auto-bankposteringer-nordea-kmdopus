@@ -1,7 +1,7 @@
 import type { RunStatus } from '~/lib/db/schema/enums'
 
 const MISSING_MAPPING_ERROR_PATTERN = /Mangler konterings-mapping \((artskonto|statuskonto)\) for bankkonto:/i
-const MAPPING_RECOVERY_SUCCESS_PATTERN = /^Genkørsel efter statuskonto-mapping lykkedes\./i
+const RECOVERY_SUCCESS_PATTERN = /^Genkørsel efter (statuskonto-mapping|ignorering af bankkonto) lykkedes\./i
 
 export type RunErrorSummaryRow = {
   errorCode: unknown
@@ -25,16 +25,16 @@ function isMissingMappingError(message: unknown): boolean {
   return MISSING_MAPPING_ERROR_PATTERN.test(String(message ?? ''))
 }
 
-function isMappingRecoverySuccessEvent(row: RunErrorSummaryRow): boolean {
+function isRecoverySuccessEvent(row: RunErrorSummaryRow): boolean {
   const code = Number(row.errorCode)
   if (Number.isFinite(code) && code !== 200) return false
-  return MAPPING_RECOVERY_SUCCESS_PATTERN.test(String(row.errorString ?? ''))
+  return RECOVERY_SUCCESS_PATTERN.test(String(row.errorString ?? ''))
 }
 
 export function filterActiveRunErrors<T extends RunErrorSummaryRow>(rows: T[]): T[] {
   return rows.filter((row) => {
     const recoveredAfterError = isMissingMappingError(row.errorString) && rows.some((candidate) => (
-      isMappingRecoverySuccessEvent(candidate) && toEpochMs(candidate.createdAt) >= toEpochMs(row.createdAt)
+      isRecoverySuccessEvent(candidate) && toEpochMs(candidate.createdAt) >= toEpochMs(row.createdAt)
     ))
 
     return !recoveredAfterError && isSeverityError(row.errorCode)

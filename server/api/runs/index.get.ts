@@ -25,7 +25,7 @@ import { parseAmount } from "#engine/matching/domain/amount";
 import { resolveEffectiveRunStatus } from "~~/server/utils/runs/runStatus";
 
 const MISSING_MAPPING_ERROR_PATTERN = /Mangler konterings-mapping \((artskonto|statuskonto)\) for bankkonto:/i
-const MAPPING_RECOVERY_SUCCESS_PATTERN = /^Genkørsel efter statuskonto-mapping lykkedes\./i
+const RECOVERY_SUCCESS_PATTERN = /^Genkørsel efter (statuskonto-mapping|ignorering af bankkonto) lykkedes\./i
 
 function toEpochMs(value: unknown): number {
   const d = value instanceof Date ? value : new Date(String(value ?? ''))
@@ -37,10 +37,10 @@ function isMissingMappingError(message: unknown): boolean {
   return MISSING_MAPPING_ERROR_PATTERN.test(String(message ?? ''))
 }
 
-function isMappingRecoverySuccessEvent(row: { errorCode: unknown; errorString: unknown }): boolean {
+function isRecoverySuccessEvent(row: { errorCode: unknown; errorString: unknown }): boolean {
   const code = Number(row.errorCode)
   if (Number.isFinite(code) && code !== 200) return false
-  return MAPPING_RECOVERY_SUCCESS_PATTERN.test(String(row.errorString ?? ''))
+  return RECOVERY_SUCCESS_PATTERN.test(String(row.errorString ?? ''))
 }
 
 function isSeverityError(code: unknown): boolean {
@@ -305,7 +305,7 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
     const runId = String(row.runId)
     const errorCreatedAtMs = toEpochMs(row.createdAt)
     const recoveredAfterError = (rawErrorsByRun.get(runId) ?? []).some((e) => (
-      isMappingRecoverySuccessEvent(e)
+      isRecoverySuccessEvent(e)
       && toEpochMs(e.createdAt) >= errorCreatedAtMs
     ))
 
