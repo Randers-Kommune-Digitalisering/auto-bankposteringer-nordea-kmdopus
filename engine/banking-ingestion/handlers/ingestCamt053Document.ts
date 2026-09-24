@@ -11,6 +11,7 @@ import { bankingAgreementAccountDimension } from '../../../app/lib/db/schema/ban
 import { transaction } from '../../../app/lib/db/schema/transaction'
 import { transactionReference } from '../../../app/lib/db/schema/transactionReference'
 import { transactionParty } from '../../../app/lib/db/schema/transactionParty'
+import { prepareCamt053XmlForIngestion } from './camt053/anonymizeCamt053Cpr'
 import { parseCamt053Xml } from './camt053/parseCamt053Xml'
 import {
   buildReferenceDedupKeyV2,
@@ -277,8 +278,9 @@ export async function ingestCamt053Document(
   })
 
   const startedAt = Date.now()
-  const xml = input.xml
-  const contentHash = crypto.createHash('sha256').update(xml, 'utf8').digest('hex')
+  const sourceXml = input.xml
+  const xml = prepareCamt053XmlForIngestion(sourceXml, process.env.NODE_ENV)
+  const contentHash = crypto.createHash('sha256').update(sourceXml, 'utf8').digest('hex')
 
   log.debug('CAMT.053 ingest start', {
     filename: input.filename ?? null,

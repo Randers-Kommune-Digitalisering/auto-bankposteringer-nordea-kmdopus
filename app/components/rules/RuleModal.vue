@@ -173,6 +173,10 @@ const timeLimitOptions = [
 
 const activePeriodRange = ref<any>(null)
 
+function updateActivePeriodRange(next: any) {
+  activePeriodRange.value = next
+}
+
 function normalizeDateToNoon(d: Date) {
   d.setHours(12, 0, 0, 0)
   return d
@@ -201,8 +205,8 @@ watchEffect(() => {
     return
   }
 
-  // Ensure the picker has a default range when enabling
-  if (!activePeriodRange.value?.start || !activePeriodRange.value?.end) {
+  // Initialize once when time limitation is enabled; keep partial selections intact.
+  if (!activePeriodRange.value) {
     const endDefault = today(timeZone)
     activePeriodRange.value = { start: endDefault, end: endDefault }
   }
@@ -210,6 +214,9 @@ watchEffect(() => {
   if (activePeriodRange.value?.start && activePeriodRange.value?.end) {
     state.activeFrom = normalizeDateToNoon(activePeriodRange.value.start.toDate(timeZone))
     state.activeTo = normalizeDateToNoon(activePeriodRange.value.end.toDate(timeZone))
+  } else {
+    state.activeFrom = undefined
+    state.activeTo = undefined
   }
 })
 
@@ -978,9 +985,10 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                         <div v-if="timeLimitMode === 'Tidsbegrænset'" class="pt-2 border-t border-gray-200 dark:border-gray-700">
                           <p class="text-xs font-medium uppercase text-gray-600 dark:text-gray-400 mb-2">Periode</p>
                           <FiltersDateRangePicker
-                            v-model="activePeriodRange"
+                            :model-value="activePeriodRange"
                             :reset-value="null"
                             :time-zone="timeZone"
+                            @update:model-value="updateActivePeriodRange"
                           />
                           <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">
                             Reglen gælder i den valgte periode og bliver automatisk sat til inaktiv efter sidste dag.
@@ -1059,7 +1067,7 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                   </USeparator>
 
                   <!-- Input og knap -->
-                  <template v-if="matchModes[category] === 'Alle felter'">
+                  <template v-if="category === transactionTypeCategory || matchModes[category] === 'Alle felter'">
                     <div class="flex gap-2 mb-4">
                       <USelectMenu
                         v-if="usesOperator(category)"
@@ -1089,7 +1097,7 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                       <UButton
                         :icon="appConfig.ui.icons.plus"
                         color="primary"
-                        @click="() => addMatchEntry(category, 'Alle felter')"
+                        @click="() => addMatchEntry(category, category === transactionTypeCategory ? 'Alle felter' : matchModes[category])"
                       />
                     </div>
                   </template>
@@ -1125,7 +1133,7 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                         :icon="appConfig.ui.icons.plus"
                         color="primary"
                         @click="() => addMatchEntry(category, 'Vælg felter')"
-                        :disabled="selectedColumns[category].length === 0"
+                        :disabled="category !== transactionTypeCategory && selectedColumns[category].length === 0"
                       />
                     </div>
                   </template>
@@ -1138,7 +1146,7 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                   </p>
 
                   <!-- Mode valg og feltvalg grupperet sammen -->
-                  <div class="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 space-y-3">
+                  <div v-if="category !== transactionTypeCategory" class="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 space-y-3">
                     <div>
                       <p class="text-xs font-medium uppercase text-gray-600 dark:text-gray-400 mb-2">Søgemetode</p>
                       <URadioGroup

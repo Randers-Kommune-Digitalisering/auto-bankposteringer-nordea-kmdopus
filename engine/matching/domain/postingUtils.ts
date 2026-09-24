@@ -1,4 +1,5 @@
 import type { PostingAttachment, PostingLineInput } from '../../posting/domain/posting'
+import { extractCprFromText } from '~/lib/text/cpr'
 import {
   projectCanonicalTransactionText,
   resolveBankMessage as resolveCanonicalBankMessage,
@@ -121,9 +122,6 @@ export function resolveCounterpartyName(tx: PostingTransactionContext): string |
   return projection.counterpart ?? undefined
 }
 
-const CPR_REGEX =
-  /(((0[1-9]|[12][0-9]|3[01])(0[13578]|10|12)(\d{2}))|(([0][1-9]|[12][0-9]|30)(0[469]|11)(\d{2}))|((0[1-9]|1[0-9]|2[0-8])(02)(\d{2}))|((29)(02)(00))|((29)(02)([2468][048]))|((29)(02)([13579][26])))[-]*\d{4}/gm
-
 export function extractCprFromTransaction(tx: PostingTransactionContext): string | undefined {
   const haystacks = [
     tx.entryAdditionalInfo,
@@ -133,10 +131,8 @@ export function extractCprFromTransaction(tx: PostingTransactionContext): string
   ].filter(Boolean) as string[]
 
   for (const value of haystacks) {
-    const match = value.match(CPR_REGEX)
-    if (match?.length) {
-      return match[0].replace('-', '')
-    }
+    const cpr = extractCprFromText(value)
+    if (cpr) return cpr
   }
 
   return undefined

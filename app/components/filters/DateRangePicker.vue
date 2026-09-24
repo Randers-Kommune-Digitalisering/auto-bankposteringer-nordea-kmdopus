@@ -54,7 +54,7 @@ function normalizeRange(input: any): any {
   if (!start && !end) return null
   return {
     start,
-    end: end ?? start,
+    end,
   }
 }
 
@@ -90,7 +90,7 @@ const label = computed(() => {
           :number-of-months="2"
           range
         />
-        <div v-if="value?.start && value?.end" class="mt-4 flex gap-2">
+        <div v-if="props.resetValue !== null && value?.start && value?.end" class="mt-4 flex gap-2">
           <UButton
             variant="ghost"
             size="sm"

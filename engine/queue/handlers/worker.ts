@@ -189,7 +189,10 @@ async function claimOutbox(): Promise<{ id: string; topic: string; payload: any 
 async function handleJob(type: string, payload: any, context: { runId?: string } = {}): Promise<void> {
   if (type === 'banking.ingest') {
     const { runBankIngestionAndPosting } = await import('../../banking-ingestion/handlers/runBankIngestionAndPosting')
-    await runBankIngestionAndPosting({ runId: context.runId ?? (payload?.runId ? String(payload.runId) : undefined) })
+    await runBankIngestionAndPosting({
+      runId: context.runId ?? (payload?.runId ? String(payload.runId) : undefined),
+      recoveryReason: payload?.recoveryReason,
+    })
     return
   }
 

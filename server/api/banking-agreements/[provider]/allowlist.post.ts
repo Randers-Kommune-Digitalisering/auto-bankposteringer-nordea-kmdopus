@@ -8,7 +8,8 @@ import { bankProviderValues } from '~/lib/db/schema/bankingAgreement'
 import { bankingAgreementAccountAllowlist } from '~/lib/db/schema/bankingAgreementAccountAllowlist'
 import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreementAccountDimension'
 import { getActiveErpSupplier } from '~~/server/utils/accountingDimensions'
-import { retryRunsAfterAccountMapping } from '~~/server/utils/recovery/retryRunsAfterAccountMapping'
+import { retryRunsAfterAccountChange } from '~~/server/utils/recovery/retryRunsAfterAccountChange'
+import { purgeIgnoredAccountTransactions } from '~~/server/utils/recovery/purgeIgnoredAccountTransactions'
 import { logger } from '~/lib/logger'
 
 function normalizeIban(input: string): string {
@@ -109,6 +110,16 @@ export default defineEventHandler(async (event) => {
         set: { dimensionValue: ignoreIngestion ? 'true' : 'false', updatedAt: new Date() } as any,
       })
 
+    if (ignoreIngestion) {
+      const observedAccounts = await trx
+        .select({ id: account.id })
+        .from(account)
+        .where(and(eq(account.provider, provider as any), eq(account.iban, iban)))
+      for (const observedAccount of observedAccounts) {
+        await purgeIgnoredAccountTransactions(trx, observedAccount.id)
+      }
+    }
+
     if (name) {
       await trx
         .update(account)
@@ -120,14 +131,21 @@ export default defineEventHandler(async (event) => {
     }
   })
 
-  if (statuskonto) {
+  const recoveryReason = ignoreIngestion
+    ? 'account-ignored'
+    : statuskonto
+      ? 'account-mapping'
+      : null
+
+  if (recoveryReason) {
     try {
-      await retryRunsAfterAccountMapping({
+      await retryRunsAfterAccountChange({
         provider: provider as 'danskebank' | 'nordea' | 'bankconnect',
         iban,
+        reason: recoveryReason,
       })
     } catch (error) {
-      log.warn('Auto-retry efter allowlist-mapping fejlede', { provider, iban, err: error })
+      log.warn('Auto-retry efter allowlist-opsætning fejlede', { provider, err: error })
     }
   }
 

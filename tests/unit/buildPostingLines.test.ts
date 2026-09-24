@@ -1,6 +1,17 @@
 import { describe, expect, it } from 'vitest'
 
+import { anonymizeCprInText, extractCprFromText } from '../../app/lib/text/cpr'
 import { buildPostingLines, extractCprFromTransaction, resolvePostingText } from '../../engine/matching/domain/postingUtils'
+
+describe('CPR text helpers', () => {
+  it('extracts the first CPR with the same normalization used by matching', () => {
+    expect(extractCprFromText('NOTICE 010203-1234 then 0203045678')).toBe('0102031234')
+  })
+
+  it('anonymizes every CPR with or without a hyphen', () => {
+    expect(anonymizeCprInText('010203-1234 and 0203045678')).toBe('[CPR REDACTED] and [CPR REDACTED]')
+  })
+})
 
 describe('buildPostingLines', () => {
   it('propagates transactionId to all generated posting lines', () => {

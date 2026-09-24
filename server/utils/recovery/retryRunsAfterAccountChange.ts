@@ -6,13 +6,15 @@ import { enqueueJob } from '#engine/queue/handlers/enqueueJob'
 import { logger } from '~/lib/logger'
 
 type SupportedProvider = 'danskebank' | 'nordea' | 'bankconnect'
+export type AccountRecoveryReason = 'account-mapping' | 'account-ignored'
 
-export type RetryRunsAfterAccountMappingInput = {
+export type RetryRunsAfterAccountChangeInput = {
   provider: SupportedProvider
   iban: string
+  reason: AccountRecoveryReason
 }
 
-export type RetryRunsAfterAccountMappingResult = {
+export type RetryRunsAfterAccountChangeResult = {
   provider: SupportedProvider
   iban: string
   candidates: string[]
@@ -32,35 +34,35 @@ function normalizeProvider(value: string): SupportedProvider {
   throw new Error(`Ukendt provider for retry-flow: ${value}`)
 }
 
-export async function retryRunsAfterAccountMapping(input: RetryRunsAfterAccountMappingInput): Promise<RetryRunsAfterAccountMappingResult> {
+export async function retryRunsAfterAccountChange(input: RetryRunsAfterAccountChangeInput): Promise<RetryRunsAfterAccountChangeResult> {
   const provider = normalizeProvider(input.provider)
   const iban = normalizeIban(input.iban)
-  const log = logger.child({ scope: 'recovery.retryRunsAfterAccountMapping', provider, iban })
+  const reason = input.reason
+  const log = logger.child({ scope: 'recovery.retryRunsAfterAccountChange', provider, reason })
 
   if (!iban) {
     return { provider, iban, candidates: [], skippedExistingInFlight: [], enqueuedRunIds: [] }
   }
 
-  const providerIbanKey = `${provider}:${iban}`
-
   const candidateResult = await db.execute(sql`
     select distinct r.id
     from run r
-    join "transaction" t on t.run_id = r.id
-    join account a on a.id = t.account
     where r.status = 'afventer'::run_status
-      and a.provider = ${provider}
-      and a.iban = ${iban}
       and exists (
         select 1
         from error e
+        cross join lateral regexp_split_to_table(
+          split_part(e.error_string, 'for bankkonto:', 2),
+          ','
+        ) as missing_account(value)
         where e.run_id = r.id
           and e.source = 'application'::run_error_source
           and (
             e.error_string ilike 'Mangler konterings-mapping (artskonto)%'
             or e.error_string ilike 'Mangler konterings-mapping (statuskonto)%'
           )
-          and e.error_string ilike ${`%${providerIbanKey}%`}
+          and lower(btrim(split_part(missing_account.value, ':', 1))) = ${provider}
+          and upper(regexp_replace(btrim(split_part(missing_account.value, ':', 2)), '\\s', '', 'g')) = ${iban}
       )
   `)
 
@@ -94,6 +96,9 @@ export async function retryRunsAfterAccountMapping(input: RetryRunsAfterAccountM
 
   const skippedExistingInFlight: string[] = []
   const enqueuedRunIds: string[] = []
+  const recoveryMessage = reason === 'account-ignored'
+    ? 'Bankkonto markeret til ignorering. Automatisk genkørsel planlagt.'
+    : 'Statuskonto-mapping oprettet. Automatisk genkørsel planlagt.'
 
   for (const runId of candidates) {
     if (inFlight.has(runId)) {
@@ -101,17 +106,17 @@ export async function retryRunsAfterAccountMapping(input: RetryRunsAfterAccountM
       continue
     }
 
-    await enqueueJob('banking.ingest', { source: 'auto-recovery.account-mapping' }, { runId })
+    await enqueueJob('banking.ingest', { source: 'auto-recovery', recoveryReason: reason }, { runId })
     await db.insert(errorLog).values({
       runId,
       source: 'application',
       errorCode: 202,
-      errorString: `Statuskonto-mapping oprettet for bankkonto ${providerIbanKey}. Automatisk genkørsel planlagt.`,
+      errorString: recoveryMessage,
     } as any).catch(() => {})
     enqueuedRunIds.push(runId)
   }
 
-  log.info('Auto-retry evalueret for konto-mapping', {
+  log.info('Auto-retry evalueret for kontoændring', {
     candidates: candidates.length,
     skippedExistingInFlight: skippedExistingInFlight.length,
     enqueued: enqueuedRunIds.length,

@@ -4,12 +4,25 @@ import { describe, expect, it } from 'vitest'
 import { eq, sql } from 'drizzle-orm'
 
 import { ingestCamt053Document } from '../../engine/banking-ingestion/handlers/ingestCamt053Document'
+import { extractCprFromTransaction } from '../../engine/matching/domain/postingUtils'
 import crypto from 'node:crypto'
 import { parseCamt053Xml } from '../../engine/banking-ingestion/handlers/camt053/parseCamt053Xml'
+import { transactionReference } from '../../app/lib/db/schema/transactionReference'
 
 function isDatabaseReachableError(err: unknown): boolean {
   const message = String((err as any)?.message ?? err)
   return message.includes('ECONNREFUSED') || message.includes('ENOTFOUND')
+}
+
+async function withNodeEnv<T>(nodeEnv: string, callback: () => Promise<T>): Promise<T> {
+  const previousNodeEnv = process.env.NODE_ENV
+  process.env.NODE_ENV = nodeEnv
+  try {
+    return await callback()
+  } finally {
+    if (previousNodeEnv === undefined) delete process.env.NODE_ENV
+    else process.env.NODE_ENV = previousNodeEnv
+  }
 }
 
 describe('ingestCamt053Document (integration)', () => {
@@ -30,7 +43,9 @@ describe('ingestCamt053Document (integration)', () => {
       'examples',
       'camt.053e.xml',
     )
-    const xml = await readFile(examplePath, 'utf8')
+    const fixtureXml = await readFile(examplePath, 'utf8')
+    const xml = fixtureXml.replace('<Ustrd>', '<Ustrd>CPR 010203-1234; ')
+    if (xml === fixtureXml) throw new Error('Test setup failed: fixture has no Ustrd element')
 
     const parsed = parseCamt053Xml(xml)
     const stmt0 = parsed.statements[0]
@@ -97,14 +112,14 @@ describe('ingestCamt053Document (integration)', () => {
 
     await db.insert(run).values({ id: runId1, bookingDate: bookingDate1, status: 'indlæser' })
 
-    const result1 = await db.transaction(async (trx) => {
-      return ingestCamt053Document(trx as any, {
+    const result1 = await withNodeEnv('development', () =>
+      db.transaction((trx) => ingestCamt053Document(trx as any, {
         runId: runId1,
         provider: 'nordea',
         filename: 'camt.053e.xml',
         xml,
-      })
-    })
+      })),
+    )
 
     expect(result1.deduplicated).toBe(false)
     expect(result1.insertedStatements).toBe(1)
@@ -113,14 +128,14 @@ describe('ingestCamt053Document (integration)', () => {
 
     await db.insert(run).values({ id: runId2, bookingDate: bookingDate2, status: 'indlæser' })
 
-    const result2 = await db.transaction(async (trx) => {
-      return ingestCamt053Document(trx as any, {
+    const result2 = await withNodeEnv('development', () =>
+      db.transaction((trx) => ingestCamt053Document(trx as any, {
         runId: runId2,
         provider: 'nordea',
         filename: 'camt.053e.xml',
         xml,
-      })
-    })
+      })),
+    )
 
     expect(result2.deduplicated).toBe(true)
     expect(result2.insertedStatements).toBe(0)
@@ -154,6 +169,58 @@ describe('ingestCamt053Document (integration)', () => {
     expect(Number(stmtCountRaw)).toBe(1)
     expect(Number(balCountRaw)).toBe(3)
     expect(Number(txCountRaw)).toBe(8)
+
+    const [storedDocument] = await db
+      .select({ content: bankingDocument.content })
+      .from(bankingDocument)
+      .where(eq(bankingDocument.contentHash, contentHash))
+      .limit(1)
+    expect(storedDocument?.content).toContain('[CPR REDACTED]')
+    expect(storedDocument?.content).not.toContain('0102031234')
+
+    const storedTransactions = await db
+      .select({
+        id: transaction.id,
+        amount: transaction.amount,
+        debtorName: transaction.debtorName,
+        debtorId: transaction.debtorId,
+        creditorName: transaction.creditorName,
+        creditorId: transaction.creditorId,
+        entryAdditionalInfo: transaction.entryAdditionalInfo,
+        txAdditionalInfo: transaction.txAdditionalInfo,
+        remittanceUstrd: transaction.remittanceUstrd,
+        remittanceAdditional: transaction.remittanceAdditional,
+      })
+      .from(transaction)
+      .where(eq(transaction.runId, runId1))
+    const injectedTransaction = storedTransactions.find((row) =>
+      row.remittanceUstrd?.some((value) => value.includes('[CPR REDACTED]')),
+    )
+    expect(injectedTransaction).toBeTruthy()
+    for (const row of storedTransactions) {
+      expect(extractCprFromTransaction({
+        transactionId: row.id,
+        amount: Number(row.amount),
+        statusDimensions: {},
+        debtorName: row.debtorName,
+        debtorId: row.debtorId,
+        creditorName: row.creditorName,
+        creditorId: row.creditorId,
+        entryAdditionalInfo: row.entryAdditionalInfo,
+        txAdditionalInfo: row.txAdditionalInfo,
+        remittanceUstrd: row.remittanceUstrd,
+        remittanceAdditional: row.remittanceAdditional,
+      })).toBeUndefined()
+    }
+
+    const references = await db
+      .select({ valueRaw: transactionReference.valueRaw, valueNormalized: transactionReference.valueNormalized })
+      .from(transactionReference)
+      .innerJoin(transaction, eq(transactionReference.transactionId, transaction.id))
+      .where(eq(transaction.runId, runId1))
+    expect(references.some((row) => row.valueRaw.includes('[CPR REDACTED]'))).toBe(true)
+    expect(references.some((row) => row.valueRaw.includes('010203-1234'))).toBe(false)
+    expect(references.some((row) => row.valueNormalized.includes('0102031234'))).toBe(false)
 
     // Sanity: document exists by content hash.
     const docs = await db
