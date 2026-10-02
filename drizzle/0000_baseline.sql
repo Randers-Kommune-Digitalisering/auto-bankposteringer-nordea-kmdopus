@@ -18,9 +18,9 @@ CREATE TYPE "public"."rule_type" AS ENUM('standard', 'undtagelse', 'engangs');--
 CREATE TYPE "public"."run_error_source" AS ENUM('banking', 'application', 'erp');--> statement-breakpoint
 CREATE TYPE "public"."run_status" AS ENUM('afventer', 'indlæser', 'udført', 'fejl');--> statement-breakpoint
 CREATE TYPE "public"."transaction_party_role" AS ENUM('debtor', 'creditor', 'ultimateDebtor', 'ultimateCreditor');--> statement-breakpoint
+CREATE TYPE "public"."transaction_processing_source" AS ENUM('regel', 'manuel', 'ingen_regel', 'ukendt');--> statement-breakpoint
 CREATE TYPE "public"."transaction_reference_type" AS ENUM('reference', 'freetext', 'technical', 'remittance');--> statement-breakpoint
 CREATE TYPE "public"."transaction_source_scope" AS ENUM('entry', 'tx', 'remittance', 'party');--> statement-breakpoint
-CREATE TYPE "public"."transaction_processing_source" AS ENUM('regel', 'manuel', 'ingen_regel', 'ukendt');--> statement-breakpoint
 CREATE TABLE "account" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text,
@@ -301,8 +301,9 @@ CREATE TABLE "rule" (
 	"last_used" date,
 	"created_at" date DEFAULT now(),
 	"updated_at" date DEFAULT now(),
-	"locked_at" date,
+	"locked_at" timestamp with time zone,
 	"locked_by" text,
+	"locked_by_name" text,
 	"active_from" date,
 	"active_to" date,
 	"current_version_id" bigint NOT NULL,
@@ -468,8 +469,9 @@ CREATE TABLE "transaction_processing" (
 	"status" "booking_status",
 	"rule_applied" integer,
 	"source" "transaction_processing_source",
-	"locked_at" date,
-	"locked_by" text
+	"locked_at" timestamp with time zone,
+	"locked_by" text,
+	"locked_by_name" text
 );
 --> statement-breakpoint
 CREATE TABLE "transaction_code_catalog" (

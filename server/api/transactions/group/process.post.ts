@@ -18,7 +18,8 @@ import {
   listAccountingDimensionDefinitions,
   normalizeDimensionInput,
 } from '~~/server/utils/accountingDimensions'
-import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
+import { requireWriteAccessWithIdentity } from '~~/server/auth/requireAppRoles'
+import { verifyTransactionBookingLock } from '~~/server/utils/transactionBookingLock'
 import { parseAmount } from '#engine/matching/domain/amount'
 import { buildNordeaDeterministicGroupKey } from '#engine/banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo'
 import { bookingPeriodRebookingAudit } from '~/lib/db/schema/bookingPeriod'
@@ -30,7 +31,7 @@ const groupProcessSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  await requireWriteAccess(event)
+  const user = await requireWriteAccessWithIdentity(event)
 
   const parsed = groupProcessSchema.safeParse(await readBody(event))
   if (!parsed.success) {
@@ -149,6 +150,8 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  await verifyTransactionBookingLock(first.id, user, transactionIds)
+
   const provider = first.accountProvider ? String(first.accountProvider) : ''
   const iban = first.accountIban ? String(first.accountIban) : ''
 
@@ -251,7 +254,7 @@ export default defineEventHandler(async (event) => {
   if (withProcessingRow.length) {
     await db
       .update(transactionProcessing)
-      .set({ status: 'bogført', ruleApplied: null, source: 'manuel' })
+      .set({ status: 'bogført', ruleApplied: null, source: 'manuel', lockedAt: null, lockedBy: null, lockedByName: null })
       .where(inArray(transactionProcessing.transactionId, withProcessingRow))
   }
 

@@ -33,6 +33,18 @@ CMD ["pnpm", "dev"]
 FROM base AS build
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+ENV NODE_OPTIONS=--max-old-space-size=4096
+ENV APP_ROLE=web \
+	DATABASE_URL=postgres://build:build@localhost:5432/build \
+	ERP_SUPPLIER=kmd \
+	ERP_BOOKING_PERIOD_CLOSE_DAY=7 \
+	ERP_ERROR_ACCOUNT=95999999 \
+	ERP_ACTIVE_INTEGRATION=false \
+	ERP_PROD_ENVIRONMENT=P04 \
+	ERP_MUNICIPALITY_CODE=000 \
+	ERP_COMP_CODE=0000 \
+	ERP_INTEGRATION_ID=BUILD \
+	ERP_INTEGRATION_FILENAME_MASK=ZFIR_{municipalityCode}_{integrationId}_{docDate}_{docTime}.xml
 RUN pnpm build
 
 # -------------------------

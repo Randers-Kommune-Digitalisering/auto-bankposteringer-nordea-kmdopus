@@ -4,6 +4,7 @@ import { today, type DateValue } from '@internationalized/date'
 import FiltersRow from '~/components/filters/FiltersRow.vue'
 import { useDebouncedString } from '~/composables/useDebouncedString'
 import { fuzzyRankRows } from '~/lib/search/fuzzyRanking'
+import { redactSensitiveXml } from '~/lib/text/redactSensitiveXml'
 import BookingSummaryCard from '~/components/open-items/BookingSummaryCard.vue'
 import type { TransactionSummary } from '~/types/transactions'
 import { DEFAULT_TIME_ZONE, formatSignedDkk } from '~/utils'
@@ -67,6 +68,16 @@ type ErpRequestViewResponse = {
   }>
 }
 
+type ErpRawFilesResponse = {
+  requestId: string
+  requestPayload: string | null
+  response: null | {
+    id: string
+    statusText: string | null
+    payload: string | null
+  }
+}
+
 type ErpTransaction = ErpRequestViewResponse['transactions'][number]
 
 function provenanceLabel(transaction: ErpTransaction): string {
@@ -113,6 +124,9 @@ const failedTableKey = computed(() => (failedList.value?.items ?? []).map((i) =>
 const erpRequestId = ref('')
 const erpLoading = ref(false)
 const erpView = ref<ErpRequestViewResponse | null>(null)
+const rawFilesLoading = ref(false)
+const rawFilesOpen = ref(false)
+const rawFiles = ref<ErpRawFilesResponse | null>(null)
 const transactionSearchInput = ref('')
 const debouncedTransactionSearch = useDebouncedString(transactionSearchInput, { delayMs: 300 })
 const selectedTransactionIds = ref<Record<string, boolean>>({})
@@ -123,6 +137,23 @@ const isTransactionSummaryOpen = ref(false)
 function openTransactionSummary(transaction: ErpTransaction) {
   selectedTransaction.value = transaction
   isTransactionSummaryOpen.value = true
+}
+
+async function openRawFiles() {
+  if (!erpView.value) return
+  rawFilesLoading.value = true
+  try {
+    rawFiles.value = await $fetch<ErpRawFilesResponse>(
+      `/api/fejlhaandtering/erp-requests/${encodeURIComponent(erpView.value.requestId)}`,
+      { method: 'GET' },
+    )
+    rawFilesOpen.value = true
+  } catch (error) {
+    console.error('Kunne ikke hente rå ERP-filer', error)
+    toast.add({ title: 'Kunne ikke hente rå ERP-filer', color: 'error' })
+  } finally {
+    rawFilesLoading.value = false
+  }
 }
 
 const filteredTransactions = computed(() => fuzzyRankRows({
@@ -598,6 +629,14 @@ async function reopenBookedTransactions() {
 
             <div class="flex flex-wrap gap-2">
               <UButton
+                :icon="appConfig.ui.icons.doc"
+                label="Vis rå fil"
+                color="neutral"
+                variant="soft"
+                :loading="rawFilesLoading"
+                @click="openRawFiles"
+              />
+              <UButton
                 :icon="appConfig.ui.icons.undo"
                 label="Genåbn valgte transaktioner"
                 color="warning"
@@ -689,6 +728,32 @@ async function reopenBookedTransactions() {
               </table>
             </div>
           </section>
+        </template>
+      </UModal>
+
+      <UModal v-model:open="rawFilesOpen" title="Rå ERP-filer">
+        <template #body>
+          <div v-if="rawFiles" class="space-y-5">
+            <section class="space-y-2">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <h3 class="font-medium">Udgående request</h3>
+                <span class="text-xs text-muted">CPR/personfelter maskeret</span>
+              </div>
+              <pre v-if="rawFiles.requestPayload" class="max-h-[32rem] overflow-auto rounded-md border border-default bg-elevated/30 p-3 text-xs whitespace-pre-wrap break-all">{{ redactSensitiveXml(rawFiles.requestPayload) }}</pre>
+              <p v-else class="text-sm text-muted">Ingen request-payload er gemt.</p>
+            </section>
+
+            <section class="space-y-2">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <h3 class="font-medium">Indgående response</h3>
+                <UBadge v-if="rawFiles.response?.statusText" color="neutral" variant="subtle">
+                  {{ rawFiles.response.statusText }}
+                </UBadge>
+              </div>
+              <pre v-if="rawFiles.response?.payload" class="max-h-[32rem] overflow-auto rounded-md border border-default bg-elevated/30 p-3 text-xs whitespace-pre-wrap break-all">{{ redactSensitiveXml(rawFiles.response.payload) }}</pre>
+              <p v-else class="text-sm text-muted">Der er endnu ikke modtaget et response.</p>
+            </section>
+          </div>
         </template>
       </UModal>
     </template>

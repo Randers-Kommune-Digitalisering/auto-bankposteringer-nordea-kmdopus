@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, isNull, or, sql } from 'drizzle-orm'
+import { and, eq, inArray, isNull, or, sql } from 'drizzle-orm'
 import { defineEventHandler, getQuery, setHeader } from 'h3'
 import db from '~/lib/db'
 import { account } from '~/lib/db/schema/account'
@@ -16,7 +16,7 @@ import { presentOpenTransaction } from '~~/server/presenters/openTransactionPres
 import { projectCanonicalTransactionFields } from '~~/server/presenters/transactionCanonicalFields'
 import { buildTransactionCodeCatalogMap, resolveTransactionType, type TransactionCodeCatalogMap } from '~~/server/presenters/transactionTypePresenter'
 import { createUtcIsoString, parseIsoDateToUtcDate } from '~~/utils/function'
-import { toSamlepostId, toStatementEntryKey } from '~~/server/utils/iso20022Samlepost'
+import { selectPaginatedTransactionKeys, type TransactionStackSortKey } from '~~/server/utils/transactions/selectPaginatedTransactionKeys'
 
 type TransactionsMode = 'open-items' | 'statement'
 
@@ -26,6 +26,7 @@ type StatementPageResponse = {
   page: number
   pageSize: number
   totalSamleposter: number
+  transactionTypeValues: string[]
 }
 
 type BaseRow = {
@@ -78,6 +79,8 @@ type BaseRow = {
   processingStatus: 'åben' | 'bogført' | 'undtaget' | null
   ruleApplied: number | null
   draftNote: string | null
+  entryGroupSize: number
+  samlepostId: string
   runningBalance?: string | null
 }
 
@@ -118,6 +121,14 @@ function parsePositiveIntParam(value: unknown, fallback: number): number {
 
 function parseMode(value: unknown): TransactionsMode {
   return value === 'statement' ? 'statement' : 'open-items'
+}
+
+function parseTransactionStackSortKey(value: unknown): TransactionStackSortKey | undefined {
+  return value === 'counterpart' || value === 'transactionType' ? value : undefined
+}
+
+function parseSortDirection(value: unknown): 'asc' | 'desc' | undefined {
+  return value === 'asc' || value === 'desc' ? value : undefined
 }
 
 function parseAmount(value: unknown): number {
@@ -398,6 +409,11 @@ export default defineEventHandler(async (event) => {
   const page = Math.max(1, parsePositiveIntParam((query as any).page, 1))
   const pageSize = Math.min(200, parsePositiveIntParam((query as any).pageSize, 50))
   const offset = (page - 1) * pageSize
+  const sortKey = mode === 'statement' ? parseTransactionStackSortKey((query as any).sortBy) : undefined
+  const sortDirection = mode === 'statement' ? parseSortDirection((query as any).sortDirection) : undefined
+  const transactionTypeFilter = mode === 'statement'
+    ? parseStringArrayParam((query as any).transactionTypes ?? (query as any).transactionType)
+    : []
 
   const start = parseDateParam((query as any).start)
   const end = parseDateParam((query as any).end)
@@ -440,7 +456,19 @@ export default defineEventHandler(async (event) => {
 
   const whereClause = whereConditions.length ? and(...whereConditions) : undefined
 
-  const rows = await db
+  const pageKeys = await selectPaginatedTransactionKeys({
+    whereClause,
+    pageSize: mode === 'statement' ? pageSize : limit,
+    offset: mode === 'statement' ? offset : 0,
+    sortKey,
+    sortDirection,
+    transactionTypeFilter,
+    includeTransactionTypeValues: mode === 'statement',
+  })
+  const pageIds = pageKeys.rows.map(row => row.id)
+
+  const rows = pageIds.length
+    ? await db
     .select({
       id: transaction.id,
       runId: transaction.runId,
@@ -496,10 +524,18 @@ export default defineEventHandler(async (event) => {
     .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
     .leftJoin(account, eq(account.id, transaction.accountId))
     .leftJoin(manualBookingDraft, eq(manualBookingDraft.transactionId, transaction.id))
-    .where(whereClause)
-    .orderBy(desc(transaction.bookingDate), desc(transaction.id))
+    .where(inArray(transaction.id, pageIds))
+    : []
 
-  const filteredRows = rows as BaseRow[]
+  const loadedRowsById = new Map(rows.map(row => [row.id, row] as const))
+  const filteredRows = pageKeys.rows.map((key) => {
+    const row = loadedRowsById.get(key.id)
+    if (!row) throw new Error(`Selected transaction row was not loaded: ${key.id}`)
+    return { ...row, entryGroupSize: key.entryGroupSize, samlepostId: key.samlepostId } as BaseRow
+  })
+  const baseRowById = new Map<string, BaseRow>(
+    filteredRows.map((row): [string, BaseRow] => [row.id, row]),
+  )
 
   const providers = Array.from(
     new Set(
@@ -588,43 +624,23 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const entryGroupSizeByEntryKey = new Map<string, number>()
-  for (const row of filteredRows) {
-    const entryKey = toStatementEntryKey(row.statementId, row.entryIndex)
-    if (!entryKey) continue
-    entryGroupSizeByEntryKey.set(entryKey, (entryGroupSizeByEntryKey.get(entryKey) ?? 0) + 1)
-  }
-
   const statementRows = filteredRows.map((row) => {
-    const samlepostId = toSamlepostId({
-      id: row.id,
-      accountId: row.accountId,
-      entryGroupSize: entryGroupSizeByEntryKey.get(toStatementEntryKey(row.statementId, row.entryIndex) ?? '') ?? 0,
-      bookingDate: row.bookingDate,
-      creditDebitIndicator: row.creditDebitIndicator,
-      ntryRef: row.ntryRef,
-      entryAdditionalInfo: row.entryAdditionalInfo,
-      ntryAcctSvcrRef: row.ntryAcctSvcrRef,
-    })
-
     return mapRowToStatementTransaction({
       ...row,
       runningBalance: runningBalanceByTransactionId.get(row.id) ?? null,
-    }, samlepostId, catalogByProviderCodeKey)
+    }, row.samlepostId, catalogByProviderCodeKey)
   })
 
   const samlepostOrder = uniqueStackOrderFromSamlepostIds(statementRows.map((row) => row.samlepostId ?? `single:${row.id}`))
 
   if (mode === 'statement') {
-    const pageStackIds = new Set(samlepostOrder.slice(offset, offset + pageSize))
-    const pagedRows = statementRows.filter((row) => pageStackIds.has(row.samlepostId ?? `single:${row.id}`))
-
     const response: StatementPageResponse = {
-      rows: pagedRows,
-      total: samlepostOrder.length,
-      totalSamleposter: samlepostOrder.length,
+      rows: statementRows,
+      total: pageKeys.totalSamleposter,
+      totalSamleposter: pageKeys.totalSamleposter,
       page,
       pageSize,
+      transactionTypeValues: pageKeys.transactionTypeValues,
     }
 
     return response
@@ -633,7 +649,7 @@ export default defineEventHandler(async (event) => {
   const visibleStackIds = new Set(samlepostOrder.slice(0, limit))
   const visibleStatementRows = statementRows.filter((row) => visibleStackIds.has(row.samlepostId ?? `single:${row.id}`))
   const visibleItems = visibleStatementRows.map((row) => mapRowToOpenTransaction(
-    filteredRows.find((r) => r.id === row.id) as BaseRow,
+    baseRowById.get(row.id)!,
     row.samlepostId ?? `single:${row.id}`,
     catalogByProviderCodeKey,
   ))
@@ -682,9 +698,9 @@ export default defineEventHandler(async (event) => {
     items: visibleItems,
     stacks,
     groupedStacksByAccount,
-    total: filteredRows.length,
+    total: pageKeys.totalTransactions,
     limit,
-    totalSamleposter: samlepostOrder.length,
+    totalSamleposter: pageKeys.totalSamleposter,
   }
 
   return response

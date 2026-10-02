@@ -1,6 +1,7 @@
 import type { BuildErpRequestInput, ErpAdapter } from '../../../ports/erpAdapter'
 import type { PostingLineInput } from '../../../../posting/domain/posting'
 import { buildErpPostingXml, type BuildPostingXmlOptions } from './postingXmlBuilder'
+import { parseKmdPostingResponse } from './kmdResponseParser'
 import { ErpSftpClient, type RemoteFile } from './sftpClient'
 import { logger } from '~/lib/logger'
 
@@ -61,11 +62,23 @@ export function createKmdErpAdapter(options: {
         options.resolveRequestId ??
         ((file: RemoteFile) => tryResolveRequestIdFromFilename(file))
 
-      const responses = files.map(file => ({
-        requestId: resolveRequestId(file),
-        payload: file.contents.toString('utf-8'),
-        remotePath: file.path,
-      }))
+      const responses = files.map((file) => {
+        const payload = file.contents.toString('utf-8')
+        let statusText: string
+        try {
+          statusText = parseKmdPostingResponse(payload).statusText
+        } catch (error) {
+          log.error('ERP response parse failed (KMD)', { filename: file.name, error })
+          statusText = 'FEJL: KMD-svar kunne ikke fortolkes'
+        }
+
+        return {
+          requestId: resolveRequestId(file),
+          payload,
+          remotePath: file.path,
+          statusText,
+        }
+      })
 
       if (ingestOptions.deleteAfterPickup ?? false) {
         for (const file of files) {

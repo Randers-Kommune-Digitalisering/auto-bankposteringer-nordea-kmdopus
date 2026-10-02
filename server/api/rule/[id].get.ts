@@ -1,9 +1,9 @@
 import { defineEventHandler, createError } from 'h3'
-import { eq } from 'drizzle-orm'
-import { mapConditionsToMatches, ruleDraftSchema, rule } from '~/lib/db/schema/rule'
+import { mapConditionsToMatches, ruleDraftSchema } from '~/lib/db/schema/rule'
 import { mapDimensionRowsToDto } from '~~/server/utils/accountingDimensions'
 import db from '~/lib/db'
 import { parseAmount } from '#engine/matching/domain/amount'
+import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
 
 function parseDbNumericOrUndefined(value: unknown): number | undefined {
   if (value == null) return undefined
@@ -30,6 +30,7 @@ function normalizeDbRow(row: any) {
 }
 
 export default defineEventHandler(async (event) => {
+  await requireWriteAccess(event)
   try {
     const id = event.context.params?.id
     if (!id) {
@@ -78,23 +79,6 @@ export default defineEventHandler(async (event) => {
     }
 
     // --------------------------
-    // Håndter locking
-    // --------------------------
-    const now = new Date()
-
-    // Hvis reglen allerede er låst, returnér lockedAt
-    let isLocked = false
-    if (dbRule.lockedAt && (new Date(dbRule.lockedAt).getTime() + 5 * 60 * 1000) > now.getTime()) {
-      // Låsning gælder i f.eks. 5 minutter
-      isLocked = true
-    } else {
-      // Sæt lockedAt = nu, så andre brugere ser reglen som låst
-      await db.update(rule)
-        .set({ lockedAt: now })
-        .where(eq(rule.id, Number(id)))
-    }
-
-    // --------------------------
     // Byg draft objekt
     // --------------------------
     const { accountingParameters, conditions, accountingDimensions, ...rest } = dbRule
@@ -128,7 +112,6 @@ export default defineEventHandler(async (event) => {
       accountingAttachmentName: attachmentNames.length ? attachmentNames : undefined,
       accountingAttachmentFileExtension: attachmentExtensions.length ? attachmentExtensions : undefined,
       accountingAttachmentData: attachmentData.length ? attachmentData : undefined,
-      lockedAt: isLocked ? dbRule.lockedAt : undefined
     })
 
     // --------------------------

@@ -11,6 +11,12 @@ describe('CPR text helpers', () => {
   it('anonymizes every CPR with or without a hyphen', () => {
     expect(anonymizeCprInText('010203-1234 and 0203045678')).toBe('[CPR REDACTED] and [CPR REDACTED]')
   })
+
+  it('only anonymizes CPRs surrounded by non-alphanumeric characters', () => {
+    expect(anonymizeCprInText('(010203-1234), 0203045678.')).toBe('([CPR REDACTED]), [CPR REDACTED].')
+    expect(anonymizeCprInText('X0102031234Y 12301020312345 Æ0102031234ø'))
+      .toBe('X0102031234Y 12301020312345 Æ0102031234ø')
+  })
 })
 
 describe('buildPostingLines', () => {

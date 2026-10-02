@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { pgTable, text, date, numeric, integer, uuid, primaryKey, bigint, boolean, unique, index } from "drizzle-orm/pg-core"
+import { pgTable, text, date, timestamp, numeric, integer, uuid, primaryKey, bigint, boolean, unique, index } from "drizzle-orm/pg-core"
 import { createUpdateSchema, createSelectSchema } from "drizzle-zod"
 import type { RuleType, RuleStatus, RuleConditionOperator, RuleConditionGate } from "./enums"
 import {
@@ -33,8 +33,9 @@ export const rule = pgTable('rule', {
   lastUsed: date('last_used', { mode: "date" }),
   createdAt: date('created_at', { mode: "date" }).defaultNow(),
   updatedAt: date('updated_at', { mode: "date" }).defaultNow().$onUpdate(() => new Date()),
-  lockedAt: date('locked_at', { mode: "date" }),
+  lockedAt: timestamp('locked_at', { withTimezone: true }),
   lockedBy: text('locked_by'),
+  lockedByName: text('locked_by_name'),
   activeFrom: date('active_from', { mode: 'date' }),
   activeTo: date('active_to', { mode: 'date' }),
   currentVersionId: bigint('current_version_id', { mode: 'number' }).notNull(),
@@ -266,7 +267,6 @@ export function mapConditionsToMatches(conditions: RuleConditionRow[]): MatchEnt
 export const ruleDraftSchema = z.object({
   type: z.enum(ruleTypeValues),
   status: z.enum(ruleStatusValues),
-  lockedAt: z.date().optional(),
   activeFrom: z.coerce.date().optional(),
   activeTo: z.coerce.date().optional(),
   relatedBankAccounts: z.array(z.string()).min(1, "Vælg mindst én bankkonto"),

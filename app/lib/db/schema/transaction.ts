@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { pgTable, uuid, text, numeric, date, integer, unique, index } from "drizzle-orm/pg-core"
+import { pgTable, uuid, text, numeric, date, timestamp, integer, unique, index } from "drizzle-orm/pg-core"
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod"
 import { account } from "./account"
 import { run } from "./run"
@@ -79,8 +79,9 @@ export const transactionProcessing = pgTable('transaction_processing', {
   status: bookingStatusEnum('status'),
   ruleApplied: integer('rule_applied').references(() => rule.id),
   source: transactionProcessingSourceEnum('source'),
-  lockedAt: date('locked_at', { mode: "date" }),
+  lockedAt: timestamp('locked_at', { withTimezone: true }),
   lockedBy: text('locked_by'),
+  lockedByName: text('locked_by_name'),
 }, (t) => [
   index('transaction_processing_status_transaction_id_idx').on(t.status, t.transactionId),
   index('transaction_processing_rule_applied_idx').on(t.ruleApplied),

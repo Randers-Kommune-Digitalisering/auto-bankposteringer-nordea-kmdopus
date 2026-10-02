@@ -24,14 +24,15 @@ import {
   listAccountingDimensionDefinitions,
   normalizeDimensionInput,
 } from '~~/server/utils/accountingDimensions'
-import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
+import { requireWriteAccessWithIdentity } from '~~/server/auth/requireAppRoles'
+import { verifyTransactionBookingLock } from '~~/server/utils/transactionBookingLock'
 import { parseAmount } from '#engine/matching/domain/amount'
 import { buildNordeaDeterministicGroupKey } from '#engine/banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo'
 import { bookingPeriodRebookingAudit } from '~/lib/db/schema/bookingPeriod'
 import { resolveManualBookingDate } from '~~/server/utils/bookingPeriod'
 
 export default defineEventHandler(async (event) => {
-  await requireWriteAccess(event)
+  const user = await requireWriteAccessWithIdentity(event)
 
   const txId = event.context.params?.id;
 
@@ -172,6 +173,8 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  await verifyTransactionBookingLock(transactionId, user, [transactionId])
+
   const amount = parseAmount(row.amount);
   const provider = row.accountProvider ? String(row.accountProvider) : ''
   const iban = row.accountIban ? String(row.accountIban) : ''
@@ -266,7 +269,7 @@ export default defineEventHandler(async (event) => {
   if (row.processingId) {
     await db
       .update(transactionProcessing)
-      .set({ status: "bogført", ruleApplied: null, source: 'manuel' })
+      .set({ status: "bogført", ruleApplied: null, source: 'manuel', lockedAt: null, lockedBy: null, lockedByName: null })
       .where(eq(transactionProcessing.transactionId, row.id));
   } else {
     await db.insert(transactionProcessing).values({

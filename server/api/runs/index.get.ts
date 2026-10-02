@@ -287,13 +287,16 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
     documentsByRun.set(row.runId, list);
   });
 
-  const rawErrorsByRun = new Map<string, Array<{ errorCode: unknown; errorString: unknown; createdAt: unknown }>>()
+  const latestRecoverySuccessAtByRun = new Map<string, number>()
   for (const row of errorRows ?? []) {
     const runId = row.runId ? String(row.runId) : ''
-    if (!runId) continue
-    const bucket = rawErrorsByRun.get(runId) ?? []
-    bucket.push({ errorCode: row.errorCode, errorString: row.errorString, createdAt: row.createdAt })
-    rawErrorsByRun.set(runId, bucket)
+    if (!runId || !isRecoverySuccessEvent(row)) continue
+
+    const recoveryAt = toEpochMs(row.createdAt)
+    const latestRecoveryAt = latestRecoverySuccessAtByRun.get(runId)
+    if (latestRecoveryAt === undefined || recoveryAt > latestRecoveryAt) {
+      latestRecoverySuccessAtByRun.set(runId, recoveryAt)
+    }
   }
 
   const errorsByRun = new Map<string, ErrorListItem[]>();
@@ -304,10 +307,8 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
 
     const runId = String(row.runId)
     const errorCreatedAtMs = toEpochMs(row.createdAt)
-    const recoveredAfterError = (rawErrorsByRun.get(runId) ?? []).some((e) => (
-      isRecoverySuccessEvent(e)
-      && toEpochMs(e.createdAt) >= errorCreatedAtMs
-    ))
+    const latestRecoveryAt = latestRecoverySuccessAtByRun.get(runId)
+    const recoveredAfterError = latestRecoveryAt !== undefined && latestRecoveryAt >= errorCreatedAtMs
 
     if (isMissingMappingError(row.errorString) && recoveredAfterError) {
       return
