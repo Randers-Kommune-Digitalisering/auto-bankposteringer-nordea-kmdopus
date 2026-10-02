@@ -115,6 +115,7 @@ FOBI kan udvides med fx:
 
 * 💸 Udbetalingskomponenter
 * 🏧 Integration til betalingssystemer
+* 🌐 Skalering udover en kommunal kontekst
 
 ---
 
