@@ -19,6 +19,14 @@ This repo is a stateless financial integration engine:
 - Local time conversion is a UI-only concern; APIs must not localize timestamps.
 - If a run-related event timestamp is unknown from persisted state, API responses return `null`/missing date fields instead of synthesizing time from `bookingDate`.
 
+## ERP response polling and recovery
+
+- The scheduler enqueues the global `erp.ingestResponses` worker job at 00:00 and 12:00 in `Europe/Copenhagen`; the scheduler does not perform SFTP I/O itself.
+- Poll slots are represented by their local Copenhagen date/time and persisted in the job payload. A PostgreSQL advisory lock plus the persisted slot key prevents duplicate enqueue across scheduler replicas and restarts. Slot conversion uses the IANA timezone database so CET/CEST changes do not shift the requested wall-clock times.
+- The recovery queue presents failed jobs and failed ERP outbox deliveries as one paginated worklist. Each retry endpoint atomically changes only a currently failed row with a supported job type/topic; stale retries return a conflict. Payloads are excluded from the list and error text is bounded/redacted.
+- A failed transport upload retry, a global ERP response poll, and business recovery (ERP request resend or transaction reopen) are distinct actions. Business recovery remains in the ERP request detail workflow.
+- Timeline event normalization is a separate concern: run-level bank and ERP events should later share an explicit, deduplicated event contract rather than being inferred from the recovery worklist.
+
 ## Posting text policy (matching -> ERP)
 
 - Posting text derivation is deterministic and split in two responsibilities:
@@ -48,8 +56,11 @@ This repo is a stateless financial integration engine:
   - `transaction`
   - `transaction_processing`
 - UI header metadata (booking date, counts, currencies, totals, response status) and table rows are derived from the same server-side model.
-- Raw XML editing is intentionally removed from the UI to avoid dual sources of truth.
+- Raw XML is read-only and available through the protected ERP detail endpoint for authorized recovery users. The frontend masks known CPR/person fields before rendering; list endpoints do not expose payloads.
 - Resend still persists and uploads XML payloads, but payload generation/usage is controlled server-side and remains auditable via `erp_request.payload`.
+- KMD `FinancePostingResponse` interpretation stays in the KMD adapter. Raw response XML is preserved, while `erp_response.status_text` stores the derived aggregate outcome; mixed voucher results are an aggregate error/partial outcome and individual vouchers remain represented in the raw response.
+- The dev Compose profile runs a responder sidecar that polls and transfers files through the same SFTP service as the ERP adapter. It generates a response from each uploaded KMD request once, choosing success/error outcomes randomly by default or through `KMD_SFTP_MOCK_MODE` for reproducible testing. The responder is development-only and is not part of production runtime behavior.
+- Run recovery views keep bank ingestion jobs, matching state, outbound delivery state, and inbound ERP response state distinct. An uploaded request without a parsed response remains pending rather than being presented as successful.
 - Each `erp_request_line` also stores the accounting input snapshot used for that line: amount, debit/credit, posting text, CPR, and dynamic dimension key/value pairs. The recovery view displays this snapshot rather than re-evaluating the current rule configuration.
 - Accounting dimensions remain dynamic and supplier-agnostic in the persistence model. Any schema change to add these snapshot fields follows the repository's single-baseline migration workflow; no incremental migration is added.
 - Reopen is transaction-oriented: operators choose transactions, and the system resets processing state for those transaction ids (covering all related request lines).
@@ -63,6 +74,21 @@ This repo is a stateless financial integration engine:
 - UI clients may temporarily receive both legacy and new names during migration:
   - New: samlepostId, totalSamleposter, openSamleposter
   - Legacy compatibility: topStackId, totalTopTransactions, openTransactions
+
+## Manual booking leases
+
+- Opening a manual booking acquires a persisted lease in `transaction_processing` for the transaction or every currently open member of its deterministic semantic samlepost. Group membership is derived server-side from transaction data, not from the filtered/paginated UI result.
+- Lease claims are serialized by locking the corresponding `transaction_processing` rows in one PostgreSQL transaction. Draft writes and ERP processing require an unexpired lease owned by the authenticated user; group processing revalidates the complete open-member set.
+- `locked_by` stores the OIDC issuer/subject identity, while `locked_by_name` stores the display-name snapshot shown in the conflict banner. The stable identity is used for ownership checks, never the mutable display name.
+- Leases last three minutes and the open modal renews them every minute. Normal modal close and completed processing release the lease; browser or network failure is recovered through lease expiry. The periodic DB cleanup also clears expired owner/name snapshots.
+- A competing user can inspect the booking in `BookingModal` read-only mode, with a banner naming the current owner. A database schema change updates the schema source only; deployment follows the repository's single-baseline migration workflow and does not add an incremental migration.
+
+## Rule editor leases
+
+- Editing a persisted rule acquires a three-minute lease on the `rule` row, renewed every minute while the modal is open. Rule reads do not acquire locks as a side effect.
+- The lease stores the OIDC issuer/subject as owner identity and a separate display-name snapshot for the conflict banner. A competing editor can read the rule in `RuleModal`, but save is disabled and the API rejects writes without current ownership.
+- Save verifies ownership while holding the rule row lock. Rollback and delete take a short row-locked claim and reject the operation while another user's lease is live.
+- Closing releases the lease; periodic DB cleanup clears expired identity/name fields. Rule lease schema changes share the single-baseline migration workflow with other schema changes.
 
 ## Unified transactions API
 
@@ -264,6 +290,8 @@ The database remains the single source of truth, so read performance is achieved
 
 When schema/indexes change, migrations follow the baseline-only workflow used in this repository (regenerate a single `drizzle/0000_baseline.sql`).
 
+For transaction pagination query-plan checks, run `pnpm db:explain:transaction-pagination [pageSize] [offset]` against a staging database populated with generated or sanitized representative data. The command uses the endpoint's SQL builder, runs in a read-only transaction, and applies a 30-second statement timeout. Do not use production personal or financial data for local performance tests.
+
 ## Logging
 
 The system uses **structured JSON logs** written to **stdout/stderr** (container logs).
@@ -383,6 +411,11 @@ The development database is automatically cleared when Docker Compose shuts
 down the database with `docker compose stop` or `docker compose down`. The
 cleanup drops and recreates the `drizzle` and `public` schemas, but does not
 delete the Docker volume.
+
+The development SFTP service clears the mock request and response directories
+from its `pre_stop` hook during the same orderly Compose shutdown. This keeps
+local mock responses aligned with the database reset and prevents stale files
+from being ingested after their `erp_request` rows are gone.
 
 On the next `docker compose up`, the app automatically runs migrations and the
 system seed. This feature requires a Docker Compose version with support for
@@ -537,6 +570,14 @@ Minimal env required for the run-once step:
 - `ERP_SUPPLIER` (for system seed)
 
 Database connectivity is checked before the command runs. The check retries transient DNS/connection failures with a bounded timeout and fails immediately on permanent authentication or configuration errors. This addresses database readiness for the init job, but does not make DNS available by itself: the job must still run in the same network/namespace as the database service.
+
+### HTTP security controls
+
+- Nitro adds `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, and a restrictive `Permissions-Policy` to responses.
+- `Content-Security-Policy-Report-Only` is an initial observation policy. Validate Nuxt hydration, OIDC flows, and required assets in a production-like browser before enforcing a CSP. The current policy does not send reports to a collector; violations are visible in browser developer tools.
+- HSTS belongs at the ingress/TLS termination layer, which knows whether the external request used HTTPS.
+- No application-process-local rate limiter is used: limits held in one pod are bypassable across replicas and restarts. Production ingress/WAF must apply shared IP-based limits, request-size limits, and stricter limits on authentication and expensive endpoints. If limits must be per authenticated user, use an ingress-supported identity key or a shared store; do not trust client-supplied forwarding headers or use in-memory counters.
+- Set the actual rate thresholds with DevOps based on expected user traffic and identity-provider/bank integration behavior. The deployment must not expose the web service without an agreed rate-limit policy.
 
 Emergency-only:
 

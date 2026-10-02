@@ -53,6 +53,10 @@ const end = computed(() => {
 })
 
 const search = computed(() => debouncedGlobalFilterValue.value.trim())
+type StatementSortKey = 'counterpart' | 'transactionType'
+const sortKey = ref<StatementSortKey | null>(null)
+const sortDirection = ref<'asc' | 'desc'>('asc')
+const transactionTypeFilter = ref<string[]>([])
 
 type StatementPage = {
   rows: StatementTransaction[]
@@ -60,6 +64,7 @@ type StatementPage = {
   page: number
   pageSize: number
   totalSamleposter?: number
+  transactionTypeValues?: string[]
 }
 
 const { data, status, refresh } = await useFetch<StatementPage>('/api/transactions', {
@@ -73,10 +78,13 @@ const { data, status, refresh } = await useFetch<StatementPage>('/api/transactio
     // Always pass primitive IDs as a comma-separated string to avoid query serialization pitfalls.
     accountIds: selectedAccountIds.value.length ? selectedAccountIds.value.join(',') : undefined,
     search: search.value.length ? search.value : undefined,
+    sortBy: sortKey.value ?? undefined,
+    sortDirection: sortKey.value ? sortDirection.value : undefined,
+    transactionTypes: transactionTypeFilter.value.length ? transactionTypeFilter.value.join(',') : undefined,
     page: page.value,
     pageSize: pageSize.value,
   })),
-  watch: [start, end, selectedAccountIds, search, page, pageSize],
+  watch: [start, end, selectedAccountIds, search, sortKey, sortDirection, transactionTypeFilter, page, pageSize],
   // Avoid "1 tick behind" behavior caused by out-of-order responses when filters change quickly.
   dedupe: 'cancel',
   deep: true,
@@ -90,7 +98,7 @@ const { data, status, refresh } = await useFetch<StatementPage>('/api/transactio
   default: () => ({ rows: [], total: 0, page: 1, pageSize: pageSize.value }),
 })
 
-watch([start, end, selectedAccountIds, search], () => {
+watch([start, end, selectedAccountIds, search, sortKey, sortDirection, transactionTypeFilter], () => {
   page.value = 1
 })
 
@@ -114,10 +122,6 @@ const totalRows = computed<number>(() => data.value?.total ?? 0)
 const visibleRows = computed<StatementTransaction[]>(() => fetchedRows.value)
 const isRawTransactionOpen = ref(false)
 const selectedRawTransaction = ref<StatementTransaction | null>(null)
-type StatementSortKey = 'bookingDate' | 'account' | 'counterpart' | 'amount' | 'transactionType'
-const sortKey = ref<StatementSortKey>('bookingDate')
-const sortDirection = ref<'asc' | 'desc'>('desc')
-const transactionTypeFilter = ref<string[]>([])
 
 function toggleSort(key: StatementSortKey): void {
   if (sortKey.value === key) {
@@ -126,28 +130,30 @@ function toggleSort(key: StatementSortKey): void {
   }
 
   sortKey.value = key
-  sortDirection.value = key === 'bookingDate' ? 'desc' : 'asc'
-}
-
-function sortIndicator(key: StatementSortKey): string {
-  if (sortKey.value !== key) return ''
-  return sortDirection.value === 'asc' ? ' ↑' : ' ↓'
+  sortDirection.value = 'asc'
 }
 
 function sortableHeader(label: string, key: StatementSortKey) {
-  return h('button', {
-    type: 'button',
-    class: 'font-semibold hover:text-primary',
+  const icon = sortKey.value !== key
+    ? appConfig.ui.icons.unsorted
+    : sortDirection.value === 'asc'
+      ? appConfig.ui.icons.sortAscending
+      : appConfig.ui.icons.sortDescending
+  const nextDirection = sortKey.value === key && sortDirection.value === 'asc' ? 'faldende' : 'stigende'
+
+  return h(resolveComponent('UButton'), {
+    color: 'neutral',
+    variant: 'ghost',
+    label,
+    icon,
+    class: '-mx-2.5',
     onClick: () => toggleSort(key),
-  }, `${label}${sortIndicator(key)}`)
+    'aria-label': `Sortér ${label} ${nextDirection}`,
+  })
 }
 
 const transactionTypeFilterOptions = computed(() => [
-  ...Array.from(new Set(
-    stacked.value.stacks
-      .map((stack) => resolveTransactionType(stack.representative))
-      .filter((value): value is string => Boolean(value)),
-  ))
+  ...Array.from(new Set(data.value?.transactionTypeValues ?? []))
     .sort((left, right) => left.localeCompare(right, 'da'))
     .map((value) => ({ label: value, value })),
 ])
@@ -188,13 +194,10 @@ const groupedVisibleRows = computed<StatementStackRow[]>(() => {
     }
   })
 
-  const selectedTransactionTypes = transactionTypeFilter.value
-  const filteredRows = selectedTransactionTypes.length
-    ? rows.filter((row) => row.transactionTypeEntries.some((entry) => selectedTransactionTypes.includes(entry.value)))
-    : rows
+  if (sortKey.value) return rows
 
-  const rankedRows = fuzzyRankRows({
-    rows: filteredRows,
+  return fuzzyRankRows({
+    rows,
     query: search.value,
     getValues: (row) => [
       row.stackId,
@@ -214,31 +217,6 @@ const groupedVisibleRows = computed<StatementStackRow[]>(() => {
       return String(b.representative.id).localeCompare(String(a.representative.id), 'da', { sensitivity: 'base' })
     },
   })
-
-  const direction = sortDirection.value === 'asc' ? 1 : -1
-  return rankedRows.sort((left, right) => {
-    let comparison = 0
-    if (sortKey.value === 'bookingDate') {
-      comparison = new Date(left.bookingDate).getTime() - new Date(right.bookingDate).getTime()
-    } else if (sortKey.value === 'amount') {
-      comparison = left.amount - right.amount
-    } else {
-      const leftValue = sortKey.value === 'account'
-        ? left.account
-        : sortKey.value === 'counterpart'
-          ? left.counterpartEntries[0]?.value ?? ''
-          : left.transactionTypeEntries[0]?.value ?? ''
-      const rightValue = sortKey.value === 'account'
-        ? right.account
-        : sortKey.value === 'counterpart'
-          ? right.counterpartEntries[0]?.value ?? ''
-          : right.transactionTypeEntries[0]?.value ?? ''
-      comparison = leftValue.localeCompare(rightValue, 'da', { sensitivity: 'base' })
-    }
-
-    if (comparison !== 0) return comparison * direction
-    return String(left.stackId).localeCompare(String(right.stackId), 'da', { sensitivity: 'base' })
-  })
 })
 
 const statementTableKey = computed(() => groupedVisibleRows.value.map((r) => r.stackId).join('|'))
@@ -248,10 +226,6 @@ function setPage(p: number): void {
 }
 
 watch(pageSize, () => {
-  page.value = 1
-})
-
-watch(transactionTypeFilter, () => {
   page.value = 1
 })
 
@@ -425,7 +399,7 @@ const rawTriad500Values = computed<string[]>(() =>
 const columns: TableColumn<StatementStackRow>[] = [
   { // Banking date
     accessorKey: 'bookingDate',
-    header: () => sortableHeader('Dato', 'bookingDate'),
+    header: 'Dato',
     size: 120,
     cell: ({ row }) => {
       return new Date(row.original.bookingDate).toLocaleString('da-DK', {
@@ -437,7 +411,7 @@ const columns: TableColumn<StatementStackRow>[] = [
   },
   { // Bank account
     id: 'account',
-    header: () => sortableHeader('Konto', 'account'),
+    header: 'Konto',
     size: 180,
     cell: ({ row }) => {
       const value = row.original.account
@@ -450,7 +424,7 @@ const columns: TableColumn<StatementStackRow>[] = [
   },
   { // Amount
     id: 'amount',
-    header: () => sortableHeader('Beløb', 'amount'),
+    header: 'Beløb',
     size: 140,
     cell: ({ row }) => h('span', { class: 'font-bold' }, formatSignedDkk(row.original.amount)),
   },

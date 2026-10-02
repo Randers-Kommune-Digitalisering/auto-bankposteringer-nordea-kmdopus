@@ -16,6 +16,8 @@ import {
 import { ruleVersion, type RuleVersionInsertSchema } from '~/lib/db/schema/ruleVersion'
 import { listAccountingDimensionConstraints, resolveDimensionValueRows, type AccountingDimensionDefinition } from '~~/server/utils/accountingDimensions'
 import { normalizeRuleTagIds, resolveRuleTagIds } from '~~/server/utils/ruleTags/resolveRuleTagIds'
+import { requireWriteAccessWithIdentity } from '~~/server/auth/requireAppRoles'
+import { claimRuleForMutationInTransaction } from '~~/server/utils/ruleEditLock'
 
 type CprType = 'ingen' | 'statisk' | 'dynamisk'
 
@@ -94,6 +96,7 @@ function normalizeNumeric(value: unknown): number | null {
 }
 
 export default defineEventHandler(async (event) => {
+  const user = await requireWriteAccessWithIdentity(event)
   const ruleId = Number(event.context.params?.ruleId)
   if (!ruleId) {
     throw createError({ statusCode: 400, statusMessage: 'Missing ruleId' })
@@ -149,6 +152,8 @@ export default defineEventHandler(async (event) => {
   const attachments = Array.isArray(accounting.attachments) ? accounting.attachments : []
 
   await db.transaction(async (tx) => {
+    await claimRuleForMutationInTransaction(tx, ruleId, user)
+
     let resolvedTagIds: string[] = []
     if (tagIds.length) {
       const resolved = await resolveRuleTagIds(tx, tagIds)
@@ -184,6 +189,7 @@ export default defineEventHandler(async (event) => {
         currentVersionId: newVersion,
         lockedAt: null,
         lockedBy: null,
+        lockedByName: null,
       })
       .where(eq(rule.id, ruleId))
       .returning({ id: rule.id })
@@ -285,7 +291,7 @@ export default defineEventHandler(async (event) => {
   })
 
   const storage = useStorage('rules')
-  await storage.removeItem('rule-list')
+  await storage.removeItem('rule-list-v2')
 
   return {
     success: true,

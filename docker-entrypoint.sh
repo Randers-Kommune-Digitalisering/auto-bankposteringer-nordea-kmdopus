@@ -118,14 +118,23 @@ sync_dependencies_if_needed() {
 sync_dependencies_if_needed
 
 seed_system_if_enabled() {
-  # System seed is idempotent and safe to run on each startup.
-  if [ "${DB_SEED_SYSTEM_ON_START:-1}" = "1" ]; then
+  seed_default=1
+  if [ "$NODE_ENV" = "production" ]; then
+    seed_default=0
+  fi
+
+  if [ "${DB_SEED_SYSTEM_ON_START:-$seed_default}" = "1" ]; then
     echo "Seeding system configuration..."
     pnpm db:seed:system
   else
-    echo "Skipping system seed (DB_SEED_SYSTEM_ON_START=${DB_SEED_SYSTEM_ON_START:-1})"
+    echo "Skipping system seed (DB_SEED_SYSTEM_ON_START=${DB_SEED_SYSTEM_ON_START:-$seed_default})"
   fi
 }
+
+if [ "$NODE_ENV" = "production" ] && [ "${DB_RESET_ON_START:-0}" = "1" ]; then
+  echo "DB_RESET_ON_START is not allowed in production." >&2
+  exit 1
+fi
 
 wait_for_db
 

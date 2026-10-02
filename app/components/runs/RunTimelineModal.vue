@@ -218,6 +218,8 @@ function erpDeliveryState(delivery: ErpDelivery): { color: StatusColor; label: s
 
   const hasFailed = rows.some((r) => r.status === 'failed')
   const hasInFlight = rows.some((r) => r.status === 'pending' || r.status === 'processing')
+  const awaitingResponse = rows.some((r) => r.status === 'sent' && !r.responseId)
+  const unclassifiedResponse = rows.some((r) => Boolean(r.responseId) && !r.responseStatusText)
   const rejectedByErp = Boolean(delivery.responseStatusText && !isOkErpStatusText(delivery.responseStatusText))
 
   const lastOutboxError =
@@ -226,7 +228,13 @@ function erpDeliveryState(delivery: ErpDelivery): { color: StatusColor; label: s
       .map((r) => String(r.lastError))
       .find(Boolean) ?? null
 
-  const color: StatusColor = hasFailed || rejectedByErp ? 'error' : hasInFlight ? 'warning' : 'success'
+  const color: StatusColor = hasFailed || rejectedByErp
+    ? 'error'
+    : hasInFlight || awaitingResponse
+      ? 'warning'
+      : unclassifiedResponse
+        ? 'neutral'
+        : 'success'
 
   const statusCounts = rows.reduce(
     (acc, r) => {
@@ -243,8 +251,10 @@ function erpDeliveryState(delivery: ErpDelivery): { color: StatusColor; label: s
 
   const responsePart = rejectedByErp
     ? `Afvist af ERP: ${delivery.responseStatusText ?? ''}`
-    : hasInFlight
+    : hasInFlight || awaitingResponse
       ? 'Afventer ERP-svar'
+      : unclassifiedResponse
+        ? 'ERP-svar modtaget, status ukendt'
       : undefined
   const errorPart = lastOutboxError ? `Sidste fejl: ${lastOutboxError}` : undefined
 
@@ -292,9 +302,14 @@ const overallState = computed(() => {
 
   const anyInFlight =
     (data.value?.jobs ?? []).some((j) => j.status === 'pending' || j.status === 'in_progress') ||
-    erpDeliveries.value.some((d) => d.rows.some((r) => r.status === 'pending' || r.status === 'processing'))
+    erpDeliveries.value.some((d) => d.rows.some((r) => (
+      r.status === 'pending' || r.status === 'processing' || (r.status === 'sent' && !r.responseId)
+    )))
+
+  const unclassifiedResponse = erpDeliveries.value.some((d) => d.rows.some((r) => Boolean(r.responseId) && !r.responseStatusText))
 
   if (anyInFlight) return { color: 'warning' as StatusColor, label: 'Afventer' }
+  if (unclassifiedResponse) return { color: 'neutral' as StatusColor, label: 'Ukendt ERP-status' }
 
   if (!data.value) return { color: 'neutral' as StatusColor, label: '—' }
   return { color: 'success' as StatusColor, label: 'OK' }

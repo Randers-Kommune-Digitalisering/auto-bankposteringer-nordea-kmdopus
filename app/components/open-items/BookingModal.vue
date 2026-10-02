@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
-import { nextTick, watch } from 'vue'
+import { nextTick, onBeforeUnmount, watch } from 'vue'
 import BookingSummaryCard from '~/components/open-items/BookingSummaryCard.vue'
 import RulesFileUpload from '~/components/rules/FileUpload.vue'
 import { useManualBookingForm } from '~/composables/useManualBookingForm'
+import { MANUAL_BOOKING_LOCK_RENEW_INTERVAL_MS } from '#engine/manual-booking/domain/bookingLease'
 import type { OpenTransaction, TransactionSummary } from '~/types/transactions'
 import type { ManualBookingFormState as ManualFormState } from '#engine/manual-booking/domain/manualBooking'
 
@@ -65,6 +66,13 @@ const isSavingDraft = ref(false)
 const isLoadingDraft = ref(false)
 const closedPeriodWarning = ref<{ originalBookingDate: string; effectiveBookingDate: string } | null>(null)
 const pendingClosedPeriodPayload = ref<ComparableManualBookingPayload | null>(null)
+const bookingLockState = ref<'idle' | 'pending' | 'owned' | 'conflict' | 'error'>('idle')
+const bookingLockOwnerName = ref('')
+const bookingLockError = ref('')
+const isBookingReadOnly = computed(() => bookingLockState.value !== 'owned')
+let bookingLockHeartbeat: ReturnType<typeof setInterval> | undefined
+let activeBookingLockTransactionId: string | null = null
+let bookingLockGeneration = 0
 
 const {
 	manualBookingFormSchema,
@@ -100,6 +108,95 @@ const groupTotalAmount = computed(() =>
 	groupTransactions.value.reduce((sum, entry) => sum + Math.abs(Number(entry.amount) || 0), 0),
 )
 const isLargeGroup = computed(() => groupTransactions.value.length > largeGroupThreshold)
+
+function stopBookingLockHeartbeat() {
+	if (bookingLockHeartbeat) {
+		clearInterval(bookingLockHeartbeat)
+		bookingLockHeartbeat = undefined
+	}
+}
+
+async function postBookingLockAction(transactionId: string, action: 'acquire' | 'renew' | 'release') {
+	return await $fetch<{ acquired?: boolean; ownerName?: string }>(`/api/transactions/${transactionId}/lock`, {
+		method: 'POST',
+		body: { action },
+	})
+}
+
+async function releaseBookingLock(transactionId: string) {
+	try {
+		await postBookingLockAction(transactionId, 'release')
+	} catch {
+		// The persisted lease expires if the release request cannot reach the server.
+	}
+}
+
+async function renewBookingLock(transactionId: string, generation: number) {
+	try {
+		const result = await postBookingLockAction(transactionId, 'renew')
+		if (generation !== bookingLockGeneration) return
+		if (result.acquired) return
+
+		bookingLockOwnerName.value = result.ownerName || 'anden bruger'
+		bookingLockState.value = 'conflict'
+		stopBookingLockHeartbeat()
+	} catch {
+		if (generation !== bookingLockGeneration) return
+		bookingLockError.value = 'Låsestatus kunne ikke bekræftes. Luk og åbn posten igen.'
+		bookingLockState.value = 'error'
+		stopBookingLockHeartbeat()
+	}
+}
+
+watch(
+	() => [open.value, transaction.value?.id] as const,
+	async ([isOpen, transactionId]) => {
+		const generation = ++bookingLockGeneration
+		stopBookingLockHeartbeat()
+		const previousLockId = activeBookingLockTransactionId
+		activeBookingLockTransactionId = null
+		if (previousLockId) await releaseBookingLock(previousLockId)
+		if (generation !== bookingLockGeneration) return
+
+		bookingLockOwnerName.value = ''
+		bookingLockError.value = ''
+		if (!isOpen || !transactionId) {
+			bookingLockState.value = 'idle'
+			return
+		}
+
+		bookingLockState.value = 'pending'
+		try {
+			const result = await postBookingLockAction(transactionId, 'acquire')
+			if (generation !== bookingLockGeneration) {
+				if (result.acquired) void releaseBookingLock(transactionId)
+				return
+			}
+			if (!result.acquired) {
+				bookingLockOwnerName.value = result.ownerName || 'anden bruger'
+				bookingLockState.value = 'conflict'
+				return
+			}
+
+			activeBookingLockTransactionId = transactionId
+			bookingLockState.value = 'owned'
+			bookingLockHeartbeat = setInterval(() => {
+				void renewBookingLock(transactionId, generation)
+			}, MANUAL_BOOKING_LOCK_RENEW_INTERVAL_MS)
+		} catch (error: any) {
+			if (generation !== bookingLockGeneration) return
+			bookingLockError.value = error?.data?.message ?? 'Låsestatus kunne ikke indlæses.'
+			bookingLockState.value = 'error'
+		}
+	},
+	{ immediate: true },
+)
+
+onBeforeUnmount(() => {
+	bookingLockGeneration++
+	stopBookingLockHeartbeat()
+	if (activeBookingLockTransactionId) void releaseBookingLock(activeBookingLockTransactionId)
+})
 
 const dimensionLabel = (key: string) => key.charAt(0).toUpperCase() + key.slice(1)
 
@@ -213,7 +310,7 @@ function collapsedGroupPayload() {
 }
 
 async function expandGroupLines() {
-	if (!isGroupMode.value || isGroupExpanded.value || isExpandingGroup.value) return
+	if (isBookingReadOnly.value || !isGroupMode.value || isGroupExpanded.value || isExpandingGroup.value) return
 
 	if (isLargeGroup.value && process.client) {
 		const confirmed = window.confirm(
@@ -271,7 +368,7 @@ watch(
 )
 
 async function handleSubmit(event?: FormSubmitEvent<ManualFormState>) {
-	if (!transaction.value) return
+	if (!transaction.value || isBookingReadOnly.value) return
 	if (!isAccountingDimensionConfigReady.value) {
 		toast.add({
 			title: 'Kan ikke sende endnu',
@@ -288,6 +385,7 @@ async function handleSubmit(event?: FormSubmitEvent<ManualFormState>) {
 }
 
 async function submitBooking(payload: ComparableManualBookingPayload) {
+	if (isBookingReadOnly.value) return
 	try {
 		isSubmitting.value = true
 		if (isGroupMode.value) {
@@ -344,7 +442,7 @@ async function confirmClosedPeriodRebooking() {
 }
 
 async function handleSaveDraft() {
-	if (isGroupMode.value) return
+	if (isBookingReadOnly.value || isGroupMode.value) return
 	if (!transaction.value) return
 	if (!isAccountingDimensionConfigReady.value) {
 		toast.add({
@@ -386,7 +484,7 @@ async function handleSaveDraft() {
 }
 
 function collapseAllLines() {
-	if (!isGroupMode.value) return
+	if (isBookingReadOnly.value || !isGroupMode.value) return
 	if ((formState.lines?.length ?? 0) <= 1) {
 		isGroupExpanded.value = false
 		return
@@ -428,6 +526,29 @@ function collapseAllLines() {
 			</div>
 			<div v-else class="space-y-4">
 				<UAlert
+					v-if="bookingLockState === 'conflict'"
+					color="warning"
+					variant="soft"
+					:icon="appConfig.ui.icons.lock"
+					:title="`Posten behandles af ${bookingLockOwnerName}`"
+					description="Posten vises i læsetilstand. Kontakt brugeren, hvis vedkommende skal afslutte redigeringen."
+				/>
+				<UAlert
+					v-else-if="bookingLockState === 'pending'"
+					color="neutral"
+					variant="soft"
+					title="Kontrollerer bookinglås"
+					description="Posten kan ikke ændres, før låsestatus er bekræftet."
+				/>
+				<UAlert
+					v-else-if="bookingLockState === 'error'"
+					color="error"
+					variant="soft"
+					:icon="appConfig.ui.icons.warning"
+					title="Bookinglåsen kunne ikke bekræftes"
+					:description="bookingLockError"
+				/>
+				<UAlert
 					v-if="isGroupMode"
 					variant="soft"
 					color="primary"
@@ -445,6 +566,7 @@ function collapseAllLines() {
 							color="primary"
 							:icon="appConfig.ui.icons.layers"
 							:loading="isExpandingGroup"
+							:disabled="isBookingReadOnly"
 							@click="expandGroupLines"
 						>
 							Spred linjer
@@ -494,10 +616,11 @@ function collapseAllLines() {
 						ref="formRef"
 						:schema="manualBookingFormSchema"
 						:state="formState"
-						:disabled="isSubmitting || isSavingDraft"
+						:disabled="isSubmitting || isSavingDraft || isBookingReadOnly"
 						class="space-y-4 w-full"
 						@submit="handleSubmit"
 					>
+						<fieldset :disabled="isSubmitting || isSavingDraft || isBookingReadOnly" class="contents">
 						<div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
 							<div class="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
 								<div class="text-gray-600">Linjesum</div>
@@ -514,6 +637,7 @@ function collapseAllLines() {
 									color="primary"
 									variant="soft"
 									:icon="appConfig.ui.icons.plus"
+									:disabled="isBookingReadOnly"
 									@click="addLine"
 								>
 									Tilføj linje
@@ -523,6 +647,7 @@ function collapseAllLines() {
 									color="neutral"
 									variant="soft"
 									:icon="appConfig.ui.icons.layers"
+									:disabled="isBookingReadOnly"
 									@click="collapseAllLines"
 								>
 									Saml alle linjer
@@ -557,6 +682,7 @@ function collapseAllLines() {
 										color="neutral"
 										variant="soft"
 										:icon="appConfig.ui.icons.trash"
+										:disabled="isBookingReadOnly"
 										@click="removeLine(lineIndex)"
 									>
 										Fjern
@@ -636,7 +762,7 @@ function collapseAllLines() {
 							</UFormField>
 						</UCard>
 
-						<RulesFileUpload @update="handleAttachmentUpdate" />
+						<RulesFileUpload @update="(value) => { if (!isBookingReadOnly) handleAttachmentUpdate(value) }" />
 
 						<div class="flex items-center justify-end gap-3 pt-4">
 							<UButton
@@ -655,11 +781,12 @@ function collapseAllLines() {
 								color="primary"
 								:icon="appConfig.ui.icons.send"
 								:loading="isSubmitting"
-								:disabled="isSubmitting || isSavingDraft || hasSumMismatch || accountingDimensionPending || !!accountingDimensionError"
+								:disabled="isBookingReadOnly || isSubmitting || isSavingDraft || hasSumMismatch || accountingDimensionPending || !!accountingDimensionError"
 							>
 								Send til ERP
 							</UButton>
 						</div>
+						</fieldset>
 					</UForm>
 				</div>
 		</template>

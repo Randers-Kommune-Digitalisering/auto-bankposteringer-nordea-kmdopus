@@ -25,18 +25,21 @@ export async function ingestErpResponses(options: {
     deleteAfterPickup: options.deleteAfterPickup,
   })
 
+  let savedResponses = 0
   for (const response of result.responses) {
-    await db.insert(erpResponse).values({
+    const inserted = await db.insert(erpResponse).values({
       id: crypto.randomUUID(),
       requestId: response.requestId,
+      statusText: response.statusText ?? null,
       payload: response.payload,
-    })
+    }).onConflictDoNothing({ target: erpResponse.requestId }).returning({ id: erpResponse.id })
+    savedResponses += inserted.length
   }
 
-  log.info('ERP responses ingested', { savedResponses: result.responses.length })
+  log.info('ERP responses ingested', { savedResponses, receivedResponses: result.responses.length })
 
   return {
-    savedResponses: result.responses.length,
+    savedResponses,
     deletedRemoteFiles: result.deletedRemoteFiles,
   }
 }

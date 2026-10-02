@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { parseDate, today } from '@internationalized/date'
-import { nextTick, watch } from 'vue'
+import { nextTick, onBeforeUnmount, watch } from 'vue'
 import type {
   AccountSelectSchema,
 } from '~/lib/db/schema/account'
@@ -16,6 +16,7 @@ import { accountingDimensionFormatHint } from '~/lib/presenters/accountingDimens
 import { useRuleTags } from '~/composables/useRuleTags'
 import { useTransactionTypeCatalog } from '~/composables/useTransactionTypeCatalog'
 import { encodeTransactionTypeCatalogReference, transactionTypeCatalogValueLabel, transactionTypeCategory } from '~/lib/rules/transactionTypeCatalog'
+import { MANUAL_BOOKING_LOCK_RENEW_INTERVAL_MS } from '#engine/manual-booking/domain/bookingLease'
 
 const appConfig = useAppConfig()
 
@@ -137,7 +138,6 @@ function createEmptyDraft(): RuleDraftUiState {
   return {
     type: 'standard' as RuleType,
     status: 'aktiv' as RuleStatus,
-    lockedAt: undefined,
     activeFrom: undefined,
     activeTo: undefined,
     relatedBankAccounts: [],
@@ -303,12 +303,117 @@ watchEffect(() => {
 // --------------------
 // Load rule if editing
 // --------------------
-const isLocked = computed(() => {
-  // Hvis lockedAt eksisterer og stadig er indenfor timeout (fx 5 minutter)
-  if (!state.lockedAt) return false
-  const lockTime = new Date(state.lockedAt).getTime()
-  const now = Date.now()
-  return now - lockTime < 5 * 60 * 1000
+const ruleLockState = ref<'idle' | 'pending' | 'owned' | 'conflict' | 'error'>('idle')
+const ruleLockOwnerName = ref('')
+const ruleLockError = ref('')
+const isRuleReadOnly = computed(() => isEdit.value && ruleLockState.value !== 'owned')
+let ruleLockHeartbeat: ReturnType<typeof setInterval> | undefined
+let activeRuleLockId: number | null = null
+let ruleLockGeneration = 0
+
+function stopRuleLockHeartbeat() {
+  if (!ruleLockHeartbeat) return
+  clearInterval(ruleLockHeartbeat)
+  ruleLockHeartbeat = undefined
+}
+
+async function postRuleLockAction(ruleId: number, action: 'acquire' | 'renew' | 'release') {
+  return await $fetch<{ acquired?: boolean; ownerName?: string }>(`/api/rule/${ruleId}/lock`, {
+    method: 'POST',
+    body: { action },
+  })
+}
+
+async function releaseRuleLock(ruleId: number) {
+  try {
+    await postRuleLockAction(ruleId, 'release')
+  } catch {
+    // The persisted lease expires if the release request cannot reach the server.
+  }
+}
+
+async function renewRuleLock(ruleId: number, generation: number) {
+  try {
+    const result = await postRuleLockAction(ruleId, 'renew')
+    if (generation !== ruleLockGeneration) return
+    if (result.acquired) return
+
+    ruleLockOwnerName.value = result.ownerName || 'anden bruger'
+    ruleLockState.value = 'conflict'
+    stopRuleLockHeartbeat()
+  } catch {
+    if (generation !== ruleLockGeneration) return
+    ruleLockError.value = 'Låsestatus kunne ikke bekræftes. Luk og åbn reglen igen.'
+    ruleLockState.value = 'error'
+    stopRuleLockHeartbeat()
+  }
+}
+
+watch(
+  () => [open.value, props.ruleId] as const,
+  async ([isOpen, ruleId]) => {
+    const generation = ++ruleLockGeneration
+    stopRuleLockHeartbeat()
+    const previousRuleId = activeRuleLockId
+    activeRuleLockId = null
+    if (previousRuleId) await releaseRuleLock(previousRuleId)
+    if (generation !== ruleLockGeneration) return
+
+    ruleLockOwnerName.value = ''
+    ruleLockError.value = ''
+    if (!isOpen || !ruleId) {
+      ruleLockState.value = 'idle'
+      return
+    }
+
+    ruleLockState.value = 'pending'
+    let acquired = false
+    try {
+      const result = await postRuleLockAction(ruleId, 'acquire')
+      if (generation !== ruleLockGeneration) {
+        if (result.acquired) void releaseRuleLock(ruleId)
+        return
+      }
+
+      acquired = result.acquired === true
+      if (acquired) {
+        activeRuleLockId = ruleId
+        ruleLockState.value = 'owned'
+        ruleLockHeartbeat = setInterval(() => {
+          void renewRuleLock(ruleId, generation)
+        }, MANUAL_BOOKING_LOCK_RENEW_INTERVAL_MS)
+      } else {
+        ruleLockOwnerName.value = result.ownerName || 'anden bruger'
+        ruleLockState.value = 'conflict'
+      }
+    } catch (error: any) {
+      if (generation !== ruleLockGeneration) return
+      ruleLockError.value = error?.data?.message ?? error?.data?.statusMessage ?? 'Låsestatus kunne ikke indlæses.'
+      ruleLockState.value = 'error'
+    }
+
+    try {
+      const data = await $fetch<RuleDraftSchema>(`/api/rule/${ruleId}`)
+      if (generation !== ruleLockGeneration) {
+        if (acquired) void releaseRuleLock(ruleId)
+        return
+      }
+      hydrateDraft(data)
+      await nextTick()
+      savedSnapshot.value = currentSnapshot.value
+    } catch (error: any) {
+      if (generation !== ruleLockGeneration) return
+      ruleLockError.value = error?.data?.message ?? error?.data?.statusMessage ?? 'Reglen kunne ikke indlæses.'
+      ruleLockState.value = 'error'
+    }
+  },
+  { immediate: true },
+)
+
+onBeforeUnmount(() => {
+  ruleLockGeneration++
+  stopRuleLockHeartbeat()
+  if (activeRuleLockId) void releaseRuleLock(activeRuleLockId)
 })
 
 watch(
@@ -387,14 +492,6 @@ function hydrateDraft(rule: RuleDraftSchema & { matches?: MatchEntry[] }) {
     })
   }
 }
-
-watchEffect(async () => {
-  if (!props.ruleId) return
-  
-  const data = await $fetch<RuleDraftSchema>(`/api/rule/${props.ruleId}`)
-  
-  hydrateDraft(data)
-})
 
 // ---------------
 // Fetch rule tags
@@ -557,6 +654,7 @@ type AttachmentPayload = {
 }
 const attachments = ref<AttachmentPayload | null>(null)
 const handleAttachmentUpdate = (value: AttachmentPayload | null) => {
+  if (isRuleReadOnly.value) return
   attachments.value = value
 }
 
@@ -817,6 +915,7 @@ const handlePrev = () => {
 }
 
 async function onSubmit(_event?: FormSubmitEvent<any>) {
+  if (isRuleReadOnly.value) return
   if (!isAccountingDimensionConfigReady.value) {
     toast.add({
       title: 'Kan ikke gemme endnu',
@@ -930,9 +1029,32 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
     </template>
 
     <template #body>
-      <div v-if="isLocked" class="bg-yellow-100 dark:bg-yellow-900/30 p-2 mb-4 rounded border border-yellow-400 dark:border-yellow-700">
-        Denne regel redigeres i øjeblikket af en anden bruger.
-      </div>
+      <UAlert
+        v-if="ruleLockState === 'conflict'"
+        class="mb-4"
+        color="warning"
+        variant="soft"
+        :icon="appConfig.ui.icons.lock"
+        :title="`Reglen redigeres af ${ruleLockOwnerName}`"
+        description="Reglen vises i læsetilstand. Kontakt brugeren, hvis vedkommende skal afslutte redigeringen."
+      />
+      <UAlert
+        v-else-if="ruleLockState === 'pending'"
+        class="mb-4"
+        color="neutral"
+        variant="soft"
+        title="Kontrollerer regellås"
+        description="Reglen kan ikke ændres, før låsestatus er bekræftet."
+      />
+      <UAlert
+        v-else-if="ruleLockState === 'error'"
+        class="mb-4"
+        color="error"
+        variant="soft"
+        :icon="appConfig.ui.icons.warning"
+        title="Regellåsen kunne ikke bekræftes"
+        :description="ruleLockError"
+      />
 
       <div
         v-if="(state.accountingNote ?? '').trim().length > 0"
@@ -941,7 +1063,7 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
         <span class="font-semibold text-default">Noter:</span>
         <span class="ml-2 text-muted whitespace-pre-wrap">{{ state.accountingNote }}</span>
       </div>
-      <UForm ref="formRef" :schema="stepSchema" :state="state" @submit="onSubmit" :disabled="isLocked">
+      <UForm ref="formRef" :schema="stepSchema" :state="state" @submit="onSubmit" :disabled="isRuleReadOnly">
         <UStepper v-model="currentStep" :items="steps" class="mb-6">
           <template #content="{ item }">
             <USeparator class="mb-6" />
@@ -1282,7 +1404,7 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                   </UFormField>
                   
                   <div>
-                    <RulesFileUpload @update="handleAttachmentUpdate" />
+                    <RulesFileUpload :disabled="isRuleReadOnly" @update="handleAttachmentUpdate" />
                   </div>
                 </div>
               </UCard>
@@ -1299,7 +1421,7 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
             :disabled="currentStep === 0"
           />
           <template v-if="currentStep === steps.length - 1">
-            <UButton type="submit">
+            <UButton type="submit" :disabled="isRuleReadOnly">
               {{ isEdit ? 'Opdater regel' : 'Opret regel' }}
             </UButton>
           </template>

@@ -11,10 +11,11 @@ import {
   manualBookingDraftLineDimension,
 } from '~/lib/db/schema/manualBookingDraft'
 import { manualBookingPayloadSchema } from '#engine/manual-booking/domain/manualBooking'
-import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
+import { requireWriteAccessWithIdentity } from '~~/server/auth/requireAppRoles'
+import { verifyTransactionBookingLockInTransaction } from '~~/server/utils/transactionBookingLock'
 
 export default defineEventHandler(async (event) => {
-  await requireWriteAccess(event)
+  const user = await requireWriteAccessWithIdentity(event)
   const now = new Date()
   const parsedBody = manualBookingPayloadSchema.parse(await readBody(event))
 
@@ -49,6 +50,8 @@ export default defineEventHandler(async (event) => {
   }
 
   await db.transaction(async (tx) => {
+    await verifyTransactionBookingLockInTransaction(tx, transactionId, user, [transactionId])
+
     await tx
       .insert(manualBookingDraft)
       .values({

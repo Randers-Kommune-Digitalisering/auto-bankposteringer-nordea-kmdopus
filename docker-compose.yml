@@ -84,6 +84,9 @@ services:
 
   scheduler:
     image: auto-bankposteringer-nordea-kmdopus-role-runtime
+    build:
+      context: .
+      target: role-runtime
     init: true
     restart: unless-stopped
     read_only: true
@@ -148,6 +151,39 @@ services:
     #   /test-from-randers
     #   /test-to-randers
     command: "test:pass:1001:100:test-from-randers,test-to-randers"
+    pre_stop:
+      - command:
+          - sh
+          - -ec
+          - |
+            for directory in \
+              /home/test/test-from-randers \
+              /home/test/test-to-randers
+            do
+              if [ -d "$$directory" ]; then
+                find "$$directory" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+              fi
+            done
+    networks:
+      - app_net
+
+  kmd-sftp-responder:
+    build:
+      context: .
+      target: dev
+    restart: unless-stopped
+    init: true
+    command: ["pnpm", "exec", "tsx", "scripts/dev/kmd-sftp-responder.ts"]
+    environment:
+      KMD_SFTP_MOCK_HOST: sftp
+      KMD_SFTP_MOCK_PORT: 22
+      KMD_SFTP_MOCK_USERNAME: ${KMD_SFTP_MOCK_USERNAME:-test}
+      KMD_SFTP_MOCK_PASSWORD: ${KMD_SFTP_MOCK_PASSWORD:-pass}
+      KMD_SFTP_MOCK_REQUEST_DIR: ${SFTP_REQUEST_DIR:-/test-from-randers}
+      KMD_SFTP_MOCK_RESPONSE_DIR: ${SFTP_RESPONSE_DIR:-/test-to-randers}
+      KMD_SFTP_MOCK_MODE: ${KMD_SFTP_MOCK_MODE:-random}
+    depends_on:
+      - sftp
     networks:
       - app_net
 

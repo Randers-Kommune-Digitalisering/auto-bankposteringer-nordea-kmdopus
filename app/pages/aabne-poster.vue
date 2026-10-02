@@ -62,6 +62,38 @@ const pageSizeOptions = [5, 10, 25, 50].map((value) => ({
   label: `${value} pr. side`,
   value,
 }))
+type OpenItemsSortKey = 'counterpart' | 'transactionType'
+const sortKey = ref<OpenItemsSortKey | null>(null)
+const sortDirection = ref<'asc' | 'desc'>('asc')
+
+function toggleSort(key: OpenItemsSortKey): void {
+  if (sortKey.value === key) {
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+    return
+  }
+
+  sortKey.value = key
+  sortDirection.value = 'asc'
+}
+
+function sortableHeader(label: string, key: OpenItemsSortKey) {
+  const icon = sortKey.value !== key
+    ? appConfig.ui.icons.unsorted
+    : sortDirection.value === 'asc'
+      ? appConfig.ui.icons.sortAscending
+      : appConfig.ui.icons.sortDescending
+  const nextDirection = sortKey.value === key && sortDirection.value === 'asc' ? 'faldende' : 'stigende'
+
+  return h(resolveComponent('UButton'), {
+    color: 'neutral',
+    variant: 'ghost',
+    label,
+    icon,
+    class: '-mx-2.5',
+    onClick: () => toggleSort(key),
+    'aria-label': `Sortér ${label} ${nextDirection}`,
+  })
+}
 
 const {
   pending,
@@ -159,7 +191,7 @@ const filteredTableRows = computed<OpenItemsTableRow[]>(() => {
     ? tableRows.value.filter((row) => row.transactionTypeEntries.some((entry) => selectedTransactionTypes.includes(entry.value)))
     : tableRows.value
 
-  return fuzzyRankRows({
+  const rankedRows = fuzzyRankRows({
     rows,
     query: openItemsSearch.value,
     getValues: (row) => [
@@ -181,6 +213,21 @@ const filteredTableRows = computed<OpenItemsTableRow[]>(() => {
       return String(b.stackId).localeCompare(String(a.stackId), 'da', { sensitivity: 'base' })
     },
   })
+
+  if (!sortKey.value) return rankedRows
+
+  const direction = sortDirection.value === 'asc' ? 1 : -1
+  return rankedRows.sort((left, right) => {
+    const leftValue = sortKey.value === 'counterpart'
+      ? left.counterpartEntries[0]?.value ?? ''
+      : left.transactionTypeEntries[0]?.value ?? ''
+    const rightValue = sortKey.value === 'counterpart'
+      ? right.counterpartEntries[0]?.value ?? ''
+      : right.transactionTypeEntries[0]?.value ?? ''
+    const comparison = leftValue.localeCompare(rightValue, 'da', { sensitivity: 'base' })
+    if (comparison !== 0) return comparison * direction
+    return left.stackId.localeCompare(right.stackId, 'da', { sensitivity: 'base' })
+  })
 })
 
 const pagedTableRows = computed<OpenItemsTableRow[]>(() => {
@@ -189,9 +236,9 @@ const pagedTableRows = computed<OpenItemsTableRow[]>(() => {
   return filteredTableRows.value.slice(start, end)
 })
 
-const tablePageCount = computed<number>(() => Math.max(1, Math.ceil(tableRows.value.length / pageSize.value)))
+const tablePageCount = computed<number>(() => Math.max(1, Math.ceil(filteredTableRows.value.length / pageSize.value)))
 
-watch([tableSearchValue, pageSize, transactionTypeFilter], () => {
+watch([tableSearchValue, pageSize, transactionTypeFilter, sortKey, sortDirection], () => {
   page.value = 1
 })
 
@@ -242,7 +289,7 @@ const columns: TableColumn<OpenItemsTableRow>[] = [
   },
   { // Counterparty
     accessorKey: 'counterpartEntries',
-    header: 'Modpart',
+    header: () => sortableHeader('Modpart', 'counterpart'),
     cell: ({ row }) => {
       const entries = row.original.counterpartEntries
       if (!entries.length) return '-'
@@ -286,7 +333,7 @@ const columns: TableColumn<OpenItemsTableRow>[] = [
   },
   { // Transaction type
     accessorKey: 'transactionTypeEntries',
-    header: 'Transaktionstype',
+    header: () => sortableHeader('Transaktionstype', 'transactionType'),
     cell: ({ row }) => {
       const entries = row.original.transactionTypeEntries
       if (!entries.length) return '-'

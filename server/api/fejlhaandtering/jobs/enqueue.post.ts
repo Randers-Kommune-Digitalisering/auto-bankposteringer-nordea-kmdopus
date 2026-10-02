@@ -23,6 +23,9 @@ export default defineEventHandler(async (event) => {
       statusMessage: `Job-type ikke understøttet: ${body.type}`,
     })
   }
+  if (body.type === 'erp.ingestResponses' && body.runId) {
+    throw createError({ statusCode: 422, statusMessage: 'ERP-response-poll er global og kan ikke knyttes til en run' })
+  }
 
   const runAt = body.runAt ? new Date(body.runAt) : undefined
   const id = await enqueueJob(

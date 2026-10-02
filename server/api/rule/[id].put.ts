@@ -17,7 +17,8 @@ import {
 } from '~/lib/db/schema/rule'
 import { ruleVersion, type RuleVersionInsertSchema } from '~/lib/db/schema/ruleVersion'
 import { getActiveErpSupplier, listAccountingDimensionConstraints, listAccountingDimensionDefinitions, resolveDimensionValueRows } from '~~/server/utils/accountingDimensions'
-import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
+import { requireWriteAccessWithIdentity } from '~~/server/auth/requireAppRoles'
+import { verifyRuleEditLockInTransaction } from '~~/server/utils/ruleEditLock'
 
 function toDbNumericStringOrUndefined(value: number | null | undefined): string | undefined {
   if (value == null) return undefined
@@ -98,7 +99,7 @@ function compileRuleDraftToDb(draft: RuleDraftSchema, newVersion: number, erpSup
 }
 
 export default defineEventHandler(async (event) => {
-  await requireWriteAccess(event)
+  const user = await requireWriteAccessWithIdentity(event)
   const id = Number(event.context.params?.id)
   if (!id) throw createError({ statusCode: 400, statusMessage: 'Missing rule id' })
 
@@ -113,14 +114,6 @@ export default defineEventHandler(async (event) => {
     where: (fields, { eq }) => eq(fields.id, id)
   })
   if (!existingRule) throw createError({ statusCode: 404, statusMessage: 'Rule not found' })
-
-  // -------------------
-  // Tjek locking (5 min)
-  // -------------------
-  const now = new Date()
-  if (existingRule.lockedAt && (new Date(existingRule.lockedAt).getTime() + 5 * 60 * 1000) > now.getTime()) {
-    return { success: false, error: 'Reglen er låst af en anden bruger' }
-  }
 
   const newVersion = (existingRule.currentVersionId ?? 0) + 1
 
@@ -140,6 +133,8 @@ export default defineEventHandler(async (event) => {
   })
 
   await db.transaction(async (tx) => {
+    await verifyRuleEditLockInTransaction(tx, id, user)
+
     const [updatedRule] = await tx.update(rule)
       .set(validatedDbPayload)
       .where(eq(rule.id, id))

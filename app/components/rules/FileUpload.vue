@@ -9,6 +9,11 @@ type AttachmentPayload = {
 
 const appConfig = useAppConfig()
 
+const props = withDefaults(defineProps<{
+  disabled?: boolean
+}>(), {
+  disabled: false,
+})
 
 const emit = defineEmits<{
   (e: 'update', value: AttachmentPayload | null): void
@@ -40,6 +45,7 @@ const fileToBase64 = (file: File): Promise<string> =>
   })
 
 watch(files, async (newFiles) => {
+  if (props.disabled) return
   if (!newFiles || newFiles.length === 0) {
     emit('update', null)
     return
@@ -49,6 +55,7 @@ watch(files, async (newFiles) => {
     const base64List = await Promise.all(
       newFiles.map(fileToBase64)
     )
+    if (props.disabled) return
 
     emit('update', {
       names: newFiles.map(f => f.name),
@@ -65,6 +72,7 @@ watch(files, async (newFiles) => {
 <template>
   <UFileUpload
     v-model="files"
+    :disabled="props.disabled"
     :icon="appConfig.ui.icons.attachment"
     label="Vedhæft bilag"
     description="PDF, Excel, billeder m.m."
@@ -79,6 +87,7 @@ watch(files, async (newFiles) => {
         :icon="appConfig.ui.icons.pin"
         color="neutral"
         variant="outline"
+        :disabled="props.disabled"
         @click="open()"
       />
     </template>
@@ -89,6 +98,7 @@ watch(files, async (newFiles) => {
         label="Fjern alle filer"
         color="neutral"
         variant="soft"
+        :disabled="props.disabled"
         @click="removeFile()"
       />
     </template>

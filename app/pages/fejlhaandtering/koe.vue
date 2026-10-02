@@ -1,548 +1,180 @@
 <script setup lang="ts">
-import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date'
 import type { TableColumn } from '@nuxt/ui'
-import type { RunListItem, RunListResponse } from '~/types/runs'
-import useFlattenArray from '~/composables/useFlattenArray'
 
 const appConfig = useAppConfig()
-
-type RunOutboxContextResponse = {
-  runIds: string[]
-  outbox: Array<{
-    id: string
-    runId: string
-    topic: string
-    status: string
-    attempts: number
-    nextAttemptAt: string
-    lastError: string | null
-    payload: unknown
-    requestId: string | null
-    responseId: string | null
-    responseStatusText: string | null
-    createdAt: string
-    processedAt: string | null
-  }>
-}
-
-type RunJobsContextResponse = {
-  runIds: string[]
-  jobs: Array<{
-    id: string
-    type: string
-    status: string
-    runId: string
-    attempts: number
-    runAt: string
-    lastError: string | null
-    updatedAt: string
-  }>
-}
-
 const toast = useToast()
 const UButton = resolveComponent('UButton')
-const route = useRoute()
+const NuxtLink = resolveComponent('NuxtLink')
+const page = ref(1)
+const pageSize = 25
+const pollingNow = ref(false)
+const retryingId = ref<string | null>(null)
 
-const { data: runsData, pending: runsPending, refresh: refreshRuns } = await useFetch<RunListResponse>('/api/runs', {
-  key: 'runs-for-recovery-queue',
+type RecoveryWorkItem = {
+  kind: 'job' | 'outbox'
+  id: string
+  typeOrTopic: string
+  status: string
+  runId: string | null
+  requestId: string | null
+  attempts: number
+  nextAt: string
+  updatedAt: string
+  lastError: string | null
+  canRetry: boolean
+}
+
+type RecoveryQueueResponse = {
+  items: RecoveryWorkItem[]
+  total: number
+  page: number
+  pageSize: number
+}
+
+const { data, pending, refresh } = await useFetch<RecoveryQueueResponse>('/api/fejlhaandtering/queue', {
+  key: 'failed-recovery-worklist',
+  query: computed(() => ({ page: page.value, pageSize })),
+  watch: [page],
   deep: true,
-  default: () => ([]),
+  default: () => ({ items: [], total: 0, page: 1, pageSize }),
 })
 
-const allRuns = computed<RunListItem[]>(() => useFlattenArray<RunListItem>(runsData))
+const workItems = computed(() => data.value?.items ?? [])
+const tableKey = computed(() => workItems.value.map(item => `${item.kind}:${item.id}`).join('|'))
 
-// Date range picker state (same default as /koersler)
-const df = new DateFormatter('da-DK', { dateStyle: 'medium' })
-const endDefault = today(getLocalTimeZone())
-const startDefault = endDefault.subtract({ days: 29 })
-const defaultRange = { start: startDefault, end: endDefault }
-const dateRange = ref<any>(defaultRange)
-
-const filteredRuns = computed<RunListItem[]>(() => {
-  if (!dateRange.value?.start || !dateRange.value?.end) return allRuns.value
-
-  const start = dateRange.value.start.toDate(getLocalTimeZone())
-  const end = dateRange.value.end.toDate(getLocalTimeZone())
-  start.setHours(0, 0, 0, 0)
-  end.setHours(23, 59, 59, 999)
-
-  return allRuns.value.filter((run) => {
-    const runDate = new Date(run.bookingDate)
-    return runDate >= start && runDate <= end
-  })
-})
-
-const runOptions = computed(() =>
-  [...filteredRuns.value]
-    .sort((a, b) => new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime())
-    .map((run) => ({
-      value: run.id,
-      label: `${new Date(run.bookingDate).toLocaleDateString('da-DK', { day: 'numeric', month: 'short', year: 'numeric' })} • ${run.status ?? 'afventer'}`,
-    })),
-)
-
-const selectedRunIds = ref<string[]>([])
-const selectedSingleRunId = computed(() => (selectedRunIds.value.length === 1 ? selectedRunIds.value[0] : undefined))
-
-function parseQueryRunIds(): string[] {
-  const q: any = route.query
-  const raw = q.runIds ?? q.runId
-  if (Array.isArray(raw)) return raw.flatMap((v) => String(v).split(',').map((s) => s.trim()).filter(Boolean))
-  if (typeof raw === 'string') return raw.split(',').map((s) => s.trim()).filter(Boolean)
-  return []
+function typeLabel(item: RecoveryWorkItem): string {
+  if (item.kind === 'outbox') return 'ERP-aflevering'
+  switch (item.typeOrTopic) {
+    case 'banking.ingest': return 'Bankindlæsning'
+    case 'banking.accountDiscovery': return 'Kontoopdagelse'
+    case 'erp.ingestResponses': return 'ERP-svarpoll'
+    case 'ops.dbCleanup': return 'Databaseoprydning'
+    default: return item.typeOrTopic
+  }
 }
 
-const runErpLoading = ref(false)
-const runErp = ref<RunOutboxContextResponse | null>(null)
-
-const runJobsLoading = ref(false)
-const runJobs = ref<RunJobsContextResponse | null>(null)
-
-const runJobsTableKey = computed(() => (runJobs.value?.jobs ?? []).map((j) => String(j.id)).join('|'))
-const runOutboxTableKey = computed(() => (runErp.value?.outbox ?? []).map((o) => String(o.id)).join('|'))
-
-async function loadRunErp() {
-  const runIds = selectedRunIds.value
-  if (!runIds.length) {
-    runErp.value = null
-    runJobs.value = null
-    return
+function actionLabel(item: RecoveryWorkItem): string {
+  if (!item.canRetry) return 'Ikke genkørbar'
+  if (item.kind === 'outbox') return 'Genkør ERP-aflevering'
+  switch (item.typeOrTopic) {
+    case 'banking.ingest': return 'Genkør bankindlæsning'
+    case 'banking.accountDiscovery': return 'Genkør kontoopdagelse'
+    case 'erp.ingestResponses': return 'Genkør ERP-poll'
+    default: return 'Genkør job'
   }
+}
 
-  runErpLoading.value = true
-  runJobsLoading.value = true
+function formatDate(value: string): string {
+  const date = new Date(value)
+  return Number.isNaN(date.getTime())
+    ? '—'
+    : new Intl.DateTimeFormat('da-DK', { dateStyle: 'short', timeStyle: 'short' }).format(date)
+}
+
+async function retryWorkItem(item: RecoveryWorkItem) {
+  if (!item.canRetry || retryingId.value) return
+  retryingId.value = item.id
   try {
-    const [outboxRes, jobsRes] = await Promise.all([
-      $fetch<RunOutboxContextResponse>('/api/fejlhaandtering/runs/outbox', {
-        method: 'GET',
-        query: { runIds: runIds.join(',') },
-      } as any),
-      $fetch<RunJobsContextResponse>('/api/fejlhaandtering/runs/jobs', {
-        method: 'GET',
-        query: { runIds: runIds.join(',') },
-      } as any),
-    ])
-
-    runErp.value = outboxRes
-    runJobs.value = jobsRes
+    const path = item.kind === 'job'
+      ? `/api/fejlhaandtering/jobs/${encodeURIComponent(item.id)}/retry`
+      : `/api/fejlhaandtering/outbox/${encodeURIComponent(item.id)}/retry`
+    await $fetch(path, { method: 'POST' })
+    toast.add({ title: `${typeLabel(item)} sat til genkørsel` })
+    await refresh()
   } catch (error) {
-    console.error('Kunne ikke hente run ERP/outbox kontekst', error)
-    runErp.value = null
-    runJobs.value = null
-    toast.add({ title: 'Kunne ikke hente run-kontekst', color: 'error' })
+    console.error('Genkørsel fejlede', error)
+    toast.add({ title: 'Kunne ikke genkøre arbejdet', color: 'error' })
   } finally {
-    runErpLoading.value = false
-    runJobsLoading.value = false
+    retryingId.value = null
   }
 }
 
-async function refreshPageData() {
-  await refreshRuns()
-  if (selectedRunIds.value.length) {
-    await loadRunErp()
-  }
-}
-
-watch(selectedRunIds, async () => {
-  await loadRunErp()
-}, { deep: true })
-
-watch(
-  () => [allRuns.value.length, route.query.runId, route.query.runIds] as const,
-  async () => {
-    const fromQuery = parseQueryRunIds()
-    if (!fromQuery.length) return
-    if (!allRuns.value.length) return
-
-    const available = new Set(allRuns.value.map((r) => r.id))
-    const next = fromQuery.filter((id) => available.has(id))
-    if (!next.length) return
-    if (next.join(',') === selectedRunIds.value.join(',')) return
-
-    selectedRunIds.value = next
-  },
-  { immediate: true },
-)
-
-// Calendar events (chip events) based on runs in selected period
-type StatusColor = 'success' | 'error' | 'warning' | 'neutral'
-const getColorByStatus = (status: string | null | undefined): StatusColor => {
-  switch (status) {
-    case 'udført':
-      return 'success'
-    case 'fejl':
-      return 'error'
-    case 'indlæser':
-      return 'warning'
-    case 'afventer':
-      return 'warning'
-    default:
-      return 'neutral'
-  }
-}
-
-function getChipColorByDate(date: Date): StatusColor | undefined {
-  const dateKey = date.toISOString().slice(0, 10)
-  const events = calendarEvents.value[dateKey] ?? []
-  if (!events.length) return undefined
-
-  const colors = new Set(events.map((e) => e.color))
-  if (colors.has('error')) return 'error'
-  if (colors.has('warning')) return 'warning'
-  if (colors.has('success')) return 'success'
-  return 'neutral'
-}
-
-const calendarEvents = computed(() => {
-  const events: Record<string, Array<{ color: StatusColor; label: string }>> = {}
-  allRuns.value.forEach((run) => {
-    const dateKey = new Date(run.bookingDate).toISOString().slice(0, 10)
-    const status = String(run.status ?? 'afventer')
-    events[dateKey] = events[dateKey] ?? []
-    events[dateKey].push({ color: getColorByStatus(run.status as any), label: status })
-  })
-  return events
-})
-
-const outboxStatusCounts = computed(() => {
-  const rows = runErp.value?.outbox ?? []
-  const counts: Record<'pending' | 'processing' | 'sent' | 'failed', number> = {
-    pending: 0,
-    processing: 0,
-    sent: 0,
-    failed: 0,
-  }
-  for (const row of rows) {
-    const key = String(row.status ?? '').trim() as keyof typeof counts
-    if (Object.prototype.hasOwnProperty.call(counts, key)) {
-      counts[key] = (counts[key] ?? 0) + 1
-    }
-  }
-  return counts
-})
-
-function outboxStatusColor(status: string): 'success' | 'error' | 'warning' | 'neutral' {
-  switch (status) {
-    case 'sent':
-      return 'success'
-    case 'failed':
-      return 'error'
-    case 'processing':
-      return 'warning'
-    case 'pending':
-    default:
-      return 'neutral'
-  }
-}
-
-function outboxStatusLabel(status: string): string {
-  switch (status) {
-    case 'sent':
-      return 'Afsendt'
-    case 'failed':
-      return 'Fejlet'
-    case 'processing':
-      return 'Sender'
-    case 'pending':
-      return 'Afventer'
-    default:
-      return status || '—'
-  }
-}
-
-function jobStatusLabel(status: string): string {
-  switch (status) {
-    case 'succeeded':
-      return 'OK'
-    case 'failed':
-      return 'Fejl'
-    case 'in_progress':
-      return 'Kører'
-    case 'pending':
-      return 'Afventer'
-    default:
-      return status || '—'
-  }
-}
-
-function directionLabelFromJobType(type: string): 'Ind' | 'Ud' {
-  if (type === 'banking.ingest') return 'Ind'
-  if (type === 'erp.ingestResponses') return 'Ind'
-  return 'Ind'
-}
-
-function directionLabelFromOutboxTopic(topic: string): 'Ind' | 'Ud' {
-  return 'Ud'
-}
-
-function responseBadgeColor(row: RunOutboxContextResponse['outbox'][number]): 'success' | 'neutral' | 'error' {
-  if (!row.requestId) return 'neutral'
-  if (row.responseId) return 'success'
-  // If we have an ERP request but no response yet, it's not an error by itself.
-  return 'neutral'
-}
-
-const runningWorker = ref(false)
-async function runWorkerNow() {
-  runningWorker.value = true
+async function pollErpResponses() {
+  pollingNow.value = true
   try {
-    const res = await $fetch<{ success: boolean; jobs: number; outbox: number }>(
-      '/api/fejlhaandtering/worker',
-      { method: 'POST', body: { maxJobs: 25, maxOutbox: 50 } },
-    )
-    toast.add({
-      title: 'Behandling kørt',
-      description: `Behandling: ${res.jobs}, afleveringer: ${res.outbox}`,
-    })
-    await refreshPageData()
-  } catch (error) {
-    console.error('Worker fejlede', error)
-    toast.add({ title: 'Behandling fejlede', color: 'error' })
-  } finally {
-    runningWorker.value = false
-  }
-}
-
-const enqueuing = ref<'banking.ingest' | 'erp.ingestResponses' | null>(null)
-async function enqueue(type: 'banking.ingest' | 'erp.ingestResponses') {
-  enqueuing.value = type
-  try {
-    if (selectedRunIds.value.length !== 1) {
-      toast.add({
-        title: 'Vælg præcis én kørsel',
-        description: 'Denne handling kræver at du vælger præcis én run.',
-        color: 'warning',
-      })
-      return
-    }
-
     await $fetch('/api/fejlhaandtering/jobs/enqueue', {
       method: 'POST',
-      body: {
-        type,
-        ...(selectedSingleRunId.value ? { runId: selectedSingleRunId.value } : {}),
-      },
+      body: { type: 'erp.ingestResponses' },
     })
     toast.add({
-      title: 'Opgave oprettet',
-      description: type === 'banking.ingest'
-        ? 'Run er sat til genbehandling. Kræver aktiv worker-proces for at blive udført.'
-        : 'ERP-svar poll er sat i kø. Kræver aktiv worker-proces for at blive udført.',
+      title: 'ERP-svarpoll sat i kø',
+      description: 'Pollingen er global og bliver udført af workeren.',
     })
-    await refreshPageData()
+    await refresh()
   } catch (error) {
-    console.error('Enqueue fejlede', error)
-    toast.add({ title: 'Kunne ikke oprette opgave', color: 'error' })
+    console.error('ERP-svarpoll kunne ikke sættes i kø', error)
+    toast.add({ title: 'Kunne ikke starte ERP-svarpoll', color: 'error' })
   } finally {
-    enqueuing.value = null
+    pollingNow.value = false
   }
 }
 
-const runOutboxColumns: TableColumn<RunOutboxContextResponse['outbox'][number]>[] = [
+const columns: TableColumn<RecoveryWorkItem>[] = [
   {
-    id: 'direction',
-    header: 'Retning',
-    size: 90,
-    cell: ({ row }) => directionLabelFromOutboxTopic(String(row.original.topic ?? '')),
+    id: 'type',
+    header: 'Arbejde',
+    cell: ({ row }) => typeLabel(row.original),
   },
   {
-    accessorKey: 'runId',
-    header: 'Run',
-    size: 210,
-    cell: ({ row }) => String(row.original.runId ?? '—'),
-  },
-  { accessorKey: 'topic', header: 'Afleveringstype', size: 220 },
-  {
-    accessorKey: 'status',
-    header: 'Status',
-    size: 120,
+    id: 'reference',
+    header: 'Run / request',
     cell: ({ row }) => {
-      const status = String(row.getValue('status') ?? '')
-      return h(
-        resolveComponent('UBadge'),
-        { color: outboxStatusColor(status), variant: 'subtle', class: 'w-fit' },
-        () => outboxStatusLabel(status),
-      )
+      const item = row.original
+      if (item.requestId) {
+        return h(
+          NuxtLink,
+          {
+            to: { path: '/fejlhaandtering/erp', query: { requestId: item.requestId } },
+            class: 'font-mono text-primary hover:underline',
+          },
+          () => item.requestId,
+        )
+      }
+      if (item.runId) {
+        return h(
+          NuxtLink,
+          {
+            to: { path: '/koersler', query: { runId: item.runId } },
+            class: 'font-mono text-primary hover:underline',
+          },
+          () => item.runId,
+        )
+      }
+      return 'Global'
     },
   },
   {
     accessorKey: 'attempts',
     header: 'Forsøg',
     size: 90,
-    cell: ({ row }) => String(row.getValue('attempts') ?? ''),
+    cell: ({ row }) => String(row.original.attempts),
   },
   {
-    accessorKey: 'requestId',
-    header: 'Request',
-    size: 240,
-    cell: ({ row }) => String(row.original.requestId ?? '—'),
-  },
-  {
-    id: 'response',
-    header: 'Svar',
-    size: 160,
-    cell: ({ row }) => {
-      const label = row.original.responseId ? 'Modtaget' : '—'
-      return h(
-        resolveComponent('UBadge'),
-        { color: responseBadgeColor(row.original), variant: 'subtle', class: 'w-fit' },
-        () => label,
-      )
-    },
+    id: 'nextAt',
+    header: 'Senest ændret',
+    cell: ({ row }) => formatDate(row.original.updatedAt || row.original.nextAt),
   },
   {
     accessorKey: 'lastError',
     header: 'Seneste fejl',
-    cell: ({ row }) => {
-      const value = row.getValue('lastError') as string | null
-      return value ? value : ''
-    },
+    cell: ({ row }) => row.original.lastError || 'Ingen fejlbesked',
   },
   {
     id: 'actions',
     header: '',
     enableSorting: false,
-    cell: ({ row }) => {
-      const status = String(row.original.status ?? '')
-      const id = row.original.id
-      const requestId = row.original.requestId
-      const isErpTopic = String(row.original.topic ?? '').startsWith('erp.')
-      const canResendErp = Boolean(isErpTopic && requestId && !row.original.responseId)
-
-      if (status === 'failed') {
-        return h(
-          UButton,
-          {
-            size: 'sm',
-            color: 'primary',
-            variant: 'soft',
-            disabled: runErpLoading.value,
-            onClick: async () => {
-              try {
-                await $fetch(`/api/fejlhaandtering/outbox/${id}/retry`, { method: 'POST' })
-                await Promise.all([loadRunErp(), refreshPageData()])
-                toast.add({ title: 'Outbox sat til genkørsel' })
-              } catch (error) {
-                console.error('Outbox retry fejlede', error)
-                toast.add({ title: 'Outbox retry fejlede', color: 'error' })
-              }
-            },
-          },
-          () => 'Genkør',
-        )
-      }
-
-      if (canResendErp) {
-        return h(
-          UButton,
-          {
-            size: 'sm',
-            color: 'neutral',
-            variant: 'soft',
-            disabled: runErpLoading.value,
-            onClick: async () => {
-              try {
-                const res = await $fetch<{ success: boolean; requestId: string; sourceRequestId: string }>(
-                  `/api/fejlhaandtering/erp-requests/${encodeURIComponent(requestId!)}/resend`,
-                  { method: 'POST' },
-                )
-                toast.add({ title: 'ERP request genfremsendt', description: `Ny request: ${res.requestId}` })
-                await Promise.all([loadRunErp(), refreshPageData()])
-              } catch (error) {
-                console.error('ERP resend fejlede', error)
-                toast.add({ title: 'ERP resend fejlede', color: 'error' })
-              }
-            },
-          },
-          () => 'Genfremsend',
-        )
-      }
-
-      return h(
-        UButton,
-        {
-          size: 'sm',
-          color: 'info',
-          variant: 'outline',
-          disabled: true,
-        },
-        () => 'Genkør',
-      )
-    },
-  },
-]
-
-const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
-  {
-    id: 'direction',
-    header: 'Retning',
-    size: 90,
-    cell: ({ row }) => directionLabelFromJobType(String(row.original.type ?? '')),
-  },
-  {
-    accessorKey: 'runId',
-    header: 'Run',
-    size: 210,
-    cell: ({ row }) => String(row.original.runId ?? '—'),
-  },
-  { accessorKey: 'type', header: 'Type', size: 220 },
-  {
-    accessorKey: 'status',
-    header: 'Status',
-    size: 120,
-    cell: ({ row }) => {
-      const status = String(row.getValue('status') ?? '')
-      const color =
-        status === 'succeeded'
-          ? 'success'
-          : status === 'failed'
-            ? 'error'
-            : status === 'in_progress'
-              ? 'warning'
-              : 'neutral'
-      return h(resolveComponent('UBadge'), { color, variant: 'subtle', class: 'w-fit' }, () => jobStatusLabel(status))
-    },
-  },
-  {
-    accessorKey: 'attempts',
-    header: 'Forsøg',
-    size: 90,
-    cell: ({ row }) => String(row.getValue('attempts') ?? ''),
-  },
-  {
-    accessorKey: 'lastError',
-    header: 'Seneste fejl',
-    cell: ({ row }) => String(row.getValue('lastError') ?? ''),
-  },
-  {
-    id: 'retry',
-    header: '',
-    enableSorting: false,
-    cell: ({ row }) => {
-      const status = String(row.original.status ?? '')
-      const id = row.original.id
-      return h(
-        UButton,
-        {
-          size: 'sm',
-          color: status === 'failed' ? 'primary' : 'info',
-          variant: status === 'failed' ? 'soft' : 'outline',
-          disabled: runJobsLoading.value || status !== 'failed',
-          onClick: async () => {
-            if (status !== 'failed') return
-            try {
-              await $fetch(`/api/fejlhaandtering/jobs/${id}/retry`, { method: 'POST' })
-              await Promise.all([loadRunErp(), refreshPageData()])
-              toast.add({ title: 'Job sat til genkørsel' })
-            } catch (error) {
-              console.error('Job retry fejlede', error)
-              toast.add({ title: 'Job retry fejlede', color: 'error' })
-            }
-          },
-        },
-        () => 'Genkør',
-      )
-    },
+    cell: ({ row }) => h(
+      UButton,
+      {
+        size: 'sm',
+        color: 'primary',
+        variant: 'soft',
+        disabled: !row.original.canRetry || retryingId.value !== null,
+        loading: retryingId.value === row.original.id,
+        label: actionLabel(row.original),
+        onClick: () => retryWorkItem(row.original),
+      },
+    ),
   },
 ]
 </script>
@@ -550,240 +182,72 @@ const runJobColumns: TableColumn<RunJobsContextResponse['jobs'][number]>[] = [
 <template>
   <UDashboardPanel id="recovery-queue">
     <template #header>
-      <UDashboardNavbar title="Kørsler">
+      <UDashboardNavbar title="Fejlhåndtering">
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
         <template #right>
           <UButton
+            :icon="appConfig.ui.icons.download"
+            label="Poll ERP-svar nu"
+            color="neutral"
+            variant="soft"
+            :loading="pollingNow"
+            :disabled="pending || pollingNow"
+            @click="pollErpResponses"
+          />
+          <UButton
             :icon="appConfig.ui.icons.reload"
-            variant="ghost"
-            color="primary"
             label="Opdater"
-            :loading="runsPending || runErpLoading || runJobsLoading"
-            @click="refreshPageData"
+            color="primary"
+            variant="ghost"
+            :loading="pending"
+            @click="refresh"
           />
         </template>
       </UDashboardNavbar>
     </template>
 
     <template #body>
-      <div class="space-y-4">
-        <div class="flex flex-col gap-4 md:flex-row md:items-end">
-          <div class="min-w-0">
-            <UFormField label="Periode">
-              <UPopover :popper="{ placement: 'bottom-start' }">
-                <UButton variant="outline" :icon="appConfig.ui.icons.calendar" :loading="runsPending" class="w-full md:w-auto">
-                  <template v-if="dateRange?.start">
-                    <template v-if="dateRange?.end">
-                      {{ df.format(dateRange.start.toDate(getLocalTimeZone())) }} - {{ df.format(dateRange.end.toDate(getLocalTimeZone())) }}
-                    </template>
-                    <template v-else>
-                      {{ df.format(dateRange.start.toDate(getLocalTimeZone())) }}
-                    </template>
-                  </template>
-                  <template v-else>
-                    Vælg periode
-                  </template>
-                </UButton>
-
-                <template #content>
-                  <div class="p-4">
-                    <UCalendar
-                      v-model="dateRange"
-                      variant="subtle"
-                      class="p-2"
-                      :number-of-months="2"
-                      range
-                    >
-                      <template #day="{ day }">
-                        <UChip
-                          :show="!!getChipColorByDate(day.toDate('UTC'))"
-                          :color="getChipColorByDate(day.toDate('UTC'))"
-                          size="lg"
-                        >
-                          {{ day.day }}
-                        </UChip>
-                      </template>
-                    </UCalendar>
-                    <div v-if="dateRange?.start && dateRange?.end" class="mt-4 flex gap-2">
-                      <UButton
-                        variant="ghost"
-                        size="sm"
-                        label="Nulstil"
-                        @click="dateRange = defaultRange"
-                        class="flex-1"
-                      />
-                    </div>
-                  </div>
-                </template>
-              </UPopover>
-            </UFormField>
-          </div>
-
-          <div class="md:ml-auto md:w-[28rem]">
-            <UFormField label="Kørsel (run)">
-              <USelectMenu
-                v-model="selectedRunIds"
-                :items="runOptions"
-                multiple
-                valueKey="value"
-                labelKey="label"
-                placeholder="Vælg en kørsel"
-                :loading="runsPending"
-                class="w-full"
-              />
-            </UFormField>
-          </div>
-        </div>
-
-        <UCard>
-          <template #header>
-            <div class="flex flex-col gap-1">
-              <div class="font-medium">Fejlhåndtering og genkørsel</div>
-              <div class="text-sm text-muted">
-                Genkørsel sker ved at sætte behandling/afleveringer tilbage til “Afventer” og lade systemet håndtere genforsøg.
-              </div>
-              <div class="text-sm text-muted">
-                I normal drift kører behandlingen automatisk (se deployment-roller via <span class="font-mono">APP_ROLE</span>).
-                Knapperne herunder er derfor manuelle recovery/debug-handtag.
-              </div>
-
-              <div class="mt-2 text-sm text-muted">
-                <div class="font-medium text-default">Hvornår giver det mening?</div>
-                <ul class="list-disc pl-5 space-y-1 mt-1">
-                  <li>
-                    <span class="font-medium text-default">Fejlede ERP-afleveringer</span>: tryk “Genkør” på den konkrete aflevering.
-                  </li>
-                  <li>
-                    <span class="font-medium text-default">Fejlede behandlingsopgaver</span>: tryk “Genkør” på den konkrete række.
-                  </li>
-                  <li>
-                    <span class="font-medium text-default">Run pauset pga. manglende statuskonto-kontering</span>: ret statuskonto på kontoen. Systemet forsøger automatisk igen via køen.
-                  </li>
-                  <li>
-                    <span class="font-medium text-default">Dagens behandling er ikke startet</span>: brug nød-knapperne til at få arbejdet i gang igen.
-                  </li>
-                  <li>
-                    <span class="font-medium text-default">Behandling er stoppet / hænger</span>: “Kør behandling nu” kan dræne noget af køen, men i drift bør den køre kontinuerligt.
-                  </li>
-                </ul>
-                <div class="mt-2">
-                  Se også <NuxtLink to="/koersler" class="underline">Kørsler</NuxtLink> for run-overblik,
-                  og <NuxtLink to="/fejlhaandtering/erp" class="underline">ERP-integration</NuxtLink> for request/resend.
-                </div>
-              </div>
-            </div>
-          </template>
-
-          <div v-if="selectedRunIds.length" class="mt-4">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div class="flex flex-wrap items-center gap-2">
-              <UBadge color="neutral" variant="subtle">Valgte kørsler: {{ selectedRunIds.length }}</UBadge>
-              <UBadge :color="outboxStatusColor('failed')" variant="subtle">Fejlede afleveringer: {{ outboxStatusCounts.failed }}</UBadge>
-              <UBadge :color="outboxStatusColor('pending')" variant="subtle">Afventer: {{ outboxStatusCounts.pending }}</UBadge>
-              <UBadge :color="outboxStatusColor('processing')" variant="subtle">Sender: {{ outboxStatusCounts.processing }}</UBadge>
-              <UBadge :color="outboxStatusColor('sent')" variant="subtle">Afsendt: {{ outboxStatusCounts.sent }}</UBadge>
-            </div>
-            <div class="flex items-center gap-2">
-              <UButton
-                :icon="appConfig.ui.icons.download"
-                label="Poll ERP-svar nu"
-                color="neutral"
-                variant="soft"
-                :disabled="selectedRunIds.length !== 1"
-                :loading="enqueuing === 'erp.ingestResponses'"
-                @click="enqueue('erp.ingestResponses')"
-              />
-            </div>
-          </div>
-
-          <div class="grid gap-6 mt-4 lg:grid-cols-2">
+      <UCard>
+        <template #header>
+          <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <div class="flex items-center justify-between mb-2">
-                    <div class="font-medium">Behandling (kørsel)</div>
-                <UBadge color="neutral" variant="subtle">{{ runJobs?.jobs?.length ?? 0 }}</UBadge>
-              </div>
-
-              <UEmpty
-                v-if="!runJobsLoading && !(runJobs?.jobs?.length)"
-                :icon="appConfig.ui.icons.archive"
-                title="Ingen jobs"
-                description="Der er ingen jobs knyttet til den valgte kørsel."
-                class="border border-dashed border-default rounded-lg"
-              />
-
-              <UTable
-                v-else-if="runJobs"
-                :key="runJobsTableKey"
-                :data="runJobs?.jobs ?? []"
-                :columns="runJobColumns"
-                :loading="runJobsLoading"
-                :ui="{
-                  base: 'border-separate border-spacing-0',
-                  thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
-                  tbody: '[&>tr]:last:[&>td]:border-b-0',
-                  th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
-                  td: 'border-b border-default',
-                  separator: 'h-0'
-                }"
-              />
+              <h2 class="font-medium">Fejlet arbejde</h2>
+              <p class="mt-1 text-sm text-muted">Genkør kun den fejlede delproces. ERP-genfremsendelse og transaktionsgenåbning findes under ERP-integration.</p>
             </div>
-
-            <div>
-              <div class="flex items-center justify-between mb-2">
-                    <div class="font-medium">ERP-afleveringer (kørsel)</div>
-                <UBadge color="neutral" variant="subtle">{{ runErp?.outbox?.length ?? 0 }}</UBadge>
-              </div>
-
-              <UEmpty
-                v-if="!runErpLoading && !(runErp?.outbox?.length)"
-                :icon="appConfig.ui.icons.inbox"
-                    title="Ingen ERP-afleveringer"
-                    description="Der er ingen ERP-afleveringer for den valgte kørsel."
-                class="border border-dashed border-default rounded-lg"
-              />
-
-              <UTable
-                v-else-if="runErp"
-                :key="runOutboxTableKey"
-                :data="runErp?.outbox ?? []"
-                :columns="runOutboxColumns"
-                :loading="runErpLoading"
-                :ui="{
-                  base: 'border-separate border-spacing-0',
-                  thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
-                  tbody: '[&>tr]:last:[&>td]:border-b-0',
-                  th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
-                  td: 'border-b border-default',
-                  separator: 'h-0'
-                }"
-              />
-            </div>
+            <UBadge color="error" variant="subtle">{{ data.total }} fejl</UBadge>
           </div>
-        </div>
+        </template>
 
-        <div class="flex flex-wrap items-center gap-2 mt-4">
-          <UButton
-            :icon="appConfig.ui.icons.play"
-            label="Kør behandling nu"
-            color="primary"
-            variant="soft"
-            :loading="runningWorker"
-            @click="runWorkerNow"
-          />
-          <UButton
-            :icon="appConfig.ui.icons.download"
-            label='Forsøg kørsel igen'
-            color="neutral"
-            variant="soft"
-            :disabled="selectedRunIds.length !== 1"
-            :loading="enqueuing === 'banking.ingest'"
-            @click="enqueue('banking.ingest')"
-          />
+        <UEmpty
+          v-if="!pending && !workItems.length"
+          :icon="appConfig.ui.icons.check"
+          title="Ingen fejlede jobs eller ERP-afleveringer"
+          description="Nye fejl vises her, når en automatisk behandling eller aflevering fejler."
+          class="border border-dashed border-default rounded-lg"
+        />
+
+        <UTable
+          v-else
+          :key="tableKey"
+          :data="workItems"
+          :columns="columns"
+          :loading="pending"
+          :ui="{
+            base: 'border-separate border-spacing-0',
+            thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
+            tbody: '[&>tr]:last:[&>td]:border-b-0',
+            th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
+            td: 'border-b border-default align-top',
+            separator: 'h-0',
+          }"
+        />
+
+        <div v-if="data.total > pageSize" class="flex justify-center border-t border-default pt-4 mt-4">
+          <UPagination v-model:page="page" :items-per-page="pageSize" :total="data.total" />
         </div>
       </UCard>
-      </div>
     </template>
   </UDashboardPanel>
 </template>

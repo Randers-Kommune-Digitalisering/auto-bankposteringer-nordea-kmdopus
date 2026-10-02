@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm'
 import db from '~/lib/db'
 import { logger } from '~/lib/logger'
 import env from '~/lib/env/env'
+import { MANUAL_BOOKING_LOCK_LEASE_MS, RULE_EDIT_LOCK_LEASE_MS } from '#engine/manual-booking/domain/bookingLease'
 
 function getRowCount(result: any): number {
   if (!result) return 0
@@ -152,6 +153,25 @@ export async function runDbCleanup(): Promise<DbCleanupResult> {
         using "run" r
         where d.run_id = r.id
           and r.booking_date < ${cutoffDate}
+      `),
+    )
+
+    // Expired booking leases retain no user identity after their three-minute lifetime.
+    deleted.expiredTransactionBookingLocksCleared = getRowCount(
+      await tx.execute(sql`
+        update transaction_processing
+        set locked_at = null, locked_by = null, locked_by_name = null
+        where locked_at < now() - (${MANUAL_BOOKING_LOCK_LEASE_MS} * interval '1 millisecond')
+          or (locked_at is null and (locked_by is not null or locked_by_name is not null))
+      `),
+    )
+
+    deleted.expiredRuleEditLocksCleared = getRowCount(
+      await tx.execute(sql`
+        update rule
+        set locked_at = null, locked_by = null, locked_by_name = null
+        where locked_at < now() - (${RULE_EDIT_LOCK_LEASE_MS} * interval '1 millisecond')
+          or (locked_at is null and (locked_by is not null or locked_by_name is not null))
       `),
     )
 

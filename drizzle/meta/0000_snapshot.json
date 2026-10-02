@@ -1,5 +1,5 @@
 {
-  "id": "41208603-446a-43cb-8361-f75830921e77",
+  "id": "455f484d-74ad-4520-86c3-e40ae96d3ed0",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -2414,12 +2414,18 @@
         },
         "locked_at": {
           "name": "locked_at",
-          "type": "date",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
         "locked_by": {
           "name": "locked_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "locked_by_name": {
+          "name": "locked_by_name",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -3909,12 +3915,18 @@
         },
         "locked_at": {
           "name": "locked_at",
-          "type": "date",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
         "locked_by": {
           "name": "locked_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "locked_by_name": {
+          "name": "locked_by_name",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -4539,6 +4551,16 @@
         "ultimateCreditor"
       ]
     },
+    "public.transaction_processing_source": {
+      "name": "transaction_processing_source",
+      "schema": "public",
+      "values": [
+        "regel",
+        "manuel",
+        "ingen_regel",
+        "ukendt"
+      ]
+    },
     "public.transaction_reference_type": {
       "name": "transaction_reference_type",
       "schema": "public",
@@ -4557,16 +4579,6 @@
         "tx",
         "remittance",
         "party"
-      ]
-    },
-    "public.transaction_processing_source": {
-      "name": "transaction_processing_source",
-      "schema": "public",
-      "values": [
-        "regel",
-        "manuel",
-        "ingen_regel",
-        "ukendt"
       ]
     }
   },

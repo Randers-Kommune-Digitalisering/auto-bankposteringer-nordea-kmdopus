@@ -31,6 +31,7 @@ export type IngestedErpResponse = {
   requestId?: string
   payload: string
   remotePath?: string
+  statusText?: string
 }
 
 export interface ErpAdapter {
