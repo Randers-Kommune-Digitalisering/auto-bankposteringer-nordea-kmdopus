@@ -28,7 +28,12 @@ const schema = z
     }
   })
 
-export type NordeaRestEnv = z.infer<typeof schema> & {
+export type NordeaRestEnv = Omit<
+  z.infer<typeof schema>,
+  'NORDEA_REST_ACCESS_DURATION_SEC' | 'NORDEA_REST_TIMEOUT_MS'
+> & {
+  NORDEA_REST_ACCESS_DURATION_SEC: number
+  NORDEA_REST_TIMEOUT_MS: number
   eidasPrivateKeyPem: string
   scopes: string[]
 }

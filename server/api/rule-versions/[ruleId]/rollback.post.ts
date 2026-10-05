@@ -134,12 +134,12 @@ export default defineEventHandler(async (event) => {
 
   const dimensionConstraints = await listAccountingDimensionConstraints(existingRule.erpSupplier as any)
 
-  const [{ latestVersion }] = await db
+  const [latestVersionRow] = await db
     .select({ latestVersion: max(ruleVersion.version) })
     .from(ruleVersion)
     .where(eq(ruleVersion.ruleId, ruleId))
 
-  const newVersion = Number(latestVersion ?? existingRule.currentVersionId ?? 0) + 1
+  const newVersion = Number(latestVersionRow?.latestVersion ?? existingRule.currentVersionId ?? 0) + 1
 
   const bankAccountIds = Array.from(new Set(parsedContent.relatedBankAccounts ?? []))
   const tagIds = normalizeRuleTagIds(parsedContent.ruleTags ?? [])
@@ -223,6 +223,8 @@ export default defineEventHandler(async (event) => {
         required: erpAccountingDimensionDefinition.required,
         sortOrder: erpAccountingDimensionDefinition.sortOrder,
         erpTarget: erpAccountingDimensionDefinition.erpTarget,
+        valueRegex: erpAccountingDimensionDefinition.valueRegex,
+        valueRegexFlags: erpAccountingDimensionDefinition.valueRegexFlags,
       })
       .from(erpAccountingDimensionDefinition)
       .where(eq(erpAccountingDimensionDefinition.erpSupplier, existingRule.erpSupplier as any))

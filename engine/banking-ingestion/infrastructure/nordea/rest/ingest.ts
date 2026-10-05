@@ -103,13 +103,13 @@ export async function runNordeaRestIngestion(
     scopes: env.scopes,
   })
 
-  const allowlisted = await trx
+  const allowlisted: Array<{ iban: string; name: string | null }> = await trx
     .select({ iban: bankingAgreementAccountAllowlist.iban, name: bankingAgreementAccountAllowlist.name })
     .from(bankingAgreementAccountAllowlist)
     .where(eq(bankingAgreementAccountAllowlist.provider, 'nordea' as any))
     .orderBy(asc(bankingAgreementAccountAllowlist.iban))
 
-  const ignoredRows = await trx
+  const ignoredRows: Array<{ iban: string; value: string | null }> = await trx
     .select({ iban: bankingAgreementAccountDimension.iban, value: bankingAgreementAccountDimension.dimensionValue })
     .from(bankingAgreementAccountDimension)
     .where(and(

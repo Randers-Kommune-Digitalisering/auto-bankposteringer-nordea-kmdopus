@@ -26,7 +26,7 @@ export interface RemoteFile {
   contents: Buffer
 }
 
-const defaultOptions: SftpConnectionOptions = {
+const defaultOptions: Partial<SftpConnectionOptions> = {
   host: env.SFTP_URL,
   port: 22,
   username: env.SFTP_USERNAME,
@@ -40,7 +40,14 @@ export class ErpSftpClient {
   private readonly log = logger.child({ scope: 'erp.sftp' })
 
   constructor(options: Partial<SftpConnectionOptions> = {}) {
-    this.options = { ...defaultOptions, ...options }
+    this.options = {
+      host: options.host ?? requireSftpOption(defaultOptions.host, 'SFTP_URL'),
+      port: options.port ?? defaultOptions.port ?? 22,
+      username: options.username ?? requireSftpOption(defaultOptions.username, 'SFTP_USERNAME'),
+      password: options.password ?? requireSftpOption(defaultOptions.password, 'SFTP_PASSWORD'),
+      requestDir: options.requestDir ?? requireSftpOption(defaultOptions.requestDir, 'SFTP_REQUEST_DIR'),
+      responseDir: options.responseDir ?? requireSftpOption(defaultOptions.responseDir, 'SFTP_RESPONSE_DIR'),
+    }
   }
 
   async uploadFile(options: UploadFileOptions): Promise<string> {
@@ -165,6 +172,11 @@ export class ErpSftpClient {
       await client.end().catch(() => undefined)
     }
   }
+}
+
+function requireSftpOption(value: string | undefined, name: string): string {
+  if (!value) throw new Error(`Missing required SFTP configuration: ${name}`)
+  return value
 }
 
 function normalizeHostPort(rawHost: string, fallbackPort: number): { host: string; port: number } {

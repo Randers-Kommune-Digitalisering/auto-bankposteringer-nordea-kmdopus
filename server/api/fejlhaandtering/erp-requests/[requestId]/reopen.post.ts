@@ -4,6 +4,7 @@ import { z } from 'zod'
 import db from '~/lib/db'
 import { erpRequestLine } from '~/lib/db/schema/erp'
 import { transactionProcessing } from '~/lib/db/schema/transaction'
+import type { ErpRequestReopenResponse } from '~/types/erpReopen'
 import { requireErrorHandlingWriteAccess } from '~~/server/auth/requireAppRoles'
 
 export default defineEventHandler(async (event) => {
@@ -65,7 +66,7 @@ export default defineEventHandler(async (event) => {
   const missingTransactionIds = requestedTransactionIds.filter((id) => !foundTransactionIds.has(id))
 
   if (!eligibleTransactionIds.length) {
-    return {
+    const response: ErpRequestReopenResponse = {
       success: true,
       requestId,
       requestedTransactionIds,
@@ -77,6 +78,7 @@ export default defineEventHandler(async (event) => {
       unmappedLineNos,
       skippedNotBooked: 0,
     }
+    return response
   }
 
   const updatedRows = await db
@@ -93,7 +95,7 @@ export default defineEventHandler(async (event) => {
   const reopened = updatedRows.length
   const skippedNotBooked = eligibleTransactionIds.length - reopened
 
-  return {
+  const response: ErpRequestReopenResponse = {
     success: true,
     requestId,
     requestedTransactionIds,
@@ -105,4 +107,5 @@ export default defineEventHandler(async (event) => {
     unmappedLineNos,
     skippedNotBooked,
   }
+  return response
 })

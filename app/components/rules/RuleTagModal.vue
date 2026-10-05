@@ -192,7 +192,7 @@ async function onSubmit() {
             label="Annuller"
             variant="soft"
             color="neutral"
-            @click="open = false"
+            @click="() => { open = false }"
           />
 
           <UButton type="submit" color="primary">

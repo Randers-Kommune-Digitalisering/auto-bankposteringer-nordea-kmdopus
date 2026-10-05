@@ -599,7 +599,7 @@ const addMatchEntry = (category: MatchCategory, mode: 'Alle felter' | 'Vælg fel
     operator = undefined
   }
 
-  const entry: MatchEntry = {
+  const entry = {
     category,
     value,
     ...(operator ? { operator } : {}),
@@ -1199,18 +1199,7 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                         labelKey="label"
                         valueKey="value"
                       />
-                      <USelectMenu
-                        v-if="category === 'Transaktionstype'"
-                        v-model="matchInputs[category]"
-                        :items="transactionTypeOptions"
-                        label-key="label"
-                        value-key="value"
-                        placeholder="Vælg transaktionstype"
-                        class="flex-1"
-                        :loading="transactionTypeCatalogPending"
-                      />
                       <UiFloatingLabelInput
-                        v-else
                         v-model="matchInputs[category]"
                         :label="`Søg i ${category.toLowerCase()}`"
                         color="neutral"
@@ -1234,18 +1223,7 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                         labelKey="label"
                         valueKey="value"
                       />
-                      <USelectMenu
-                        v-if="category === 'Transaktionstype'"
-                        v-model="matchInputs[category]"
-                        :items="transactionTypeOptions"
-                        label-key="label"
-                        value-key="value"
-                        placeholder="Vælg transaktionstype"
-                        class="flex-1"
-                        :loading="transactionTypeCatalogPending"
-                      />
                       <UiFloatingLabelInput
-                        v-else
                         v-model="matchInputs[category]"
                         :label="`Værdi for ${selectedColumns[category].length > 0 ? selectedColumns[category].join(', ') : 'valgte felter'}`"
                         color="neutral"
@@ -1255,7 +1233,7 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                         :icon="appConfig.ui.icons.plus"
                         color="primary"
                         @click="() => addMatchEntry(category, 'Vælg felter')"
-                        :disabled="category !== transactionTypeCategory && selectedColumns[category].length === 0"
+                        :disabled="selectedColumns[category].length === 0"
                       />
                     </div>
                   </template>
@@ -1426,7 +1404,18 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
             </UButton>
           </template>
           <template v-else>
-            <UButton label="Næste" color="primary" @click="handleNext"/>
+            <div class="flex gap-2">
+              <UButton
+                v-if="isEdit"
+                label="Gem"
+                variant="soft"
+                color="neutral"
+                type="button"
+                @click="onSubmit()"
+                :disabled="isRuleReadOnly"
+              />
+              <UButton label="Næste" color="primary" @click="handleNext"/>
+            </div>
           </template>
         </div>
       </UForm>

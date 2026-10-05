@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "zod/v4"
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
 import { pgTable, uuid, integer, text, timestamp, index } from "drizzle-orm/pg-core"
 import { run } from "./run"

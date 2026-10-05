@@ -333,7 +333,7 @@ export async function ingestCamt053Document(
 
   const documentId = insertedDocument[0]!.id
 
-  const ignoredRows = await db
+  const ignoredRows: Array<{ iban: string; value: string | null }> = await db
     .select({ iban: bankingAgreementAccountDimension.iban, value: bankingAgreementAccountDimension.dimensionValue })
     .from(bankingAgreementAccountDimension)
     .where(and(

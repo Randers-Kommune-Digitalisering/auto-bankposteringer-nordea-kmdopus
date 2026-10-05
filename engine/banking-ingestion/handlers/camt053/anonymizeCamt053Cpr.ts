@@ -1,11 +1,15 @@
 import { DOMParser, XMLSerializer } from '@xmldom/xmldom'
 import { anonymizeCprInText } from '~/lib/text/cpr'
 
-function localName(node: Node | null): string | null {
-  return node && node.nodeType === 1 ? (node as Element).localName : null
+type XmlDocument = ReturnType<DOMParser['parseFromString']>
+type XmlNode = NonNullable<ReturnType<XmlDocument['childNodes']['item']>>
+type XmlElement = NonNullable<ReturnType<ReturnType<XmlDocument['getElementsByTagName']>['item']>>
+
+function localName(node: XmlNode | null): string | null {
+  return node && node.nodeType === 1 ? (node as XmlElement).localName : null
 }
 
-function isCprField(element: Element): boolean {
+function isCprField(element: XmlElement): boolean {
   const parent = element.parentElement
   const grandparent = parent?.parentElement
   const name = element.localName

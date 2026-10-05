@@ -1,7 +1,7 @@
 import crypto from 'node:crypto'
 import { DOMParser } from '@xmldom/xmldom'
 import { z } from 'zod'
-import { Agent } from 'undici'
+import { Agent, fetch } from 'undici'
 
 import {
   buildNordeaDownloadFileApplicationRequestXml,

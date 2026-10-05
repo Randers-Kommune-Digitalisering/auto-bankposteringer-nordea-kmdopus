@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import { DOMParser } from '@xmldom/xmldom'
+import { DOMParser, XMLSerializer } from '@xmldom/xmldom'
 import { SignedXml } from 'xml-crypto'
 
 export type XmlDsigAlgorithms = {
@@ -134,7 +134,7 @@ export function verifyEnvelopedXmlDsig(input: VerifyXmlInput): VerifyXmlOutput {
     // Required if we want to verify using KeyInfo's embedded X509Certificate.
     getCertFromKeyInfo: SignedXml.getCertFromKeyInfo,
   })
-  verifier.loadSignature(signatureNode)
+  verifier.loadSignature(new XMLSerializer().serializeToString(signatureNode))
 
   if (input.verificationCertificatePem) {
     verifier.publicCert = normalizePem(input.verificationCertificatePem) as any

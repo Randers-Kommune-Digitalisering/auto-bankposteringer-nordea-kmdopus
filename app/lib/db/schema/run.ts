@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "zod/v4"
 import { createUpdateSchema, createSelectSchema } from "drizzle-zod"
 import { pgTable, date, uuid, unique, index } from "drizzle-orm/pg-core"
 import { runStatusEnum } from "./enums"
@@ -12,6 +12,8 @@ export const run = pgTable('run', {
   index('run_status_booking_date_idx').on(t.status, t.bookingDate),
 ])
 
+export const runSelectSchema = createSelectSchema(run)
+
 export const runInsertSchema = z.object({
   bookingDate: z
     .string()
@@ -20,3 +22,4 @@ export const runInsertSchema = z.object({
 })
 
 export type RunInsertSchema = z.infer<typeof runInsertSchema>
+export type RunSelectSchema = z.infer<typeof runSelectSchema>

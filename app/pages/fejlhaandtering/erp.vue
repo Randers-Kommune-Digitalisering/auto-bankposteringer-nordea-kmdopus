@@ -6,6 +6,7 @@ import { useDebouncedString } from '~/composables/useDebouncedString'
 import { fuzzyRankRows } from '~/lib/search/fuzzyRanking'
 import { redactSensitiveXml } from '~/lib/text/redactSensitiveXml'
 import BookingSummaryCard from '~/components/open-items/BookingSummaryCard.vue'
+import type { ErpRequestReopenResponse, RunReopenResponse } from '~/types/erpReopen'
 import type { TransactionSummary } from '~/types/transactions'
 import { DEFAULT_TIME_ZONE, formatSignedDkk } from '~/utils'
 
@@ -292,18 +293,17 @@ async function reopenSelectedTransactions() {
 
   reopeningTransactions.value = true
   try {
-    const res = (await $fetch(
+    const fetchReopen = $fetch as unknown as (
+      request: string,
+      options: { method: 'POST'; body: { transactionIds: string[] } },
+    ) => Promise<ErpRequestReopenResponse>
+    const res = await fetchReopen(
       `/api/fejlhaandtering/erp-requests/${encodeURIComponent(erpView.value.requestId)}/reopen`,
       {
         method: 'POST',
         body: { transactionIds },
       },
-    )) as {
-      success: boolean
-      reopened: number
-      eligibleTransactions: number
-      skippedNotBooked: number
-    }
+    )
     toast.add({
       title: 'Genåbning udført',
       description: `Genåbnede ${res.reopened}/${res.eligibleTransactions} transaktion(er).`,
@@ -428,8 +428,13 @@ function toSignedAmount(amount: string | number, indicator: string | null): numb
 }
 
 function formatAccountingAmount(line: { amount: string | null; debetOrCredit: string | null }): string {
-  const indicator = line.debetOrCredit === 'Debet' ? 'DBIT' : line.debetOrCredit === 'Kredit' ? 'CRDT' : null
-  return formatSignedDkk(toSignedAmount(line.amount ?? '0', indicator))
+  return formatSignedDkk(Math.abs(parseAmount(line.amount ?? '0')))
+}
+
+function formatAccountingDebitCredit(value: string | null): string {
+  if (value === 'Debet') return 'D'
+  if (value === 'Kredit') return 'K'
+  return '—'
 }
 
 function formatStatusLabel(status: string | null): string {
@@ -454,9 +459,14 @@ async function reopenBookedTransactions() {
 
   reopening.value = true
   try {
-    const res = (await $fetch(`/api/fejlhaandtering/runs/${encodeURIComponent(runId)}/reopen`, {
-      method: 'POST',
-    })) as { success: boolean; reopened: number }
+    const fetchReopen = $fetch as unknown as (
+      request: string,
+      options: { method: 'POST' },
+    ) => Promise<RunReopenResponse>
+    const res = await fetchReopen(
+      `/api/fejlhaandtering/runs/${encodeURIComponent(runId)}/reopen`,
+      { method: 'POST' },
+    )
     toast.add({ title: 'Genåbnet', description: `${res.reopened} transaktion(er)` })
   } catch (error) {
     console.error('Reopen fejlede', error)
@@ -704,15 +714,15 @@ async function reopenBookedTransactions() {
                   <tr>
                     <th class="px-3 py-2 font-medium">Linje</th>
                     <th class="px-3 py-2 font-medium">Beløb</th>
+                    <th class="px-3 py-2 font-medium">D/K</th>
                     <th class="px-3 py-2 font-medium">Dimensioner</th>
-                    <th class="px-3 py-2 font-medium">Tekst</th>
-                    <th class="px-3 py-2 font-medium">CPR</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="line in selectedTransaction.accountingLines" :key="line.lineNo" class="border-t border-default align-top">
                     <td class="px-3 py-2 font-mono">{{ line.lineNo }}</td>
                     <td class="px-3 py-2 whitespace-nowrap">{{ formatAccountingAmount(line) }}</td>
+                    <td class="px-3 py-2">{{ formatAccountingDebitCredit(line.debetOrCredit) }}</td>
                     <td class="px-3 py-2">
                       <div v-if="Object.keys(line.dimensions).length" class="space-y-1">
                         <div v-for="([key, value]) in Object.entries(line.dimensions)" :key="key" class="break-all">
@@ -721,8 +731,6 @@ async function reopenBookedTransactions() {
                       </div>
                       <span v-else class="text-muted">—</span>
                     </td>
-                    <td class="px-3 py-2 break-all">{{ line.postingText || '—' }}</td>
-                    <td class="px-3 py-2 font-mono">{{ line.cpr || '—' }}</td>
                   </tr>
                 </tbody>
               </table>

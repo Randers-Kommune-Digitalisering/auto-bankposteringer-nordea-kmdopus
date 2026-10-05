@@ -19,7 +19,7 @@
       :class="[
         labelStartClass === 'start-9' ? 'ps-[35px] peer-focus-visible:ps-[34px]' : '',
         outlineFocusClasses,
-        isHighlighted ? outlineColorClasses.rest : '',
+        isHighlighted ? outlineColorClasses[props.color].rest : '',
       ]"
     >
       <legend class="floating-label-input-notch float-none m-0 w-auto max-w-[0.01px] overflow-hidden p-0 text-xs leading-[11px] invisible whitespace-nowrap transition-[max-width] duration-200">
