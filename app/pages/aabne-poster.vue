@@ -15,6 +15,7 @@ import type { OpenTransaction, TransactionSummary } from '~/types/transactions'
 
 const appConfig = useAppConfig()
 const UBadge = resolveComponent('UBadge')
+const UDropdownMenu = resolveComponent('UDropdownMenu')
 
 const endDefault = today(DEFAULT_TIME_ZONE)
 const startDefault = endDefault.subtract({ days: 29 })
@@ -66,33 +67,54 @@ type OpenItemsSortKey = 'counterpart' | 'transactionType'
 const sortKey = ref<OpenItemsSortKey | null>(null)
 const sortDirection = ref<'asc' | 'desc'>('asc')
 
-function toggleSort(key: OpenItemsSortKey): void {
-  if (sortKey.value === key) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
-    return
-  }
-
-  sortKey.value = key
-  sortDirection.value = 'asc'
-}
-
 function sortableHeader(label: string, key: OpenItemsSortKey) {
-  const icon = sortKey.value !== key
-    ? appConfig.ui.icons.unsorted
-    : sortDirection.value === 'asc'
-      ? appConfig.ui.icons.sortAscending
-      : appConfig.ui.icons.sortDescending
-  const nextDirection = sortKey.value === key && sortDirection.value === 'asc' ? 'faldende' : 'stigende'
+  const isSorted = sortKey.value === key ? sortDirection.value : false
 
-  return h(resolveComponent('UButton'), {
+  return h(UDropdownMenu, {
+    content: { align: 'start' },
+    'aria-label': 'Sorteringsmuligheder',
+    items: [
+      {
+        label: 'Sortér stigende',
+        type: 'checkbox',
+        icon: appConfig.ui.icons.sortAscending,
+        checked: isSorted === 'asc',
+        onSelect: () => {
+          if (isSorted === 'asc') {
+            sortKey.value = null
+          } else {
+            sortKey.value = key
+            sortDirection.value = 'asc'
+          }
+        },
+      },
+      {
+        label: 'Sortér faldende',
+        type: 'checkbox',
+        icon: appConfig.ui.icons.sortDescending,
+        checked: isSorted === 'desc',
+        onSelect: () => {
+          if (isSorted === 'desc') {
+            sortKey.value = null
+          } else {
+            sortKey.value = key
+            sortDirection.value = 'desc'
+          }
+        },
+      },
+    ],
+  }, () => h(resolveComponent('UButton'), {
     color: 'neutral',
     variant: 'ghost',
     label,
-    icon,
-    class: '-mx-2.5',
-    onClick: () => toggleSort(key),
-    'aria-label': `Sortér ${label} ${nextDirection}`,
-  })
+    icon: isSorted
+      ? isSorted === 'asc'
+        ? appConfig.ui.icons.sortAscending
+        : appConfig.ui.icons.sortDescending
+      : appConfig.ui.icons.unsorted,
+    class: '-mx-2.5 data-[state=open]:bg-elevated',
+    'aria-label': `Sortér efter ${isSorted === 'asc' ? 'faldende' : 'stigende'}`,
+  }))
 }
 
 const {
