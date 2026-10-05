@@ -34,6 +34,7 @@ jobs:
 
       # Dummy values to satisfy strict env parsing during CLI/test imports
       ERP_SUPPLIER: kmd
+      ERP_BOOKING_PERIOD_CLOSE_DAY: "7"
       ERP_ERROR_ACCOUNT: "95999999"
       ERP_ACTIVE_INTEGRATION: "false"
       ERP_PROD_ENVIRONMENT: P04
