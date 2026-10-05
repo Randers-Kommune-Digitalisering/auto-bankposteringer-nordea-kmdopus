@@ -12,7 +12,9 @@ import { useDebouncedString } from '~/composables/useDebouncedString'
 import { fuzzyRankRows } from '~/lib/search/fuzzyRanking'
 
 const appConfig = useAppConfig()
+const toast = useToast()
 const UBadge = resolveComponent('UBadge')
+const UDropdownMenu = resolveComponent('UDropdownMenu')
 
 definePageMeta({
   path: '/kontoudtog'
@@ -67,23 +69,27 @@ type StatementPage = {
   transactionTypeValues?: string[]
 }
 
-const { data, status, refresh } = await useFetch<StatementPage>('/api/transactions', {
-  // A single stable key keeps one cache entry; per-filter keys would replay stale payloads when a
-  // previously used filter combination is revisited.
-  key: 'statement-transactions',
-  query: computed(() => ({
+function statementQuery(pageNumber: number, requestedPageSize: number) {
+  return {
     mode: 'statement',
     start: start.value,
     end: end.value,
-    // Always pass primitive IDs as a comma-separated string to avoid query serialization pitfalls.
+    // Pass primitive IDs as a comma-separated string to avoid query serialization pitfalls.
     accountIds: selectedAccountIds.value.length ? selectedAccountIds.value.join(',') : undefined,
     search: search.value.length ? search.value : undefined,
     sortBy: sortKey.value ?? undefined,
     sortDirection: sortKey.value ? sortDirection.value : undefined,
     transactionTypes: transactionTypeFilter.value.length ? transactionTypeFilter.value.join(',') : undefined,
-    page: page.value,
-    pageSize: pageSize.value,
-  })),
+    page: pageNumber,
+    pageSize: requestedPageSize,
+  }
+}
+
+const { data, status, refresh } = await useFetch<StatementPage>('/api/transactions', {
+  // A single stable key keeps one cache entry; per-filter keys would replay stale payloads when a
+  // previously used filter combination is revisited.
+  key: 'statement-transactions',
+  query: computed(() => statementQuery(page.value, pageSize.value)),
   watch: [start, end, selectedAccountIds, search, sortKey, sortDirection, transactionTypeFilter, page, pageSize],
   // Avoid "1 tick behind" behavior caused by out-of-order responses when filters change quickly.
   dedupe: 'cancel',
@@ -122,34 +128,56 @@ const totalRows = computed<number>(() => data.value?.total ?? 0)
 const visibleRows = computed<StatementTransaction[]>(() => fetchedRows.value)
 const isRawTransactionOpen = ref(false)
 const selectedRawTransaction = ref<StatementTransaction | null>(null)
-
-function toggleSort(key: StatementSortKey): void {
-  if (sortKey.value === key) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
-    return
-  }
-
-  sortKey.value = key
-  sortDirection.value = 'asc'
-}
+const isExportingCsv = ref(false)
 
 function sortableHeader(label: string, key: StatementSortKey) {
-  const icon = sortKey.value !== key
-    ? appConfig.ui.icons.unsorted
-    : sortDirection.value === 'asc'
-      ? appConfig.ui.icons.sortAscending
-      : appConfig.ui.icons.sortDescending
-  const nextDirection = sortKey.value === key && sortDirection.value === 'asc' ? 'faldende' : 'stigende'
+  const isSorted = sortKey.value === key ? sortDirection.value : false
 
-  return h(resolveComponent('UButton'), {
+  return h(UDropdownMenu, {
+    content: { align: 'start' },
+    'aria-label': 'Sorteringsmuligheder',
+    items: [
+      {
+        label: 'Sortér stigende',
+        type: 'checkbox',
+        icon: appConfig.ui.icons.sortAscending,
+        checked: isSorted === 'asc',
+        onSelect: () => {
+          if (isSorted === 'asc') {
+            sortKey.value = null
+          } else {
+            sortKey.value = key
+            sortDirection.value = 'asc'
+          }
+        },
+      },
+      {
+        label: 'Sortér faldende',
+        type: 'checkbox',
+        icon: appConfig.ui.icons.sortDescending,
+        checked: isSorted === 'desc',
+        onSelect: () => {
+          if (isSorted === 'desc') {
+            sortKey.value = null
+          } else {
+            sortKey.value = key
+            sortDirection.value = 'desc'
+          }
+        },
+      },
+    ],
+  }, () => h(resolveComponent('UButton'), {
     color: 'neutral',
     variant: 'ghost',
     label,
-    icon,
-    class: '-mx-2.5',
-    onClick: () => toggleSort(key),
-    'aria-label': `Sortér ${label} ${nextDirection}`,
-  })
+    icon: isSorted
+      ? isSorted === 'asc'
+        ? appConfig.ui.icons.sortAscending
+        : appConfig.ui.icons.sortDescending
+      : appConfig.ui.icons.unsorted,
+    class: '-mx-2.5 data-[state=open]:bg-elevated',
+    'aria-label': `Sortér efter ${isSorted === 'asc' ? 'faldende' : 'stigende'}`,
+  }))
 }
 
 const transactionTypeFilterOptions = computed(() => [
@@ -158,8 +186,12 @@ const transactionTypeFilterOptions = computed(() => [
     .map((value) => ({ label: value, value })),
 ])
 
-const groupedVisibleRows = computed<StatementStackRow[]>(() => {
-  const rows = stacked.value.stacks.map((stack) => {
+function buildGroupedRows(
+  stacks: typeof stacked.value.stacks,
+  query = search.value,
+  activeSortKey = sortKey.value,
+): StatementStackRow[] {
+  const rows = stacks.map((stack) => {
     const items = stack.items
     const representative = stack.representative
 
@@ -194,11 +226,11 @@ const groupedVisibleRows = computed<StatementStackRow[]>(() => {
     }
   })
 
-  if (sortKey.value) return rows
+  if (activeSortKey) return rows
 
   return fuzzyRankRows({
     rows,
-    query: search.value,
+    query,
     getValues: (row) => [
       row.stackId,
       row.representative.id,
@@ -217,7 +249,41 @@ const groupedVisibleRows = computed<StatementStackRow[]>(() => {
       return String(b.representative.id).localeCompare(String(a.representative.id), 'da', { sensitivity: 'base' })
     },
   })
-})
+}
+
+function buildStatementStacks(rows: StatementTransaction[]): typeof stacked.value.stacks {
+  const stacks = new Map<string, {
+    stackId: string
+    groupKey: string | null
+    items: StatementTransaction[]
+    representative: StatementTransaction
+    totalAmount: number
+    isGrouped: boolean
+  }>()
+
+  for (const row of rows) {
+    const stackId = row.samlepostId ?? `single:${row.id}`
+    const existing = stacks.get(stackId)
+    if (existing) {
+      existing.items.push(row)
+      existing.totalAmount += Number(row.amount ?? 0)
+      continue
+    }
+
+    stacks.set(stackId, {
+      stackId,
+      groupKey: stackId.startsWith('group:') ? stackId.slice('group:'.length) : null,
+      items: [row],
+      representative: row,
+      totalAmount: Number(row.amount ?? 0),
+      isGrouped: stackId.startsWith('group:'),
+    })
+  }
+
+  return [...stacks.values()]
+}
+
+const groupedVisibleRows = computed<StatementStackRow[]>(() => buildGroupedRows(stacked.value.stacks))
 
 const statementTableKey = computed(() => groupedVisibleRows.value.map((r) => r.stackId).join('|'))
 
@@ -258,44 +324,75 @@ function formatDanishAmount(value: unknown): string {
 
 function lastEntryDetail(stack: StatementStackRow): StatementTransaction {
   return stack.items.reduce((latest, item) => {
-    if ((item.entrySubIndex ?? 0) > (latest.entrySubIndex ?? 0)) return item
+    const sequenceDifference = (item.entryIndex ?? Number.MAX_SAFE_INTEGER) - (latest.entryIndex ?? Number.MAX_SAFE_INTEGER)
+      || (item.entrySubIndex ?? Number.MAX_SAFE_INTEGER) - (latest.entrySubIndex ?? Number.MAX_SAFE_INTEGER)
+      || item.id.localeCompare(latest.id)
+
+    if (sequenceDifference > 0) return item
     return latest
   }, stack.representative)
 }
 
-function downloadStatementCsv(): void {
+async function downloadStatementCsv(): Promise<void> {
   if (!import.meta.client) return
-  if (!groupedVisibleRows.value.length) return
+  if (isExportingCsv.value) return
 
-  const columns: CsvColumn[] = [
-    { header: 'Bogføringsdato', value: (r) => r.bookingDate },
-    { header: 'Kontonavn', value: (r) => r.account },
-    { header: 'Konto-id', value: (r) => r.representative.accountId ?? '' },
-    { header: 'Beløb', value: (r) => formatDanishAmount(r.amount) },
-    { header: 'Saldo', value: (r) => formatDanishAmount(lastEntryDetail(r).runningBalance) },
-    { header: 'Valuta', value: (r) => r.representative.currency ?? 'DKK' },
-    { header: 'Kredit/debet', value: (r) => r.representative.creditDebitIndicator === 'CRDT' ? 'K' : r.representative.creditDebitIndicator === 'DBIT' ? 'D' : '' },
-    { header: 'Modpart', value: (r) => r.counterpartEntries[0]?.value ?? '' },
-    { header: 'Posteringstekst', value: (r) => r.representative.postingText ?? r.referenceEntries.map((entry) => entry.value).join(' · ') },
-    { header: 'EntryRef', value: (r) => r.representative.ntryRef ?? '' },
-    { header: 'Transaktionstype', value: (r) => r.transactionTypeEntries[0]?.value ?? '' },
-    { header: 'Kategori', value: (r) => r.category },
-    { header: 'Antal linjer', value: (r) => r.lineCount },
-  ]
+  isExportingCsv.value = true
+  try {
+    const exportPageSize = 200
+    const exportQuery = statementQuery(1, exportPageSize)
+    const firstPage = await $fetch<StatementPage>('/api/transactions', {
+      query: exportQuery,
+    })
+    const allRows = [...firstPage.rows]
+    const totalPages = Math.ceil((firstPage.totalSamleposter ?? firstPage.total) / exportPageSize)
 
-  const csv = toCsv(groupedVisibleRows.value, columns)
-  const bom = '\ufeff'
-  const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
+    for (let pageNumber = 2; pageNumber <= totalPages; pageNumber += 1) {
+      const nextPage = await $fetch<StatementPage>('/api/transactions', {
+        query: { ...exportQuery, page: pageNumber },
+      })
+      allRows.push(...nextPage.rows)
+    }
 
-  const fileName = `kontoudtog_${start.value}_${end.value}.csv`
-  const link = document.createElement('a')
-  link.href = url
-  link.download = fileName
-  document.body.appendChild(link)
-  link.click()
-  link.remove()
-  URL.revokeObjectURL(url)
+    const exportRows = buildGroupedRows(
+      buildStatementStacks(allRows),
+      String(exportQuery.search ?? ''),
+      exportQuery.sortBy ?? null,
+    )
+    if (!exportRows.length) return
+
+    const columns: CsvColumn[] = [
+      { header: 'Bogføringsdato', value: (r) => r.bookingDate },
+      { header: 'Kontonavn', value: (r) => r.account },
+      { header: 'Konto-id', value: (r) => r.representative.accountId ?? '' },
+      { header: 'Beløb', value: (r) => formatDanishAmount(r.amount) },
+      { header: 'Saldo', value: (r) => formatDanishAmount(lastEntryDetail(r).runningBalance) },
+      { header: 'Valuta', value: (r) => r.representative.currency ?? 'DKK' },
+      { header: 'Kredit/debet', value: (r) => r.representative.creditDebitIndicator === 'CRDT' ? 'K' : r.representative.creditDebitIndicator === 'DBIT' ? 'D' : '' },
+      { header: 'Posteringstekst', value: (r) => r.representative.postingText ?? r.referenceEntries.map((entry) => entry.value).join(' · ') },
+      { header: 'EntryRef', value: (r) => r.representative.ntryRef ?? '' },
+      { header: 'Transaktionstype', value: (r) => r.transactionTypeEntries[0]?.value ?? '' },
+      { header: 'Kategori', value: (r) => r.category },
+    ]
+
+    const csv = toCsv(exportRows, columns)
+    const bom = '\ufeff'
+    const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+
+    const fileName = `kontoudtog_${exportQuery.start}_${exportQuery.end}.csv`
+    const link = document.createElement('a')
+    link.href = url
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+  } catch {
+    toast.add({ title: 'Kunne ikke hente alle transaktioner til CSV', color: 'error' })
+  } finally {
+    isExportingCsv.value = false
+  }
 }
 
 function resolveTransactionType(row: StatementTransaction): string | null {
@@ -557,7 +654,8 @@ const tableUi = {
               label="Download CSV"
               variant="ghost"
               color="primary"
-              :disabled="!visibleRows.length || status === 'pending'"
+              :disabled="!visibleRows.length || status === 'pending' || isExportingCsv"
+              :loading="isExportingCsv"
               @click="downloadStatementCsv()"
             />
             <UButton
