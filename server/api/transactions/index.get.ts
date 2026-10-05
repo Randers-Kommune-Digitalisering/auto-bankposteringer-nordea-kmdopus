@@ -20,7 +20,7 @@ import { selectPaginatedTransactionKeys, type TransactionStackSortKey } from '~~
 
 type TransactionsMode = 'open-items' | 'statement'
 
-type StatementPageResponse = {
+export type StatementPageResponse = {
   rows: StatementTransaction[]
   total: number
   page: number

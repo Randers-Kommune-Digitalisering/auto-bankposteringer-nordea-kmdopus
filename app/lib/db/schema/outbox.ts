@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod/v4'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
 import { pgTable, uuid, text, integer, jsonb, timestamp, index } from 'drizzle-orm/pg-core'
 import { outboxStatusEnum } from './enums'

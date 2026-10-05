@@ -31,7 +31,7 @@ function isReferenceTriadCode(code: string): boolean {
 }
 
 export function toSummarySectionEntries(section: TransactionSummarySection): TransactionSummaryEntry[] {
-  if (section.key === 'part' || section.key === 'transaktionstype') {
+  if ('items' in section) {
     return section.items
       .map((item) => ({
         value: String(item.value ?? '').trim(),

@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod/v4'
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from 'drizzle-zod'
 import { integer, index, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 import { bankProvider } from './account'

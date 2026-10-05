@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "zod/v4"
 import { pgTable, text, date, timestamp, numeric, integer, uuid, primaryKey, bigint, boolean, unique, index } from "drizzle-orm/pg-core"
 import { createUpdateSchema, createSelectSchema } from "drizzle-zod"
 import type { RuleType, RuleStatus, RuleConditionOperator, RuleConditionGate } from "./enums"

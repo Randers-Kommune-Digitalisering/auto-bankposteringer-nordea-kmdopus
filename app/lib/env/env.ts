@@ -90,6 +90,11 @@ const baseCommonSchema = z.object({
   // Retention policy for deleting sensitive/history tables.
   // Default is 90 days if unset.
   DATA_RETENTION_DAYS: z.coerce.number().int().min(1).max(3650).default(90),
+  OPEN_ITEMS_ALLOW_GROUP_MEMBER_PROCESSING: z
+    .enum(['true', 'false'])
+    .optional()
+    .default('false')
+    .transform(value => value === 'true'),
 
   // SFTP is required only for roles that actually communicate with the ERP via SFTP.
   SFTP_URL: z.string().optional(),

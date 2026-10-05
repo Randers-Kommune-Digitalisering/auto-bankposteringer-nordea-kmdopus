@@ -2,6 +2,7 @@ import { defineEventHandler } from 'h3'
 import { sql } from 'drizzle-orm'
 import { z } from 'zod'
 import db from '~/lib/db'
+import type { RunReopenResponse } from '~/types/erpReopen'
 import { requireErrorHandlingWriteAccess } from '~~/server/auth/requireAppRoles'
 
 export default defineEventHandler(async (event) => {
@@ -20,5 +21,6 @@ export default defineEventHandler(async (event) => {
   `)
 
   const rows = (result.rows ?? []) as Array<{ transaction_id?: string }>
-  return { success: true, runId, reopened: rows.length }
+  const response: RunReopenResponse = { success: true, runId, reopened: rows.length }
+  return response
 })

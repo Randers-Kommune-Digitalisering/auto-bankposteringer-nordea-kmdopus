@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "zod/v4"
 import { pgEnum, pgTable, text, index } from "drizzle-orm/pg-core"
 import { createInsertSchema, createUpdateSchema, createSelectSchema } from "drizzle-zod"
 

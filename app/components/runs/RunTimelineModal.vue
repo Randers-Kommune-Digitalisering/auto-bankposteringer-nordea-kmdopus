@@ -510,7 +510,7 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
         </div>
 
         <div class="flex justify-end gap-2 pt-4 mt-4 border-t border-default">
-          <UButton label="Luk" color="neutral" variant="soft" @click="open = false" />
+          <UButton label="Luk" color="neutral" variant="soft" @click="() => { open = false }" />
         </div>
       </div>
     </template>

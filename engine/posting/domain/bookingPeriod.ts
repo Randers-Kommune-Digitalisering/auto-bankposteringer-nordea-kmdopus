@@ -40,7 +40,8 @@ export function getBookingPeriodState({
     throw new Error('closingDay skal være et heltal mellem 1 og 31')
   }
 
-  const [todayYear, todayMonth] = today.split('-').map(Number)
+  const todayYear = Number(today.slice(0, 4))
+  const todayMonth = Number(today.slice(5, 7))
   const previousMonth = addMonths(todayYear, todayMonth, -1)
   const closingDate = formatDate(
     todayYear,

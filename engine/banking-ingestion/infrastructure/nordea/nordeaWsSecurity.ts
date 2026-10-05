@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import { DOMParser } from '@xmldom/xmldom'
+import { DOMParser, XMLSerializer } from '@xmldom/xmldom'
 import { SignedXml } from 'xml-crypto'
 
 type WsseTimestamp = { created: Date; expires: Date }
@@ -130,7 +130,7 @@ export function verifySoapSignatureOrThrow(options: {
   const verifier = new SignedXml({
     getCertFromKeyInfo: SignedXml.getCertFromKeyInfo,
   })
-  verifier.loadSignature(sigNode)
+  verifier.loadSignature(new XMLSerializer().serializeToString(sigNode))
 
   if (tokenPem) {
     verifier.publicCert = tokenPem as any

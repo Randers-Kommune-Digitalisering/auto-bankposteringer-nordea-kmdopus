@@ -96,7 +96,7 @@ export async function claimRuleForMutationInTransaction(
     .where(eq(rule.id, ruleId))
 }
 
-export async function releaseRuleEditLock(ruleId: number, user: BookingLockUser) {
+export async function releaseRuleEditLock(ruleId: number, user: LockOwnerIdentity) {
   const released = await db.update(rule)
     .set({ lockedAt: null, lockedBy: null, lockedByName: null })
     .where(and(eq(rule.id, ruleId), eq(rule.lockedBy, user.id)))

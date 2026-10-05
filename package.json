@@ -8,6 +8,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "typecheck": "vue-tsc --noEmit --pretty false -p .nuxt/tsconfig.app.json && vue-tsc --noEmit --pretty false -p .nuxt/tsconfig.server.json && vue-tsc --noEmit --pretty false -p .nuxt/tsconfig.shared.json && vue-tsc --noEmit --pretty false -p .nuxt/tsconfig.node.json",
     "db:init": "pnpm db:migrate && pnpm db:seed:system",
     "db:migrate": "drizzle-kit migrate --config drizzle.config.ts",
     "db:reset:public": "tsx scripts/db/reset-public-schema.ts",

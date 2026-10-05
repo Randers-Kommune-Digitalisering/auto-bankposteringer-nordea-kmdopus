@@ -12,6 +12,10 @@ import crypto from 'node:crypto'
 import { DOMParser } from '@xmldom/xmldom'
 import forge from 'node-forge'
 
+type XmlDocument = ReturnType<DOMParser['parseFromString']>
+type XmlNode = NonNullable<ReturnType<XmlDocument['childNodes']['item']>>
+type XmlElement = NonNullable<ReturnType<ReturnType<XmlDocument['getElementsByTagName']>['item']>>
+
 export type XmlEncEncryptOptions = {
   /** PEM encoded X.509 certificate of the recipient (used for key transport). */
   recipientCertificatePem: string
@@ -53,14 +57,14 @@ async function loadXmlEncryption(): Promise<XmlEncryptionModule> {
   return (mod?.default ?? mod) as XmlEncryptionModule
 }
 
-function collectElementsByLocalName(root: Node, localName: string): Element[] {
-  const out: Element[] = []
-  const visit = (node: Node) => {
+function collectElementsByLocalName(root: XmlNode | XmlDocument, localName: string): XmlElement[] {
+  const out: XmlElement[] = []
+  const visit = (node: XmlNode) => {
     const anyNode = node as any
     const name = String(anyNode?.localName ?? anyNode?.nodeName ?? '')
     const normalized = name.includes(':') ? name.split(':').pop() : name
     if (normalized === localName && anyNode?.nodeType === 1) {
-      out.push(anyNode as Element)
+      out.push(anyNode as XmlElement)
     }
     const children = anyNode?.childNodes ?? []
     for (let i = 0; i < children.length; i += 1) {
@@ -71,29 +75,29 @@ function collectElementsByLocalName(root: Node, localName: string): Element[] {
   return out
 }
 
-function firstElementByLocalName(root: Node, localName: string): Element | null {
+function firstElementByLocalName(root: XmlNode | XmlDocument, localName: string): XmlElement | null {
   return collectElementsByLocalName(root, localName)[0] ?? null
 }
 
-function firstTextByLocalName(root: Node, localName: string): string | null {
+function firstTextByLocalName(root: XmlNode | XmlDocument, localName: string): string | null {
   const node = firstElementByLocalName(root, localName)
   const text = node?.textContent?.trim() ?? ''
   return text.length > 0 ? text : null
 }
 
-function directChildByLocalName(root: Node, localName: string): Element | null {
+function directChildByLocalName(root: XmlNode | XmlDocument, localName: string): XmlElement | null {
   const children = (root as any)?.childNodes ?? []
   for (let i = 0; i < children.length; i += 1) {
     const child = children[i] as any
     if (child?.nodeType !== 1) continue
     const name = String(child?.localName ?? child?.nodeName ?? '')
     const normalized = name.includes(':') ? name.split(':').pop() : name
-    if (normalized === localName) return child as Element
+    if (normalized === localName) return child as XmlElement
   }
   return null
 }
 
-function directChildTextByLocalName(root: Node, localName: string): string | null {
+function directChildTextByLocalName(root: XmlNode | XmlDocument, localName: string): string | null {
   const child = directChildByLocalName(root, localName)
   const text = child?.textContent?.trim() ?? ''
   return text.length > 0 ? text : null

@@ -6,7 +6,10 @@ import RulesFileUpload from '~/components/rules/FileUpload.vue'
 import { useManualBookingForm } from '~/composables/useManualBookingForm'
 import { MANUAL_BOOKING_LOCK_RENEW_INTERVAL_MS } from '#engine/manual-booking/domain/bookingLease'
 import type { OpenTransaction, TransactionSummary } from '~/types/transactions'
-import type { ManualBookingFormState as ManualFormState } from '#engine/manual-booking/domain/manualBooking'
+import type {
+	ManualBookingFormState as ManualFormState,
+	ManualBookingPayloadInput,
+} from '#engine/manual-booking/domain/manualBooking'
 
 const appConfig = useAppConfig()
 
@@ -23,7 +26,8 @@ const emit = defineEmits<{
 	(e: 'draft-saved', payload: { transactionId: string; note: string | null }): void
 }>()
 
-type ComparableManualBookingPayload = ReturnType<typeof buildManualBookingPayload>
+type ComparableManualBookingPayload = ReturnType<typeof buildManualBookingPayload> &
+	Pick<ManualBookingPayloadInput, 'confirmClosedPeriodRebooking'>
 
 const savedSnapshot = ref<string | null>(null)
 
@@ -386,9 +390,12 @@ async function handleSubmit(event?: FormSubmitEvent<ManualFormState>) {
 
 async function submitBooking(payload: ComparableManualBookingPayload) {
 	if (isBookingReadOnly.value) return
+	const isGroup = isGroupMode.value
+	const transactionId = transaction.value?.id
+	if (!isGroup && !transactionId) return
 	try {
 		isSubmitting.value = true
-		if (isGroupMode.value) {
+		if (isGroup) {
 			await $fetch('/api/transactions/group/process', {
 				method: 'POST',
 				body: {
@@ -396,17 +403,17 @@ async function submitBooking(payload: ComparableManualBookingPayload) {
 					payload,
 				},
 			})
-		} else {
-			await $fetch(`/api/transactions/${transaction.value.id}/process`, {
+		} else if (transactionId) {
+			await $fetch(`/api/transactions/${transactionId}/process`, {
 				method: 'POST',
 				body: payload
 			})
 		}
 		toast.add({
 			title: 'Postering sendt',
-			description: isGroupMode.value
+			description: isGroup
 				? `Samlepost med ${groupTransactionIds.value.length} transaktioner er sendt til ERP`
-				: `Transaktion ${transaction.value.id} er sendt til ERP`,
+				: `Transaktion ${transactionId} er sendt til ERP`,
 			color: 'primary'
 		})
 		await refreshNuxtData('open-transactions')
@@ -576,7 +583,7 @@ function collapseAllLines() {
 							variant="soft"
 							color="primary"
 							:icon="appConfig.ui.icons.arrowRight"
-							@click="isGroupLinesOpen = true"
+							@click="() => { isGroupLinesOpen = true }"
 						>
 							Vis linjer
 						</UButton>
@@ -854,7 +861,7 @@ function collapseAllLines() {
 					Hvis du fortsætter, bliver den bogført med dato {{ closedPeriodWarning?.effectiveBookingDate }}.
 				</p>
 				<div class="flex justify-end gap-2">
-					<UButton color="neutral" variant="soft" @click="closedPeriodWarning = null">
+					<UButton color="neutral" variant="soft" @click="() => { closedPeriodWarning = null }">
 						Annuller
 					</UButton>
 					<UButton color="primary" :loading="isSubmitting" @click="confirmClosedPeriodRebooking">
