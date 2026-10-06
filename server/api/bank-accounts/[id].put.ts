@@ -7,7 +7,6 @@ import { bankingAgreementAccountAllowlist } from '~/lib/db/schema/bankingAgreeme
 import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreementAccountDimension'
 import { logger } from '~/lib/logger'
 import { retryRunsAfterAccountChange } from '~~/server/utils/recovery/retryRunsAfterAccountChange'
-import { purgeIgnoredAccountTransactions } from '~~/server/utils/recovery/purgeIgnoredAccountTransactions'
 import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
 
 const updateSchema = z.object({
@@ -102,9 +101,6 @@ export default defineEventHandler(async (event) => {
           } as any,
         })
 
-      if (payload.ignoreIngestion) {
-        await purgeIgnoredAccountTransactions(trx, id)
-      }
     }
 
     const [base] = await trx

@@ -239,6 +239,7 @@ async function requestNordeaRestReauth() {
 }
 
 const refreshingAccounts = ref(false)
+const bulkIgnorePending = ref(false)
 const sorting = ref<SortingState>([])
 const discoveryPollingByProvider = ref<Record<string, boolean>>({})
 const seenCompletedDiscoveryByProvider = ref<Record<string, string>>({})
@@ -522,6 +523,33 @@ async function activateSelectedAgreement() {
 }
 
 const rows = computed(() => [...(accounts.value ?? [])])
+const nextBulkIgnoreValue = computed(() => rows.value.some((row) => !row.ignoreIngestion))
+
+async function toggleAllAccountIngestion() {
+  if (bulkIgnorePending.value || !rows.value.length) return
+
+  bulkIgnorePending.value = true
+  try {
+    const result = await $fetch<{ accountsUpdated: number; ignoreIngestion: boolean }>('/api/banking-accounts/bulk-ignore', {
+      method: 'PUT',
+      body: { ignoreIngestion: nextBulkIgnoreValue.value },
+    })
+    await refreshBankingData()
+    toast.add({
+      title: result.ignoreIngestion ? 'Alle bankkonti ignoreres' : 'Alle bankkonti anvendes',
+      description: `${result.accountsUpdated} konti opdateret.`,
+      color: 'success',
+    })
+  } catch (err: any) {
+    toast.add({
+      title: 'Kan ikke ændre anvendelse for alle konti',
+      description: String(err?.data?.statusMessage ?? err?.statusMessage ?? err?.message ?? err),
+      color: 'error',
+    })
+  } finally {
+    bulkIgnorePending.value = false
+  }
+}
 
 const accountsTableKey = computed(() => rows.value.map((row) => [
   row.provider,
@@ -856,6 +884,15 @@ const pagination = ref({ pageIndex: 0, pageSize: 20 })
           :trailing-icon="appConfig.ui.icons.search"
           label="Søg..."
         />
+        <UButton
+          color="neutral"
+          variant="soft"
+          :loading="bulkIgnorePending"
+          :disabled="!rows.length"
+          @click="toggleAllAccountIngestion"
+        >
+          {{ nextBulkIgnoreValue ? 'Ignorér alle konti' : 'Anvend alle konti' }}
+        </UButton>
       </div>
 
       <UTable
