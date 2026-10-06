@@ -1,5 +1,6 @@
 import crypto from 'node:crypto'
 import { Builder } from 'xml2js'
+import { parseStringPromise } from 'xml2js'
 import { erpIntegrationMetadata, type ErpIntegrationMetadata } from '~/lib/env/env'
 import type { DimensionKeyByTarget } from '../../../ports/erpAdapter'
 import type { PostingAttachment, PostingLineInput } from '../../../../posting/domain/posting'
@@ -11,7 +12,6 @@ const builder = new Builder({
 
 export interface BuildPostingXmlOptions {
   bookingDate: Date | string
-  runUid?: string
   documentId?: string
   documentDate?: Date
   metadataOverride?: Partial<ErpIntegrationMetadata>
@@ -22,6 +22,7 @@ export interface BuildPostingXmlOptions {
 }
 
 export interface PostingXmlResult {
+  documentId: string
   filename: string
   payload: string
   lineCount: number
@@ -111,6 +112,7 @@ export function buildErpPostingXml(postings: PostingLineInput[], options: BuildP
     }
   }
 
+  const documentId = deriveDocId(options.documentId)
   const header: Record<string, unknown> = {
     NO_DOC_POSITION: String(lineCounter),
     BALANCE_DEBET: (debitSum / 100).toFixed(2),
@@ -119,7 +121,7 @@ export function buildErpPostingXml(postings: PostingLineInput[], options: BuildP
     COMP_CODE: metadata.compCode,
     DOC_DATE: docDate,
     PSTNG_DATE: bookingDate,
-    RECEIV_DOC: deriveDocId(options.documentId, options.runUid, metadata.integrationId),
+    RECEIV_DOC: documentId,
     HEADER_TXT: metadata.integrationId,
     XREF1_HD: metadata.integrationId,
   }
@@ -156,12 +158,32 @@ export function buildErpPostingXml(postings: PostingLineInput[], options: BuildP
   }
 
   return {
+    documentId,
     filename: xmlObject['n1:FinancePostingRequest'].CONTROL_FIELDS.FILE_NAME,
     payload: builder.buildObject(xmlObject),
     lineCount: lineCounter,
     debitSumInOre: debitSum,
     creditSumInOre: creditSum,
   }
+}
+
+export async function replaceKmdRequestFilename(xml: string, filename: string): Promise<{
+  payload: string
+  documentId: string
+}> {
+  const parsed = await parseStringPromise(xml, { explicitArray: false }) as Record<string, any>
+  const rootName = Object.keys(parsed).find(key => key.endsWith('FinancePostingRequest'))
+  const root = rootName ? parsed[rootName] as Record<string, any> : undefined
+  const controlFields = root?.CONTROL_FIELDS as Record<string, unknown> | undefined
+  const header = root?.POSTING_DOCUMENT?.HEADER as Record<string, unknown> | undefined
+  const documentId = typeof header?.RECEIV_DOC === 'string' ? header.RECEIV_DOC.trim() : ''
+
+  if (!controlFields || !header || !documentId) {
+    throw new Error('KMD request payload mangler CONTROL_FIELDS eller POSTING_DOCUMENT/HEADER/RECEIV_DOC')
+  }
+
+  controlFields.FILE_NAME = filename
+  return { payload: builder.buildObject(parsed), documentId }
 }
 
 function formatDate(input: Date | string): string {
@@ -235,12 +257,8 @@ function normalizeAmount(amount: number | string): number {
   return parsed
 }
 
-function deriveDocId(documentId?: string, runUid?: string, integrationId?: string): string {
-  const source = documentId ?? runUid ?? integrationId
-  if (!source) {
-    return crypto.randomUUID()
-  }
-
+function deriveDocId(documentId?: string): string {
+  const source = documentId ?? crypto.randomUUID()
   const hash = crypto.createHash('sha1').update(source).digest('hex')
   return hash.substring(0, 16)
 }

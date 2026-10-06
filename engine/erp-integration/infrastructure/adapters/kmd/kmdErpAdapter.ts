@@ -1,3 +1,4 @@
+import crypto from 'node:crypto'
 import type { BuildErpRequestInput, ErpAdapter } from '../../../ports/erpAdapter'
 import type { PostingLineInput } from '../../../../posting/domain/posting'
 import { buildErpPostingXml, type BuildPostingXmlOptions } from './postingXmlBuilder'
@@ -5,17 +6,8 @@ import { parseKmdPostingResponse } from './kmdResponseParser'
 import { ErpSftpClient, type RemoteFile } from './sftpClient'
 import { logger } from '~/lib/logger'
 
-function tryResolveRequestIdFromFilename(file: RemoteFile): string | undefined {
-  const name = file.name.trim()
-  if (!name) return undefined
-
-  // KMD Opus: we use the generated filename as requestId
-  return name
-}
-
 export function createKmdErpAdapter(options: {
   sftpClient?: ErpSftpClient
-  resolveRequestId?: (file: RemoteFile) => string | undefined
   xmlOptions?: Partial<BuildPostingXmlOptions>
 } = {}): ErpAdapter {
   const sftp = options.sftpClient ?? new ErpSftpClient()
@@ -27,16 +19,16 @@ export function createKmdErpAdapter(options: {
     buildRequest(input: BuildErpRequestInput) {
       const xmlOptions: BuildPostingXmlOptions = {
         bookingDate: input.bookingDate,
-        runUid: input.runId,
         dimensionKeyByTarget: input.dimensionKeyByTarget,
         ...options.xmlOptions,
       }
 
       const xmlResult = buildErpPostingXml(input.postings, xmlOptions)
-      const requestId = xmlResult.filename
+      const requestId = crypto.randomUUID()
 
       return {
         requestId,
+        documentId: xmlResult.documentId,
         filename: xmlResult.filename,
         payload: xmlResult.payload,
         lineCount: xmlResult.lineCount,
@@ -56,40 +48,39 @@ export function createKmdErpAdapter(options: {
         deleteAfterPickup: ingestOptions.deleteAfterPickup ?? false,
       })
       const files = await sftp.fetchResponseFiles(ingestOptions.limit)
-      let deleted = 0
-
-      const resolveRequestId =
-        options.resolveRequestId ??
-        ((file: RemoteFile) => tryResolveRequestIdFromFilename(file))
 
       const responses = files.map((file) => {
         const payload = file.contents.toString('utf-8')
-        let statusText: string
         try {
-          statusText = parseKmdPostingResponse(payload).statusText
+          const parsed = parseKmdPostingResponse(payload)
+          return {
+            requestFilename: parsed.requestFilename,
+            payload,
+            remotePath: file.path,
+            statusText: parsed.statusText,
+            documents: parsed.documents.map(document => ({
+              documentId: document.documentNumber,
+              status: document.status,
+              messages: document.messages,
+            })),
+          }
         } catch (error) {
           log.error('ERP response parse failed (KMD)', { filename: file.name, error })
-          statusText = 'FEJL: KMD-svar kunne ikke fortolkes'
-        }
-
-        return {
-          requestId: resolveRequestId(file),
-          payload,
-          remotePath: file.path,
-          statusText,
+          return {
+            payload,
+            remotePath: file.path,
+            statusText: 'FEJL: KMD-svar kunne ikke fortolkes',
+          }
         }
       })
 
-      if (ingestOptions.deleteAfterPickup ?? false) {
-        for (const file of files) {
-          await sftp.deleteRemoteFile(file.path)
-          deleted += 1
-        }
-      }
+      log.info('ERP response ingest (KMD) done', { files: files.length, deletedRemoteFiles: 0 })
 
-      log.info('ERP response ingest (KMD) done', { files: files.length, deletedRemoteFiles: deleted })
+      return { responses, deletedRemoteFiles: 0 }
+    },
 
-      return { responses, deletedRemoteFiles: deleted }
+    async deleteResponseFile(remotePath: string) {
+      await sftp.deleteRemoteFile(remotePath)
     },
   }
 }

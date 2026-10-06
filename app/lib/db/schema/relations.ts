@@ -27,7 +27,7 @@ import {
 } from "./banking";
 import { bankingDocument, bankingStatement, bankingStatementBalance } from "./statement";
 import { bankingAdapterCursor } from "./bankingAdapterCursor";
-import { erpRequest, erpResponse, erpRequestLine } from "./erp";
+import { erpDocument, erpRequest, erpResponse, erpRequestLine, erpResponseDocument } from "./erp";
 import { errorLog } from "./error";
 import { job } from './job';
 import { bankingAgreementDiscoveryRun } from './bankingAgreementDiscoveryRun';
@@ -106,8 +106,21 @@ export const bankingResponseRelations = relations(BankingResponse, ({ one }) => 
 export const erpRequestRelations = relations(erpRequest, ({ one, many }) => ({
   response: one(erpResponse),
   lines: many(erpRequestLine),
+  document: one(erpDocument, {
+    fields: [erpRequest.documentId],
+    references: [erpDocument.id],
+  }),
   run: one(run, {
     fields: [erpRequest.runId],
+    references: [run.id],
+  }),
+}));
+
+export const erpDocumentRelations = relations(erpDocument, ({ one, many }) => ({
+  requests: many(erpRequest),
+  responseDocuments: many(erpResponseDocument),
+  run: one(run, {
+    fields: [erpDocument.runId],
     references: [run.id],
   }),
 }));
@@ -123,10 +136,22 @@ export const erpRequestLineRelations = relations(erpRequestLine, ({ one }) => ({
   }),
 }));
 
-export const erpResponseRelations = relations(erpResponse, ({ one }) => ({
+export const erpResponseRelations = relations(erpResponse, ({ one, many }) => ({
   request: one(erpRequest, {
     fields: [erpResponse.requestId],
     references: [erpRequest.id],
+  }),
+  documents: many(erpResponseDocument),
+}));
+
+export const erpResponseDocumentRelations = relations(erpResponseDocument, ({ one }) => ({
+  response: one(erpResponse, {
+    fields: [erpResponseDocument.responseId],
+    references: [erpResponse.id],
+  }),
+  document: one(erpDocument, {
+    fields: [erpResponseDocument.documentId],
+    references: [erpDocument.id],
   }),
 }));
 

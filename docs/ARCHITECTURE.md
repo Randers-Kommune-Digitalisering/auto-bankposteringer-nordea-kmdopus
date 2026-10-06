@@ -40,6 +40,10 @@ This repo is a stateless financial integration engine:
 
 - `requestId` is an internal, persistent identity key for ERP request tracking/idempotency.
 - The physical filename used during ERP transport is an explicit payload field (`filename`) and must not be inferred from `requestId`.
+- KMD business-document identity (`erp_document.id`) is separate from both: it is written to `POSTING_DOCUMENT/HEADER/RECEIV_DOC`, and request attempts reference it through `erp_request.document_id`.
+- Each initial submission or resend creates a distinct `erp_request.id` and stores its transport filename. A resend updates `CONTROL_FIELDS.FILE_NAME` to the new filename while preserving `RECEIV_DOC` to retain KMD's duplicate-posting protection.
+- KMD responses are correlated to a request attempt using the embedded `CONTROL_FIELDS.FILE_NAME` and the persisted request filename. The response's `RETURN/RECEIV_DOC` outcomes are stored against `erp_document`; the response row itself references the matched request attempt. The remote response filename is only transport metadata.
+- Older requests without a persisted filename may be matched by their legacy request ID, which was the original transport filename. Unknown or malformed response correlations fail ingestion without deleting the remote response file.
 - For KMD, filename rendering is deterministic from the configured mask placeholders:
   - `{municipalityCode}`
   - `{integrationId}`
