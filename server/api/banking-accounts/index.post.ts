@@ -9,7 +9,6 @@ import { bankingAgreementAccountAllowlist } from '~/lib/db/schema/bankingAgreeme
 import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreementAccountDimension'
 import { getActiveErpSupplier, listAccountingDimensionDefinitions } from '~~/server/utils/accountingDimensions'
 import { retryRunsAfterAccountChange } from '~~/server/utils/recovery/retryRunsAfterAccountChange'
-import { purgeIgnoredAccountTransactions } from '~~/server/utils/recovery/purgeIgnoredAccountTransactions'
 import { logger } from '~/lib/logger'
 
 function normalizeIban(input: string): string {
@@ -113,16 +112,6 @@ export default defineEventHandler(async (event) => {
         ],
         set: { dimensionValue: ignoreIngestion ? 'true' : 'false', updatedAt: new Date() } as any,
       })
-
-    if (ignoreIngestion) {
-      const observedAccounts = await trx
-        .select({ id: account.id })
-        .from(account)
-        .where(and(eq(account.provider, provider as any), eq(account.iban, iban)))
-      for (const observedAccount of observedAccounts) {
-        await purgeIgnoredAccountTransactions(trx, observedAccount.id)
-      }
-    }
 
     if (name) {
       await trx
