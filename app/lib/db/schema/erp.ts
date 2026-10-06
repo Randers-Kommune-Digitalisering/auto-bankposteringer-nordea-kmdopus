@@ -23,6 +23,18 @@ export const erpDocument = pgTable("erp_document", {
   runIdIdx: index('erp_document_run_id_idx').on(t.runId),
 }));
 
+export const erpDocumentTransaction = pgTable(
+  'erp_document_transaction',
+  {
+    documentId: text('document_id').notNull().references(() => erpDocument.id, { onDelete: 'cascade' }),
+    transactionId: uuid('transaction_id').notNull().references(() => transaction.id, { onDelete: 'cascade' }),
+  },
+  (table) => ([
+    primaryKey({ columns: [table.documentId, table.transactionId] }),
+    index('erp_document_transaction_transaction_id_idx').on(table.transactionId),
+  ]),
+)
+
 export const erpResponse = pgTable("erp_response", {
   id: text().primaryKey(),
   requestId: text("request_id").references(() => erpRequest.id).unique(),

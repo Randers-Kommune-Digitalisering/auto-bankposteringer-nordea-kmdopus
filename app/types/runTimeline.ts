@@ -35,7 +35,7 @@ export type TimelineErpRequest = {
 
 export type TimelineStageEvent = {
   id: string
-  stage: 'banking' | 'matching' | 'erp'
+  stage: 'banking' | 'matching' | 'manual' | 'erp'
   eventType: string
   status: string | null
   detail: string | null
@@ -60,6 +60,7 @@ export type MatchingSummary = {
   matched: number
   exception: number
   open: number
+  manualBookedTransactions: number
 }
 
 export type RunTimelineResponse = {

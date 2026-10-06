@@ -3,6 +3,7 @@ import type { TableColumn } from '@nuxt/ui'
 import type { SortingState } from '@tanstack/table-core'
 import { getPaginationRowModel } from '@tanstack/table-core'
 import BankingAccountModal from '~/components/banking/AccountModal.vue'
+import { useDefaultBankAccount } from '~/composables/useDefaultBankAccount'
 
 
 type BankingAccountUnionDto = {
@@ -15,6 +16,13 @@ type BankingAccountUnionDto = {
   observed: boolean
   configuredForApi: boolean
   observedAccountId: string | null
+}
+
+type SelectableBankAccount = {
+  id: string
+  iban: string
+  name: string | null
+  ignoreIngestion?: boolean
 }
 
 type AllowlistAccount = { iban: string; name: string | null; statuskonto: string | null; ignoreIngestion: boolean }
@@ -268,6 +276,57 @@ const { data: agreements, refresh: refreshAgreements } = useFetch<BankingAgreeme
     lazy: true,
   },
 )
+
+const { data: selectableAccounts, pending: selectableAccountsPending } = useFetch<SelectableBankAccount[]>(
+  '/api/bank-accounts',
+  {
+    key: 'bank-accounts',
+    default: () => [],
+  },
+)
+
+const {
+  data: defaultBankAccount,
+  pending: defaultBankAccountPending,
+  setDefaultBankAccount,
+} = useDefaultBankAccount()
+
+const defaultBankAccountOptions = computed(() =>
+  (selectableAccounts.value ?? [])
+    .filter(account => !account.ignoreIngestion)
+    .map(account => ({
+      label: `${account.name ? `${account.name} · ` : ''}${account.iban}`,
+      value: account.id,
+    })),
+)
+
+const defaultBankAccountId = computed(() => {
+  const configuredId = defaultBankAccount.value?.defaultBankAccountId
+  if (!configuredId) return undefined
+  return defaultBankAccountOptions.value.some(option => option.value === configuredId) ? configuredId : undefined
+})
+
+const savingDefaultBankAccount = ref(false)
+
+async function changeDefaultBankAccount(accountId: string | null | undefined) {
+  if (savingDefaultBankAccount.value) return
+  savingDefaultBankAccount.value = true
+  try {
+    const saved = await setDefaultBankAccount(accountId ?? null)
+    toast.add({
+      title: saved.defaultBankAccountId ? 'Standardkonto ændret' : 'Standardkonto fjernet',
+      color: 'success',
+    })
+  } catch (err: any) {
+    toast.add({
+      title: 'Kan ikke ændre standardkonto',
+      description: String(err?.data?.statusMessage ?? err?.statusMessage ?? err?.message ?? err),
+      color: 'error',
+    })
+  } finally {
+    savingDefaultBankAccount.value = false
+  }
+}
 
 async function refreshBankingData() {
   await Promise.all([
@@ -764,6 +823,34 @@ const pagination = ref({ pageIndex: 0, pageSize: 20 })
     </template>
 
     <template #body>
+      <section class="mb-8 space-y-3">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-muted">Standardkonto</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <USelect
+            class="w-full max-w-md"
+            :model-value="defaultBankAccountId"
+            :items="defaultBankAccountOptions"
+            valueKey="value"
+            labelKey="label"
+            placeholder="Vælg standardkonto"
+            :loading="selectableAccountsPending || defaultBankAccountPending || savingDefaultBankAccount"
+            :disabled="savingDefaultBankAccount"
+            @update:model-value="(value: string | undefined) => changeDefaultBankAccount(value)"
+          />
+          <UButton
+            label="Fjern standard"
+            color="neutral"
+            variant="soft"
+            :disabled="!defaultBankAccount?.defaultBankAccountId || savingDefaultBankAccount"
+            :loading="savingDefaultBankAccount"
+            @click="changeDefaultBankAccount(null)"
+          />
+        </div>
+      </section>
+
       <section class="mb-8 space-y-3">
         <div>
           <p class="text-xs font-semibold uppercase tracking-wide text-muted">Aftaler</p>

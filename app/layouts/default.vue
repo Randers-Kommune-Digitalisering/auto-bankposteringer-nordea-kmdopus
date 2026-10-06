@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { NavigationMenuItem } from '@nuxt/ui'
 import { canAccessPath } from '~/lib/authz/policy'
+import type { OpenTransactionsResponse } from '~/types/transactions'
 
 const APP_TITLE = 'FOBI'
 const open = ref(false)
@@ -8,6 +9,34 @@ const route = useRoute()
 const { user, roles } = useAuthz()
 
 const appConfig = useAppConfig()
+const canViewOpenItems = computed(() => canAccessPath('/aabne-poster', roles.value))
+const openItemsCount = ref<number | null>(null)
+const { data: openItemsSummary, refresh: refreshOpenItemsSummary } = useFetch<
+  Pick<OpenTransactionsResponse, 'totalSamleposter'>
+>('/api/transactions', {
+  key: 'navigation-open-items-count',
+  query: { mode: 'open-items', limit: 1 },
+  server: false,
+  immediate: false,
+  default: () => ({ totalSamleposter: undefined }),
+})
+
+watch(
+  () => openItemsSummary.value?.totalSamleposter,
+  (count) => {
+    if (typeof count === 'number') openItemsCount.value = count
+  },
+  { immediate: true },
+)
+
+watch(canViewOpenItems, (canView) => {
+  if (canView) void refreshOpenItemsSummary()
+}, { immediate: true })
+
+const openItemsBadgeText = computed(() => {
+  if (openItemsCount.value === null) return undefined
+  return openItemsCount.value > 99 ? '99+' : openItemsCount.value
+})
 
 function normalizePath(path: string): string {
   const trimmed = path.length > 1 ? path.replace(/\/+$/, '') : path
@@ -86,7 +115,7 @@ const primaryLinks: NavigationMenuItem[] = [
     label: 'Indstillinger',
     to: '/indstillinger',
     icon: appConfig.ui.icons.settings,
-    defaultOpen: true,
+    defaultOpen: false,
     type: 'trigger',
     children: [
       {
@@ -123,6 +152,7 @@ const primaryLinks: NavigationMenuItem[] = [
     label: 'Kontrol',
     to: '/fejlhaandtering',
     icon: appConfig.ui.icons.warning,
+    defaultOpen: false,
     type: 'trigger',
     children: [
       {
@@ -218,7 +248,28 @@ useHead(() => ({
           tooltip
           popover
           class="mt-2"
-        />
+        >
+          <template #item-leading="{ item, active, ui }">
+            <UChip
+              v-if="item.to === '/aabne-poster'"
+              :show="openItemsCount !== 0"
+              :text="openItemsBadgeText"
+              color="error"
+              size="sm"
+            >
+              <UIcon
+                v-if="item.icon"
+                :name="item.icon"
+                :class="ui.linkLeadingIcon({ active, disabled: !!item.disabled })"
+              />
+            </UChip>
+            <UIcon
+              v-else-if="item.icon"
+              :name="item.icon"
+              :class="ui.linkLeadingIcon({ active, disabled: !!item.disabled })"
+            />
+          </template>
+        </UNavigationMenu>
 
         <!-- Sekundær navigation / bund -->
         <UNavigationMenu

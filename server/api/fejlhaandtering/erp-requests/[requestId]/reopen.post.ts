@@ -1,8 +1,8 @@
 import { defineEventHandler, createError, readBody } from 'h3'
-import { and, eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import db from '~/lib/db'
-import { erpRequestLine } from '~/lib/db/schema/erp'
+import { erpDocumentTransaction, erpRequest, erpRequestLine } from '~/lib/db/schema/erp'
 import { transactionProcessing } from '~/lib/db/schema/transaction'
 import type { ErpRequestReopenResponse } from '~/types/erpReopen'
 import { requireErrorHandlingWriteAccess } from '~~/server/auth/requireAppRoles'
@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
 
   const existing = await db.query.erpRequest.findFirst({
     where: (fields, { eq }) => eq(fields.id, requestId),
-    columns: { id: true },
+    columns: { id: true, documentId: true },
   })
 
   if (!existing?.id) {
@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 422, statusMessage: 'Der skal vælges mindst én transaktion' })
   }
 
-  const mappingRows = requestedTransactionIds.length
+  const lineMappingRows = requestedTransactionIds.length
     ? await db
         .select({
           lineNo: erpRequestLine.lineNo,
@@ -50,9 +50,25 @@ export default defineEventHandler(async (event) => {
         .from(erpRequestLine)
         .where(and(eq(erpRequestLine.requestId, requestId), inArray(erpRequestLine.lineNo, requestedLineNos)))
 
-  const foundLineNos = new Set(mappingRows.map((r) => r.lineNo))
+  const documentMappingRows = requestedTransactionIds.length && existing.documentId
+    ? await db
+        .select({
+          lineNo: sql<number>`0`,
+          transactionId: erpDocumentTransaction.transactionId,
+        })
+        .from(erpDocumentTransaction)
+        .innerJoin(erpRequest, eq(erpRequest.documentId, erpDocumentTransaction.documentId))
+        .where(and(
+          eq(erpRequest.id, requestId),
+          inArray(erpDocumentTransaction.transactionId, requestedTransactionIds),
+        ))
+    : []
+
+  const mappingRows = [...lineMappingRows, ...documentMappingRows]
+
+  const foundLineNos = new Set(lineMappingRows.map((r) => r.lineNo))
   const missingLineNos = requestedLineNos.filter((n) => !foundLineNos.has(n))
-  const unmappedLineNos = mappingRows.filter((r) => !r.transactionId).map((r) => r.lineNo)
+  const unmappedLineNos = lineMappingRows.filter((r) => !r.transactionId).map((r) => r.lineNo)
 
   const eligibleTransactionIds = Array.from(
     new Set(

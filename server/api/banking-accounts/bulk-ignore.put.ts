@@ -1,9 +1,11 @@
 import { defineEventHandler, readBody, createError } from 'h3'
+import { and, eq, inArray } from 'drizzle-orm'
 import { z } from 'zod'
 import db from '~/lib/db'
 import { account } from '~/lib/db/schema/account'
 import { bankingAgreementAccountAllowlist } from '~/lib/db/schema/bankingAgreementAccountAllowlist'
 import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreementAccountDimension'
+import { tenantConfiguration } from '~/lib/db/schema/rule'
 import { logger } from '~/lib/logger'
 import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
 import { retryRunsAfterAccountChange } from '~~/server/utils/recovery/retryRunsAfterAccountChange'
@@ -20,7 +22,7 @@ export default defineEventHandler(async (event) => {
 
   const ignoreIngestion = parsed.data.ignoreIngestion
   const [observedAccounts, configuredAccounts] = await Promise.all([
-    db.select({ provider: account.provider, iban: account.iban }).from(account),
+    db.select({ id: account.id, provider: account.provider, iban: account.iban }).from(account),
     db.select({ provider: bankingAgreementAccountAllowlist.provider, iban: bankingAgreementAccountAllowlist.iban })
       .from(bankingAgreementAccountAllowlist),
   ])
@@ -55,6 +57,14 @@ export default defineEventHandler(async (event) => {
           ],
           set: { dimensionValue: ignoreIngestion ? 'true' : 'false', updatedAt: now } as any,
         })
+    }
+
+    const observedAccountIds = observedAccounts.map(row => String(row.id))
+    if (ignoreIngestion && observedAccountIds.length) {
+      await trx
+        .update(tenantConfiguration)
+        .set({ defaultBankAccountId: null })
+        .where(inArray(tenantConfiguration.defaultBankAccountId, observedAccountIds))
     }
 
   })

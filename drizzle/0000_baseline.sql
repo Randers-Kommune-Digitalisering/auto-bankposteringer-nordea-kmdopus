@@ -180,10 +180,25 @@ CREATE TABLE "document" (
 	"file_extension" text NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "erp_document" (
+	"id" text PRIMARY KEY NOT NULL,
+	"run_id" uuid NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "erp_document_transaction" (
+	"document_id" text NOT NULL,
+	"transaction_id" uuid NOT NULL,
+	CONSTRAINT "erp_document_transaction_document_id_transaction_id_pk" PRIMARY KEY("document_id","transaction_id")
+);
+--> statement-breakpoint
 CREATE TABLE "erp_request" (
 	"id" text PRIMARY KEY NOT NULL,
 	"run_id" uuid NOT NULL,
-	"payload" text
+	"source_request_id" text,
+	"document_id" text,
+	"filename" text,
+	"payload" text,
+	CONSTRAINT "erp_request_filename_unique" UNIQUE("filename")
 );
 --> statement-breakpoint
 CREATE TABLE "erp_request_line" (
@@ -204,6 +219,14 @@ CREATE TABLE "erp_response" (
 	"status_text" text,
 	"payload" text,
 	CONSTRAINT "erp_response_request_id_unique" UNIQUE("request_id")
+);
+--> statement-breakpoint
+CREATE TABLE "erp_response_document" (
+	"response_id" text NOT NULL,
+	"document_id" text NOT NULL,
+	"status" text NOT NULL,
+	"messages" jsonb NOT NULL,
+	CONSTRAINT "erp_response_document_response_id_document_id_pk" PRIMARY KEY("response_id","document_id")
 );
 --> statement-breakpoint
 CREATE TABLE "error" (
@@ -363,6 +386,7 @@ CREATE TABLE "tenant_configuration" (
 	"id" integer PRIMARY KEY NOT NULL,
 	"active_erp_supplier" "erp_supplier" NOT NULL,
 	"booking_period_close_day" integer NOT NULL,
+	"default_bank_account_id" text,
 	"created_at" date DEFAULT now(),
 	"updated_at" date DEFAULT now()
 );
@@ -384,6 +408,22 @@ CREATE TABLE "run" (
 	"booking_date" date NOT NULL,
 	"status" "run_status",
 	CONSTRAINT "run_booking_date_unique" UNIQUE("booking_date")
+);
+--> statement-breakpoint
+CREATE TABLE "run_timeline_event" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"run_id" uuid NOT NULL,
+	"stage" text NOT NULL,
+	"event_type" text NOT NULL,
+	"status" text,
+	"detail" text,
+	"request_id" text,
+	"outbox_id" uuid,
+	"attempt" integer,
+	"actor_id" text,
+	"payload_sha256" text,
+	"created_at" timestamp with time zone DEFAULT clock_timestamp() NOT NULL,
+	"sequence" integer GENERATED ALWAYS AS IDENTITY (sequence name "run_timeline_event_sequence_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1)
 );
 --> statement-breakpoint
 CREATE TABLE "banking_document" (
@@ -530,10 +570,17 @@ ALTER TABLE "banking_agreement_cursor" ADD CONSTRAINT "banking_agreement_cursor_
 ALTER TABLE "banking_agreement_discovery_run" ADD CONSTRAINT "banking_agreement_discovery_run_job_id_job_id_fk" FOREIGN KEY ("job_id") REFERENCES "public"."job"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "booking_period_rebooking_audit" ADD CONSTRAINT "booking_period_rebooking_audit_transaction_id_transaction_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."transaction"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "document" ADD CONSTRAINT "document_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "erp_document" ADD CONSTRAINT "erp_document_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "erp_document_transaction" ADD CONSTRAINT "erp_document_transaction_document_id_erp_document_id_fk" FOREIGN KEY ("document_id") REFERENCES "public"."erp_document"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "erp_document_transaction" ADD CONSTRAINT "erp_document_transaction_transaction_id_transaction_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."transaction"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "erp_request" ADD CONSTRAINT "erp_request_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "erp_request" ADD CONSTRAINT "erp_request_source_request_id_erp_request_id_fk" FOREIGN KEY ("source_request_id") REFERENCES "public"."erp_request"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "erp_request" ADD CONSTRAINT "erp_request_document_id_erp_document_id_fk" FOREIGN KEY ("document_id") REFERENCES "public"."erp_document"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "erp_request_line" ADD CONSTRAINT "erp_request_line_request_id_erp_request_id_fk" FOREIGN KEY ("request_id") REFERENCES "public"."erp_request"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "erp_request_line" ADD CONSTRAINT "erp_request_line_transaction_id_transaction_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."transaction"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "erp_response" ADD CONSTRAINT "erp_response_request_id_erp_request_id_fk" FOREIGN KEY ("request_id") REFERENCES "public"."erp_request"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "erp_response_document" ADD CONSTRAINT "erp_response_document_response_id_erp_response_id_fk" FOREIGN KEY ("response_id") REFERENCES "public"."erp_response"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "erp_response_document" ADD CONSTRAINT "erp_response_document_document_id_erp_document_id_fk" FOREIGN KEY ("document_id") REFERENCES "public"."erp_document"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "error" ADD CONSTRAINT "error_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "job" ADD CONSTRAINT "job_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "manual_booking_draft" ADD CONSTRAINT "manual_booking_draft_transaction_id_transaction_id_fk" FOREIGN KEY ("transaction_id") REFERENCES "public"."transaction"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -550,7 +597,11 @@ ALTER TABLE "rule_bank_account" ADD CONSTRAINT "rule_bank_account_bank_account_i
 ALTER TABLE "rule_banking_condition" ADD CONSTRAINT "rule_banking_condition_rule_id_rule_id_fk" FOREIGN KEY ("rule_id") REFERENCES "public"."rule"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "rule_rule_tag" ADD CONSTRAINT "rule_rule_tag_rule_id_rule_id_fk" FOREIGN KEY ("rule_id") REFERENCES "public"."rule"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "rule_rule_tag" ADD CONSTRAINT "rule_rule_tag_rule_tag_id_rule_tag_id_fk" FOREIGN KEY ("rule_tag_id") REFERENCES "public"."rule_tag"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "tenant_configuration" ADD CONSTRAINT "tenant_configuration_default_bank_account_id_account_id_fk" FOREIGN KEY ("default_bank_account_id") REFERENCES "public"."account"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "rule_version" ADD CONSTRAINT "rule_version_ruleId_rule_id_fk" FOREIGN KEY ("ruleId") REFERENCES "public"."rule"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "run_timeline_event" ADD CONSTRAINT "run_timeline_event_run_id_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."run"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "run_timeline_event" ADD CONSTRAINT "run_timeline_event_request_id_erp_request_id_fk" FOREIGN KEY ("request_id") REFERENCES "public"."erp_request"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "run_timeline_event" ADD CONSTRAINT "run_timeline_event_outbox_id_outbox_id_fk" FOREIGN KEY ("outbox_id") REFERENCES "public"."outbox"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "banking_document" ADD CONSTRAINT "banking_document_account_id_account_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."account"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "banking_statement" ADD CONSTRAINT "banking_statement_document_id_banking_document_id_fk" FOREIGN KEY ("document_id") REFERENCES "public"."banking_document"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "banking_statement_balance" ADD CONSTRAINT "banking_statement_balance_statement_id_banking_statement_id_fk" FOREIGN KEY ("statement_id") REFERENCES "public"."banking_statement"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -569,8 +620,12 @@ CREATE INDEX "banking_agreement_discovery_run_status_updated_at_idx" ON "banking
 CREATE INDEX "banking_agreement_discovery_run_job_id_idx" ON "banking_agreement_discovery_run" USING btree ("job_id");--> statement-breakpoint
 CREATE INDEX "booking_period_rebooking_audit_transaction_id_idx" ON "booking_period_rebooking_audit" USING btree ("transaction_id");--> statement-breakpoint
 CREATE INDEX "document_run_id_idx" ON "document" USING btree ("run_id");--> statement-breakpoint
+CREATE INDEX "erp_document_run_id_idx" ON "erp_document" USING btree ("run_id");--> statement-breakpoint
+CREATE INDEX "erp_document_transaction_transaction_id_idx" ON "erp_document_transaction" USING btree ("transaction_id");--> statement-breakpoint
 CREATE INDEX "erp_request_run_id_idx" ON "erp_request" USING btree ("run_id");--> statement-breakpoint
+CREATE INDEX "erp_request_document_id_idx" ON "erp_request" USING btree ("document_id");--> statement-breakpoint
 CREATE INDEX "erp_request_line_transaction_id_idx" ON "erp_request_line" USING btree ("transaction_id");--> statement-breakpoint
+CREATE INDEX "erp_response_document_document_id_idx" ON "erp_response_document" USING btree ("document_id");--> statement-breakpoint
 CREATE INDEX "error_run_id_created_at_idx" ON "error" USING btree ("run_id","created_at");--> statement-breakpoint
 CREATE INDEX "error_created_at_idx" ON "error" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX "job_status_run_at_idx" ON "job" USING btree ("status","run_at");--> statement-breakpoint
@@ -588,6 +643,9 @@ CREATE INDEX "kmd_accounting_parameters_rule_id_idx" ON "kmd_accounting_paramete
 CREATE INDEX "rule_banking_condition_rule_id_idx" ON "rule_banking_condition" USING btree ("rule_id");--> statement-breakpoint
 CREATE INDEX "rule_version_rule_id_version_idx" ON "rule_version" USING btree ("ruleId","version");--> statement-breakpoint
 CREATE INDEX "run_status_booking_date_idx" ON "run" USING btree ("status","booking_date");--> statement-breakpoint
+CREATE INDEX "run_timeline_event_run_created_at_idx" ON "run_timeline_event" USING btree ("run_id","created_at");--> statement-breakpoint
+CREATE INDEX "run_timeline_event_request_created_at_idx" ON "run_timeline_event" USING btree ("request_id","created_at");--> statement-breakpoint
+CREATE INDEX "run_timeline_event_outbox_created_at_idx" ON "run_timeline_event" USING btree ("outbox_id","created_at");--> statement-breakpoint
 CREATE INDEX "banking_document_account_received_at_idx" ON "banking_document" USING btree ("account_id","received_at");--> statement-breakpoint
 CREATE INDEX "banking_statement_document_id_idx" ON "banking_statement" USING btree ("document_id");--> statement-breakpoint
 CREATE INDEX "banking_statement_statement_id_idx" ON "banking_statement" USING btree ("statement_id");--> statement-breakpoint

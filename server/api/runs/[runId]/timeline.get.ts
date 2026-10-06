@@ -134,7 +134,7 @@ export default defineEventHandler(async (event) => {
       })
       .from(runTimelineEvent)
       .where(eq(runTimelineEvent.runId, runId))
-      .orderBy(desc(runTimelineEvent.sequence))
+      .orderBy(desc(runTimelineEvent.createdAt), desc(runTimelineEvent.sequence))
       .limit(500),
 
     // Get total transaction count and processing status counts for the run
@@ -148,24 +148,29 @@ export default defineEventHandler(async (event) => {
     db
       .select({
         status: transactionProcessing.status,
+        source: transactionProcessing.source,
         count: sql<number>`count(*)`,
       })
       .from(transactionProcessing)
       .innerJoin(transaction, eq(transaction.id, transactionProcessing.transactionId))
       .where(eq(transaction.runId, runId))
-      .groupBy(transactionProcessing.status),
+      .groupBy(transactionProcessing.status, transactionProcessing.source),
   ])
 
   const totalTransactions = Number(totalTxRows?.[0]?.count ?? 0)
 
   const byStatus = new Map<string, number>()
   let processedTransactions = 0
+  let manualBookedTransactions = 0
   for (const row of processingRows ?? []) {
     const status = String(row.status ?? '')
     const count = Number(row.count ?? 0)
     if (!status) continue
-    byStatus.set(status, count)
+    byStatus.set(status, (byStatus.get(status) ?? 0) + count)
     processedTransactions += count
+    if (status === 'bogført' && row.source === 'manuel') {
+      manualBookedTransactions += count
+    }
   }
 
   const matching: RunTimelineResponse['matching'] = {
@@ -174,6 +179,7 @@ export default defineEventHandler(async (event) => {
     matched: byStatus.get('bogført') ?? 0,
     exception: byStatus.get('undtaget') ?? 0,
     open: byStatus.get('åben') ?? 0,
+    manualBookedTransactions,
   }
 
   const filteredErrors = (errorRows ?? []).filter((e) => {

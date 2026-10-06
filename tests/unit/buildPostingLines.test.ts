@@ -38,6 +38,22 @@ describe('buildPostingLines', () => {
     expect(lines[1]?.transactionId).toBe(txId)
   })
 
+  it('can keep a synthetic group context out of the transaction foreign key', () => {
+    const lines = buildPostingLines({
+      transaction: {
+        transactionId: 'SAMLEPOST:group-key',
+        requestLineTransactionId: null,
+        amount: 123.45,
+        statusDimensions: { artskonto: '95999999' },
+      },
+      landingDimensions: { artskonto: '12345678' },
+      text: 'Samlepost',
+    })
+
+    expect(lines).toHaveLength(2)
+    expect(lines.every(line => line.transactionId === null)).toBe(true)
+  })
+
   it('supports multiple landing lines and attaches files once', () => {
     const txId = '00000000-0000-0000-0000-00000000abcd'
 

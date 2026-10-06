@@ -5,6 +5,7 @@ import db from '~/lib/db'
 import { account } from '~/lib/db/schema/account'
 import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreementAccountDimension'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
+import { runTimelineEvent } from '~/lib/db/schema/runTimelineEvent'
 import {
   manualBookingDraft,
   manualBookingDraftAttachment,
@@ -253,10 +254,32 @@ export default defineEventHandler(async (event) => {
     attachments: attachments.length ? attachments : undefined,
   });
 
-  const submission = await executePostingCommand(command, {
+  await db.insert(runTimelineEvent).values({
     runId: row.runId,
-    bookingDate: toDate(effectiveBookingDate),
-  });
+    stage: 'manual',
+    eventType: 'booking_started',
+    status: 'in_progress',
+    detail: 'Manuel bogføring startet.',
+    actorId: user.id,
+  })
+
+  let submission: Awaited<ReturnType<typeof executePostingCommand>>
+  try {
+    submission = await executePostingCommand(command, {
+      runId: row.runId,
+      bookingDate: toDate(effectiveBookingDate),
+    })
+  } catch (error) {
+    await db.insert(runTimelineEvent).values({
+      runId: row.runId,
+      stage: 'manual',
+      eventType: 'booking_failed',
+      status: 'failed',
+      detail: 'Manuel bogføring fejlede før ERP-request kunne oprettes.',
+      actorId: user.id,
+    }).catch(() => {})
+    throw error
+  }
 
   if (effectiveBookingDate !== originalBookingDate) {
     await db.insert(bookingPeriodRebookingAudit).values({
@@ -279,6 +302,16 @@ export default defineEventHandler(async (event) => {
         source: 'manuel',
     });
   }
+
+  await db.insert(runTimelineEvent).values({
+    runId: row.runId,
+    stage: 'manual',
+    eventType: 'booking_completed',
+    status: 'succeeded',
+    detail: 'Manuel bogføring afsluttet.',
+    requestId: submission.requestId,
+    actorId: user.id,
+  })
 
   await clearManualBookingDraft(row.id)
 

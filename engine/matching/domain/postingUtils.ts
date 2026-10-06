@@ -7,6 +7,7 @@ import {
 
 export type PostingTransactionContext = {
   transactionId: string
+  requestLineTransactionId?: string | null
   amount: number
   statusDimensions: Record<string, string>
 
@@ -35,7 +36,9 @@ export function buildPostingLines(options: {
   const isIncoming = options.transaction.amount >= 0
 
   const statusLine: PostingLineInput = {
-    transactionId: options.transaction.transactionId,
+    transactionId: options.transaction.requestLineTransactionId === undefined
+      ? options.transaction.transactionId
+      : options.transaction.requestLineTransactionId,
     dimensions: options.transaction.statusDimensions,
     debetOrCredit: isIncoming ? 'Debet' : 'Kredit',
     amount: amountAbs,
@@ -48,7 +51,9 @@ export function buildPostingLines(options: {
       : [{ dimensions: options.landingDimensions, amount: amountAbs }]
 
   const landingLines: PostingLineInput[] = landingDefinitions.map((line, index) => ({
-    transactionId: options.transaction.transactionId,
+    transactionId: options.transaction.requestLineTransactionId === undefined
+      ? options.transaction.transactionId
+      : options.transaction.requestLineTransactionId,
     dimensions: line.dimensions,
     debetOrCredit: isIncoming ? 'Kredit' : 'Debet',
     amount: Math.abs(line.amount),
