@@ -1,12 +1,13 @@
 import { z } from "zod/v4";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { pgTable, text, uuid, integer, numeric, jsonb, primaryKey, index } from "drizzle-orm/pg-core";
+import { pgTable, text, uuid, integer, numeric, jsonb, primaryKey, index, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { run } from "./run";
 import { transaction } from "./transaction";
 
 export const erpRequest = pgTable("erp_request", {
   id: text().primaryKey(),
   runId: uuid("run_id").notNull().references(() => run.id),
+  sourceRequestId: text('source_request_id').references((): AnyPgColumn => erpRequest.id),
   documentId: text("document_id").references(() => erpDocument.id),
   filename: text().unique(),
   payload: text("payload"),

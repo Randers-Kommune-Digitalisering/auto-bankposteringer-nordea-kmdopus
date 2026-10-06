@@ -1,6 +1,7 @@
 import crypto from 'node:crypto'
 import { sql } from 'drizzle-orm'
 import db from '~/lib/db'
+import { runTimelineEvent } from '~/lib/db/schema/runTimelineEvent'
 import { logger } from '~/lib/logger'
 
 /**
@@ -132,6 +133,20 @@ async function processOutbox(limit: number): Promise<number> {
     if (!claimed) return processed
 
     const log = logger.child({ scope: 'worker.outbox', outboxId: claimed.id, topic: claimed.topic })
+    const requestId = typeof claimed.payload?.requestId === 'string' ? claimed.payload.requestId : null
+    if (claimed.runId && claimed.topic.startsWith('erp.')) {
+      await db.insert(runTimelineEvent).values({
+        runId: claimed.runId,
+        stage: 'erp',
+        eventType: 'upload_attempt_started',
+        status: 'processing',
+        detail: 'Automatisk ERP-afsendelsesforsøg startet.',
+        requestId,
+        outboxId: claimed.id,
+        attempt: claimed.attempts + 1,
+      }).catch(() => {})
+    }
+
     try {
       log.info('worker.outbox.start')
       const result = await handleOutbox(claimed.topic, claimed.payload)
@@ -141,6 +156,18 @@ async function processOutbox(limit: number): Promise<number> {
             payload = ${JSON.stringify({ ...claimed.payload, result })}::jsonb
         where id = ${claimed.id}
       `)
+      if (claimed.runId && claimed.topic.startsWith('erp.')) {
+        await db.insert(runTimelineEvent).values({
+          runId: claimed.runId,
+          stage: 'erp',
+          eventType: 'upload_succeeded',
+          status: 'sent',
+          detail: 'ERP-request afsendt; afventer ERP-svar.',
+          requestId,
+          outboxId: claimed.id,
+          attempt: claimed.attempts + 1,
+        }).catch(() => {})
+      }
       log.info('worker.outbox.sent')
       processed += 1
     } catch (err) {
@@ -156,6 +183,18 @@ async function processOutbox(limit: number): Promise<number> {
           next_attempt_at = now() + interval '5 minutes'
         where id = ${claimed.id}
       `)
+      if (claimed.runId && claimed.topic.startsWith('erp.')) {
+        await db.insert(runTimelineEvent).values({
+          runId: claimed.runId,
+          stage: 'erp',
+          eventType: 'upload_failed',
+          status: 'failed',
+          detail: 'Automatisk afsendelse til ERP fejlede.',
+          requestId,
+          outboxId: claimed.id,
+          attempt: claimed.attempts + 1,
+        }).catch(() => {})
+      }
       processed += 1
     }
   }
@@ -163,7 +202,7 @@ async function processOutbox(limit: number): Promise<number> {
 }
 
 // Claim item from outbox table, marking it as processing and locking it to this worker.
-async function claimOutbox(): Promise<{ id: string; topic: string; payload: any } | null> {
+async function claimOutbox(): Promise<{ id: string; topic: string; payload: any; runId: string | null; attempts: number } | null> {
   const result = await db.execute(sql`
     with next_item as (
       select id
@@ -177,12 +216,18 @@ async function claimOutbox(): Promise<{ id: string; topic: string; payload: any 
     set status = 'processing', locked_at = now(), locked_by = ${workerId}
     from next_item
     where outbox.id = next_item.id
-    returning outbox.id, outbox.topic, outbox.payload
+    returning outbox.id, outbox.topic, outbox.payload, outbox.run_id, outbox.attempts
   `)
 
   const row = (result.rows?.[0] ?? null) as any
   if (!row?.id) return null
-  return { id: String(row.id), topic: String(row.topic), payload: row.payload }
+  return {
+    id: String(row.id),
+    topic: String(row.topic),
+    payload: row.payload,
+    runId: row.run_id ? String(row.run_id) : null,
+    attempts: Number(row.attempts ?? 0),
+  }
 }
 
 // 

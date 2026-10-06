@@ -2,6 +2,7 @@ import crypto from 'node:crypto'
 import { eq } from 'drizzle-orm'
 import db from '~/lib/db'
 import { erpDocument, erpRequest, erpResponse, erpResponseDocument } from '~/lib/db/schema/erp'
+import { runTimelineEvent } from '~/lib/db/schema/runTimelineEvent'
 import { logger } from '~/lib/logger'
 import { getErpAdapter } from '../registry'
 
@@ -96,6 +97,24 @@ export async function ingestErpResponses(options: {
             messages: document.messages,
           })))
           .onConflictDoNothing()
+      }
+
+      if (created.length > 0) {
+        const rejected = response.documents?.some(document => document.status === 'rejected') ?? false
+        const accepted = response.documents?.length
+          ? response.documents.every(document => document.status === 'accepted')
+          : String(response.statusText ?? '').trim().toUpperCase().startsWith('OK')
+        const eventType = rejected ? 'response_rejected' : accepted ? 'response_accepted' : 'response_unknown'
+        const status = rejected ? 'rejected' : accepted ? 'accepted' : 'unknown'
+
+        await tx.insert(runTimelineEvent).values({
+          runId: request.runId,
+          stage: 'erp',
+          eventType,
+          status,
+          detail: accepted ? 'ERP har accepteret bilaget.' : rejected ? 'ERP har afvist bilaget.' : 'ERP-svar modtaget; status kunne ikke klassificeres.',
+          requestId: request.id,
+        })
       }
 
       return created.length > 0

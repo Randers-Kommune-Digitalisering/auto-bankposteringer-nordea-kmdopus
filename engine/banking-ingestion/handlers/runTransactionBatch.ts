@@ -4,6 +4,7 @@ import { and, asc, eq, inArray, sql } from 'drizzle-orm'
 import db from '~/lib/db'
 import { run } from '~/lib/db/schema/run'
 import { errorLog } from '~/lib/db/schema/error'
+import { runTimelineEvent } from '~/lib/db/schema/runTimelineEvent'
 import { logger } from '~/lib/logger'
 import { LocalFileBankAdapter } from '../infrastructure/localFileBankAdapter'
 import { buildBankMeta } from '~~/utils/function'
@@ -109,6 +110,15 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
         set: { bookingDate, status: 'indlæser' },
       })
 
+    await trx.insert(runTimelineEvent).values({
+      runId,
+      stage: 'banking',
+      eventType: 'started',
+      status: 'in_progress',
+      detail: 'Bankhentning startet.',
+      createdAt: sql`clock_timestamp()`,
+    })
+
     const existingRunTxCountRows = await trx
       .select({ total: sql<number>`count(*)` })
       .from(transaction)
@@ -142,6 +152,13 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
         errorCode: 208,
         errorString: `Genbruger eksisterende bankdata i DB for bogføringsdato ${bookingDateOnly}. Bankkald er sprunget over.`,
       } as any).catch(() => {})
+      await trx.insert(runTimelineEvent).values({
+        runId,
+        stage: 'banking',
+        eventType: 'existing_data_reused',
+        detail: 'Eksisterende bankdata genbrugt; bankkald sprunget over.',
+        createdAt: sql`clock_timestamp()`,
+      })
       log.info('Genbruger eksisterende transaktioner i DB for run - springer bankkald over', {
         runId,
         bookingDate: bookingDateOnly,
@@ -254,6 +271,13 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
             errorString: `provider=${r.provider} channel=${r.channel}: ${diagnosticParts.join(' | ')}`,
           })
           .catch(() => {})
+        await trx.insert(runTimelineEvent).values({
+          runId,
+          stage: 'banking',
+          eventType: 'provider_failed',
+          detail: 'Hentning fra en bankkilde fejlede.',
+          createdAt: sql`clock_timestamp()`,
+        })
         continue
       }
     }
@@ -330,6 +354,17 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
       .update(run)
       .set({ status: providerErrors > 0 ? 'fejl' : 'udført' })
       .where(eq(run.id, runId))
+
+    await trx.insert(runTimelineEvent).values({
+      runId,
+      stage: 'banking',
+      eventType: providerErrors > 0 ? 'completed_with_errors' : 'completed',
+      status: providerErrors > 0 ? 'failed' : 'succeeded',
+      detail: providerErrors > 0
+        ? `Bankhentning afsluttet med ${providerErrors} fejl.`
+        : `Bankhentning afsluttet. ${runInsertedCount} transaktioner tilgængelige.`,
+      createdAt: sql`clock_timestamp()`,
+    })
 
     return {
       insertedStatements,

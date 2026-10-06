@@ -127,3 +127,12 @@ export async function requireErrorHandlingReadAccess(event: H3Event): Promise<vo
 export async function requireErrorHandlingWriteAccess(event: H3Event): Promise<void> {
   return requireAnyAppRole(event, ERROR_HANDLING_WRITE_ROLES)
 }
+
+export async function requireErrorHandlingWriteIdentity(event: H3Event): Promise<LockOwnerIdentity> {
+  const session = await requireRoleSession(event, ERROR_HANDLING_WRITE_ROLES)
+  const config = useRuntimeConfig(event)
+  const developmentIdentityAllowed = process.env.NODE_ENV !== 'production'
+    && (config.public?.oidcDevMode === true || config.public?.devAuthBypass === true)
+
+  return resolveLockOwnerIdentity(session ?? {}, developmentIdentityAllowed)
+}

@@ -3,6 +3,12 @@ import { DateFormatter } from '@internationalized/date'
 import type { TimelineItem } from '@nuxt/ui'
 import type { RunListItem } from '~/types/runs'
 import type { RunTimelineResponse } from '~/types/runTimeline'
+import {
+  getErpTimelineDeliveryState,
+  getErpTimelineStageState,
+  groupErpTimelineDeliveries,
+  type ErpTimelineDelivery,
+} from '~/lib/presenters/runTimeline'
 
 const appConfig = useAppConfig()
 
@@ -68,11 +74,6 @@ watch(
 
 type StatusColor = 'success' | 'error' | 'warning' | 'neutral'
 
-function isOkErpStatusText(statusText: string | null | undefined): boolean {
-  if (!statusText) return true
-  return statusText.trim().toUpperCase().startsWith('OK')
-}
-
 function formatMaybeIso(value: string | null | undefined): string {
   if (!value) return '—'
   const d = new Date(value)
@@ -85,14 +86,6 @@ function jobStatusLabel(status: string): string {
   if (status === 'in_progress') return 'Kører'
   if (status === 'succeeded') return 'OK'
   if (status === 'failed') return 'Fejl'
-  return status || '—'
-}
-
-function deliveryStatusLabel(status: string): string {
-  if (status === 'pending') return 'Afventer'
-  if (status === 'processing') return 'Sender'
-  if (status === 'sent') return 'Afsendt'
-  if (status === 'failed') return 'Fejlet'
   return status || '—'
 }
 
@@ -110,12 +103,41 @@ function statusLabelFromColor(color: StatusColor): string {
   return '—'
 }
 
+function statusFromStageEvent(event: RunTimelineResponse['events'][number] | undefined) {
+  if (!event?.status) return null
+  const color: StatusColor = event.status === 'failed' || event.status === 'rejected'
+    ? 'error'
+    : event.status === 'succeeded' || event.status === 'accepted'
+      ? 'success'
+      : event.status === 'skipped' || event.status === 'unknown'
+        ? 'neutral'
+        : 'warning'
+  const label = event.status === 'in_progress'
+    ? 'Kører'
+    : event.status === 'blocked'
+      ? 'Afventer'
+      : event.status === 'unknown'
+        ? 'Ukendt'
+        : event.status === 'needs_attention'
+          ? 'Åbne poster'
+      : statusLabelFromColor(color)
+  return { color, label, description: event.detail ?? label }
+}
+
+function latestStageEvent(stage: RunTimelineResponse['events'][number]['stage']) {
+  return [...(data.value?.events ?? [])]
+    .filter(event => event.stage === stage)
+    .sort((a, b) => b.sequence - a.sequence)[0]
+}
+
 const bankingJob = computed(() => (data.value?.jobs ?? []).find((j) => j.type === 'banking.ingest'))
 
 const bankingJobState = computed(() => {
+  const eventState = statusFromStageEvent(latestStageEvent('banking'))
+  if (eventState) return eventState
   const j = bankingJob.value
   if (!j) {
-    return { color: 'neutral' as StatusColor, label: '—', description: 'Ikke registreret' }
+    return { color: 'neutral' as StatusColor, label: 'Afventer', description: 'Bankhentning er ikke startet' }
   }
 
   const color = statusColorFromJobStatus(j.status)
@@ -125,11 +147,13 @@ const bankingJobState = computed(() => {
 })
 
 const matchingState = computed(() => {
+  const eventState = statusFromStageEvent(latestStageEvent('matching'))
+  if (eventState) return eventState
   const m = data.value?.matching
-  if (!m) return { color: 'neutral' as StatusColor, label: '—', description: 'Ingen matching-data' }
+  if (!m) return { color: 'neutral' as StatusColor, label: 'Afventer', description: 'Matching er ikke startet' }
 
   if (m.totalTransactions === 0) {
-    return { color: 'neutral' as StatusColor, label: '—', description: 'Ingen transaktioner' }
+    return { color: 'neutral' as StatusColor, label: 'Ikke relevant', description: 'Ingen transaktioner at matche' }
   }
 
   if (m.processedTransactions === 0) {
@@ -160,157 +184,42 @@ const matchingState = computed(() => {
 })
 
 const erpDeliveryRows = computed(() => (data.value?.outbox ?? []).filter((o) => String(o.topic ?? '').startsWith('erp.')))
-
-type ErpDelivery = {
-  requestId: string | null
-  firstCreatedAt: string | null
-  rows: RunTimelineResponse['outbox']
-  responseId: string | null
-  responseStatusText: string | null
-}
-
-const erpDeliveries = computed<ErpDelivery[]>(() => {
-  const byRequest = new Map<string, ErpDelivery>()
-  const noRequest: ErpDelivery = { requestId: null, firstCreatedAt: null, rows: [], responseId: null, responseStatusText: null }
-
-  for (const row of erpDeliveryRows.value) {
-    const requestId = row.requestId
-    const target = requestId
-      ? (byRequest.get(requestId) ?? {
-          requestId,
-          firstCreatedAt: null,
-          rows: [],
-          responseId: null,
-          responseStatusText: null,
-        })
-      : noRequest
-
-    target.rows.push(row)
-
-    if (row.createdAt && (!target.firstCreatedAt || new Date(row.createdAt) < new Date(target.firstCreatedAt))) {
-      target.firstCreatedAt = row.createdAt
-    }
-
-    if (row.responseId) {
-      target.responseId = row.responseId
-      target.responseStatusText = row.responseStatusText
-    }
-
-    if (requestId) {
-      byRequest.set(requestId, target)
-    }
-  }
-
-  const list = Array.from(byRequest.values())
-  if (noRequest.rows.length) list.push(noRequest)
-
-  return list.sort((a, b) => {
-    if (!a.firstCreatedAt && !b.firstCreatedAt) return 0
-    if (!a.firstCreatedAt) return 1
-    if (!b.firstCreatedAt) return -1
-    return new Date(a.firstCreatedAt).getTime() - new Date(b.firstCreatedAt).getTime()
-  })
-})
-
-function erpDeliveryState(delivery: ErpDelivery): { color: StatusColor; label: string; description: string } {
-  const rows = delivery.rows
-  if (!rows.length) return { color: 'neutral', label: '—', description: 'Ingen afleveringer' }
-
-  const hasFailed = rows.some((r) => r.status === 'failed')
-  const hasInFlight = rows.some((r) => r.status === 'pending' || r.status === 'processing')
-  const awaitingResponse = rows.some((r) => r.status === 'sent' && !r.responseId)
-  const unclassifiedResponse = rows.some((r) => Boolean(r.responseId) && !r.responseStatusText)
-  const rejectedByErp = Boolean(delivery.responseStatusText && !isOkErpStatusText(delivery.responseStatusText))
-
-  const lastOutboxError =
-    rows
-      .filter((r) => r.status === 'failed' && r.lastError)
-      .map((r) => String(r.lastError))
-      .find(Boolean) ?? null
-
-  const color: StatusColor = hasFailed || rejectedByErp
-    ? 'error'
-    : hasInFlight || awaitingResponse
-      ? 'warning'
-      : unclassifiedResponse
-        ? 'neutral'
-        : 'success'
-
-  const statusCounts = rows.reduce(
-    (acc, r) => {
-      const key = String(r.status ?? '')
-      acc[key] = (acc[key] ?? 0) + 1
-      return acc
-    },
-    {} as Record<string, number>,
-  )
-
-  const parts = Object.entries(statusCounts)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([k, v]) => `${deliveryStatusLabel(k)}: ${v}`)
-
-  const responsePart = rejectedByErp
-    ? `Afvist af ERP: ${delivery.responseStatusText ?? ''}`
-    : hasInFlight || awaitingResponse
-      ? 'Afventer ERP-svar'
-      : unclassifiedResponse
-        ? 'ERP-svar modtaget, status ukendt'
-      : undefined
-  const errorPart = lastOutboxError ? `Sidste fejl: ${lastOutboxError}` : undefined
-
-  return {
-    color,
-    label: statusLabelFromColor(color),
-    description: [parts.join(', '), responsePart, errorPart].filter(Boolean).join(' • '),
-  }
-}
-
-const errorsState = computed(() => {
-  const errs = data.value?.errors ?? []
-  const severityErrors = errs.filter((e) => e.errorCode == null || Number(e.errorCode) >= 400)
-  if (!severityErrors.length) {
-    if (!errs.length) return { color: 'success' as StatusColor, label: 'OK', description: 'Ingen registrerede fejl' }
-    return { color: 'success' as StatusColor, label: 'OK', description: 'Ingen aktive fejl (kun hændelser)' }
-  }
-  return { color: 'error' as StatusColor, label: 'Fejl', description: `${severityErrors.length} fejl` }
-})
+const erpDeliveries = computed<ErpTimelineDelivery[]>(() => groupErpTimelineDeliveries(
+  data.value?.erpRequests ?? [],
+  erpDeliveryRows.value,
+  data.value?.events ?? [],
+))
+const erpDeliveryState = getErpTimelineDeliveryState
 
 const bankingEvents = computed(() => {
+  const timelineEvents = (data.value?.events ?? []).filter(e => e.stage === 'banking')
+  if (timelineEvents.length) return timelineEvents
   const rows = (data.value?.errors ?? []).filter((e) => e.source === 'banking')
   return [...rows].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
 })
 
 const applicationEvents = computed(() => {
+  const timelineEvents = (data.value?.events ?? []).filter(e => e.stage === 'matching')
+  if (timelineEvents.length) return timelineEvents
   const rows = (data.value?.errors ?? []).filter((e) => !e.source || e.source === 'application')
   return [...rows].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
 })
 
-const erpEvents = computed(() => {
-  const rows = (data.value?.errors ?? []).filter((e) => e.source === 'erp')
-  return [...rows].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+const erpStageEvents = computed(() => {
+  const events = erpDeliveries.value.flatMap(delivery => delivery.events)
+  if (events.length) return events.sort((a, b) => a.sequence - b.sequence)
+  return [...(data.value?.errors ?? []).filter((e) => e.source === 'erp')]
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+})
+
+const erpStageState = computed(() => {
+  return getErpTimelineStageState(erpDeliveries.value)
 })
 
 const overallState = computed(() => {
-  const severityErrors = (data.value?.errors ?? []).filter((e) => e.errorCode == null || Number(e.errorCode) >= 400)
-  const anyError =
-    severityErrors.length > 0 ||
-    erpDeliveries.value.some((d) => Boolean(d.responseStatusText && !isOkErpStatusText(d.responseStatusText))) ||
-    erpDeliveries.value.some((d) => d.rows.some((r) => r.status === 'failed')) ||
-    (data.value?.jobs ?? []).some((j) => j.status === 'failed')
-
-  if (anyError) return { color: 'error' as StatusColor, label: 'Fejl' }
-
-  const anyInFlight =
-    (data.value?.jobs ?? []).some((j) => j.status === 'pending' || j.status === 'in_progress') ||
-    erpDeliveries.value.some((d) => d.rows.some((r) => (
-      r.status === 'pending' || r.status === 'processing' || (r.status === 'sent' && !r.responseId)
-    )))
-
-  const unclassifiedResponse = erpDeliveries.value.some((d) => d.rows.some((r) => Boolean(r.responseId) && !r.responseStatusText))
-
-  if (anyInFlight) return { color: 'warning' as StatusColor, label: 'Afventer' }
-  if (unclassifiedResponse) return { color: 'neutral' as StatusColor, label: 'Ukendt ERP-status' }
-
+  const colors = [bankingJobState.value.color, matchingState.value.color, erpStageState.value.color]
+  if (colors.includes('error')) return { color: 'error' as StatusColor, label: 'Fejl' }
+  if (colors.includes('warning')) return { color: 'warning' as StatusColor, label: 'Afventer' }
   if (!data.value) return { color: 'neutral' as StatusColor, label: '—' }
   return { color: 'success' as StatusColor, label: 'OK' }
 })
@@ -341,21 +250,25 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
     },
   ]
 
-  const deliveries: RunTimelineItem[] = erpDeliveries.value.map((d) => {
-    const state = erpDeliveryState(d)
-    return {
-      slot: 'erpDelivery',
-      value: d.requestId ? `erp-${d.requestId}` : `erp-unknown-${d.firstCreatedAt ?? ''}`,
-      title: 'Aflevering til ERP',
-      date: d.firstCreatedAt ? formatMaybeIso(d.firstCreatedAt) : undefined,
-      description: state.description,
-      icon: appConfig.ui.icons.upload,
-      _delivery: d,
-      _state: state,
-    } as any
-  })
+  const latestErpEvent = erpStageEvents.value.at(-1)
+  const latestErpDate = [...erpDeliveries.value]
+    .map(delivery => delivery.latestCreatedAt)
+    .filter((value): value is string => Boolean(value))
+    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0]
 
-  return [...base, ...deliveries]
+  return [
+    ...base,
+    {
+      slot: 'erpDelivery',
+      value: 'erp',
+      title: 'ERP-fremsendelse',
+      date: formatMaybeIso(latestErpEvent?.createdAt ?? latestErpDate),
+      description: erpStageState.value.description,
+      icon: appConfig.ui.icons.upload,
+      _deliveries: erpDeliveries.value,
+      _state: erpStageState.value,
+    } as any,
+  ]
 })
 
 </script>
@@ -424,7 +337,7 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
                 <ul v-if="bankingEvents.length" class="list-disc pl-5 space-y-1">
                   <li v-for="e in bankingEvents" :key="e.id" class="text-sm">
                     <span class="text-muted">{{ formatMaybeIso(e.createdAt) }}:</span>
-                    <span class="ml-1">{{ e.errorString ?? 'Ukendt hændelse' }}</span>
+                    <span class="ml-1">{{ e.detail ?? e.errorString ?? e.eventType ?? 'Ukendt hændelse' }}</span>
                   </li>
                 </ul>
               </div>
@@ -447,7 +360,7 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
                 <ul v-if="applicationEvents.length" class="list-disc pl-5 space-y-1">
                   <li v-for="e in applicationEvents" :key="e.id" class="text-sm">
                     <span class="text-muted">{{ formatMaybeIso(e.createdAt) }}:</span>
-                    <span class="ml-1">{{ e.errorString ?? 'Ukendt hændelse' }}</span>
+                    <span class="ml-1">{{ e.detail ?? e.errorString ?? e.eventType ?? 'Ukendt hændelse' }}</span>
                   </li>
                 </ul>
 
@@ -470,6 +383,9 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
                 <UBadge :color="(slotItem as any)._state?.color ?? 'neutral'" variant="subtle">
                   {{ (slotItem as any)._state?.label ?? '—' }}
                 </UBadge>
+                <UBadge v-if="(slotItem as any)._deliveries?.length" color="neutral" variant="outline">
+                  {{ (slotItem as any)._deliveries.length }} bilag
+                </UBadge>
               </div>
             </template>
 
@@ -477,33 +393,42 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
               <div class="space-y-2">
                 <div class="text-sm text-muted">{{ (slotItem as any)._state?.description ?? slotItem.description }}</div>
 
-                <ul v-if="erpEvents.length" class="list-disc pl-5 space-y-1">
-                  <li v-for="e in erpEvents" :key="e.id" class="text-sm">
-                    <span class="text-muted">{{ formatMaybeIso(e.createdAt) }}:</span>
-                    <span class="ml-1">{{ e.errorString ?? 'Ukendt hændelse' }}</span>
-                  </li>
-                </ul>
-
-                <div v-if="run" class="flex flex-wrap gap-2">
+                <div v-for="delivery in (slotItem as any)._deliveries" :key="delivery.key" class="flex flex-wrap items-center gap-2">
+                  <UBadge :color="erpDeliveryState(delivery).color" variant="subtle">
+                    {{ erpDeliveryState(delivery).label }}
+                  </UBadge>
+                  <UBadge v-if="delivery.documentId" color="neutral" variant="outline" class="font-mono">
+                    {{ delivery.documentId }}
+                  </UBadge>
+                  <UBadge v-if="delivery.rows.length" color="neutral" variant="outline">
+                    {{ delivery.rows.reduce((sum, row) => sum + row.attempts + (row.status === 'sent' || row.status === 'processing' ? 1 : 0), 0) }} forsøg
+                  </UBadge>
                   <UButton
-                    v-if="(slotItem as any)._state?.label === 'Fejl'"
+                    v-if="erpDeliveryState(delivery).color === 'error'"
                     :icon="appConfig.ui.icons.warning"
                     label="Behandl aflevering"
                     color="warning"
                     variant="soft"
                     size="xs"
-                    :to="{ path: '/fejlhaandtering/koe', query: { runId: run.id } }"
+                    :to="{ path: '/fejlhaandtering/koe', query: { runId: run?.id } }"
                   />
                   <UButton
-                    v-if="(slotItem as any)._delivery?.requestId"
+                    v-if="delivery.requestId"
                     :icon="appConfig.ui.icons.send"
-                    label="Åbn ERP-aflevering"
+                    label="Åbn ERP-request"
                     color="neutral"
                     variant="soft"
                     size="xs"
-                    :to="{ path: '/fejlhaandtering/erp', query: { requestId: (slotItem as any)._delivery.requestId } }"
+                    :to="{ path: '/fejlhaandtering/erp', query: { requestId: delivery.requestId } }"
                   />
                 </div>
+
+                <ul v-if="erpStageEvents.length" class="list-disc pl-5 space-y-1">
+                  <li v-for="e in erpStageEvents" :key="e.id" class="text-sm">
+                    <span class="text-muted">{{ formatMaybeIso(e.createdAt) }}:</span>
+                    <span class="ml-1">{{ e.detail ?? e.errorString ?? e.eventType ?? 'Ukendt hændelse' }}</span>
+                  </li>
+                </ul>
               </div>
             </template>
           </UTimeline>
