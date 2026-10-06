@@ -55,6 +55,7 @@ export const tenantConfiguration = pgTable('tenant_configuration', {
   id: integer('id').primaryKey(),
   activeErpSupplier: erpSupplierEnum('active_erp_supplier').notNull(),
   bookingPeriodCloseDay: integer('booking_period_close_day').notNull(),
+  defaultBankAccountId: text('default_bank_account_id').references(() => account.id, { onDelete: 'set null' }),
   createdAt: date('created_at', { mode: 'date' }).defaultNow(),
   updatedAt: date('updated_at', { mode: 'date' }).defaultNow().$onUpdate(() => new Date()),
 })

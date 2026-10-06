@@ -5,6 +5,7 @@ import db from '~/lib/db'
 import { account } from '~/lib/db/schema/account'
 import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreementAccountDimension'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
+import { runTimelineEvent } from '~/lib/db/schema/runTimelineEvent'
 import { manualBookingPayloadSchema, type CprType } from '#engine/manual-booking/domain/manualBooking'
 import type { PostingAttachment } from '#engine/posting/domain/posting'
 import { buildPostingCommand, executePostingCommand } from '#engine/posting/handlers/postingCommand'
@@ -92,6 +93,9 @@ export default defineEventHandler(async (event) => {
   const first = rows[0]
   if (!first?.runId) {
     throw createError({ statusCode: 409, statusMessage: 'Mangler run-id for samleposten' })
+  }
+  if (rows.some(row => row.runId !== first.runId)) {
+    throw createError({ statusCode: 409, statusMessage: 'Samlepost kræver samme run for alle transaktioner' })
   }
 
   const accountId = first.accountId
@@ -189,6 +193,7 @@ export default defineEventHandler(async (event) => {
 
   const txContext: PostingTransactionContext = {
     transactionId: `SAMLEPOST:${expectedGroupKey}`,
+    requestLineTransactionId: null,
     amount: lineTotalAmount,
     statusDimensions: { artskonto },
     debtorName: first.debtorName,
@@ -233,10 +238,33 @@ export default defineEventHandler(async (event) => {
     attachments: attachments.length ? attachments : undefined,
   })
 
-  const submission = await executePostingCommand(command, {
+  await db.insert(runTimelineEvent).values({
     runId: first.runId,
-    bookingDate: toDate(effectiveBookingDate),
+    stage: 'manual',
+    eventType: 'booking_started',
+    status: 'in_progress',
+    detail: `Manuel gruppebogføring startet for ${rows.length} transaktioner.`,
+    actorId: user.id,
   })
+
+  let submission: Awaited<ReturnType<typeof executePostingCommand>>
+  try {
+    submission = await executePostingCommand(command, {
+      runId: first.runId,
+      bookingDate: toDate(effectiveBookingDate),
+      sourceTransactionIds: transactionIds,
+    })
+  } catch (error) {
+    await db.insert(runTimelineEvent).values({
+      runId: first.runId,
+      stage: 'manual',
+      eventType: 'booking_failed',
+      status: 'failed',
+      detail: 'Manuel gruppebogføring fejlede før ERP-request kunne oprettes.',
+      actorId: user.id,
+    }).catch(() => {})
+    throw error
+  }
 
   if (effectiveBookingDate !== originalBookingDate) {
     await db.insert(bookingPeriodRebookingAudit).values(
@@ -268,6 +296,16 @@ export default defineEventHandler(async (event) => {
       })),
     )
   }
+
+  await db.insert(runTimelineEvent).values({
+    runId: first.runId,
+    stage: 'manual',
+    eventType: 'booking_completed',
+    status: 'succeeded',
+    detail: `Manuel gruppebogføring afsluttet for ${rows.length} transaktioner.`,
+    requestId: submission.requestId,
+    actorId: user.id,
+  })
 
   return {
     success: true,

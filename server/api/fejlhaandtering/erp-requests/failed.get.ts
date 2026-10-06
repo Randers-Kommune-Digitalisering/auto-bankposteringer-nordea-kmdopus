@@ -58,7 +58,8 @@ export default defineEventHandler(async (event) => {
     from erp_request r
     left join erp_response resp on resp.request_id = r.id
     left join erp_request_line line on line.request_id = r.id
-    left join "transaction" tx on tx.id = line.transaction_id
+    left join erp_document_transaction membership on membership.document_id = r.document_id
+    left join "transaction" tx on tx.id = coalesce(line.transaction_id, membership.transaction_id)
     where ${where}
     group by r.id, r.run_id, resp.id, resp.status_text
     order by min(tx.booking_date) desc nulls last, r.id desc

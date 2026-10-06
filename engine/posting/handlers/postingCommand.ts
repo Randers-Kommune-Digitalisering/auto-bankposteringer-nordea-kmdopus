@@ -27,6 +27,7 @@ export type PostingExecutionOptions = {
   runId: string
   bookingDate: Date
   erpSupplier?: string
+  sourceTransactionIds?: string[]
 }
 
 export type PostingExecutionResult = Awaited<ReturnType<typeof submitErpPostingViaOutbox>>
@@ -40,5 +41,6 @@ export async function executePostingCommand(
     bookingDate: options.bookingDate,
     postings: command.postings,
     erpSupplier: options.erpSupplier,
+    sourceTransactionIds: options.sourceTransactionIds,
   })
 }

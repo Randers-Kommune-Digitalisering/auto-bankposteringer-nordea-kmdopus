@@ -9,7 +9,7 @@ export interface PostingLineInput {
    * Internal linkage for audit/recovery.
    * Not part of the ERP payload; adapters should ignore unknown fields.
    */
-  transactionId?: string
+  transactionId?: string | null
   amount: number | string
   debetOrCredit: 'Debet' | 'Kredit'
   dimensions: Record<string, string>

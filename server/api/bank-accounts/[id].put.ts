@@ -5,6 +5,7 @@ import db from '~/lib/db'
 import { account } from '~/lib/db/schema/account'
 import { bankingAgreementAccountAllowlist } from '~/lib/db/schema/bankingAgreementAccountAllowlist'
 import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreementAccountDimension'
+import { tenantConfiguration } from '~/lib/db/schema/rule'
 import { logger } from '~/lib/logger'
 import { retryRunsAfterAccountChange } from '~~/server/utils/recovery/retryRunsAfterAccountChange'
 import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
@@ -100,6 +101,13 @@ export default defineEventHandler(async (event) => {
             updatedAt: new Date(),
           } as any,
         })
+
+      if (payload.ignoreIngestion) {
+        await trx
+          .update(tenantConfiguration)
+          .set({ defaultBankAccountId: null })
+          .where(eq(tenantConfiguration.defaultBankAccountId, id))
+      }
 
     }
 

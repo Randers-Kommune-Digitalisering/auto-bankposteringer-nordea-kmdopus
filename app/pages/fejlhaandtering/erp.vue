@@ -41,6 +41,13 @@ type ErpRequestViewResponse = {
     transactionCount: number
     unmappedLineCount: number
     totalAmount: string
+    accountingLines: Array<{
+      lineNo: number
+      amount: string | null
+      debetOrCredit: string | null
+      dimensions: Record<string, string>
+      postingText: string | null
+    }>
   }
   transactions: Array<{
     transactionId: string
@@ -622,6 +629,39 @@ async function reopenBookedTransactions() {
                 <span>{{ erpView.response.statusText }}</span>
               </div>
             </div>
+
+            <section
+              v-if="erpView.header.transactionCount > 1 && erpView.header.accountingLines.length"
+              class="space-y-2"
+            >
+              <h3 class="text-sm font-semibold">Kontering på samlet ERP-bilag</h3>
+              <div class="overflow-x-auto rounded-md border border-default">
+                <table class="min-w-full text-sm">
+                  <thead class="bg-elevated/50 text-left">
+                    <tr>
+                      <th class="px-3 py-2 font-medium">Linje</th>
+                      <th class="px-3 py-2 font-medium">Beløb</th>
+                      <th class="px-3 py-2 font-medium">D/K</th>
+                      <th class="px-3 py-2 font-medium">Dimensioner</th>
+                      <th class="px-3 py-2 font-medium">Tekst</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="line in erpView.header.accountingLines" :key="line.lineNo" class="border-t border-default align-top">
+                      <td class="px-3 py-2 font-mono">{{ line.lineNo }}</td>
+                      <td class="px-3 py-2 whitespace-nowrap">{{ line.amount ?? '—' }}</td>
+                      <td class="px-3 py-2">{{ line.debetOrCredit ?? '—' }}</td>
+                      <td class="px-3 py-2">
+                        <div v-for="([key, value]) in Object.entries(line.dimensions)" :key="key" class="break-all">
+                          <span class="text-muted">{{ key }}:</span> {{ value }}
+                        </div>
+                      </td>
+                      <td class="px-3 py-2">{{ line.postingText ?? '—' }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
 
             <div class="flex flex-wrap items-end justify-between gap-3">
               <UFormField label="Posteringstekst" class="min-w-64 max-w-sm">

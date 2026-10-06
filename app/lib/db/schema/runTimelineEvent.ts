@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm'
 import { pgTable, uuid, text, integer, timestamp, index } from 'drizzle-orm/pg-core'
 import { run } from './run'
 import { erpRequest } from './erp'
@@ -15,7 +16,7 @@ export const runTimelineEvent = pgTable('run_timeline_event', {
   attempt: integer(),
   actorId: text('actor_id'),
   payloadSha256: text('payload_sha256'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`clock_timestamp()`),
   sequence: integer().generatedAlwaysAsIdentity(),
 }, (table) => ({
   runCreatedAtIdx: index('run_timeline_event_run_created_at_idx').on(table.runId, table.createdAt),

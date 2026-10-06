@@ -4,10 +4,14 @@ import type { TimelineItem } from '@nuxt/ui'
 import type { RunListItem } from '~/types/runs'
 import type { RunTimelineResponse } from '~/types/runTimeline'
 import {
+  compareTimelineEvents,
   getErpTimelineDeliveryState,
   getErpTimelineStageState,
   groupErpTimelineDeliveries,
+  latestTimelineStageEvent,
+  RUN_TIMELINE_STAGE_ORDER,
   type ErpTimelineDelivery,
+  type RunTimelineStageKey,
 } from '~/lib/presenters/runTimeline'
 
 const appConfig = useAppConfig()
@@ -81,6 +85,14 @@ function formatMaybeIso(value: string | null | undefined): string {
   return dtf.format(d)
 }
 
+function compareEventRows(
+  left: { createdAt: string; sequence?: number },
+  right: { createdAt: string; sequence?: number },
+): number {
+  return Date.parse(left.createdAt) - Date.parse(right.createdAt)
+    || (left.sequence ?? 0) - (right.sequence ?? 0)
+}
+
 function jobStatusLabel(status: string): string {
   if (status === 'pending') return 'Afventer'
   if (status === 'in_progress') return 'Kører'
@@ -125,9 +137,7 @@ function statusFromStageEvent(event: RunTimelineResponse['events'][number] | und
 }
 
 function latestStageEvent(stage: RunTimelineResponse['events'][number]['stage']) {
-  return [...(data.value?.events ?? [])]
-    .filter(event => event.stage === stage)
-    .sort((a, b) => b.sequence - a.sequence)[0]
+  return latestTimelineStageEvent(data.value?.events ?? [], stage)
 }
 
 const bankingJob = computed(() => (data.value?.jobs ?? []).find((j) => j.type === 'banking.ingest'))
@@ -183,6 +193,25 @@ const matchingState = computed(() => {
   }
 })
 
+const manualEvents = computed(() => (data.value?.events ?? []).filter(event => event.stage === 'manual'))
+const manualRequestId = computed(() => manualEvents.value.filter(event => event.requestId).at(-1)?.requestId ?? null)
+const manualState = computed(() => {
+  const eventState = statusFromStageEvent(latestStageEvent('manual'))
+  if (eventState) return eventState
+  const historicalCount = data.value?.matching.manualBookedTransactions ?? 0
+  return historicalCount
+    ? {
+        color: 'neutral' as StatusColor,
+        label: 'Historik',
+        description: `${historicalCount} manuelt bogført før hændelsesloggen blev indført.`,
+      }
+    : {
+        color: 'neutral' as StatusColor,
+        label: 'Ingen aktivitet',
+        description: 'Ingen manuelle bogføringer på dette run',
+      }
+})
+
 const erpDeliveryRows = computed(() => (data.value?.outbox ?? []).filter((o) => String(o.topic ?? '').startsWith('erp.')))
 const erpDeliveries = computed<ErpTimelineDelivery[]>(() => groupErpTimelineDeliveries(
   data.value?.erpRequests ?? [],
@@ -193,23 +222,20 @@ const erpDeliveryState = getErpTimelineDeliveryState
 
 const bankingEvents = computed(() => {
   const timelineEvents = (data.value?.events ?? []).filter(e => e.stage === 'banking')
-  if (timelineEvents.length) return timelineEvents
-  const rows = (data.value?.errors ?? []).filter((e) => e.source === 'banking')
-  return [...rows].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+  const errorEvents = (data.value?.errors ?? []).filter(e => e.source === 'banking')
+  return [...timelineEvents, ...errorEvents].sort(compareEventRows)
 })
 
 const applicationEvents = computed(() => {
   const timelineEvents = (data.value?.events ?? []).filter(e => e.stage === 'matching')
-  if (timelineEvents.length) return timelineEvents
-  const rows = (data.value?.errors ?? []).filter((e) => !e.source || e.source === 'application')
-  return [...rows].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+  const errorEvents = (data.value?.errors ?? []).filter(e => !e.source || e.source === 'application')
+  return [...timelineEvents, ...errorEvents].sort(compareEventRows)
 })
 
 const erpStageEvents = computed(() => {
   const events = erpDeliveries.value.flatMap(delivery => delivery.events)
-  if (events.length) return events.sort((a, b) => a.sequence - b.sequence)
-  return [...(data.value?.errors ?? []).filter((e) => e.source === 'erp')]
-    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+  const errorEvents = (data.value?.errors ?? []).filter(e => e.source === 'erp')
+  return [...events, ...errorEvents].sort(compareEventRows)
 })
 
 const erpStageState = computed(() => {
@@ -217,7 +243,7 @@ const erpStageState = computed(() => {
 })
 
 const overallState = computed(() => {
-  const colors = [bankingJobState.value.color, matchingState.value.color, erpStageState.value.color]
+  const colors = [bankingJobState.value.color, matchingState.value.color, manualState.value.color, erpStageState.value.color]
   if (colors.includes('error')) return { color: 'error' as StatusColor, label: 'Fejl' }
   if (colors.includes('warning')) return { color: 'warning' as StatusColor, label: 'Afventer' }
   if (!data.value) return { color: 'neutral' as StatusColor, label: '—' }
@@ -227,28 +253,35 @@ const overallState = computed(() => {
 type RunTimelineItem = TimelineItem & { slot: string }
 
 const timelineItems = computed<RunTimelineItem[]>(() => {
-  const base: RunTimelineItem[] = [
-    {
+  const bankingDate = latestStageEvent('banking')?.createdAt ?? bankingJob.value?.runAt
+  const matchingDate = latestStageEvent('matching')?.createdAt ?? bankingJob.value?.updatedAt ?? bankingJob.value?.runAt
+  const manualDate = latestStageEvent('manual')?.createdAt
+  const stageItems: Record<Exclude<RunTimelineStageKey, 'erp'>, RunTimelineItem> = {
+    banking: {
       slot: 'banking',
       value: 'banking',
       title: 'Hentning af bankdata',
-      date: bankingJob.value?.runAt ? formatMaybeIso(bankingJob.value.runAt) : undefined,
+      date: bankingDate ? formatMaybeIso(bankingDate) : undefined,
       description: bankingJobState.value.description,
       icon: appConfig.ui.icons.download,
     },
-    {
+    matching: {
       slot: 'matching',
       value: 'matching',
       title: 'Matching',
-      date: bankingJob.value?.updatedAt
-        ? formatMaybeIso(bankingJob.value.updatedAt)
-        : bankingJob.value?.runAt
-          ? formatMaybeIso(bankingJob.value.runAt)
-          : undefined,
+      date: matchingDate ? formatMaybeIso(matchingDate) : undefined,
       description: matchingState.value.description,
       icon: appConfig.ui.icons.wand,
     },
-  ]
+    manual: {
+      slot: 'manualBooking',
+      value: 'manualBooking',
+      title: 'Manuel bogføring',
+      date: manualDate ? formatMaybeIso(manualDate) : undefined,
+      description: manualState.value.description,
+      icon: appConfig.ui.icons.edit,
+    },
+  }
 
   const latestErpEvent = erpStageEvents.value.at(-1)
   const latestErpDate = [...erpDeliveries.value]
@@ -256,19 +289,18 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
     .filter((value): value is string => Boolean(value))
     .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0]
 
-  return [
-    ...base,
-    {
+  const erpItem: RunTimelineItem = {
       slot: 'erpDelivery',
       value: 'erp',
       title: 'ERP-fremsendelse',
-      date: formatMaybeIso(latestErpEvent?.createdAt ?? latestErpDate),
+      date: latestErpEvent?.createdAt || latestErpDate ? formatMaybeIso(latestErpEvent?.createdAt ?? latestErpDate) : undefined,
       description: erpStageState.value.description,
       icon: appConfig.ui.icons.upload,
       _deliveries: erpDeliveries.value,
       _state: erpStageState.value,
-    } as any,
-  ]
+  } as any
+
+  return RUN_TIMELINE_STAGE_ORDER.map(stage => stage === 'erp' ? erpItem : stageItems[stage])
 })
 
 </script>
@@ -374,6 +406,37 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
                     to="/aabne-poster"
                   />
                 </div>
+              </div>
+            </template>
+
+            <template #manualBooking-title>
+              <div class="flex items-center gap-2">
+                <span>Manuel bogføring</span>
+                <UBadge :color="manualState.color" variant="subtle">{{ manualState.label }}</UBadge>
+                <UBadge v-if="manualEvents.length" color="neutral" variant="outline">
+                  {{ manualEvents.filter(event => event.eventType === 'booking_completed').length }} afsluttet
+                </UBadge>
+              </div>
+            </template>
+
+            <template #manualBooking-description>
+              <div class="space-y-2">
+                <div class="text-sm text-muted">{{ manualState.description }}</div>
+                <ul v-if="manualEvents.length" class="list-disc pl-5 space-y-1">
+                  <li v-for="event in manualEvents" :key="event.id" class="text-sm">
+                    <span class="text-muted">{{ formatMaybeIso(event.createdAt) }}:</span>
+                    <span class="ml-1">{{ event.detail ?? event.eventType }}</span>
+                  </li>
+                </ul>
+                <UButton
+                  v-if="manualRequestId"
+                  :icon="appConfig.ui.icons.send"
+                  label="Åbn tilhørende ERP-request"
+                  color="neutral"
+                  variant="soft"
+                  size="xs"
+                  :to="{ path: '/fejlhaandtering/erp', query: { requestId: manualRequestId } }"
+                />
               </div>
             </template>
 

@@ -19,7 +19,7 @@ describe('paginated transaction keys (integration)', () => {
     const { transactionCodeCatalog } = await import('../../app/lib/db/schema/transactionCodeCatalog')
     const { bankingDocument, bankingStatement, bankingStatementBalance } = await import('../../app/lib/db/schema/statement')
     const { run } = await import('../../app/lib/db/schema/run')
-    const { transaction } = await import('../../app/lib/db/schema/transaction')
+    const { transaction, transactionProcessing } = await import('../../app/lib/db/schema/transaction')
     const { selectPaginatedTransactionKeys } = await import('../../server/utils/transactions/selectPaginatedTransactionKeys')
 
     let runId: string | undefined
@@ -94,6 +94,7 @@ describe('paginated transaction keys (integration)', () => {
       ])
 
       cleanup = async () => {
+        await db.delete(transactionProcessing).where(inArray(transactionProcessing.transactionId, ids))
         await db.delete(transaction).where(eq(transaction.runId, runId!))
         await db.delete(transactionCodeCatalog).where(inArray(transactionCodeCatalog.codeKey, [typeCodeA, typeCodeB, typeCodeZ]))
         await db.delete(bankingStatementBalance).where(eq(bankingStatementBalance.statementId, statementId!))
@@ -283,6 +284,21 @@ describe('paginated transaction keys (integration)', () => {
         expect(openItemsBody.totalSamleposter).toBe(2)
         expect(openItemsBody.items.map(row => row.id)).toEqual([ids[0], ids[2]])
         expect(openItemsBody.stacks).toHaveLength(1)
+
+        await db.insert(transactionProcessing).values([
+          { transactionId: ids[1]!, status: 'bogført' },
+          { transactionId: ids[2]!, status: 'undtaget' },
+        ])
+
+        const activeOpenItems = await fetch(`${baseUrl}?mode=open-items&limit=1&${accountFilter}`)
+        const activeOpenItemsBody = await activeOpenItems.json() as {
+          items: Array<{ id: string }>
+          total: number
+          totalSamleposter: number
+        }
+        expect(activeOpenItemsBody.total).toBe(1)
+        expect(activeOpenItemsBody.totalSamleposter).toBe(1)
+        expect(activeOpenItemsBody.items.map(row => row.id)).toEqual([ids[0]])
 
         const filtered = await fetch(`${baseUrl}?mode=statement&pageSize=10&${accountFilter}&search=Match%20only%20first`)
         const filteredBody = await filtered.json() as {

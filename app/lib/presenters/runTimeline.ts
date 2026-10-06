@@ -12,11 +12,24 @@ export type ErpTimelineDelivery = {
 }
 
 export type TimelineStatusColor = 'success' | 'error' | 'warning' | 'neutral'
+export const RUN_TIMELINE_STAGE_ORDER = ['banking', 'matching', 'manual', 'erp'] as const
+export type RunTimelineStageKey = (typeof RUN_TIMELINE_STAGE_ORDER)[number]
 
 export type ErpTimelineState = {
   color: TimelineStatusColor
   label: string
   description: string
+}
+
+export function compareTimelineEvents(a: TimelineStageEvent, b: TimelineStageEvent): number {
+  return Date.parse(a.createdAt) - Date.parse(b.createdAt) || a.sequence - b.sequence
+}
+
+export function latestTimelineStageEvent(
+  events: TimelineStageEvent[],
+  stage: TimelineStageEvent['stage'],
+): TimelineStageEvent | undefined {
+  return events.filter(event => event.stage === stage).sort(compareTimelineEvents).at(-1)
 }
 
 export function groupErpTimelineDeliveries(
@@ -98,7 +111,7 @@ export function groupErpTimelineDeliveries(
 
   return Array.from(byKey.values()).map((delivery) => {
     delivery.requestIds = [...new Set(delivery.requestIds)]
-    delivery.events.sort((a, b) => a.sequence - b.sequence)
+    delivery.events.sort(compareTimelineEvents)
 
     function requestDepth(requestId: string): number {
       let depth = 0
@@ -114,10 +127,13 @@ export function groupErpTimelineDeliveries(
       return depth
     }
 
-    const latestEditedResendSequence = new Map<string, number>()
+    const latestEditedResend = new Map<string, TimelineStageEvent>()
     for (const event of delivery.events) {
       if (event.eventType === 'edited_resend_created' && event.requestId) {
-        latestEditedResendSequence.set(event.requestId, event.sequence)
+        const current = latestEditedResend.get(event.requestId)
+        if (!current || compareTimelineEvents(event, current) > 0) {
+          latestEditedResend.set(event.requestId, event)
+        }
       }
     }
 
@@ -130,12 +146,22 @@ export function groupErpTimelineDeliveries(
       }
     }
 
-    delivery.requestId = [...delivery.requestIds].sort((a, b) => (
-      requestDepth(a) - requestDepth(b)
-      || (latestEditedResendSequence.get(a) ?? 0) - (latestEditedResendSequence.get(b) ?? 0)
-      || (latestOutboxCreatedAt.get(a) ?? 0) - (latestOutboxCreatedAt.get(b) ?? 0)
-      || a.localeCompare(b)
-    )).at(-1) ?? null
+    delivery.requestId = [...delivery.requestIds].sort((a, b) => {
+      const depthDifference = requestDepth(a) - requestDepth(b)
+      if (depthDifference) return depthDifference
+
+      const aResend = latestEditedResend.get(a)
+      const bResend = latestEditedResend.get(b)
+      if (aResend && bResend) {
+        const resendDifference = compareTimelineEvents(aResend, bResend)
+        if (resendDifference) return resendDifference
+      } else if (aResend || bResend) {
+        return aResend ? 1 : -1
+      }
+
+      return (latestOutboxCreatedAt.get(a) ?? 0) - (latestOutboxCreatedAt.get(b) ?? 0)
+        || a.localeCompare(b)
+    }).at(-1) ?? null
     return delivery
   }).sort((a, b) => {
     if (!a.firstCreatedAt && !b.firstCreatedAt) return 0
@@ -149,7 +175,7 @@ export function getErpTimelineDeliveryState(delivery: ErpTimelineDelivery): ErpT
   const requestEvents = delivery.events.filter(event => delivery.requestId
     ? event.requestId === delivery.requestId
     : !event.requestId)
-  const latestEvent = requestEvents.at(-1)
+  const latestEvent = requestEvents.sort(compareTimelineEvents).at(-1)
   if (latestEvent?.status) {
     const color: TimelineStatusColor = ['failed', 'rejected'].includes(latestEvent.status)
       ? 'error'
@@ -182,7 +208,7 @@ export function getErpTimelineDeliveryState(delivery: ErpTimelineDelivery): ErpT
     return { color, label, description: latestEvent.detail ?? label }
   }
 
-  const latestRow = [...delivery.rows].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))[0]
+  const latestRow = [...delivery.rows].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt) || b.id.localeCompare(a.id))[0]
   if (!latestRow) return { color: 'neutral', label: 'Afventer', description: 'Ingen ERP-request endnu' }
 
   if (latestRow.responseId && latestRow.responseStatusText) {

@@ -1,5 +1,5 @@
 {
-  "id": "455f484d-74ad-4520-86c3-e40ae96d3ed0",
+  "id": "ba5a9bb0-7ce3-469e-bd7c-14aac583a24d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1275,6 +1275,137 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.erp_document": {
+      "name": "erp_document",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "run_id": {
+          "name": "run_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "erp_document_run_id_idx": {
+          "name": "erp_document_run_id_idx",
+          "columns": [
+            {
+              "expression": "run_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "erp_document_run_id_run_id_fk": {
+          "name": "erp_document_run_id_run_id_fk",
+          "tableFrom": "erp_document",
+          "tableTo": "run",
+          "columnsFrom": [
+            "run_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.erp_document_transaction": {
+      "name": "erp_document_transaction",
+      "schema": "",
+      "columns": {
+        "document_id": {
+          "name": "document_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "transaction_id": {
+          "name": "transaction_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "erp_document_transaction_transaction_id_idx": {
+          "name": "erp_document_transaction_transaction_id_idx",
+          "columns": [
+            {
+              "expression": "transaction_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "erp_document_transaction_document_id_erp_document_id_fk": {
+          "name": "erp_document_transaction_document_id_erp_document_id_fk",
+          "tableFrom": "erp_document_transaction",
+          "tableTo": "erp_document",
+          "columnsFrom": [
+            "document_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "erp_document_transaction_transaction_id_transaction_id_fk": {
+          "name": "erp_document_transaction_transaction_id_transaction_id_fk",
+          "tableFrom": "erp_document_transaction",
+          "tableTo": "transaction",
+          "columnsFrom": [
+            "transaction_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "erp_document_transaction_document_id_transaction_id_pk": {
+          "name": "erp_document_transaction_document_id_transaction_id_pk",
+          "columns": [
+            "document_id",
+            "transaction_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.erp_request": {
       "name": "erp_request",
       "schema": "",
@@ -1291,6 +1422,24 @@
           "primaryKey": false,
           "notNull": true
         },
+        "source_request_id": {
+          "name": "source_request_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "document_id": {
+          "name": "document_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "filename": {
+          "name": "filename",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "payload": {
           "name": "payload",
           "type": "text",
@@ -1304,6 +1453,21 @@
           "columns": [
             {
               "expression": "run_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "erp_request_document_id_idx": {
+          "name": "erp_request_document_id_idx",
+          "columns": [
+            {
+              "expression": "document_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1328,10 +1492,44 @@
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
+        },
+        "erp_request_source_request_id_erp_request_id_fk": {
+          "name": "erp_request_source_request_id_erp_request_id_fk",
+          "tableFrom": "erp_request",
+          "tableTo": "erp_request",
+          "columnsFrom": [
+            "source_request_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "erp_request_document_id_erp_document_id_fk": {
+          "name": "erp_request_document_id_erp_document_id_fk",
+          "tableFrom": "erp_request",
+          "tableTo": "erp_document",
+          "columnsFrom": [
+            "document_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "erp_request_filename_unique": {
+          "name": "erp_request_filename_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "filename"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -1503,6 +1701,94 @@
           ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.erp_response_document": {
+      "name": "erp_response_document",
+      "schema": "",
+      "columns": {
+        "response_id": {
+          "name": "response_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "document_id": {
+          "name": "document_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "messages": {
+          "name": "messages",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "erp_response_document_document_id_idx": {
+          "name": "erp_response_document_document_id_idx",
+          "columns": [
+            {
+              "expression": "document_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "erp_response_document_response_id_erp_response_id_fk": {
+          "name": "erp_response_document_response_id_erp_response_id_fk",
+          "tableFrom": "erp_response_document",
+          "tableTo": "erp_response",
+          "columnsFrom": [
+            "response_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "erp_response_document_document_id_erp_document_id_fk": {
+          "name": "erp_response_document_document_id_erp_document_id_fk",
+          "tableFrom": "erp_response_document",
+          "tableTo": "erp_document",
+          "columnsFrom": [
+            "document_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "erp_response_document_response_id_document_id_pk": {
+          "name": "erp_response_document_response_id_document_id_pk",
+          "columns": [
+            "response_id",
+            "document_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -2966,6 +3252,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "default_bank_account_id": {
+          "name": "default_bank_account_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "date",
@@ -2982,7 +3274,21 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "tenant_configuration_default_bank_account_id_account_id_fk": {
+          "name": "tenant_configuration_default_bank_account_id_account_id_fk",
+          "tableFrom": "tenant_configuration",
+          "tableTo": "account",
+          "columnsFrom": [
+            "default_bank_account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -3148,6 +3454,214 @@
           ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.run_timeline_event": {
+      "name": "run_timeline_event",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "run_id": {
+          "name": "run_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "stage": {
+          "name": "stage",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "event_type": {
+          "name": "event_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "detail": {
+          "name": "detail",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "request_id": {
+          "name": "request_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "outbox_id": {
+          "name": "outbox_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "attempt": {
+          "name": "attempt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "actor_id": {
+          "name": "actor_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payload_sha256": {
+          "name": "payload_sha256",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "clock_timestamp()"
+        },
+        "sequence": {
+          "name": "sequence",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "run_timeline_event_sequence_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        }
+      },
+      "indexes": {
+        "run_timeline_event_run_created_at_idx": {
+          "name": "run_timeline_event_run_created_at_idx",
+          "columns": [
+            {
+              "expression": "run_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "run_timeline_event_request_created_at_idx": {
+          "name": "run_timeline_event_request_created_at_idx",
+          "columns": [
+            {
+              "expression": "request_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "run_timeline_event_outbox_created_at_idx": {
+          "name": "run_timeline_event_outbox_created_at_idx",
+          "columns": [
+            {
+              "expression": "outbox_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "run_timeline_event_run_id_run_id_fk": {
+          "name": "run_timeline_event_run_id_run_id_fk",
+          "tableFrom": "run_timeline_event",
+          "tableTo": "run",
+          "columnsFrom": [
+            "run_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "run_timeline_event_request_id_erp_request_id_fk": {
+          "name": "run_timeline_event_request_id_erp_request_id_fk",
+          "tableFrom": "run_timeline_event",
+          "tableTo": "erp_request",
+          "columnsFrom": [
+            "request_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "run_timeline_event_outbox_id_outbox_id_fk": {
+          "name": "run_timeline_event_outbox_id_outbox_id_fk",
+          "tableFrom": "run_timeline_event",
+          "tableTo": "outbox",
+          "columnsFrom": [
+            "outbox_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

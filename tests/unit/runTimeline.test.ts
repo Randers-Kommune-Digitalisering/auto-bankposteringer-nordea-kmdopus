@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getErpTimelineDeliveryState, getErpTimelineStageState, groupErpTimelineDeliveries } from '../../app/lib/presenters/runTimeline'
+import { compareTimelineEvents, getErpTimelineDeliveryState, getErpTimelineStageState, groupErpTimelineDeliveries, latestTimelineStageEvent, RUN_TIMELINE_STAGE_ORDER } from '../../app/lib/presenters/runTimeline'
 import type { RunTimelineResponse } from '../../app/types/runTimeline'
 
 const emptyTimeline: RunTimelineResponse = {
@@ -9,10 +9,14 @@ const emptyTimeline: RunTimelineResponse = {
   erpRequests: [],
   errors: [],
   events: [],
-  matching: { totalTransactions: 0, processedTransactions: 0, matched: 0, exception: 0, open: 0 },
+  matching: { totalTransactions: 0, processedTransactions: 0, matched: 0, exception: 0, open: 0, manualBookedTransactions: 0 },
 }
 
 describe('run timeline ERP grouping', () => {
+  it('keeps four stage positions in the agreed pipeline order', () => {
+    expect(RUN_TIMELINE_STAGE_ORDER).toEqual(['banking', 'matching', 'manual', 'erp'])
+  })
+
   it('keeps corrected requests for the same document in one delivery group', () => {
     const requests: RunTimelineResponse['erpRequests'] = [
       { requestId: 'request-original', sourceRequestId: null, documentId: 'document-1', responseId: null, responseStatusText: null, lineCount: 1 },
@@ -41,5 +45,15 @@ describe('run timeline ERP grouping', () => {
     expect(groups).toHaveLength(1)
     expect(getErpTimelineDeliveryState(groups[0]!).label).toBe('Sender')
     expect(getErpTimelineStageState(groups).color).toBe('warning')
+  })
+
+  it('uses occurrence timestamp before sequence when selecting a stage status', () => {
+    const events: RunTimelineResponse['events'] = [
+      { id: 'later-sequence', sequence: 2, stage: 'manual', eventType: 'booking_failed', status: 'failed', detail: 'Later in sequence, earlier occurrence.', requestId: null, outboxId: null, attempt: null, createdAt: '2026-10-06T10:04:00.000Z' },
+      { id: 'later-occurrence', sequence: 1, stage: 'manual', eventType: 'booking_completed', status: 'succeeded', detail: 'Latest occurrence.', requestId: 'request-1', outboxId: null, attempt: null, createdAt: '2026-10-06T10:05:00.000Z' },
+    ]
+
+    expect(latestTimelineStageEvent(events, 'manual')?.id).toBe('later-occurrence')
+    expect(compareTimelineEvents(events[0]!, events[1]!)).toBeLessThan(0)
   })
 })

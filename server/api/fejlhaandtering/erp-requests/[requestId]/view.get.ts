@@ -1,9 +1,9 @@
 import { createError, defineEventHandler } from 'h3'
-import { and, asc, eq, inArray } from 'drizzle-orm'
+import { and, asc, eq, inArray, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import db from '~/lib/db'
 import { account } from '~/lib/db/schema/account'
-import { erpRequest, erpRequestLine, erpResponse } from '~/lib/db/schema/erp'
+import { erpDocumentTransaction, erpRequest, erpRequestLine, erpResponse } from '~/lib/db/schema/erp'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import { rule } from '~/lib/db/schema/rule'
 import { transactionCodeCatalog } from '~/lib/db/schema/transactionCodeCatalog'
@@ -69,6 +69,7 @@ export default defineEventHandler(async (event) => {
     .select({
       requestId: erpRequest.id,
       runId: erpRequest.runId,
+      documentId: erpRequest.documentId,
       responseId: erpResponse.id,
       responseStatusText: erpResponse.statusText,
     })
@@ -84,7 +85,8 @@ export default defineEventHandler(async (event) => {
   const rows = await db
     .select({
       lineNo: erpRequestLine.lineNo,
-      transactionId: erpRequestLine.transactionId,
+      lineTransactionId: erpRequestLine.transactionId,
+      transactionId: sql<string | null>`coalesce(${erpRequestLine.transactionId}, ${erpDocumentTransaction.transactionId})`,
       accountingAmount: erpRequestLine.amount,
       accountingDebetOrCredit: erpRequestLine.debetOrCredit,
       accountingDimensions: erpRequestLine.dimensions,
@@ -122,7 +124,13 @@ export default defineEventHandler(async (event) => {
       ntryRef: transaction.ntryRef,
     })
     .from(erpRequestLine)
-    .leftJoin(transaction, eq(transaction.id, erpRequestLine.transactionId))
+    .leftJoin(
+      erpDocumentTransaction,
+      requestRow.documentId
+        ? eq(erpDocumentTransaction.documentId, requestRow.documentId)
+        : sql`false`,
+    )
+    .leftJoin(transaction, eq(transaction.id, sql`coalesce(${erpRequestLine.transactionId}, ${erpDocumentTransaction.transactionId})`))
     .leftJoin(account, eq(account.id, transaction.accountId))
     .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
     .leftJoin(rule, eq(rule.id, transactionProcessing.ruleApplied))
@@ -152,6 +160,15 @@ export default defineEventHandler(async (event) => {
   const groups = new Map<string, GroupAccumulator>()
   const currencies = new Set<string>()
   const bookingDates = new Set<string>()
+  const isGroupedDocument = rows.some(row => !row.lineTransactionId && Boolean(row.transactionId))
+  const documentAccountingLines = Array.from(new Map(rows.map(row => [row.lineNo, {
+    lineNo: row.lineNo,
+    amount: row.accountingAmount == null ? null : String(row.accountingAmount),
+    debetOrCredit: row.accountingDebetOrCredit ?? null,
+    dimensions: normalizeDimensions(row.accountingDimensions),
+    postingText: row.accountingPostingText ?? null,
+    cpr: row.accountingCpr ?? null,
+  }])).values()).sort((a, b) => a.lineNo - b.lineNo)
   let unmappedLineCount = 0
 
   for (const row of rows) {
@@ -223,7 +240,7 @@ export default defineEventHandler(async (event) => {
         postingText: canonicalFields.postingText,
         counterparty: canonicalFields.counterpart,
         reference: canonicalFields.preferredReference,
-        accountingLines: [accountingLine],
+        accountingLines: isGroupedDocument ? [] : [accountingLine],
         summary: buildTransactionSummaryView({
           id: transactionId,
           runId: String(requestRow.runId),
@@ -242,7 +259,7 @@ export default defineEventHandler(async (event) => {
     }
 
     existing.lineNos.add(row.lineNo)
-    existing.accountingLines.push(accountingLine)
+    if (!isGroupedDocument) existing.accountingLines.push(accountingLine)
   }
 
   const transactions: GroupedTransaction[] = Array.from(groups.values())
@@ -284,10 +301,11 @@ export default defineEventHandler(async (event) => {
     header: {
       bookingDate: bookingDates.size === 1 ? Array.from(bookingDates)[0] : null,
       currencies: Array.from(currencies).sort(),
-      lineCount: rows.length,
+      lineCount: new Set(rows.map(row => row.lineNo)).size,
       transactionCount: transactions.length,
       unmappedLineCount,
       totalAmount: totalAmount.toFixed(2),
+      accountingLines: documentAccountingLines,
     },
     transactions,
   }

@@ -27,7 +27,7 @@ import {
 } from "./banking";
 import { bankingDocument, bankingStatement, bankingStatementBalance } from "./statement";
 import { bankingAdapterCursor } from "./bankingAdapterCursor";
-import { erpDocument, erpRequest, erpResponse, erpRequestLine, erpResponseDocument } from "./erp";
+import { erpDocument, erpDocumentTransaction, erpRequest, erpResponse, erpRequestLine, erpResponseDocument } from "./erp";
 import { errorLog } from "./error";
 import { job } from './job';
 import { bankingAgreementDiscoveryRun } from './bankingAgreementDiscoveryRun';
@@ -118,10 +118,22 @@ export const erpRequestRelations = relations(erpRequest, ({ one, many }) => ({
 
 export const erpDocumentRelations = relations(erpDocument, ({ one, many }) => ({
   requests: many(erpRequest),
+  transactionMemberships: many(erpDocumentTransaction),
   responseDocuments: many(erpResponseDocument),
   run: one(run, {
     fields: [erpDocument.runId],
     references: [run.id],
+  }),
+}));
+
+export const erpDocumentTransactionRelations = relations(erpDocumentTransaction, ({ one }) => ({
+  document: one(erpDocument, {
+    fields: [erpDocumentTransaction.documentId],
+    references: [erpDocument.id],
+  }),
+  transaction: one(transaction, {
+    fields: [erpDocumentTransaction.transactionId],
+    references: [transaction.id],
   }),
 }));
 
@@ -161,6 +173,7 @@ export const transactionRelations = relations(transaction, ({ one, many }) => ({
   statement: one(bankingStatement, { fields: [transaction.statementId], references: [bankingStatement.id] }),
   processing: one(transactionProcessing, { fields: [transaction.id], references: [transactionProcessing.transactionId] }),
   manualBookingDraft: one(manualBookingDraft, { fields: [transaction.id], references: [manualBookingDraft.transactionId] }),
+  erpDocumentMemberships: many(erpDocumentTransaction),
   bookingPeriodRebookingAudits: many(bookingPeriodRebookingAudit),
   references: many(transactionReference),
   parties: many(transactionParty),

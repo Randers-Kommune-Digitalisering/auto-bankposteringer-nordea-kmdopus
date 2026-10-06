@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import useFlattenArray from '~/composables/useFlattenArray'
+import { useDefaultBankAccount } from '~/composables/useDefaultBankAccount'
+import {
+  transitionDefaultBankAccountFilter,
+  type DefaultBankAccountFilterState,
+} from '~/lib/banking/defaultBankAccountSelection'
 
 type BankAccount = { id: string; name: string | null; ignoreIngestion?: boolean }
 
@@ -52,6 +57,11 @@ const { data: bankAccountsData, status: bankAccountsStatus } = await useFetch<Ba
   default: () => ([]),
 })
 
+const {
+  defaultBankAccountId,
+  pending: defaultBankAccountPending,
+} = useDefaultBankAccount()
+
 const options = computed<Option[]>(() => {
   const accounts = useFlattenArray<BankAccount>(bankAccountsData)
   return accounts
@@ -66,6 +76,35 @@ watch(bankAccountsData, (accounts) => {
   const filteredIds = model.value.filter((id) => allowedIds.has(id))
   if (filteredIds.length !== model.value.length) emit('update:modelValue', filteredIds)
 })
+
+const filterDefaultState = ref<DefaultBankAccountFilterState>({ autoAppliedDefaultId: null, initialized: false })
+
+watch(
+  [
+    () => props.modelValue.slice(),
+    defaultBankAccountId,
+    defaultBankAccountPending,
+    bankAccountsData,
+    bankAccountsStatus,
+  ],
+  ([selectedIds, configuredDefaultId, settingPending, accounts, accountsStatus]) => {
+    if (settingPending || accountsStatus === 'pending' || !Array.isArray(accounts)) return
+
+    const selectableIds = new Set(accounts.filter((account) => !account.ignoreIngestion).map((account) => account.id))
+    const selectableDefaultId = configuredDefaultId && selectableIds.has(configuredDefaultId)
+      ? configuredDefaultId
+      : null
+
+    const transition = transitionDefaultBankAccountFilter(
+      selectedIds,
+      selectableDefaultId,
+      filterDefaultState.value,
+    )
+    filterDefaultState.value = transition.state
+    if (transition.selectedIds !== null) emit('update:modelValue', transition.selectedIds)
+  },
+  { immediate: true },
+)
 
 const isLoading = computed(() => props.loading || bankAccountsStatus.value === 'pending')
 </script>

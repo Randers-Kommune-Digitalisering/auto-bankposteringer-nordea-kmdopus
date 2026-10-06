@@ -14,11 +14,17 @@ import { matchEntrySchema, ruleBasicSchema, ruleMatchingSchema, ruleAccountingSc
 import { DEFAULT_TIME_ZONE } from '~/utils'
 import { accountingDimensionFormatHint } from '~/lib/presenters/accountingDimensionFormatHints'
 import { useRuleTags } from '~/composables/useRuleTags'
+import { useDefaultBankAccount } from '~/composables/useDefaultBankAccount'
 import { useTransactionTypeCatalog } from '~/composables/useTransactionTypeCatalog'
 import { encodeTransactionTypeCatalogReference, transactionTypeCatalogValueLabel, transactionTypeCategory } from '~/lib/rules/transactionTypeCatalog'
 import { MANUAL_BOOKING_LOCK_RENEW_INTERVAL_MS } from '#engine/manual-booking/domain/bookingLease'
 
 const appConfig = useAppConfig()
+const {
+  defaultBankAccountId,
+  pending: defaultBankAccountPending,
+  refresh: refreshDefaultBankAccount,
+} = useDefaultBankAccount()
 
 const props = defineProps<{
   open?: boolean
@@ -436,6 +442,7 @@ watch(
 
     // When opening in create mode, the current in-memory state might be stale.
     if (!props.ruleId) {
+      if (defaultBankAccountPending.value) await refreshDefaultBankAccount()
       resetForm()
     }
 
@@ -662,7 +669,17 @@ const handleAttachmentUpdate = (value: AttachmentPayload | null) => {
 // Schema creation
 // -----------------------
 function resetForm() {
-  Object.assign(state, createEmptyDraft())
+  const draft = createEmptyDraft()
+  const configuredDefaultId = defaultBankAccountId.value
+  const selectableDefaultId = configuredDefaultId
+    && accountOptions.value.some(option => option.value === configuredDefaultId)
+    ? configuredDefaultId
+    : null
+
+  Object.assign(state, {
+    ...draft,
+    relatedBankAccounts: selectableDefaultId ? [selectableDefaultId] : [],
+  })
   matches.value = []
   timeLimitMode.value = 'Ikke tidsbegrænset'
   activePeriodRange.value = null
