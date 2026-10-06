@@ -17,6 +17,7 @@ export type TimelineOutbox = {
   nextAttemptAt: string | null
   lastError: string | null
   requestId: string | null
+  documentId: string | null
   responseId: string | null
   responseStatusText: string | null
   createdAt: string
@@ -25,9 +26,24 @@ export type TimelineOutbox = {
 
 export type TimelineErpRequest = {
   requestId: string
+  sourceRequestId: string | null
+  documentId: string | null
   responseId: string | null
   responseStatusText: string | null
   lineCount: number
+}
+
+export type TimelineStageEvent = {
+  id: string
+  stage: 'banking' | 'matching' | 'erp'
+  eventType: string
+  status: string | null
+  detail: string | null
+  requestId: string | null
+  outboxId: string | null
+  attempt: number | null
+  createdAt: string
+  sequence: number
 }
 
 export type TimelineError = {
@@ -56,5 +72,6 @@ export type RunTimelineResponse = {
   outbox: TimelineOutbox[]
   erpRequests: TimelineErpRequest[]
   errors: TimelineError[]
+  events: TimelineStageEvent[]
   matching: MatchingSummary
 }

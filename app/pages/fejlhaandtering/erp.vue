@@ -128,6 +128,13 @@ const erpView = ref<ErpRequestViewResponse | null>(null)
 const rawFilesLoading = ref(false)
 const rawFilesOpen = ref(false)
 const rawFiles = ref<ErpRawFilesResponse | null>(null)
+const canEditRequestXml = computed(() => Boolean(
+  rawFiles.value?.requestPayload
+  && rawFiles.value.response?.statusText?.trim().toUpperCase().startsWith('FEJL'),
+))
+const isEditingRequestXml = ref(false)
+const editedRequestXml = ref('')
+const confirmEditedResend = ref(false)
 const transactionSearchInput = ref('')
 const debouncedTransactionSearch = useDebouncedString(transactionSearchInput, { delayMs: 300 })
 const selectedTransactionIds = ref<Record<string, boolean>>({})
@@ -148,6 +155,9 @@ async function openRawFiles() {
       `/api/fejlhaandtering/erp-requests/${encodeURIComponent(erpView.value.requestId)}`,
       { method: 'GET' },
     )
+    editedRequestXml.value = rawFiles.value.requestPayload ?? ''
+    isEditingRequestXml.value = false
+    confirmEditedResend.value = false
     rawFilesOpen.value = true
   } catch (error) {
     console.error('Kunne ikke hente rå ERP-filer', error)
@@ -225,7 +235,7 @@ watch(
   { immediate: true },
 )
 
-async function resendErpRequest() {
+async function resendErpRequest(payload?: string) {
   if (!erpView.value) return
 
   erpLoading.value = true
@@ -233,17 +243,31 @@ async function resendErpRequest() {
     const url = `/api/fejlhaandtering/erp-requests/${encodeURIComponent(erpView.value.requestId)}/resend`
     const res = await $fetch<{ success: boolean; requestId: string; sourceRequestId: string; filename: string }>(url, {
       method: 'POST',
+      ...(payload !== undefined ? { body: { payload } } : {}),
     })
     toast.add({ title: 'Ny ERP-request oprettet', description: res.requestId })
+    rawFilesOpen.value = false
+    isEditingRequestXml.value = false
+    confirmEditedResend.value = false
     erpRequestId.value = res.requestId
     await loadErpRequest()
     await refreshFailed()
   } catch (error) {
-    console.error('Resend fejlede', error)
-    toast.add({ title: 'Kunne ikke genafsende', color: 'error' })
+    const responseError = error as { data?: { statusMessage?: unknown }; statusMessage?: unknown }
+    const message = responseError.data?.statusMessage ?? responseError.statusMessage
+    toast.add({
+      title: typeof message === 'string' ? message : 'Kunne ikke genafsende',
+      color: 'error',
+    })
   } finally {
     erpLoading.value = false
   }
+}
+
+function cancelRequestXmlEdit() {
+  isEditingRequestXml.value = false
+  confirmEditedResend.value = false
+  editedRequestXml.value = rawFiles.value?.requestPayload ?? ''
 }
 
 const failedColumns: TableColumn<FailedErpRequestListItem>[] = [
@@ -739,15 +763,68 @@ async function reopenBookedTransactions() {
         </template>
       </UModal>
 
-      <UModal v-model:open="rawFilesOpen" title="Rå ERP-filer">
+      <UModal v-model:open="rawFilesOpen" title="Rå ERP-filer" :ui="{ content: 'max-w-5xl' }">
         <template #body>
           <div v-if="rawFiles" class="space-y-5">
             <section class="space-y-2">
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <h3 class="font-medium">Udgående request</h3>
-                <span class="text-xs text-muted">CPR/personfelter maskeret</span>
+                <UButton
+                  v-if="canEditRequestXml && !isEditingRequestXml"
+                  :icon="appConfig.ui.icons.edit"
+                  label="Rediger XML"
+                  color="neutral"
+                  variant="soft"
+                  size="sm"
+                  @click="isEditingRequestXml = true"
+                />
+                <span v-else-if="!isEditingRequestXml" class="text-xs text-muted">
+                  CPR/personfelter maskeret{{ canEditRequestXml ? '' : ' • XML-redigering kræver en ERP-afvisning' }}
+                </span>
               </div>
-              <pre v-if="rawFiles.requestPayload" class="max-h-[32rem] overflow-auto rounded-md border border-default bg-elevated/30 p-3 text-xs whitespace-pre-wrap break-all">{{ redactSensitiveXml(rawFiles.requestPayload) }}</pre>
+              <div v-if="isEditingRequestXml" class="space-y-3">
+                <UAlert
+                  color="warning"
+                  variant="subtle"
+                  title="XML’en kan indeholde CPR- og personoplysninger"
+                  description="Rettelsen gælder kun den nye ERP-request. Meld fejl i applikationens generering tilbage, så grundårsagen kan blive rettet."
+                />
+                <UTextarea
+                  v-model="editedRequestXml"
+                  :rows="24"
+                  class="w-full font-mono text-xs"
+                  spellcheck="false"
+                  aria-label="Redigér udgående ERP XML"
+                />
+                <div v-if="confirmEditedResend" class="space-y-3 rounded-md border border-warning bg-warning/5 p-3">
+                  <p class="text-sm">
+                    En ny ERP-request oprettes, og den oprindelige bevares. Kontrollér, at bilaget ikke allerede er bogført i ERP.
+                  </p>
+                  <div class="flex flex-wrap justify-end gap-2">
+                    <UButton label="Tilbage" color="neutral" variant="soft" @click="confirmEditedResend = false" />
+                    <UButton
+                      :icon="appConfig.ui.icons.send"
+                      label="Send korrigeret XML"
+                      color="warning"
+                      :loading="erpLoading"
+                      :disabled="!editedRequestXml.trim()"
+                      @click="resendErpRequest(editedRequestXml)"
+                    />
+                  </div>
+                </div>
+                <div v-else class="flex flex-wrap justify-end gap-2">
+                  <UButton label="Annullér" color="neutral" variant="soft" @click="cancelRequestXmlEdit" />
+                  <UButton
+                    :icon="appConfig.ui.icons.send"
+                    label="Kontrollér og genfremsend"
+                    color="primary"
+                    variant="soft"
+                    :disabled="!editedRequestXml.trim()"
+                    @click="confirmEditedResend = true"
+                  />
+                </div>
+              </div>
+              <pre v-else-if="rawFiles.requestPayload" class="max-h-[32rem] overflow-auto rounded-md border border-default bg-elevated/30 p-3 text-xs whitespace-pre-wrap break-all">{{ redactSensitiveXml(rawFiles.requestPayload) }}</pre>
               <p v-else class="text-sm text-muted">Ingen request-payload er gemt.</p>
             </section>
 

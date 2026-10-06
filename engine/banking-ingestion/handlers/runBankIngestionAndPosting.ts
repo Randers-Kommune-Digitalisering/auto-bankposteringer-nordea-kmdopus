@@ -2,6 +2,7 @@ import { and, eq, inArray } from 'drizzle-orm'
 import db from '~/lib/db'
 import { run } from '~/lib/db/schema/run'
 import { errorLog } from '~/lib/db/schema/error'
+import { runTimelineEvent } from '~/lib/db/schema/runTimelineEvent'
 import { transaction } from '~/lib/db/schema/transaction'
 import { account } from '~/lib/db/schema/account'
 import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreementAccountDimension'
@@ -108,7 +109,21 @@ export async function runBankIngestionAndPosting(options: {
     }
   }
 
-  const ingest = await runTransactionBatch({ runId: options.runId, bookingDate })
+  let ingest: Awaited<ReturnType<typeof runTransactionBatch>>
+  try {
+    ingest = await runTransactionBatch({ runId: options.runId, bookingDate })
+  } catch (error) {
+    if (options.runId) {
+      await db.insert(runTimelineEvent).values({
+        runId: options.runId,
+        stage: 'banking',
+        eventType: 'failed',
+        status: 'failed',
+        detail: 'Bankhentning kunne ikke gennemføres.',
+      }).catch(() => {})
+    }
+    throw error
+  }
 
   const priorMissingMappingErrorRows = await db
     .select({ id: errorLog.id, errorString: errorLog.errorString })
@@ -121,13 +136,61 @@ export async function runBankIngestionAndPosting(options: {
 
   const pauseCheck = await pauseRunIfMissingAccountMappings(ingest.runId)
   if (pauseCheck.paused) {
+    await db.insert(runTimelineEvent).values({
+      runId: ingest.runId,
+      stage: 'matching',
+      eventType: 'blocked',
+      status: 'blocked',
+      detail: 'Matching afventer manglende konteringsopsætning.',
+    })
+    await db.insert(runTimelineEvent).values({
+      runId: ingest.runId,
+      stage: 'erp',
+      eventType: 'blocked',
+      status: 'blocked',
+      detail: 'ERP-fremsendelse afventer matching og konteringsopsætning.',
+    })
     log.warn('Run sat på pause pga. manglende konto-kontering', { runId: ingest.runId, missing: pauseCheck.missingIbans })
     // Still run system alerts (e.g., expiring bank certificates)
     return { runId: ingest.runId, insertedCount: ingest.insertedCount }
   }
 
   // After ingestion, perform matching (deterministic, DB-driven)
-  const summary = await matchRun(ingest.runId)
+  await db.insert(runTimelineEvent).values({
+    runId: ingest.runId,
+    stage: 'matching',
+    eventType: 'started',
+    status: 'in_progress',
+    detail: 'Matching startet.',
+  })
+
+  let summary: Awaited<ReturnType<typeof matchRun>>
+  try {
+    summary = await matchRun(ingest.runId)
+    await db.insert(runTimelineEvent).values({
+      runId: ingest.runId,
+      stage: 'matching',
+      eventType: 'completed',
+      status: summary.unmatchedTransactions > 0 ? 'needs_attention' : 'succeeded',
+      detail: `Matching afsluttet: ${summary.matchedTransactions} bogført, ${summary.exceptionTransactions} undtaget, ${summary.unmatchedTransactions} åbne.`,
+    })
+  } catch (error) {
+    await db.insert(runTimelineEvent).values({
+      runId: ingest.runId,
+      stage: 'matching',
+      eventType: 'failed',
+      status: 'failed',
+      detail: 'Matching fejlede.',
+    }).catch(() => {})
+    await db.insert(runTimelineEvent).values({
+      runId: ingest.runId,
+      stage: 'erp',
+      eventType: 'blocked',
+      status: 'blocked',
+      detail: 'ERP-fremsendelse blev ikke startet, fordi matching fejlede.',
+    }).catch(() => {})
+    throw error
+  }
 
   // Submit ERP posting via outbox (already robust/retry-safe)
   if (summary.postings.length) {
@@ -153,6 +216,14 @@ export async function runBankIngestionAndPosting(options: {
         .catch(() => {})
       // Do NOT throw: outbox will retry; run should still be considered completed.
     }
+  } else {
+    await db.insert(runTimelineEvent).values({
+      runId: ingest.runId,
+      stage: 'erp',
+      eventType: 'skipped',
+      status: 'skipped',
+      detail: 'Ingen posteringer at sende til ERP.',
+    })
   }
 
   // Mark run as completed (ingestion sets 'udført'; keep it consistent)

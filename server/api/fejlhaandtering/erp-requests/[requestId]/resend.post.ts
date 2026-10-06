@@ -3,14 +3,16 @@ import { defineEventHandler, createError, readBody } from 'h3'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import db from '~/lib/db'
-import { erpDocument, erpRequest, erpRequestLine } from '~/lib/db/schema/erp'
+import { erpDocument, erpRequest, erpRequestLine, erpResponse } from '~/lib/db/schema/erp'
 import { outbox } from '~/lib/db/schema/outbox'
+import { runTimelineEvent } from '~/lib/db/schema/runTimelineEvent'
 import { erpIntegrationMetadata } from '~/lib/env/env'
+import { isWellFormedXml } from '~~/engine/erp-integration/infrastructure/validateXml'
 import { buildKmdFileName, replaceKmdRequestFilename } from '~~/engine/erp-integration/infrastructure/adapters/kmd/postingXmlBuilder'
-import { requireErrorHandlingWriteAccess } from '../../../../auth/requireAppRoles'
+import { requireErrorHandlingWriteIdentity } from '../../../../auth/requireAppRoles'
 
 export default defineEventHandler(async (event) => {
-  await requireErrorHandlingWriteAccess(event)
+  const actor = await requireErrorHandlingWriteIdentity(event)
 
   const requestId = z.string().min(1).parse(event.context.params?.requestId)
 
@@ -29,15 +31,37 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'ERP request blev ikke fundet' })
   }
 
+  if (body.payload !== undefined) {
+    const [response] = await db
+      .select({ statusText: erpResponse.statusText })
+      .from(erpResponse)
+      .where(eq(erpResponse.requestId, requestId))
+      .limit(1)
+
+    if (!response?.statusText?.trim().toUpperCase().startsWith('FEJL')) {
+      throw createError({ statusCode: 409, statusMessage: 'Kun ERP-afviste requests kan genfremsendes med redigeret XML' })
+    }
+  }
+
   const payload = (body.payload ?? existing.payload ?? '').trim()
   if (!payload) {
     throw createError({ statusCode: 422, statusMessage: 'ERP request payload mangler (kan ikke genfremsende)' })
   }
 
+  if (!isWellFormedXml(payload)) {
+    throw createError({ statusCode: 422, statusMessage: 'ERP request indeholder ugyldig XML' })
+  }
+
   const newRequestId = crypto.randomUUID()
   const newDedupeKey = `erp.upload:${newRequestId}`
   const retryFilename = buildRetryFilename()
-  const retry = await replaceKmdRequestFilename(payload, retryFilename)
+  let retry: Awaited<ReturnType<typeof replaceKmdRequestFilename>>
+  try {
+    retry = await replaceKmdRequestFilename(payload, retryFilename)
+  } catch {
+    throw createError({ statusCode: 422, statusMessage: 'ERP request mangler påkrævede KMD-felter' })
+  }
+  const payloadSha256 = crypto.createHash('sha256').update(retry.payload).digest('hex')
 
   await db.transaction(async (tx) => {
     await tx
@@ -48,6 +72,7 @@ export default defineEventHandler(async (event) => {
     await tx.insert(erpRequest).values({
       id: newRequestId,
       runId: existing.runId,
+      sourceRequestId: requestId,
       documentId: retry.documentId,
       filename: retryFilename,
       payload: retry.payload,
@@ -81,7 +106,7 @@ export default defineEventHandler(async (event) => {
       )
     }
 
-    await tx
+    const [delivery] = await tx
       .insert(outbox)
       .values({
         topic: 'erp.uploadRequestPayload',
@@ -92,6 +117,19 @@ export default defineEventHandler(async (event) => {
         nextAttemptAt: new Date(),
       })
       .onConflictDoNothing({ target: outbox.dedupeKey })
+      .returning({ id: outbox.id })
+
+    await tx.insert(runTimelineEvent).values({
+      runId: existing.runId,
+      stage: 'erp',
+      eventType: 'edited_resend_created',
+      status: 'pending',
+      detail: 'Korrigeret ERP-request oprettet til genfremsendelse.',
+      requestId: newRequestId,
+      outboxId: delivery?.id,
+      actorId: actor.id,
+      payloadSha256,
+    })
   })
 
   return { success: true, requestId: newRequestId, sourceRequestId: requestId, filename: retryFilename }

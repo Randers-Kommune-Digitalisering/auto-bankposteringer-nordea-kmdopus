@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm'
 import db from '~/lib/db'
 import { erpDocument, erpRequest, erpRequestLine } from '~/lib/db/schema/erp'
 import { outbox } from '~/lib/db/schema/outbox'
+import { runTimelineEvent } from '~/lib/db/schema/runTimelineEvent'
 import { logger } from '~/lib/logger'
 import { erpAccountingDimensionDefinition } from '~/lib/db/schema/rule'
 import type { PostingLineInput } from '../../posting/domain/posting'
@@ -115,19 +116,32 @@ export async function submitErpPostingViaOutbox(
       .onConflictDoNothing()
       .returning({ id: outbox.id })
 
-    if (row?.id) return row.id
+    let persistedOutboxId = row?.id
+    if (!persistedOutboxId) {
+      const existing = await trx
+        .select({ id: outbox.id })
+        .from(outbox)
+        .where(eq(outbox.dedupeKey, dedupeKey))
+        .limit(1)
 
-    const existing = await trx
-      .select({ id: outbox.id })
-      .from(outbox)
-      .where(eq(outbox.dedupeKey, dedupeKey))
-      .limit(1)
-
-    if (!existing[0]?.id) {
-      throw new Error('Kunne ikke oprette eller finde outbox record for ERP upload')
+      if (!existing[0]?.id) {
+        throw new Error('Kunne ikke oprette eller finde outbox record for ERP upload')
+      }
+      persistedOutboxId = existing[0].id
     }
 
-    return existing[0].id
+    await trx.insert(runTimelineEvent).values({
+      runId: input.runId,
+      stage: 'erp',
+      eventType: 'upload_attempt_started',
+      status: 'processing',
+      detail: 'ERP-afsendelse startet.',
+      requestId,
+      outboxId: persistedOutboxId,
+      attempt: 1,
+    })
+
+    return persistedOutboxId
   })
 
   try {
@@ -148,6 +162,17 @@ export async function submitErpPostingViaOutbox(
         payload: { requestId, filename: built.filename, lineCount: built.lineCount, result },
       })
       .where(eq(outbox.id, outboxId))
+
+    await db.insert(runTimelineEvent).values({
+      runId: input.runId,
+      stage: 'erp',
+      eventType: 'upload_succeeded',
+      status: 'sent',
+      detail: 'ERP-request afsendt; afventer ERP-svar.',
+      requestId,
+      outboxId,
+      attempt: 1,
+    }).catch(() => {})
 
     log.info('ERP-postering uploadet', { requestId, remotePath: result.remotePath })
 
@@ -170,6 +195,17 @@ export async function submitErpPostingViaOutbox(
         nextAttemptAt: new Date(Date.now() + 5 * 60 * 1000),
       })
       .where(eq(outbox.id, outboxId))
+
+    await db.insert(runTimelineEvent).values({
+      runId: input.runId,
+      stage: 'erp',
+      eventType: 'upload_failed',
+      status: 'failed',
+      detail: 'Afsendelse til ERP fejlede; automatisk forsøg planlagt.',
+      requestId,
+      outboxId,
+      attempt: 1,
+    }).catch(() => {})
 
     throw err
   }
