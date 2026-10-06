@@ -1192,7 +1192,17 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                   <template v-if="category === transactionTypeCategory || matchModes[category] === 'Alle felter'">
                     <div class="flex gap-2 mb-4">
                       <USelectMenu
-                        v-if="usesOperator(category)"
+                        v-if="category === transactionTypeCategory"
+                        v-model="matchInputs[category]"
+                        :items="transactionTypeOptions"
+                        labelKey="label"
+                        valueKey="value"
+                        :loading="transactionTypeCatalogPending"
+                        placeholder="Vælg transaktionstype"
+                        class="flex-1"
+                      />
+                      <USelectMenu
+                        v-else-if="usesOperator(category)"
                         v-model="matchOperators[category]"
                         :items="matchOperatorItemsByCategory[category]"
                         class="min-w-fit"
@@ -1200,6 +1210,7 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                         valueKey="value"
                       />
                       <UiFloatingLabelInput
+                        v-if="category !== transactionTypeCategory"
                         v-model="matchInputs[category]"
                         :label="`Søg i ${category.toLowerCase()}`"
                         color="neutral"

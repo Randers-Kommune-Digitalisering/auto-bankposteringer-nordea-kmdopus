@@ -17,6 +17,7 @@ export type BuildErpRequestInput = {
 
 export type BuiltErpRequest = {
   requestId: string
+  documentId: string
   filename: string
   payload: string
   lineCount: number
@@ -28,10 +29,15 @@ export type IngestErpResponsesOptions = {
 }
 
 export type IngestedErpResponse = {
-  requestId?: string
+  requestFilename?: string
   payload: string
   remotePath?: string
   statusText?: string
+  documents?: Array<{
+    documentId: string
+    status: 'accepted' | 'rejected' | 'unknown'
+    messages: Array<{ type: string; number: string; text: string }>
+  }>
 }
 
 export interface ErpAdapter {
@@ -48,4 +54,6 @@ export interface ErpAdapter {
     responses: IngestedErpResponse[]
     deletedRemoteFiles: number
   }>
+
+  deleteResponseFile?(remotePath: string): Promise<void>
 }

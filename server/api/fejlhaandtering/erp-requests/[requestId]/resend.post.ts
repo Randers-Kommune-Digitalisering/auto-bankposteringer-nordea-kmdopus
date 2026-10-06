@@ -3,10 +3,10 @@ import { defineEventHandler, createError, readBody } from 'h3'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import db from '~/lib/db'
-import { erpRequest, erpRequestLine } from '~/lib/db/schema/erp'
+import { erpDocument, erpRequest, erpRequestLine } from '~/lib/db/schema/erp'
 import { outbox } from '~/lib/db/schema/outbox'
 import { erpIntegrationMetadata } from '~/lib/env/env'
-import { buildKmdFileName } from '~~/engine/erp-integration/infrastructure/adapters/kmd/postingXmlBuilder'
+import { buildKmdFileName, replaceKmdRequestFilename } from '~~/engine/erp-integration/infrastructure/adapters/kmd/postingXmlBuilder'
 import { requireErrorHandlingWriteAccess } from '../../../../auth/requireAppRoles'
 
 export default defineEventHandler(async (event) => {
@@ -34,21 +34,34 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 422, statusMessage: 'ERP request payload mangler (kan ikke genfremsende)' })
   }
 
-  const newRequestId = `${requestId}__retry__${crypto.randomUUID()}`
+  const newRequestId = crypto.randomUUID()
   const newDedupeKey = `erp.upload:${newRequestId}`
   const retryFilename = buildRetryFilename()
+  const retry = await replaceKmdRequestFilename(payload, retryFilename)
 
   await db.transaction(async (tx) => {
+    await tx
+      .insert(erpDocument)
+      .values({ id: retry.documentId, runId: existing.runId })
+      .onConflictDoNothing()
+
     await tx.insert(erpRequest).values({
       id: newRequestId,
       runId: existing.runId,
-      payload,
+      documentId: retry.documentId,
+      filename: retryFilename,
+      payload: retry.payload,
     })
 
     const lines = await tx
       .select({
         lineNo: erpRequestLine.lineNo,
         transactionId: erpRequestLine.transactionId,
+        amount: erpRequestLine.amount,
+        debetOrCredit: erpRequestLine.debetOrCredit,
+        dimensions: erpRequestLine.dimensions,
+        postingText: erpRequestLine.postingText,
+        cpr: erpRequestLine.cpr,
       })
       .from(erpRequestLine)
       .where(eq(erpRequestLine.requestId, requestId))
@@ -59,6 +72,11 @@ export default defineEventHandler(async (event) => {
           requestId: newRequestId,
           lineNo: line.lineNo,
           transactionId: line.transactionId,
+          amount: line.amount,
+          debetOrCredit: line.debetOrCredit,
+          dimensions: line.dimensions,
+          postingText: line.postingText,
+          cpr: line.cpr,
         })),
       )
     }

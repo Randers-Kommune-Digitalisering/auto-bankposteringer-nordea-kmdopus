@@ -1,7 +1,7 @@
 import crypto from 'node:crypto'
 import { eq } from 'drizzle-orm'
 import db from '~/lib/db'
-import { erpRequest, erpRequestLine } from '~/lib/db/schema/erp'
+import { erpDocument, erpRequest, erpRequestLine } from '~/lib/db/schema/erp'
 import { outbox } from '~/lib/db/schema/outbox'
 import { logger } from '~/lib/logger'
 import { erpAccountingDimensionDefinition } from '~/lib/db/schema/rule'
@@ -62,8 +62,19 @@ export async function submitErpPostingViaOutbox(
 
   const outboxId = await db.transaction(async trx => {
     await trx
+      .insert(erpDocument)
+      .values({ id: built.documentId, runId: input.runId })
+      .onConflictDoNothing()
+
+    await trx
       .insert(erpRequest)
-      .values({ id: requestId, runId: input.runId, payload: built.payload })
+      .values({
+        id: requestId,
+        runId: input.runId,
+        documentId: built.documentId,
+        filename: built.filename,
+        payload: built.payload,
+      })
       .onConflictDoNothing()
 
     await trx
@@ -174,7 +185,7 @@ export async function uploadErpRequestPayload(options: {
   log.info('ERP upload start', { erpSupplier: options.erpSupplier })
 
   const [row] = await db
-    .select({ id: erpRequest.id, payload: erpRequest.payload })
+    .select({ id: erpRequest.id, payload: erpRequest.payload, filename: erpRequest.filename })
     .from(erpRequest)
     .where(eq(erpRequest.id, options.requestId))
     .limit(1)
@@ -185,7 +196,7 @@ export async function uploadErpRequestPayload(options: {
 
   const filename = resolveUploadFilename({
     requestId: row.id,
-    payloadFilename: options.filename,
+    payloadFilename: options.filename ?? row.filename ?? undefined,
   })
 
   const adapter = getErpAdapter(options.erpSupplier)

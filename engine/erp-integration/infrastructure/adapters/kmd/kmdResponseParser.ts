@@ -11,6 +11,7 @@ export type KmdPostingDocumentOutcome = {
 }
 
 export type KmdPostingResponse = {
+  requestFilename?: string
   status: 'success' | 'partial' | 'error' | 'unknown'
   statusText: string
   counts: {
@@ -63,7 +64,10 @@ export function parseKmdPostingResponse(xml: string): KmdPostingResponse {
   }
 
   const parsed = parser.parse(xml) as Record<string, unknown>
-  const root = parsed.FinancePostingResponse as { RETURN?: RawReturn[] } | undefined
+  const root = parsed.FinancePostingResponse as {
+    CONTROL_FIELDS?: { FILE_NAME?: unknown }
+    RETURN?: RawReturn[]
+  } | undefined
   if (!root || !Array.isArray(root.RETURN)) {
     throw new Error('KMD posting response is missing FinancePostingResponse/RETURN')
   }
@@ -129,5 +133,12 @@ export function parseKmdPostingResponse(xml: string): KmdPostingResponse {
         ? `FEJL: ${counts.rejected ?? rejectedDocuments} bilag afvist`
         : 'Ukendt ERP-svar'
 
-  return { status, statusText, counts, fileMessages, documents }
+  return {
+    requestFilename: text(root.CONTROL_FIELDS?.FILE_NAME) || undefined,
+    status,
+    statusText,
+    counts,
+    fileMessages,
+    documents,
+  }
 }
