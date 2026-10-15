@@ -1,6 +1,6 @@
 import { defineEventHandler, createError, readBody } from 'h3'
 import { and, eq, max } from 'drizzle-orm'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 import db from '~/lib/db'
 import {
   erpAccountingDimensionDefinition,
@@ -18,6 +18,8 @@ import { listAccountingDimensionConstraints, resolveDimensionValueRows, type Acc
 import { normalizeRuleTagIds, resolveRuleTagIds } from '~~/server/utils/ruleTags/resolveRuleTagIds'
 import { requireWriteAccessWithIdentity } from '~~/server/auth/requireAppRoles'
 import { claimRuleForMutationInTransaction } from '~~/server/utils/ruleEditLock'
+import { postingTextTemplateRe2Schema } from '#engine/matching/domain/postingTextTemplateRe2'
+import type { PostingTextTemplate } from '#engine/matching/domain/postingTextTemplate'
 
 type CprType = 'ingen' | 'statisk' | 'dynamisk'
 
@@ -56,6 +58,7 @@ const versionContentSchema = z
         secondaryAccount: z.string().optional().nullable(),
         tertiaryAccount: z.string().optional().nullable(),
         bookingText: z.string().optional().nullable(),
+        bookingTextTemplate: postingTextTemplateRe2Schema.nullable().optional(),
         cprType: z.string().optional().nullable(),
         cprNumber: z.string().optional().nullable(),
         note: z.string().optional().nullable(),
@@ -250,11 +253,13 @@ export default defineEventHandler(async (event) => {
 
     const accountingParameters: {
       bookingText: string | null
+      bookingTextTemplate: PostingTextTemplate | null
       cprType: CprType | null
       cprNumber: string | null
       note: string | null
     } = {
       bookingText: accounting.bookingText ?? null,
+      bookingTextTemplate: accounting.bookingTextTemplate ?? null,
       cprType: normalizeCprType(accounting.cprType),
       cprNumber: accounting.cprNumber ?? null,
       note: accounting.note ?? null,

@@ -5,13 +5,13 @@ import {
   ruleBankAccount,
   ruleRuleTag,
   mapMatchesToConditionRows,
-  ruleDraftSchema,
   ruleBankingCondition,
   ruleAccountingParameters,
   ruleAccountingAttachment,
   ruleAccountingDimensionValue
 } from '~/lib/db/schema/rule'
 import type { RuleDraftSchema } from '~/lib/db/schema/rule'
+import { ruleDraftApiSchema } from '~~/server/utils/rules/ruleDraftApiSchema'
 import { ruleVersion, type RuleVersionInsertSchema } from '~/lib/db/schema/ruleVersion'
 import db from '~/lib/db'
 import { logger } from '~/lib/logger'
@@ -37,6 +37,7 @@ export function compileRuleDraftToDb(draft: RuleDraftSchema) {
     ruleTags,
     accountingDimensions,
     accountingText,
+    accountingTextTemplate,
     accountingCprType,
     accountingCprNumber,
     accountingNote,
@@ -73,6 +74,7 @@ export function compileRuleDraftToDb(draft: RuleDraftSchema) {
 
   const accountingParameters = {
     bookingText: accountingText,
+    bookingTextTemplate: accountingTextTemplate,
     cprType: accountingCprType,
     cprNumber: accountingCprNumber,
     note: accountingNote,
@@ -108,7 +110,7 @@ export default defineEventHandler(async (event) => {
     const dimensionConstraints = await listAccountingDimensionConstraints(activeSupplier)
 
     const body = await readBody(event)
-    const draft = ruleDraftSchema.parse(body)
+    const draft = ruleDraftApiSchema.parse(body)
     const { ruleData, bankAccountIds, tagIds, conditionRows, accountingParameters, attachments, versionContent } = compileRuleDraftToDb(draft)
 
     log.debug('Rule draft parsed', {

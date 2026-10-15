@@ -14,6 +14,9 @@ FROM base AS deps
 COPY package.json pnpm-lock.yaml ./
 COPY pnpm-workspace.yaml ./
 COPY patches ./patches
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends python3 make g++ \
+	&& rm -rf /var/lib/apt/lists/*
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
 	pnpm install --frozen-lockfile --config.strict-dep-builds=false
 
@@ -39,7 +42,6 @@ ENV APP_ROLE=web \
 	ERP_SUPPLIER=kmd \
 	ERP_BOOKING_PERIOD_CLOSE_DAY=7 \
 	ERP_ERROR_ACCOUNT=95999999 \
-	ERP_ACTIVE_INTEGRATION=false \
 	ERP_PROD_ENVIRONMENT=P04 \
 	ERP_MUNICIPALITY_CODE=000 \
 	ERP_COMP_CODE=0000 \

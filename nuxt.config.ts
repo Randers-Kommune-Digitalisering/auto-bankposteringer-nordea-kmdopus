@@ -48,6 +48,7 @@ export default defineNuxtConfig({
         'drizzle-orm/pg-core',
         'drizzle-zod',
         'zod',
+        'zod/v4'
       ]
     },
   },

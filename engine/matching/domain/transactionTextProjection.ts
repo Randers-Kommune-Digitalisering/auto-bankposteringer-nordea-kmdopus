@@ -1,5 +1,3 @@
-import { applyPostingTextPolicy } from './postingTextPolicy'
-
 export type TransactionReferenceDetail = {
   value: string
   source: string
@@ -74,11 +72,9 @@ export function projectCanonicalTransactionText(
     entryAdditionalInfo: input.entryAdditionalInfo ?? null,
   })
 
-  const policyText = applyPostingTextPolicy(bankMessage, counterpart.counterpart ?? undefined)
   const pairedPostingText = [counterpart.counterpart, preferredReference].filter(Boolean).join(' — ')
   const postingText =
-    policyText
-    || pairedPostingText
+    pairedPostingText
     || preferredReference
     || counterpart.counterpart
     || bankMessage

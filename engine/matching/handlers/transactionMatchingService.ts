@@ -17,6 +17,7 @@ import type {
   RuleAccountingAttachmentRow,
   RuleConditionRow,
 } from '~/lib/db/schema/rule'
+import type { PostingTextTemplate } from '../domain/postingTextTemplate'
 import type { PostingAttachment, PostingLineInput } from '../../posting/domain/posting'
 import { buildPostingCommand, type PostingCommand } from '../../posting/handlers/postingCommand'
 import {
@@ -92,6 +93,7 @@ type HydratedRule = {
 export type RuleAccounting = {
   dimensions: Record<string, string>
   bookingText?: string | null
+  bookingTextTemplate?: PostingTextTemplate | null
   cprType?: string | null
   cprNumber?: string | null
   note?: string | null
@@ -459,6 +461,7 @@ async function fetchActiveRules(accountIds: string[]): Promise<HydratedRule[]> {
         return {
           dimensions,
           bookingText: parameters.bookingText ?? null,
+          bookingTextTemplate: parameters.bookingTextTemplate ?? null,
           cprType: parameters.cprType ?? null,
           cprNumber: parameters.cprNumber ?? null,
           note: parameters.note ?? null,
@@ -508,7 +511,7 @@ function evaluateTransaction(tx: MatchableTransaction, rules: HydratedRule[]): M
     }
 
     const cpr = resolveCpr(accounting, tx)
-    const postingText = resolvePostingText(accounting.bookingText, tx)
+    const postingText = resolvePostingText(accounting.bookingText, tx, accounting.bookingTextTemplate)
     const command = buildPostingCommand({
       transaction: tx,
       landingDimensions: accounting.dimensions,

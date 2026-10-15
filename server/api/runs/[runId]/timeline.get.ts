@@ -12,6 +12,7 @@ import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import { runTimelineEvent } from '~/lib/db/schema/runTimelineEvent'
 import type { RunTimelineResponse } from '~/types/runTimeline'
 import { requireAnyAppRole } from '~~/server/auth/requireAppRoles'
+import { summarizeRunSamleposter } from '~~/server/utils/runs/runSamlepostSummary'
 
 const MISSING_MAPPING_ERROR_PATTERN = /Mangler konterings-mapping \((artskonto|statuskonto)\) for bankkonto:/i
 const RECOVERY_SUCCESS_PATTERN = /^Genkørsel efter (statuskonto-mapping|ignorering af bankkonto) lykkedes\./i
@@ -42,7 +43,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Run ikke fundet' })
   }
 
-  const [jobRows, outboxRows, requestRows, errorRows, eventRows, totalTxRows, processingRows] = await Promise.all([
+  const [jobRows, outboxRows, requestRows, errorRows, eventRows, samlepostRows] = await Promise.all([
     db
       .select({
         id: job.id,
@@ -137,50 +138,40 @@ export default defineEventHandler(async (event) => {
       .orderBy(desc(runTimelineEvent.createdAt), desc(runTimelineEvent.sequence))
       .limit(500),
 
-    // Get total transaction count and processing status counts for the run
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(transaction)
-      .where(eq(transaction.runId, runId))
-      .limit(1),
-
-    // Get processing status for transactions in the run, grouped by status
+    // Load full run membership before deriving samlepost identity and status.
     db
       .select({
-        status: transactionProcessing.status,
-        source: transactionProcessing.source,
-        count: sql<number>`count(*)`,
+        id: transaction.id,
+        accountId: transaction.accountId,
+        statementId: transaction.statementId,
+        entryIndex: transaction.entryIndex,
+        bookingDate: transaction.bookingDate,
+        creditDebitIndicator: transaction.creditDebitIndicator,
+        ntryRef: transaction.ntryRef,
+        entryAdditionalInfo: transaction.entryAdditionalInfo,
+        ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,
+        processingStatus: transactionProcessing.status,
+        processingSource: transactionProcessing.source,
       })
-      .from(transactionProcessing)
-      .innerJoin(transaction, eq(transaction.id, transactionProcessing.transactionId))
+      .from(transaction)
+      .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
       .where(eq(transaction.runId, runId))
-      .groupBy(transactionProcessing.status, transactionProcessing.source),
   ])
 
-  const totalTransactions = Number(totalTxRows?.[0]?.count ?? 0)
-
-  const byStatus = new Map<string, number>()
-  let processedTransactions = 0
-  let manualBookedTransactions = 0
-  for (const row of processingRows ?? []) {
-    const status = String(row.status ?? '')
-    const count = Number(row.count ?? 0)
-    if (!status) continue
-    byStatus.set(status, (byStatus.get(status) ?? 0) + count)
-    processedTransactions += count
-    if (status === 'bogført' && row.source === 'manuel') {
-      manualBookedTransactions += count
-    }
-  }
-
-  const matching: RunTimelineResponse['matching'] = {
-    totalTransactions,
-    processedTransactions,
-    matched: byStatus.get('bogført') ?? 0,
-    exception: byStatus.get('undtaget') ?? 0,
-    open: byStatus.get('åben') ?? 0,
-    manualBookedTransactions,
-  }
+  const matching = summarizeRunSamleposter((samlepostRows ?? []).map(row => ({
+    id: String(row.id),
+    accountId: row.accountId ? String(row.accountId) : null,
+    statementId: row.statementId ? String(row.statementId) : null,
+    entryIndex: row.entryIndex == null ? null : Number(row.entryIndex),
+    entryGroupSize: 0,
+    bookingDate: row.bookingDate,
+    creditDebitIndicator: row.creditDebitIndicator ? String(row.creditDebitIndicator) : null,
+    ntryRef: row.ntryRef ? String(row.ntryRef) : null,
+    entryAdditionalInfo: row.entryAdditionalInfo ? String(row.entryAdditionalInfo) : null,
+    ntryAcctSvcrRef: row.ntryAcctSvcrRef ? String(row.ntryAcctSvcrRef) : null,
+    processingStatus: row.processingStatus ? String(row.processingStatus) : null,
+    processingSource: row.processingSource ? String(row.processingSource) : null,
+  })))
 
   const filteredErrors = (errorRows ?? []).filter((e) => {
     if (!isMissingMappingError(e.errorString)) return true

@@ -177,3 +177,19 @@ export type StatementTransaction = {
   // Present when statementId/entryIndex and OPBD balance exists.
   runningBalance: string | null;
 };
+
+export type Camt053SourceTreeNode = {
+  id: string;
+  kind: "element" | "text" | "cdata" | "comment";
+  name: string;
+  value?: string;
+  attributes?: Array<{ name: string; value: string }>;
+  children?: Camt053SourceTreeNode[];
+};
+
+export type StatementTransactionSourceTree = {
+  statementId: string;
+  entryIndex: number | null;
+  entrySubIndex: number | null;
+  tree: Camt053SourceTreeNode;
+};

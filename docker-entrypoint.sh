@@ -110,7 +110,7 @@ sync_dependencies_if_needed() {
   fi
 
   echo "Dependency sync: lock hash changed; running pnpm install"
-  pnpm install --frozen-lockfile --config.strict-dep-builds=false --config.verify-deps-before-run=false
+  pnpm install --frozen-lockfile --config.confirmModulesPurge=false --config.strict-dep-builds=false --config.verify-deps-before-run=false
   mkdir -p "$(dirname "$state_file")"
   printf '%s' "$lock_hash" > "$state_file"
 }

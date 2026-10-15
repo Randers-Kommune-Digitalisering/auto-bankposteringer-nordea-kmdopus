@@ -33,11 +33,6 @@ watch(canViewOpenItems, (canView) => {
   if (canView) void refreshOpenItemsSummary()
 }, { immediate: true })
 
-const openItemsBadgeText = computed(() => {
-  if (openItemsCount.value === null) return undefined
-  return openItemsCount.value > 99 ? '99+' : openItemsCount.value
-})
-
 function normalizePath(path: string): string {
   const trimmed = path.length > 1 ? path.replace(/\/+$/, '') : path
   try {
@@ -253,9 +248,8 @@ useHead(() => ({
             <UChip
               v-if="item.to === '/aabne-poster'"
               :show="openItemsCount !== 0"
-              :text="openItemsBadgeText"
               color="error"
-              size="sm"
+              size="lg"
             >
               <UIcon
                 v-if="item.icon"
@@ -280,9 +274,13 @@ useHead(() => ({
           class="mt-auto"
         />
 
-        <!-- Separator + ColorModeButton nederst -->
+        <!-- Separator + color mode nederst -->
         <div class="border-t border-default mt-4 pt-3 flex justify-center">
-          <UColorModeButton size="xl"/>
+          <UColorModeSelect
+            size="xl"
+            aria-label="Farvetema"
+            class="w-full"
+          />
         </div>
       </template>
     </UDashboardSidebar>

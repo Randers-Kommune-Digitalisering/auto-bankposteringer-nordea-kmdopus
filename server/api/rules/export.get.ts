@@ -60,6 +60,7 @@ export default defineEventHandler(async (event) => {
     'matchAmountMin',
     'matchAmountMax',
     'accountingText',
+    'accountingTextTemplate',
     'accountingCprType',
     'accountingCprNumber',
     'accountingNote',
@@ -94,6 +95,9 @@ export default defineEventHandler(async (event) => {
     const amountMax = r.matchAmountMax == null ? '' : String(r.matchAmountMax)
 
     const accountingText = r.accountingParameters?.bookingText ?? ''
+    const accountingTextTemplate = r.accountingParameters?.bookingTextTemplate
+      ? JSON.stringify(r.accountingParameters.bookingTextTemplate)
+      : ''
     const accountingCprType = r.accountingParameters?.cprType ?? 'ingen'
     const accountingCprNumber = r.accountingParameters?.cprNumber ?? ''
     const accountingNote = r.accountingParameters?.note ?? ''
@@ -138,6 +142,7 @@ export default defineEventHandler(async (event) => {
     values.push(amountMin)
     values.push(amountMax)
     values.push(String(accountingText ?? ''))
+    values.push(accountingTextTemplate)
     values.push(String(accountingCprType ?? 'ingen'))
     values.push(String(accountingCprNumber ?? ''))
     values.push(String(accountingNote ?? ''))

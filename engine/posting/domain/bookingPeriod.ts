@@ -49,7 +49,9 @@ export function getBookingPeriodState({
     Math.min(closingDay, daysInMonth(todayYear, todayMonth)),
   )
   const previousMonthStart = formatDate(previousMonth.year, previousMonth.month, 1)
-  const isClosed = bookingDate < previousMonthStart || today > closingDate
+  const currentMonthStart = formatDate(todayYear, todayMonth, 1)
+  const isClosed = bookingDate < previousMonthStart
+    || (bookingDate < currentMonthStart && today > closingDate)
 
   return {
     isClosed,

@@ -49,6 +49,6 @@ export function resolveEffectiveRunStatus(input: {
   hasInFlightIo: boolean
 }): RunStatus {
   if (input.hasActiveErrors || input.hasNegativeErpResponse || input.hasFailedIo) return 'fejl'
-  if (input.hasInFlightIo) return 'indlæser'
+  if (input.hasInFlightIo) return 'afventer'
   return (input.baseStatus as RunStatus | null) ?? 'afventer'
 }

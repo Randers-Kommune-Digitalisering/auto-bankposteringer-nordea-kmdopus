@@ -3,6 +3,7 @@ import { DateFormatter } from '@internationalized/date'
 import type { TimelineItem } from '@nuxt/ui'
 import type { RunListItem } from '~/types/runs'
 import type { RunTimelineResponse } from '~/types/runTimeline'
+import { getRunStatusPresentation } from '~/lib/presenters/runStatus'
 import {
   compareTimelineEvents,
   getErpTimelineDeliveryState,
@@ -39,6 +40,17 @@ const loading = ref(false)
 const data = ref<RunTimelineResponse | null>(null)
 
 const openPopovers = ref<Record<string, boolean>>({})
+const openEventLogs = ref({ banking: false, matching: false, manual: false, erp: false })
+
+function resetEventLogs() {
+  openEventLogs.value = { banking: false, matching: false, manual: false, erp: false }
+}
+
+type EventLogKey = keyof typeof openEventLogs.value
+
+function toggleEventLog(stage: EventLogKey) {
+  openEventLogs.value[stage] = !openEventLogs.value[stage]
+}
 
 const runId = computed(() => props.run?.id ?? '')
 
@@ -70,8 +82,10 @@ watch(
   async ([isOpen]) => {
     if (!isOpen) {
       data.value = null
+      resetEventLogs()
       return
     }
+    resetEventLogs()
     await load()
   },
 )
@@ -91,6 +105,16 @@ function compareEventRows(
 ): number {
   return Date.parse(left.createdAt) - Date.parse(right.createdAt)
     || (left.sequence ?? 0) - (right.sequence ?? 0)
+}
+
+type RunEventLogEntry = {
+  id: string
+  createdAt: string
+  sequence?: number
+  outboxId?: string | null
+  detail?: string | null
+  errorString?: string | null
+  eventType?: string
 }
 
 function jobStatusLabel(status: string): string {
@@ -162,34 +186,34 @@ const matchingState = computed(() => {
   const m = data.value?.matching
   if (!m) return { color: 'neutral' as StatusColor, label: 'Afventer', description: 'Matching er ikke startet' }
 
-  if (m.totalTransactions === 0) {
-    return { color: 'neutral' as StatusColor, label: 'Ikke relevant', description: 'Ingen transaktioner at matche' }
+  if (m.totalSamleposter === 0) {
+    return { color: 'neutral' as StatusColor, label: 'Ikke relevant', description: 'Ingen samleposter at matche' }
   }
 
-  if (m.processedTransactions === 0) {
+  if (m.processedSamleposter === 0) {
     return { color: 'warning' as StatusColor, label: 'Afventer', description: 'Matching er ikke kørt endnu' }
   }
 
-  if (m.processedTransactions < m.totalTransactions) {
+  if (m.processedSamleposter < m.totalSamleposter) {
     return {
       color: 'warning' as StatusColor,
       label: 'Kører',
-      description: `Behandlet ${m.processedTransactions}/${m.totalTransactions}`,
+      description: `Behandlet ${m.processedSamleposter}/${m.totalSamleposter} samleposter`,
     }
   }
 
-  if (m.open > 0) {
+  if (m.openSamleposter > 0 || m.mixedSamleposter > 0) {
     return {
       color: 'warning' as StatusColor,
-      label: 'Åbne poster',
-      description: `${m.matched} match, ${m.exception} undtaget, ${m.open} åben`,
+      label: m.openSamleposter > 0 ? 'Åbne poster' : 'Blandede statusser',
+      description: `${m.bookedSamleposter} bogførte, ${m.exceptedSamleposter} undtagne, ${m.openSamleposter} åbne, ${m.mixedSamleposter} blandede samleposter`,
     }
   }
 
   return {
     color: 'success' as StatusColor,
     label: 'OK',
-    description: `${m.matched} match, ${m.exception} undtaget, ${m.open} åben`,
+    description: `${m.bookedSamleposter} bogførte, ${m.exceptedSamleposter} undtagne samleposter`,
   }
 })
 
@@ -198,12 +222,14 @@ const manualRequestId = computed(() => manualEvents.value.filter(event => event.
 const manualState = computed(() => {
   const eventState = statusFromStageEvent(latestStageEvent('manual'))
   if (eventState) return eventState
-  const historicalCount = data.value?.matching.manualBookedTransactions ?? 0
+  const historicalCount = data.value?.matching.manualBookedSamleposter ?? 0
+  const historicalCountNoun = historicalCount === 1 ? 'samlepost' : 'samleposter'
+  const historicalCountAdjective = historicalCount === 1 ? 'bogført' : 'bogførte'
   return historicalCount
     ? {
         color: 'neutral' as StatusColor,
         label: 'Historik',
-        description: `${historicalCount} manuelt bogført før hændelsesloggen blev indført.`,
+        description: `${historicalCount} manuelt ${historicalCountAdjective} ${historicalCountNoun} før hændelsesloggen blev indført.`,
       }
     : {
         color: 'neutral' as StatusColor,
@@ -220,35 +246,52 @@ const erpDeliveries = computed<ErpTimelineDelivery[]>(() => groupErpTimelineDeli
 ))
 const erpDeliveryState = getErpTimelineDeliveryState
 
-const bankingEvents = computed(() => {
+const bankingEvents = computed<RunEventLogEntry[]>(() => {
   const timelineEvents = (data.value?.events ?? []).filter(e => e.stage === 'banking')
   const errorEvents = (data.value?.errors ?? []).filter(e => e.source === 'banking')
   return [...timelineEvents, ...errorEvents].sort(compareEventRows)
 })
 
-const applicationEvents = computed(() => {
+const applicationEvents = computed<RunEventLogEntry[]>(() => {
   const timelineEvents = (data.value?.events ?? []).filter(e => e.stage === 'matching')
   const errorEvents = (data.value?.errors ?? []).filter(e => !e.source || e.source === 'application')
   return [...timelineEvents, ...errorEvents].sort(compareEventRows)
 })
 
-const erpStageEvents = computed(() => {
-  const events = erpDeliveries.value.flatMap(delivery => delivery.events)
+const erpStageEvents = computed<RunEventLogEntry[]>(() => {
+  const outboxById = new Map(erpDeliveryRows.value.map(row => [row.id, row]))
+  const events = erpDeliveries.value
+    .flatMap(delivery => delivery.events)
+    .map((event) => {
+      const failedOutbox = event.outboxId ? outboxById.get(event.outboxId) : undefined
+      return failedOutbox?.status === 'failed' && failedOutbox.lastError
+        ? { ...event, detail: failedOutbox.lastError }
+        : event
+    })
+  const correlatedOutboxIds = new Set(events.map(event => event.outboxId).filter((id): id is string => Boolean(id)))
+  const missingFailureEvents = erpDeliveryRows.value
+    .filter(row => row.status === 'failed' && !correlatedOutboxIds.has(row.id))
+    .map(row => ({
+      id: `outbox-error:${row.id}`,
+      outboxId: row.id,
+      eventType: 'upload_failed',
+      detail: row.lastError ?? 'Afsendelse til ERP fejlede.',
+      createdAt: row.createdAt,
+      sequence: 0,
+    }))
   const errorEvents = (data.value?.errors ?? []).filter(e => e.source === 'erp')
-  return [...events, ...errorEvents].sort(compareEventRows)
+  return [...events, ...errorEvents, ...missingFailureEvents].sort(compareEventRows)
 })
 
 const erpStageState = computed(() => {
   return getErpTimelineStageState(erpDeliveries.value)
 })
 
-const overallState = computed(() => {
-  const colors = [bankingJobState.value.color, matchingState.value.color, manualState.value.color, erpStageState.value.color]
-  if (colors.includes('error')) return { color: 'error' as StatusColor, label: 'Fejl' }
-  if (colors.includes('warning')) return { color: 'warning' as StatusColor, label: 'Afventer' }
-  if (!data.value) return { color: 'neutral' as StatusColor, label: '—' }
-  return { color: 'success' as StatusColor, label: 'OK' }
-})
+function deliveryAttemptCount(delivery: ErpTimelineDelivery): number {
+  return delivery.rows.reduce((sum, row) => sum + row.attempts + (row.status === 'sent' || row.status === 'processing' ? 1 : 0), 0)
+}
+
+const overallState = computed(() => getRunStatusPresentation(props.run?.status))
 
 type RunTimelineItem = TimelineItem & { slot: string }
 
@@ -329,8 +372,8 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
                 @update:open="(v: boolean) => (openPopovers[`${runId}-error`] = v)"
               />
               <RunsDataPopover
-                v-if="run.erpResponses?.length"
-                type="erpResponses"
+                v-if="run.erpDocuments?.length"
+                type="erpDocuments"
                 :run="run"
                 :open="!!openPopovers[`${runId}-erpResponses`]"
                 @update:open="(v: boolean) => (openPopovers[`${runId}-erpResponses`] = v)"
@@ -366,7 +409,17 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
               <div class="space-y-2">
                 <div class="text-sm text-muted">{{ bankingJobState.description }}</div>
 
-                <ul v-if="bankingEvents.length" class="list-disc pl-5 space-y-1">
+                <UButton
+                  v-if="bankingEvents.length"
+                  size="xs"
+                  color="neutral"
+                  variant="subtle"
+                  :label="openEventLogs.banking ? 'Skjul hændelseslog' : 'Vis hændelseslog'"
+                  :aria-expanded="openEventLogs.banking"
+                  aria-controls="run-event-log-banking"
+                  @click="toggleEventLog('banking')"
+                />
+                <ul v-if="openEventLogs.banking && bankingEvents.length" id="run-event-log-banking" class="list-disc pl-5 space-y-1">
                   <li v-for="e in bankingEvents" :key="e.id" class="text-sm">
                     <span class="text-muted">{{ formatMaybeIso(e.createdAt) }}:</span>
                     <span class="ml-1">{{ e.detail ?? e.errorString ?? e.eventType ?? 'Ukendt hændelse' }}</span>
@@ -376,9 +429,18 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
             </template>
 
             <template #matching-title>
-              <div class="flex items-center gap-2">
+              <div class="flex flex-wrap items-center gap-2">
                 <span>Matching</span>
                 <UBadge :color="matchingState.color" variant="subtle">{{ matchingState.label }}</UBadge>
+                <UButton
+                  v-if="data?.matching?.openSamleposter"
+                  :icon="appConfig.ui.icons.edit"
+                  label="Behandl"
+                  color="primary"
+                  variant="soft"
+                  size="xs"
+                  to="/aabne-poster"
+                />
               </div>
             </template>
 
@@ -386,26 +448,26 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
               <div class="space-y-2">
                 <div class="text-sm text-muted">{{ matchingState.description }}</div>
                 <div v-if="data?.matching" class="text-xs text-muted">
-                  Total transaktioner: {{ data.matching.totalTransactions }} • Behandlet: {{ data.matching.processedTransactions }}
+                  Samleposter i alt: {{ data.matching.totalSamleposter }} • Behandlet: {{ data.matching.processedSamleposter }}
                 </div>
 
-                <ul v-if="applicationEvents.length" class="list-disc pl-5 space-y-1">
+                <UButton
+                  v-if="applicationEvents.length"
+                  size="xs"
+                  color="neutral"
+                  variant="subtle"
+                  :label="openEventLogs.matching ? 'Skjul hændelseslog' : 'Vis hændelseslog'"
+                  :aria-expanded="openEventLogs.matching"
+                  aria-controls="run-event-log-matching"
+                  @click="toggleEventLog('matching')"
+                />
+                <ul v-if="openEventLogs.matching && applicationEvents.length" id="run-event-log-matching" class="list-disc pl-5 space-y-1">
                   <li v-for="e in applicationEvents" :key="e.id" class="text-sm">
                     <span class="text-muted">{{ formatMaybeIso(e.createdAt) }}:</span>
                     <span class="ml-1">{{ e.detail ?? e.errorString ?? e.eventType ?? 'Ukendt hændelse' }}</span>
                   </li>
                 </ul>
 
-                <div v-if="data?.matching?.open" class="pt-1">
-                  <UButton
-                    :icon="appConfig.ui.icons.edit"
-                    label="Behandl åbne poster"
-                    color="primary"
-                    variant="soft"
-                    size="xs"
-                    to="/aabne-poster"
-                  />
-                </div>
               </div>
             </template>
 
@@ -413,8 +475,8 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
               <div class="flex items-center gap-2">
                 <span>Manuel bogføring</span>
                 <UBadge :color="manualState.color" variant="subtle">{{ manualState.label }}</UBadge>
-                <UBadge v-if="manualEvents.length" color="neutral" variant="outline">
-                  {{ manualEvents.filter(event => event.eventType === 'booking_completed').length }} afsluttet
+                <UBadge v-if="data?.matching.manualBookedSamleposter" color="neutral" variant="outline">
+                  {{ data.matching.manualBookedSamleposter }} manuelt {{ data.matching.manualBookedSamleposter === 1 ? 'bogført samlepost' : 'bogførte samleposter' }}
                 </UBadge>
               </div>
             </template>
@@ -422,7 +484,17 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
             <template #manualBooking-description>
               <div class="space-y-2">
                 <div class="text-sm text-muted">{{ manualState.description }}</div>
-                <ul v-if="manualEvents.length" class="list-disc pl-5 space-y-1">
+                <UButton
+                  v-if="manualEvents.length"
+                  size="xs"
+                  color="neutral"
+                  variant="subtle"
+                  :label="openEventLogs.manual ? 'Skjul hændelseslog' : 'Vis hændelseslog'"
+                  :aria-expanded="openEventLogs.manual"
+                  aria-controls="run-event-log-manual"
+                  @click="toggleEventLog('manual')"
+                />
+                <ul v-if="openEventLogs.manual && manualEvents.length" id="run-event-log-manual" class="list-disc pl-5 space-y-1">
                   <li v-for="event in manualEvents" :key="event.id" class="text-sm">
                     <span class="text-muted">{{ formatMaybeIso(event.createdAt) }}:</span>
                     <span class="ml-1">{{ event.detail ?? event.eventType }}</span>
@@ -446,7 +518,7 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
                 <UBadge :color="(slotItem as any)._state?.color ?? 'neutral'" variant="subtle">
                   {{ (slotItem as any)._state?.label ?? '—' }}
                 </UBadge>
-                <UBadge v-if="(slotItem as any)._deliveries?.length" color="neutral" variant="outline">
+                <UBadge v-if="(slotItem as any)._deliveries?.length > 1" color="neutral" variant="outline">
                   {{ (slotItem as any)._deliveries.length }} bilag
                 </UBadge>
               </div>
@@ -460,11 +532,8 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
                   <UBadge :color="erpDeliveryState(delivery).color" variant="subtle">
                     {{ erpDeliveryState(delivery).label }}
                   </UBadge>
-                  <UBadge v-if="delivery.documentId" color="neutral" variant="outline" class="font-mono">
-                    {{ delivery.documentId }}
-                  </UBadge>
-                  <UBadge v-if="delivery.rows.length" color="neutral" variant="outline">
-                    {{ delivery.rows.reduce((sum, row) => sum + row.attempts + (row.status === 'sent' || row.status === 'processing' ? 1 : 0), 0) }} forsøg
+                  <UBadge v-if="deliveryAttemptCount(delivery) > 1" color="neutral" variant="outline">
+                    {{ deliveryAttemptCount(delivery) }} forsøg
                   </UBadge>
                   <UButton
                     v-if="erpDeliveryState(delivery).color === 'error'"
@@ -486,12 +555,24 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
                   />
                 </div>
 
-                <ul v-if="erpStageEvents.length" class="list-disc pl-5 space-y-1">
+                <UButton
+                  size="xs"
+                  color="neutral"
+                  variant="subtle"
+                  :label="openEventLogs.erp ? 'Skjul hændelseslog' : 'Vis hændelseslog'"
+                  :aria-expanded="openEventLogs.erp"
+                  aria-controls="run-event-log-erp"
+                  @click="toggleEventLog('erp')"
+                />
+                <ul v-if="openEventLogs.erp && erpStageEvents.length" id="run-event-log-erp" class="list-disc pl-5 space-y-1">
                   <li v-for="e in erpStageEvents" :key="e.id" class="text-sm">
                     <span class="text-muted">{{ formatMaybeIso(e.createdAt) }}:</span>
                     <span class="ml-1">{{ e.detail ?? e.errorString ?? e.eventType ?? 'Ukendt hændelse' }}</span>
                   </li>
                 </ul>
+                <div v-else-if="openEventLogs.erp" class="text-sm text-muted">
+                  Ingen hændelser for ERP-fremsendelsen.
+                </div>
               </div>
             </template>
           </UTimeline>

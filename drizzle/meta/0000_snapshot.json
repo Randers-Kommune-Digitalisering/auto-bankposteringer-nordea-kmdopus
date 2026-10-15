@@ -1,5 +1,5 @@
 {
-  "id": "ba5a9bb0-7ce3-469e-bd7c-14aac583a24d",
+  "id": "8c8c88f5-39ab-4c45-bfc5-82aaa67b2be1",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -2963,6 +2963,12 @@
         "booking_text": {
           "name": "booking_text",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "booking_text_template": {
+          "name": "booking_text_template",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },

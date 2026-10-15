@@ -242,6 +242,8 @@ export function getErpTimelineStageState(deliveries: ErpTimelineDelivery[]): Erp
   const acceptedCount = states.filter(state => state.color === 'success').length
   const color: TimelineStatusColor = failedCount > 0 ? 'error' : pendingCount > 0 ? 'warning' : acceptedCount > 0 ? 'success' : 'neutral'
   const label = failedCount > 0 ? 'Fejl' : pendingCount > 0 ? 'Afventer' : acceptedCount > 0 ? 'OK' : 'Afventer'
-  const description = `${deliveries.length} bilag${failedCount ? `, ${failedCount} med fejl` : ''}${pendingCount ? `, ${pendingCount} afventer` : ''}`
+  const description = deliveries.length > 1
+    ? `${deliveries.length} bilag${failedCount ? `, ${failedCount} med fejl` : ''}${pendingCount ? `, ${pendingCount} afventer` : ''}`
+    : ''
   return { color, label, description }
 }

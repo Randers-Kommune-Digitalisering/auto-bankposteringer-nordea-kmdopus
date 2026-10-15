@@ -18,26 +18,8 @@ export type TransactionListItem = {
 	ruleApplied?: number | null;
 };
 
-export type DocumentListItem = {
-	id: string;
-	runId: string;
-	type: string | null;
-	filename: string;
-	fileExtension: string;
-	content?: string | null;
-	mimeType?: string | null;
-};
-
-export type DocumentContentItem = {
-	id: string;
-	filename: string;
-	fileExtension: string;
-	content: string;
-	mimeType?: string | null;
-};
-
-export type ErpResponseListItem = {
-	id: string;
+export type ErpDocumentListItem = {
+	documentId: string;
 };
 
 export type ErrorListItem = {
@@ -53,9 +35,8 @@ export type ErrorListItem = {
 export type RunListItem = Omit<RunSelectSchema, "bookingDate"> & {
 	bookingDate: IsoDateString;
 	transactions: TransactionListItem[];
-	documents: DocumentListItem[];
 	errors: ErrorListItem[];
-	erpResponses: ErpResponseListItem[];
+	erpDocuments: ErpDocumentListItem[];
 };
 
 export type RunListResponse = RunListItem[];

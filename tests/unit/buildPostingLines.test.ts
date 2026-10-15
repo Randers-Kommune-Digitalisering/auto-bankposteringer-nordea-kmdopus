@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { anonymizeCprInText, extractCprFromText } from '../../app/lib/text/cpr'
 import { buildPostingLines, extractCprFromTransaction, resolvePostingText } from '../../engine/matching/domain/postingUtils'
+import { postingTextTemplateSchema } from '../../engine/matching/domain/postingTextTemplate'
 
 describe('CPR text helpers', () => {
   it('extracts the first CPR with the same normalization used by matching', () => {
@@ -106,7 +107,7 @@ describe('buildPostingLines', () => {
     expect(text).toBe('BAMBORA AB — 63470645-20260804')
   })
 
-  it('applies BDP policy and strips whitespace', () => {
+  it('does not apply an implicit BDP posting-text policy', () => {
     const text = resolvePostingText(undefined, {
       transactionId: '00000000-0000-0000-0000-00000000beef',
       amount: 100,
@@ -114,10 +115,10 @@ describe('buildPostingLines', () => {
       txAdditionalInfo: 'foo BDP12345678901234567890 bar',
     })
 
-    expect(text).toBe('BDP123456789012345')
+    expect(text).toBe('foo BDP12345678901234567890 bar')
   })
 
-  it('applies KSD policy and appends counterparty', () => {
+  it('does not apply an implicit KSD posting-text policy', () => {
     const text = resolvePostingText(undefined, {
       transactionId: '00000000-0000-0000-0000-00000000beef',
       amount: 100,
@@ -125,6 +126,41 @@ describe('buildPostingLines', () => {
       txAdditionalInfo: 'foo KSD12345678901234567890 bar',
       debtorName: 'BORGER NAVN',
     })
+
+    expect(text).toContain('KSD12345678901234567890')
+    expect(text).toContain('BORGER NAVN')
+  })
+
+  it('recreates a BDP format through a rule template', () => {
+    const template = postingTextTemplateSchema.parse({
+      version: 1,
+      parts: [{ type: 'extract', source: 'txAdditionalInfo', pattern: 'BDP\\d{15}' }],
+    })
+    const text = resolvePostingText(undefined, {
+      transactionId: '00000000-0000-0000-0000-00000000beef',
+      amount: 100,
+      statusDimensions: {},
+      txAdditionalInfo: 'foo BDP12345678901234567890 bar',
+    }, template)
+
+    expect(text).toBe('BDP123456789012345')
+  })
+
+  it('recreates a KSD format with its counterparty through a rule template', () => {
+    const template = postingTextTemplateSchema.parse({
+      version: 1,
+      parts: [
+        { type: 'extract', source: 'txAdditionalInfo', pattern: 'KSD\\d{18}' },
+        { type: 'extract', source: 'counterparty', pattern: '.+' },
+      ],
+    })
+    const text = resolvePostingText(undefined, {
+      transactionId: '00000000-0000-0000-0000-00000000beef',
+      amount: 100,
+      statusDimensions: {},
+      txAdditionalInfo: 'foo KSD123456789012345678 bar',
+      debtorName: 'BORGER NAVN',
+    }, template)
 
     expect(text).toBe('KSD123456789012345678BORGER NAVN')
   })

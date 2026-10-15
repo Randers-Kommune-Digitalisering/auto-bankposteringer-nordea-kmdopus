@@ -6,7 +6,6 @@ import { inArray, sql } from 'drizzle-orm'
 import db from '~/lib/db'
 import { logger } from '~/lib/logger'
 import {
-  ruleDraftSchema,
   type MatchEntry,
   type RuleDraftSchema,
   rule,
@@ -17,6 +16,7 @@ import {
   ruleAccountingAttachment,
   ruleAccountingDimensionValue,
 } from '~/lib/db/schema/rule'
+import { ruleDraftApiSchema } from '~~/server/utils/rules/ruleDraftApiSchema'
 import { account } from '~/lib/db/schema/account'
 import { ruleTag } from '~/lib/db/schema/ruleTag'
 import { ruleVersion, type RuleVersionInsertSchema } from '~/lib/db/schema/ruleVersion'
@@ -298,6 +298,21 @@ export default defineEventHandler(async (event) => {
         continue
       }
 
+      const accountingTextTemplateCell = toOptionalString((row as any).accountingTextTemplate)
+      let accountingTextTemplate: unknown
+      if (accountingTextTemplateCell) {
+        try {
+          accountingTextTemplate = JSON.parse(accountingTextTemplateCell)
+        } catch {
+          errors.push({
+            row: rowNumber,
+            field: 'accountingTextTemplate',
+            message: 'Ugyldigt JSON-format for dynamisk posteringstekst',
+          })
+          continue
+        }
+      }
+
       const amountMin = parseOptionalNumberCell((row as any).matchAmountMin)
       if (amountMin.invalid) {
         errors.push({ row: rowNumber, field: 'matchAmountMin', message: 'Ugyldigt talformat' })
@@ -319,6 +334,7 @@ export default defineEventHandler(async (event) => {
         matchAmountMin: amountMin.value,
         matchAmountMax: amountMax.value,
         accountingText: toOptionalString((row as any).accountingText),
+        accountingTextTemplate,
         accountingCprType: (toOptionalString((row as any).accountingCprType) ?? 'ingen'),
         accountingCprNumber: toOptionalString((row as any).accountingCprNumber),
         accountingNote: toOptionalString((row as any).accountingNote),
@@ -331,7 +347,7 @@ export default defineEventHandler(async (event) => {
         accountingAttachmentData: undefined,
       }
 
-      const parsedDraft = ruleDraftSchema.safeParse(candidate)
+      const parsedDraft = ruleDraftApiSchema.safeParse(candidate)
       if (!parsedDraft.success) {
         for (const issue of parsedDraft.error.issues) {
           errors.push({

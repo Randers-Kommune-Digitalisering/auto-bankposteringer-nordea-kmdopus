@@ -53,14 +53,14 @@ const columns: TableColumn<DashboardLatestRun>[] = [
     },
   },
   {
-    accessorKey: 'transactionsCount',
+    accessorKey: 'totalSamleposterCount',
     header: 'Behandling',
     size: 150,
     cell: ({ row }) => {
       const run = row.original
       return h('span', {
-        title: `Åbne: ${run.openTransactionsCount}, undtagne: ${run.exceptionTransactionsCount}`,
-      }, `${run.processedTransactionsCount}/${run.transactionsCount}`)
+        title: `Bogførte: ${run.bookedSamleposterCount}, undtagne: ${run.exceptionSamleposterCount}, åbne: ${run.openSamleposterCount}, blandede: ${run.mixedSamleposterCount}`,
+      }, `${run.completedSamleposterCount}/${run.totalSamleposterCount} samleposter`)
     },
   },
   {

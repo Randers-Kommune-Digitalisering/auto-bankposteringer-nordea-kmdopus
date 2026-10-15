@@ -45,7 +45,6 @@ const baseCommonSchema = z.object({
   ERP_SUPPLIER: z.enum(erpSupplierValues),
   ERP_BOOKING_PERIOD_CLOSE_DAY: z.coerce.number().int().min(1).max(31),
   ERP_ERROR_ACCOUNT: z.string(),
-  ERP_ACTIVE_INTEGRATION: z.enum(["true", "false"]).transform((value) => value === "true"),
   ERP_PROD_ENVIRONMENT: z.string(),
   ERP_MUNICIPALITY_CODE: z.string(),
   ERP_COMP_CODE: z.string(),
@@ -145,7 +144,6 @@ validateErpIntegrationFilenameMask(parsedEnv.ERP_INTEGRATION_FILENAME_MASK)
 export const erpIntegrationMetadata = {
   erpSupplier: parsedEnv.ERP_SUPPLIER,
   erpErrorAccount: parsedEnv.ERP_ERROR_ACCOUNT,
-  activeIntegration: parsedEnv.ERP_ACTIVE_INTEGRATION,
   prodEnvironment: parsedEnv.ERP_PROD_ENVIRONMENT,
   municipalityCode: parsedEnv.ERP_MUNICIPALITY_CODE,
   compCode: parsedEnv.ERP_COMP_CODE,

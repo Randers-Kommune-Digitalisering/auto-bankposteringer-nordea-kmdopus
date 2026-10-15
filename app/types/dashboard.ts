@@ -34,11 +34,12 @@ export type DashboardLatestRun = {
   id: string
   bookingDate: string
   status: string | null
-  transactionsCount: number
-  processedTransactionsCount: number
-  bookedTransactionsCount: number
-  openTransactionsCount: number
-  exceptionTransactionsCount: number
+  totalSamleposterCount: number
+  completedSamleposterCount: number
+  bookedSamleposterCount: number
+  openSamleposterCount: number
+  exceptionSamleposterCount: number
+  mixedSamleposterCount: number
   activeErrorsCount: number
   eventCount: number
   erpRejected: boolean

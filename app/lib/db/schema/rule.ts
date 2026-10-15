@@ -1,5 +1,5 @@
 import { z } from "zod/v4"
-import { pgTable, text, date, timestamp, numeric, integer, uuid, primaryKey, bigint, boolean, unique, index } from "drizzle-orm/pg-core"
+import { pgTable, text, date, timestamp, numeric, integer, uuid, primaryKey, bigint, boolean, unique, index, jsonb } from "drizzle-orm/pg-core"
 import { createUpdateSchema, createSelectSchema } from "drizzle-zod"
 import type { RuleType, RuleStatus, RuleConditionOperator, RuleConditionGate } from "./enums"
 import {
@@ -27,6 +27,8 @@ import type { MatchCategory, MatchField } from "../../rules/match-config"
 import { isValidCprStrict } from "../../text/cpr"
 import { isTransactionTypeCatalogValue, transactionTypeCategory } from "../../rules/transactionTypeCatalog"
 import { transactionTypeCatalogValueLabel } from "../../rules/transactionTypeCatalog"
+import { postingTextTemplateSchema } from "../../../../engine/matching/domain/postingTextTemplate"
+import type { PostingTextTemplate } from "../../../../engine/matching/domain/postingTextTemplate"
 
 export const rule = pgTable('rule', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -117,6 +119,7 @@ export const ruleAccountingParameters = pgTable('kmd_accounting_parameters', {
   id: uuid().defaultRandom().primaryKey(),
   ruleId: integer('rule_id').references(() => rule.id, { onDelete: 'cascade' }),
   bookingText: text('booking_text'),
+  bookingTextTemplate: jsonb('booking_text_template').$type<PostingTextTemplate>(),
   cprType: cprTypeEnum('cpr_type'),
   cprNumber: text('cpr_number'),
   note: text('note'),
@@ -279,6 +282,7 @@ export const ruleDraftSchema = z.object({
     value: z.string().min(1),
   })).optional(),
   accountingText: z.string().optional(),
+  accountingTextTemplate: postingTextTemplateSchema.optional(),
   accountingCprType: z.enum(cprTypeValues),
   accountingCprNumber: z.preprocess(
     value => (typeof value === 'string' && value.trim() === '' ? undefined : value),
@@ -312,6 +316,13 @@ export const ruleDraftSchema = z.object({
         code: z.ZodIssueCode.custom,
         path: ['accountingCprNumber'],
         message: 'CPR skal matche formatet DDMMÅÅXXXX',
+      })
+    }
+    if (data.accountingTextTemplate && data.accountingText !== undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['accountingTextTemplate'],
+        message: 'Vælg enten fast posteringstekst eller en dynamisk skabelon',
       })
     }
   })
@@ -360,6 +371,7 @@ export const ruleAccountingSchema = z.object({
     value: z.string().min(1),
   })).optional(),
   accountingText: z.string().optional(),
+  accountingTextTemplate: postingTextTemplateSchema.optional(),
   accountingCprType: z.enum(cprTypeValues),
   accountingCprNumber: z.preprocess(
     value => (typeof value === 'string' && value.trim() === '' ? undefined : value),
@@ -370,6 +382,13 @@ export const ruleAccountingSchema = z.object({
   accountingAttachmentFileExtension: z.array(z.string()).optional(),
   accountingAttachmentData: z.array(z.string()).optional(),
 }).superRefine((data, ctx) => {
+  if (data.accountingTextTemplate && data.accountingText !== undefined) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['accountingTextTemplate'],
+      message: 'Vælg enten fast posteringstekst eller en dynamisk skabelon',
+    })
+  }
   if (data.accountingCprNumber && !isValidCprStrict(String(data.accountingCprNumber))) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,

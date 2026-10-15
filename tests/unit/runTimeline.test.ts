@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { compareTimelineEvents, getErpTimelineDeliveryState, getErpTimelineStageState, groupErpTimelineDeliveries, latestTimelineStageEvent, RUN_TIMELINE_STAGE_ORDER } from '../../app/lib/presenters/runTimeline'
+import { getRunStatusPresentation } from '../../app/lib/presenters/runStatus'
 import type { RunTimelineResponse } from '../../app/types/runTimeline'
 
 const emptyTimeline: RunTimelineResponse = {
@@ -9,7 +10,15 @@ const emptyTimeline: RunTimelineResponse = {
   erpRequests: [],
   errors: [],
   events: [],
-  matching: { totalTransactions: 0, processedTransactions: 0, matched: 0, exception: 0, open: 0, manualBookedTransactions: 0 },
+  matching: {
+    totalSamleposter: 0,
+    processedSamleposter: 0,
+    bookedSamleposter: 0,
+    exceptedSamleposter: 0,
+    openSamleposter: 0,
+    mixedSamleposter: 0,
+    manualBookedSamleposter: 0,
+  },
 }
 
 describe('run timeline ERP grouping', () => {
@@ -28,6 +37,17 @@ describe('run timeline ERP grouping', () => {
     expect(groups).toHaveLength(1)
     expect(groups[0]?.requestIds).toEqual(['request-original', 'request-retry'])
     expect(getErpTimelineStageState(groups).label).toBe('Afventer')
+    expect(getErpTimelineStageState(groups).description).toBe('')
+  })
+
+  it('only includes a bilag count in the stage description when multiple deliveries exist', () => {
+    const requests: RunTimelineResponse['erpRequests'] = [
+      { requestId: 'request-1', sourceRequestId: null, documentId: 'document-1', responseId: null, responseStatusText: null, lineCount: 1 },
+      { requestId: 'request-2', sourceRequestId: null, documentId: 'document-2', responseId: null, responseStatusText: null, lineCount: 1 },
+    ]
+    const groups = groupErpTimelineDeliveries(requests, [], [])
+
+    expect(getErpTimelineStageState(groups).description).toBe('2 bilag')
   })
 
   it('uses the latest correlated event as the document status', () => {
@@ -55,5 +75,14 @@ describe('run timeline ERP grouping', () => {
 
     expect(latestTimelineStageEvent(events, 'manual')?.id).toBe('later-occurrence')
     expect(compareTimelineEvents(events[0]!, events[1]!)).toBeLessThan(0)
+  })
+})
+
+describe('run status presentation', () => {
+  it('uses the same overall status wording and color for the run list and timeline', () => {
+    expect(getRunStatusPresentation('afventer')).toEqual({ color: 'warning', label: 'Afventer' })
+    expect(getRunStatusPresentation('indlæser')).toEqual({ color: 'warning', label: 'Indlæser' })
+    expect(getRunStatusPresentation('udført')).toEqual({ color: 'success', label: 'Udført' })
+    expect(getRunStatusPresentation('fejl')).toEqual({ color: 'error', label: 'Fejl' })
   })
 })

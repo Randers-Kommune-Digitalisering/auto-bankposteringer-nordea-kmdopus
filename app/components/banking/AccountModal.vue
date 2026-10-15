@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { z } from 'zod'
 import type { AccountSelectSchema } from '~/lib/db/schema/account'
+import { useDefaultBankAccount } from '~/composables/useDefaultBankAccount'
 
 type BankProvider = 'danskebank' | 'nordea' | 'bankconnect'
 
@@ -27,6 +28,12 @@ const open = computed({
 })
 
 const toast = useToast()
+const {
+  data: defaultBankAccount,
+  pending: defaultBankAccountPending,
+  refresh: refreshDefaultBankAccount,
+  setDefaultBankAccount,
+} = useDefaultBankAccount()
 
 type AccountingDimensionDefinition = {
   id: string
@@ -129,6 +136,7 @@ type FormState = {
   provider: BankProvider | undefined
   iban: string | undefined
   ignoreIngestion: boolean
+  isDefaultBankAccount: boolean
 }
 
 const state = reactive<FormState>({
@@ -137,6 +145,7 @@ const state = reactive<FormState>({
   provider: undefined,
   iban: undefined,
   ignoreIngestion: false,
+  isDefaultBankAccount: false,
 })
 
 function resetForm() {
@@ -145,12 +154,15 @@ function resetForm() {
   state.provider = undefined
   state.iban = undefined
   state.ignoreIngestion = false
+  state.isDefaultBankAccount = false
 }
 
 function hydrateDraft(account: AccountSelectSchema) {
   state.name = account.name ?? undefined
   state.statuskonto = String((account as any).statuskonto ?? (account as any).artskonto ?? '') || undefined
   state.ignoreIngestion = Boolean((account as any).ignoreIngestion)
+  state.isDefaultBankAccount = !state.ignoreIngestion
+    && defaultBankAccount.value?.defaultBankAccountId === account.id
 }
 
 function hydrateConfiguredDraft(draft: { provider: BankProvider; iban: string; name?: string | null; statuskonto?: string | null; ignoreIngestion?: boolean }) {
@@ -159,7 +171,12 @@ function hydrateConfiguredDraft(draft: { provider: BankProvider; iban: string; n
   state.name = draft.name ?? undefined
   state.statuskonto = draft.statuskonto ?? undefined
   state.ignoreIngestion = Boolean(draft.ignoreIngestion)
+  state.isDefaultBankAccount = false
 }
+
+watch(() => state.ignoreIngestion, (ignoreIngestion) => {
+  if (ignoreIngestion) state.isDefaultBankAccount = false
+})
 
 watch(
   () => [props.accountId, open.value] as const,
@@ -189,6 +206,7 @@ watch(
     }
 
     try {
+      if (defaultBankAccountPending.value) await refreshDefaultBankAccount()
       const data = await $fetch<AccountSelectSchema>(`/api/bank-accounts/${id}`)
       hydrateDraft(data)
     } catch (err) {
@@ -241,6 +259,13 @@ async function onSubmit() {
     } else {
       if (!props.accountId) return
 
+      const currentDefaultBankAccountId = defaultBankAccount.value?.defaultBankAccountId ?? null
+      const nextDefaultBankAccountId = state.ignoreIngestion
+        ? currentDefaultBankAccountId === props.accountId ? null : currentDefaultBankAccountId
+        : state.isDefaultBankAccount
+          ? props.accountId
+          : currentDefaultBankAccountId === props.accountId ? null : currentDefaultBankAccountId
+
       const payload = {
         name: state.name?.trim() || undefined,
         statuskonto: state.statuskonto?.trim() || undefined,
@@ -262,6 +287,10 @@ async function onSubmit() {
           ignoreIngestion: result.data.ignoreIngestion,
         },
       })
+
+      if (nextDefaultBankAccountId !== currentDefaultBankAccountId) {
+        await setDefaultBankAccount(nextDefaultBankAccountId)
+      }
 
       await Promise.all([
         refreshNuxtData('bank-accounts'),
@@ -352,6 +381,15 @@ async function onSubmit() {
               v-model="state.ignoreIngestion"
               label="Ignorér konto ved ingestion"
               description="Hvis valgt, bliver transaktioner for kontoen ikke indlæst i applikationen."
+            />
+          </UFormField>
+
+          <UFormField v-if="isEditObserved" name="isDefaultBankAccount">
+            <UCheckbox
+              v-model="state.isDefaultBankAccount"
+              label="Standardkonto"
+              description="Forvælges i kontofiltre og ved oprettelse af konteringsregler."
+              :disabled="state.ignoreIngestion || defaultBankAccountPending"
             />
           </UFormField>
         </div>
