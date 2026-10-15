@@ -1,5 +1,27 @@
 import { describe, expect, it } from 'vitest'
-import { filterActiveRunErrors } from '../../server/utils/runs/runStatus'
+import { filterActiveRunErrors, resolveEffectiveRunStatus } from '../../server/utils/runs/runStatus'
+
+describe('resolveEffectiveRunStatus', () => {
+  it('uses the timeline aggregate status for in-flight I/O', () => {
+    expect(resolveEffectiveRunStatus({
+      baseStatus: 'indlæser',
+      hasActiveErrors: false,
+      hasNegativeErpResponse: false,
+      hasFailedIo: false,
+      hasInFlightIo: true,
+    })).toBe('afventer')
+  })
+
+  it('keeps errors above the pending status', () => {
+    expect(resolveEffectiveRunStatus({
+      baseStatus: 'indlæser',
+      hasActiveErrors: true,
+      hasNegativeErpResponse: false,
+      hasFailedIo: false,
+      hasInFlightIo: true,
+    })).toBe('fejl')
+  })
+})
 
 describe('filterActiveRunErrors', () => {
   it('clears a missing-mapping error after an ignored-account recovery succeeds', () => {

@@ -6,6 +6,7 @@ import type {
   AccountSelectSchema,
 } from '~/lib/db/schema/account'
 import type { RuleDraftSchema, MatchEntry, MatchGate } from '~/lib/db/schema/rule'
+import type { PostingTextTemplate } from '~/../engine/matching/domain/postingTextTemplate'
 import type { RuleStatus, RuleType, CprType } from '~/lib/db/schema/enums'
 import type { MatchField, MatchCategory } from '~/lib/rules/match-config'
 import { ruleTypeValues, ruleStatusValues, cprTypeValues } from '~/lib/db/schema/enums'
@@ -36,6 +37,7 @@ const isEdit = computed(() => props.ruleId != null)
 const emit = defineEmits<{
   (e: 'update:open', value: boolean): void
   (e: 'saved'): void
+  (e: 'deleted', ruleId: number): void
 }>()
 
 // -----------------------
@@ -53,6 +55,7 @@ type RuleSnapshot = {
   matches: MatchEntry[]
   accountingDimensions: Array<{ key: string; value: string }>
   accountingText?: string
+  accountingTextTemplate?: PostingTextTemplate
   accountingCprType: CprType
   accountingCprNumber?: string
   accountingNote?: string
@@ -89,6 +92,7 @@ function buildRuleSnapshot(): RuleSnapshot {
       .map(d => ({ key: d.key, value: d.value }))
       .sort((a, b) => a.key.localeCompare(b.key)),
     accountingText: state.accountingText,
+    accountingTextTemplate: state.accountingTextTemplate,
     accountingCprType: state.accountingCprType as CprType,
     accountingCprNumber: state.accountingCprNumber,
     accountingNote: state.accountingNote,
@@ -151,6 +155,7 @@ function createEmptyDraft(): RuleDraftUiState {
     matchAmountMax: undefined,
     accountingDimensions: [],
     accountingText: undefined,
+    accountingTextTemplate: undefined,
     accountingCprType: 'ingen' as CprType,
     accountingCprNumber: undefined,
     accountingNote: undefined,
@@ -312,6 +317,7 @@ watchEffect(() => {
 const ruleLockState = ref<'idle' | 'pending' | 'owned' | 'conflict' | 'error'>('idle')
 const ruleLockOwnerName = ref('')
 const ruleLockError = ref('')
+const deletingRulePending = ref(false)
 const isRuleReadOnly = computed(() => isEdit.value && ruleLockState.value !== 'owned')
 let ruleLockHeartbeat: ReturnType<typeof setInterval> | undefined
 let activeRuleLockId: number | null = null
@@ -663,6 +669,12 @@ const attachments = ref<AttachmentPayload | null>(null)
 const handleAttachmentUpdate = (value: AttachmentPayload | null) => {
   if (isRuleReadOnly.value) return
   attachments.value = value
+}
+
+function handleAccountingTextTemplateUpdate(template: PostingTextTemplate | undefined) {
+  if (isRuleReadOnly.value) return
+  state.accountingTextTemplate = template
+  if (template) state.accountingText = undefined
 }
 
 // -----------------------
@@ -1033,6 +1045,38 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
     })
   }
 }
+
+async function onDeleteRule() {
+  const ruleId = props.ruleId
+  if (!isEdit.value || !ruleId || ruleLockState.value !== 'owned' || deletingRulePending.value) return
+
+  const confirmed = window.confirm(
+    `Vil du slette regel #${ruleId}? Denne handling kan ikke fortrydes, og ikke-gemte ændringer går tabt.`,
+  )
+  if (!confirmed) return
+
+  deletingRulePending.value = true
+  try {
+    await $fetch(`/api/rule/${ruleId}`, { method: 'DELETE' })
+
+    stopRuleLockHeartbeat()
+    ruleLockGeneration++
+    activeRuleLockId = null
+    bypassUnsavedPromptOnce.value = true
+    savedSnapshot.value = null
+    open.value = false
+    toast.add({ title: 'Regel slettet', description: `Regel #${ruleId} er blevet fjernet.` })
+    emit('deleted', ruleId)
+  } catch (error: any) {
+    toast.add({
+      title: 'Fejl ved sletning',
+      description: error?.data?.statusMessage ?? error?.statusMessage ?? error?.message ?? 'Kunne ikke slette reglen.',
+      color: 'error',
+    })
+  } finally {
+    deletingRulePending.value = false
+  }
+}
 </script>
 
 <template>
@@ -1080,7 +1124,7 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
         <span class="font-semibold text-default">Noter:</span>
         <span class="ml-2 text-muted whitespace-pre-wrap">{{ state.accountingNote }}</span>
       </div>
-      <UForm ref="formRef" :schema="stepSchema" :state="state" @submit="onSubmit" :disabled="isRuleReadOnly">
+      <UForm ref="formRef" :schema="stepSchema" :state="state" @submit="onSubmit" :disabled="isRuleReadOnly || deletingRulePending">
         <UStepper v-model="currentStep" :items="steps" class="mb-6">
           <template #content="{ item }">
             <USeparator class="mb-6" />
@@ -1380,9 +1424,24 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                       />
                     </UFormField>
                   </div>
-                  <UFormField name="accountingText">
-                    <UiFloatingLabelInput v-model="state.accountingText" class="w-full" label="Posteringstekst" color="neutral" />
-                  </UFormField>
+                  <div class="flex items-end gap-2">
+                    <UFormField v-if="!state.accountingTextTemplate" name="accountingText" class="min-w-0 flex-1">
+                      <UiFloatingLabelInput v-model="state.accountingText" class="w-full" label="Posteringstekst" color="neutral" />
+                    </UFormField>
+                    <UButton
+                      v-else
+                      :label="`Dynamisk posteringstekst · ${state.accountingTextTemplate.parts.length} dele`"
+                      variant="outline"
+                      color="neutral"
+                      class="min-w-0 flex-1 justify-start"
+                      disabled
+                    />
+                    <RulesPostingTextTemplateBuilder
+                      :model-value="state.accountingTextTemplate"
+                      :disabled="isRuleReadOnly"
+                      @update:model-value="handleAccountingTextTemplateUpdate"
+                    />
+                  </div>
                   <div class="grid grid-cols-2 gap-4 mt-2 items-end">
                     <UFormField label="CPR-type" name="accountingCprType">
                       <USelectMenu
@@ -1419,15 +1478,27 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
         </UStepper>
 
         <div class="flex justify-between gap-2 pt-4 border-t border-default">
-          <UButton
-            label="Forrige"
-            variant="soft"
-            color="neutral"
-            @click="handlePrev"
-            :disabled="currentStep === 0"
-          />
+          <div class="flex gap-2">
+            <UButton
+              label="Forrige"
+              variant="soft"
+              color="neutral"
+              @click="handlePrev"
+              :disabled="currentStep === 0 || deletingRulePending"
+            />
+            <UButton
+              v-if="isEdit && ruleLockState === 'owned'"
+              label="Slet regel"
+              variant="soft"
+              color="error"
+              type="button"
+              :loading="deletingRulePending"
+              :disabled="deletingRulePending"
+              @click="onDeleteRule"
+            />
+          </div>
           <template v-if="currentStep === steps.length - 1">
-            <UButton type="submit" :disabled="isRuleReadOnly">
+            <UButton type="submit" :disabled="isRuleReadOnly || deletingRulePending">
               {{ isEdit ? 'Opdater regel' : 'Opret regel' }}
             </UButton>
           </template>
@@ -1440,9 +1511,9 @@ async function onSubmit(_event?: FormSubmitEvent<any>) {
                 color="neutral"
                 type="button"
                 @click="onSubmit()"
-                :disabled="isRuleReadOnly"
+                :disabled="isRuleReadOnly || deletingRulePending"
               />
-              <UButton label="Næste" color="primary" @click="handleNext"/>
+              <UButton label="Næste" color="primary" :disabled="deletingRulePending" @click="handleNext"/>
             </div>
           </template>
         </div>

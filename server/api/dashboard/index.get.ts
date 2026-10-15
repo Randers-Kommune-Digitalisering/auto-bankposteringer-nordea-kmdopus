@@ -4,7 +4,7 @@ import { getQuery, setHeader } from 'h3'
 import db from '~/lib/db'
 import { createUtcIsoString } from '~~/utils/function'
 import { errorLog } from '~/lib/db/schema/error'
-import { erpRequest, erpResponse } from '~/lib/db/schema/erp'
+import { erpRequest, erpResponse, erpResponseDocument } from '~/lib/db/schema/erp'
 import { job } from '~/lib/db/schema/job'
 import { outbox } from '~/lib/db/schema/outbox'
 import { run } from '~/lib/db/schema/run'
@@ -12,7 +12,9 @@ import { rule } from '~/lib/db/schema/rule'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import type { DashboardResponse } from '~/types/dashboard'
 import { toSamlepostId, toStatementEntryKey } from '~~/server/utils/iso20022Samlepost'
-import { filterActiveRunErrors, resolveEffectiveRunStatus } from '~~/server/utils/runs/runStatus'
+import { resolveEffectiveRunStatus } from '~~/server/utils/runs/runStatus'
+import { collectCurrentRunIssues, resolveCurrentErpDocumentRejections } from '~~/server/utils/runs/currentRunIssues'
+import { summarizeRunSamleposter, type RunSamlepostRow } from '~~/server/utils/runs/runSamlepostSummary'
 
 const querySchema = z.object({
   start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
@@ -38,10 +40,6 @@ function parseStringArrayParam(value: unknown): string[] {
   return []
 }
 
-function accountInSql(accountIds: string[]) {
-  return sql`(${sql.join(accountIds.map((id) => sql`${id}`), sql`, `)})`
-}
-
 function parseDate(value: string): Date {
   // Interpret YYYY-MM-DD as local midnight; ok because we compare against DATE columns
   const parts = value.split('-').map((entry) => Number(entry))
@@ -65,21 +63,6 @@ function percent(numerator: number, denominator: number): number {
   return Math.round((numerator / denominator) * 1000) / 10
 }
 
-function buildDateRange(start: Date, end: Date): string[] {
-  const dates: string[] = []
-  const cursor = new Date(start)
-  cursor.setHours(12, 0, 0, 0)
-  const endCopy = new Date(end)
-  endCopy.setHours(12, 0, 0, 0)
-
-  while (cursor <= endCopy) {
-    dates.push(createUtcIsoString(cursor))
-    cursor.setDate(cursor.getDate() + 1)
-  }
-
-  return dates
-}
-
 export default defineEventHandler(async (event): Promise<DashboardResponse> => {
   setHeader(event, 'Cache-Control', 'no-store')
 
@@ -100,32 +83,28 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
 
   const startDate = parsedQuery.start ? parseDate(parsedQuery.start) : defaultStart
   const endDate = parsedQuery.end ? parseDate(parsedQuery.end) : defaultEnd
-  const endDateExclusive = new Date(endDate)
-  endDateExclusive.setDate(endDateExclusive.getDate() + 1)
-
   const start = createUtcIsoString(startDate)
   const end = createUtcIsoString(endDate)
 
-  const dateKeys = buildDateRange(startDate, endDate)
-
   const txAccountFilter = accountIds.length ? inArray(transaction.accountId, accountIds) : null
-  const [seriesRows, openRowsForTopTx, ruleRows, errorRowsForKpi, latestRuns] = await Promise.all([
+  const [seriesRows, openRowsForTopTx, ruleRows, scopedRuns, latestRuns] = await Promise.all([
     db
       .select({
-        date: transaction.bookingDate,
+        date: run.bookingDate,
         totalTransactions: sql<number>`count(*)::int`,
         matchedTransactions: sql<number>`count(*) filter (where ${transactionProcessing.ruleApplied} is not null)::int`,
         autoBookedTransactions: sql<number>`count(*) filter (where ${transactionProcessing.status} = 'bogført' and ${transactionProcessing.ruleApplied} is not null)::int`,
       })
       .from(transaction)
+      .innerJoin(run, eq(transaction.runId, run.id))
       .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
       .where(and(
-        gte(transaction.bookingDate, startDate),
-        lte(transaction.bookingDate, endDate),
+        gte(run.bookingDate, startDate),
+        lte(run.bookingDate, endDate),
         ...(txAccountFilter ? [txAccountFilter] : []),
       ))
-      .groupBy(transaction.bookingDate)
-      .orderBy(asc(transaction.bookingDate)),
+      .groupBy(run.bookingDate)
+      .orderBy(asc(run.bookingDate)),
 
     db
       .select({
@@ -158,21 +137,21 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
       })
       .from(rule),
 
-    db
-      .select({
-        runId: errorLog.runId,
-        errorCode: errorLog.errorCode,
-        errorString: errorLog.errorString,
-        createdAt: errorLog.createdAt,
-      })
-      .from(errorLog)
-      .where(and(
-        gte(errorLog.createdAt, startDate),
-        sql`${errorLog.createdAt} < ${endDateExclusive}`,
-        ...(accountIds.length
-          ? [sql`${errorLog.runId} in (select distinct t.run_id from "transaction" t where t.account in ${accountInSql(accountIds)})`]
-          : []),
-      )),
+    accountIds.length
+      ? db
+          .select({ id: run.id })
+          .from(run)
+          .innerJoin(transaction, eq(transaction.runId, run.id))
+          .where(and(
+            gte(run.bookingDate, startDate),
+            lte(run.bookingDate, endDate),
+            inArray(transaction.accountId, accountIds),
+          ))
+          .groupBy(run.id)
+      : db
+          .select({ id: run.id })
+          .from(run)
+          .where(and(gte(run.bookingDate, startDate), lte(run.bookingDate, endDate))),
 
     accountIds.length
       ? db
@@ -198,23 +177,38 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
           .limit(10),
   ])
 
-  const runIds = latestRuns.map((entry) => entry.id)
-  const [txRows, errorRowsForRuns, jobRows, outboxRows, erpResponseRows] = runIds.length
+  const scopedRunIds = scopedRuns.map(entry => String(entry.id))
+  const latestRunIds = latestRuns.map(entry => String(entry.id))
+  const runIds = [...new Set([...latestRunIds, ...scopedRunIds])]
+  const [txRows, errorRowsForRuns, jobRows, outboxRows, requestRows, responseOutcomeRows, responseStatusRows] = runIds.length
     ? await Promise.all([
         db
           .select({
             runId: transaction.runId,
-            transactionsCount: sql<number>`count(*)::int`,
-            status: transactionProcessing.status,
+            id: transaction.id,
+            accountId: transaction.accountId,
+            statementId: transaction.statementId,
+            entryIndex: transaction.entryIndex,
+            bookingDate: transaction.bookingDate,
+            creditDebitIndicator: transaction.creditDebitIndicator,
+            ntryRef: transaction.ntryRef,
+            entryAdditionalInfo: transaction.entryAdditionalInfo,
+            ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,
+            processingStatus: transactionProcessing.status,
+            processingSource: transactionProcessing.source,
           })
           .from(transaction)
           .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
-          .where(and(inArray(transaction.runId, runIds), ...(txAccountFilter ? [txAccountFilter] : [])))
-          .groupBy(transaction.runId, transactionProcessing.status),
+          .where(and(
+            latestRunIds.length ? inArray(transaction.runId, latestRunIds) : sql`false`,
+            ...(txAccountFilter ? [txAccountFilter] : []),
+          )),
 
         db
           .select({
+            id: errorLog.id,
             runId: errorLog.runId,
+            source: errorLog.source,
             errorCode: errorLog.errorCode,
             errorString: errorLog.errorString,
             createdAt: errorLog.createdAt,
@@ -224,33 +218,76 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
           .orderBy(asc(errorLog.createdAt)),
 
         db
-          .select({ runId: job.runId, status: job.status, updatedAt: job.updatedAt })
+          .select({ id: job.id, runId: job.runId, type: job.type, status: job.status, lastError: job.lastError, updatedAt: job.updatedAt })
           .from(job)
           .where(inArray(job.runId, runIds)),
 
         db
-          .select({ runId: outbox.runId, status: outbox.status, createdAt: outbox.createdAt, processedAt: outbox.processedAt })
+          .select({
+            id: outbox.id,
+            runId: outbox.runId,
+            topic: outbox.topic,
+            status: outbox.status,
+            lastError: outbox.lastError,
+            createdAt: outbox.createdAt,
+            processedAt: outbox.processedAt,
+            requestId: sql<string | null>`${outbox.payload} ->> 'requestId'`,
+          })
           .from(outbox)
           .where(inArray(outbox.runId, runIds)),
 
         db
-          .select({ runId: erpRequest.runId, statusText: erpResponse.statusText })
+          .select({
+            runId: erpRequest.runId,
+            requestId: erpRequest.id,
+            sourceRequestId: erpRequest.sourceRequestId,
+            documentId: erpRequest.documentId,
+          })
+          .from(erpRequest)
+          .where(inArray(erpRequest.runId, runIds)),
+
+        db
+          .select({
+            runId: erpRequest.runId,
+            requestId: erpRequest.id,
+            documentId: erpResponseDocument.documentId,
+            status: erpResponseDocument.status,
+            messages: erpResponseDocument.messages,
+          })
+          .from(erpResponseDocument)
+          .innerJoin(erpResponse, eq(erpResponse.id, erpResponseDocument.responseId))
+          .innerJoin(erpRequest, eq(erpRequest.id, erpResponse.requestId))
+          .where(inArray(erpRequest.runId, runIds)),
+
+        db
+          .select({ runId: erpRequest.runId, requestId: erpRequest.id, statusText: erpResponse.statusText })
           .from(erpRequest)
           .innerJoin(erpResponse, eq(erpResponse.requestId, erpRequest.id))
           .where(inArray(erpRequest.runId, runIds)),
       ])
-    : [[], [], [], [], []]
+    : [[], [], [], [], [], [], []]
 
-  const txCountByRunId = new Map<string, number>()
-  const txStatusCountsByRunId = new Map<string, Record<string, number>>()
+  const transactionRowsByRunId = new Map<string, RunSamlepostRow[]>()
   for (const entry of txRows) {
     if (!entry.runId) continue
-    txCountByRunId.set(entry.runId, (txCountByRunId.get(entry.runId) ?? 0) + clampNumber(entry.transactionsCount))
-    const statusCounts = txStatusCountsByRunId.get(entry.runId) ?? {}
-    const status = String(entry.status ?? 'åben')
-    statusCounts[status] = (statusCounts[status] ?? 0) + clampNumber(entry.transactionsCount)
-    txStatusCountsByRunId.set(entry.runId, statusCounts)
+    const rows = transactionRowsByRunId.get(entry.runId) ?? []
+    rows.push({
+      id: String(entry.id),
+      accountId: entry.accountId ? String(entry.accountId) : null,
+      statementId: entry.statementId ? String(entry.statementId) : null,
+      entryIndex: entry.entryIndex == null ? null : Number(entry.entryIndex),
+      entryGroupSize: 0,
+      bookingDate: entry.bookingDate,
+      creditDebitIndicator: entry.creditDebitIndicator ? String(entry.creditDebitIndicator) : null,
+      ntryRef: entry.ntryRef ? String(entry.ntryRef) : null,
+      entryAdditionalInfo: entry.entryAdditionalInfo ? String(entry.entryAdditionalInfo) : null,
+      ntryAcctSvcrRef: entry.ntryAcctSvcrRef ? String(entry.ntryAcctSvcrRef) : null,
+      processingStatus: entry.processingStatus ? String(entry.processingStatus) : null,
+      processingSource: entry.processingSource ? String(entry.processingSource) : null,
+    })
+    transactionRowsByRunId.set(entry.runId, rows)
   }
+  const samlepostSummaryByRunId = new Map([...transactionRowsByRunId].map(([runId, rows]) => [runId, summarizeRunSamleposter(rows)]))
 
   const activeErrorsByRunId = new Map<string, number>()
   const eventCountByRunId = new Map<string, number>()
@@ -267,17 +304,49 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
     if (!current || date > current) lastActivityByRunId.set(runId, date)
   }
 
-  const errorsByRunId = new Map<string, typeof errorRowsForRuns>()
-  for (const entry of errorRowsForRuns) {
-    if (!entry.runId) continue
-    const rows = errorsByRunId.get(entry.runId) ?? []
-    rows.push(entry)
-    errorsByRunId.set(entry.runId, rows)
-    updateLastActivity(entry.runId, entry.createdAt)
+  const currentIssues = collectCurrentRunIssues({
+    errorLogs: errorRowsForRuns,
+    jobs: jobRows.map(row => ({ ...row, runId: row.runId ? String(row.runId) : null })),
+    outbox: outboxRows.map(row => ({ ...row, runId: row.runId ? String(row.runId) : null })),
+    rejectedErpDocuments: resolveCurrentErpDocumentRejections({
+      requests: requestRows.map(row => ({
+        runId: String(row.runId),
+        requestId: String(row.requestId),
+        sourceRequestId: row.sourceRequestId ? String(row.sourceRequestId) : null,
+        documentId: row.documentId ? String(row.documentId) : null,
+      })),
+      outbox: outboxRows.map(row => ({
+        requestId: row.requestId ? String(row.requestId) : null,
+        createdAt: row.createdAt,
+        topic: String(row.topic),
+      })),
+      outcomes: responseOutcomeRows.map(row => ({
+        runId: String(row.runId),
+        requestId: String(row.requestId),
+        documentId: String(row.documentId),
+        status: String(row.status),
+        messages: row.messages,
+      })),
+      responseStatuses: responseStatusRows.map(row => ({
+        runId: String(row.runId),
+        requestId: String(row.requestId),
+        statusText: row.statusText ? String(row.statusText) : null,
+      })),
+    }),
+  })
+  const issuesByRunId = new Map<string, typeof currentIssues>()
+  for (const issue of currentIssues) {
+    if (!issue.runId) continue
+    const rows = issuesByRunId.get(issue.runId) ?? []
+    rows.push(issue)
+    issuesByRunId.set(issue.runId, rows)
+    updateLastActivity(issue.runId, issue.createdAt)
+    if (issue.id.startsWith('erp-document:')) hasNegativeErpResponseByRunId.set(issue.runId, true)
   }
-  for (const [runId, rows] of errorsByRunId) {
-    eventCountByRunId.set(runId, rows.length)
-    activeErrorsByRunId.set(runId, filterActiveRunErrors(rows).length)
+  for (const [runId, rows] of issuesByRunId) activeErrorsByRunId.set(runId, rows.length)
+  for (const row of errorRowsForRuns) {
+    if (!row.runId) continue
+    eventCountByRunId.set(row.runId, (eventCountByRunId.get(row.runId) ?? 0) + 1)
   }
 
   for (const entry of jobRows) {
@@ -296,34 +365,19 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
     updateLastActivity(entry.runId, entry.processedAt ?? entry.createdAt)
   }
 
-  for (const entry of erpResponseRows) {
-    if (!entry.runId) continue
-    const statusText = String(entry.statusText ?? '')
-    if (statusText && !statusText.trim().toUpperCase().startsWith('OK')) {
-      hasNegativeErpResponseByRunId.set(entry.runId, true)
-    }
-  }
-
-  const rawSeriesByDate = new Map<string, { total: number; matched: number; autoBooked: number }>()
-  for (const row of seriesRows) {
-    const dateKey = row.date instanceof Date ? createUtcIsoString(row.date) : String(row.date).slice(0, 10)
-    rawSeriesByDate.set(dateKey, {
-      total: clampNumber(row.totalTransactions),
-      matched: clampNumber(row.matchedTransactions),
-      autoBooked: clampNumber(row.autoBookedTransactions),
+  const automationSeries = seriesRows
+    .filter((row) => clampNumber(row.totalTransactions) > 0)
+    .map((row) => {
+      const totalTransactions = clampNumber(row.totalTransactions)
+      const matchedTransactions = clampNumber(row.matchedTransactions)
+      return {
+        date: row.date instanceof Date ? createUtcIsoString(row.date) : String(row.date).slice(0, 10),
+        totalTransactions,
+        matchedTransactions,
+        autoBookedTransactions: clampNumber(row.autoBookedTransactions),
+        automationRatePercent: percent(matchedTransactions, totalTransactions),
+      }
     })
-  }
-
-  const automationSeries = dateKeys.map((date) => {
-    const entry = rawSeriesByDate.get(date) ?? { total: 0, matched: 0, autoBooked: 0 }
-    return {
-      date,
-      totalTransactions: entry.total,
-      matchedTransactions: entry.matched,
-      autoBookedTransactions: entry.autoBooked,
-      automationRatePercent: percent(entry.matched, entry.total),
-    }
-  })
 
   const totalTransactions = automationSeries.reduce((acc, p) => acc + p.totalTransactions, 0)
   const matchedTransactions = automationSeries.reduce((acc, p) => acc + p.matchedTransactions, 0)
@@ -363,15 +417,10 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
     ruleDeactivations: 0,
   }
 
-  const errorsByRunForKpi = new Map<string, typeof errorRowsForKpi>()
-  for (const entry of errorRowsForKpi) {
-    if (!entry.runId) continue
-    const rows = errorsByRunForKpi.get(entry.runId) ?? []
-    rows.push(entry)
-    errorsByRunForKpi.set(entry.runId, rows)
-  }
-  const errorCount = [...errorsByRunForKpi.values()]
-    .reduce((count, rows) => count + filterActiveRunErrors(rows).length, 0)
+  const scopedRunIdSet = new Set(scopedRunIds)
+  const errorCount = [...issuesByRunId.entries()]
+    .filter(([runId]) => scopedRunIdSet.has(runId))
+    .reduce((count, [, issues]) => count + issues.length, 0)
 
   const payload: DashboardResponse = {
     range: { start, end },
@@ -403,12 +452,14 @@ export default defineEventHandler(async (event): Promise<DashboardResponse> => {
         hasFailedIo: hasFailedIoByRunId.get(entry.id) ?? false,
         hasInFlightIo: hasInFlightIoByRunId.get(entry.id) ?? false,
       }),
-      transactionsCount: txCountByRunId.get(entry.id) ?? 0,
-      processedTransactionsCount: (txStatusCountsByRunId.get(entry.id)?.bogført ?? 0) +
-        (txStatusCountsByRunId.get(entry.id)?.undtaget ?? 0),
-      bookedTransactionsCount: txStatusCountsByRunId.get(entry.id)?.bogført ?? 0,
-      openTransactionsCount: txStatusCountsByRunId.get(entry.id)?.åben ?? 0,
-      exceptionTransactionsCount: txStatusCountsByRunId.get(entry.id)?.undtaget ?? 0,
+      totalSamleposterCount: samlepostSummaryByRunId.get(entry.id)?.totalSamleposter ?? 0,
+      completedSamleposterCount: (samlepostSummaryByRunId.get(entry.id)?.bookedSamleposter ?? 0) +
+        (samlepostSummaryByRunId.get(entry.id)?.exceptedSamleposter ?? 0) +
+        (samlepostSummaryByRunId.get(entry.id)?.mixedSamleposter ?? 0),
+      bookedSamleposterCount: samlepostSummaryByRunId.get(entry.id)?.bookedSamleposter ?? 0,
+      openSamleposterCount: samlepostSummaryByRunId.get(entry.id)?.openSamleposter ?? 0,
+      exceptionSamleposterCount: samlepostSummaryByRunId.get(entry.id)?.exceptedSamleposter ?? 0,
+      mixedSamleposterCount: samlepostSummaryByRunId.get(entry.id)?.mixedSamleposter ?? 0,
       activeErrorsCount: activeErrorsByRunId.get(entry.id) ?? 0,
       eventCount: eventCountByRunId.get(entry.id) ?? 0,
       erpRejected: hasNegativeErpResponseByRunId.get(entry.id) ?? false,

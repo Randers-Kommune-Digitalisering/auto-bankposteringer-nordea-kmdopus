@@ -2,7 +2,6 @@
 interface ErpMetadataResponse {
   erpSupplier: string
   erpErrorAccount: string
-  activeIntegration: boolean
   prodEnvironment: string
   municipalityCode: string
   compCode: string
@@ -36,7 +35,6 @@ const { data: erpMetadata } = await useFetch<ErpMetadataResponse>(
     default: () => ({
       erpSupplier: '',
       erpErrorAccount: '',
-      activeIntegration: false,
       prodEnvironment: '',
       municipalityCode: '',
       compCode: '',
@@ -58,7 +56,6 @@ const { data: accountingDimensions } = await useFetch<AccountingDimensionsRespon
 const metadataFields = computed(() => [
   { label: 'ERP Leverandør', value: erpMetadata.value?.erpSupplier ?? '—' },
   { label: 'Fejlkonto', value: erpMetadata.value?.erpErrorAccount ?? '—' },
-  { label: 'Integration', value: (erpMetadata.value?.activeIntegration ?? false) ? 'Aktiv' : 'Inaktiv' },
   { label: 'Miljø', value: erpMetadata.value?.prodEnvironment ?? '—' },
   { label: 'Kommunekode', value: erpMetadata.value?.municipalityCode ?? '—' },
   { label: 'Firmakode', value: erpMetadata.value?.compCode ?? '—' },

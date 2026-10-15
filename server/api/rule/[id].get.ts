@@ -1,5 +1,6 @@
 import { defineEventHandler, createError } from 'h3'
-import { mapConditionsToMatches, ruleDraftSchema } from '~/lib/db/schema/rule'
+import { mapConditionsToMatches } from '~/lib/db/schema/rule'
+import { ruleDraftApiSchema } from '~~/server/utils/rules/ruleDraftApiSchema'
 import { mapDimensionRowsToDto } from '~~/server/utils/accountingDimensions'
 import db from '~/lib/db'
 import { parseAmount } from '#engine/matching/domain/amount'
@@ -99,13 +100,14 @@ export default defineEventHandler(async (event) => {
     const attachmentNames = attachments.map(att => att.name)
     const attachmentExtensions = attachments.map(att => att.fileExtension)
     const attachmentData = attachments.map(att => att.data)
-    const draft = ruleDraftSchema.parse({
+    const draft = ruleDraftApiSchema.parse({
       ...normalizedRule,
       relatedBankAccounts,
       ruleTags,
       matches,
       accountingDimensions: dimensions.length ? dimensions : undefined,
       accountingText: accountingParameters?.bookingText ?? undefined,
+      accountingTextTemplate: accountingParameters?.bookingTextTemplate ?? undefined,
       accountingCprType: accountingParameters?.cprType ?? 'ingen',
       accountingCprNumber: accountingParameters?.cprNumber ?? undefined,
       accountingNote: accountingParameters?.note ?? undefined,
@@ -117,7 +119,7 @@ export default defineEventHandler(async (event) => {
     // --------------------------
     // Valider med zod
     // --------------------------
-    const validated = ruleDraftSchema.parse(draft)
+    const validated = ruleDraftApiSchema.parse(draft)
 
     return validated
   } catch (error: any) {

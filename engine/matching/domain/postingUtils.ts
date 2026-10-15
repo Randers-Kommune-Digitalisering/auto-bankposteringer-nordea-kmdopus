@@ -4,6 +4,8 @@ import {
   projectCanonicalTransactionText,
   resolveBankMessage as resolveCanonicalBankMessage,
 } from './transactionTextProjection'
+import { evaluatePostingTextTemplate } from './postingTextTemplateRe2'
+import type { PostingTextTemplate } from './postingTextTemplate'
 
 export type PostingTransactionContext = {
   transactionId: string
@@ -71,6 +73,7 @@ export function buildPostingLines(options: {
 export function resolvePostingText(
   textTemplate: string | null | undefined,
   tx: PostingTransactionContext,
+  dynamicTemplate?: PostingTextTemplate | null,
 ): string {
   const projection = projectCanonicalTransactionText({
     transactionId: tx.transactionId,
@@ -86,6 +89,18 @@ export function resolvePostingText(
     entryAdditionalInfo: tx.entryAdditionalInfo,
     txAdditionalInfo: tx.txAdditionalInfo,
   })
+
+  if (dynamicTemplate) {
+    return evaluatePostingTextTemplate(dynamicTemplate, {
+      bankMessage: projection.bankMessage,
+      txAdditionalInfo: tx.txAdditionalInfo ?? undefined,
+      entryAdditionalInfo: tx.entryAdditionalInfo ?? undefined,
+      remittanceCreditorReference: tx.remittanceCreditorReference ?? undefined,
+      remittanceUstrd: tx.remittanceUstrd ?? undefined,
+      remittanceAdditional: tx.remittanceAdditional ?? undefined,
+      counterparty: projection.counterpart ?? undefined,
+    })
+  }
 
   if (!textTemplate) {
     return projection.postingText || tx.transactionId

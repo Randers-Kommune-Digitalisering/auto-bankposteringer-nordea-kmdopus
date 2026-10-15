@@ -38,6 +38,7 @@ export default defineEventHandler(async (event) => {
     'matchAmountMin',
     'matchAmountMax',
     'accountingText',
+    'accountingTextTemplate',
     'accountingCprType',
     'accountingCprNumber',
     'accountingNote',

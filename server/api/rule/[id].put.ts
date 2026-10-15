@@ -3,12 +3,12 @@ import { createInsertSchema } from 'drizzle-zod'
 import { eq } from 'drizzle-orm'
 import db from '~/lib/db'
 import type { RuleDraftSchema } from '~/lib/db/schema/rule'
+import { ruleDraftApiSchema } from '~~/server/utils/rules/ruleDraftApiSchema'
 import { normalizeRuleTagIds, resolveRuleTagIds } from '~~/server/utils/ruleTags/resolveRuleTagIds'
 import {
   rule,
   ruleBankAccount,
   ruleRuleTag,
-  ruleDraftSchema,
   mapMatchesToConditionRows,
   ruleBankingCondition,
   ruleAccountingParameters,
@@ -35,6 +35,7 @@ function compileRuleDraftToDb(draft: RuleDraftSchema, newVersion: number, erpSup
     ruleTags,
     accountingDimensions,
     accountingText,
+    accountingTextTemplate,
     accountingCprType,
     accountingCprNumber,
     accountingNote,
@@ -72,6 +73,7 @@ function compileRuleDraftToDb(draft: RuleDraftSchema, newVersion: number, erpSup
 
   const accountingParameters = {
     bookingText: accountingText,
+    bookingTextTemplate: accountingTextTemplate,
     cprType: accountingCprType,
     cprNumber: accountingCprNumber,
     note: accountingNote,
@@ -104,7 +106,7 @@ export default defineEventHandler(async (event) => {
   if (!id) throw createError({ statusCode: 400, statusMessage: 'Missing rule id' })
 
   const body = await readBody(event)
-  const parsed = ruleDraftSchema.safeParse(body)
+  const parsed = ruleDraftApiSchema.safeParse(body)
   if (!parsed.success) return { success: false, error: parsed.error }
 
   // -------------------

@@ -1,12 +1,11 @@
 // This endpoint is used in interactive UI where the user can handle errors
 
-import { desc, eq, inArray } from "drizzle-orm";
+import { desc, eq, inArray, sql } from "drizzle-orm";
 import { setHeader } from "h3";
 import db from "~/lib/db";
-import { createUtcDateString, createUtcDateTimeString, inferMimeType } from "~~/utils/function";
+import { createUtcDateString } from "~~/utils/function";
 import { account } from "~/lib/db/schema/account";
-import { document } from "~/lib/db/schema/document";
-import { erpRequest, erpResponse } from "~/lib/db/schema/erp";
+import { erpDocument, erpRequest, erpResponse, erpResponseDocument } from "~/lib/db/schema/erp";
 import { errorLog } from "~/lib/db/schema/error";
 import { job } from "~/lib/db/schema/job";
 import { outbox } from "~/lib/db/schema/outbox";
@@ -14,8 +13,7 @@ import { run } from "~/lib/db/schema/run";
 import { transaction, transactionProcessing } from "~/lib/db/schema/transaction";
 import type { RunStatus } from "~/lib/db/schema/enums";
 import type {
-  DocumentListItem,
-  ErpResponseListItem,
+  ErpDocumentListItem,
   ErrorListItem,
   RunListItem,
   RunListResponse,
@@ -23,32 +21,7 @@ import type {
 } from "~/types/runs";
 import { parseAmount } from "#engine/matching/domain/amount";
 import { resolveEffectiveRunStatus } from "~~/server/utils/runs/runStatus";
-
-const MISSING_MAPPING_ERROR_PATTERN = /Mangler konterings-mapping \((artskonto|statuskonto)\) for bankkonto:/i
-const RECOVERY_SUCCESS_PATTERN = /^Genkørsel efter (statuskonto-mapping|ignorering af bankkonto) lykkedes\./i
-
-function toEpochMs(value: unknown): number {
-  const d = value instanceof Date ? value : new Date(String(value ?? ''))
-  const ms = d.getTime()
-  return Number.isFinite(ms) ? ms : 0
-}
-
-function isMissingMappingError(message: unknown): boolean {
-  return MISSING_MAPPING_ERROR_PATTERN.test(String(message ?? ''))
-}
-
-function isRecoverySuccessEvent(row: { errorCode: unknown; errorString: unknown }): boolean {
-  const code = Number(row.errorCode)
-  if (Number.isFinite(code) && code !== 200) return false
-  return RECOVERY_SUCCESS_PATTERN.test(String(row.errorString ?? ''))
-}
-
-function isSeverityError(code: unknown): boolean {
-  if (code == null) return true
-  const num = Number(code)
-  if (!Number.isFinite(num)) return true
-  return num >= 400
-}
+import { collectCurrentRunIssues, resolveCurrentErpDocumentRejections } from "~~/server/utils/runs/currentRunIssues";
 
 function parseNumeric(value: unknown): number {
   return parseAmount(value)
@@ -163,7 +136,7 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
 
   const runIds = runRows.map((row) => row.id);
 
-  const [TransactionTypeRows, documentRows, errorRows, erpResponseRows, jobRows, outboxRows] = await Promise.all([
+  const [TransactionTypeRows, erpDocumentRows, errorRows, requestRows, responseOutcomeRows, responseStatusRows, jobRows, outboxRows] = await Promise.all([
     db
       .select({
         id: transaction.id,
@@ -206,14 +179,11 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
       .where(inArray(transaction.runId, runIds)),
     db
       .select({
-        id: document.id,
-        runId: document.runId,
-        type: document.type,
-        filename: document.filename,
-        fileExtension: document.fileExtension,
+        runId: erpDocument.runId,
+        id: erpDocument.id,
       })
-      .from(document)
-      .where(inArray(document.runId, runIds)),
+      .from(erpDocument)
+      .where(inArray(erpDocument.runId, runIds)),
     db
       .select({
         id: errorLog.id,
@@ -228,7 +198,28 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
     db
       .select({
         runId: erpRequest.runId,
-        id: erpResponse.id,
+        requestId: erpRequest.id,
+        sourceRequestId: erpRequest.sourceRequestId,
+        documentId: erpRequest.documentId,
+      })
+      .from(erpRequest)
+      .where(inArray(erpRequest.runId, runIds)),
+    db
+      .select({
+        runId: erpRequest.runId,
+        requestId: erpRequest.id,
+        documentId: erpResponseDocument.documentId,
+        status: erpResponseDocument.status,
+        messages: erpResponseDocument.messages,
+      })
+      .from(erpResponseDocument)
+      .innerJoin(erpResponse, eq(erpResponse.id, erpResponseDocument.responseId))
+      .innerJoin(erpRequest, eq(erpRequest.id, erpResponse.requestId))
+      .where(inArray(erpRequest.runId, runIds)),
+    db
+      .select({
+        runId: erpRequest.runId,
+        requestId: erpRequest.id,
         statusText: erpResponse.statusText,
       })
       .from(erpRequest)
@@ -236,9 +227,11 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
       .where(inArray(erpRequest.runId, runIds)),
     db
       .select({
+        id: job.id,
         runId: job.runId,
         type: job.type,
         status: job.status,
+        lastError: job.lastError,
         updatedAt: job.updatedAt,
       })
       .from(job)
@@ -246,8 +239,13 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
       .limit(500),
     db
       .select({
+        id: outbox.id,
         runId: outbox.runId,
+        topic: outbox.topic,
         status: outbox.status,
+        lastError: outbox.lastError,
+        createdAt: outbox.createdAt,
+        requestId: sql<string | null>`${outbox.payload} ->> 'requestId'`,
       })
       .from(outbox)
       .where(inArray(outbox.runId, runIds as any))
@@ -280,69 +278,54 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
     transactionsByRun.set(row.runId, list);
   });
 
-  const documentsByRun = new Map<string, DocumentListItem[]>();
-  documentRows.forEach((row) => {
-    const list = documentsByRun.get(row.runId) ?? [];
-    list.push({ ...row, mimeType: inferMimeType(row.fileExtension, row.filename) });
-    documentsByRun.set(row.runId, list);
+  const erpDocumentsByRun = new Map<string, ErpDocumentListItem[]>();
+  erpDocumentRows.forEach((row) => {
+    const list = erpDocumentsByRun.get(row.runId) ?? [];
+    list.push({ documentId: row.id });
+    erpDocumentsByRun.set(row.runId, list);
   });
 
-  const latestRecoverySuccessAtByRun = new Map<string, number>()
-  for (const row of errorRows ?? []) {
-    const runId = row.runId ? String(row.runId) : ''
-    if (!runId || !isRecoverySuccessEvent(row)) continue
-
-    const recoveryAt = toEpochMs(row.createdAt)
-    const latestRecoveryAt = latestRecoverySuccessAtByRun.get(runId)
-    if (latestRecoveryAt === undefined || recoveryAt > latestRecoveryAt) {
-      latestRecoverySuccessAtByRun.set(runId, recoveryAt)
+  const currentIssues = collectCurrentRunIssues({
+    errorLogs: errorRows,
+    jobs: jobRows.map(row => ({ ...row, runId: row.runId ? String(row.runId) : null })),
+    outbox: outboxRows.map(row => ({ ...row, runId: row.runId ? String(row.runId) : null })),
+    rejectedErpDocuments: resolveCurrentErpDocumentRejections({
+      requests: requestRows.map(row => ({
+        runId: String(row.runId),
+        requestId: String(row.requestId),
+        sourceRequestId: row.sourceRequestId ? String(row.sourceRequestId) : null,
+        documentId: row.documentId ? String(row.documentId) : null,
+      })),
+      outbox: outboxRows.map(row => ({
+        requestId: row.requestId ? String(row.requestId) : null,
+        createdAt: row.createdAt,
+        topic: String(row.topic),
+      })),
+      outcomes: responseOutcomeRows.map(row => ({
+        runId: String(row.runId),
+        requestId: String(row.requestId),
+        documentId: String(row.documentId),
+        status: String(row.status),
+        messages: row.messages,
+      })),
+      responseStatuses: responseStatusRows.map(row => ({
+        runId: String(row.runId),
+        requestId: String(row.requestId),
+        statusText: row.statusText ? String(row.statusText) : null,
+      })),
+    }),
+  });
+  const errorsByRun = new Map<string, ErrorListItem[]>();
+  const hasNegativeErpResponseByRun = new Map<string, boolean>();
+  for (const issue of currentIssues) {
+    if (!issue.runId) continue;
+    const list = errorsByRun.get(issue.runId) ?? [];
+    list.push(issue);
+    errorsByRun.set(issue.runId, list);
+    if (issue.source === 'erp' && issue.id.startsWith('erp-document:')) {
+      hasNegativeErpResponseByRun.set(issue.runId, true);
     }
   }
-
-  const errorsByRun = new Map<string, ErrorListItem[]>();
-  errorRows.forEach((row) => {
-    if (!row.runId) {
-      return;
-    }
-
-    const runId = String(row.runId)
-    const errorCreatedAtMs = toEpochMs(row.createdAt)
-    const latestRecoveryAt = latestRecoverySuccessAtByRun.get(runId)
-    const recoveredAfterError = latestRecoveryAt !== undefined && latestRecoveryAt >= errorCreatedAtMs
-
-    if (isMissingMappingError(row.errorString) && recoveredAfterError) {
-      return
-    }
-
-    if (!isSeverityError(row.errorCode)) {
-      return
-    }
-
-    const list = errorsByRun.get(row.runId) ?? [];
-    const normalized: ErrorListItem = {
-      ...row,
-      createdAt: createUtcDateTimeString(row.createdAt),
-      message: row.errorString,
-    };
-    list.push(normalized);
-    errorsByRun.set(row.runId, list);
-  });
-
-  const erpResponsesByRun = new Map<string, ErpResponseListItem[]>();
-  const hasNegativeErpResponseByRun = new Map<string, boolean>();
-  erpResponseRows.forEach((row) => {
-    if (!row.runId) {
-      return;
-    }
-    const list = erpResponsesByRun.get(row.runId) ?? [];
-    list.push({ id: row.id });
-    erpResponsesByRun.set(row.runId, list);
-
-    const statusText = row.statusText ? String(row.statusText) : ''
-    if (statusText && !statusText.trim().toUpperCase().startsWith('OK')) {
-      hasNegativeErpResponseByRun.set(String(row.runId), true)
-    }
-  });
 
   const hasInFlightByRun = new Map<string, boolean>();
   const hasFailedIoByRun = new Map<string, boolean>();
@@ -391,9 +374,8 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
     bookingDate: createUtcDateString(row.bookingDate),
     status: resolveRunStatus(String(row.id), row.status),
     transactions: transactionsByRun.get(row.id) ?? [],
-    documents: documentsByRun.get(row.id) ?? [],
     errors: errorsByRun.get(row.id) ?? [],
-    erpResponses: erpResponsesByRun.get(row.id) ?? [],
+    erpDocuments: erpDocumentsByRun.get(row.id) ?? [],
   }));
 }
 

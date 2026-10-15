@@ -1,17 +1,21 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
-import type { Row, SortingState } from '@tanstack/table-core'
+import type { SortingState } from '@tanstack/table-core'
 import { getPaginationRowModel } from '@tanstack/table-core'
 import type { RuleTagSelectSchema } from '~/lib/db/schema/ruleTag'
 import { capitalizeFirst } from '~/lib/text/capitalizeFirst'
 import { useRuleTags } from '~/composables/useRuleTags'
+import {
+	activateClickableTableRowOnKeydown,
+	clickableTableRowsBodyClass,
+	createTableRowSelectHandler,
+} from '~/composables/useClickableTableRows'
 
 const appConfig = useAppConfig()
 const toast = useToast()
 const table = useTemplateRef('table')
 const globalFilterValue = ref('')
 const UButton = resolveComponent('UButton')
-const UDropdownMenu = resolveComponent('UDropdownMenu')
 const UIcon = resolveComponent('UIcon')
 
 const modalOpen = ref(false)
@@ -74,18 +78,20 @@ function handleAddTag() {
 	modalOpen.value = true
 }
 
-function handleEditTag(row: Row<RuleTagSelectSchema>) {
-	editingTagId.value = row.original.id
+function handleEditTag(tag: RuleTagSelectSchema) {
+	editingTagId.value = tag.id
 	modalOpen.value = true
 }
+
+const onTagRowSelect = createTableRowSelectHandler(handleEditTag)
 
 async function handleSaved() {
 	editingTagId.value = null
 	modalOpen.value = false
 }
 
-async function handleDeleteTag(row: Row<RuleTagSelectSchema>) {
-	const tagId = row.original.id
+async function handleDeleteTag(tag: RuleTagSelectSchema) {
+	const tagId = tag.id
 	deletingTagId.value = tagId
 
 	try {
@@ -111,25 +117,6 @@ async function handleDeleteTag(row: Row<RuleTagSelectSchema>) {
 	}
 }
 
-function getRowItems(row: Row<RuleTagSelectSchema>) {
-	return [
-		{ type: 'label', label: 'Handlinger' },
-		{
-			label: 'Rediger tag',
-			icon: appConfig.ui.icons.edit,
-			onSelect() { handleEditTag(row) }
-		},
-		{ type: 'separator' },
-		{
-			label: 'Slet tag',
-			icon: appConfig.ui.icons.trash,
-			color: 'error',
-			disabled: deletingTagId.value === row.original.id,
-			onSelect() { handleDeleteTag(row) }
-		}
-	]
-}
-
 const columns: TableColumn<RuleTagSelectSchema>[] = [
 	{
 		accessorKey: 'id',
@@ -142,26 +129,17 @@ const columns: TableColumn<RuleTagSelectSchema>[] = [
 		id: 'actions',
 		enableHiding: false,
 		enableSorting: false,
-		cell: ({ row }) => {
-			return h(
-				'div',
-				{ class: 'text-right' },
-				h(
-					UDropdownMenu,
-					{
-						content: { align: 'end' },
-						items: getRowItems(row)
-					},
-					() =>
-						h(UButton, {
-							icon: appConfig.ui.icons.dotMenu,
-							color: 'neutral',
-							variant: 'ghost',
-							class: 'ml-auto'
-						})
-				)
-			)
-		}
+		cell: ({ row }) => h(UButton, {
+			icon: appConfig.ui.icons.trash,
+			color: 'error',
+			variant: 'ghost',
+			'aria-label': `Slet tag ${capitalizeFirst(row.original.id)}`,
+			disabled: deletingTagId.value === row.original.id,
+			onClick: (event: MouseEvent) => {
+				event.stopPropagation()
+				void handleDeleteTag(row.original)
+			},
+		}),
 	}
 ]
 
@@ -211,10 +189,12 @@ const pagination = ref({ pageIndex: 0, pageSize: 20 })
 				:data="rows"
 				:columns="columns"
 				:loading="pending || refreshingTags"
+				@select="onTagRowSelect"
+				@keydown="activateClickableTableRowOnKeydown"
 				:ui="{
 					base: 'table-fixed border-separate border-spacing-0',
 					thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
-					tbody: '[&>tr]:last:[&>td]:border-b-0',
+					tbody: `${clickableTableRowsBodyClass} [&>tr]:last:[&>td]:border-b-0`,
 					th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
 					td: 'border-b border-default',
 					separator: 'h-0'

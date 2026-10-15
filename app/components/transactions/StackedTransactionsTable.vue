@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="T extends StackedTransactionsTableRow">
-import type { TableColumn } from '@nuxt/ui'
+import type { TableColumn, TableRow } from '@nuxt/ui'
 import type { StackedTransactionsTableRow } from '~/types/transactions'
 
 const props = defineProps<{
@@ -15,7 +15,17 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:columnVisibility', value: Record<string, boolean>): void
+  (e: 'select', event: Event, row: TableRow<T>): void
+  (e: 'keydown', event: KeyboardEvent): void
 }>()
+
+function forwardSelect(event: Event, row: TableRow<T>): void {
+  emit('select', event, row)
+}
+
+function forwardKeydown(event: KeyboardEvent): void {
+  emit('keydown', event)
+}
 </script>
 
 <template>
@@ -30,6 +40,8 @@ const emit = defineEmits<{
       :column-visibility="props.columnVisibility"
       :ui="props.ui"
       @update:column-visibility="(value) => emit('update:columnVisibility', value)"
+      @select="forwardSelect"
+      @keydown="forwardKeydown"
     >
       <template #empty>
         <div class="py-10 text-center text-gray-500">

@@ -4,6 +4,7 @@ import type { TableColumn } from '@nuxt/ui'
 import type { RunStatus } from '~/lib/db/schema/enums'
 import type { RunListItem, RunListResponse } from '~/types/runs'
 import useFlattenArray from '~/composables/useFlattenArray'
+import { getRunStatusPresentation } from '~/lib/presenters/runStatus'
 import { DEFAULT_TIME_ZONE } from '~/utils'
 
 const appConfig = useAppConfig()
@@ -103,18 +104,7 @@ function openRun(run: RunListItem) {
 type StatusColor = 'success' | 'error' | 'warning' | 'neutral'
 
 const getColorByStatus = (status: RunStatus): StatusColor => {
-  switch (status) {
-    case 'udført':
-      return 'success'
-    case 'fejl':
-      return 'error'
-    case 'indlæser':
-      return 'warning'
-    case 'afventer':
-      return 'warning'
-    default:
-      return 'neutral'
-  }
+  return getRunStatusPresentation(status).color
 }
 
 const getChipColorByDate = (date: Date): StatusColor | undefined => {
@@ -210,11 +200,12 @@ const columns: TableColumn<RunListItem>[] = [
     size: 120,
     cell: ({ row }) => {
       const status = (row.getValue('status') ?? 'afventer') as RunStatus
+      const presentation = getRunStatusPresentation(status)
       return h(resolveComponent('UBadge'), {
         color: getColorByStatus(status),
-        class: 'capitalize w-fit',
+        class: 'w-fit',
         variant: 'subtle'
-      }, () => status)
+      }, () => presentation.label)
     }
   },
   {
@@ -238,45 +229,25 @@ const columns: TableColumn<RunListItem>[] = [
     }
   },
   {
-    id: 'erpResponses',
+    id: 'erpDocuments',
     header: 'Bilagsnumre',
     size: 120,
     enableSorting: false,
     cell: ({ row }) => {
-      const erpResponses = row.original.erpResponses
-      if (!erpResponses?.length) return null
+      const erpDocuments = row.original.erpDocuments
+      if (!erpDocuments?.length) return null
 
-      const key = `${row.original.id}-erpResponses`
+      const key = `${row.original.id}-erpDocuments`
       return h(resolveComponent('RunsDataPopover'), {
-        type: 'erpResponses',
+        type: 'erpDocuments',
         run: row.original,
         open: !!openPopovers.value[key],
         'onUpdate:open': (val: boolean) => {
-          openPopovers.value[key] = val ? 'erpResponses' : null
+          openPopovers.value[key] = val ? 'erpDocuments' : null
         }
       })
     }
   },
-  {
-    id: 'docs',
-    header: 'Dokumenter',
-    size: 120,
-    enableSorting: false,
-    cell: ({ row }) => {
-      const docs = row.original.documents
-      if (!docs?.length) return null
-
-      const key = `${row.original.id}-docs`
-      return h(resolveComponent('RunsDataPopover'), {
-        type: 'docs',
-        run: row.original,
-        open: !!openPopovers.value[key],
-        'onUpdate:open': (val: boolean) => {
-          openPopovers.value[key] = val ? 'docs' : null
-        }
-      })
-    }
-  }
 ]
 </script>
 

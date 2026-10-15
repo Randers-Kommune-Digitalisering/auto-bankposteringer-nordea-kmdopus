@@ -11,6 +11,7 @@ export function compileRuleDraftToDb(draft: RuleDraftSchema) {
     ruleTags,
     accountingDimensions,
     accountingText,
+    accountingTextTemplate,
     accountingCprType,
     accountingCprNumber,
     accountingNote,
@@ -47,6 +48,7 @@ export function compileRuleDraftToDb(draft: RuleDraftSchema) {
 
   const accountingParameters = {
     bookingText: accountingText,
+    bookingTextTemplate: accountingTextTemplate,
     cprType: accountingCprType,
     cprNumber: accountingCprNumber,
     note: accountingNote,

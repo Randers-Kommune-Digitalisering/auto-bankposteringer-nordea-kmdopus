@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
 import { upperFirst } from 'scule'
-import type { Column, Row, SortingFn, SortingState } from '@tanstack/table-core'
+import type { Column, SortingFn, SortingState } from '@tanstack/table-core'
 import { getPaginationRowModel } from '@tanstack/table-core'
 import type { RuleListDto } from '~/lib/db/schema/rule'
 import { ruleTypeEnum, ruleStatusEnum } from '~/lib/db/schema/enums'
@@ -11,6 +11,11 @@ import { fuzzyRankRows } from '~/lib/search/fuzzyRanking'
 import { useRuleTags } from '~/composables/useRuleTags'
 import { useTransactionTypeCatalog } from '~/composables/useTransactionTypeCatalog'
 import { matchCategoryLabels } from '~/lib/rules/match-config'
+import {
+  activateClickableTableRowOnKeydown,
+  clickableTableRowsBodyClass,
+  createTableRowSelectHandler,
+} from '~/composables/useClickableTableRows'
 
 const appConfig = useAppConfig()
 const UButton = resolveComponent('UButton')
@@ -27,7 +32,6 @@ const modalOpen = ref(false)
 const editingRuleId = ref<number | null>(null)
 const globalFilterValue = ref('')
 const debouncedGlobalFilterValue = useDebouncedString(globalFilterValue, { delayMs: 300 })
-const deletingRuleId = ref<number | null>(null)
 
 const selectedAccountIds = ref<string[]>([])
 const selectedTransactionTypes = ref<string[]>([])
@@ -113,7 +117,7 @@ const visibleRows = computed<RuleListDto[]>(() => {
   })
 })
 
-  const rulesTableKey = computed(() => visibleRows.value.map((r) => String(r.id)).join('|'))
+const rulesTableKey = computed(() => visibleRows.value.map(rule => String(rule.id)).join('|'))
 
 const compareStrings = (a?: string | null, b?: string | null) =>
   (a ?? '').localeCompare(b ?? '', 'da', { sensitivity: 'base', numeric: true })
@@ -209,35 +213,6 @@ const sorting = ref([
     desc: false
   }
 ])
-
-// Dropdown-menu for actions
-function getRowItems(row: Row<RuleListDto>) {
-  return [
-    { type: 'label', label: 'Handlinger' },
-    {
-      label: 'Rediger',
-      icon: appConfig.ui.icons.edit,
-      onSelect() { handleEditRule(row) }
-    },
-    {
-      label: 'Download',
-      icon: appConfig.ui.icons.download,
-      onSelect() {
-        if (process.client) {
-          window.open(`/api/rule/${row.original.id}/export?variant=advanced`, '_blank')
-        }
-      }
-    },
-    { type: 'separator' },
-    {
-      label: 'Slet',
-      icon: appConfig.ui.icons.trash,
-      color: 'error',
-      disabled: deletingRuleId.value === row.original.id,
-      onSelect() { handleDeleteRule(row) }
-    }
-  ]
-}
 
 const columnVisibility = ref({
   status: false,
@@ -397,28 +372,16 @@ const columns: TableColumn<RuleListDto>[] = [
     id: 'actions',
     enableHiding: false,
     enableSorting: false,
-    cell: ({ row }) => {
-      return h(
-        'div',
-        { class: 'text-right' },
-        h(
-          UDropdownMenu,
-          {
-            content: {
-              align: 'end'
-            },
-            items: getRowItems(row)
-          },
-          () =>
-            h(UButton, {
-              icon: appConfig.ui.icons.dotMenu,
-              color: 'neutral',
-              variant: 'ghost',
-              class: 'ml-auto'
-            })
-        )
-      )
-    }
+    cell: ({ row }) => h('div', { class: 'text-right' }, h(UButton, {
+      icon: appConfig.ui.icons.download,
+      color: 'neutral',
+      variant: 'ghost',
+      'aria-label': `Download regel ${row.original.id}`,
+      onClick: (event: MouseEvent) => {
+        event.stopPropagation()
+        handleDownloadRule(row.original.id)
+      },
+    })),
   }
 ]
 
@@ -459,9 +422,17 @@ function handleAddRule() {
   modalOpen.value = true
 }
 
-function handleEditRule(row: Row<RuleListDto>) {
-  editingRuleId.value = row.original.id
+function handleEditRule(rule: RuleListDto) {
+  editingRuleId.value = rule.id
   modalOpen.value = true
+}
+
+const onRuleRowSelect = createTableRowSelectHandler(handleEditRule)
+
+function handleDownloadRule(ruleId: number) {
+  if (process.client) {
+    window.open(`/api/rule/${ruleId}/export?variant=advanced`, '_blank')
+  }
 }
 
 async function handleSaved() {
@@ -474,32 +445,11 @@ watch(modalOpen, (isOpen) => {
   if (!isOpen) editingRuleId.value = null
 })
 
-async function handleDeleteRule(row: Row<RuleListDto>) {
-  const ruleId = row.original.id
-  deletingRuleId.value = ruleId
-
-  try {
-    await $fetch(`/api/rule/${ruleId}`, {
-      method: 'DELETE'
-    })
-
-    toast.add({
-      title: 'Regel slettet',
-      description: `Regel #${ruleId} er blevet fjernet.`
-    })
-
-    rules.value = (rules.value ?? []).filter(rule => rule.id !== ruleId)
-    await refreshNuxtData('rules')
-  } catch (error) {
-    console.error('Fejl ved sletning af regel', error)
-    toast.add({
-      title: 'Fejl ved sletning',
-      description: 'Kunne ikke slette reglen. Prøv igen senere.',
-      color: 'error'
-    })
-  } finally {
-    deletingRuleId.value = null
-  }
+async function handleDeleted(ruleId: number) {
+  rules.value = (rules.value ?? []).filter(rule => rule.id !== ruleId)
+  modalOpen.value = false
+  editingRuleId.value = null
+  await refreshNuxtData('rules')
 }
 </script>
 
@@ -522,6 +472,7 @@ async function handleDeleteRule(row: Row<RuleListDto>) {
             v-model:open="modalOpen"
             :rule-id="editingRuleId"
             @saved="handleSaved"
+            @deleted="handleDeleted"
           />
         </template>
       </UDashboardNavbar>
@@ -620,10 +571,12 @@ async function handleDeleteRule(row: Row<RuleListDto>) {
         :data="visibleRows"
         :columns="columns"
         :loading="status === 'pending'"
+        @select="onRuleRowSelect"
+        @keydown="activateClickableTableRowOnKeydown"
         :ui="{
           base: 'table-fixed border-separate border-spacing-0',
           thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
-          tbody: '[&>tr]:last:[&>td]:border-b-0',
+          tbody: `${clickableTableRowsBodyClass} [&>tr]:last:[&>td]:border-b-0`,
           th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
           td: 'border-b border-default',
           separator: 'h-0'

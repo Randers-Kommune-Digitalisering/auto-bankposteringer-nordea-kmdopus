@@ -18,6 +18,14 @@ describe('getBookingPeriodState', () => {
     })).toMatchObject({ isClosed: true, effectiveBookingDate: '2026-08-08', closingDate: '2026-08-07' })
   })
 
+  it('keeps the current month open after the configured closing day', () => {
+    expect(getBookingPeriodState({
+      bookingDate: '2026-10-13',
+      today: '2026-10-15',
+      closingDay: 7,
+    })).toMatchObject({ isClosed: false, effectiveBookingDate: '2026-10-13' })
+  })
+
   it('closes older periods and clamps the closing day for short months', () => {
     expect(getBookingPeriodState({
       bookingDate: '2026-01-31',

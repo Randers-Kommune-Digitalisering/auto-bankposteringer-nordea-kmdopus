@@ -55,12 +55,13 @@ export type TimelineError = {
 }
 
 export type MatchingSummary = {
-  totalTransactions: number
-  processedTransactions: number
-  matched: number
-  exception: number
-  open: number
-  manualBookedTransactions: number
+  totalSamleposter: number
+  processedSamleposter: number
+  bookedSamleposter: number
+  exceptedSamleposter: number
+  openSamleposter: number
+  mixedSamleposter: number
+  manualBookedSamleposter: number
 }
 
 export type RunTimelineResponse = {

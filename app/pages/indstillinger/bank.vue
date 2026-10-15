@@ -4,6 +4,11 @@ import type { SortingState } from '@tanstack/table-core'
 import { getPaginationRowModel } from '@tanstack/table-core'
 import BankingAccountModal from '~/components/banking/AccountModal.vue'
 import { useDefaultBankAccount } from '~/composables/useDefaultBankAccount'
+import {
+  activateClickableTableRowOnKeydown,
+  clickableTableRowsBodyClass,
+  createTableRowSelectHandler,
+} from '~/composables/useClickableTableRows'
 
 
 type BankingAccountUnionDto = {
@@ -16,13 +21,6 @@ type BankingAccountUnionDto = {
   observed: boolean
   configuredForApi: boolean
   observedAccountId: string | null
-}
-
-type SelectableBankAccount = {
-  id: string
-  iban: string
-  name: string | null
-  ignoreIngestion?: boolean
 }
 
 type AllowlistAccount = { iban: string; name: string | null; statuskonto: string | null; ignoreIngestion: boolean }
@@ -138,6 +136,7 @@ const table = useTemplateRef('table')
 const globalFilterValue = ref('')
 const UButton = resolveComponent('UButton')
 const UIcon = resolveComponent('UIcon')
+const UBadge = resolveComponent('UBadge')
 
 const channelOptions = [
   { label: 'ISO 20022', value: 'iso20022' as const },
@@ -277,56 +276,9 @@ const { data: agreements, refresh: refreshAgreements } = useFetch<BankingAgreeme
   },
 )
 
-const { data: selectableAccounts, pending: selectableAccountsPending } = useFetch<SelectableBankAccount[]>(
-  '/api/bank-accounts',
-  {
-    key: 'bank-accounts',
-    default: () => [],
-  },
-)
-
 const {
   data: defaultBankAccount,
-  pending: defaultBankAccountPending,
-  setDefaultBankAccount,
 } = useDefaultBankAccount()
-
-const defaultBankAccountOptions = computed(() =>
-  (selectableAccounts.value ?? [])
-    .filter(account => !account.ignoreIngestion)
-    .map(account => ({
-      label: `${account.name ? `${account.name} · ` : ''}${account.iban}`,
-      value: account.id,
-    })),
-)
-
-const defaultBankAccountId = computed(() => {
-  const configuredId = defaultBankAccount.value?.defaultBankAccountId
-  if (!configuredId) return undefined
-  return defaultBankAccountOptions.value.some(option => option.value === configuredId) ? configuredId : undefined
-})
-
-const savingDefaultBankAccount = ref(false)
-
-async function changeDefaultBankAccount(accountId: string | null | undefined) {
-  if (savingDefaultBankAccount.value) return
-  savingDefaultBankAccount.value = true
-  try {
-    const saved = await setDefaultBankAccount(accountId ?? null)
-    toast.add({
-      title: saved.defaultBankAccountId ? 'Standardkonto ændret' : 'Standardkonto fjernet',
-      color: 'success',
-    })
-  } catch (err: any) {
-    toast.add({
-      title: 'Kan ikke ændre standardkonto',
-      description: String(err?.data?.statusMessage ?? err?.statusMessage ?? err?.message ?? err),
-      color: 'error',
-    })
-  } finally {
-    savingDefaultBankAccount.value = false
-  }
-}
 
 async function refreshBankingData() {
   await Promise.all([
@@ -704,6 +656,18 @@ const createSortableHeader = (label: string) => ({ column }: { column: any }) =>
   )
 }
 
+function isDefaultAccount(row: BankingAccountUnionDto): boolean {
+  return Boolean(row.observedAccountId)
+    && defaultBankAccount.value?.defaultBankAccountId === row.observedAccountId
+}
+
+function editAccount(row: BankingAccountUnionDto) {
+  if (row.observedAccountId) return openEditObservedAccountModal(row.observedAccountId)
+  return openEditConfiguredAccountModal(row)
+}
+
+const onAccountRowSelect = createTableRowSelectHandler(editAccount)
+
 const columns: TableColumn<BankingAccountUnionDto>[] = [
   {
     accessorKey: 'iban',
@@ -711,8 +675,15 @@ const columns: TableColumn<BankingAccountUnionDto>[] = [
     header: createSortableHeader('IBAN'),
     enableSorting: true,
     cell: ({ row }) => {
-      const v = String((row.original as any).iban ?? '')
-      return h('span', { class: 'font-mono text-xs' }, v.toUpperCase())
+      const isDefault = isDefaultAccount(row.original)
+      return h(
+        'span',
+        { class: 'inline-flex items-center gap-2', ...(isDefault ? { 'data-default-bank-account': '' } : {}) },
+        [
+          h('span', { class: 'font-mono text-xs' }, row.original.iban.toUpperCase()),
+          isDefault ? h(UBadge, { class: 'capitalize', variant: 'subtle', color: 'primary' }, () => 'standard') : null,
+        ],
+      )
     }
   },
   {
@@ -770,31 +741,18 @@ const columns: TableColumn<BankingAccountUnionDto>[] = [
   {
     id: 'actions',
     enableSorting: false,
-    cell: ({ row }) =>
-      h(
-        'div',
-        { class: 'text-right flex items-center justify-end gap-1' },
-        [
-          h(UButton, {
-            icon: appConfig.ui.icons.edit,
-            color: 'neutral',
-            variant: 'ghost',
-            onClick: () => {
-              const r: any = row.original
-              if (r.observedAccountId) return openEditObservedAccountModal(String(r.observedAccountId))
-              return openEditConfiguredAccountModal(row.original)
-            },
-          }),
-          row.original.configuredForApi
-            ? h(UButton, {
-                icon: appConfig.ui.icons.trash,
-                color: 'error',
-                variant: 'ghost',
-                onClick: () => removeConfiguredAccount(row.original),
-              })
-            : null,
-        ],
-      ),
+    cell: ({ row }) => row.original.configuredForApi
+      ? h('div', { class: 'text-right' }, h(UButton, {
+          icon: appConfig.ui.icons.trash,
+          color: 'error',
+          variant: 'ghost',
+          'aria-label': 'Fjern API-konto',
+          onClick: (event: MouseEvent) => {
+            event.stopPropagation()
+            void removeConfiguredAccount(row.original)
+          },
+        }))
+      : null,
   },
 ]
 
@@ -823,34 +781,6 @@ const pagination = ref({ pageIndex: 0, pageSize: 20 })
     </template>
 
     <template #body>
-      <section class="mb-8 space-y-3">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-wide text-muted">Standardkonto</p>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-2">
-          <USelect
-            class="w-full max-w-md"
-            :model-value="defaultBankAccountId"
-            :items="defaultBankAccountOptions"
-            valueKey="value"
-            labelKey="label"
-            placeholder="Vælg standardkonto"
-            :loading="selectableAccountsPending || defaultBankAccountPending || savingDefaultBankAccount"
-            :disabled="savingDefaultBankAccount"
-            @update:model-value="(value: string | undefined) => changeDefaultBankAccount(value)"
-          />
-          <UButton
-            label="Fjern standard"
-            color="neutral"
-            variant="soft"
-            :disabled="!defaultBankAccount?.defaultBankAccountId || savingDefaultBankAccount"
-            :loading="savingDefaultBankAccount"
-            @click="changeDefaultBankAccount(null)"
-          />
-        </div>
-      </section>
-
       <section class="mb-8 space-y-3">
         <div>
           <p class="text-xs font-semibold uppercase tracking-wide text-muted">Aftaler</p>
@@ -995,10 +925,12 @@ const pagination = ref({ pageIndex: 0, pageSize: 20 })
         :data="rows"
         :columns="columns"
         :loading="pending || refreshingAccounts"
+        @select="onAccountRowSelect"
+        @keydown="activateClickableTableRowOnKeydown"
         :ui="{
           base: 'table-fixed border-separate border-spacing-0',
           thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
-          tbody: '[&>tr]:last:[&>td]:border-b-0',
+          tbody: `${clickableTableRowsBodyClass} [&>tr]:last:[&>td]:border-b-0`,
           th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
           td: 'border-b border-default',
           separator: 'h-0'
@@ -1157,3 +1089,9 @@ const pagination = ref({ pageIndex: 0, pageSize: 20 })
     </template>
   </UDashboardPanel>
 </template>
+
+<style scoped>
+:deep(tbody tr:has([data-default-bank-account]) td) {
+  font-weight: 600;
+}
+</style>

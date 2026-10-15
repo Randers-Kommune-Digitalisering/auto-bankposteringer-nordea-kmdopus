@@ -356,6 +356,7 @@ CREATE TABLE "kmd_accounting_parameters" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"rule_id" integer,
 	"booking_text" text,
+	"booking_text_template" jsonb,
 	"cpr_type" "cpr_type",
 	"cpr_number" text,
 	"note" text

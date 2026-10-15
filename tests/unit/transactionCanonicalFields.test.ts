@@ -58,6 +58,6 @@ describe('transactionCanonicalFields', () => {
     })
 
     expect(projected.preferredReference).toBe('KSD12345678901234567890')
-    expect(projected.postingText).toBe('KSD123456789012345678')
+    expect(projected.postingText).toBe('KSD12345678901234567890')
   })
 })

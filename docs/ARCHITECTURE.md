@@ -27,20 +27,20 @@ This repo is a stateless financial integration engine:
 - A failed transport upload retry, a global ERP response poll, and business recovery (ERP request resend or transaction reopen) are distinct actions. Business recovery remains in the ERP request detail workflow.
 - Timeline event normalization is a separate concern: run-level bank and ERP events should later share an explicit, deduplicated event contract rather than being inferred from the recovery worklist.
 
-## Posting text policy (matching -> ERP)
+## Posting text templates (matching -> ERP)
 
-- Posting text derivation is deterministic and split in two responsibilities:
-  - base bank message/counterparty resolution (`postingUtils`)
-  - policy overrides (`postingTextPolicy`) for municipality-specific formats
-- A shared transaction text projection (`engine/matching/domain/transactionTextProjection.ts`) is reused by matching and server presenters to keep counterpart/reference/posting text semantics aligned.
-- Override rules (currently BDP/KSD) are configured as ordered policy rules, not hardcoded branches inside the generic resolver.
-- The same derived posting text is used for posting commands and ERP `ITEM_TEXT`, reducing drift between UI interpretation and outbound payload.
+- Posting text uses deterministic canonical bank message, counterparty, and reference resolution, with an optional rule-owned template persisted alongside accounting parameters.
+- Templates are versioned structured data with ordered literal and regex-extraction parts. Extraction reads only allowlisted transaction fields; RE2 provides linear-time matching over bank-supplied text.
+- Matching criteria remain boolean predicates and do not implicitly provide capture groups. A rule's text template independently selects its source field, regex, and capture group.
+- Municipality-specific formats such as BDP/KSD are expressed as ordinary persisted accounting rules. The runtime has no implicit marker-specific formatting or seeded fallback rules.
+- Rule editing sends only manually entered sample values to an authenticated preview endpoint. The server evaluates templates with RE2; previews are not persisted and do not fetch transaction data. Template content participates in rule versions and advanced export/import.
+- The same resolved text is used for posting commands and ERP `ITEM_TEXT`, reducing drift between rule configuration and outbound payload.
 
 ## ERP request identity vs transport filename
 
 - `requestId` is an internal, persistent identity key for ERP request tracking/idempotency.
 - The physical filename used during ERP transport is an explicit payload field (`filename`) and must not be inferred from `requestId`.
-- KMD business-document identity (`erp_document.id`) is separate from both: it is written to `POSTING_DOCUMENT/HEADER/RECEIV_DOC`, and request attempts reference it through `erp_request.document_id`.
+- `erp_document.id` is the ERP-neutral business-document identity (the bilagsnummer), separate from request and response IDs. Supplier adapters map it to their native document reference; KMD writes it to `POSTING_DOCUMENT/HEADER/RECEIV_DOC`, and request attempts reference it through `erp_request.document_id`.
 - Each initial submission or resend creates a distinct `erp_request.id` and stores its transport filename. A resend updates `CONTROL_FIELDS.FILE_NAME` to the new filename while preserving `RECEIV_DOC` to retain KMD's duplicate-posting protection.
 - KMD responses are correlated to a request attempt using the embedded `CONTROL_FIELDS.FILE_NAME` and the persisted request filename. The response's `RETURN/RECEIV_DOC` outcomes are stored against `erp_document`; the response row itself references the matched request attempt. The remote response filename is only transport metadata.
 - Older requests without a persisted filename may be matched by their legacy request ID, which was the original transport filename. Unknown or malformed response correlations fail ingestion without deleting the remote response file.
@@ -66,6 +66,9 @@ This repo is a stateless financial integration engine:
 - Raw XML is available through the protected ERP detail endpoint for authorized recovery users. The read-only view masks known CPR/person fields. A technical editor may submit a corrected full XML as an unsaved draft only after an explicit ERP rejection; it is validated for XML syntax server-side and creates a new immutable ERP request. The original request payload is never overwritten. Transport retries remain a separate operation.
 - A corrected ERP request links to its source request and reuses the same `erp_document`, so retries and corrections for one bilag appear under the single ERP-posting stage and one document entry. `erp_document_transaction` stores grouped bilag membership to every originating transaction UUID; grouped accounting lines remain document-level and do not claim a false transaction owner. Append-only timeline events are correlated to the run and, for ERP, the request/outbox attempt. They store event summaries and audit metadata (actor identity and payload digest) but never a duplicate raw XML payload.
 - The ERP-posting stage status is derived from the latest event for each bilag and aggregates the current document statuses. Transport retries, corrected business requests, and ERP acceptance/rejection remain distinguishable in the event log.
+- The run-list and run-timeline overall status use the same effective run status; stage-level timeline statuses retain their more detailed workflow meanings.
+- “Current run issues” are projected from persisted error/job/outbox/ERP response state with source-specific recovery rules. Append-only timeline events are audit history, not active issues by themselves. The run error popover, dashboard KPI, and latest-runs active-error count use the same deduplicated issue projection; retries and newer ERP request descendants supersede prior failures.
+- ERP integration is mandatory for every supported tenant; there is no runtime “integration inactive” mode.
 - KMD `FinancePostingResponse` interpretation stays in the KMD adapter. Raw response XML is preserved, while `erp_response.status_text` stores the derived aggregate outcome; mixed voucher results are an aggregate error/partial outcome and individual vouchers remain represented in the raw response.
 - The dev Compose profile runs a responder sidecar that polls and transfers files through the same SFTP service as the ERP adapter. It generates a response from each uploaded KMD request once, choosing success/error outcomes randomly by default or through `KMD_SFTP_MOCK_MODE` for reproducible testing. The responder is development-only and is not part of production runtime behavior.
 - Run recovery views keep bank ingestion jobs, matching state, outbound delivery state, and inbound ERP response state distinct. An uploaded request without a parsed response remains pending rather than being presented as successful.
@@ -79,6 +82,7 @@ This repo is a stateless financial integration engine:
 - Transactions are counted and paginated by samleposter across UI/API/dashboard.
 - The canonical samlepost identity is computed in shared server utilities to avoid duplicated per-endpoint logic:
   - server/utils/iso20022Samlepost.ts
+- Run timeline matching summaries count each canonical samlepost once across all run members. A samlepost is status-assigned when every member has a processing status, open when any member is open or has no status, and mixed when assigned member statuses differ. Manual booking is counted once per samlepost when any member was manually booked.
 - UI clients may temporarily receive both legacy and new names during migration:
   - New: samlepostId, totalSamleposter, openSamleposter
   - Legacy compatibility: topStackId, totalTopTransactions, openTransactions
@@ -250,6 +254,7 @@ Tenant-konfigurationen indeholder `booking_period_close_day`, som seedes fra
 den sidste åbne dag for foregående måneds bogføring. Beregningen bruger
 `Europe/Copenhagen` som kalender og begrænser konfigurationsdagen til den
 sidste faktiske dag i måneden.
+Den aktuelle kalendermåned forbliver åben; ældre perioder er lukkede.
 
 Reglen håndhæves kun ved manuel enkeltpost og manuel samlepost. Serveren
 afviser et forsøg i en lukket periode med en stabil 409-kode, indtil brugeren

@@ -10,6 +10,11 @@ import { formatTransactionFieldHint } from '~/lib/presenters/transactionFieldHin
 import { toCanonicalReferenceBadgeEntries, toCanonicalValueBadgeEntries } from '~/lib/presenters/referenceBadgeEntries'
 import { useDebouncedString } from '~/composables/useDebouncedString'
 import { useOpenTransactions } from '~/composables/useOpenTransactions'
+import {
+  activateClickableTableRowOnKeydown,
+  clickableTableRowsBodyClass,
+  createTableRowSelectHandler,
+} from '~/composables/useClickableTableRows'
 import { fuzzyRankRows } from '~/lib/search/fuzzyRanking'
 import type { OpenTransaction, TransactionSummary } from '~/types/transactions'
 
@@ -399,30 +404,6 @@ const columns: TableColumn<OpenItemsTableRow>[] = [
       }, notePreview)
     },
   },
-  { // Actions
-    id: 'actions',
-    header: 'Handling',
-    cell: ({ row }) => {
-      const stack = row.original.stack
-      const isGrouped = stack.items.length > 1
-
-      return h('div', { class: 'flex gap-2' }, [
-        h(resolveComponent('UButton'), {
-          size: 'sm',
-          color: 'primary',
-          variant: 'soft',
-          trailingIcon: appConfig.ui.icons.edit,
-          onClick: () => {
-            if (isGrouped) {
-              openGroupedBookingModal(stack.items)
-              return
-            }
-            openBookingModal(stack.representative)
-          },
-        }, () => 'Behandl'),
-      ])
-    },
-  },
 ]
 
 function toStackSummary(stack: OpenTransactionStack): TransactionSummary {
@@ -489,6 +470,14 @@ function openGroupedBookingModal(items: OpenTransaction[]) {
   isBookingOpen.value = true
 }
 
+const onOpenItemsRowSelect = createTableRowSelectHandler((row: OpenItemsTableRow) => {
+  if (row.stack.items.length > 1) {
+    openGroupedBookingModal(row.stack.items)
+    return
+  }
+  openBookingModal(row.stack.representative)
+})
+
 function stackNotePreview(stack: OpenTransactionStack): string | null {
   const notes = stack.items
     .map((item) => String(item.draftNote ?? '').trim())
@@ -526,7 +515,7 @@ function handleDraftSaved(payload: { transactionId: string; note: string | null 
 const tableUi = {
   base: 'border-separate border-spacing-0',
   thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
-  tbody: '[&>tr]:last:[&>td]:border-b-0',
+  tbody: `${clickableTableRowsBodyClass} [&>tr]:last:[&>td]:border-b-0`,
   tr: 'group',
   th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
   td: 'align-top group-has-[td:not(:empty)]:border-b border-default',
@@ -607,6 +596,8 @@ const tableUi = {
               :loading="pending"
               empty-label="Der er ingen åbne transaktioner at behandle."
               :ui="tableUi"
+              @select="onOpenItemsRowSelect"
+              @keydown="activateClickableTableRowOnKeydown"
             />
 
             <TransactionsTablePagination

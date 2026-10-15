@@ -1,9 +1,8 @@
 <script setup lang="ts">
-    import { onBeforeUnmount } from 'vue'
-    import type { DocumentContentItem, RunListItem } from '~/types/runs'
+    import type { RunListItem } from '~/types/runs'
 
     interface Props {
-        type: 'error' | 'docs' | 'erpResponses'
+        type: 'error' | 'erpDocuments'
         run: RunListItem
         open: boolean
     }
@@ -18,107 +17,12 @@
     const props = defineProps<Props>()
     const emit = defineEmits<Emits>()
 
-    const docUrlMap = new Map<string, string>()
-    const loadingDocIds = ref<Record<string, boolean>>({})
-    const isClient = import.meta.client
-
-    const attemptCreateBlobFromContent = (doc: { content?: string | Blob | null; mimeType?: string | null }) => {
-        const content: any = doc.content
-        if (content instanceof Blob) {
-            return content as Blob
-        }
-
-        if (typeof doc.content === 'string') {
-            const fallbackMime = doc.mimeType ?? 'application/octet-stream'
-
-            try {
-                const normalizedContent = doc.content.includes(',')
-                    ? doc.content.split(',').at(-1) ?? ''
-                    : doc.content
-                const binary = atob(normalizedContent)
-                const bytes = new Uint8Array(binary.length)
-                for (let i = 0; i < binary.length; i++) {
-                    bytes[i] = binary.charCodeAt(i)
-                }
-                return new Blob([bytes], { type: fallbackMime })
-            } catch (error) {
-                // Not base64 (or corrupted). Fall back to treating content as plain text.
-                const likelyText = fallbackMime.startsWith('text/') || fallbackMime.includes('xml')
-                return new Blob([doc.content], { type: likelyText ? fallbackMime : 'text/plain' })
-            }
-        }
-
-        return null
-    }
-
-    const fetchDocumentContent = async (documentId: string): Promise<DocumentContentItem | null> => {
-        try {
-            return await $fetch<DocumentContentItem>(`/api/runs/documents/${documentId}`)
-        } catch {
-            return null
-        }
-    }
-
-    async function downloadDoc(doc: RunListItem['documents'][number]) {
-        if (!isClient) {
-            return
-        }
-
-        loadingDocIds.value[doc.id] = true
-        try {
-            let url = docUrlMap.get(doc.id) ?? null
-            if (!url) {
-                const withContent = await fetchDocumentContent(doc.id)
-                if (!withContent?.content) {
-                    return
-                }
-                const blob = attemptCreateBlobFromContent(withContent)
-                if (!blob) {
-                    return
-                }
-                url = URL.createObjectURL(blob)
-                docUrlMap.set(doc.id, url)
-            }
-
-            const anchor = window.document.createElement('a')
-            anchor.href = url
-            anchor.download = doc.filename
-            anchor.rel = 'noopener'
-            window.document.body.appendChild(anchor)
-            anchor.click()
-            window.document.body.removeChild(anchor)
-        } finally {
-            loadingDocIds.value[doc.id] = false
-        }
-    }
-
-    onBeforeUnmount(() => {
-        if (!isClient) {
-            return
-        }
-        for (const url of docUrlMap.values()) {
-            URL.revokeObjectURL(url)
-        }
-        docUrlMap.clear()
-    })
-
-    const groupDocsByType = (docs: RunListItem['documents']) => {
-        return docs.reduce((acc: Record<string, RunListItem['documents']>, d) => {
-            const typeKey = d.type ?? 'ukendt'
-            acc[typeKey] = acc[typeKey] ?? []
-            acc[typeKey].push(d)
-            return acc
-        }, {})
-    }
-
     const getTitle = () => {
         switch (props.type) {
             case 'error':
                 return `Fejl (${props.run.errors?.length || 0})`
-            case 'docs':
-                return `Dokumenter (${props.run.documents?.length || 0})`
-            case 'erpResponses':
-                return `Bilagsnumre (${props.run.erpResponses?.length || 0})`
+            case 'erpDocuments':
+                return `Bilagsnumre (${props.run.erpDocuments?.length || 0})`
         }
     }
 
@@ -126,9 +30,7 @@
         switch (props.type) {
             case 'error':
                 return appConfig.ui.icons.warning
-            case 'docs':
-                return appConfig.ui.icons.file
-            case 'erpResponses':
+            case 'erpDocuments':
                 return appConfig.ui.icons.hash
         }
     }
@@ -137,9 +39,7 @@
         switch (props.type) {
             case 'error':
                 return 'error'
-            case 'docs':
-                return 'neutral'
-            case 'erpResponses':
+            case 'erpDocuments':
                 return 'neutral'
         }
     }
@@ -148,10 +48,8 @@
         switch (props.type) {
             case 'error':
                 return props.run.errors?.length || 0
-            case 'docs':
-                return props.run.documents?.length || 0
-            case 'erpResponses':
-                return props.run.erpResponses?.length || 0
+            case 'erpDocuments':
+                return props.run.erpDocuments?.length || 0
         }
     }
 
@@ -191,35 +89,11 @@
                     </ul>
                 </template>
 
-                <!-- Documents Content -->
-                <template v-if="type === 'docs' && run.documents">
-                    <div class="space-y-3">
-                        <template v-for="(docsOfType, docType) in groupDocsByType(run.documents)" :key="String(docType)">
-                            <div>
-                                <h4 class="font-medium text-sm mb-2 capitalize">{{ docType }}</h4>
-                                <ul class="list-disc pl-5 space-y-1">
-                                    <li v-for="doc in docsOfType" :key="doc.id" class="text-sm">
-                                        <button
-                                            type="button"
-                                            class="text-blue-600 hover:underline font-medium disabled:text-muted disabled:no-underline"
-                                            :disabled="loadingDocIds[doc.id]"
-                                            @click="downloadDoc(doc)"
-                                        >
-                                            {{ loadingDocIds[doc.id] ? 'Henter…' : doc.filename }}
-                                        </button>
-                                        <span class="text-muted text-xs ml-1">({{ doc.mimeType ?? doc.fileExtension }})</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </template>
-                    </div>
-                </template>
-
-                <!-- ERP Responses Content (Bilagsnumre) -->
-                <template v-if="type === 'erpResponses' && run.erpResponses">
+                <!-- ERP document references (bilagsnumre) -->
+                <template v-if="type === 'erpDocuments' && run.erpDocuments">
                     <ul class="list-disc pl-5 space-y-1">
-                        <li v-for="resp in run.erpResponses" :key="resp.id" class="text-sm">
-                            <span class="font-medium">{{ resp.id }}</span>
+                        <li v-for="document in run.erpDocuments" :key="document.documentId" class="text-sm">
+                            <span class="font-medium">{{ document.documentId }}</span>
                         </li>
                     </ul>
                 </template>
