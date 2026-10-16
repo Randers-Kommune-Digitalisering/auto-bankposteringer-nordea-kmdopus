@@ -267,6 +267,7 @@ export default defineEventHandler(async (event) => {
   try {
     submission = await executePostingCommand(command, {
       runId: row.runId,
+      origin: 'manual',
       bookingDate: toDate(effectiveBookingDate),
     })
   } catch (error) {

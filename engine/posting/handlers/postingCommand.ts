@@ -1,6 +1,7 @@
 import type { PostingAttachment, PostingLineInput } from '../domain/posting'
 import { submitErpPostingViaOutbox } from '../../erp-integration/infrastructure/erpOutbox'
 import { buildPostingLines, type PostingTransactionContext } from '../../matching/domain/postingUtils'
+import type { ErpDocumentOrigin } from '~/lib/db/schema/enums'
 
 export type PostingCommandDefinition = {
   transaction: PostingTransactionContext
@@ -25,6 +26,7 @@ export function buildPostingCommand(definition: PostingCommandDefinition): Posti
 
 export type PostingExecutionOptions = {
   runId: string
+  origin: ErpDocumentOrigin
   bookingDate: Date
   erpSupplier?: string
   sourceTransactionIds?: string[]
@@ -38,6 +40,7 @@ export async function executePostingCommand(
 ): Promise<PostingExecutionResult> {
   return submitErpPostingViaOutbox({
     runId: options.runId,
+    origin: options.origin,
     bookingDate: options.bookingDate,
     postings: command.postings,
     erpSupplier: options.erpSupplier,

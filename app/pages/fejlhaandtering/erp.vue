@@ -30,24 +30,15 @@ type FailedErpRequestsResponse = {
 type ErpRequestViewResponse = {
   requestId: string
   runId: string
+  documentOrigin: 'batch' | 'manual' | null
   response: null | {
     id: string
     statusText: string | null
   }
   header: {
     bookingDate: string | null
-    currencies: string[]
-    lineCount: number
     transactionCount: number
-    unmappedLineCount: number
     totalAmount: string
-    accountingLines: Array<{
-      lineNo: number
-      amount: string | null
-      debetOrCredit: string | null
-      dimensions: Record<string, string>
-      postingText: string | null
-    }>
   }
   transactions: Array<{
     transactionId: string
@@ -587,9 +578,17 @@ async function reopenBookedTransactions() {
         <UCard>
           <template #header>
             <div class="flex flex-col gap-1">
-              <div class="font-medium">Transaktioner i ERP-request</div>
+              <div class="font-medium">
+                {{ !erpView ? 'ERP-request' : erpView.documentOrigin === 'manual' ? 'Manuel ERP-request' : erpView.documentOrigin === 'batch' ? 'Transaktioner i ERP-request' : 'ERP-request med ukendt bilagsoprindelse' }}
+              </div>
               <div class="text-sm text-muted">
-                Visningen er transaktionsbaseret og bruger samme persisted kobling som integrationen (request → linjer → transaktioner).
+                {{ !erpView
+                  ? 'Åbn en request fra listen ovenfor for at se detaljer og handlinger.'
+                  : erpView.documentOrigin === 'manual'
+                    ? 'Manuelle ERP-bilag viser ikke en run-transaktionsliste.'
+                    : erpView.documentOrigin === 'batch'
+                      ? 'Transaktionerne nedenfor kommer fra linjerne i det valgte ERP-request.'
+                      : 'Transaktionslisten skjules, fordi bilagets oprindelse ikke er kendt.' }}
               </div>
             </div>
           </template>
@@ -608,15 +607,15 @@ async function reopenBookedTransactions() {
                 <span class="text-muted">Run: </span>
                 <span class="font-mono">{{ erpView.runId }}</span>
               </div>
-              <div class="text-sm">
+              <div v-if="erpView.documentOrigin === 'batch'" class="text-sm">
                 <span class="text-muted">Bogføringsdato: </span>
                 <span class="font-mono">{{ erpView.header.bookingDate ?? 'Flere datoer' }}</span>
               </div>
-              <div class="text-sm">
+              <div v-if="erpView.documentOrigin === 'batch'" class="text-sm">
                 <span class="text-muted">Transaktioner: </span>
                 <span class="font-mono">{{ erpView.header.transactionCount }}</span>
               </div>
-              <div class="text-sm">
+              <div v-if="erpView.documentOrigin === 'batch'" class="text-sm">
                 <span class="text-muted">Netto-beløb: </span>
                 <span class="font-mono">{{ formatSignedDkk(toSignedAmount(erpView.header.totalAmount, null)) }}</span>
               </div>
@@ -630,40 +629,7 @@ async function reopenBookedTransactions() {
               </div>
             </div>
 
-            <section
-              v-if="erpView.header.transactionCount > 1 && erpView.header.accountingLines.length"
-              class="space-y-2"
-            >
-              <h3 class="text-sm font-semibold">Kontering på samlet ERP-bilag</h3>
-              <div class="overflow-x-auto rounded-md border border-default">
-                <table class="min-w-full text-sm">
-                  <thead class="bg-elevated/50 text-left">
-                    <tr>
-                      <th class="px-3 py-2 font-medium">Linje</th>
-                      <th class="px-3 py-2 font-medium">Beløb</th>
-                      <th class="px-3 py-2 font-medium">D/K</th>
-                      <th class="px-3 py-2 font-medium">Dimensioner</th>
-                      <th class="px-3 py-2 font-medium">Tekst</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="line in erpView.header.accountingLines" :key="line.lineNo" class="border-t border-default align-top">
-                      <td class="px-3 py-2 font-mono">{{ line.lineNo }}</td>
-                      <td class="px-3 py-2 whitespace-nowrap">{{ line.amount ?? '—' }}</td>
-                      <td class="px-3 py-2">{{ line.debetOrCredit ?? '—' }}</td>
-                      <td class="px-3 py-2">
-                        <div v-for="([key, value]) in Object.entries(line.dimensions)" :key="key" class="break-all">
-                          <span class="text-muted">{{ key }}:</span> {{ value }}
-                        </div>
-                      </td>
-                      <td class="px-3 py-2">{{ line.postingText ?? '—' }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            <div class="flex flex-wrap items-end justify-between gap-3">
+            <div v-if="erpView.documentOrigin === 'batch'" class="flex flex-wrap items-end justify-between gap-3">
               <UFormField label="Posteringstekst" class="min-w-64 max-w-sm">
                 <UInput
                   v-model="transactionSearchInput"
@@ -678,7 +644,7 @@ async function reopenBookedTransactions() {
             </div>
 
             <UEmpty
-              v-if="!filteredTransactions.length"
+              v-if="erpView.documentOrigin === 'batch' && !filteredTransactions.length"
               :icon="appConfig.ui.icons.search"
               title="Ingen transaktioner fundet"
               description="Ingen af de indlæste transaktioner matcher posteringsteksten."
@@ -686,7 +652,7 @@ async function reopenBookedTransactions() {
             />
 
             <UTable
-              v-else
+              v-if="erpView.documentOrigin === 'batch' && filteredTransactions.length"
               :key="transactionTableKey"
               :data="filteredTransactions"
               :columns="transactionColumns"
@@ -711,6 +677,7 @@ async function reopenBookedTransactions() {
                 @click="openRawFiles"
               />
               <UButton
+                v-if="erpView.documentOrigin === 'batch'"
                 :icon="appConfig.ui.icons.undo"
                 label="Genåbn valgte transaktioner"
                 color="warning"
@@ -725,7 +692,7 @@ async function reopenBookedTransactions() {
                 color="primary"
                 variant="soft"
                 :loading="erpLoading"
-                @click="resendErpRequest"
+                @click="() => resendErpRequest()"
               />
               <div v-if="selectedTransactionIdList.length" class="text-sm text-muted">
                 Valgt: {{ selectedTransactionIdList.length }} transaktion(er)

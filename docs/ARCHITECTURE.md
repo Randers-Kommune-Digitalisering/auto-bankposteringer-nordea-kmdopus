@@ -41,6 +41,7 @@ This repo is a stateless financial integration engine:
 - `requestId` is an internal, persistent identity key for ERP request tracking/idempotency.
 - The physical filename used during ERP transport is an explicit payload field (`filename`) and must not be inferred from `requestId`.
 - `erp_document.id` is the ERP-neutral business-document identity (the bilagsnummer), separate from request and response IDs. Supplier adapters map it to their native document reference; KMD writes it to `POSTING_DOCUMENT/HEADER/RECEIV_DOC`, and request attempts reference it through `erp_request.document_id`.
+- `erp_document.origin` is the durable presentation/domain marker for `batch` versus `manual` documents. It is assigned when the document is first created, is preserved by corrected resends that reuse the document ID, and remains nullable for legacy/unknown documents; UI behavior must not infer origin from timeline events or mutable transaction state.
 - Each initial submission or resend creates a distinct `erp_request.id` and stores its transport filename. A resend updates `CONTROL_FIELDS.FILE_NAME` to the new filename while preserving `RECEIV_DOC` to retain KMD's duplicate-posting protection.
 - KMD responses are correlated to a request attempt using the embedded `CONTROL_FIELDS.FILE_NAME` and the persisted request filename. The response's `RETURN/RECEIV_DOC` outcomes are stored against `erp_document`; the response row itself references the matched request attempt. The remote response filename is only transport metadata.
 - Older requests without a persisted filename may be matched by their legacy request ID, which was the original transport filename. Unknown or malformed response correlations fail ingestion without deleting the remote response file.
@@ -65,6 +66,7 @@ This repo is a stateless financial integration engine:
 - Manual booking start, completion, and failure events are recorded against the existing run with actor and ERP request linkage where available. ERP upload/retry/response events remain exclusively under the ERP stage to avoid representing one ERP I/O operation twice.
 - Raw XML is available through the protected ERP detail endpoint for authorized recovery users. The read-only view masks known CPR/person fields. A technical editor may submit a corrected full XML as an unsaved draft only after an explicit ERP rejection; it is validated for XML syntax server-side and creates a new immutable ERP request. The original request payload is never overwritten. Transport retries remain a separate operation.
 - A corrected ERP request links to its source request and reuses the same `erp_document`, so retries and corrections for one bilag appear under the single ERP-posting stage and one document entry. `erp_document_transaction` stores grouped bilag membership to every originating transaction UUID; grouped accounting lines remain document-level and do not claim a false transaction owner. Append-only timeline events are correlated to the run and, for ERP, the request/outbox attempt. They store event summaries and audit metadata (actor identity and payload digest) but never a duplicate raw XML payload.
+- ERP request detail lists transactions only for `posting` documents, using distinct non-null `erp_request_line.transaction_id` values on the selected request. `manual` and legacy/unknown documents do not show a run transaction list; `erp_document_transaction` remains for grouped-booking membership/recovery, not as a fallback for request detail. Aggregate document accounting is not shown; line snapshots remain available from each transaction's detail view.
 - The ERP-posting stage status is derived from the latest event for each bilag and aggregates the current document statuses. Transport retries, corrected business requests, and ERP acceptance/rejection remain distinguishable in the event log.
 - The run-list and run-timeline overall status use the same effective run status; stage-level timeline statuses retain their more detailed workflow meanings.
 - “Current run issues” are projected from persisted error/job/outbox/ERP response state with source-specific recovery rules. Append-only timeline events are audit history, not active issues by themselves. The run error popover, dashboard KPI, and latest-runs active-error count use the same deduplicated issue projection; retries and newer ERP request descendants supersede prior failures.
@@ -437,6 +439,14 @@ system seed. This feature requires a Docker Compose version with support for
 service hooks, against which the local Compose configuration is validated.
 Cleanup cannot be guaranteed in the event of a crash, OOM, `SIGKILL`, or host
 failure.
+
+When refreshing the single baseline migration, keep its journal timestamp
+unchanged for databases where that baseline was already applied. A newer
+timestamp makes Drizzle treat the baseline as pending and rerun its `CREATE`
+statements against the existing schema. Keeping the timestamp only prevents
+that rerun; it does not apply schema changes to an existing database. Local
+development databases are reset by the Compose shutdown hook before applying a
+refreshed baseline.
 
 ## Deployment considerations (production)
 

@@ -83,6 +83,10 @@ export const erpSupplierValues = ['kmd', 'andet'] as const
 export const erpSupplierEnum = pgEnum('erp_supplier', erpSupplierValues)
 export type ErpSupplier = typeof erpSupplierValues[number]
 
+export const erpDocumentOriginValues = ['batch', 'manual'] as const
+export const erpDocumentOriginEnum = pgEnum('erp_document_origin', erpDocumentOriginValues)
+export type ErpDocumentOrigin = typeof erpDocumentOriginValues[number]
+
 export const bookingStatusValues = ['åben', 'bogført', 'undtaget'] as const
 export const bookingStatusEnum = pgEnum('booking_status', bookingStatusValues)
 export type BookingStatus = typeof bookingStatusValues[number]

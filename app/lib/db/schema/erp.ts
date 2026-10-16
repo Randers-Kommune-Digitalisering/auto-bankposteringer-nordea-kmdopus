@@ -3,6 +3,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { pgTable, text, uuid, integer, numeric, jsonb, primaryKey, index, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { run } from "./run";
 import { transaction } from "./transaction";
+import { erpDocumentOriginEnum } from "./enums";
 
 export const erpRequest = pgTable("erp_request", {
   id: text().primaryKey(),
@@ -19,6 +20,7 @@ export const erpRequest = pgTable("erp_request", {
 export const erpDocument = pgTable("erp_document", {
   id: text().primaryKey(),
   runId: uuid("run_id").notNull().references(() => run.id),
+  origin: erpDocumentOriginEnum('origin'),
 }, (t) => ({
   runIdIdx: index('erp_document_run_id_idx').on(t.runId),
 }));

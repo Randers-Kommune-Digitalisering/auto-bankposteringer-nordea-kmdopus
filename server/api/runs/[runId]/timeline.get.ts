@@ -6,7 +6,7 @@ import { createUtcDateString, createUtcDateTimeString } from '~~/utils/function'
 import { run } from '~/lib/db/schema/run'
 import { job } from '~/lib/db/schema/job'
 import { outbox } from '~/lib/db/schema/outbox'
-import { erpRequest, erpRequestLine, erpResponse } from '~/lib/db/schema/erp'
+import { erpDocument, erpRequest, erpRequestLine, erpResponse } from '~/lib/db/schema/erp'
 import { errorLog } from '~/lib/db/schema/error'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import { runTimelineEvent } from '~/lib/db/schema/runTimelineEvent'
@@ -94,15 +94,17 @@ export default defineEventHandler(async (event) => {
         requestId: erpRequest.id,
         sourceRequestId: erpRequest.sourceRequestId,
         documentId: erpRequest.documentId,
+        documentOrigin: erpDocument.origin,
         responseId: erpResponse.id,
         responseStatusText: erpResponse.statusText,
         lineCount: sql<number>`count(${erpRequestLine.lineNo})`,
       })
       .from(erpRequest)
+      .leftJoin(erpDocument, eq(erpDocument.id, erpRequest.documentId))
       .leftJoin(erpResponse, eq(erpResponse.requestId, erpRequest.id))
       .leftJoin(erpRequestLine, eq(erpRequestLine.requestId, erpRequest.id))
       .where(eq(erpRequest.runId, runId))
-      .groupBy(erpRequest.id, erpResponse.id, erpResponse.statusText)
+      .groupBy(erpRequest.id, erpDocument.origin, erpResponse.id, erpResponse.statusText)
       .orderBy(desc(erpRequest.id))
       .limit(200),
 
@@ -216,6 +218,7 @@ export default defineEventHandler(async (event) => {
       requestId: String(req.requestId),
       sourceRequestId: req.sourceRequestId ? String(req.sourceRequestId) : null,
       documentId: req.documentId ? String(req.documentId) : null,
+      documentOrigin: req.documentOrigin ?? null,
       responseId: req.responseId ? String(req.responseId) : null,
       responseStatusText: req.responseStatusText ? String(req.responseStatusText) : null,
       lineCount: Number(req.lineCount ?? 0),
