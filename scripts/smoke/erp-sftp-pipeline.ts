@@ -87,6 +87,7 @@ async function main(): Promise<void> {
 
   const result = await submitErpPostingViaOutbox({
     runId,
+    origin: 'batch',
     bookingDate,
     postings,
   })

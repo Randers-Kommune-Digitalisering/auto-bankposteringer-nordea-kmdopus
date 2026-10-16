@@ -251,6 +251,7 @@ export default defineEventHandler(async (event) => {
   try {
     submission = await executePostingCommand(command, {
       runId: first.runId,
+      origin: 'manual',
       bookingDate: toDate(effectiveBookingDate),
       sourceTransactionIds: transactionIds,
     })

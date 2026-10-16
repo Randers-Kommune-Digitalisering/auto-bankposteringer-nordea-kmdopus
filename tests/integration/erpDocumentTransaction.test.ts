@@ -54,13 +54,19 @@ describe('grouped ERP document transaction membership (integration)', () => {
         status: 'bogført' as const,
         source: 'manuel' as const,
       })))
-      await db.insert(erpDocument).values({ id: documentId, runId: runId! })
+      await db.insert(erpDocument).values({ id: documentId, runId: runId!, origin: 'manual' })
       await db.insert(erpRequest).values({ id: requestId, runId: runId!, documentId, payload: '<Request/>' })
       await db.insert(erpRequestLine).values([
         { requestId, lineNo: 1, transactionId: null, amount: '20.00', debetOrCredit: 'Debet' },
         { requestId, lineNo: 2, transactionId: null, amount: '20.00', debetOrCredit: 'Kredit' },
       ])
       await db.insert(erpDocumentTransaction).values(transactionIds.map(transactionId => ({ documentId, transactionId })))
+
+      const [document] = await db
+        .select({ origin: erpDocument.origin })
+        .from(erpDocument)
+        .where(eq(erpDocument.id, documentId))
+      expect(document?.origin).toBe('manual')
 
       cleanup = async () => {
         await db.delete(erpRequestLine).where(eq(erpRequestLine.requestId, requestId))

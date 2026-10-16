@@ -1,5 +1,5 @@
 {
-  "id": "8c8c88f5-39ab-4c45-bfc5-82aaa67b2be1",
+  "id": "196055e8-b378-4981-a899-bd93d00333c4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1290,6 +1290,13 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "origin": {
+          "name": "origin",
+          "type": "erp_document_origin",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
@@ -4940,6 +4947,14 @@
       "values": [
         "postering",
         "afstemning"
+      ]
+    },
+    "public.erp_document_origin": {
+      "name": "erp_document_origin",
+      "schema": "public",
+      "values": [
+        "batch",
+        "manual"
       ]
     },
     "public.erp_supplier": {

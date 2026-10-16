@@ -6,6 +6,7 @@ import type { RunTimelineResponse } from '~/types/runTimeline'
 import { getRunStatusPresentation } from '~/lib/presenters/runStatus'
 import {
   compareTimelineEvents,
+  getErpDocumentIdsByOrigin,
   getErpTimelineDeliveryState,
   getErpTimelineStageState,
   groupErpTimelineDeliveries,
@@ -40,16 +41,28 @@ const loading = ref(false)
 const data = ref<RunTimelineResponse | null>(null)
 
 const openPopovers = ref<Record<string, boolean>>({})
-const openEventLogs = ref({ banking: false, matching: false, manual: false, erp: false })
+const openEventLogs = ref({ banking: false, matching: false, manual: false })
+const showManualBilagsnumre = ref(false)
+const showErpDeliveries = ref(false)
 
 function resetEventLogs() {
-  openEventLogs.value = { banking: false, matching: false, manual: false, erp: false }
+  openEventLogs.value = { banking: false, matching: false, manual: false }
+  showManualBilagsnumre.value = false
+  showErpDeliveries.value = false
 }
 
 type EventLogKey = keyof typeof openEventLogs.value
 
 function toggleEventLog(stage: EventLogKey) {
   openEventLogs.value[stage] = !openEventLogs.value[stage]
+}
+
+function toggleManualBilagsnumre() {
+  showManualBilagsnumre.value = !showManualBilagsnumre.value
+}
+
+function toggleErpDeliveries() {
+  showErpDeliveries.value = !showErpDeliveries.value
 }
 
 const runId = computed(() => props.run?.id ?? '')
@@ -218,18 +231,16 @@ const matchingState = computed(() => {
 })
 
 const manualEvents = computed(() => (data.value?.events ?? []).filter(event => event.stage === 'manual'))
-const manualRequestId = computed(() => manualEvents.value.filter(event => event.requestId).at(-1)?.requestId ?? null)
+const manualBilagsnumre = computed(() => getErpDocumentIdsByOrigin(data.value?.erpRequests ?? [], 'manual'))
 const manualState = computed(() => {
   const eventState = statusFromStageEvent(latestStageEvent('manual'))
   if (eventState) return eventState
   const historicalCount = data.value?.matching.manualBookedSamleposter ?? 0
-  const historicalCountNoun = historicalCount === 1 ? 'samlepost' : 'samleposter'
-  const historicalCountAdjective = historicalCount === 1 ? 'bogført' : 'bogførte'
   return historicalCount
     ? {
         color: 'neutral' as StatusColor,
         label: 'Historik',
-        description: `${historicalCount} manuelt ${historicalCountAdjective} ${historicalCountNoun} før hændelsesloggen blev indført.`,
+        description: 'Der findes historiske manuelle bogføringer fra før hændelsesloggen blev indført.',
       }
     : {
         color: 'neutral' as StatusColor,
@@ -286,10 +297,6 @@ const erpStageEvents = computed<RunEventLogEntry[]>(() => {
 const erpStageState = computed(() => {
   return getErpTimelineStageState(erpDeliveries.value)
 })
-
-function deliveryAttemptCount(delivery: ErpTimelineDelivery): number {
-  return delivery.rows.reduce((sum, row) => sum + row.attempts + (row.status === 'sent' || row.status === 'processing' ? 1 : 0), 0)
-}
 
 const overallState = computed(() => getRunStatusPresentation(props.run?.status))
 
@@ -475,15 +482,27 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
               <div class="flex items-center gap-2">
                 <span>Manuel bogføring</span>
                 <UBadge :color="manualState.color" variant="subtle">{{ manualState.label }}</UBadge>
-                <UBadge v-if="data?.matching.manualBookedSamleposter" color="neutral" variant="outline">
-                  {{ data.matching.manualBookedSamleposter }} manuelt {{ data.matching.manualBookedSamleposter === 1 ? 'bogført samlepost' : 'bogførte samleposter' }}
-                </UBadge>
               </div>
             </template>
 
             <template #manualBooking-description>
               <div class="space-y-2">
                 <div class="text-sm text-muted">{{ manualState.description }}</div>
+                <UButton
+                  v-if="manualBilagsnumre.length"
+                  size="xs"
+                  color="neutral"
+                  variant="subtle"
+                  :label="showManualBilagsnumre ? 'Skjul bilagsnumre' : 'Vis bilagsnumre'"
+                  :aria-expanded="showManualBilagsnumre"
+                  aria-controls="run-manual-bilagsnumre"
+                  @click="toggleManualBilagsnumre"
+                />
+                <ul v-if="showManualBilagsnumre && manualBilagsnumre.length" id="run-manual-bilagsnumre" class="list-disc pl-5 space-y-1">
+                  <li v-for="documentId in manualBilagsnumre" :key="documentId" class="text-sm font-mono">
+                    {{ documentId }}
+                  </li>
+                </ul>
                 <UButton
                   v-if="manualEvents.length"
                   size="xs"
@@ -500,15 +519,6 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
                     <span class="ml-1">{{ event.detail ?? event.eventType }}</span>
                   </li>
                 </ul>
-                <UButton
-                  v-if="manualRequestId"
-                  :icon="appConfig.ui.icons.send"
-                  label="Åbn tilhørende ERP-request"
-                  color="neutral"
-                  variant="soft"
-                  size="xs"
-                  :to="{ path: '/fejlhaandtering/erp', query: { requestId: manualRequestId } }"
-                />
               </div>
             </template>
 
@@ -528,50 +538,37 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
               <div class="space-y-2">
                 <div class="text-sm text-muted">{{ (slotItem as any)._state?.description ?? slotItem.description }}</div>
 
-                <div v-for="delivery in (slotItem as any)._deliveries" :key="delivery.key" class="flex flex-wrap items-center gap-2">
-                  <UBadge :color="erpDeliveryState(delivery).color" variant="subtle">
-                    {{ erpDeliveryState(delivery).label }}
-                  </UBadge>
-                  <UBadge v-if="deliveryAttemptCount(delivery) > 1" color="neutral" variant="outline">
-                    {{ deliveryAttemptCount(delivery) }} forsøg
-                  </UBadge>
-                  <UButton
-                    v-if="erpDeliveryState(delivery).color === 'error'"
-                    :icon="appConfig.ui.icons.warning"
-                    label="Behandl aflevering"
-                    color="warning"
-                    variant="soft"
-                    size="xs"
-                    :to="{ path: '/fejlhaandtering/koe', query: { runId: run?.id } }"
-                  />
-                  <UButton
-                    v-if="delivery.requestId"
-                    :icon="appConfig.ui.icons.send"
-                    label="Åbn ERP-request"
-                    color="neutral"
-                    variant="soft"
-                    size="xs"
-                    :to="{ path: '/fejlhaandtering/erp', query: { requestId: delivery.requestId } }"
-                  />
-                </div>
-
                 <UButton
+                  v-if="erpDeliveries.length"
                   size="xs"
                   color="neutral"
                   variant="subtle"
-                  :label="openEventLogs.erp ? 'Skjul hændelseslog' : 'Vis hændelseslog'"
-                  :aria-expanded="openEventLogs.erp"
-                  aria-controls="run-event-log-erp"
-                  @click="toggleEventLog('erp')"
+                  :label="showErpDeliveries ? 'Skjul fremsendelser' : 'Vis fremsendelser'"
+                  :aria-expanded="showErpDeliveries"
+                  aria-controls="run-erp-deliveries"
+                  @click="toggleErpDeliveries"
                 />
-                <ul v-if="openEventLogs.erp && erpStageEvents.length" id="run-event-log-erp" class="list-disc pl-5 space-y-1">
-                  <li v-for="e in erpStageEvents" :key="e.id" class="text-sm">
-                    <span class="text-muted">{{ formatMaybeIso(e.createdAt) }}:</span>
-                    <span class="ml-1">{{ e.detail ?? e.errorString ?? e.eventType ?? 'Ukendt hændelse' }}</span>
-                  </li>
-                </ul>
-                <div v-else-if="openEventLogs.erp" class="text-sm text-muted">
-                  Ingen hændelser for ERP-fremsendelsen.
+                <div v-if="showErpDeliveries" id="run-erp-deliveries" class="space-y-2">
+                  <div v-for="delivery in erpDeliveries" :key="delivery.key" class="flex flex-wrap items-center gap-2">
+                    <UBadge :color="erpDeliveryState(delivery).color" variant="subtle">
+                      {{ erpDeliveryState(delivery).label }}
+                    </UBadge>
+                    <UBadge v-if="delivery.documentId" color="neutral" variant="outline" class="font-mono">
+                      {{ delivery.documentId }}
+                    </UBadge>
+                    <span v-if="delivery.rows.find(row => row.status === 'failed')?.lastError" class="text-sm text-error">
+                      {{ delivery.rows.find(row => row.status === 'failed')?.lastError }}
+                    </span>
+                    <UButton
+                      v-if="delivery.requestId"
+                      :icon="appConfig.ui.icons.send"
+                      label="Åbn ERP-request"
+                      color="neutral"
+                      variant="soft"
+                      size="xs"
+                      :to="{ path: '/fejlhaandtering/erp', query: { requestId: delivery.requestId } }"
+                    />
+                  </div>
                 </div>
               </div>
             </template>

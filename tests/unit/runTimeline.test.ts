@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { compareTimelineEvents, getErpTimelineDeliveryState, getErpTimelineStageState, groupErpTimelineDeliveries, latestTimelineStageEvent, RUN_TIMELINE_STAGE_ORDER } from '../../app/lib/presenters/runTimeline'
+import { compareTimelineEvents, getErpDocumentIdsByOrigin, getErpTimelineDeliveryState, getErpTimelineStageState, groupErpTimelineDeliveries, latestTimelineStageEvent, RUN_TIMELINE_STAGE_ORDER } from '../../app/lib/presenters/runTimeline'
 import { getRunStatusPresentation } from '../../app/lib/presenters/runStatus'
 import type { RunTimelineResponse } from '../../app/types/runTimeline'
 
@@ -28,8 +28,8 @@ describe('run timeline ERP grouping', () => {
 
   it('keeps corrected requests for the same document in one delivery group', () => {
     const requests: RunTimelineResponse['erpRequests'] = [
-      { requestId: 'request-original', sourceRequestId: null, documentId: 'document-1', responseId: null, responseStatusText: null, lineCount: 1 },
-      { requestId: 'request-retry', sourceRequestId: 'request-original', documentId: 'document-1', responseId: null, responseStatusText: null, lineCount: 1 },
+      { requestId: 'request-original', sourceRequestId: null, documentId: 'document-1', documentOrigin: 'batch', responseId: null, responseStatusText: null, lineCount: 1 },
+      { requestId: 'request-retry', sourceRequestId: 'request-original', documentId: 'document-1', documentOrigin: 'batch', responseId: null, responseStatusText: null, lineCount: 1 },
     ]
 
     const groups = groupErpTimelineDeliveries(requests, [], [])
@@ -42,8 +42,8 @@ describe('run timeline ERP grouping', () => {
 
   it('only includes a bilag count in the stage description when multiple deliveries exist', () => {
     const requests: RunTimelineResponse['erpRequests'] = [
-      { requestId: 'request-1', sourceRequestId: null, documentId: 'document-1', responseId: null, responseStatusText: null, lineCount: 1 },
-      { requestId: 'request-2', sourceRequestId: null, documentId: 'document-2', responseId: null, responseStatusText: null, lineCount: 1 },
+      { requestId: 'request-1', sourceRequestId: null, documentId: 'document-1', documentOrigin: 'batch', responseId: null, responseStatusText: null, lineCount: 1 },
+      { requestId: 'request-2', sourceRequestId: null, documentId: 'document-2', documentOrigin: 'batch', responseId: null, responseStatusText: null, lineCount: 1 },
     ]
     const groups = groupErpTimelineDeliveries(requests, [], [])
 
@@ -57,8 +57,8 @@ describe('run timeline ERP grouping', () => {
       { id: 'event-3', sequence: 3, stage: 'erp', eventType: 'response_rejected', status: 'rejected', detail: 'Forsinket svar på originalen.', requestId: 'request-1', outboxId: null, attempt: null, createdAt: '2026-10-06T10:06:00.000Z' },
     ]
     const requests: RunTimelineResponse['erpRequests'] = [
-      { requestId: 'request-1', sourceRequestId: null, documentId: 'document-1', responseId: null, responseStatusText: null, lineCount: 1 },
-      { requestId: 'request-2', sourceRequestId: 'request-1', documentId: 'document-1', responseId: null, responseStatusText: null, lineCount: 1 },
+      { requestId: 'request-1', sourceRequestId: null, documentId: 'document-1', documentOrigin: 'batch', responseId: null, responseStatusText: null, lineCount: 1 },
+      { requestId: 'request-2', sourceRequestId: 'request-1', documentId: 'document-1', documentOrigin: 'batch', responseId: null, responseStatusText: null, lineCount: 1 },
     ]
     const groups = groupErpTimelineDeliveries(requests, emptyTimeline.outbox, events)
 
@@ -84,5 +84,19 @@ describe('run status presentation', () => {
     expect(getRunStatusPresentation('indlæser')).toEqual({ color: 'warning', label: 'Indlæser' })
     expect(getRunStatusPresentation('udført')).toEqual({ color: 'success', label: 'Udført' })
     expect(getRunStatusPresentation('fejl')).toEqual({ color: 'error', label: 'Fejl' })
+  })
+})
+
+describe('ERP document origin presentation', () => {
+  it('lists unique manual bilagsnumre and excludes posting and unknown documents', () => {
+    const requests: RunTimelineResponse['erpRequests'] = [
+      { requestId: 'manual-1', sourceRequestId: null, documentId: 'manual-bilag', documentOrigin: 'manual', responseId: null, responseStatusText: null, lineCount: 2 },
+      { requestId: 'manual-resend', sourceRequestId: 'manual-1', documentId: 'manual-bilag', documentOrigin: 'manual', responseId: null, responseStatusText: null, lineCount: 2 },
+      { requestId: 'posting-1', sourceRequestId: null, documentId: 'posting-bilag', documentOrigin: 'batch', responseId: null, responseStatusText: null, lineCount: 1 },
+      { requestId: 'legacy-1', sourceRequestId: null, documentId: 'legacy-bilag', documentOrigin: null, responseId: null, responseStatusText: null, lineCount: 1 },
+    ]
+
+    expect(getErpDocumentIdsByOrigin(requests, 'manual')).toEqual(['manual-bilag'])
+    expect(getErpDocumentIdsByOrigin(requests, 'batch')).toEqual(['posting-bilag'])
   })
 })

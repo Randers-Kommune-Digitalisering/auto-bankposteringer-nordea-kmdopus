@@ -21,6 +21,16 @@ export type ErpTimelineState = {
   description: string
 }
 
+export function getErpDocumentIdsByOrigin(
+  requests: RunTimelineResponse['erpRequests'],
+  origin: Exclude<RunTimelineResponse['erpRequests'][number]['documentOrigin'], null>,
+): string[] {
+  return [...new Set(requests
+    .filter(request => request.documentOrigin === origin && request.documentId)
+    .map(request => request.documentId!.trim())
+    .filter(Boolean))]
+}
+
 export function compareTimelineEvents(a: TimelineStageEvent, b: TimelineStageEvent): number {
   return Date.parse(a.createdAt) - Date.parse(b.createdAt) || a.sequence - b.sequence
 }

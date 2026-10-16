@@ -28,6 +28,7 @@ export type TimelineErpRequest = {
   requestId: string
   sourceRequestId: string | null
   documentId: string | null
+  documentOrigin: 'batch' | 'manual' | null
   responseId: string | null
   responseStatusText: string | null
   lineCount: number

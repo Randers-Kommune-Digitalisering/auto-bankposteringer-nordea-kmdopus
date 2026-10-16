@@ -1,9 +1,9 @@
 import { createError, defineEventHandler } from 'h3'
-import { and, asc, eq, inArray, sql } from 'drizzle-orm'
+import { and, asc, eq, inArray, isNotNull } from 'drizzle-orm'
 import { z } from 'zod'
 import db from '~/lib/db'
 import { account } from '~/lib/db/schema/account'
-import { erpDocumentTransaction, erpRequest, erpRequestLine, erpResponse } from '~/lib/db/schema/erp'
+import { erpDocument, erpRequest, erpRequestLine, erpResponse } from '~/lib/db/schema/erp'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import { rule } from '~/lib/db/schema/rule'
 import { transactionCodeCatalog } from '~/lib/db/schema/transactionCodeCatalog'
@@ -70,10 +70,12 @@ export default defineEventHandler(async (event) => {
       requestId: erpRequest.id,
       runId: erpRequest.runId,
       documentId: erpRequest.documentId,
+      documentOrigin: erpDocument.origin,
       responseId: erpResponse.id,
       responseStatusText: erpResponse.statusText,
     })
     .from(erpRequest)
+    .leftJoin(erpDocument, eq(erpDocument.id, erpRequest.documentId))
     .leftJoin(erpResponse, eq(erpResponse.requestId, erpRequest.id))
     .where(eq(erpRequest.id, requestId))
     .limit(1)
@@ -82,11 +84,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'ERP request blev ikke fundet' })
   }
 
-  const rows = await db
+  const rows = requestRow.documentOrigin === 'batch'
+    ? await db
     .select({
       lineNo: erpRequestLine.lineNo,
-      lineTransactionId: erpRequestLine.transactionId,
-      transactionId: sql<string | null>`coalesce(${erpRequestLine.transactionId}, ${erpDocumentTransaction.transactionId})`,
+      transactionId: erpRequestLine.transactionId,
       accountingAmount: erpRequestLine.amount,
       accountingDebetOrCredit: erpRequestLine.debetOrCredit,
       accountingDimensions: erpRequestLine.dimensions,
@@ -124,18 +126,13 @@ export default defineEventHandler(async (event) => {
       ntryRef: transaction.ntryRef,
     })
     .from(erpRequestLine)
-    .leftJoin(
-      erpDocumentTransaction,
-      requestRow.documentId
-        ? eq(erpDocumentTransaction.documentId, requestRow.documentId)
-        : sql`false`,
-    )
-    .leftJoin(transaction, eq(transaction.id, sql`coalesce(${erpRequestLine.transactionId}, ${erpDocumentTransaction.transactionId})`))
+    .leftJoin(transaction, eq(transaction.id, erpRequestLine.transactionId))
     .leftJoin(account, eq(account.id, transaction.accountId))
     .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
     .leftJoin(rule, eq(rule.id, transactionProcessing.ruleApplied))
-    .where(eq(erpRequestLine.requestId, requestId))
+    .where(and(eq(erpRequestLine.requestId, requestId), isNotNull(erpRequestLine.transactionId)))
     .orderBy(asc(erpRequestLine.lineNo))
+    : []
 
   const providers = Array.from(new Set(
     rows
@@ -158,22 +155,9 @@ export default defineEventHandler(async (event) => {
   const catalogByProviderCodeKey: TransactionCodeCatalogMap = buildTransactionCodeCatalogMap(catalogRows)
 
   const groups = new Map<string, GroupAccumulator>()
-  const currencies = new Set<string>()
   const bookingDates = new Set<string>()
-  const isGroupedDocument = rows.some(row => !row.lineTransactionId && Boolean(row.transactionId))
-  const documentAccountingLines = Array.from(new Map(rows.map(row => [row.lineNo, {
-    lineNo: row.lineNo,
-    amount: row.accountingAmount == null ? null : String(row.accountingAmount),
-    debetOrCredit: row.accountingDebetOrCredit ?? null,
-    dimensions: normalizeDimensions(row.accountingDimensions),
-    postingText: row.accountingPostingText ?? null,
-    cpr: row.accountingCpr ?? null,
-  }])).values()).sort((a, b) => a.lineNo - b.lineNo)
-  let unmappedLineCount = 0
-
   for (const row of rows) {
     if (!row.transactionId) {
-      unmappedLineCount += 1
       continue
     }
 
@@ -222,7 +206,6 @@ export default defineEventHandler(async (event) => {
 
     const existing = groups.get(transactionId)
     if (!existing) {
-      if (row.currency) currencies.add(String(row.currency))
       if (bookingDate) bookingDates.add(bookingDate)
 
       groups.set(transactionId, {
@@ -240,7 +223,7 @@ export default defineEventHandler(async (event) => {
         postingText: canonicalFields.postingText,
         counterparty: canonicalFields.counterpart,
         reference: canonicalFields.preferredReference,
-        accountingLines: isGroupedDocument ? [] : [accountingLine],
+        accountingLines: [accountingLine],
         summary: buildTransactionSummaryView({
           id: transactionId,
           runId: String(requestRow.runId),
@@ -259,7 +242,7 @@ export default defineEventHandler(async (event) => {
     }
 
     existing.lineNos.add(row.lineNo)
-    if (!isGroupedDocument) existing.accountingLines.push(accountingLine)
+    existing.accountingLines.push(accountingLine)
   }
 
   const transactions: GroupedTransaction[] = Array.from(groups.values())
@@ -292,6 +275,7 @@ export default defineEventHandler(async (event) => {
   return {
     requestId: String(requestRow.requestId),
     runId: String(requestRow.runId),
+    documentOrigin: requestRow.documentOrigin ?? null,
     response: requestRow.responseId
       ? {
           id: String(requestRow.responseId),
@@ -300,12 +284,8 @@ export default defineEventHandler(async (event) => {
       : null,
     header: {
       bookingDate: bookingDates.size === 1 ? Array.from(bookingDates)[0] : null,
-      currencies: Array.from(currencies).sort(),
-      lineCount: new Set(rows.map(row => row.lineNo)).size,
       transactionCount: transactions.length,
-      unmappedLineCount,
       totalAmount: totalAmount.toFixed(2),
-      accountingLines: documentAccountingLines,
     },
     transactions,
   }

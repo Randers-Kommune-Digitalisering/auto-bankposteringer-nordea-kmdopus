@@ -7,6 +7,7 @@ CREATE TYPE "public"."booking_status" AS ENUM('åben', 'bogført', 'undtaget');-
 CREATE TYPE "public"."cpr_type" AS ENUM('ingen', 'statisk', 'dynamisk');--> statement-breakpoint
 CREATE TYPE "public"."credit_debit_indicator" AS ENUM('CRDT', 'DBIT');--> statement-breakpoint
 CREATE TYPE "public"."document_type" AS ENUM('postering', 'afstemning');--> statement-breakpoint
+CREATE TYPE "public"."erp_document_origin" AS ENUM('batch', 'manual');--> statement-breakpoint
 CREATE TYPE "public"."erp_supplier" AS ENUM('kmd', 'andet');--> statement-breakpoint
 CREATE TYPE "public"."job_status" AS ENUM('pending', 'in_progress', 'succeeded', 'failed');--> statement-breakpoint
 CREATE TYPE "public"."outbox_status" AS ENUM('pending', 'processing', 'sent', 'failed');--> statement-breakpoint
@@ -182,7 +183,8 @@ CREATE TABLE "document" (
 --> statement-breakpoint
 CREATE TABLE "erp_document" (
 	"id" text PRIMARY KEY NOT NULL,
-	"run_id" uuid NOT NULL
+	"run_id" uuid NOT NULL,
+	"origin" "erp_document_origin"
 );
 --> statement-breakpoint
 CREATE TABLE "erp_document_transaction" (

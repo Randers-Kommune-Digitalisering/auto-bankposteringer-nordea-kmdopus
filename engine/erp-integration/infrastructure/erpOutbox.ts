@@ -6,6 +6,7 @@ import { outbox } from '~/lib/db/schema/outbox'
 import { runTimelineEvent } from '~/lib/db/schema/runTimelineEvent'
 import { logger } from '~/lib/logger'
 import { erpAccountingDimensionDefinition } from '~/lib/db/schema/rule'
+import type { ErpDocumentOrigin } from '~/lib/db/schema/enums'
 import type { PostingLineInput } from '../../posting/domain/posting'
 import { getErpAdapter } from '../registry'
 
@@ -30,6 +31,7 @@ async function loadDimensionKeyByTarget(erpSupplier: string): Promise<Record<str
 
 export type SubmitErpPostingOutboxInput = {
   runId: string
+  origin: ErpDocumentOrigin
   postings: PostingLineInput[]
   bookingDate: Date | string
   erpSupplier?: string
@@ -65,7 +67,7 @@ export async function submitErpPostingViaOutbox(
   const outboxId = await db.transaction(async trx => {
     await trx
       .insert(erpDocument)
-      .values({ id: built.documentId, runId: input.runId })
+      .values({ id: built.documentId, runId: input.runId, origin: input.origin })
       .onConflictDoNothing()
 
     const sourceTransactionIds = [...new Set(input.sourceTransactionIds ?? [])]

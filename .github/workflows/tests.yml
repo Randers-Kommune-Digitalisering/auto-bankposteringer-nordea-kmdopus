@@ -70,6 +70,9 @@ jobs:
       - name: Apply DB schema (Drizzle)
         run: pnpm db:migrate
 
+      - name: Seed system data
+        run: pnpm db:seed:system
+
       - name: Unit tests
         run: pnpm test:unit
 

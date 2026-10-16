@@ -17,5 +17,5 @@ export async function submitPostingViaOutbox(input: {
   postings: PostingLineInput[]
   erpSupplier: ErpSupplier
 }) {
-  return submitErpPostingViaOutbox(input)
+  return submitErpPostingViaOutbox({ ...input, origin: 'batch' })
 }
