@@ -224,12 +224,21 @@ useHead(() => ({
       <template #default="{ collapsed }">
         <!-- Header -->
         <template v-if="!collapsed">
-          <div class="flex items-center justify-center w-full px-3 py-3 border-b border-default">
-            <span class="font-semibold text-xl truncate">
-              FOBI
-            </span>
+          <div class="flex items-center justify-center gap-3 w-full px-3 py-4 border-b border-default">
+            <img src="/favicon.svg" alt="" class="size-16 shrink-0">
+            <div class="min-w-0">
+              <div class="font-semibold text-xl truncate">
+                {{ APP_TITLE }}
+              </div>
+              <div class="text-xs leading-tight text-muted">
+                Fællesoffentlig Bankintegration
+              </div>
+            </div>
           </div>
         </template>
+        <div v-else class="flex items-center justify-center w-full px-3 py-4 border-b border-default">
+          <img src="/favicon.svg" alt="" class="size-6 shrink-0">
+        </div>
 
         <!-- Primær navigation -->
         <UNavigationMenu
@@ -288,4 +297,3 @@ useHead(() => ({
     <slot />
   </UDashboardGroup>
 </template>
-

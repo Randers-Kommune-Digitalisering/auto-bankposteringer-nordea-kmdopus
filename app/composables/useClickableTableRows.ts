@@ -2,8 +2,8 @@ import type { TableRow } from '@nuxt/ui'
 
 export const clickableTableRowsBodyClass = '[&>tr]:cursor-pointer [&>tr]:transition-colors [&>tr:hover]:bg-elevated/50'
 
-export function createTableRowSelectHandler<T>(onSelect: (row: T) => void) {
-  return (_event: Event, row: TableRow<T>) => onSelect(row.original)
+export function createTableRowSelectHandler<T>(onSelect: (row: T, tableRow: TableRow<T>) => void) {
+  return (_event: Event, row: TableRow<T>) => onSelect(row.original, row)
 }
 
 export function activateClickableTableRowOnKeydown(event: KeyboardEvent): void {
