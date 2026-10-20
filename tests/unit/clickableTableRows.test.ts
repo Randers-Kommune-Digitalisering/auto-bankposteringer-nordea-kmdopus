@@ -16,14 +16,15 @@ function createRowElement() {
 }
 
 describe('clickable table row interactions', () => {
-  it('forwards the original row from Nuxt UI select', () => {
+  it('forwards the original data and Nuxt UI row from select', () => {
     const account = { id: 'account-1' }
     const onSelect = vi.fn()
     const handler = createTableRowSelectHandler(onSelect)
+    const row = { original: account, getIsGrouped: () => false } as TableRow<Account>
 
-    handler(new Event('click'), { original: account } as TableRow<Account>)
+    handler(new Event('click'), row)
 
-    expect(onSelect).toHaveBeenCalledWith(account)
+    expect(onSelect).toHaveBeenCalledWith(account, row)
   })
 
   it.each(['Enter', ' '])('activates a focused row with key %j', (key) => {

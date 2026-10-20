@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+
+  <!-- ===================================================== -->
+  <!-- Definitioner                                          -->
+  <!-- ===================================================== -->
+  <defs>
+
+    <!-- Møntens guldgradient -->
+    <linearGradient
+      id="gold"
+      x1="0%"
+      y1="0%"
+      x2="100%"
+      y2="100%"
+    >
+      <stop offset="0%" stop-color="#F6DF9A" />
+      <stop offset="55%" stop-color="#DDB75F" />
+      <stop offset="100%" stop-color="#B8872B" />
+    </linearGradient>
+
+    <!--
+      Maske til tandhjulshullet.
+
+      Hvid = synlig mønt
+      Sort = hul i mønten
+
+      Tandhjulet tegnes derfor sort for at skære et hul
+      i den gyldne mønt.
+    -->
+    <mask id="gearHole">
+
+      <!-- Hele mønten er synlig som udgangspunkt -->
+      <rect
+        width="100%"
+        height="100%"
+        fill="white"
+      />
+
+      <!-- Tandhjulshul -->
+      <g transform="translate(500 500) scale(25) translate(-12 -12)">
+
+        <!-- Selve udskæringen -->
+        <path
+          fill="black"
+          d="m9.25 22l-.4-3.2q-.325-.125-.612-.3t-.563-.375L4.7 19.375l-2.75-4.75l2.575-1.95Q4.5 12.5 4.5 12.338v-.675q0-.163.025-.338L1.95 9.375l2.75-4.75l2.975 1.25q.275-.2.575-.375t.6-.3l.4-3.2h5.5l.4 3.2q.325.125.613.3t.562.375l2.975-1.25l2.75 4.75l-2.575 1.95q.025.175.025.338v.674q0 .163-.05.338l2.575 1.95l-2.75 4.75l-2.95-1.25q-.275.2-.575.375t-.6.3l-.4 3.2z"
+        />
+
+      </g>
+
+    </mask>
+
+  </defs>
+
+  <!-- ===================================================== -->
+  <!-- Hovedmønt                                             -->
+  <!-- ===================================================== -->
+
+  <circle
+    cx="500"
+    cy="500"
+    r="440"
+    fill="url(#gold)"
+    stroke="#9D6F20"
+    stroke-width="13"
+    mask="url(#gearHole)"
+  />
+
+  <!-- ===================================================== -->
+  <!-- Kant omkring tandhjulshul                             -->
+  <!-- ===================================================== -->
+
+  <g
+    transform="translate(500 500) scale(25) translate(-12 -12)"
+    fill="none"
+    stroke="#9D6F20"
+    stroke-width="0.5"
+    stroke-linejoin="round"
+  >
+    <path
+      d="m9.25 22l-.4-3.2q-.325-.125-.612-.3t-.563-.375L4.7 19.375l-2.75-4.75l2.575-1.95Q4.5 12.5 4.5 12.338v-.675q0-.163.025-.338L1.95 9.375l2.75-4.75l2.975 1.25q.275-.2.575-.375t.6-.3l.4-3.2h5.5l.4 3.2q.325.125.613.3t.562.375l2.975-1.25l2.75 4.75l-2.575 1.95q.025.175.025.338v.674q0 .163-.05.338l2.575 1.95l-2.75 4.75l-2.95-1.25q-.275.2-.575.375t-.6.3l-.4 3.2z"
+    />
+  </g>
+
+  <!-- ===================================================== -->
+  <!-- Yderring                                              -->
+  <!-- ===================================================== -->
+
+  <circle
+    cx="500"
+    cy="500"
+    r="390"
+    fill="none"
+    stroke="#A67828"
+    stroke-width="13"
+    mask="url(#gearHole)"
+  />
+
+</svg>

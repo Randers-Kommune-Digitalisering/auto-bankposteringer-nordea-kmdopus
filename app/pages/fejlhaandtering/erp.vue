@@ -1,10 +1,18 @@
 <script setup lang="ts">
+import { getGroupedRowModel } from '@tanstack/table-core'
 import type { TableColumn } from '@nuxt/ui'
 import { today, type DateValue } from '@internationalized/date'
 import FiltersRow from '~/components/filters/FiltersRow.vue'
 import { useDebouncedString } from '~/composables/useDebouncedString'
+import {
+  activateClickableTableRowOnKeydown,
+  clickableTableRowsBodyClass,
+  createTableRowSelectHandler,
+} from '~/composables/useClickableTableRows'
 import { fuzzyRankRows } from '~/lib/search/fuzzyRanking'
 import { redactSensitiveXml } from '~/lib/text/redactSensitiveXml'
+import type { ErpOverviewStatus } from '~/lib/presenters/erpRequestOverview'
+import type { ErpRequestOverviewItem, ErpRequestOverviewResponse } from '~/types/erpRequestOverview'
 import BookingSummaryCard from '~/components/open-items/BookingSummaryCard.vue'
 import type { ErpRequestReopenResponse, RunReopenResponse } from '~/types/erpReopen'
 import type { TransactionSummary } from '~/types/transactions'
@@ -12,24 +20,10 @@ import { DEFAULT_TIME_ZONE, formatSignedDkk } from '~/utils'
 
 const appConfig = useAppConfig()
 
-type FailedErpRequestListItem = {
-  requestId: string
-  runId: string
-  responseId: string | null
-  statusText: string | null
-  bookingDate: string | null
-}
-
-type FailedErpRequestsResponse = {
-  items: FailedErpRequestListItem[]
-  total: number
-  page: number
-  pageSize: number
-}
-
 type ErpRequestViewResponse = {
   requestId: string
   runId: string
+  documentId: string | null
   documentOrigin: 'batch' | 'manual' | null
   response: null | {
     id: string
@@ -40,6 +34,13 @@ type ErpRequestViewResponse = {
     transactionCount: number
     totalAmount: string
   }
+  manualPostings: Array<{
+    lineNo: number
+    amount: string | null
+    debetOrCredit: string | null
+    dimensions: Record<string, string>
+    postingText: string | null
+  }>
   transactions: Array<{
     transactionId: string
     bankAccountName: string | null
@@ -100,11 +101,11 @@ const startDefault = endDefault.subtract({ days: 29 })
 const dateRange = shallowRef<{ start: DateValue; end: DateValue }>({ start: startDefault, end: endDefault })
 const page = ref(1)
 const pageSize = ref(25)
-const pageSizeOptions = [10, 25, 50, 100].map((value) => ({ label: `${value} pr. side`, value }))
+const pageSizeOptions = [10, 25, 50, 100].map((value) => ({ label: `${value} ERP-forløb pr. side`, value }))
 const start = computed(() => dateRange.value.start.toString())
 const end = computed(() => dateRange.value.end.toString())
 
-const { data: failedList, pending: failedPending, refresh: refreshFailed } = await useFetch<FailedErpRequestsResponse>(
+const { data: failedList, pending: failedPending, refresh: refreshFailed } = await useFetch<ErpRequestOverviewResponse>(
   '/api/fejlhaandtering/erp-requests/failed',
   {
     key: 'control-erp-requests',
@@ -118,7 +119,9 @@ const { data: failedList, pending: failedPending, refresh: refreshFailed } = awa
 
 watch([start, end], () => { page.value = 1 })
 
-const failedTableKey = computed(() => (failedList.value?.items ?? []).map((i) => String(i.requestId)).join('|'))
+const failedTableKey = computed(() => (failedList.value?.items ?? [])
+  .map(item => `${item.runId}:${item.documentId ?? item.requestId}`)
+  .join('|'))
 
 const erpRequestId = ref('')
 const erpLoading = ref(false)
@@ -178,6 +181,8 @@ const selectedTransactionIdList = computed(() =>
     .filter((transactionId) => transactionId.trim().length > 0),
 )
 
+const hasTransactionDetails = computed(() => erpView.value?.documentOrigin === 'batch')
+
 const transactionTableKey = computed(() =>
   (erpView.value?.transactions ?? [])
     .map((row) => `${row.transactionId}:${row.lineNos.join(',')}`)
@@ -212,7 +217,7 @@ async function loadErpRequest() {
     selectedTransactionIds.value = {}
   } catch (error) {
     console.error('Kunne ikke hente ERP request view', error)
-    toast.add({ title: 'ERP request ikke fundet', color: 'error' })
+    toast.add({ title: 'ERP-postering ikke fundet', color: 'error' })
     erpView.value = null
     selectedTransactionIds.value = {}
   } finally {
@@ -243,7 +248,7 @@ async function resendErpRequest(payload?: string) {
       method: 'POST',
       ...(payload !== undefined ? { body: { payload } } : {}),
     })
-    toast.add({ title: 'Ny ERP-request oprettet', description: res.requestId })
+    toast.add({ title: 'ERP-postering genfremsendt' })
     rawFilesOpen.value = false
     isEditingRequestXml.value = false
     confirmEditedResend.value = false
@@ -268,18 +273,76 @@ function cancelRequestXmlEdit() {
   editedRequestXml.value = rawFiles.value?.requestPayload ?? ''
 }
 
-const failedColumns: TableColumn<FailedErpRequestListItem>[] = [
-  { accessorKey: 'requestId', header: 'Request', cell: ({ row }) => row.original.requestId },
-  { accessorKey: 'runId', header: 'Run', size: 240, cell: ({ row }) => row.original.runId },
-  { accessorKey: 'bookingDate', header: 'Bogføringsdato', cell: ({ row }) => row.original.bookingDate ?? '—' },
-  { accessorKey: 'statusText', header: 'Status', cell: ({ row }) => row.original.statusText ?? 'Intet svar' },
+const groupingOptions = {
+  groupedColumnMode: 'remove' as const,
+  getGroupedRowModel: getGroupedRowModel(),
+}
+
+function getOverviewRowStatus(row: {
+  getIsGrouped: () => boolean
+  original: ErpRequestOverviewItem
+}): ErpOverviewStatus {
+  const status = row.getIsGrouped() ? row.original.group : row.original
+  return {
+    label: status.statusLabel,
+    color: status.statusColor,
+    detail: status.statusDetail,
+  }
+}
+
+async function openOverviewRequest(requestId: string) {
+  erpRequestId.value = requestId
+  await loadErpRequest()
+}
+
+const onFailedRowSelect = createTableRowSelectHandler<ErpRequestOverviewItem>((item, row) => {
+  void openOverviewRequest(row.getIsGrouped() ? item.group.requestId : item.requestId)
+})
+
+const failedColumns: TableColumn<ErpRequestOverviewItem>[] = [
+  {
+    accessorKey: 'groupingKey',
+    header: 'Gruppering',
+  },
+  {
+    id: 'label',
+    header: 'Bilag',
+  },
+  {
+    accessorKey: 'bookingDate',
+    header: 'Bogføringsdato',
+    cell: ({ row }) => row.getIsGrouped()
+      ? row.original.group.bookingDate ?? '—'
+      : row.original.bookingDate ?? '—',
+  },
+  {
+    accessorKey: 'transactionCount',
+    header: 'Transaktioner',
+    cell: ({ row }) => row.getIsGrouped()
+      ? `${row.original.group.transactionCount} transaktioner`
+      : `${row.original.transactionCount} transaktioner`,
+  },
+  {
+    id: 'status',
+    header: 'Aktuel status',
+    cell: ({ row }) => {
+      const status = getOverviewRowStatus(row)
+      return h(UBadge, {
+        color: status.color,
+        variant: 'subtle',
+        title: status.detail ?? undefined,
+      }, () => status.label)
+    },
+  },
   {
     id: 'open',
     header: '',
     enableSorting: false,
     size: 110,
     cell: ({ row }) => {
-      const requestId = row.original.requestId
+      const requestId = row.getIsGrouped()
+        ? row.original.group.requestId
+        : row.original.requestId
       return h(
         UButton,
         {
@@ -287,14 +350,46 @@ const failedColumns: TableColumn<FailedErpRequestListItem>[] = [
           color: 'primary',
           variant: 'soft',
           disabled: failedPending.value || erpLoading.value,
-          onClick: async () => {
-            erpRequestId.value = requestId
-            await loadErpRequest()
+          onClick: async (event: MouseEvent) => {
+            event.stopPropagation()
+            await openOverviewRequest(requestId)
           },
         },
-        () => 'Åbn',
+        () => 'Åbn bogføring',
       )
     },
+  },
+]
+
+const manualPostingColumns: TableColumn<ErpRequestViewResponse['manualPostings'][number]>[] = [
+  {
+    accessorKey: 'lineNo',
+    header: 'Linje',
+  },
+  {
+    accessorKey: 'amount',
+    header: 'Beløb',
+    cell: ({ row }) => formatAccountingAmount(row.original),
+  },
+  {
+    accessorKey: 'debetOrCredit',
+    header: 'D/K',
+    cell: ({ row }) => formatAccountingDebitCredit(row.original.debetOrCredit),
+  },
+  {
+    id: 'dimensions',
+    header: 'Dimensioner',
+    cell: ({ row }) => {
+      const dimensions = Object.entries(row.original.dimensions)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join(', ')
+      return dimensions || '—'
+    },
+  },
+  {
+    accessorKey: 'postingText',
+    header: 'Posteringstekst',
+    cell: ({ row }) => row.original.postingText || '—',
   },
 ]
 
@@ -309,7 +404,7 @@ async function reopenSelectedTransactions() {
   }
 
   const ok = window.confirm(
-    `Vil du genåbne ${transactionIds.length} valgte transaktion(er) i dette ERP-request?\n\nGenåbning sker på transaktionsniveau og omfatter alle relaterede posteringer.`,
+    `Vil du genåbne ${transactionIds.length} valgte transaktion(er) i denne bogføring?\n\nGenåbning sker på transaktionsniveau og omfatter alle relaterede posteringer.`,
   )
   if (!ok) return
 
@@ -526,8 +621,8 @@ async function reopenBookedTransactions() {
             <div class="flex flex-col gap-1">
               <div class="font-medium">ERP-forløb</div>
               <div class="text-sm text-muted">
-                Her vises ERP-requests og responses. Brug bogføringsdato og posteringstekst til at finde et forløb, og åbn en request for at arbejde transaktionsbaseret med genåbning og genfremsendelse.
-                Hvis et svar mangler helt (outbox/request uden kvittering), så brug <NuxtLink to="/fejlhaandtering/koe" class="underline">Kørsler</NuxtLink>.
+                Bogføringer vises pr. batch med eventuelle manuelle bogføringer samlet under batchen. Tabellen viser den aktuelle status; genfremsendelser opretter ikke ekstra synlige rækker.
+                Hvis en afsendelse mangler svar, så brug <NuxtLink to="/fejlhaandtering/koe" class="underline">Kørsler</NuxtLink>.
               </div>
             </div>
           </template>
@@ -545,7 +640,7 @@ async function reopenBookedTransactions() {
             v-if="!failedList?.items?.length"
             :icon="appConfig.ui.icons.check"
             title="Ingen ERP-forløb fundet"
-            description="Der er ingen ERP-forløb, som matcher de valgte filtre."
+            description="Der er ingen batcher eller manuelle bogføringer, som matcher de valgte filtre."
             class="mt-4 border border-dashed border-default rounded-lg"
           />
 
@@ -554,17 +649,48 @@ async function reopenBookedTransactions() {
             :key="failedTableKey"
             :data="failedList.items"
             :columns="failedColumns"
+            :grouping="['groupingKey']"
+            :grouping-options="groupingOptions"
             :loading="failedPending"
             class="mt-4"
+            @select="onFailedRowSelect"
+            @keydown="activateClickableTableRowOnKeydown"
             :ui="{
+              root: 'min-w-full',
               base: 'border-separate border-spacing-0',
               thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
-              tbody: '[&>tr]:last:[&>td]:border-b-0',
+              tbody: `${clickableTableRowsBodyClass} [&>tr]:last:[&>td]:border-b-0`,
               th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
-              td: 'border-b border-default',
+              td: 'border-b border-default empty:p-0',
               separator: 'h-0'
             }"
-          />
+          >
+            <template #label-cell="{ row }">
+              <div v-if="row.getIsGrouped()" class="flex items-center gap-2">
+                <UButton
+                  v-if="row.original.group.childCount > 0"
+                  size="xs"
+                  color="neutral"
+                  variant="ghost"
+                  :icon="row.getIsExpanded() ? 'i-lucide-chevron-down' : 'i-lucide-chevron-right'"
+                  :aria-label="row.getIsExpanded() ? 'Skjul manuelle bogføringer' : 'Vis manuelle bogføringer'"
+                  @click.stop="row.toggleExpanded()"
+                />
+                <div class="min-w-0">
+                  <div class="font-medium">{{ row.original.group.documentLabel }}</div>
+                  <div v-if="row.original.group.documentId" class="text-xs text-muted truncate">
+                    {{ row.original.group.documentId }}
+                  </div>
+                </div>
+              </div>
+              <div v-else class="min-w-0">
+                <div class="font-medium">{{ row.original.documentLabel }}</div>
+                <div v-if="row.original.documentId" class="text-xs text-muted truncate">
+                  {{ row.original.documentId }}
+                </div>
+              </div>
+            </template>
+          </UTable>
 
           <div v-if="failedList?.items?.length" class="flex items-center justify-center border-t border-default pt-4 mt-4">
             <UPagination
@@ -579,15 +705,21 @@ async function reopenBookedTransactions() {
           <template #header>
             <div class="flex flex-col gap-1">
               <div class="font-medium">
-                {{ !erpView ? 'ERP-request' : erpView.documentOrigin === 'manual' ? 'Manuel ERP-request' : erpView.documentOrigin === 'batch' ? 'Transaktioner i ERP-request' : 'ERP-request med ukendt bilagsoprindelse' }}
+                {{ !erpView
+                  ? 'ERP-postering'
+                  : erpView.documentOrigin === 'manual'
+                    ? 'Manuel bogføring'
+                    : erpView.documentOrigin === 'batch'
+                      ? 'Batchpostering'
+                      : 'ERP-postering' }}
               </div>
               <div class="text-sm text-muted">
                 {{ !erpView
-                  ? 'Åbn en request fra listen ovenfor for at se detaljer og handlinger.'
+                  ? 'Vælg en bogføring ovenfor for at se transaktioner og handlinger.'
                   : erpView.documentOrigin === 'manual'
-                    ? 'Manuelle ERP-bilag viser ikke en run-transaktionsliste.'
+                    ? 'Samleposteringerne nedenfor er de linjer, der faktisk blev sendt til ERP.'
                     : erpView.documentOrigin === 'batch'
-                      ? 'Transaktionerne nedenfor kommer fra linjerne i det valgte ERP-request.'
+                      ? 'Transaktionerne nedenfor indgår i batchposteringen.'
                       : 'Transaktionslisten skjules, fordi bilagets oprindelse ikke er kendt.' }}
               </div>
             </div>
@@ -596,32 +728,32 @@ async function reopenBookedTransactions() {
           <UEmpty
             v-if="!erpView"
             :icon="appConfig.ui.icons.doc"
-            title="Vælg en ERP request"
-            description="Åbn en request fra listen ovenfor for at se transaktioner og handlinger."
+            title="Vælg en bogføring"
+            description="Vælg en batch eller manuel bogføring fra listen ovenfor."
             class="border border-dashed border-default rounded-lg"
           />
 
           <div v-else class="space-y-4">
             <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-              <div class="text-sm">
-                <span class="text-muted">Run: </span>
-                <span class="font-mono">{{ erpView.runId }}</span>
+              <div v-if="erpView.documentId" class="text-sm">
+                <span class="text-muted">Bilagsnummer: </span>
+                <span class="font-mono">{{ erpView.documentId }}</span>
               </div>
-              <div v-if="erpView.documentOrigin === 'batch'" class="text-sm">
+              <div v-if="hasTransactionDetails" class="text-sm">
                 <span class="text-muted">Bogføringsdato: </span>
                 <span class="font-mono">{{ erpView.header.bookingDate ?? 'Flere datoer' }}</span>
               </div>
-              <div v-if="erpView.documentOrigin === 'batch'" class="text-sm">
+              <div v-if="hasTransactionDetails" class="text-sm">
                 <span class="text-muted">Transaktioner: </span>
                 <span class="font-mono">{{ erpView.header.transactionCount }}</span>
               </div>
-              <div v-if="erpView.documentOrigin === 'batch'" class="text-sm">
+              <div v-if="hasTransactionDetails" class="text-sm">
                 <span class="text-muted">Netto-beløb: </span>
                 <span class="font-mono">{{ formatSignedDkk(toSignedAmount(erpView.header.totalAmount, null)) }}</span>
               </div>
-              <div v-if="erpView.response" class="text-sm">
-                <span class="text-muted">Response-ID: </span>
-                <span class="font-mono">{{ erpView.response.id }}</span>
+              <div v-if="erpView.documentOrigin === 'manual'" class="text-sm">
+                <span class="text-muted">Posteringer sendt til ERP: </span>
+                <span class="font-mono">{{ erpView.manualPostings.length }}</span>
               </div>
               <div v-if="erpView.response?.statusText" class="text-sm">
                 <span class="text-muted">Status: </span>
@@ -629,7 +761,7 @@ async function reopenBookedTransactions() {
               </div>
             </div>
 
-            <div v-if="erpView.documentOrigin === 'batch'" class="flex flex-wrap items-end justify-between gap-3">
+            <div v-if="hasTransactionDetails" class="flex flex-wrap items-end justify-between gap-3">
               <UFormField label="Posteringstekst" class="min-w-64 max-w-sm">
                 <UInput
                   v-model="transactionSearchInput"
@@ -644,7 +776,7 @@ async function reopenBookedTransactions() {
             </div>
 
             <UEmpty
-              v-if="erpView.documentOrigin === 'batch' && !filteredTransactions.length"
+              v-if="hasTransactionDetails && !filteredTransactions.length"
               :icon="appConfig.ui.icons.search"
               title="Ingen transaktioner fundet"
               description="Ingen af de indlæste transaktioner matcher posteringsteksten."
@@ -652,7 +784,7 @@ async function reopenBookedTransactions() {
             />
 
             <UTable
-              v-if="erpView.documentOrigin === 'batch' && filteredTransactions.length"
+              v-if="hasTransactionDetails && filteredTransactions.length"
               :key="transactionTableKey"
               :data="filteredTransactions"
               :columns="transactionColumns"
@@ -667,6 +799,30 @@ async function reopenBookedTransactions() {
               }"
             />
 
+            <UEmpty
+              v-if="erpView.documentOrigin === 'manual' && !erpView.manualPostings.length"
+              :icon="appConfig.ui.icons.doc"
+              title="Ingen posteringer fundet"
+              description="Der er ingen gemte ERP-posteringer på denne manuelle bogføring."
+              class="border border-dashed border-default rounded-lg"
+            />
+
+            <UTable
+              v-if="erpView.documentOrigin === 'manual' && erpView.manualPostings.length"
+              :key="`manual-postings:${erpView.requestId}`"
+              :data="erpView.manualPostings"
+              :columns="manualPostingColumns"
+              :loading="erpLoading"
+              :ui="{
+                base: 'border-separate border-spacing-0',
+                thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
+                tbody: '[&>tr]:last:[&>td]:border-b-0',
+                th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
+                td: 'border-b border-default empty:p-0',
+                separator: 'h-0'
+              }"
+            />
+
             <div class="flex flex-wrap gap-2">
               <UButton
                 :icon="appConfig.ui.icons.doc"
@@ -677,7 +833,7 @@ async function reopenBookedTransactions() {
                 @click="openRawFiles"
               />
               <UButton
-                v-if="erpView.documentOrigin === 'batch'"
+                v-if="hasTransactionDetails"
                 :icon="appConfig.ui.icons.undo"
                 label="Genåbn valgte transaktioner"
                 color="warning"
@@ -688,7 +844,7 @@ async function reopenBookedTransactions() {
               />
               <UButton
                 :icon="appConfig.ui.icons.send"
-                label="Genfremsend ERP-request"
+                label="Genfremsend ERP-postering"
                 color="primary"
                 variant="soft"
                 :loading="erpLoading"
@@ -775,7 +931,7 @@ async function reopenBookedTransactions() {
           <div v-if="rawFiles" class="space-y-5">
             <section class="space-y-2">
               <div class="flex flex-wrap items-center justify-between gap-2">
-                <h3 class="font-medium">Udgående request</h3>
+                <h3 class="font-medium">Udgående ERP-fil</h3>
                 <UButton
                   v-if="canEditRequestXml && !isEditingRequestXml"
                   :icon="appConfig.ui.icons.edit"
@@ -794,7 +950,7 @@ async function reopenBookedTransactions() {
                   color="warning"
                   variant="subtle"
                   title="XML’en kan indeholde CPR- og personoplysninger"
-                  description="Rettelsen gælder kun den nye ERP-request. Meld fejl i applikationens generering tilbage, så grundårsagen kan blive rettet."
+                  description="Rettelsen gælder genfremsendelsen. Meld fejl i applikationens generering tilbage, så grundårsagen kan blive rettet."
                 />
                 <UTextarea
                   v-model="editedRequestXml"
@@ -805,7 +961,7 @@ async function reopenBookedTransactions() {
                 />
                 <div v-if="confirmEditedResend" class="space-y-3 rounded-md border border-warning bg-warning/5 p-3">
                   <p class="text-sm">
-                    En ny ERP-request oprettes, og den oprindelige bevares. Kontrollér, at bilaget ikke allerede er bogført i ERP.
+                    Genfremsendelsen vises som samme bogføring med opdateret status. Kontrollér, at bilaget ikke allerede er bogført i ERP.
                   </p>
                   <div class="flex flex-wrap justify-end gap-2">
                     <UButton label="Tilbage" color="neutral" variant="soft" @click="confirmEditedResend = false" />
@@ -832,18 +988,18 @@ async function reopenBookedTransactions() {
                 </div>
               </div>
               <pre v-else-if="rawFiles.requestPayload" class="max-h-[32rem] overflow-auto rounded-md border border-default bg-elevated/30 p-3 text-xs whitespace-pre-wrap break-all">{{ redactSensitiveXml(rawFiles.requestPayload) }}</pre>
-              <p v-else class="text-sm text-muted">Ingen request-payload er gemt.</p>
+              <p v-else class="text-sm text-muted">Ingen udgående ERP-fil er gemt.</p>
             </section>
 
             <section class="space-y-2">
               <div class="flex flex-wrap items-center justify-between gap-2">
-                <h3 class="font-medium">Indgående response</h3>
+                <h3 class="font-medium">Svar fra ERP</h3>
                 <UBadge v-if="rawFiles.response?.statusText" color="neutral" variant="subtle">
                   {{ rawFiles.response.statusText }}
                 </UBadge>
               </div>
               <pre v-if="rawFiles.response?.payload" class="max-h-[32rem] overflow-auto rounded-md border border-default bg-elevated/30 p-3 text-xs whitespace-pre-wrap break-all">{{ redactSensitiveXml(rawFiles.response.payload) }}</pre>
-              <p v-else class="text-sm text-muted">Der er endnu ikke modtaget et response.</p>
+              <p v-else class="text-sm text-muted">Der er endnu ikke modtaget et svar fra ERP.</p>
             </section>
           </div>
         </template>

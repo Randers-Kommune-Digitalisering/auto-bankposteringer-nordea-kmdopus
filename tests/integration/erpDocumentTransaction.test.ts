@@ -16,6 +16,7 @@ describe('grouped ERP document transaction membership (integration)', () => {
     const { erpDocument, erpDocumentTransaction, erpRequest, erpRequestLine } = await import('../../app/lib/db/schema/erp')
     const { run } = await import('../../app/lib/db/schema/run')
     const { transaction, transactionProcessing } = await import('../../app/lib/db/schema/transaction')
+    const { loadErpRequestView } = await import('../../server/api/fejlhaandtering/erp-requests/[requestId]/view.get')
 
     let runId: string | undefined
     const accountId = `erp-group-${randomUUID()}`
@@ -57,8 +58,24 @@ describe('grouped ERP document transaction membership (integration)', () => {
       await db.insert(erpDocument).values({ id: documentId, runId: runId!, origin: 'manual' })
       await db.insert(erpRequest).values({ id: requestId, runId: runId!, documentId, payload: '<Request/>' })
       await db.insert(erpRequestLine).values([
-        { requestId, lineNo: 1, transactionId: null, amount: '20.00', debetOrCredit: 'Debet' },
-        { requestId, lineNo: 2, transactionId: null, amount: '20.00', debetOrCredit: 'Kredit' },
+        {
+          requestId,
+          lineNo: 1,
+          transactionId: null,
+          amount: '20.00',
+          debetOrCredit: 'Debet',
+          dimensions: { account: '123' },
+          postingText: 'Gruppe debet',
+        },
+        {
+          requestId,
+          lineNo: 2,
+          transactionId: null,
+          amount: '20.00',
+          debetOrCredit: 'Kredit',
+          dimensions: { account: '456' },
+          postingText: 'Gruppe kredit',
+        },
       ])
       await db.insert(erpDocumentTransaction).values(transactionIds.map(transactionId => ({ documentId, transactionId })))
 
@@ -92,6 +109,26 @@ describe('grouped ERP document transaction membership (integration)', () => {
       expect(new Set(memberships.map(row => row.transactionId))).toEqual(new Set(transactionIds))
       expect(lines).toHaveLength(2)
       expect(lines.every(line => line.transactionId === null)).toBe(true)
+
+      const manualView = await loadErpRequestView(requestId)
+      expect(manualView.transactions).toEqual([])
+      expect(manualView.header.transactionCount).toBe(0)
+      expect(manualView.manualPostings).toEqual([
+        {
+          lineNo: 1,
+          amount: '20.00',
+          debetOrCredit: 'Debet',
+          dimensions: { account: '123' },
+          postingText: 'Gruppe debet',
+        },
+        {
+          lineNo: 2,
+          amount: '20.00',
+          debetOrCredit: 'Kredit',
+          dimensions: { account: '456' },
+          postingText: 'Gruppe kredit',
+        },
+      ])
 
       const [selectedTransactionId] = transactionIds
       const reopened = await db.update(transactionProcessing)

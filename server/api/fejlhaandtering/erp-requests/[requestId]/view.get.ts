@@ -3,7 +3,7 @@ import { and, asc, eq, inArray, isNotNull } from 'drizzle-orm'
 import { z } from 'zod'
 import db from '~/lib/db'
 import { account } from '~/lib/db/schema/account'
-import { erpDocument, erpRequest, erpRequestLine, erpResponse } from '~/lib/db/schema/erp'
+import { erpDocument, erpDocumentTransaction, erpRequest, erpRequestLine, erpResponse, erpResponseDocument } from '~/lib/db/schema/erp'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import { rule } from '~/lib/db/schema/rule'
 import { transactionCodeCatalog } from '~/lib/db/schema/transactionCodeCatalog'
@@ -64,7 +64,10 @@ export default defineEventHandler(async (event) => {
   await requireErrorHandlingReadAccess(event)
 
   const requestId = z.string().min(1).parse(event.context.params?.requestId)
+  return loadErpRequestView(requestId)
+})
 
+export async function loadErpRequestView(requestId: string) {
   const [requestRow] = await db
     .select({
       requestId: erpRequest.id,
@@ -73,10 +76,15 @@ export default defineEventHandler(async (event) => {
       documentOrigin: erpDocument.origin,
       responseId: erpResponse.id,
       responseStatusText: erpResponse.statusText,
+      responseDocumentStatus: erpResponseDocument.status,
     })
     .from(erpRequest)
     .leftJoin(erpDocument, eq(erpDocument.id, erpRequest.documentId))
     .leftJoin(erpResponse, eq(erpResponse.requestId, erpRequest.id))
+    .leftJoin(erpResponseDocument, and(
+      eq(erpResponseDocument.responseId, erpResponse.id),
+      eq(erpResponseDocument.documentId, erpRequest.documentId),
+    ))
     .where(eq(erpRequest.id, requestId))
     .limit(1)
 
@@ -84,11 +92,45 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'ERP request blev ikke fundet' })
   }
 
-  const rows = requestRow.documentOrigin === 'batch'
+  const manualPostings = requestRow.documentOrigin === 'manual'
+    ? await db
+        .select({
+          lineNo: erpRequestLine.lineNo,
+          amount: erpRequestLine.amount,
+          debetOrCredit: erpRequestLine.debetOrCredit,
+          dimensions: erpRequestLine.dimensions,
+          postingText: erpRequestLine.postingText,
+        })
+        .from(erpRequestLine)
+        .where(eq(erpRequestLine.requestId, requestId))
+        .orderBy(asc(erpRequestLine.lineNo))
+    : []
+  const requestLineTransactions = requestRow.documentOrigin === 'manual'
+    ? []
+    : await db
+        .select({ transactionId: erpRequestLine.transactionId })
+        .from(erpRequestLine)
+        .where(and(eq(erpRequestLine.requestId, requestId), isNotNull(erpRequestLine.transactionId)))
+  const documentTransactions = requestRow.documentOrigin !== 'manual' && requestRow.documentId
+    ? await db
+        .select({ transactionId: erpDocumentTransaction.transactionId })
+        .from(erpDocumentTransaction)
+        .where(eq(erpDocumentTransaction.documentId, requestRow.documentId))
+    : []
+  const transactionIds = Array.from(new Set([
+    ...requestLineTransactions
+      .map(row => row.transactionId)
+      .filter((transactionId): transactionId is string => transactionId !== null),
+    ...documentTransactions
+      .map(row => row.transactionId)
+      .filter((transactionId): transactionId is string => transactionId !== null),
+  ]))
+
+  const rows = transactionIds.length
     ? await db
     .select({
       lineNo: erpRequestLine.lineNo,
-      transactionId: erpRequestLine.transactionId,
+      transactionId: transaction.id,
       accountingAmount: erpRequestLine.amount,
       accountingDebetOrCredit: erpRequestLine.debetOrCredit,
       accountingDimensions: erpRequestLine.dimensions,
@@ -125,13 +167,16 @@ export default defineEventHandler(async (event) => {
       ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,
       ntryRef: transaction.ntryRef,
     })
-    .from(erpRequestLine)
-    .leftJoin(transaction, eq(transaction.id, erpRequestLine.transactionId))
+    .from(transaction)
+    .leftJoin(erpRequestLine, and(
+      eq(erpRequestLine.requestId, requestId),
+      eq(erpRequestLine.transactionId, transaction.id),
+    ))
     .leftJoin(account, eq(account.id, transaction.accountId))
     .leftJoin(transactionProcessing, eq(transactionProcessing.transactionId, transaction.id))
     .leftJoin(rule, eq(rule.id, transactionProcessing.ruleApplied))
-    .where(and(eq(erpRequestLine.requestId, requestId), isNotNull(erpRequestLine.transactionId)))
-    .orderBy(asc(erpRequestLine.lineNo))
+    .where(inArray(transaction.id, transactionIds))
+    .orderBy(asc(transaction.bookingDate), asc(erpRequestLine.lineNo))
     : []
 
   const providers = Array.from(new Set(
@@ -172,14 +217,16 @@ export default defineEventHandler(async (event) => {
       bkTxCdSubFamily: row.bkTxCdSubFamily,
       catalogByProviderCodeKey,
     })
-    const accountingLine: AccountingLine = {
-      lineNo: row.lineNo,
-      amount: row.accountingAmount == null ? null : String(row.accountingAmount),
-      debetOrCredit: row.accountingDebetOrCredit ?? null,
-      dimensions: normalizeDimensions(row.accountingDimensions),
-      postingText: row.accountingPostingText ?? null,
-      cpr: row.accountingCpr ?? null,
-    }
+    const accountingLine: AccountingLine | null = row.lineNo == null
+      ? null
+      : {
+          lineNo: row.lineNo,
+          amount: row.accountingAmount == null ? null : String(row.accountingAmount),
+          debetOrCredit: row.accountingDebetOrCredit ?? null,
+          dimensions: normalizeDimensions(row.accountingDimensions),
+          postingText: row.accountingPostingText ?? null,
+          cpr: row.accountingCpr ?? null,
+        }
     const canonicalFields = projectCanonicalTransactionFields({
       id: transactionId,
       runId: String(requestRow.runId),
@@ -211,7 +258,7 @@ export default defineEventHandler(async (event) => {
       groups.set(transactionId, {
         transactionId,
         bankAccountName: row.bankAccountName ?? null,
-        lineNos: new Set([row.lineNo]),
+        lineNos: new Set(row.lineNo === null ? [] : [row.lineNo]),
         amount: String(row.amount),
         currency: row.currency,
         bookingDate,
@@ -223,7 +270,7 @@ export default defineEventHandler(async (event) => {
         postingText: canonicalFields.postingText,
         counterparty: canonicalFields.counterpart,
         reference: canonicalFields.preferredReference,
-        accountingLines: [accountingLine],
+        accountingLines: accountingLine ? [accountingLine] : [],
         summary: buildTransactionSummaryView({
           id: transactionId,
           runId: String(requestRow.runId),
@@ -241,8 +288,10 @@ export default defineEventHandler(async (event) => {
       continue
     }
 
-    existing.lineNos.add(row.lineNo)
-    existing.accountingLines.push(accountingLine)
+    if (row.lineNo !== null) {
+      existing.lineNos.add(row.lineNo)
+      if (accountingLine) existing.accountingLines.push(accountingLine)
+    }
   }
 
   const transactions: GroupedTransaction[] = Array.from(groups.values())
@@ -280,6 +329,7 @@ export default defineEventHandler(async (event) => {
       ? {
           id: String(requestRow.responseId),
           statusText: requestRow.responseStatusText ?? null,
+          documentStatus: requestRow.responseDocumentStatus ?? null,
         }
       : null,
     header: {
@@ -287,9 +337,16 @@ export default defineEventHandler(async (event) => {
       transactionCount: transactions.length,
       totalAmount: totalAmount.toFixed(2),
     },
+    manualPostings: manualPostings.map(line => ({
+      lineNo: line.lineNo,
+      amount: line.amount == null ? null : String(line.amount),
+      debetOrCredit: line.debetOrCredit,
+      dimensions: normalizeDimensions(line.dimensions),
+      postingText: line.postingText,
+    })),
     transactions,
   }
-})
+}
 
 function parseAmount(value: unknown): number {
   const normalized = typeof value === 'number' ? String(value) : String(value ?? '').trim()
