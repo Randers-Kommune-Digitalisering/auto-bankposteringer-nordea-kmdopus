@@ -72,7 +72,7 @@ export default defineNuxtConfig({
 
   oidc: {
     defaultProvider: 'keycloak',
-    provideDefaultSecrets: true,
+    provideDefaultSecrets: false,
     devMode: {
       enabled: process.env.OIDC_DEV_MODE === 'true',
       generateAccessToken: true,

@@ -11,7 +11,7 @@ import {
 } from '~/composables/useClickableTableRows'
 import { fuzzyRankRows } from '~/lib/search/fuzzyRanking'
 import { redactSensitiveXml } from '~/lib/text/redactSensitiveXml'
-import type { ErpOverviewStatus } from '~/lib/presenters/erpRequestOverview'
+import { isErpRequestAccepted, type ErpOverviewStatus } from '~/lib/presenters/erpRequestOverview'
 import type { ErpRequestOverviewItem, ErpRequestOverviewResponse } from '~/types/erpRequestOverview'
 import BookingSummaryCard from '~/components/open-items/BookingSummaryCard.vue'
 import type { ErpRequestReopenResponse, RunReopenResponse } from '~/types/erpReopen'
@@ -28,6 +28,7 @@ type ErpRequestViewResponse = {
   response: null | {
     id: string
     statusText: string | null
+    documentStatus: string | null
   }
   header: {
     bookingDate: string | null
@@ -182,6 +183,15 @@ const selectedTransactionIdList = computed(() =>
 )
 
 const hasTransactionDetails = computed(() => erpView.value?.documentOrigin === 'batch')
+const currentRequestAccepted = computed(() => {
+  const response = erpView.value?.response
+  return response
+    ? isErpRequestAccepted({
+        documentStatus: response.documentStatus,
+        responseStatusText: response.statusText,
+      })
+    : false
+})
 
 const transactionTableKey = computed(() =>
   (erpView.value?.transactions ?? [])
@@ -239,7 +249,7 @@ watch(
 )
 
 async function resendErpRequest(payload?: string) {
-  if (!erpView.value) return
+  if (!erpView.value || currentRequestAccepted.value) return
 
   erpLoading.value = true
   try {
@@ -332,31 +342,6 @@ const failedColumns: TableColumn<ErpRequestOverviewItem>[] = [
         variant: 'subtle',
         title: status.detail ?? undefined,
       }, () => status.label)
-    },
-  },
-  {
-    id: 'open',
-    header: '',
-    enableSorting: false,
-    size: 110,
-    cell: ({ row }) => {
-      const requestId = row.getIsGrouped()
-        ? row.original.group.requestId
-        : row.original.requestId
-      return h(
-        UButton,
-        {
-          size: 'sm',
-          color: 'primary',
-          variant: 'soft',
-          disabled: failedPending.value || erpLoading.value,
-          onClick: async (event: MouseEvent) => {
-            event.stopPropagation()
-            await openOverviewRequest(requestId)
-          },
-        },
-        () => 'Åbn bogføring',
-      )
     },
   },
 ]
@@ -848,6 +833,7 @@ async function reopenBookedTransactions() {
                 color="primary"
                 variant="soft"
                 :loading="erpLoading"
+                :disabled="currentRequestAccepted"
                 @click="() => resendErpRequest()"
               />
               <div v-if="selectedTransactionIdList.length" class="text-sm text-muted">

@@ -4,14 +4,17 @@ import path from 'node:path'
 import crypto from 'node:crypto'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
+import 'dotenv/config'
 
 import {
   buildNordeaCertApplicationRequestXml,
   computeNordeaCertApplicationHmacBase64,
+  NordeaCertificateServiceError,
   nordeaCertificateServiceGetCertificate,
   parseNordeaCertificateServiceResponseXml,
 } from '../../../engine/banking-ingestion/infrastructure/nordea/certificateService'
 import { sha256FingerprintHexFromCertPem } from '../../../engine/banking-ingestion/infrastructure/bxd/xmlDsig'
+import { loadNordeaEnvSecrets } from '../../../engine/banking-ingestion/infrastructure/nordea/nordeaEnvSecrets'
 
 type Args = Record<string, string | boolean>
 
@@ -98,6 +101,9 @@ Nordea CertificateService: create/download certificate (WSDL aligned)
 Usage:
   pnpm tsx scripts/banking/nordea/certificate-service-create-certificate.ts \
     [--activation-code <10-digit SMS code> | --activation-code-file <path>] \
+    [--renewal-signing-env | \
+     --renewal-signing-private-key-file <current-private-key.pem> \
+     --renewal-signing-certificate-file <current-certificate.pem>] \
     --customer-id <CustomerId from agreement> \
     --sender-id <WS SenderId> \
     --software-id <software id> \
@@ -122,7 +128,8 @@ Recover mode (no live call):
 Notes:
   - Uses getCertificatein + RequestHeader + base64 ApplicationRequest as required by CertificateService WSDL/XSD.
   - The CSR subject is: /C=<country>/serialNumber=<signerId>/CN=<company>.
-  - HMAC is HMAC-SHA1 over CSR DER bytes using activation code as ASCII key.
+  - Initial issuance authenticates the CSR with HMAC-SHA1 using the activation code.
+  - Renewal authenticates the CertApplicationRequest with an enveloped XMLDSig signature from the current valid certificate; this replaces HMAC and needs no activation code.
   - Secure default: secrets are written to files in out-dir, not printed to terminal.
 `)
 }
@@ -157,6 +164,81 @@ function readActivationCode(args: Args): string {
   throw new Error(
     'Missing activation code: provide --activation-code, --activation-code-file, or NORDEA_CERT_ACTIVATION_CODE',
   )
+}
+
+export function validateRenewalSigningMaterial(input: {
+  privateKeyPem: string
+  certificatePem: string
+  now?: Date
+}): void {
+  const certificate = new crypto.X509Certificate(input.certificatePem)
+  const privateKey = crypto.createPrivateKey(input.privateKeyPem)
+
+  if (privateKey.asymmetricKeyType !== 'rsa' || certificate.publicKey.asymmetricKeyType !== 'rsa') {
+    throw new Error('Renewal signing certificate and key must use RSA.')
+  }
+  if (!certificate.checkPrivateKey(privateKey)) {
+    throw new Error('Renewal signing private key does not match the supplied certificate.')
+  }
+
+  const now = input.now ?? new Date()
+  if (now < new Date(certificate.validFrom) || now > new Date(certificate.validTo)) {
+    throw new Error('Renewal signing certificate is not currently valid.')
+  }
+}
+
+export function renewalSigningMaterialFromEnv(env: NodeJS.ProcessEnv = process.env): {
+  privateKeyPem: string
+  certificatePem: string
+} | null {
+  const secretKeys = [
+    'NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM',
+    'NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM_B64',
+    'NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM',
+    'NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM_B64',
+  ]
+  if (!secretKeys.some(key => env[key]?.trim())) return null
+
+  const secrets = loadNordeaEnvSecrets(env)
+  const material = {
+    privateKeyPem: secrets.NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM,
+    certificatePem: secrets.NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM,
+  }
+  validateRenewalSigningMaterial(material)
+  return material
+}
+
+function readRenewalSigningMaterial(args: Args): { privateKeyPem: string; certificatePem: string } | null {
+  const privateKeyPath = optionalString(args, 'renewal-signing-private-key-file')
+  const certificatePath = optionalString(args, 'renewal-signing-certificate-file')
+  const fromEnvironment = args['renewal-signing-env'] === true
+
+  if (fromEnvironment && (privateKeyPath || certificatePath)) {
+    throw new Error('Use --renewal-signing-env or the two renewal signing file flags, not both.')
+  }
+  if (!fromEnvironment && !privateKeyPath && !certificatePath) return null
+  if (!fromEnvironment && (!privateKeyPath || !certificatePath)) {
+    throw new Error('Renewal mode requires both --renewal-signing-private-key-file and --renewal-signing-certificate-file.')
+  }
+  if (
+    optionalString(args, 'activation-code')
+    || optionalString(args, 'activation-code-file')
+    || process.env.NORDEA_CERT_ACTIVATION_CODE?.trim()
+  ) {
+    throw new Error('Renewal signing and activation-code authentication are mutually exclusive.')
+  }
+
+  if (fromEnvironment) {
+    const material = renewalSigningMaterialFromEnv()
+    if (!material) throw new Error('Renewal environment variables are missing.')
+    return material
+  }
+
+  const privateKeyPem = fs.readFileSync(path.resolve(process.cwd(), privateKeyPath), 'utf8')
+  const certificatePem = fs.readFileSync(path.resolve(process.cwd(), certificatePath), 'utf8')
+  validateRenewalSigningMaterial({ privateKeyPem, certificatePem })
+
+  return { privateKeyPem, certificatePem }
 }
 
 function ensureSecureDir(dirPath: string): void {
@@ -287,7 +369,8 @@ export async function runNordeaCertificateServiceCreateCertificate(rawArgv: stri
     return
   }
 
-  const activationCode = readActivationCode(args)
+  const renewalSigningMaterial = readRenewalSigningMaterial(args)
+  const activationCode = renewalSigningMaterial ? null : readActivationCode(args)
   const customerId = requireString(args, 'customer-id')
   const senderId =
     optionalString(args, 'sender-id') ??
@@ -342,10 +425,19 @@ export async function runNordeaCertificateServiceCreateCertificate(rawArgv: stri
     const csrDer = fs.readFileSync(csrDerPath)
     const csrDerBase64 = base64NoWrap(csrDer)
 
-    const hmacBase64 = computeNordeaCertApplicationHmacBase64({
-      csrDer,
-      activationCode,
-    })
+    const authentication = renewalSigningMaterial
+      ? {
+          type: 'signature' as const,
+          privateKeyPem: renewalSigningMaterial.privateKeyPem,
+          certificatePem: renewalSigningMaterial.certificatePem,
+        }
+      : {
+          type: 'hmac' as const,
+          hmacBase64: computeNordeaCertApplicationHmacBase64({
+            csrDer,
+            activationCode: activationCode!,
+          }),
+        }
 
     const certApplicationRequestXml = buildNordeaCertApplicationRequestXml({
       customerId,
@@ -354,10 +446,12 @@ export async function runNordeaCertificateServiceCreateCertificate(rawArgv: stri
       command: 'GetCertificate',
       service: 'service',
       csrDerBase64,
-      hmacBase64,
+      authentication,
       timestamp: new Date(),
     })
 
+    const certApplicationRequestPath = path.join(outDir, 'cert-application-request.xml')
+    writeSensitiveFile(certApplicationRequestPath, certApplicationRequestXml)
     if (dryRun) {
       console.log('\n=== Nordea CertificateService dry-run ===\n')
       console.log(`Endpoint: ${endpointUrl}`)
@@ -367,11 +461,13 @@ export async function runNordeaCertificateServiceCreateCertificate(rawArgv: stri
       console.log(`CustomerId: ${customerId}`)
       console.log(`SoftwareId: ${softwareId}`)
       console.log(`CSR subject: ${subject}`)
-      if (optionalString(args, 'activation-code-file')) {
+      console.log(`Authentication: ${renewalSigningMaterial ? 'renewal XMLDSig' : 'activation-code HMAC'}`)
+      console.log(`CertApplicationRequest: ${certApplicationRequestPath}`)
+      if (!renewalSigningMaterial && optionalString(args, 'activation-code-file')) {
         console.log('Activation code source: file')
-      } else if (optionalString(args, 'activation-code')) {
+      } else if (!renewalSigningMaterial && optionalString(args, 'activation-code')) {
         console.log('Activation code source: cli argument')
-      } else if (process.env.NORDEA_CERT_ACTIVATION_CODE?.trim()) {
+      } else if (!renewalSigningMaterial && process.env.NORDEA_CERT_ACTIVATION_CODE?.trim()) {
         console.log('Activation code source: env var')
       }
       if (printSecrets) {
@@ -384,21 +480,34 @@ export async function runNordeaCertificateServiceCreateCertificate(rawArgv: stri
       return
     }
 
-    const response = await nordeaCertificateServiceGetCertificate(
-      {
-        endpointUrl,
-        soapAction,
-      },
-      {
-        senderId,
-        requestId,
-        certApplicationRequestXml,
-      },
-    )
+    let response
+    try {
+      response = await nordeaCertificateServiceGetCertificate(
+        {
+          endpointUrl,
+          soapAction,
+        },
+        {
+          senderId,
+          requestId,
+          certApplicationRequestXml,
+        },
+      )
+    } catch (error) {
+      if (error instanceof NordeaCertificateServiceError) {
+        const responsePath = path.join(outDir, 'certificate-service-response.xml')
+        writeSensitiveFile(responsePath, error.responseXml)
+        console.error('\nNordea CertificateService SOAP response (also saved to output directory):\n')
+        console.error(error.responseXml)
+      }
+      throw error
+    }
 
     console.log('\n=== Nordea CertificateService response ===\n')
     console.log(`ResponseCode: ${response.responseCode ?? '(missing)'}`)
     console.log(`ResponseText: ${response.responseText ?? '(missing)'}`)
+    console.log('\nNordea CertificateService SOAP response:\n')
+    console.log(response.responseXml)
 
     writeSensitiveFile(path.join(outDir, 'certificate-service-response.xml'), response.responseXml)
     if (response.certApplicationResponseXml) {

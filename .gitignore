@@ -31,3 +31,4 @@ logs
 
 # Local secret artifacts (cert enrollment outputs, response XML, key material)
 .secrets/
+kubeseal*
