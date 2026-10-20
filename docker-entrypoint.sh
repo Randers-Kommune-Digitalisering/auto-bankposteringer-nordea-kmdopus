@@ -131,10 +131,44 @@ seed_system_if_enabled() {
   fi
 }
 
+validate_production_oidc_secrets() {
+  if [ "$NODE_ENV" != "production" ] || [ "${APP_ROLE:-web}" != "web" ]; then
+    return 0
+  fi
+
+  node <<'NODE'
+const required = [
+  'NUXT_OIDC_SESSION_SECRET',
+  'NUXT_OIDC_TOKEN_KEY',
+  'NUXT_OIDC_AUTH_SESSION_SECRET',
+];
+const invalid = required.filter((name) => !process.env[name]);
+
+for (const name of ['NUXT_OIDC_SESSION_SECRET', 'NUXT_OIDC_AUTH_SESSION_SECRET']) {
+  if (process.env[name] && process.env[name].length < 48) invalid.push(name);
+}
+
+const tokenKey = process.env.NUXT_OIDC_TOKEN_KEY;
+if (tokenKey) {
+  const decoded = Buffer.from(tokenKey, 'base64');
+  if (decoded.length !== 32 || decoded.toString('base64') !== tokenKey) {
+    invalid.push('NUXT_OIDC_TOKEN_KEY');
+  }
+}
+
+if (invalid.length) {
+  process.stderr.write(`Missing or invalid OIDC secrets: ${[...new Set(invalid)].join(', ')}\n`);
+  process.exit(1);
+}
+NODE
+}
+
 if [ "$NODE_ENV" = "production" ] && [ "${DB_RESET_ON_START:-0}" = "1" ]; then
   echo "DB_RESET_ON_START is not allowed in production." >&2
   exit 1
 fi
+
+validate_production_oidc_secrets
 
 wait_for_db
 

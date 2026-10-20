@@ -13,6 +13,10 @@ setIfMissing('POSTGRES_DB', 'mydb')
 // Locally you can run `docker compose up -d db` and use localhost.
 setIfMissing('DATABASE_URL', 'postgres://root:pass@localhost:5432/mydb')
 
+process.env.NUXT_OIDC_SESSION_SECRET = 'test-only-session-secret-0123456789abcdef0123456789abcdef'
+process.env.NUXT_OIDC_TOKEN_KEY = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
+process.env.NUXT_OIDC_AUTH_SESSION_SECRET = 'test-only-auth-session-secret-0123456789abcdef0123456789'
+
 setIfMissing('ERP_SUPPLIER', 'kmd')
 setIfMissing('ERP_BOOKING_PERIOD_CLOSE_DAY', '7')
 setIfMissing('ERP_ERROR_ACCOUNT', '95999999')

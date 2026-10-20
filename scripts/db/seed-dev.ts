@@ -2,10 +2,11 @@ import 'dotenv/config'
 import { and, eq, isNull, sql } from 'drizzle-orm'
 import crypto from 'node:crypto'
 import dns from 'node:dns/promises'
+import databaseEnv from '../../app/lib/env/env-database'
 
 async function normalizeDatabaseUrlForLocalScripts() {
-  const raw = process.env.DATABASE_URL
-  if (!raw) return
+  const raw = databaseEnv.DATABASE_URL
+  process.env.DATABASE_URL = raw
   try {
     const url = new URL(raw)
     // In docker-compose, other containers can reach Postgres via hostname `db`.

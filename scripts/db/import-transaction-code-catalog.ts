@@ -4,10 +4,11 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import Papa from 'papaparse'
 import { z } from 'zod'
+import databaseEnv from '../../app/lib/env/env-database'
 
 async function normalizeDatabaseUrlForLocalScripts() {
-  const raw = process.env.DATABASE_URL
-  if (!raw) return
+  const raw = databaseEnv.DATABASE_URL
+  process.env.DATABASE_URL = raw
   try {
     const url = new URL(raw)
     if (url.hostname === 'db') {

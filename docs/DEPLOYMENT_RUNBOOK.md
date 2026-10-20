@@ -63,9 +63,15 @@ For a first deployment to a new, empty PostgreSQL database, the baseline can ini
 
 ## Configuration and secrets
 
-The application uses PostgreSQL. At minimum, runtime and init workloads need a scoped `DATABASE_URL`. Application configuration also requires ERP values such as `ERP_SUPPLIER`, `ERP_BOOKING_PERIOD_CLOSE_DAY`, `ERP_ERROR_ACCOUNT`, `ERP_PROD_ENVIRONMENT`, `ERP_MUNICIPALITY_CODE`, `ERP_COMP_CODE`, `ERP_INTEGRATION_ID`, and `ERP_INTEGRATION_FILENAME_MASK`.
+The application uses PostgreSQL. Configure a scoped `DATABASE_URL` for runtime and init workloads. If it is omitted, the application constructs it from `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB`; `POSTGRES_HOST` defaults to `db` and `POSTGRES_PORT` defaults to `5432`. For deployments, prefer an explicit `DATABASE_URL` so the database endpoint is unambiguous. Application configuration also requires ERP values such as `ERP_SUPPLIER`, `ERP_BOOKING_PERIOD_CLOSE_DAY`, `ERP_ERROR_ACCOUNT`, `ERP_PROD_ENVIRONMENT`, `ERP_MUNICIPALITY_CODE`, `ERP_COMP_CODE`, `ERP_INTEGRATION_ID`, and `ERP_INTEGRATION_FILENAME_MASK`.
 
 Provide OIDC, bank, and SFTP secrets only to workloads that need them. The worker needs credentials for the enabled bank adapters and ERP transport; web and scheduler should receive only their required configuration. Store secrets in the approved secret manager/Kubernetes Secret integration, never in image build arguments or image layers.
+
+If staging is intentionally connected to Nordea's production endpoint, treat its database and logs as containing real financial data. Use a dedicated, least-privilege worker secret, restrict staging access, confirm encryption at rest and in transit, and set a short explicit `DATA_RETENTION_DAYS`. Keep the KMD ERP environment pointed at staging. The staging deployment values enable the daily bank-ingestion schedule against Nordea production and set retention to 7 days; confirm the live-data flow is approved and verify retention cleanup is running before enabling it.
+
+Generate the three Nuxt OIDC secrets locally with `pnpm auth:oidc:generate-secrets`. By default, the command prints `KEY=value` assignments to an interactive terminal and refuses to print from CI or another non-interactive stream. An optional `--output-file .secrets/oidc/<name>.env` writes a new file with mode `0600` and refuses to overwrite an existing file. Transfer the values directly into the approved secret manager; do not commit the output or include it in build logs. `NUXT_OIDC_SESSION_SECRET` and `NUXT_OIDC_AUTH_SESSION_SECRET` must each be at least 48 characters; `NUXT_OIDC_TOKEN_KEY` must decode from Base64 to exactly 32 bytes. Use the same values across web replicas within one environment, and different values between environments.
+
+`nuxt-oidc-auth` fallback-secret generation is disabled. Production web startup fails before accepting traffic if any OIDC secret is absent or malformed. Worker, scheduler, and `db-init` do not need these secrets.
 
 ## Ingress, egress, and probes
 

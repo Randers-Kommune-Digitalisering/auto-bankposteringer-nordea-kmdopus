@@ -1,3 +1,4 @@
+  console.log('\nRenewal without SMS activation code: pass --renewal-signing-env to use the current PEM or Base64 PEM values from the environment.')
 import { runDanskePkiCreateCustomerCerts } from '../danske/pkiws-create-customer-certs'
 import { runNordeaCertificateServiceCreateCertificate } from '../nordea/certificate-service-create-certificate'
 
@@ -40,6 +41,7 @@ function printCommonHelp() {
 
 function printNordeaHelp() {
   console.log(`\nNordea certificate enrollment (best effort)\n\nCurrent status:\n  - Nordea CorporateFileService SOAP client is implemented for CAMT.053 file download.\n  - Runtime env loading expects existing key/certificate material.\n  - CertificateService flow is implemented from public documentation and may require endpoint/SOAPAction adjustments if bank setup differs.\n\nRelevant docs provided by you:\n  - https://www.nordea.com/en/doc/corporate-access-file-transfer-certificate-management-v3.pdf\n  - https://www.nordea.com/en/doc/web-services-service-description-for-ca-v1.pdf\n\nNordea provider inputs:\n  [--activation-code <temporary code from Nordea> | --activation-code-file <path>]\n  --customer-id <agreement customer id>\n  --software-id <software id>\n  --subject-serial-number <SignerID>\n  --subject-country-code <DK|FI|NO|SE>\n  --subject-cn \"Randers Kommune\"\n  [--endpoint-url https://filetransfer.nordea.com/services/CertificateService/sha2]\n  [--soap-action \"\"]\n  [--out-dir .secrets/nordea-certificate/current]\n  [--print-secrets]\n  [--dry-run]\n\nFlow:\n  1) Generate keypair/CSR locally with openssl.\n  2) Build CertApplicationRequest with CSR + HMAC from activation code.\n  3) Submit SOAP request to CertificateService.\n  4) Save key/cert/response files in out-dir and apply env vars.\n`)
+    console.log(`\nCertificate renewal before expiry:\n  --renewal-signing-private-key-file <current-private-key.pem>\n  --renewal-signing-certificate-file <current-certificate.pem>\n  These flags replace activation-code HMAC with XMLDSig signed by the current valid certificate.`)
 }
 
 async function main() {

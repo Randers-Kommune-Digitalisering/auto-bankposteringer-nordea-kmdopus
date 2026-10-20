@@ -88,6 +88,25 @@ pnpm banking:pki:create-customer-certs -- \
   --out-dir .secrets/nordea-certificate/current
 ```
 
+Renew a certificate before its current certificate expires, using the current private key and certificate to XML-sign the new request. This mode replaces HMAC and does not use an activation code:
+
+```bash
+renewal_dir=".secrets/nordea-certificate/renewal-$(date -u +%Y%m%dT%H%M%SZ)"
+
+pnpm banking:pki:create-customer-certs -- \
+  --provider nordea \
+  --renewal-signing-env \
+  --customer-id <CUSTOMER_ID> \
+  --sender-id <WS_SENDER_ID> \
+  --software-id <SOFTWARE_ID> \
+  --subject-serial-number <SIGNER_ID> \
+  --subject-country-code DK \
+  --subject-cn "Randers Kommune" \
+  --out-dir "$renewal_dir"
+```
+
+`--renewal-signing-env` reads `NORDEA_SECURE_ENVELOPE_PRIVATE_KEY_PEM_B64` and `NORDEA_SECURE_ENVELOPE_CERTIFICATE_PEM_B64` (or their direct PEM variants) from exported environment variables or the repository `.env`. The current signing certificate must still be valid and match its private key. The script generates a new keypair for the renewed certificate; keep the current certificate active until Nordea accepts the request and the new values are stored in the approved secret vault. Do not reuse an existing output directory. The two `--renewal-signing-*-file` flags remain available when PEM files exist.
+
 Optional if terminal output is required:
 
 ```bash
@@ -96,6 +115,7 @@ Optional if terminal output is required:
 
 Artifacts written by Nordea flow (live call):
 
+- `cert-application-request.xml` (signed request; also written in dry-run mode with restrictive file permissions)
 - `private-key.pem`
 - `request.csr.pem`
 - `request.csr.der`
@@ -104,6 +124,8 @@ Artifacts written by Nordea flow (live call):
 - `certificate.pem`
 - `certificate.sha256`
 - `env.suggested`
+
+The CertificateService SOAP response is printed to the invoking terminal on success and on SOAP faults. It is also saved as `certificate-service-response.xml` in the output directory, including when the service returns a SOAP fault. Run the command only in a trusted terminal; do not enable `--print-secrets` unless the full private key and suggested environment values are intentionally needed on screen.
 
 Recover mode (no live call):
 

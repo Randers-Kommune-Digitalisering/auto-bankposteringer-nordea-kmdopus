@@ -565,7 +565,7 @@ This enables two worker deployments:
 ### Required env (high level)
 
 - `APP_ROLE`: `web` | `scheduler` | `worker`
-- `DATABASE_URL`: Postgres connection string (scoped per namespace/customer)
+- `DATABASE_URL`: Postgres connection string (scoped per namespace/customer). If omitted, it is built from `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB`; `POSTGRES_HOST` defaults to `db`, and `POSTGRES_PORT` defaults to `5432`.
 - Integration secrets (scoped per namespace/customer): bank, SFTP, ERP, OIDC
 
 ### Recommended deployment flow (per rollout)

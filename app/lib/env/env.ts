@@ -1,6 +1,7 @@
 // Checks whether all required environment variables are set before starting the application
 import { z } from "zod";
 import tryParseEnv from "./try-parse-env";
+import databaseEnv from "./env-database";
 import { erpSupplierValues } from "../db/schema/enums";
 
 const requiredFilenameMaskPlaceholders = [
@@ -40,7 +41,9 @@ const baseCommonSchema = z.object({
   POSTGRES_USER: z.string().optional(),
   POSTGRES_PASSWORD: z.string().optional(),
   POSTGRES_DB: z.string().optional(),
-  DATABASE_URL: z.string(),
+  POSTGRES_HOST: z.string().optional(),
+  POSTGRES_PORT: z.string().optional(),
+  DATABASE_URL: z.string().min(1),
 
   ERP_SUPPLIER: z.enum(erpSupplierValues),
   ERP_BOOKING_PERIOD_CLOSE_DAY: z.coerce.number().int().min(1).max(31),
@@ -137,6 +140,7 @@ const EnvSchema = z.union([webSchema, workerSchema, schedulerSchema]);
 export type EnvSchema = z.infer<typeof EnvSchema>;
 
 const normalizedEnv = withNormalizedEnv({ ...process.env, APP_ROLE: process.env.APP_ROLE ?? "web" })
+normalizedEnv.DATABASE_URL = databaseEnv.DATABASE_URL
 tryParseEnv(EnvSchema, normalizedEnv);
 const parsedEnv = EnvSchema.parse(normalizedEnv);
 validateErpIntegrationFilenameMask(parsedEnv.ERP_INTEGRATION_FILENAME_MASK)
