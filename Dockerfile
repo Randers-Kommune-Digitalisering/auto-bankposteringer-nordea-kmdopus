@@ -111,5 +111,6 @@ COPY patches ./patches
 COPY --from=role-deps /app/node_modules ./node_modules
 
 EXPOSE 3000
+USER node
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["node", ".output/server/index.mjs"]
