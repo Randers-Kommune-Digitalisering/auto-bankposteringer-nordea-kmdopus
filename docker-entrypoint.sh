@@ -87,6 +87,40 @@ configure_oidc_origin() {
 
 configure_oidc_origin
 
+configure_keycloak_runtime() {
+  if [ "${APP_ROLE:-web}" != "web" ] || [ "${OIDC_DEV_MODE:-false}" = "true" ]; then
+    return 0
+  fi
+
+  require_web_oidc_env() {
+    if [ -z "$2" ]; then
+      echo "Missing web OIDC configuration: $1" >&2
+      exit 1
+    fi
+  }
+
+  require_web_oidc_env KEYCLOAK_URL "${KEYCLOAK_URL:-}"
+  require_web_oidc_env KEYCLOAK_REALM "${KEYCLOAK_REALM:-}"
+  require_web_oidc_env KEYCLOAK_CLIENT_ID "${KEYCLOAK_CLIENT_ID:-}"
+  require_web_oidc_env KEYCLOAK_CLIENT_SECRET "${KEYCLOAK_CLIENT_SECRET:-}"
+  require_web_oidc_env OIDC_APP_ORIGIN "${OIDC_APP_ORIGIN:-}"
+
+  origin="${OIDC_APP_ORIGIN%/}"
+  realm_url="${KEYCLOAK_URL%/}/realms/$KEYCLOAK_REALM"
+  export NUXT_OIDC_PROVIDERS_KEYCLOAK_CLIENT_ID="$KEYCLOAK_CLIENT_ID"
+  export NUXT_OIDC_PROVIDERS_KEYCLOAK_CLIENT_SECRET="$KEYCLOAK_CLIENT_SECRET"
+  export NUXT_OIDC_PROVIDERS_KEYCLOAK_AUTHORIZATION_URL="$realm_url/protocol/openid-connect/auth"
+  export NUXT_OIDC_PROVIDERS_KEYCLOAK_TOKEN_URL="$realm_url/protocol/openid-connect/token"
+  export NUXT_OIDC_PROVIDERS_KEYCLOAK_USER_INFO_URL="$realm_url/protocol/openid-connect/userinfo"
+  export NUXT_OIDC_PROVIDERS_KEYCLOAK_LOGOUT_URL="$realm_url/protocol/openid-connect/logout"
+  export NUXT_OIDC_PROVIDERS_KEYCLOAK_REDIRECT_URI="$origin/auth/keycloak/callback"
+  export NUXT_OIDC_PROVIDERS_KEYCLOAK_LOGOUT_REDIRECT_URI="$origin"
+  export NUXT_PUBLIC_OIDC_CLIENT_ID="$KEYCLOAK_CLIENT_ID"
+  export NUXT_PUBLIC_APP_ORIGIN="$origin"
+}
+
+configure_keycloak_runtime
+
 sync_dependencies_if_needed() {
   if [ "$NODE_ENV" = "production" ]; then
     return 0
