@@ -109,6 +109,7 @@ configure_keycloak_runtime() {
   realm_url="${KEYCLOAK_URL%/}/realms/$KEYCLOAK_REALM"
   export NUXT_OIDC_PROVIDERS_KEYCLOAK_CLIENT_ID="$KEYCLOAK_CLIENT_ID"
   export NUXT_OIDC_PROVIDERS_KEYCLOAK_CLIENT_SECRET="$KEYCLOAK_CLIENT_SECRET"
+  export NUXT_OIDC_PROVIDERS_KEYCLOAK_BASE_URL="$realm_url"
   export NUXT_OIDC_PROVIDERS_KEYCLOAK_AUTHORIZATION_URL="$realm_url/protocol/openid-connect/auth"
   export NUXT_OIDC_PROVIDERS_KEYCLOAK_TOKEN_URL="$realm_url/protocol/openid-connect/token"
   export NUXT_OIDC_PROVIDERS_KEYCLOAK_USER_INFO_URL="$realm_url/protocol/openid-connect/userinfo"
