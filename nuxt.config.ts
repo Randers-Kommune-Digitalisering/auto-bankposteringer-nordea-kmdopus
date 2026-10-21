@@ -85,6 +85,7 @@ export default defineNuxtConfig({
         keycloak: {
           clientId: '',
           clientSecret: '',
+          baseUrl: '',
           authorizationUrl: '',
           tokenUrl: '',
           userInfoUrl: '',

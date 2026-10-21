@@ -130,7 +130,7 @@ This repo is a stateless financial integration engine:
 ## Authentication and Authorization (v1)
 
 - Authentication/session lifecycle is handled by `nuxt-oidc-auth`.
-- The web entrypoint derives `NUXT_OIDC_PROVIDERS_KEYCLOAK_*` and `NUXT_PUBLIC_*` runtime configuration from the pod's `KEYCLOAK_URL`, `KEYCLOAK_REALM`, client credentials, and `OIDC_APP_ORIGIN` before starting Nitro. Provider keys are declared with empty defaults at build time; images contain no Keycloak credentials or environment-specific callback URLs. The client secret is sourced from a web-only Kubernetes Secret. Worker and scheduler roles skip this mapping.
+- The web entrypoint derives `NUXT_OIDC_PROVIDERS_KEYCLOAK_*` and `NUXT_PUBLIC_*` runtime configuration from the pod's `KEYCLOAK_URL`, `KEYCLOAK_REALM`, client credentials, and `OIDC_APP_ORIGIN` before starting Nitro. The provider base URL points to the Keycloak realm so callback discovery resolves under that realm. Provider keys are declared with empty defaults at build time; images contain no Keycloak credentials or environment-specific callback URLs. The client secret is sourced from a web-only Kubernetes Secret. Worker and scheduler roles skip this mapping.
 - UI visibility is role-gated in:
   - `app/composables/useAuthz.ts`
   - `app/layouts/default.vue`
