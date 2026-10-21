@@ -1,5 +1,6 @@
 import "./app/lib/env/env"
 import { createRequire } from 'node:module'
+import { copyFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -56,6 +57,13 @@ export default defineNuxtConfig({
   nitro: {
     experimental: {
       tasks: true,
+    },
+    hooks: {
+      compiled: async (nitro) => {
+        const wasmPath = join(nitro.options.output.serverDir, 'node_modules/re2-wasm/build/wasm/re2.wasm')
+        await mkdir(dirname(wasmPath), { recursive: true })
+        await copyFile(requireFromConfig.resolve('re2-wasm/build/wasm/re2.wasm'), wasmPath)
+      },
     },
     scheduledTasks: {
       '0 3 * * *': 'bank-transactions-batch',
