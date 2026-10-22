@@ -14,6 +14,7 @@ This repo is a stateless financial integration engine:
 
 ## Temporal model for runs
 
+- Manual run requests are persisted as pending `banking.ingest` jobs; only the worker claims the job and performs bank I/O. The web request validates inputs, creates the run/job records atomically, and returns without invoking bank adapters.
 - `run.bookingDate` is a business date (`YYYY-MM-DD`) used for deterministic day scoping, not an event timestamp.
 - Event timestamps related to runs are stored/transmitted as UTC datetimes (`ISO-8601` with `Z`) on server-side contracts.
 - Local time conversion is a UI-only concern; APIs must not localize timestamps.

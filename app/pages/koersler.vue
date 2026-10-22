@@ -51,15 +51,13 @@ async function startRunForDate() {
   startingRun.value = true
 
   try {
-    const res = await $fetch<{ success: boolean; runId: string; insertedCount: number }>(
+    const res = await $fetch<{ success: boolean; runId: string; jobId: string; status: 'pending' }>(
       '/api/runs/start',
       { method: 'POST', body: { bookingDate: String(startRunDate.value) } },
     )
     toast.add({
-      title: 'Kørsel startet',
-      description: res.insertedCount
-        ? `Run: ${res.runId} (${res.insertedCount} transaktioner)`
-        : `Run: ${res.runId} (ingen transaktioner — mangler allowlist eller ingen bevægelser på datoen)`,
+      title: 'Kørsel lagt i kø',
+      description: `Run: ${res.runId}. Worker behandler jobbet, når den har hentet det fra køen.`,
     })
     await handleRefresh()
   } catch (error) {
