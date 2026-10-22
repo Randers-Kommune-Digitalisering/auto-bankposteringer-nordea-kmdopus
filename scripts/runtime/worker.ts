@@ -1,6 +1,7 @@
 import env from '../../app/lib/env/env'
 import { logger } from '../../app/lib/logger'
 import { runWorker } from '../../engine/queue/handlers/worker'
+import { startWorkerStatusServer } from './worker-status-server'
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -50,6 +51,7 @@ async function main() {
     maxOutbox: maxOutboxOverride ?? workerOptionsBase.maxOutbox,
   }
 
+  const statusServer = await startWorkerStatusServer()
   const stop = () => {
     stopped = true
   }
@@ -59,19 +61,25 @@ async function main() {
 
   log.info('worker.runtime.started', { profile, idleSleepMs, errorSleepMs, jobCooldownMs, workerOptions })
 
-  while (!stopped) {
-    try {
-      const result = await runWorker(workerOptions)
-      const didWork = Boolean(result.jobs || result.outbox)
-      if (!didWork) {
-        await sleep(idleSleepMs)
-      } else if (jobCooldownMs > 0) {
-        await sleep(jobCooldownMs)
+  try {
+    while (!stopped) {
+      try {
+        const result = await runWorker(workerOptions)
+        const didWork = Boolean(result.jobs || result.outbox)
+        if (!didWork) {
+          await sleep(idleSleepMs)
+        } else if (jobCooldownMs > 0) {
+          await sleep(jobCooldownMs)
+        }
+      } catch (err) {
+        log.error('worker.runtime.iterationFailed', { err })
+        await sleep(errorSleepMs)
       }
-    } catch (err) {
-      log.error('worker.runtime.iterationFailed', { err })
-      await sleep(errorSleepMs)
     }
+  } finally {
+    await new Promise<void>((resolve, reject) => {
+      statusServer.close((error) => error ? reject(error) : resolve())
+    })
   }
 
   log.info('worker.runtime.stopped')

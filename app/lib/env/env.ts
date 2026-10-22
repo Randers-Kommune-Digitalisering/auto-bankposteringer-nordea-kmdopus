@@ -84,6 +84,7 @@ const baseCommonSchema = z.object({
   OIDC_ALLOWED_GROUP_PREFIX: z.string().optional(),
   // Optional comma-separated allowlist for API CORS (supports credentials).
   OIDC_CORS_ALLOWED_ORIGINS: z.string().optional(),
+  WORKER_STATUS_URL: z.string().url().optional(),
 
   // Dev convenience: bypass auth entirely in local dev.
   // Keep stateless: this only changes runtime behavior based on env.

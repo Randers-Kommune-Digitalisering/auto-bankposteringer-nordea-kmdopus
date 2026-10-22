@@ -10,8 +10,98 @@ export type EnvRequirement =
   | { type: 'key'; key: string }
   | { type: 'anyOf'; label: string; keys: string[] }
 
+export type ProviderEnvRequirementStatus =
+  | { type: 'key'; key: string; present: boolean; invalid: boolean }
+  | {
+      type: 'anyOf'
+      label: string
+      keys: string[]
+      presentKeys: string[]
+      satisfied: boolean
+      invalidKeys: string[]
+    }
+
+export type ProviderEnvStatus =
+  | {
+      status: 'ready' | 'missing_env' | 'not_configured'
+      message?: string
+      missingKeys: string[]
+      env: {
+        requirements: ProviderEnvRequirementStatus[]
+        presentKeys: string[]
+        missingKeys: string[]
+        invalidKeys: string[]
+      }
+    }
+  | { status: 'not_implemented'; message: string }
+
 export function nonEmpty(value: unknown): boolean {
   return typeof value === 'string' && value.trim().length > 0
+}
+
+export function inspectProviderEnv(
+  provider: string,
+  channel: string,
+  env: NodeJS.ProcessEnv = process.env,
+): ProviderEnvStatus {
+  const requirements = providerEnvRequirements(provider, channel)
+  if (!requirements) {
+    return { status: 'not_implemented', message: 'Ikke implementeret endnu' }
+  }
+
+  const requirementStatuses: ProviderEnvRequirementStatus[] = []
+  const presentKeys: string[] = []
+  const missingKeys: string[] = []
+
+  for (const requirement of requirements) {
+    if (requirement.type === 'key') {
+      const present = nonEmpty(env[requirement.key])
+      requirementStatuses.push({ type: 'key', key: requirement.key, present, invalid: false })
+      if (present) presentKeys.push(requirement.key)
+      else missingKeys.push(requirement.key)
+      continue
+    }
+
+    const presentGroupKeys = requirement.keys.filter(key => nonEmpty(env[key]))
+    const satisfied = presentGroupKeys.length > 0
+    requirementStatuses.push({
+      type: 'anyOf',
+      label: requirement.label,
+      keys: requirement.keys,
+      presentKeys: presentGroupKeys,
+      satisfied,
+      invalidKeys: [],
+    })
+    if (satisfied) presentKeys.push(...presentGroupKeys)
+    else missingKeys.push(...requirement.keys)
+  }
+
+  const envStatus = {
+    requirements: requirementStatuses,
+    presentKeys: Array.from(new Set(presentKeys)),
+    missingKeys: Array.from(new Set(missingKeys)),
+    invalidKeys: [],
+  }
+
+  if (presentKeys.length === 0) {
+    return {
+      status: 'not_configured',
+      message: 'Ingen relevante env vars sat',
+      missingKeys: envStatus.missingKeys,
+      env: envStatus,
+    }
+  }
+
+  if (envStatus.missingKeys.length === 0) {
+    return { status: 'ready', missingKeys: [], env: envStatus }
+  }
+
+  return {
+    status: 'missing_env',
+    message: 'Mangler env vars for at aktivere',
+    missingKeys: envStatus.missingKeys,
+    env: envStatus,
+  }
 }
 
 export function extractEnvKeysFromMessage(message: string): string[] {

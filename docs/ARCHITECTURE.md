@@ -466,7 +466,7 @@ To reduce runtime overhead and avoid loading unnecessary web runtime components 
 - **worker role**: runs a dedicated headless worker loop script (`scripts/runtime/worker.ts`)
 - **scheduler role**: runs a dedicated headless scheduler script (`scripts/runtime/scheduler.ts`)
 
-This keeps repository/domain code shared while separating process responsibilities. Worker and scheduler do not need to expose HTTP or run the web request pipeline.
+This keeps repository/domain code shared while separating process responsibilities. The worker exposes only a small internal configuration-status HTTP endpoint for the web API; it does not run the web request pipeline or expose queue controls. A ClusterIP Service and NetworkPolicies restrict this endpoint to the web pods. It reports presence/status metadata only, never environment-variable values. The web API uses the worker's report for agreement readiness and activation validation, so status reflects the configuration actually loaded by the worker.
 
 To keep deployments simple and reproducible, scheduling and DB setup are controlled via explicit env toggles:
 

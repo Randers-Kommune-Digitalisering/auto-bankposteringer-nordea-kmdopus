@@ -11,11 +11,7 @@ import type {
   BankingAgreementInsertSchema,
   BankingAgreementUpdateSchema,
 } from '~/lib/db/schema/bankingAgreement'
-import { ZodError } from 'zod'
-import {
-  extractKeysFromZod,
-  validateProviderEnvOrThrow as validateProviderEnvOrThrowShared,
-} from '~/../engine/banking-ingestion/infrastructure/providerEnv'
+import { validateWorkerProviderConfiguration } from '~/../server/utils/workerStatus'
 import { syncTransactionCodeCatalogForProvider } from '~/../engine/banking-ingestion/handlers/syncTransactionCodeCatalog'
 import { logger } from '~/lib/logger'
 import { bankingAgreementDiscoveryRun } from '~/lib/db/schema/bankingAgreementDiscoveryRun'
@@ -25,17 +21,6 @@ const bodySchema = z.object({
   enabled: z.boolean(),
   channel: z.enum(bankChannelValues).optional(),
 })
-
-function formatEnvValidationError(err: unknown): string {
-  if (err instanceof ZodError) {
-    const keys = extractKeysFromZod(err)
-    if (keys.length) return `Manglende/ugyldige env vars: ${keys.join(', ')}`
-    return 'Manglende/ugyldige env vars'
-  }
-
-  const msg = String((err as any)?.message ?? err)
-  return msg || 'Ugyldig env-konfiguration'
-}
 
 export default defineEventHandler(async (event) => {
   const log = logger.child({ scope: 'api.bankingAgreements.update' })
@@ -80,11 +65,22 @@ export default defineEventHandler(async (event) => {
 
   if (nextEnabled) {
     try {
-      validateProviderEnvOrThrowShared(provider, nextChannel)
+      const validation = await validateWorkerProviderConfiguration(provider, nextChannel)
+      if (!validation.valid) {
+        const missingKeys = validation.missingKeys?.length
+          ? `: ${validation.missingKeys.join(', ')}`
+          : ''
+        throw createError({
+          statusCode: 400,
+          statusMessage: `${validation.message ?? 'Workerens env-konfiguration er ugyldig'}${missingKeys}`,
+        })
+      }
     } catch (err) {
+      if (err && typeof err === 'object' && 'statusCode' in err) throw err
+      log.error('Worker configuration validation request failed', { provider, channel: nextChannel, err })
       throw createError({
-        statusCode: 400,
-        statusMessage: formatEnvValidationError(err),
+        statusCode: 503,
+        statusMessage: 'Workerens konfiguration kunne ikke kontrolleres lige nu',
       })
     }
   }

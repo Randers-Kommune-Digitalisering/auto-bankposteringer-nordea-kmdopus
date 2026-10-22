@@ -99,6 +99,7 @@ type BankingAgreement = {
           invalidKeys: string[]
         }
       }
+    | { status: 'worker_unavailable'; message: string }
     | { status: 'not_implemented'; message: string; env?: any }
   latestDiscovery?: {
     id: string
@@ -485,6 +486,7 @@ async function updateAgreementChannel(provider: BankingAgreement['provider'], ch
 const readinessText = (a: BankingAgreement) => {
   const r = a.readiness
   if (!r) return '—'
+  if (r.status === 'worker_unavailable') return 'Worker utilgængelig'
   if (r.status === 'ready') return 'Klar'
   if (r.status === 'not_implemented') return 'Ikke implementeret'
   if (r.status === 'not_configured') return 'Ikke konfigureret'

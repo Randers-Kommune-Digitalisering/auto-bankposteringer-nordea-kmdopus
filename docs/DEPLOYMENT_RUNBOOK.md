@@ -15,7 +15,7 @@ The application is split into three runtime roles and one release-time database 
 
 The worker and scheduler use the same runtime image with different commands. The role-runtime image's default command starts the worker; the scheduler deployment must override it with `scripts/runtime/scheduler.ts`.
 
-Only the web workload should be exposed through a Kubernetes Service/Ingress. Worker, scheduler, and database-init workloads do not need public ingress. Worker-initiated SFTP is egress: allow the worker to reach the supplier's SFTP endpoint, normally TCP 22, and allow established response traffic. Confirm the endpoint, port, DNS behavior, and stable outbound/NAT IP with the supplier. Bank API/SOAP destinations may also require worker egress, normally over HTTPS.
+Only the web workload should be exposed through a public Ingress. The worker has a separate internal `ClusterIP` Service on TCP 3001 for `/internal/status/config` and `/internal/status/validate`; it must not have public ingress. NetworkPolicies must allow this port only from the web pods and allow web egress only to the worker status port. The endpoint returns configuration presence and certificate metadata, never secret values. Worker-initiated SFTP is egress: allow the worker to reach the supplier's SFTP endpoint, normally TCP 22, and allow established response traffic. Confirm the endpoint, port, DNS behavior, and stable outbound/NAT IP with the supplier. Bank API/SOAP destinations may also require worker egress, normally over HTTPS.
 
 ## Images and CI
 
@@ -78,7 +78,7 @@ Generate the three Nuxt OIDC secrets locally with `pnpm auth:oidc:generate-secre
 ## Ingress, egress, and probes
 
 - Ingress: browser/API HTTPS traffic to web only; configure TLS and the production hostname at the cluster ingress.
-- Egress: web to PostgreSQL and OIDC as required; scheduler to PostgreSQL; worker to PostgreSQL, bank endpoints, and ERP SFTP; db-init to PostgreSQL.
+- Egress: web to PostgreSQL and OIDC as required, plus the worker status port; scheduler to PostgreSQL; worker to PostgreSQL, bank endpoints, and ERP SFTP; db-init to PostgreSQL. Worker ingress on TCP 3001 is allowed only from web pods.
 - Use NetworkPolicies/firewall rules to enforce the minimum destinations. If an external partner allowlists source IPs, route worker egress through a stable NAT/egress gateway.
 - HSTS belongs at the TLS-terminating ingress. The application currently emits CSP in `Report-Only`; validate OIDC redirects, scripts, styles, and assets before enforcing a policy.
 - `/api/health` is a lightweight HTTP health endpoint, not a schema-migration gate. Deployment ordering must wait for successful `db-init` separately.
@@ -88,7 +88,7 @@ Generate the three Nuxt OIDC secrets locally with `pnpm auth:oidc:generate-secre
 - Keep the previous approved image SHA available.
 - If `db-init` fails, stop the rollout and inspect the migration/seed error; existing runtime pods may continue running if the deployment system has not replaced them.
 - Only roll back application images when the older application is compatible with the schema already applied. Otherwise use a tested forward fix or restore the database from backup.
-- Monitor database-init Job completion, web readiness, worker restarts, pending/failed jobs, ERP outbox retries, bank ingestion, and SFTP connectivity.
+- Monitor database-init Job completion, web readiness, worker status endpoint availability/restarts, pending/failed jobs, ERP outbox retries, bank ingestion, and SFTP connectivity.
 - Set ingress/WAF rate limits before exposing the web service. Do not implement per-pod in-memory limits for a horizontally scaled deployment.
 
 ## Deployment-repository checklist
