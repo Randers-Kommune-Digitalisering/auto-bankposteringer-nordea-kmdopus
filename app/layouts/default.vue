@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { NavigationMenuItem } from '@nuxt/ui'
 import { canAccessPath } from '~/lib/authz/policy'
+import { resolveUserDisplayName } from '~/lib/authz/userDisplayName'
 import type { OpenTransactionsResponse } from '~/types/transactions'
 
 const APP_TITLE = 'FOBI'
@@ -169,7 +170,7 @@ const primaryLinks: NavigationMenuItem[] = [
 ]
 
 const userLabel = computed(() => {
-  return user.value?.userName ?? 'Bruger'
+  return resolveUserDisplayName(user.value)
 })
 
 const links = computed(() => {

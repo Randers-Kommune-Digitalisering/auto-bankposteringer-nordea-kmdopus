@@ -70,6 +70,7 @@ export default defineNuxtConfig({
     },
     providers: {
       keycloak: {
+        scope: ['openid', 'profile'],
         exposeAccessToken: true,
       }
     },
