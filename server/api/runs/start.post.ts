@@ -22,19 +22,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Ugyldig bookingDate' })
   }
 
-  const enabledAgreements = await db
-    .select({ provider: bankingAgreement.provider, channel: bankingAgreement.channel })
-    .from(bankingAgreement)
-    .where(eq(bankingAgreement.enabled, true))
-    .limit(1)
-
-  if (!enabledAgreements.length) {
-    throw createError({
-      statusCode: 409,
-      statusMessage: 'Ingen aktive bankaftaler. Aktivér mindst én bankaftale før du starter en kørsel.',
-    })
-  }
-
   const lock = await withPgAdvisoryLock(`run:start:${bookingDateIso}`, async () => {
     // Guard against duplicate runs per booking date.
     const existing = await db
@@ -55,6 +42,20 @@ export default defineEventHandler(async (event) => {
 
     // Pre-create run + job records for observability (timeline timestamps).
     await db.transaction(async (trx) => {
+      const enabledAgreements = await trx
+        .select({ provider: bankingAgreement.provider })
+        .from(bankingAgreement)
+        .where(eq(bankingAgreement.enabled, true))
+        .limit(1)
+        .for('share')
+
+      if (!enabledAgreements.length) {
+        throw createError({
+          statusCode: 409,
+          statusMessage: 'Ingen aktive bankaftaler. Aktivér mindst én bankaftale før du starter en kørsel.',
+        })
+      }
+
       await trx
         .insert(run)
         .values({ id: runId, bookingDate, status: 'afventer' } as any)
