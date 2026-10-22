@@ -7,7 +7,6 @@ import { run, runInsertSchema } from '~/lib/db/schema/run'
 import { job } from '~/lib/db/schema/job'
 import { bankingAgreement } from '~/lib/db/schema/bankingAgreement'
 import { withPgAdvisoryLock } from '~/lib/db/advisoryLock'
-import { runBankIngestionAndPosting } from '#engine/banking-ingestion/handlers/runBankIngestionAndPosting'
 
 export default defineEventHandler(async (event) => {
   const body = runInsertSchema.safeParse(await readBody(event).catch(() => ({})))
@@ -66,7 +65,7 @@ export default defineEventHandler(async (event) => {
         .values({
           id: jobId,
           type: 'banking.ingest',
-          status: 'in_progress',
+          status: 'pending',
           runId,
           payload: { bookingDate: bookingDateIso, source: 'manual' },
           attempts: 0,
@@ -77,27 +76,12 @@ export default defineEventHandler(async (event) => {
         .onConflictDoNothing({ target: job.id })
     })
 
-    try {
-      const result = await runBankIngestionAndPosting({ runId, bookingDate })
-
-      await db
-        .update(job)
-        .set({ status: 'succeeded', updatedAt: new Date(), lastError: null } as any)
-        .where(eq(job.id, jobId))
-
-      return {
-        success: true,
-        runId: result.runId,
-        bookingDate: bookingDateIso,
-        insertedCount: result.insertedCount,
-      }
-    } catch (err: any) {
-      await db
-        .update(job)
-        .set({ status: 'failed', updatedAt: new Date(), lastError: String(err?.message ?? err) } as any)
-        .where(eq(job.id, jobId))
-
-      throw err
+    return {
+      success: true,
+      runId,
+      jobId,
+      bookingDate: bookingDateIso,
+      status: 'pending' as const,
     }
   })
 
