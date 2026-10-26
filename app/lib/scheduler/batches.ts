@@ -6,6 +6,7 @@ import { run } from '~/lib/db/schema/run'
 import { job } from '~/lib/db/schema/job'
 import { bankingAgreement } from '~/lib/db/schema/bankingAgreement'
 import { enqueueJob } from '#engine/queue/handlers/enqueueJob'
+import { getLatestCompletedWeekday } from './scheduledBookingDate'
 
 export type SchedulerBatchResult = {
   skipped: boolean
@@ -19,8 +20,8 @@ export async function enqueueBankTransactionsBatch(input?: {
   scheduledTimeIso?: string
 }): Promise<SchedulerBatchResult> {
   const scheduledTimeIso = input?.scheduledTimeIso ?? new Date().toISOString()
-  const bookingDate = new Date(scheduledTimeIso)
-  const bookingDateIso = bookingDate.toISOString().slice(0, 10)
+  const bookingDateIso = getLatestCompletedWeekday(scheduledTimeIso)
+  const bookingDate = new Date(`${bookingDateIso}T00:00:00.000Z`)
 
   const locked = await withPgAdvisoryLock(`run:start:${bookingDateIso}`, async () => {
     const existing = await db
