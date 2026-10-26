@@ -21,7 +21,7 @@ export async function runDbCleanup(): Promise<DbCleanupResult> {
   const retentionDays = env.DATA_RETENTION_DAYS
 
   const cutoffTs = sql`now() - (${retentionDays} * interval '1 day')`
-  const cutoffDate = sql`current_date - ${retentionDays}`
+  const cutoffDate = sql`current_date - ${retentionDays}::integer`
 
   log.info('dbCleanup.start', { retentionDays })
 

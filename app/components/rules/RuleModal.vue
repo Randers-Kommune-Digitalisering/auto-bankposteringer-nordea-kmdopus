@@ -1077,15 +1077,53 @@ async function onDeleteRule() {
     deletingRulePending.value = false
   }
 }
+
+function onDownloadRule() {
+  if (process.client && props.ruleId) {
+    window.open(`/api/rule/${props.ruleId}/export?variant=advanced`, '_blank')
+  }
+}
 </script>
 
 <template>
   <UModal v-model:open="open">
     <template #header>
-      <div class="flex items-center justify-between">
+      <div class="flex w-full items-center gap-4">
         <h2 class="text-lg font-semibold">
           {{ isEdit ? `Rediger regel ${props.ruleId}` : 'Ny regel' }}
         </h2>
+        <div v-if="isEdit" class="ml-auto flex shrink-0 items-center gap-1">
+          <UTooltip text="Download regel">
+            <UButton
+              :icon="appConfig.ui.icons.download"
+              color="neutral"
+              variant="ghost"
+              aria-label="Download regel"
+              @click="onDownloadRule"
+            />
+          </UTooltip>
+          <UTooltip v-if="ruleLockState === 'owned'" text="Slet regel">
+            <UButton
+              :icon="appConfig.ui.icons.trash"
+              color="error"
+              variant="ghost"
+              aria-label="Slet regel"
+              :loading="deletingRulePending"
+              :disabled="deletingRulePending"
+              @click="onDeleteRule"
+            />
+          </UTooltip>
+          <UTooltip text="Gem regel">
+            <UButton
+              :icon="appConfig.ui.icons.save"
+              color="neutral"
+              variant="subtle"
+              aria-label="Gem regel"
+              :disabled="isRuleReadOnly || deletingRulePending"
+              @click="onSubmit()"
+            />
+          </UTooltip>
+        </div>
       </div>
     </template>
 
@@ -1378,7 +1416,7 @@ async function onDeleteRule() {
                             {{ entry.fields.join(', ') }}
                           </div>
                         </div>
-                        <UIcon :name="appConfig.ui.icons.delete" class="size-5" />
+                        <UIcon :name="appConfig.ui.icons.delete" class="size-5"/>
                       </UBadge>
                     </div>
                   </div>
@@ -1486,35 +1524,14 @@ async function onDeleteRule() {
               @click="handlePrev"
               :disabled="currentStep === 0 || deletingRulePending"
             />
-            <UButton
-              v-if="isEdit && ruleLockState === 'owned'"
-              label="Slet regel"
-              variant="soft"
-              color="error"
-              type="button"
-              :loading="deletingRulePending"
-              :disabled="deletingRulePending"
-              @click="onDeleteRule"
-            />
           </div>
-          <template v-if="currentStep === steps.length - 1">
-            <UButton type="submit" :disabled="isRuleReadOnly || deletingRulePending">
-              {{ isEdit ? 'Opdater regel' : 'Opret regel' }}
+          <template v-if="currentStep === steps.length - 1 && !isEdit">
+            <UButton type="submit" :disabled="deletingRulePending">
+              Opret regel
             </UButton>
           </template>
-          <template v-else>
-            <div class="flex gap-2">
-              <UButton
-                v-if="isEdit"
-                label="Gem"
-                variant="soft"
-                color="neutral"
-                type="button"
-                @click="onSubmit()"
-                :disabled="isRuleReadOnly || deletingRulePending"
-              />
-              <UButton label="Næste" color="primary" :disabled="deletingRulePending" @click="handleNext"/>
-            </div>
+          <template v-else-if="currentStep < steps.length - 1">
+            <UButton label="Næste" color="primary" :disabled="deletingRulePending" @click="handleNext"/>
           </template>
         </div>
       </UForm>

@@ -159,8 +159,9 @@ seed_system_if_enabled() {
   fi
 
   if [ "${DB_SEED_SYSTEM_ON_START:-$seed_default}" = "1" ]; then
-    echo "Seeding system configuration..."
+    echo "Seeding system configuration and transaction code catalog..."
     pnpm db:seed:system
+    pnpm db:import:transaction-code-catalog
   else
     echo "Skipping system seed (DB_SEED_SYSTEM_ON_START=${DB_SEED_SYSTEM_ON_START:-$seed_default})"
   fi

@@ -4,6 +4,7 @@ import type { SortingState } from '@tanstack/table-core'
 import { getPaginationRowModel } from '@tanstack/table-core'
 import BankingAccountModal from '~/components/banking/AccountModal.vue'
 import { useDefaultBankAccount } from '~/composables/useDefaultBankAccount'
+import { canAccessPath } from '~/lib/authz/policy'
 import {
   activateClickableTableRowOnKeydown,
   clickableTableRowsBodyClass,
@@ -133,6 +134,8 @@ const BANKING_ACCOUNTS_QUERY_KEY = 'banking-accounts' as const
 
 const appConfig = useAppConfig()
 const toast = useToast()
+const { roles } = useAuthz()
+const canRetryDiscovery = computed(() => canAccessPath('/fejlhaandtering', roles.value))
 const table = useTemplateRef('table')
 const globalFilterValue = ref('')
 const UButton = resolveComponent('UButton')
@@ -250,6 +253,7 @@ const refreshingAccounts = ref(false)
 const bulkIgnorePending = ref(false)
 const sorting = ref<SortingState>([])
 const discoveryPollingByProvider = ref<Record<string, boolean>>({})
+const retryingDiscoveryByProvider = ref<Record<string, boolean>>({})
 const seenCompletedDiscoveryByProvider = ref<Record<string, string>>({})
 
 const envModalOpen = ref(false)
@@ -295,6 +299,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 type DiscoveryRunResponse = {
   id: string
+  jobId: string | null
   provider: BankingAgreement['provider']
   channel: BankingAgreement['channel']
   status: 'started' | 'running' | 'completed' | 'failed'
@@ -354,7 +359,8 @@ async function pollDiscoveryUntilTerminal(provider: BankingAgreement['provider']
         return
       }
 
-      if (run.status === 'failed') {
+      const retryIsQueued = run.diagnostics?.job?.status === 'pending' || run.diagnostics?.job?.status === 'in_progress'
+      if (run.status === 'failed' && !retryIsQueued) {
         toast.add({
           title: 'Kontohentning fejlede',
           description: run.errorMessage || 'Ukendt fejl under kontohentning',
@@ -390,6 +396,34 @@ async function pollDiscoveryUntilTerminal(provider: BankingAgreement['provider']
     })
   } finally {
     discoveryPollingByProvider.value[provider] = false
+  }
+}
+
+async function retryDiscovery(provider: BankingAgreement['provider'], discoveryRunId: string) {
+  if (!canRetryDiscovery.value || retryingDiscoveryByProvider.value[provider]) return
+
+  retryingDiscoveryByProvider.value[provider] = true
+  try {
+    const discovery = await $fetch<DiscoveryRunResponse>(`/api/banking-agreements/${provider}/discovery`, {
+      query: { id: discoveryRunId },
+    })
+    if (discovery.status !== 'failed' || !discovery.jobId) {
+      throw new Error('Kontoopdagelsen kan ikke længere genstartes')
+    }
+
+    await $fetch(`/api/fejlhaandtering/jobs/${encodeURIComponent(discovery.jobId)}/retry`, { method: 'POST' })
+    toast.add({ title: 'Kontoopdagelse sat til genkørsel' })
+    await refreshAgreements()
+    void pollDiscoveryUntilTerminal(provider, discoveryRunId)
+  } catch (error) {
+    console.error('Kontoopdagelse kunne ikke genstartes', error)
+    const message = (error as { data?: { statusMessage?: unknown } }).data?.statusMessage
+    toast.add({
+      title: typeof message === 'string' ? message : 'Kontoopdagelse kunne ikke genstartes',
+      color: 'error',
+    })
+  } finally {
+    retryingDiscoveryByProvider.value[provider] = false
   }
 }
 
@@ -837,6 +871,25 @@ const pagination = ref({ pageIndex: 0, pageSize: 20 })
               >
                 {{ a.enabled ? 'Deaktiver' : 'Aktiver' }}
               </UButton>
+            </div>
+
+            <div v-if="a.latestDiscovery" class="flex flex-wrap items-center gap-2 border-t border-default pt-3">
+              <UBadge :color="a.latestDiscovery.status === 'failed' ? 'error' : a.latestDiscovery.status === 'completed' ? 'success' : 'warning'" variant="subtle">
+                Kontoopdagelse: {{ a.latestDiscovery.status }}
+              </UBadge>
+              <span v-if="a.latestDiscovery.errorMessage" class="min-w-0 text-xs text-error">
+                {{ a.latestDiscovery.errorMessage }}
+              </span>
+              <UButton
+                v-if="a.latestDiscovery.status === 'failed' && canRetryDiscovery"
+                size="xs"
+                color="primary"
+                variant="soft"
+                :loading="retryingDiscoveryByProvider[a.provider]"
+                :disabled="retryingDiscoveryByProvider[a.provider]"
+                label="Genkør kontoopdagelse"
+                @click="retryDiscovery(a.provider, a.latestDiscovery.id)"
+              />
             </div>
 
             <div

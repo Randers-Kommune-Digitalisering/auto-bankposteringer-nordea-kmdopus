@@ -2,7 +2,6 @@
 import type { NavigationMenuItem } from '@nuxt/ui'
 import { canAccessPath } from '~/lib/authz/policy'
 import { resolveUserDisplayName } from '~/lib/authz/userDisplayName'
-import type { OpenTransactionsResponse } from '~/types/transactions'
 
 const APP_TITLE = 'FOBI'
 const open = ref(false)
@@ -10,29 +9,6 @@ const route = useRoute()
 const { user, roles } = useAuthz()
 
 const appConfig = useAppConfig()
-const canViewOpenItems = computed(() => canAccessPath('/aabne-poster', roles.value))
-const openItemsCount = ref<number | null>(null)
-const { data: openItemsSummary, refresh: refreshOpenItemsSummary } = useFetch<
-  Pick<OpenTransactionsResponse, 'totalSamleposter'>
->('/api/transactions', {
-  key: 'navigation-open-items-count',
-  query: { mode: 'open-items', limit: 1 },
-  server: false,
-  immediate: false,
-  default: () => ({ totalSamleposter: undefined }),
-})
-
-watch(
-  () => openItemsSummary.value?.totalSamleposter,
-  (count) => {
-    if (typeof count === 'number') openItemsCount.value = count
-  },
-  { immediate: true },
-)
-
-watch(canViewOpenItems, (canView) => {
-  if (canView) void refreshOpenItemsSummary()
-}, { immediate: true })
 
 function normalizePath(path: string): string {
   const trimmed = path.length > 1 ? path.replace(/\/+$/, '') : path
@@ -106,6 +82,25 @@ const primaryLinks: NavigationMenuItem[] = [
     onSelect: () => {
       open.value = false
     }
+  }
+]
+
+const managementLinks: NavigationMenuItem[] = [
+  {
+    label: 'Kontrol',
+    to: '/fejlhaandtering',
+    icon: appConfig.ui.icons.warning,
+    defaultOpen: false,
+    type: 'trigger',
+    children: [
+      {
+        label: 'ERP-integration',
+        to: '/fejlhaandtering/erp',
+        onSelect: () => {
+          open.value = false
+        }
+      }
+    ]
   },
   {
     label: 'Indstillinger',
@@ -115,7 +110,7 @@ const primaryLinks: NavigationMenuItem[] = [
     type: 'trigger',
     children: [
       {
-        label: 'Regeladministration',
+        label: 'Konteringsregler',
         to: '/indstillinger/regler',
         onSelect: () => {
           open.value = false
@@ -135,36 +130,6 @@ const primaryLinks: NavigationMenuItem[] = [
           open.value = false
         }
       },
-      {
-        label: 'ERP-integration',
-        to: '/indstillinger/erp',
-        onSelect: () => {
-          open.value = false
-        }
-      },
-    ]
-  },
-  {
-    label: 'Kontrol',
-    to: '/fejlhaandtering',
-    icon: appConfig.ui.icons.warning,
-    defaultOpen: false,
-    type: 'trigger',
-    children: [
-      {
-        label: 'Kørsler',
-        to: '/fejlhaandtering/koe',
-        onSelect: () => {
-          open.value = false
-        }
-      },
-      {
-        label: 'ERP-integration',
-        to: '/fejlhaandtering/erp',
-        onSelect: () => {
-          open.value = false
-        }
-      }
     ]
   }
 ]
@@ -173,8 +138,8 @@ const userLabel = computed(() => {
   return resolveUserDisplayName(user.value)
 })
 
-const links = computed(() => {
-  const visiblePrimaryLinks = primaryLinks
+function filterVisibleLinks(items: NavigationMenuItem[]): NavigationMenuItem[] {
+  return items
     .map((item) => {
       const children = (item.children as NavigationMenuItem[] | undefined)
         ?.filter((child) => canAccessPath(child.to as string, roles.value))
@@ -191,6 +156,11 @@ const links = computed(() => {
 
       return canAccessPath(item.to as string, roles.value) || hasChildren
     })
+}
+
+const links = computed(() => {
+  const visiblePrimaryLinks = filterVisibleLinks(primaryLinks)
+  const visibleManagementLinks = filterVisibleLinks(managementLinks)
 
   const secondaryLinks: NavigationMenuItem[] = [
     {
@@ -199,7 +169,7 @@ const links = computed(() => {
     },
   ]
 
-  return [visiblePrimaryLinks, secondaryLinks]
+  return [visiblePrimaryLinks, visibleManagementLinks, secondaryLinks] as const
 })
 
 const activePageLabel = computed(() => {
@@ -238,59 +208,63 @@ useHead(() => ({
           </div>
         </template>
         <div v-else class="flex items-center justify-center w-full px-3 py-4 border-b border-default">
-          <img src="/favicon.svg" alt="" class="size-6 shrink-0">
+          <img src="/favicon.svg" alt="" class="size-6 max-w-none shrink-0">
         </div>
 
         <!-- Primær navigation -->
         <UNavigationMenu
           :collapsed="collapsed"
           :items="links[0]"
-          :ui="{ 
+          :ui="{
+            item: 'mb-2',
+            childItem: 'mb-1',
             linkLeadingIcon: 'size-6',
             childLinkIcon: 'size-6'
-          }" 
+          }"
           orientation="vertical"
           tooltip
           popover
           class="mt-2"
         >
           <template #item-leading="{ item, active, ui }">
-            <UChip
-              v-if="item.to === '/aabne-poster'"
-              :show="openItemsCount !== 0"
-              color="error"
-              size="lg"
-            >
-              <UIcon
-                v-if="item.icon"
-                :name="item.icon"
-                :class="ui.linkLeadingIcon({ active, disabled: !!item.disabled })"
-              />
-            </UChip>
             <UIcon
-              v-else-if="item.icon"
+              v-if="item.icon"
               :name="item.icon"
               :class="ui.linkLeadingIcon({ active, disabled: !!item.disabled })"
             />
           </template>
         </UNavigationMenu>
 
-        <!-- Sekundær navigation / bund -->
-        <UNavigationMenu
-          :collapsed="collapsed"
-          :items="links[1]"
-          orientation="vertical"
-          tooltip
-          class="mt-auto"
-        />
-
-        <!-- Separator + color mode nederst -->
-        <div class="border-t border-default mt-4 pt-3 flex justify-center">
-          <UColorModeSelect
-            size="xl"
-            aria-label="Farvetema"
-            class="w-full"
+        <div class="mt-auto w-full">
+          <!-- Indstillinger og kontrol nederst -->
+          <UNavigationMenu
+            :collapsed="collapsed"
+            :items="links[1]"
+            :ui="{
+              item: 'mb-2',
+              childItem: 'mb-1'
+            }"
+            orientation="vertical"
+            tooltip
           />
+
+          <div v-if="links[1].length" class="border-t border-default mt-3 pt-3">
+            <UNavigationMenu
+              :collapsed="collapsed"
+              :items="links[2]"
+              orientation="vertical"
+              tooltip
+            />
+          </div>
+
+          <!-- Separator + color mode nederst -->
+          <div class="border-t border-default mt-4 pt-3 flex justify-center">
+            <UColorModeSelect
+              size="xl"
+              aria-label="Farvetema"
+              class="w-full"
+            />
+          </div>
         </div>
       </template>
     </UDashboardSidebar>

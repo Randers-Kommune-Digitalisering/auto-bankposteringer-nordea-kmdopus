@@ -34,6 +34,9 @@ const startingRun = ref(false)
 async function handleRefresh() {
   refreshNonce.value += 1
   await refresh()
+  if (selectedRun.value) {
+    selectedRun.value = allRows.value.find(run => run.id === selectedRun.value?.id) ?? selectedRun.value
+  }
 }
 
 async function startRunForDate() {
@@ -207,26 +210,6 @@ const columns: TableColumn<RunListItem>[] = [
     }
   },
   {
-    id: 'error',
-    header: 'Fejl',
-    size: 100,
-    enableSorting: false,
-    cell: ({ row }) => {
-      const errors = row.original.errors
-      if (!errors?.length) return null
-
-      const key = `${row.original.id}-error`
-      return h(resolveComponent('RunsDataPopover'), {
-        type: 'error',
-        run: row.original,
-        open: !!openPopovers.value[key],
-        'onUpdate:open': (val: boolean) => {
-          openPopovers.value[key] = val ? 'error' : null
-        }
-      })
-    }
-  },
-  {
     id: 'erpDocuments',
     header: 'Bilagsnumre',
     size: 120,
@@ -356,7 +339,7 @@ const columns: TableColumn<RunListItem>[] = [
         </div>
       </div>
 
-      <RunsRunTimelineModal v-model:open="runModalOpen" :run="selectedRun" />
+      <RunsRunTimelineModal v-model:open="runModalOpen" :run="selectedRun" @refresh-runs="handleRefresh" />
     </template>
   </UDashboardPanel>
 </template>

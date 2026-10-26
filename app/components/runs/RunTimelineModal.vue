@@ -3,6 +3,8 @@ import { DateFormatter } from '@internationalized/date'
 import type { TimelineItem } from '@nuxt/ui'
 import type { RunListItem } from '~/types/runs'
 import type { RunTimelineResponse } from '~/types/runTimeline'
+import { canAccessPath } from '~/lib/authz/policy'
+import { resolveRunContinuation } from '~/lib/presenters/runContinuation'
 import { getRunStatusPresentation } from '~/lib/presenters/runStatus'
 import {
   compareTimelineEvents,
@@ -25,6 +27,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:open', value: boolean): void
+  (e: 'refresh-runs'): void
 }>()
 
 const open = computed({
@@ -36,9 +39,13 @@ const df = new DateFormatter('da-DK', { dateStyle: 'medium' })
 const dtf = new Intl.DateTimeFormat('da-DK', { dateStyle: 'medium', timeStyle: 'short' })
 
 const toast = useToast()
+const { roles } = useAuthz()
 
 const loading = ref(false)
+const continuing = ref(false)
 const data = ref<RunTimelineResponse | null>(null)
+const continuation = computed(() => data.value ? resolveRunContinuation(data.value) : null)
+const canContinueRun = computed(() => canAccessPath('/fejlhaandtering', roles.value))
 
 const openPopovers = ref<Record<string, boolean>>({})
 const openEventLogs = ref({ banking: false, matching: false, manual: false })
@@ -87,6 +94,28 @@ async function load() {
     data.value = null
   } finally {
     loading.value = false
+  }
+}
+
+async function continueRun() {
+  if (!runId.value || !continuation.value || !canContinueRun.value || continuing.value) return
+
+  continuing.value = true
+  try {
+    await $fetch(`/api/runs/${encodeURIComponent(runId.value)}/continue`, { method: 'POST' })
+    toast.add({ title: continuation.value.label === 'Fortsæt kørsel' ? 'Kørslen sat til fortsættelse' : 'ERP-aflevering sat til genforsøg' })
+    emit('refresh-runs')
+    await load()
+  } catch (error) {
+    console.error('Kunne ikke fortsætte kørsel', error)
+    const message = (error as { data?: { statusMessage?: unknown } }).data?.statusMessage
+    toast.add({
+      title: typeof message === 'string' ? message : 'Kunne ikke fortsætte kørslen',
+      color: 'error',
+    })
+    await load()
+  } finally {
+    continuing.value = false
   }
 }
 
@@ -370,30 +399,24 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
           <UBadge :color="overallState.color" variant="subtle">{{ overallState.label }}</UBadge>
 
           <template v-if="run && runId">
-            <div class="flex items-center gap-2">
-              <RunsDataPopover
-                v-if="run.errors?.length"
-                type="error"
-                :run="run"
-                :open="!!openPopovers[`${runId}-error`]"
-                @update:open="(v: boolean) => (openPopovers[`${runId}-error`] = v)"
-              />
-              <RunsDataPopover
-                v-if="run.erpDocuments?.length"
-                type="erpDocuments"
-                :run="run"
-                :open="!!openPopovers[`${runId}-erpResponses`]"
-                @update:open="(v: boolean) => (openPopovers[`${runId}-erpResponses`] = v)"
-              />
-            </div>
+            <RunsDataPopover
+              v-if="run.erpDocuments?.length"
+              type="erpDocuments"
+              :run="run"
+              :open="!!openPopovers[`${runId}-erpDocuments`]"
+              @update:open="(value: boolean) => (openPopovers[`${runId}-erpDocuments`] = value)"
+            />
           </template>
 
           <UButton
+            v-if="continuation && canContinueRun"
             :icon="appConfig.ui.icons.reload"
-            variant="ghost"
+            :label="continuation.label"
+            variant="soft"
             color="primary"
-            :loading="loading"
-            @click="load"
+            :loading="continuing"
+            :disabled="loading || continuing"
+            @click="continueRun"
           />
         </div>
       </div>
@@ -488,31 +511,34 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
             <template #manualBooking-description>
               <div class="space-y-2">
                 <div class="text-sm text-muted">{{ manualState.description }}</div>
-                <UButton
-                  v-if="manualBilagsnumre.length"
-                  size="xs"
-                  color="neutral"
-                  variant="subtle"
-                  :label="showManualBilagsnumre ? 'Skjul bilagsnumre' : 'Vis bilagsnumre'"
-                  :aria-expanded="showManualBilagsnumre"
-                  aria-controls="run-manual-bilagsnumre"
-                  @click="toggleManualBilagsnumre"
-                />
+                <div class="flex flex-wrap items-center gap-2">
+                  <UButton
+                    v-if="manualBilagsnumre.length"
+                    class="justify-center"
+                    size="xs"
+                    color="neutral"
+                    variant="subtle"
+                    :label="showManualBilagsnumre ? 'Skjul bilagsnumre' : 'Vis bilagsnumre'"
+                    :aria-expanded="showManualBilagsnumre"
+                    aria-controls="run-manual-bilagsnumre"
+                    @click="toggleManualBilagsnumre"
+                  />
+                  <UButton
+                    v-if="manualEvents.length"
+                    size="xs"
+                    color="neutral"
+                    variant="subtle"
+                    :label="openEventLogs.manual ? 'Skjul hændelseslog' : 'Vis hændelseslog'"
+                    :aria-expanded="openEventLogs.manual"
+                    aria-controls="run-event-log-manual"
+                    @click="toggleEventLog('manual')"
+                  />
+                </div>
                 <ul v-if="showManualBilagsnumre && manualBilagsnumre.length" id="run-manual-bilagsnumre" class="list-disc pl-5 space-y-1">
                   <li v-for="documentId in manualBilagsnumre" :key="documentId" class="text-sm font-mono">
                     {{ documentId }}
                   </li>
                 </ul>
-                <UButton
-                  v-if="manualEvents.length"
-                  size="xs"
-                  color="neutral"
-                  variant="subtle"
-                  :label="openEventLogs.manual ? 'Skjul hændelseslog' : 'Vis hændelseslog'"
-                  :aria-expanded="openEventLogs.manual"
-                  aria-controls="run-event-log-manual"
-                  @click="toggleEventLog('manual')"
-                />
                 <ul v-if="openEventLogs.manual && manualEvents.length" id="run-event-log-manual" class="list-disc pl-5 space-y-1">
                   <li v-for="event in manualEvents" :key="event.id" class="text-sm">
                     <span class="text-muted">{{ formatMaybeIso(event.createdAt) }}:</span>

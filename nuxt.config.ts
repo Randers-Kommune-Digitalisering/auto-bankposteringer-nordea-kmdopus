@@ -1,4 +1,3 @@
-import "./app/lib/env/env"
 import { createRequire } from 'node:module'
 import { copyFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'

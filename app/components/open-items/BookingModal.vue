@@ -416,10 +416,7 @@ async function submitBooking(payload: ComparableManualBookingPayload) {
 				: `Transaktion ${transactionId} er sendt til ERP`,
 			color: 'primary'
 		})
-		await Promise.all([
-			refreshNuxtData('open-transactions'),
-			refreshNuxtData('navigation-open-items-count'),
-		])
+		await refreshNuxtData('open-transactions')
 		savedSnapshot.value = currentSnapshot.value
 		emit('processed')
 	} catch (error: any) {

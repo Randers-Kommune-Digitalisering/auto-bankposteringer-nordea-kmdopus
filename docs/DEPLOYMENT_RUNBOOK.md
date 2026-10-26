@@ -46,7 +46,7 @@ Before rollout, confirm that the packages are visible to the cluster's image-pul
 7. Roll out scheduler and worker using the matching `-runtime` image, setting their respective roles and commands.
 8. Verify readiness, login/OIDC, database access, a controlled worker task, SFTP connectivity, logs, and alerts before enabling scheduled production work.
 
-The `db-init` image runs database readiness checks, `drizzle-kit migrate`, and `db:seed:system`. It does not run the destructive development reset. The init job only needs database and system-seed configuration; do not give it bank, OIDC, or SFTP credentials.
+The `db-init` image runs database readiness checks, `drizzle-kit migrate`, `db:seed:system`, and `db:import:transaction-code-catalog`. The catalog import requires the versioned Nordea and Danske Bank CSVs included in the image, validates both before writing, and fails the job if either source is missing or invalid. Import is transactional and idempotent; removed source rows become inactive. The job does not run the destructive development reset. It only needs database and system-seed configuration; do not give it bank, OIDC, or SFTP credentials.
 
 Runtime web, scheduler, and worker workloads must not migrate or seed on startup. Set `DB_MIGRATE_ON_START=0` and `DB_SEED_SYSTEM_ON_START=0` explicitly for them. `DB_RESET_ON_START=1` is rejected in production. `DB_MIGRATE_ON_START=1` is an emergency compatibility switch, not the normal rollout mechanism.
 

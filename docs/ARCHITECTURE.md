@@ -222,8 +222,9 @@ Bank accounts are not manually created by end users. Instead, accounts are disco
 
 The singleton `tenant_configuration` may reference one global default bank account. The bank settings page can select, change, or clear it; account filters use it as their initial selection, and new rules start with it selected. Existing filter selections and saved rule account associations remain authoritative. The reference is nullable and uses `ON DELETE SET NULL`; marking the default account as ignored also clears the setting.
 
-When an agreement is enabled, the system performs a best-effort sync of the provider transaction code catalog from `resources/banking/<provider>/transaction-code-catalog.dk.csv`.
-This sync is non-blocking for activation: missing/invalid catalog data is logged and skipped, while the agreement remains enabled.
+Provider transaction code catalogs are versioned reference data in `resources/banking/<provider>/transaction-code-catalog.dk.csv` for Nordea and Danske Bank. The release-time `db-init` job validates both CSVs and imports them transactionally into `transaction_code_catalog`; a missing or invalid source blocks the release. Repeated imports are idempotent, and rows no longer present in a source are marked inactive rather than deleted so historical transactions retain readable labels.
+
+The database is the runtime source of truth: `/api/transaction-code-catalog` reads active catalog rows from PostgreSQL for the UI and transaction presenters. Agreement activation does not load or mutate the catalog, keeping reference-data initialization out of web requests. Providers without a committed catalog, such as BankConnect, are not part of the required import set.
 
 Account discovery is modeled as a persisted lifecycle (`banking_agreement_discovery_run`) and executed via the worker queue.
 Activation schedules discovery and returns operation metadata immediately; discovery results are only considered final when the persisted status reaches a terminal state (`completed` or `failed`).
@@ -473,7 +474,7 @@ To keep deployments simple and reproducible, scheduling and DB setup are control
 
 - `APP_ROLE`: selects the operational role (`web`, `scheduler`, `worker`).
 - `ENABLE_SCHEDULED_TASKS`: legacy fallback (only used when `APP_ROLE` is unset) to allow role-gated tasks to do work.
-- `DB_MIGRATE_ON_START` and `DB_SEED_SYSTEM_ON_START`: control whether the container entrypoint runs migrations and system seeding.
+- `DB_MIGRATE_ON_START` and `DB_SEED_SYSTEM_ON_START`: control whether the container entrypoint runs migrations and seeds system configuration plus the transaction code catalog.
 
 ### Runtime toggles (what they do)
 
@@ -489,8 +490,8 @@ To keep deployments simple and reproducible, scheduling and DB setup are control
   - `"1"`: run `pnpm db:migrate` on container start
   - anything else: skip migrations
 - `DB_SEED_SYSTEM_ON_START`:
-  - `"1"`: run `pnpm db:seed:system` on container start
-  - anything else: skip system seed
+  - `"1"`: run `pnpm db:seed:system` and `pnpm db:import:transaction-code-catalog` on container start
+  - anything else: skip both seeds
 
 Recommended practice is to run migrations/seeding as a separate, explicit “run once” step per rollout **per database** (rather than at every pod start). If you deploy multiple Helm releases (web/scheduler/worker) pointing at the same Postgres database, you still run migrations/seed once for that shared database. The repository provides the `db-init` container target and `db:init` command for this purpose; production deployments should run it as a Kubernetes Job, Helm hook, or CI/CD deployment gate.
 
@@ -613,7 +614,7 @@ Emergency-only:
 
 Example invocation (optional):
 
-- `pnpm db:migrate && pnpm db:seed:system`
+- `pnpm db:migrate && pnpm db:seed:system && pnpm db:import:transaction-code-catalog`
 
 ### Duplicate-safety
 

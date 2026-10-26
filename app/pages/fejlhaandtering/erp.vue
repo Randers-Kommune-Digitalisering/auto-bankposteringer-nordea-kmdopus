@@ -20,6 +20,42 @@ import { DEFAULT_TIME_ZONE, formatSignedDkk } from '~/utils'
 
 const appConfig = useAppConfig()
 
+type ErpMetadataResponse = {
+  erpSupplier: string
+  erpErrorAccount: string
+  prodEnvironment: string
+  municipalityCode: string
+  compCode: string
+  integrationId: string
+  integrationFileNameMask: string
+  bookingPeriodCloseDate: number
+}
+
+const { data: erpMetadata } = await useFetch<ErpMetadataResponse>('/api/settings/erp-metadata', {
+  key: 'erp-metadata',
+  default: () => ({
+    erpSupplier: '',
+    erpErrorAccount: '',
+    prodEnvironment: '',
+    municipalityCode: '',
+    compCode: '',
+    integrationId: '',
+    integrationFileNameMask: '',
+    bookingPeriodCloseDate: 0,
+  }),
+})
+
+const metadataFields = computed(() => [
+  { label: 'ERP-leverandør', value: erpMetadata.value.erpSupplier },
+  { label: 'Fejlkonto', value: erpMetadata.value.erpErrorAccount },
+  { label: 'Miljø', value: erpMetadata.value.prodEnvironment },
+  { label: 'Kommunekode', value: erpMetadata.value.municipalityCode },
+  { label: 'Firmakode', value: erpMetadata.value.compCode },
+  { label: 'Integration ID', value: erpMetadata.value.integrationId },
+  { label: 'Filnavnsskabelon', value: erpMetadata.value.integrationFileNameMask },
+  { label: 'Bogføringsperioder lukker d.', value: erpMetadata.value.bookingPeriodCloseDate },
+])
+
 type ErpRequestViewResponse = {
   requestId: string
   runId: string
@@ -92,6 +128,7 @@ function provenanceLabel(transaction: ErpTransaction): string {
 }
 
 const toast = useToast()
+const pollingResponses = ref(false)
 const UCheckbox = resolveComponent('UCheckbox')
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
@@ -102,7 +139,7 @@ const startDefault = endDefault.subtract({ days: 29 })
 const dateRange = shallowRef<{ start: DateValue; end: DateValue }>({ start: startDefault, end: endDefault })
 const page = ref(1)
 const pageSize = ref(25)
-const pageSizeOptions = [10, 25, 50, 100].map((value) => ({ label: `${value} ERP-forløb pr. side`, value }))
+const pageSizeOptions = [10, 25, 50, 100].map((value) => ({ label: `${value} kørsler`, value }))
 const start = computed(() => dateRange.value.start.toString())
 const end = computed(() => dateRange.value.end.toString())
 
@@ -203,6 +240,25 @@ async function refreshAll() {
   await refreshFailed()
   if (erpView.value?.requestId) {
     await loadErpRequest()
+  }
+}
+
+async function pollErpResponses() {
+  pollingResponses.value = true
+  try {
+    await $fetch('/api/fejlhaandtering/jobs/enqueue', {
+      method: 'POST',
+      body: { type: 'erp.ingestResponses' },
+    })
+    toast.add({
+      title: 'ERP-svarpoll sat i kø',
+      description: 'Pollingen er global og bliver udført af workeren.',
+    })
+  } catch (error) {
+    console.error('ERP-svarpoll kunne ikke sættes i kø', error)
+    toast.add({ title: 'Kunne ikke starte ERP-svarpoll', color: 'error' })
+  } finally {
+    pollingResponses.value = false
   }
 }
 
@@ -588,11 +644,20 @@ async function reopenBookedTransactions() {
         </template>
         <template #right>
           <UButton
+            :icon="appConfig.ui.icons.download"
+            label="Poll ERP-svar nu"
+            color="neutral"
+            variant="soft"
+            :loading="pollingResponses"
+            :disabled="pollingResponses"
+            @click="pollErpResponses"
+          />
+          <UButton
             :icon="appConfig.ui.icons.reload"
             variant="ghost"
             color="primary"
             label="Opdater"
-            :loading="failedPending || erpLoading"
+            :loading="failedPending || erpLoading || pollingResponses"
             @click="refreshAll"
           />
         </template>
@@ -603,11 +668,25 @@ async function reopenBookedTransactions() {
       <div class="space-y-6">
         <UCard>
           <template #header>
+            <div>
+              <div class="font-medium">ERP-metadata</div>
+              <div class="text-sm text-muted">Miljøværdier fra serverkonfigurationen. De kan ikke redigeres her.</div>
+            </div>
+          </template>
+          <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+            <UFormField v-for="field in metadataFields" :key="field.label" :label="field.label" class="min-w-0">
+              <UInput :model-value="String(field.value ?? '')" readonly class="min-w-0 w-full font-mono" />
+            </UFormField>
+          </div>
+        </UCard>
+
+        <UCard>
+          <template #header>
             <div class="flex flex-col gap-1">
               <div class="font-medium">ERP-forløb</div>
               <div class="text-sm text-muted">
                 Bogføringer vises pr. batch med eventuelle manuelle bogføringer samlet under batchen. Tabellen viser den aktuelle status; genfremsendelser opretter ikke ekstra synlige rækker.
-                Hvis en afsendelse mangler svar, så brug <NuxtLink to="/fejlhaandtering/koe" class="underline">Kørsler</NuxtLink>.
+                Hvis en afsendelse mangler svar, så find kørslen under <NuxtLink to="/koersler" class="underline">Kørsler</NuxtLink>.
               </div>
             </div>
           </template>
@@ -656,7 +735,7 @@ async function reopenBookedTransactions() {
                   v-if="row.original.group.childCount > 0"
                   size="xs"
                   color="neutral"
-                  variant="ghost"
+                  variant="soft"
                   :icon="row.getIsExpanded() ? 'i-lucide-chevron-down' : 'i-lucide-chevron-right'"
                   :aria-label="row.getIsExpanded() ? 'Skjul manuelle bogføringer' : 'Vis manuelle bogføringer'"
                   @click.stop="row.toggleExpanded()"
@@ -668,10 +747,13 @@ async function reopenBookedTransactions() {
                   </div>
                 </div>
               </div>
-              <div v-else class="min-w-0">
-                <div class="font-medium">{{ row.original.documentLabel }}</div>
-                <div v-if="row.original.documentId" class="text-xs text-muted truncate">
-                  {{ row.original.documentId }}
+              <div v-else class="flex items-center gap-2">
+                <span class="size-6 shrink-0" aria-hidden="true" />
+                <div class="min-w-0">
+                  <div class="font-medium">{{ row.original.documentLabel }}</div>
+                  <div v-if="row.original.documentId" class="text-xs text-muted truncate">
+                    {{ row.original.documentId }}
+                  </div>
                 </div>
               </div>
             </template>

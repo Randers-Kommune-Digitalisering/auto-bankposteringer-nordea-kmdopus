@@ -368,21 +368,6 @@ const columns: TableColumn<RuleListDto>[] = [
       ])
     }
   },
-  { // Handlinger
-    id: 'actions',
-    enableHiding: false,
-    enableSorting: false,
-    cell: ({ row }) => h('div', { class: 'text-right' }, h(UButton, {
-      icon: appConfig.ui.icons.download,
-      color: 'neutral',
-      variant: 'ghost',
-      'aria-label': `Download regel ${row.original.id}`,
-      onClick: (event: MouseEvent) => {
-        event.stopPropagation()
-        handleDownloadRule(row.original.id)
-      },
-    })),
-  }
 ]
 
 const statusItems = [
@@ -428,12 +413,6 @@ function handleEditRule(rule: RuleListDto) {
 }
 
 const onRuleRowSelect = createTableRowSelectHandler(handleEditRule)
-
-function handleDownloadRule(ruleId: number) {
-  if (process.client) {
-    window.open(`/api/rule/${ruleId}/export?variant=advanced`, '_blank')
-  }
-}
 
 async function handleSaved() {
   await refreshNuxtData('rules')

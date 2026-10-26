@@ -12,7 +12,6 @@ import type {
   BankingAgreementUpdateSchema,
 } from '~/lib/db/schema/bankingAgreement'
 import { validateWorkerProviderConfiguration } from '~/../server/utils/workerStatus'
-import { syncTransactionCodeCatalogForProvider } from '~/../engine/banking-ingestion/handlers/syncTransactionCodeCatalog'
 import { logger } from '~/lib/logger'
 import { bankingAgreementDiscoveryRun } from '~/lib/db/schema/bankingAgreementDiscoveryRun'
 import { enqueueJob } from '~/../engine/queue/handlers/enqueueJob'
@@ -119,25 +118,6 @@ export default defineEventHandler(async (event) => {
   }
 
   const shouldRunDiscovery = nextEnabled && nextChannel === 'iso20022'
-  const shouldSyncCatalog = nextEnabled
-
-  let catalogSync: Awaited<ReturnType<typeof syncTransactionCodeCatalogForProvider>> | null = null
-  if (shouldSyncCatalog) {
-    catalogSync = await syncTransactionCodeCatalogForProvider(db as any, provider as any)
-    if (catalogSync.status === 'loaded') {
-      log.info('Transaction code catalog synced on agreement activation', {
-        provider,
-        sourcePath: catalogSync.sourcePath,
-        upserted: catalogSync.upserted,
-      })
-    } else {
-      log.warn('Transaction code catalog sync skipped on agreement activation', {
-        provider,
-        sourcePath: catalogSync.sourcePath,
-        reason: catalogSync.reason,
-      })
-    }
-  }
 
   let discoveryOperation: {
     id: string
@@ -224,7 +204,6 @@ export default defineEventHandler(async (event) => {
   return {
     success: true,
     agreement,
-    catalogSync,
     discoveryOperation,
     // Deprecated compatibility keys: operation is now asynchronous.
     discovery: null,
