@@ -8,6 +8,13 @@
       "when": 1791891091114,
       "tag": "0000_baseline",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793100754793,
+      "tag": "0001_manual_booking_group_drafts",
+      "breakpoints": true
     }
   ]
 }

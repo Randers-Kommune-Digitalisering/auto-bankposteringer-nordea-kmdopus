@@ -204,6 +204,17 @@ if [ "$NODE_ENV" = "production" ] && [ "${DB_RESET_ON_START:-0}" = "1" ]; then
   exit 1
 fi
 
+if [ "${DB_SCHEMA_PUSH_ON_START:-0}" = "1" ]; then
+  if [ "$NODE_ENV" = "production" ] || [ "${APP_ROLE:-web}" != "web" ]; then
+    echo "DB_SCHEMA_PUSH_ON_START is only allowed for the development web role." >&2
+    exit 1
+  fi
+  if [ "${DB_MIGRATE_ON_START:-0}" = "1" ]; then
+    echo "DB_SCHEMA_PUSH_ON_START and DB_MIGRATE_ON_START cannot both be enabled." >&2
+    exit 1
+  fi
+fi
+
 validate_production_oidc_secrets
 
 wait_for_db
@@ -220,21 +231,25 @@ elif [ "$NODE_ENV" = "production" ]; then
 
   seed_system_if_enabled
 else
-  echo "Dev boot flags: DB_RESET_ON_START=${DB_RESET_ON_START:-} DB_MIGRATE_ON_START=${DB_MIGRATE_ON_START:-} DB_SEED_SYSTEM_ON_START=${DB_SEED_SYSTEM_ON_START:-1} SEED_DEV_DATA=${SEED_DEV_DATA:-} SEED_DEV_DATA_FORCE=${SEED_DEV_DATA_FORCE:-}"
+  echo "Dev boot flags: DB_RESET_ON_START=${DB_RESET_ON_START:-} DB_MIGRATE_ON_START=${DB_MIGRATE_ON_START:-} DB_SCHEMA_PUSH_ON_START=${DB_SCHEMA_PUSH_ON_START:-0} DB_SEED_SYSTEM_ON_START=${DB_SEED_SYSTEM_ON_START:-1} SEED_DEV_DATA=${SEED_DEV_DATA:-} SEED_DEV_DATA_FORCE=${SEED_DEV_DATA_FORCE:-}"
 
   if [ "${DB_RESET_ON_START:-}" = "1" ]; then
     echo "Resetting public schema (dev)..."
     pnpm db:reset:public
   fi
 
-  # A reset leaves the schema empty, so migrations must run before any seed step.
   should_migrate="${DB_MIGRATE_ON_START:-0}"
-  if [ "${DB_RESET_ON_START:-}" = "1" ] && [ "$should_migrate" != "1" ]; then
+  if [ "${DB_RESET_ON_START:-}" = "1" ] \
+    && [ "${DB_SCHEMA_PUSH_ON_START:-0}" != "1" ] \
+    && [ "$should_migrate" != "1" ]; then
     echo "DB_RESET_ON_START=1 requires migrations; forcing DB_MIGRATE_ON_START=1 for this boot"
     should_migrate="1"
   fi
 
-  if [ "$should_migrate" = "1" ]; then
+  if [ "${DB_SCHEMA_PUSH_ON_START:-0}" = "1" ]; then
+    echo "Pushing development database schema from Drizzle..."
+    pnpm db:push
+  elif [ "$should_migrate" = "1" ]; then
     echo "Running database migrations (dev)..."
     pnpm db:migrate
   else

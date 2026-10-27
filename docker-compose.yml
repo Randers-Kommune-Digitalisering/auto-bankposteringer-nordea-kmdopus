@@ -19,6 +19,8 @@ services:
     environment:
       APP_ROLE: web
       NODE_ENV: development
+      DB_MIGRATE_ON_START: "0"
+      DB_SCHEMA_PUSH_ON_START: "1"
       WORKER_STATUS_URL: http://worker:3001
       CI: "false"
       PNPM_CONFIG_CONFIRM_MODULES_PURGE: "false"

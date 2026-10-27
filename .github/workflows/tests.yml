@@ -67,7 +67,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Apply DB schema (Drizzle)
+      - name: Apply DB migrations (Drizzle)
         run: pnpm db:migrate
 
       - name: Seed system data

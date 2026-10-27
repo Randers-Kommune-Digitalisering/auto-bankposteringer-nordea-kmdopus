@@ -344,13 +344,15 @@ The system uses **structured JSON logs** written to **stdout/stderr** (container
 - HTTP requests are correlated using `x-request-id`.
 - A global Nitro plugin assigns a request id when missing and logs API responses/errors.
 
-### API logging (Nitro)
+### Request and access logging (Nitro)
 
-API request logging is handled globally (not per endpoint) to ensure consistent behavior across all routes.
+Request logging is handled globally (not per endpoint) to ensure consistent behavior across all routes.
 
-- Default: log only 4xx/5xx and slow requests to reduce redundancy with upstream access logs.
-- Optional: enable full access logs with `API_ACCESS_LOG=1`.
+- Successful HTML page requests emit `app.access` events, including the authenticated OIDC `preferred_username` when available.
+- API errors and slow requests include that username when the request has an OIDC session.
+- Other successful API responses are logged when `API_ACCESS_LOG=1`.
 - Slow threshold can be tuned with `API_SLOW_MS` (default 1000ms).
+- Logs never include cookies, tokens, email addresses, or display names. Usernames are personal data; production log access and retention should follow the municipality's applicable policies.
 
 ### Accounting dimensions (ERP)
 
@@ -456,19 +458,19 @@ from its `pre_stop` hook during the same orderly Compose shutdown. This keeps
 local mock responses aligned with the database reset and prevents stale files
 from being ingested after their `erp_request` rows are gone.
 
-On the next `docker compose up`, the app automatically runs migrations and the
-system seed. This feature requires a Docker Compose version with support for
-service hooks, against which the local Compose configuration is validated.
-Cleanup cannot be guaranteed in the event of a crash, OOM, `SIGKILL`, or host
-failure.
+When the development app container starts, it pushes the current Drizzle schema
+to the development database before running the system seed. This development
+schema sync is enabled only for the Compose web role; runtime and production
+roles continue to use explicit migrations. After changing schema code while
+Compose is already running, restart the app container to apply it. This feature
+requires a Docker Compose version with support for service hooks, against which
+the local Compose configuration is validated. Cleanup cannot be guaranteed in
+the event of a crash, OOM, `SIGKILL`, or host failure.
 
-When refreshing the single baseline migration, keep its journal timestamp
-unchanged for databases where that baseline was already applied. A newer
-timestamp makes Drizzle treat the baseline as pending and rerun its `CREATE`
-statements against the existing schema. Keeping the timestamp only prevents
-that rerun; it does not apply schema changes to an existing database. Local
-development databases are reset by the Compose shutdown hook before applying a
-refreshed baseline.
+The baseline migration is the bootstrap for new databases and is immutable once
+applied. Schema changes after deployment use append-only Drizzle migrations.
+Production applies them through the one-shot `db-init` job; `drizzle-kit push`
+is limited to local development and disposable test databases.
 
 ## Deployment considerations (production)
 

@@ -32,9 +32,10 @@ When generating code:
 - Favor long-term maintainability over convenience.
 
 Database migrations policy:
-- Do NOT add incremental/numbered migrations.
-- When the database schema changes, we will delete everything in `drizzle/` and generate a new single baseline migration.
-- Your code changes should assume that workflow (i.e. update schema code, but do not create new migration files).
+- Treat the applied baseline as immutable once a database has been deployed.
+- Add append-only Drizzle migrations for schema changes so existing databases can be upgraded safely.
+- Do not use `drizzle-kit push` in production; run migrations once through the `db-init` deployment job.
+- `drizzle-kit push` may be used for local development and disposable CI/test databases.
 
 When the architecture or design is changed, update the ARCHITECTURE.md markdown-file to reflect the new design.
 The ARCHITECTURE.md file is not meant as a complete specification, but rather a living document that captures the current state of the system's architecture and design decisions.

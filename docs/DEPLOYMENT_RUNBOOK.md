@@ -50,16 +50,29 @@ The `db-init` image runs database readiness checks, `drizzle-kit migrate`, `db:s
 
 Runtime web, scheduler, and worker workloads must not migrate or seed on startup. Set `DB_MIGRATE_ON_START=0` and `DB_SEED_SYSTEM_ON_START=0` explicitly for them. `DB_RESET_ON_START=1` is rejected in production. `DB_MIGRATE_ON_START=1` is an emergency compatibility switch, not the normal rollout mechanism.
 
-## Migration policy: production blocker
+## Database migration strategy
 
-The current repository describes a single-baseline workflow: regenerate `drizzle/0000_baseline.sql` instead of adding incremental migration files. This is safe for creating a fresh database, but it is not a safe recurring production upgrade process by itself:
+The applied `drizzle/0000_baseline.sql` is the bootstrap schema and must remain
+immutable once any database has applied it. Add a new append-only Drizzle
+migration for every later schema change. A fresh database applies the baseline
+and then every migration in order; an existing database applies only migrations
+that have not yet run.
 
-- Keeping the already-applied baseline timestamp means Drizzle does not apply changes in the regenerated SQL.
-- Giving the regenerated baseline a newer timestamp makes Drizzle attempt its full `CREATE` statements against the existing schema, which will normally fail on existing objects.
+For each production release:
 
-Before the first production schema change after initial installation, agree on and test a forward migration strategy for existing tenant databases. Do not delete/recreate production schemas or use `DB_RESET_ON_START` to upgrade. Schema rollback is not automatic; prefer forward fixes, and keep a verified backup/restore plan for each release.
+- Confirm a verified backup and test the migration against a staging database
+  created from the currently deployed schema.
+- Run the matching `db-init` image once as a deployment job before rolling out
+  application containers. The job uses `drizzle-kit migrate`.
+- Keep schema changes backward-compatible with the currently running
+  application during rollout where possible. Use expand/migrate/contract for
+  changes that cannot be made compatible in one release.
+- Do not regenerate or replace an applied baseline, use `drizzle-kit push`, or
+  reset a production schema to perform an upgrade. If a migration fails, stop
+  the rollout and use a reviewed forward fix or the verified restore plan.
 
-For a first deployment to a new, empty PostgreSQL database, the baseline can initialize the schema. Use synthetic or sanitized data in staging to test later upgrades; never use production financial data for local performance tests.
+Use synthetic or sanitized data in staging to test upgrades; never use
+production financial data for local performance tests.
 
 ## Configuration and secrets
 
