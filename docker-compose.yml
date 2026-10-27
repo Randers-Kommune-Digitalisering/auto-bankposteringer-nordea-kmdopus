@@ -19,6 +19,7 @@ services:
     environment:
       APP_ROLE: web
       NODE_ENV: development
+      WORKER_STATUS_URL: http://worker:3001
       CI: "false"
       PNPM_CONFIG_CONFIRM_MODULES_PURGE: "false"
       PNPM_CONFIG_STRICT_DEP_BUILDS: "false"

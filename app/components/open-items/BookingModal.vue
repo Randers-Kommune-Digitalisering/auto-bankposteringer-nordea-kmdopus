@@ -24,6 +24,7 @@ const emit = defineEmits<{
 	(e: 'update:open', value: boolean): void
 	(e: 'processed'): void
 	(e: 'draft-saved', payload: { transactionId: string; note: string | null }): void
+	(e: 'group-draft-saved', payload: { transactionIds: string[]; note: string | null }): void
 }>()
 
 type ComparableManualBookingPayload = ReturnType<typeof buildManualBookingPayload> &
@@ -77,6 +78,7 @@ const isBookingReadOnly = computed(() => bookingLockState.value !== 'owned')
 let bookingLockHeartbeat: ReturnType<typeof setInterval> | undefined
 let activeBookingLockTransactionId: string | null = null
 let bookingLockGeneration = 0
+let draftLoadGeneration = 0
 
 const {
 	manualBookingFormSchema,
@@ -314,7 +316,7 @@ function collapsedGroupPayload() {
 }
 
 async function expandGroupLines() {
-	if (isBookingReadOnly.value || !isGroupMode.value || isGroupExpanded.value || isExpandingGroup.value) return
+	if (isBookingReadOnly.value || isLoadingDraft.value || !isGroupMode.value || isGroupExpanded.value || isExpandingGroup.value) return
 
 	if (isLargeGroup.value && process.client) {
 		const confirmed = window.confirm(
@@ -344,28 +346,63 @@ async function expandGroupLines() {
 }
 
 watch(
-	() => [open.value, transaction.value?.id] as const,
-	async ([isOpen, txId]) => {
-		if (!isOpen || !txId) return
-		if (isGroupMode.value) {
+	() => [open.value, transaction.value?.id, isGroupMode.value, groupTransactionIds.value.join(','), bookingLockState.value] as const,
+	async ([isOpen, txId, groupMode, , lockState]) => {
+		const generation = ++draftLoadGeneration
+		if (!isOpen || !txId) {
+			isLoadingDraft.value = false
+			return
+		}
+		if (groupMode) {
 			isGroupExpanded.value = false
 			applyManualBookingPayload(collapsedGroupPayload())
+			savedSnapshot.value = null
+			if (lockState !== 'owned') {
+				isLoadingDraft.value = false
+				await nextTick()
+				if (generation === draftLoadGeneration) savedSnapshot.value = currentSnapshot.value
+				return
+			}
+
+			try {
+				isLoadingDraft.value = true
+				const response = await $fetch<{ draft: ManualBookingPayloadInput | null }>(`/api/transactions/${txId}/group-draft`)
+				if (generation !== draftLoadGeneration) return
+				if (response.draft) {
+					applyManualBookingPayload(response.draft)
+					isGroupExpanded.value = response.draft.lines.length > 1
+				}
+			} catch (error: any) {
+				if (generation !== draftLoadGeneration) return
+				console.warn('Kunne ikke hente samlepostkladde', error)
+				toast.add({
+					title: 'Kunne ikke hente kladde',
+					description: error?.data?.message ?? error?.message ?? 'Uventet fejl',
+					color: 'error',
+				})
+				applyManualBookingPayload(collapsedGroupPayload())
+			} finally {
+				if (generation === draftLoadGeneration) isLoadingDraft.value = false
+			}
+			if (generation !== draftLoadGeneration) return
 			await nextTick()
-			savedSnapshot.value = currentSnapshot.value
+			if (generation === draftLoadGeneration) savedSnapshot.value = currentSnapshot.value
 			return
 		}
 		try {
 			isLoadingDraft.value = true
 			const response = await $fetch<{ draft: any }>(`/api/transactions/${txId}/draft`)
+			if (generation !== draftLoadGeneration) return
 			if (response?.draft) {
 				applyManualBookingPayload(response.draft)
 			}
 			await nextTick()
-			savedSnapshot.value = currentSnapshot.value
+			if (generation === draftLoadGeneration) savedSnapshot.value = currentSnapshot.value
 		} catch (error) {
+			if (generation !== draftLoadGeneration) return
 			console.warn('Kunne ikke hente kladde', error)
 		} finally {
-			isLoadingDraft.value = false
+			if (generation === draftLoadGeneration) isLoadingDraft.value = false
 		}
 	},
 	{ immediate: true }
@@ -449,7 +486,7 @@ async function confirmClosedPeriodRebooking() {
 }
 
 async function handleSaveDraft() {
-	if (isBookingReadOnly.value || isGroupMode.value) return
+	if (isBookingReadOnly.value) return
 	if (!transaction.value) return
 	if (!isAccountingDimensionConfigReady.value) {
 		toast.add({
@@ -462,21 +499,32 @@ async function handleSaveDraft() {
 		return
 	}
 	const payload = buildManualBookingPayload(formState)
+	const isGroup = isGroupMode.value
+	const groupNote = (formState.note ?? '').trim() || null
 	try {
 		isSavingDraft.value = true
-		await $fetch(`/api/transactions/${transaction.value.id}/draft`, {
-			method: 'PUT' as any,
+		await $fetch(`/api/transactions/${transaction.value.id}/${isGroup ? 'group-' : ''}draft`, {
+			method: 'PUT',
 			body: payload
 		})
 		toast.add({
 			title: 'Kladde gemt',
-			description: `Ændringer til transaktion ${transaction.value.id} er gemt uden at sende til ERP`,
+			description: isGroup
+				? `Ændringer til samleposten med ${groupTransactionIds.value.length} transaktioner er gemt uden at sende til ERP`
+				: `Ændringer til transaktion ${transaction.value.id} er gemt uden at sende til ERP`,
 			color: 'primary'
 		})
-		emit('draft-saved', {
-			transactionId: transaction.value.id,
-			note: (formState.note ?? '').trim() || null,
-		})
+		if (isGroup) {
+			emit('group-draft-saved', {
+				transactionIds: groupTransactionIds.value,
+				note: groupNote,
+			})
+		} else {
+			emit('draft-saved', {
+				transactionId: transaction.value.id,
+				note: groupNote,
+			})
+		}
 		savedSnapshot.value = currentSnapshot.value
 	} catch (error: any) {
 		const description = error?.data?.message ?? error?.message ?? 'Uventet fejl'
@@ -526,7 +574,27 @@ function collapseAllLines() {
 </script>
 
 <template>
-	<UModal v-model:open="open" :title="transaction ? (isGroupMode ? 'Konter samlepost' : 'Konter transaktion') : 'Vælg transaktion'">
+	<UModal v-model:open="open">
+		<template #header>
+			<div class="flex w-full items-center gap-4">
+				<h2 class="text-lg font-semibold">
+					{{ transaction ? (isGroupMode ? 'Konter samlepost' : 'Konter transaktion') : 'Vælg transaktion' }}
+				</h2>
+				<div v-if="transaction" class="ml-auto flex shrink-0 items-center gap-1">
+					<UTooltip text="Gem kladde">
+						<UButton
+							:icon="appConfig.ui.icons.save"
+							color="neutral"
+							variant="subtle"
+							aria-label="Gem kladde"
+							:loading="isSavingDraft"
+							:disabled="isBookingReadOnly || isLoadingDraft || isSubmitting || isSavingDraft || hasSumMismatch || accountingDimensionPending || !!accountingDimensionError"
+							@click="handleSaveDraft"
+						/>
+					</UTooltip>
+				</div>
+			</div>
+		</template>
 		<template #body>
 			<div v-if="!transaction" class="py-8 text-center text-sm text-gray-500">
 				Vælg en transaktion for at starte behandlingen
@@ -623,11 +691,11 @@ function collapseAllLines() {
 						ref="formRef"
 						:schema="manualBookingFormSchema"
 						:state="formState"
-						:disabled="isSubmitting || isSavingDraft || isBookingReadOnly"
+						:disabled="isLoadingDraft || isSubmitting || isSavingDraft || isBookingReadOnly"
 						class="space-y-4 w-full"
 						@submit="handleSubmit"
 					>
-						<fieldset :disabled="isSubmitting || isSavingDraft || isBookingReadOnly" class="contents">
+						<fieldset :disabled="isLoadingDraft || isSubmitting || isSavingDraft || isBookingReadOnly" class="contents">
 						<div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
 							<div class="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
 								<div class="text-gray-600">Linjesum</div>
@@ -644,7 +712,7 @@ function collapseAllLines() {
 									color="primary"
 									variant="soft"
 									:icon="appConfig.ui.icons.plus"
-									:disabled="isBookingReadOnly"
+									:disabled="isLoadingDraft || isBookingReadOnly"
 									@click="addLine"
 								>
 									Tilføj linje
@@ -654,7 +722,7 @@ function collapseAllLines() {
 									color="neutral"
 									variant="soft"
 									:icon="appConfig.ui.icons.layers"
-									:disabled="isBookingReadOnly"
+									:disabled="isLoadingDraft || isBookingReadOnly"
 									@click="collapseAllLines"
 								>
 									Saml alle linjer
@@ -772,17 +840,6 @@ function collapseAllLines() {
 						<RulesFileUpload @update="(value) => { if (!isBookingReadOnly) handleAttachmentUpdate(value) }" />
 
 						<div class="flex items-center justify-end gap-3 pt-4">
-							<UButton
-								v-if="!isGroupMode"
-								variant="soft"
-								color="primary"
-								:icon="appConfig.ui.icons.save"
-								:loading="isSavingDraft"
-								:disabled="isSubmitting || isSavingDraft || hasSumMismatch || accountingDimensionPending || !!accountingDimensionError"
-								@click="handleSaveDraft"
-							>
-								Gem
-							</UButton>
 							<UButton
 								type="submit"
 								color="primary"

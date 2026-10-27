@@ -279,7 +279,7 @@ function buildGroupedRows(
     }
   })
 
-  if (activeSortKey) return rows
+  if (query.length >= 2 || activeSortKey) return rows
 
   return fuzzyRankRows({
     rows,

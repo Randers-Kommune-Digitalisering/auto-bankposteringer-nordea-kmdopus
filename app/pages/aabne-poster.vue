@@ -20,6 +20,7 @@ import type { OpenTransaction, TransactionSummary } from '~/types/transactions'
 
 const appConfig = useAppConfig()
 const UBadge = resolveComponent('UBadge')
+const UAlert = resolveComponent('UAlert')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 
 const endDefault = today(DEFAULT_TIME_ZONE)
@@ -218,28 +219,31 @@ const filteredTableRows = computed<OpenItemsTableRow[]>(() => {
     ? tableRows.value.filter((row) => row.transactionTypeEntries.some((entry) => selectedTransactionTypes.includes(entry.value)))
     : tableRows.value
 
-  const rankedRows = fuzzyRankRows({
-    rows,
-    query: openItemsSearch.value,
-    getValues: (row) => [
-      row.stackId,
-      row.account,
-      row.bookingDate,
-      row.category,
-      row.amount,
-      row.notePreview,
-      ...row.counterpartEntries.map((entry) => entry.value),
-      ...row.transactionTypeEntries.map((entry) => entry.value),
-      ...row.referenceEntries.map((entry) => entry.value),
-      ...row.stack.items.map((item) => item.id),
-      ...row.stack.items.map((item) => item.runId),
-    ],
-    tieBreaker: (a, b) => {
-      const dateDiff = new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime()
-      if (dateDiff !== 0) return dateDiff
-      return String(b.stackId).localeCompare(String(a.stackId), 'da', { sensitivity: 'base' })
-    },
-  })
+  const query = openItemsSearch.value
+  const rankedRows = query.length >= 2
+    ? rows.slice()
+    : fuzzyRankRows({
+        rows,
+        query,
+        getValues: (row) => [
+          row.stackId,
+          row.account,
+          row.bookingDate,
+          row.category,
+          row.amount,
+          row.notePreview,
+          ...row.counterpartEntries.map((entry) => entry.value),
+          ...row.transactionTypeEntries.map((entry) => entry.value),
+          ...row.referenceEntries.map((entry) => entry.value),
+          ...row.stack.items.map((item) => item.id),
+          ...row.stack.items.map((item) => item.runId),
+        ],
+        tieBreaker: (a, b) => {
+          const dateDiff = new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime()
+          if (dateDiff !== 0) return dateDiff
+          return String(b.stackId).localeCompare(String(a.stackId), 'da', { sensitivity: 'base' })
+        },
+      })
 
   if (!sortKey.value) return rankedRows
 
@@ -380,6 +384,26 @@ const columns: TableColumn<OpenItemsTableRow>[] = [
       )
     },
   },
+  { // Notat preview
+    accessorKey: 'notePreview',
+    header: 'Notat',
+    cell: ({ row }) => {
+      const notePreview = row.original.notePreview
+      if (!notePreview) return '-'
+
+      return h('div', { title: notePreview }, [
+        h(UAlert, {
+          color: 'primary',
+          variant: 'soft',
+          icon: appConfig.ui.icons.notes,
+          title: 'Notat',
+          description: notePreview,
+          class: 'max-w-sm text-xs',
+          ui: { description: 'line-clamp-2' },
+        }),
+      ])
+    },
+  },
   { // Category (samlepost vs. enkeltpost)
     accessorKey: 'category',
     header: 'Kategori',
@@ -390,19 +414,6 @@ const columns: TableColumn<OpenItemsTableRow>[] = [
       }, () => row.original.category),
       h('span', { class: 'text-xs text-muted' }, `${row.original.lineCount} linje${row.original.lineCount === 1 ? '' : 'r'}`),
     ]),
-  },
-  { // Notat preview
-    accessorKey: 'notePreview',
-    header: 'Notat',
-    cell: ({ row }) => {
-      const notePreview = row.original.notePreview
-      if (!notePreview) return '-'
-
-      return h('span', {
-        class: 'line-clamp-2 text-sm text-muted',
-        title: notePreview,
-      }, notePreview)
-    },
   },
 ]
 
@@ -479,6 +490,11 @@ const onOpenItemsRowSelect = createTableRowSelectHandler((row: OpenItemsTableRow
 })
 
 function stackNotePreview(stack: OpenTransactionStack): string | null {
+  const groupNote = stack.items
+    .map((item) => String(item.groupDraftNote ?? '').trim())
+    .find((value) => value.length > 0)
+  if (groupNote) return groupNote
+
   const notes = stack.items
     .map((item) => String(item.draftNote ?? '').trim())
     .filter((value) => value.length > 0)
@@ -509,6 +525,16 @@ function handleDraftSaved(payload: { transactionId: string; note: string | null 
         entry.draftNote = payload.note
       }
     }
+  }
+}
+
+function handleGroupDraftSaved(payload: { transactionIds: string[]; note: string | null }) {
+  const transactionIds = new Set(payload.transactionIds)
+  for (const tx of transactions.value) {
+    if (transactionIds.has(tx.id)) tx.groupDraftNote = payload.note
+  }
+  for (const tx of selectedGroupTransactions.value ?? []) {
+    if (transactionIds.has(tx.id)) tx.groupDraftNote = payload.note
   }
 }
 
@@ -724,5 +750,6 @@ const tableUi = {
     :group-transactions="selectedGroupTransactions"
     @processed="handleBookingProcessed"
     @draft-saved="handleDraftSaved"
+    @group-draft-saved="handleGroupDraftSaved"
   />
 </template>

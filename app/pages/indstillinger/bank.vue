@@ -873,13 +873,18 @@ const pagination = ref({ pageIndex: 0, pageSize: 20 })
               </UButton>
             </div>
 
-            <div v-if="a.latestDiscovery" class="flex flex-wrap items-center gap-2 border-t border-default pt-3">
-              <UBadge :color="a.latestDiscovery.status === 'failed' ? 'error' : a.latestDiscovery.status === 'completed' ? 'success' : 'warning'" variant="subtle">
-                Kontoopdagelse: {{ a.latestDiscovery.status }}
+            <div
+              v-if="a.latestDiscovery && (a.latestDiscovery.status === 'started' || a.latestDiscovery.status === 'running' || (a.latestDiscovery.status === 'failed' && canRetryDiscovery))"
+              class="flex flex-wrap items-center gap-2 border-t border-default pt-3"
+            >
+              <UBadge
+                v-if="a.latestDiscovery.status === 'started' || a.latestDiscovery.status === 'running'"
+                color="primary"
+                variant="subtle"
+              >
+                <UIcon name="i-lucide-loader-circle" class="mr-1 size-3 animate-spin" aria-hidden="true" />
+                Kontoopdagelse
               </UBadge>
-              <span v-if="a.latestDiscovery.errorMessage" class="min-w-0 text-xs text-error">
-                {{ a.latestDiscovery.errorMessage }}
-              </span>
               <UButton
                 v-if="a.latestDiscovery.status === 'failed' && canRetryDiscovery"
                 size="xs"

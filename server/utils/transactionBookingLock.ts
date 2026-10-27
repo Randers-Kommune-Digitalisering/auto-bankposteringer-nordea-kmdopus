@@ -22,6 +22,7 @@ export type BookingLockCandidate = {
 }
 
 export type BookingLockScope = {
+  groupKey: string | null
   allTransactionIds: string[]
   openTransactionIds: string[]
 }
@@ -74,7 +75,7 @@ export function resolveBookingLockScope(
     .map(candidate => candidate.id)
     .sort()
 
-  return { allTransactionIds, openTransactionIds }
+  return { groupKey, allTransactionIds, openTransactionIds }
 }
 
 async function resolveScope(executor: DbTransaction, anchorTransactionId: string): Promise<BookingLockScope> {
@@ -198,7 +199,7 @@ export async function verifyTransactionBookingLockInTransaction(
   anchorTransactionId: string,
   user: LockOwnerIdentity,
   expectedTransactionIds?: string[],
-): Promise<void> {
+): Promise<BookingLockScope> {
   const scope = await resolveScope(tx, anchorTransactionId)
   if (expectedTransactionIds) {
     const expected = [...new Set(expectedTransactionIds)].sort()
@@ -229,14 +230,16 @@ export async function verifyTransactionBookingLockInTransaction(
     .update(transactionProcessing)
     .set({ lockedAt: now, lockedByName: user.displayName })
     .where(inArray(transactionProcessing.transactionId, scope.openTransactionIds))
+
+  return currentScope
 }
 
 export async function verifyTransactionBookingLock(
   anchorTransactionId: string,
   user: LockOwnerIdentity,
   expectedTransactionIds?: string[],
-): Promise<void> {
-  await db.transaction(tx => verifyTransactionBookingLockInTransaction(
+): Promise<BookingLockScope> {
+  return db.transaction(tx => verifyTransactionBookingLockInTransaction(
     tx,
     anchorTransactionId,
     user,

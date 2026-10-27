@@ -42,6 +42,7 @@ export type OpenTransaction = {
   status: BookingStatus | null;
   ruleApplied: number | null;
   draftNote?: string | null;
+  groupDraftNote?: string | null;
   transactionType: string | null;
   transactionTypeCode?: string | null;
   transactionTypeHint?: string | null;

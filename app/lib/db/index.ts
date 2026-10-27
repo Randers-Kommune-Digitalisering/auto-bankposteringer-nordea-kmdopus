@@ -20,6 +20,7 @@ import * as transactionSchema from './schema/transaction'
 import * as transactionCodeCatalogSchema from './schema/transactionCodeCatalog'
 import * as bankingAdapterCursorSchema from './schema/bankingAdapterCursor'
 import * as manualBookingDraftSchema from './schema/manualBookingDraft'
+import * as manualBookingGroupDraftSchema from './schema/manualBookingGroupDraft'
 import * as bookingPeriodSchema from './schema/bookingPeriod'
 import * as runTimelineEventSchema from './schema/runTimelineEvent'
 
@@ -48,6 +49,7 @@ const schema = {
   ...transactionCodeCatalogSchema,
   ...bankingAdapterCursorSchema,
   ...manualBookingDraftSchema,
+  ...manualBookingGroupDraftSchema,
   ...bookingPeriodSchema,
   ...runTimelineEventSchema,
 } as const

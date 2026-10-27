@@ -3,6 +3,7 @@ import { defineEventHandler, getQuery, setHeader } from 'h3'
 import db from '~/lib/db'
 import { account } from '~/lib/db/schema/account'
 import { manualBookingDraft } from '~/lib/db/schema/manualBookingDraft'
+import { manualBookingGroupDraft } from '~/lib/db/schema/manualBookingGroupDraft'
 import { transaction, transactionProcessing } from '~/lib/db/schema/transaction'
 import { transactionCodeCatalog } from '~/lib/db/schema/transactionCodeCatalog'
 import { bankingStatementBalance } from '~/lib/db/schema/statement'
@@ -17,6 +18,7 @@ import { projectCanonicalTransactionFields } from '~~/server/presenters/transact
 import { buildTransactionCodeCatalogMap, resolveTransactionType, type TransactionCodeCatalogMap } from '~~/server/presenters/transactionTypePresenter'
 import { createUtcIsoString, parseIsoDateToUtcDate } from '~~/utils/function'
 import { selectPaginatedTransactionKeys, type TransactionStackSortKey } from '~~/server/utils/transactions/selectPaginatedTransactionKeys'
+import { manualBookingGroupDraftMemberSignature } from '~~/server/utils/manualBookingGroupDraft'
 
 type TransactionsMode = 'open-items' | 'statement'
 
@@ -653,6 +655,25 @@ export default defineEventHandler(async (event) => {
     row.samlepostId ?? `single:${row.id}`,
     catalogByProviderCodeKey,
   ))
+  const groupKeys = [...new Set(visibleItems
+    .map((item) => item.groupKey)
+    .filter((groupKey): groupKey is string => Boolean(groupKey)))]
+  if (groupKeys.length) {
+    const groupDraftRows = await db
+      .select({
+        groupKey: manualBookingGroupDraft.groupKey,
+        memberSignature: manualBookingGroupDraft.memberSignature,
+        note: manualBookingGroupDraft.note,
+      })
+      .from(manualBookingGroupDraft)
+      .where(inArray(manualBookingGroupDraft.groupKey, groupKeys))
+
+    for (const draft of groupDraftRows) {
+      const members = visibleItems.filter((item) => item.groupKey === draft.groupKey)
+      if (draft.memberSignature !== manualBookingGroupDraftMemberSignature(members.map((item) => item.id))) continue
+      for (const member of members) member.groupDraftNote = draft.note
+    }
+  }
 
   const stackMap = new Map<string, {
     stackId: string

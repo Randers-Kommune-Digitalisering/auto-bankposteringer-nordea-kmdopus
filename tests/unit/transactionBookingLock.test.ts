@@ -43,6 +43,7 @@ describe('transaction booking lock scope', () => {
     ]
 
     expect(resolveBookingLockScope(candidates[0]!.id, candidates)).toEqual({
+      groupKey: 'nordea:batch:account-a:2026-01-02:CRDT:BATCH-1:ENTRY-1',
       allTransactionIds: [candidates[0]!.id, candidates[1]!.id],
       openTransactionIds: [candidates[0]!.id, candidates[1]!.id],
     })
@@ -77,6 +78,7 @@ describe('transaction booking lock scope', () => {
     ]
 
     expect(resolveBookingLockScope(candidates[0]!.id, candidates)).toEqual({
+      groupKey: 'nordea:batch:account-a:2026-01-02:CRDT:BATCH-1:ENTRY-1',
       allTransactionIds: [candidates[0]!.id, candidates[1]!.id],
       openTransactionIds: [candidates[0]!.id],
     })

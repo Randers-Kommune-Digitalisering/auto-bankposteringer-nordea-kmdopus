@@ -30,6 +30,7 @@ import { verifyTransactionBookingLock } from '~~/server/utils/transactionBooking
 import { parseAmount } from '#engine/matching/domain/amount'
 import { buildNordeaDeterministicGroupKey } from '#engine/banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo'
 import { bookingPeriodRebookingAudit } from '~/lib/db/schema/bookingPeriod'
+import { manualBookingGroupDraft } from '~/lib/db/schema/manualBookingGroupDraft'
 import { resolveManualBookingDate } from '~~/server/utils/bookingPeriod'
 
 export default defineEventHandler(async (event) => {
@@ -315,6 +316,11 @@ export default defineEventHandler(async (event) => {
   })
 
   await clearManualBookingDraft(row.id)
+  if (rowGroupKey) {
+    await db
+      .delete(manualBookingGroupDraft)
+      .where(eq(manualBookingGroupDraft.groupKey, rowGroupKey))
+  }
 
   return {
     success: true,

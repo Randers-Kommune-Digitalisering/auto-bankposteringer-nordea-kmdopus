@@ -15,6 +15,12 @@ import { transaction, transactionProcessing } from "./transaction";
 import { transactionReference } from "./transactionReference";
 import { transactionParty } from "./transactionParty";
 import { manualBookingDraft } from "./manualBookingDraft";
+import {
+  manualBookingGroupDraft,
+  manualBookingGroupDraftAttachment,
+  manualBookingGroupDraftLine,
+  manualBookingGroupDraftLineDimension,
+} from "./manualBookingGroupDraft";
 import { run } from "./run";
 import { account } from "./account";
 import {
@@ -177,6 +183,33 @@ export const transactionRelations = relations(transaction, ({ one, many }) => ({
   bookingPeriodRebookingAudits: many(bookingPeriodRebookingAudit),
   references: many(transactionReference),
   parties: many(transactionParty),
+}));
+
+export const manualBookingGroupDraftRelations = relations(manualBookingGroupDraft, ({ many }) => ({
+  lines: many(manualBookingGroupDraftLine),
+  attachments: many(manualBookingGroupDraftAttachment),
+}));
+
+export const manualBookingGroupDraftLineRelations = relations(manualBookingGroupDraftLine, ({ one, many }) => ({
+  groupDraft: one(manualBookingGroupDraft, {
+    fields: [manualBookingGroupDraftLine.groupKey],
+    references: [manualBookingGroupDraft.groupKey],
+  }),
+  dimensions: many(manualBookingGroupDraftLineDimension),
+}));
+
+export const manualBookingGroupDraftLineDimensionRelations = relations(manualBookingGroupDraftLineDimension, ({ one }) => ({
+  line: one(manualBookingGroupDraftLine, {
+    fields: [manualBookingGroupDraftLineDimension.lineId],
+    references: [manualBookingGroupDraftLine.id],
+  }),
+}));
+
+export const manualBookingGroupDraftAttachmentRelations = relations(manualBookingGroupDraftAttachment, ({ one }) => ({
+  groupDraft: one(manualBookingGroupDraft, {
+    fields: [manualBookingGroupDraftAttachment.groupKey],
+    references: [manualBookingGroupDraft.groupKey],
+  }),
 }));
 
 export const bookingPeriodRebookingAuditRelations = relations(bookingPeriodRebookingAudit, ({ one }) => ({

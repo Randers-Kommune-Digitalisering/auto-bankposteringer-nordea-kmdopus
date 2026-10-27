@@ -24,6 +24,13 @@ import { verifyTransactionBookingLock } from '~~/server/utils/transactionBooking
 import { parseAmount } from '#engine/matching/domain/amount'
 import { buildNordeaDeterministicGroupKey } from '#engine/banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo'
 import { bookingPeriodRebookingAudit } from '~/lib/db/schema/bookingPeriod'
+import { manualBookingGroupDraft } from '~/lib/db/schema/manualBookingGroupDraft'
+import {
+  manualBookingDraft,
+  manualBookingDraftAttachment,
+  manualBookingDraftLine,
+  manualBookingDraftLineDimension,
+} from '~/lib/db/schema/manualBookingDraft'
 import { resolveManualBookingDate } from '~~/server/utils/bookingPeriod'
 
 const groupProcessSchema = z.object({
@@ -297,6 +304,33 @@ export default defineEventHandler(async (event) => {
       })),
     )
   }
+
+  await db.transaction(async (tx) => {
+    const individualDraftLines = await tx
+      .select({ id: manualBookingDraftLine.id })
+      .from(manualBookingDraftLine)
+      .where(inArray(manualBookingDraftLine.transactionId, transactionIds))
+    const individualDraftLineIds = individualDraftLines.map((line) => line.id)
+
+    if (individualDraftLineIds.length) {
+      await tx
+        .delete(manualBookingDraftLineDimension)
+        .where(inArray(manualBookingDraftLineDimension.lineId, individualDraftLineIds))
+    }
+
+    await tx
+      .delete(manualBookingDraftAttachment)
+      .where(inArray(manualBookingDraftAttachment.transactionId, transactionIds))
+    await tx
+      .delete(manualBookingDraftLine)
+      .where(inArray(manualBookingDraftLine.transactionId, transactionIds))
+    await tx
+      .delete(manualBookingDraft)
+      .where(inArray(manualBookingDraft.transactionId, transactionIds))
+    await tx
+      .delete(manualBookingGroupDraft)
+      .where(eq(manualBookingGroupDraft.groupKey, expectedGroupKey))
+  })
 
   await db.insert(runTimelineEvent).values({
     runId: first.runId,

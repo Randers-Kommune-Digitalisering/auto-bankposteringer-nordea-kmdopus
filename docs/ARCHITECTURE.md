@@ -99,6 +99,23 @@ This repo is a stateless financial integration engine:
 - Leases last three minutes and the open modal renews them every minute. Normal modal close and completed processing release the lease; browser or network failure is recovered through lease expiry. The periodic DB cleanup also clears expired owner/name snapshots.
 - A competing user can inspect the booking in `BookingModal` read-only mode, with a banner naming the current owner. A database schema change updates the schema source only; deployment follows the repository's single-baseline migration workflow and does not add an incremental migration.
 
+## Manual booking drafts
+
+- Single-transaction drafts remain keyed by transaction ID. A saved samlepost draft is stored once under the deterministic samlepost key, rather than duplicated for every member transaction.
+- Group draft content is relational: one header plus ordered posting lines, line dimensions, and attachments. A SHA-256 signature of the sorted open member IDs guards against restoring a draft when the open membership of the samlepost has changed.
+- Drafts are written only after an explicit save. Reopening a locked samlepost restores the saved lines, including a split into multiple lines; a missing or stale group draft uses the normal collapsed samlepost defaults.
+- Successful group booking removes the group draft and any legacy per-transaction drafts for its members. Database schema changes update schema source only and use the repository's single-baseline migration workflow.
+
+```mermaid
+flowchart LR
+  BookingModal -->|explicit save| GroupDraftAPI
+  GroupDraftAPI -->|one payload per group key| GroupDraftHeader
+  GroupDraftHeader --> GroupDraftLines
+  GroupDraftLines --> GroupDraftDimensions
+  GroupDraftHeader --> GroupDraftAttachments
+  GroupDraftAPI -->|member signature check| OpenGroup
+```
+
 ## Rule editor leases
 
 - Editing a persisted rule acquires a three-minute lease on the `rule` row, renewed every minute while the modal is open. Rule reads do not acquire locks as a side effect.
@@ -250,6 +267,7 @@ This avoids request-coupled false positives (for example returning `0` while dis
 - `rule_accounting_dimension_value`: per-rule values for accounting dimensions (normalized; no hardcoded primary/secondary/tertiary)
 - `transaction_processing`: processing status / rule-applied locking
 - `manual_booking_draft` (+ lines/dimensions/attachments): user-edited draft state for open transactions (supports saving notes and multi-line manual postings without sending to ERP)
+- `manual_booking_group_draft` (+ lines/dimensions/attachments): one explicitly saved, split-capable draft per deterministic open samlepost, guarded by its current open-member signature
 - `banking_agreement_cursor`: opaque cursor per (provider agreement, adapter) for incremental fetching
 - `run`: batch execution unit (audit/logging)
 
