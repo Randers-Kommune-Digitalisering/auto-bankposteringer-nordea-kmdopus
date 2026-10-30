@@ -15,7 +15,7 @@ export const transaction = pgTable('transaction', {
   // Source linkage (CAMT.053: Document -> Statement -> Entry)
   statementId: uuid('statement_id').references(() => bankingStatement.id),
   entryIndex: integer('entry_index'),
-  entrySubIndex: integer('entry_sub_index'),
+  underlyingTransactionCount: integer('underlying_transaction_count').notNull().default(0),
 
   // Entry core
   amount: numeric('amount').notNull(),
@@ -30,41 +30,18 @@ export const transaction = pgTable('transaction', {
   ntryAcctSvcrRef: text('ntry_acct_svcr_ref'),
   entryAdditionalInfo: text('entry_additional_info'), // CAMT: AddtlNtryInf
 
-  // Transaction details references (TxDtls/Refs)
-  txAcctSvcrRef: text('tx_acct_svcr_ref'),
-  refsEndToEndId: text('refs_end_to_end_id'),
-  refsInstrId: text('refs_instr_id'),
-  refsPmtInfId: text('refs_pmt_inf_id'),
-  uetr: text('uetr'),
-  txAdditionalInfo: text('tx_additional_info'),
-
   // Bank transaction code (BkTxCd)
   bkTxCdDomain: text('bk_tx_cd_domain'),
   bkTxCdFamily: text('bk_tx_cd_family'),
   bkTxCdSubFamily: text('bk_tx_cd_sub_family'),
   bkTxCdProprietary: text('bk_tx_cd_proprietary'),
-
-  // Related parties (RltdPties)
-  debtorName: text('dbtr_name'),
-  debtorId: text('dbtr_id'),
-  debtorAccountIban: text('dbtr_acct_iban'),
-  creditorName: text('cdtr_name'),
-  creditorId: text('cdtr_id'),
-  creditorAccountIban: text('cdtr_acct_iban'),
-  ultimateDebtorName: text('ultmt_dbtr_name'),
-  ultimateCreditorName: text('ultmt_cdtr_name'),
-
-  // Remittance information (RmtInf)
-  remittanceUstrd: text('rmt_ustrd').array(),
-  remittanceCreditorReference: text('rmt_cdtr_ref'),
-  remittanceAdditional: text('rmt_addtl').array(),
 }, (t) => [
-  unique('transaction_statement_entry_unique').on(t.statementId, t.entryIndex, t.entrySubIndex),
+  unique('transaction_statement_entry_unique').on(t.statementId, t.entryIndex),
   index('transaction_run_id_idx').on(t.runId),
   index('transaction_run_id_account_id_idx').on(t.runId, t.accountId),
   index('transaction_booking_date_id_idx').on(t.bookingDate, t.id),
   index('transaction_account_booking_date_id_idx').on(t.accountId, t.bookingDate, t.id),
-  index('transaction_statement_order_idx').on(t.statementId, t.entryIndex, t.entrySubIndex),
+  index('transaction_statement_order_idx').on(t.statementId, t.entryIndex),
 ])
 
 export const transactionSelectSchema = createSelectSchema(transaction)

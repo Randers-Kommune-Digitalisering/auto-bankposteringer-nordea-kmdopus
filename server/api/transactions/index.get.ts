@@ -40,7 +40,7 @@ type BaseRow = {
 
   statementId: string | null
   entryIndex: number | null
-  entrySubIndex: number | null
+  underlyingTransactionCount: number
 
   amount: unknown
   currency: string | null
@@ -53,35 +53,14 @@ type BaseRow = {
   ntryAcctSvcrRef: string | null
   entryAdditionalInfo: string | null
 
-  txAcctSvcrRef: string | null
-  refsEndToEndId: string | null
-  refsInstrId: string | null
-  refsPmtInfId: string | null
-  uetr: string | null
-  txAdditionalInfo: string | null
-
   bkTxCdDomain: string | null
   bkTxCdFamily: string | null
   bkTxCdSubFamily: string | null
   bkTxCdProprietary: string | null
 
-  debtorName: string | null
-  debtorId: string | null
-  debtorAccountIban: string | null
-  creditorName: string | null
-  creditorId: string | null
-  creditorAccountIban: string | null
-  ultimateDebtorName: string | null
-  ultimateCreditorName: string | null
-
-  remittanceUstrd: string[] | null
-  remittanceCreditorReference: string | null
-  remittanceAdditional: string[] | null
-
   processingStatus: 'åben' | 'bogført' | 'undtaget' | null
   ruleApplied: number | null
   draftNote: string | null
-  entryGroupSize: number
   samlepostId: string
   runningBalance?: string | null
 }
@@ -126,7 +105,7 @@ function parseMode(value: unknown): TransactionsMode {
 }
 
 function parseTransactionStackSortKey(value: unknown): TransactionStackSortKey | undefined {
-  return value === 'counterpart' || value === 'transactionType' ? value : undefined
+  return value === 'transactionType' ? value : undefined
 }
 
 function parseSortDirection(value: unknown): 'asc' | 'desc' | undefined {
@@ -149,22 +128,6 @@ function normalizeString(value: unknown): string | null {
   if (typeof value !== 'string') return null
   const trimmed = value.trim()
   return trimmed.length ? trimmed : null
-}
-
-function dedupeStrings(values: Array<string | null | undefined>): string[] {
-  const seen = new Set<string>()
-  const result: string[] = []
-
-  for (const entry of values) {
-    const value = normalizeString(entry)
-    if (!value) continue
-    const key = value.toLowerCase()
-    if (seen.has(key)) continue
-    seen.add(key)
-    result.push(value)
-  }
-
-  return result
 }
 
 function parseSearchTokens(search: string): string[] {
@@ -194,30 +157,12 @@ function buildSearchTokenCondition(token: string) {
     sql`${transaction.ntryRef} ILIKE ${pattern}`,
     sql`${transaction.ntryAcctSvcrRef} ILIKE ${pattern}`,
     sql`${transaction.entryAdditionalInfo} ILIKE ${pattern}`,
-    sql`${transaction.txAcctSvcrRef} ILIKE ${pattern}`,
-    sql`${transaction.refsEndToEndId} ILIKE ${pattern}`,
-    sql`${transaction.refsInstrId} ILIKE ${pattern}`,
-    sql`${transaction.refsPmtInfId} ILIKE ${pattern}`,
-    sql`${transaction.uetr} ILIKE ${pattern}`,
-    sql`${transaction.txAdditionalInfo} ILIKE ${pattern}`,
 
     sql`${transaction.bkTxCdDomain} ILIKE ${pattern}`,
     sql`${transaction.bkTxCdFamily} ILIKE ${pattern}`,
     sql`${transaction.bkTxCdSubFamily} ILIKE ${pattern}`,
     sql`${transaction.bkTxCdProprietary} ILIKE ${pattern}`,
 
-    sql`${transaction.debtorName} ILIKE ${pattern}`,
-    sql`${transaction.debtorId} ILIKE ${pattern}`,
-    sql`${transaction.debtorAccountIban} ILIKE ${pattern}`,
-    sql`${transaction.creditorName} ILIKE ${pattern}`,
-    sql`${transaction.creditorId} ILIKE ${pattern}`,
-    sql`${transaction.creditorAccountIban} ILIKE ${pattern}`,
-    sql`${transaction.ultimateDebtorName} ILIKE ${pattern}`,
-    sql`${transaction.ultimateCreditorName} ILIKE ${pattern}`,
-
-    sql`array_to_string(coalesce(${transaction.remittanceUstrd}, ARRAY[]::text[]), ' ') ILIKE ${pattern}`,
-    sql`${transaction.remittanceCreditorReference} ILIKE ${pattern}`,
-    sql`array_to_string(coalesce(${transaction.remittanceAdditional}, ARRAY[]::text[]), ' ') ILIKE ${pattern}`,
   )
 }
 
@@ -243,20 +188,7 @@ function mapRowToStatementTransaction(
     bookingDate: createUtcIsoString(row.bookingDate),
     amount: signedAmount,
     creditDebitIndicator: row.creditDebitIndicator,
-    debtorName: row.debtorName,
-    debtorId: row.debtorId,
-    creditorName: row.creditorName,
-    creditorId: row.creditorId,
-    remittanceUstrd: row.remittanceUstrd,
-    remittanceAdditional: row.remittanceAdditional,
-    remittanceCreditorReference: row.remittanceCreditorReference,
     entryAdditionalInfo: row.entryAdditionalInfo,
-    txAdditionalInfo: row.txAdditionalInfo,
-    refsEndToEndId: row.refsEndToEndId,
-    refsInstrId: row.refsInstrId,
-    refsPmtInfId: row.refsPmtInfId,
-    uetr: row.uetr,
-    txAcctSvcrRef: row.txAcctSvcrRef,
     ntryAcctSvcrRef: row.ntryAcctSvcrRef,
     ntryRef: row.ntryRef,
   })
@@ -270,7 +202,7 @@ function mapRowToStatementTransaction(
 
     statementId: row.statementId,
     entryIndex: row.entryIndex,
-    entrySubIndex: row.entrySubIndex,
+    underlyingTransactionCount: row.underlyingTransactionCount,
 
     amount: String(signedAmount),
     currency: row.currency,
@@ -283,13 +215,6 @@ function mapRowToStatementTransaction(
     ntryAcctSvcrRef: row.ntryAcctSvcrRef,
     entryAdditionalInfo: row.entryAdditionalInfo,
 
-    txAcctSvcrRef: row.txAcctSvcrRef,
-    refsEndToEndId: row.refsEndToEndId,
-    refsInstrId: row.refsInstrId,
-    refsPmtInfId: row.refsPmtInfId,
-    uetr: row.uetr,
-    txAdditionalInfo: row.txAdditionalInfo,
-
     bkTxCdDomain: row.bkTxCdDomain,
     bkTxCdFamily: row.bkTxCdFamily,
     bkTxCdSubFamily: row.bkTxCdSubFamily,
@@ -301,19 +226,6 @@ function mapRowToStatementTransaction(
     counterpart: canonicalFields.counterpart,
     counterpartHint: canonicalFields.counterpartHint,
     referenceDetails: canonicalFields.referenceDetails,
-
-    debtorName: row.debtorName,
-    debtorId: row.debtorId,
-    debtorAccountIban: row.debtorAccountIban,
-    creditorName: row.creditorName,
-    creditorId: row.creditorId,
-    creditorAccountIban: row.creditorAccountIban,
-    ultimateDebtorName: row.ultimateDebtorName,
-    ultimateCreditorName: row.ultimateCreditorName,
-
-    remittanceUstrd: row.remittanceUstrd,
-    remittanceCreditorReference: row.remittanceCreditorReference,
-    remittanceAdditional: row.remittanceAdditional,
 
     processingStatus: row.processingStatus,
     ruleApplied: row.ruleApplied,
@@ -334,20 +246,7 @@ function mapRowToOpenTransaction(
     bookingDate: createUtcIsoString(row.bookingDate),
     amount: signedAmount,
     creditDebitIndicator: row.creditDebitIndicator,
-    debtorName: row.debtorName,
-    debtorId: row.debtorId,
-    creditorName: row.creditorName,
-    creditorId: row.creditorId,
-    remittanceUstrd: row.remittanceUstrd,
-    remittanceAdditional: row.remittanceAdditional,
-    remittanceCreditorReference: row.remittanceCreditorReference,
     entryAdditionalInfo: row.entryAdditionalInfo,
-    txAdditionalInfo: row.txAdditionalInfo,
-    refsEndToEndId: row.refsEndToEndId,
-    refsInstrId: row.refsInstrId,
-    refsPmtInfId: row.refsPmtInfId,
-    uetr: row.uetr,
-    txAcctSvcrRef: row.txAcctSvcrRef,
     ntryAcctSvcrRef: row.ntryAcctSvcrRef,
     ntryRef: row.ntryRef,
   })
@@ -367,6 +266,7 @@ function mapRowToOpenTransaction(
     groupKey,
     bookingDate: createUtcIsoString(row.bookingDate),
     amount: signedAmount,
+    underlyingTransactionCount: row.underlyingTransactionCount,
     accountId: row.accountId ?? 'Ukendt konto',
     bankAccountName: row.bankAccountName,
     status: row.processingStatus,
@@ -480,7 +380,7 @@ export default defineEventHandler(async (event) => {
 
       statementId: transaction.statementId,
       entryIndex: transaction.entryIndex,
-      entrySubIndex: transaction.entrySubIndex,
+      underlyingTransactionCount: transaction.underlyingTransactionCount,
 
       amount: transaction.amount,
       currency: transaction.currency,
@@ -493,30 +393,10 @@ export default defineEventHandler(async (event) => {
       ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,
       entryAdditionalInfo: transaction.entryAdditionalInfo,
 
-      txAcctSvcrRef: transaction.txAcctSvcrRef,
-      refsEndToEndId: transaction.refsEndToEndId,
-      refsInstrId: transaction.refsInstrId,
-      refsPmtInfId: transaction.refsPmtInfId,
-      uetr: transaction.uetr,
-      txAdditionalInfo: transaction.txAdditionalInfo,
-
       bkTxCdDomain: transaction.bkTxCdDomain,
       bkTxCdFamily: transaction.bkTxCdFamily,
       bkTxCdSubFamily: transaction.bkTxCdSubFamily,
       bkTxCdProprietary: transaction.bkTxCdProprietary,
-
-      debtorName: transaction.debtorName,
-      debtorId: transaction.debtorId,
-      debtorAccountIban: transaction.debtorAccountIban,
-      creditorName: transaction.creditorName,
-      creditorId: transaction.creditorId,
-      creditorAccountIban: transaction.creditorAccountIban,
-      ultimateDebtorName: transaction.ultimateDebtorName,
-      ultimateCreditorName: transaction.ultimateCreditorName,
-
-      remittanceUstrd: transaction.remittanceUstrd,
-      remittanceCreditorReference: transaction.remittanceCreditorReference,
-      remittanceAdditional: transaction.remittanceAdditional,
 
       processingStatus: transactionProcessing.status,
       ruleApplied: transactionProcessing.ruleApplied,
@@ -533,7 +413,7 @@ export default defineEventHandler(async (event) => {
   const filteredRows = pageKeys.rows.map((key) => {
     const row = loadedRowsById.get(key.id)
     if (!row) throw new Error(`Selected transaction row was not loaded: ${key.id}`)
-    return { ...row, entryGroupSize: key.entryGroupSize, samlepostId: key.samlepostId } as BaseRow
+    return { ...row, samlepostId: key.samlepostId } as BaseRow
   })
   const baseRowById = new Map<string, BaseRow>(
     filteredRows.map((row): [string, BaseRow] => [row.id, row]),
@@ -596,7 +476,6 @@ export default defineEventHandler(async (event) => {
         id: transaction.id,
         statementId: transaction.statementId,
         entryIndex: transaction.entryIndex,
-        entrySubIndex: transaction.entrySubIndex,
         amount: transaction.amount,
         creditDebitIndicator: transaction.creditDebitIndicator,
       })
@@ -614,7 +493,6 @@ export default defineEventHandler(async (event) => {
     for (const [statementId, rowsForStatement] of transactionsByStatementId) {
       rowsForStatement.sort((left, right) =>
         (left.entryIndex ?? Number.MAX_SAFE_INTEGER) - (right.entryIndex ?? Number.MAX_SAFE_INTEGER)
-        || (left.entrySubIndex ?? Number.MAX_SAFE_INTEGER) - (right.entrySubIndex ?? Number.MAX_SAFE_INTEGER)
         || left.id.localeCompare(right.id),
       )
 

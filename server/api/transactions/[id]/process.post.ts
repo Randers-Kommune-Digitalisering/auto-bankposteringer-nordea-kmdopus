@@ -75,15 +75,7 @@ export default defineEventHandler(async (event) => {
       accountId: transaction.accountId,
       accountProvider: account.provider,
       accountIban: account.iban,
-      debtorName: transaction.debtorName,
-      debtorId: transaction.debtorId,
-      creditorName: transaction.creditorName,
-      creditorId: transaction.creditorId,
       entryAdditionalInfo: transaction.entryAdditionalInfo,
-      txAdditionalInfo: transaction.txAdditionalInfo,
-      remittanceUstrd: transaction.remittanceUstrd,
-      remittanceCreditorReference: transaction.remittanceCreditorReference,
-      remittanceAdditional: transaction.remittanceAdditional,
       processingStatus: transactionProcessing.status,
       processingId: transactionProcessing.transactionId,
     })
@@ -209,15 +201,9 @@ export default defineEventHandler(async (event) => {
     transactionId: row.id,
     amount,
     statusDimensions: { statuskonto },
-    debtorName: row.debtorName,
-    debtorId: row.debtorId,
-    creditorName: row.creditorName,
-    creditorId: row.creditorId,
     entryAdditionalInfo: row.entryAdditionalInfo,
-    txAdditionalInfo: row.txAdditionalInfo,
-    remittanceUstrd: row.remittanceUstrd,
-    remittanceCreditorReference: row.remittanceCreditorReference,
-    remittanceAdditional: row.remittanceAdditional,
+    ntryAcctSvcrRef: row.ntryAcctSvcrRef,
+    ntryRef: row.ntryRef,
   };
 
   const accDimDefinitions = await listAccountingDimensionDefinitions(

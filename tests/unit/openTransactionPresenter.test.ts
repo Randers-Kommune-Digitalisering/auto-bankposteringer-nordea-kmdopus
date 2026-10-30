@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { buildTransactionSummaryView } from '../../server/presenters/openTransactionPresenter'
 
 describe('openTransactionPresenter', () => {
-  it('normalizes additional entry triads to value-only and promotes 500/502 to reference', () => {
+  it('keeps additional entry information as a technical source value', () => {
     const summary = buildTransactionSummaryView({
       id: 'tx-1',
       runId: 'run-1',
@@ -24,16 +24,13 @@ describe('openTransactionPresenter', () => {
       ],
     })
 
-    const referenceSection = summary.sections.find((section) => section.key === 'reference')
     const technicalSection = summary.sections.find((section) => section.key === 'teknisk')
 
-    expect(referenceSection?.chips?.map((chip) => chip.value)).toContain('Frivillig besked fra afsender')
-    expect(referenceSection?.chips?.map((chip) => chip.value)).toContain('Betalingsbesked fra Nets')
-    expect(technicalSection?.chips?.map((chip) => chip.value) ?? []).not.toContain('Frivillig besked fra afsender')
-    expect(technicalSection?.chips?.map((chip) => chip.value) ?? []).not.toContain('Betalingsbesked fra Nets')
+    expect(technicalSection?.chips?.map((chip) => chip.value)).toContain('500:TEXT:Frivillig besked fra afsender')
+    expect(technicalSection?.chips?.map((chip) => chip.value)).toContain('502:TEXT:Betalingsbesked fra Nets')
   })
 
-  it('keeps non-promoted additional entry triads as system fields with value-only text', () => {
+  it('keeps additional entry values without attempting to parse child-level triads', () => {
     const summary = buildTransactionSummaryView({
       id: 'tx-2',
       runId: 'run-1',
@@ -53,8 +50,8 @@ describe('openTransactionPresenter', () => {
     const technicalSection = summary.sections.find((section) => section.key === 'teknisk')
     const referenceSection = summary.sections.find((section) => section.key === 'reference')
 
-    expect(technicalSection?.chips?.map((chip) => chip.value)).toContain('NETS settlement payload')
-    expect(referenceSection?.chips?.map((chip) => chip.value) ?? []).not.toContain('NETS settlement payload')
+    expect(technicalSection?.chips?.map((chip) => chip.value)).toContain('610:TXT:NETS settlement payload')
+    expect(referenceSection?.chips?.map((chip) => chip.value) ?? []).not.toContain('610:TXT:NETS settlement payload')
   })
 
   it('does not promote low-signal KON konto values as reference', () => {
@@ -78,6 +75,6 @@ describe('openTransactionPresenter', () => {
     const technicalSection = summary.sections.find((section) => section.key === 'teknisk')
 
     expect(referenceSection).toBeUndefined()
-    expect(technicalSection?.chips?.map((chip) => chip.value)).toContain('KON konto 0970205918')
+    expect(technicalSection?.chips?.map((chip) => chip.value)).toContain('502:REFERENCE:KON konto 0970205918')
   })
 })

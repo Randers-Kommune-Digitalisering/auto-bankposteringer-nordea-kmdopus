@@ -60,7 +60,7 @@ const end = computed(() => {
 })
 
 const search = computed(() => debouncedGlobalFilterValue.value.trim())
-type StatementSortKey = 'counterpart' | 'transactionType'
+type StatementSortKey = 'transactionType'
 const sortKey = ref<StatementSortKey | null>(null)
 const sortDirection = ref<'asc' | 'desc'>('asc')
 const transactionTypeFilter = ref<string[]>([])
@@ -248,11 +248,6 @@ function buildGroupedRows(
     const items = stack.items
     const representative = stack.representative
 
-    const counterpartEntries = toCanonicalValueBadgeEntries(
-      representative.counterpart ?? resolveCounterpart(representative),
-      representative.counterpartHint,
-    )
-
     const referenceEntries = toCanonicalReferenceBadgeEntries(representative.referenceDetails)
 
     const transactionTypeEntries = toCanonicalValueBadgeEntries(
@@ -261,7 +256,8 @@ function buildGroupedRows(
     )
 
     const amount = items.reduce((sum, entry) => sum + Number(entry.amount ?? 0), 0)
-    const category: StatementStackRow['category'] = items.length > 1 ? 'Samlepost' : 'Enkeltpost'
+    const category: StatementStackRow['category'] =
+      representative.underlyingTransactionCount > 1 ? 'Samlepost' : 'Enkeltpost'
 
     return {
       stackId: stack.stackId,
@@ -271,11 +267,10 @@ function buildGroupedRows(
       account: representative.bankAccountName ?? representative.accountId ?? '-',
       amount,
       runningBalance: representative.runningBalance,
-      counterpartEntries,
       referenceEntries,
       transactionTypeEntries,
       category,
-      lineCount: items.length,
+      lineCount: representative.underlyingTransactionCount,
     }
   })
 
@@ -292,7 +287,6 @@ function buildGroupedRows(
       row.category,
       row.amount,
       row.bookingDate,
-      ...row.counterpartEntries.map((entry) => entry.value),
       ...row.referenceEntries.map((entry) => entry.value),
       ...row.transactionTypeEntries.map((entry) => entry.value),
     ],
@@ -378,7 +372,6 @@ function formatDanishAmount(value: unknown): string {
 function lastEntryDetail(stack: StatementStackRow): StatementTransaction {
   return stack.items.reduce((latest, item) => {
     const sequenceDifference = (item.entryIndex ?? Number.MAX_SAFE_INTEGER) - (latest.entryIndex ?? Number.MAX_SAFE_INTEGER)
-      || (item.entrySubIndex ?? Number.MAX_SAFE_INTEGER) - (latest.entrySubIndex ?? Number.MAX_SAFE_INTEGER)
       || item.id.localeCompare(latest.id)
 
     if (sequenceDifference > 0) return item
@@ -421,7 +414,6 @@ async function downloadStatementCsv(): Promise<void> {
       { header: 'Beløb', value: (r) => formatDanishAmount(r.amount) },
       { header: 'Saldo', value: (r) => formatDanishAmount(lastEntryDetail(r).runningBalance) },
       { header: 'Kredit/debet', value: (r) => r.representative.creditDebitIndicator === 'CRDT' ? 'K' : r.representative.creditDebitIndicator === 'DBIT' ? 'D' : '' },
-      { header: 'Modpart', value: (r) => r.counterpartEntries[0]?.value ?? '' },
       { header: 'Reference', value: (r) => r.referenceEntries.map((entry) => entry.value).join(' · ') },
       { header: 'EntryRef', value: (r) => r.representative.ntryRef ?? '' },
       { header: 'Transaktionstype', value: (r) => r.transactionTypeEntries[0]?.value ?? '' },
@@ -468,15 +460,6 @@ function resolveTransactionType(row: StatementTransaction): string | null {
   return null
 }
 
-function resolveCounterpart(row: StatementTransaction): string | null {
-  const isOutgoing = row.creditDebitIndicator === 'DBIT'
-  if (isOutgoing) {
-    return row.creditorName ?? row.ultimateCreditorName ?? row.creditorId ?? row.creditorAccountIban ?? null
-  }
-
-  return row.debtorName ?? row.ultimateDebtorName ?? row.debtorId ?? row.debtorAccountIban ?? null
-}
-
 type StatementStackRow = {
   stackId: string
   representative: StatementTransaction
@@ -485,7 +468,6 @@ type StatementStackRow = {
   account: string
   amount: number
   runningBalance: string | null
-  counterpartEntries: BadgeEntry[]
   referenceEntries: BadgeEntry[]
   transactionTypeEntries: BadgeEntry[]
   category: 'Samlepost' | 'Enkeltpost'
@@ -564,32 +546,9 @@ const columns: TableColumn<StatementStackRow>[] = [
           variant: 'subtle',
           color: 'neutral',
         }, () => category),
-        h('span', { class: 'text-xs text-muted' }, `${lineCount} linje${lineCount === 1 ? '' : 'r'}`),
+        h('span', { class: 'text-xs text-muted' }, `${lineCount} underliggende transaktioner`),
       ])
     },
-  },
-  { // Counterparty
-    id: 'counterpart',
-    header: () => sortableHeader('Modpart', 'counterpart'),
-    size: 220,
-    cell: ({ row }) => {
-      const entries = row.original.counterpartEntries
-      if (!entries.length) return '-'
-
-      return h(
-        'div',
-        { class: TRANSACTION_BADGE_COLUMN_CLASS },
-        entries.map((entry, index) =>
-          h(UBadge, {
-            key: `counterpart-${index}`,
-            class: TRANSACTION_BADGE_STYLE.counterpart.class,
-            variant: TRANSACTION_BADGE_STYLE.counterpart.variant,
-            color: TRANSACTION_BADGE_STYLE.counterpart.color,
-            title: formatTransactionFieldHint(entry.hint),
-          }, () => entry.value),
-        ),
-      )
-    }
   },
   { // Reference (aggregated from multiple fields)
     id: 'reference',
@@ -728,17 +687,18 @@ const tableUi = {
           @update:page="setPage"
         />
 
-        <UModal v-model:open="isRawTransactionOpen" title="Rå transaktion (XML)" :ui="{ content: 'max-w-5xl', body: 'space-y-3' }">
+        <UModal v-model:open="isRawTransactionOpen" title="Kildevisning (samlepost)" :ui="{ content: 'max-w-5xl', body: 'space-y-3' }">
           <template #body>
             <div v-if="!selectedRawTransaction" class="text-sm text-muted">Ingen transaktion valgt.</div>
             <div v-else class="space-y-3">
-              <div v-if="rawSourceState === 'pending'" class="text-sm text-muted">Henter XML-kildedata...</div>
-              <div v-else-if="rawSourceState === 'unavailable'" class="text-sm text-muted">XML-kilden er ikke tilgængelig for denne transaktion.</div>
-              <div v-else-if="rawSourceState === 'error'" class="text-sm text-error">Kunne ikke hente XML-kildedata.</div>
+              <div v-if="rawSourceState === 'pending'" class="text-sm text-muted">Henter kildevisning...</div>
+              <div v-else-if="rawSourceState === 'unavailable'" class="text-sm text-muted">Kildevisningen er ikke tilgængelig for denne transaktion.</div>
+              <div v-else-if="rawSourceState === 'error'" class="text-sm text-error">Kunne ikke hente kildevisningen.</div>
               <div v-else-if="rawSource" class="space-y-2">
                 <div class="text-xs text-muted">
-                  Statement {{ rawSource.statementId }} · Ntry {{ rawSource.entryIndex }}<span v-if="rawSource.entrySubIndex !== null"> · TxDtls {{ rawSource.entrySubIndex }}</span>
+                  Statement {{ rawSource.statementId }} · Ntry {{ rawSource.entryIndex }} · {{ rawSource.underlyingTransactionCount }} underliggende transaktioner
                 </div>
+                <p class="text-sm text-muted">Dette er en genereret visning af lagrede entry-felter, ikke den oprindelige CAMT-fil.</p>
                 <UTree
                   :items="rawSourceTreeItems"
                   class="max-h-[65vh] overflow-auto font-mono text-xs [&_button]:whitespace-normal [&_button]:break-all"

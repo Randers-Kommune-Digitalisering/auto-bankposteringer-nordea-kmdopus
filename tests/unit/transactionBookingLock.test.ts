@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { resolveBookingLockScope, type BookingLockCandidate } from '../../server/utils/transactionBookingLock'
 
 describe('transaction booking lock scope', () => {
-  it('resolves the full semantic group independently of filtered results', () => {
+  it('keeps distinct CAMT entries independently lockable even when bank references match', () => {
     const candidates: BookingLockCandidate[] = [
       {
         id: '00000000-0000-4000-8000-000000000001',
@@ -22,7 +22,7 @@ describe('transaction booking lock scope', () => {
         bookingDate: new Date('2026-01-02T00:00:00.000Z'),
         creditDebitIndicator: 'CRDT',
         statementId: 'statement-a',
-        entryIndex: 1,
+        entryIndex: 2,
         ntryRef: 'Batch-1',
         ntryAcctSvcrRef: 'Entry-1',
         entryAdditionalInfo: null,
@@ -43,13 +43,13 @@ describe('transaction booking lock scope', () => {
     ]
 
     expect(resolveBookingLockScope(candidates[0]!.id, candidates)).toEqual({
-      groupKey: 'nordea:batch:account-a:2026-01-02:CRDT:BATCH-1:ENTRY-1',
-      allTransactionIds: [candidates[0]!.id, candidates[1]!.id],
-      openTransactionIds: [candidates[0]!.id, candidates[1]!.id],
+      groupKey: null,
+      allTransactionIds: [candidates[0]!.id],
+      openTransactionIds: [candidates[0]!.id],
     })
   })
 
-  it('keeps processed members in the semantic group but excludes them from the active claim', () => {
+  it('does not pull a processed separate entry into an open entry lock', () => {
     const candidates: BookingLockCandidate[] = [
       {
         id: '00000000-0000-4000-8000-000000000011',
@@ -57,7 +57,7 @@ describe('transaction booking lock scope', () => {
         bookingDate: new Date('2026-01-02T00:00:00.000Z'),
         creditDebitIndicator: 'CRDT',
         statementId: 'statement-a',
-        entryIndex: 1,
+        entryIndex: 2,
         ntryRef: 'Batch-1',
         ntryAcctSvcrRef: 'Entry-1',
         entryAdditionalInfo: null,
@@ -78,8 +78,8 @@ describe('transaction booking lock scope', () => {
     ]
 
     expect(resolveBookingLockScope(candidates[0]!.id, candidates)).toEqual({
-      groupKey: 'nordea:batch:account-a:2026-01-02:CRDT:BATCH-1:ENTRY-1',
-      allTransactionIds: [candidates[0]!.id, candidates[1]!.id],
+      groupKey: null,
+      allTransactionIds: [candidates[0]!.id],
       openTransactionIds: [candidates[0]!.id],
     })
   })

@@ -3,14 +3,23 @@
 This repo is a stateless financial integration engine:
 - All *state* lives in Postgres.
 - Runtime behavior is deterministic from persisted state + inputs.
-- Bank ingestion stores raw source documents for auditability and reproducibility.
+- Bank ingestion stores a source-document hash and normalized entry data, not raw bank documents or underlying transaction details.
 
 ## Core flow
 
-1) Fetch raw bank documents (transport/adapters)
-2) Persist document + normalize into canonical CAMT tables
+1) Fetch bank documents (transport/adapters)
+2) Parse outside the database transaction; persist document metadata + normalized CAMT entries in bounded batches
 3) Match transactions against deterministic rules
 4) Generate ERP posting payloads and execute ERP integration
+
+### CAMT entry aggregates
+
+- Each `Ntry` is the canonical, independently bookable transaction. Its amount and debit/credit direction come from the entry, never from summing its child `TxDtls`.
+- `transaction.underlying_transaction_count` records the number of child `TxDtls` solely as aggregate metadata. Child references, parties, remittance text, and raw XML are not persisted or exposed as individually matchable/bookable transactions.
+- `banking_document` retains metadata and a SHA-256 content hash for idempotency, but not the source XML. The protected transaction source view is synthesized from the retained entry fields and is not a copy of the original XML.
+- The worker fetches and parses bank documents before opening a short persistence transaction. Metadata and statement rows are written once; transactions and balances are inserted in bounded batches, and cursor advancement is committed atomically with the corresponding persisted documents.
+- A retry checks the latest persisted bank-stage completion event: successful ingestion reuses the run's stored entries, while a run with no completion or a failed/partial provider completion fetches again. Document hashes make persistence idempotent, and a provider cursor only advances in the same transaction as its document rows.
+- Entry aggregation is ERP-neutral. Adapters and matching/posting use the same canonical entry contract regardless of provider.
 
 ## Temporal model for runs
 
@@ -30,7 +39,7 @@ This repo is a stateless financial integration engine:
 
 ## Posting text templates (matching -> ERP)
 
-- Posting text uses deterministic canonical bank message, counterparty, and reference resolution, with an optional rule-owned template persisted alongside accounting parameters.
+- Posting text uses deterministic resolution from retained entry-level references and additional information, with an optional rule-owned template persisted alongside accounting parameters. Counterparty and child remittance fields are not available.
 - Templates are versioned structured data with ordered literal and regex-extraction parts. Extraction reads only allowlisted transaction fields; RE2 provides linear-time matching over bank-supplied text.
 - Matching criteria remain boolean predicates and do not implicitly provide capture groups. A rule's text template independently selects its source field, regex, and capture group.
 - Municipality-specific formats such as BDP/KSD are expressed as ordinary persisted accounting rules. The runtime has no implicit marker-specific formatting or seeded fallback rules.
@@ -135,15 +144,16 @@ flowchart LR
 
 - Query parameter: `search` (or alias `q`).
 - For transaction-heavy views (`mode=open-items`, `mode=statement`), the backend applies SQL-based candidate filtering before stack pagination/counts are calculated.
-- SQL prefilter uses deterministic token matching over selected transaction/reference/counterparty fields and is only activated for meaningful search input.
+- SQL prefilter uses deterministic token matching over retained entry/reference fields and is only activated for meaningful search input.
 - The client applies TanStack fuzzy ranking on the returned candidate rows to improve relevance and typo tolerance while preserving deterministic fallback ordering.
 - Result: authoritative totals/pagination stay backend-driven, while perceived relevance is tuned in the UI layer.
 
 ## Banking document retention
 
-- banking_document remains the ingestion/audit anchor, but raw payload retention can be trimmed.
-- If payload trimming is enabled, statement metadata and normalized transaction rows remain the deterministic source for runtime behavior.
-- Retention policy must be explicit and environment-aware (for example shorter retention in dev, longer in production).
+- `banking_document` is an ingestion/idempotency anchor containing document metadata and a content hash; raw bank payloads are not retained.
+- Statement metadata and normalized entry rows are the deterministic source for runtime behavior and for the generated source view.
+- The CAMT source view cannot reproduce child `TxDtls` details. This is intentional data minimization: the app retains only the aggregate entry needed for booking and the child count needed to identify a grouped entry.
+- `pnpm db:clear-bank-data -- --execute --confirm-delete-bank-derived-data --expected-database=<non-production-db>` is a one-off destructive migration preparation command. It additionally requires `ALLOW_DESTRUCTIVE_BANKING_DATA_CLEANUP=1`, refuses production-marked environments/database names, clears run-scoped booking/ERP/ingestion state and bank cursors, and preserves accounts and configuration (agreements, rules, mappings, dimensions, and catalogs). Verify `DATABASE_URL` and the database name independently before using it; it is not part of normal deployment or `db:init`.
 
 ## Authentication and Authorization (v1)
 
@@ -256,12 +266,12 @@ This avoids request-coupled false positives (for example returning `0` while dis
 
 ## Key concepts (domain)
 
-- `banking_document`: raw source content (e.g. CAMT.053 XML) + hash (idempotency)
+- `banking_document`: source metadata + content hash (idempotency; no raw source content)
 - `banking_statement`: statement header/account info extracted from document
 - `banking_statement_balance`: statement balances (OPBD/CLBD/CLAV, etc.)
-- `transaction`: normalized entry/tx details (Refs, Parties, BkTxCd, remittance)
+- `transaction`: one normalized CAMT entry per `Ntry`, with entry-level references and BkTxCd plus the child-detail count
 - `transaction_code_catalog`: provider-scoped code/name catalog for human-readable BkTxCd/proprietary labels (deterministic lookup)
-- `rule` + `rule_banking_condition`: deterministic matching rules (CAMT-keyed). Conditions include an explicit operator (e.g. `eq`, `ilike`, `regex`) and one logical gate per flat criterion group (`OG` or `ELLER`). Fields in a group use that group gate; all criterion groups on a rule must pass. Nested groups and mixed gates within one group are not supported. Regex is only allowed for selected reference/counterparty fields and is validated on input/import.
+- `rule` + `rule_banking_condition`: deterministic matching rules (CAMT-keyed). Conditions include an explicit operator (e.g. `eq`, `ilike`, `regex`) and one logical gate per flat criterion group (`OG` or `ELLER`). Fields in a group use that group gate; all criterion groups on a rule must pass. Nested groups and mixed gates within one group are not supported. Regex is only allowed for supported entry-level reference fields and is validated on input/import; child-party rules are unavailable.
 - `erp_accounting_dimension_definition`: supplier-scoped definition of accounting dimensions (domain key, required/optional, ordering)
 - `erp_accounting_dimension_constraint` + `erp_accounting_dimension_constraint_member`: supplier-scoped dependency rules between dimensions (used for deterministic validation across UI/API/import). Constraints may be conditional on the triggering dimension value via regex (e.g. different rules for `artskonto` prefixes).
 - `rule_accounting_dimension_value`: per-rule values for accounting dimensions (normalized; no hardcoded primary/secondary/tertiary)
@@ -396,7 +406,7 @@ flowchart LR
   end
 
   BankCentral <-->|"bank transport (API/SFTP/...)<br/>statements (e.g. CAMT.053)"| Fetch
-  Fetch -->|raw documents| Ingest
+  Fetch -->|documents| Ingest
   Ingest --> Match
   Match --> Post
   Post --> ERP
@@ -414,7 +424,7 @@ flowchart LR
 
   subgraph DB["PostgreSQL"]
     Doc[(banking_document)]
-    Canon["canonical CAMT tables<br/>(statements, balances, transactions)"]
+    Canon["canonical CAMT tables<br/>(statements, balances, Ntry aggregates)"]
     Rules["rules + dimension values"]
     Ops["runs + processing + cursors"]
   end
@@ -424,8 +434,8 @@ flowchart LR
   ApiRoutes --> Rules
   ApiRoutes --> Ops
 
-  Ingest -->|persist raw| Doc
-  Ingest -->|normalize| Canon
+  Ingest -->|metadata + hash| Doc
+  Ingest -->|aggregate entries| Canon
   Canon --> Match
   Rules --> Match
 

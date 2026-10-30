@@ -26,50 +26,28 @@ const nordeaTransaction = {
 }
 
 describe('rule matching groups', () => {
-  it('persists the selected gate and matches Nets in one of the party fields', () => {
-    const conditions = mapMatchesToConditionRows([{
+  it('does not create matching conditions from child party fields', () => {
+    const legacyEntry = matchEntrySchema.safeParse({
       category: 'Modpart',
       value: 'nets',
       operator: 'ilike',
       gate: 'ELLER',
       fields: ['dbtr_name', 'cdtr_name'],
-    }])
+    })
 
-    expect(conditions).toEqual([
-      { field: 'dbtr_name', operator: 'ilike', gate: 'ELLER', value: 'nets' },
-      { field: 'cdtr_name', operator: 'ilike', gate: 'ELLER', value: 'nets' },
-    ])
-    expect(evaluateConditionGroups(transaction, conditions as any)).toBe(true)
+    expect(legacyEntry.success).toBe(false)
   })
 
-  it('requires every field when a group uses OG', () => {
-    const conditions = mapMatchesToConditionRows([{
-      category: 'Modpart',
-      value: 'nets',
-      operator: 'ilike',
-      gate: 'OG',
-      fields: ['dbtr_name', 'cdtr_name'],
-    }])
-
-    expect(evaluateConditionGroups(transaction, conditions as any)).toBe(false)
-  })
-
-  it('round-trips one gate for a category group', () => {
+  it('ignores persisted matching conditions for child party fields', () => {
     const matches = mapConditionsToMatches([
       { field: 'dbtr_name', operator: 'ilike', gate: 'ELLER', value: 'nets' } as any,
       { field: 'cdtr_name', operator: 'ilike', gate: 'ELLER', value: 'nets' } as any,
     ])
 
-    expect(matches).toEqual([{
-      category: 'Modpart',
-      value: 'nets',
-      fields: ['dbtr_name', 'cdtr_name'],
-      operator: 'ilike',
-      gate: 'ELLER',
-    }])
+    expect(matches).toEqual([])
   })
 
-  it('matches the Alle felter party group when one party field contains Nets', () => {
+  it('does not expand the party group into unavailable child fields', () => {
     const conditions = mapMatchesToConditionRows([{
       category: 'Modpart',
       value: 'Nets',
@@ -77,8 +55,7 @@ describe('rule matching groups', () => {
       gate: 'ELLER',
     }])
 
-    expect(conditions).toHaveLength(8)
-    expect(evaluateConditionGroups(transaction, conditions as any)).toBe(true)
+    expect(conditions).toEqual([])
   })
 
   it('forces ELLER when fields are omitted from the DTO', () => {

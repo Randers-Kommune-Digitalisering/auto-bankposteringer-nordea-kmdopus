@@ -12,17 +12,9 @@ export type PostingTransactionContext = {
   requestLineTransactionId?: string | null
   amount: number
   statusDimensions: Record<string, string>
-
-  // CAMT.053 party + remittance fields used for posting text/counterparty
-  debtorName?: string | null
-  debtorId?: string | null
-  creditorName?: string | null
-  creditorId?: string | null
   entryAdditionalInfo?: string | null
-  txAdditionalInfo?: string | null
-  remittanceUstrd?: string[] | null
-  remittanceCreditorReference?: string | null
-  remittanceAdditional?: string[] | null
+  ntryAcctSvcrRef?: string | null
+  ntryRef?: string | null
 }
 
 export function buildPostingLines(options: {
@@ -61,10 +53,7 @@ export function buildPostingLines(options: {
     amount: Math.abs(line.amount),
     text: truncate(line.text ?? options.text),
     cpr: line.cpr ?? options.cpr,
-    attachments:
-      index === 0 && options.attachments?.length
-        ? options.attachments
-        : undefined,
+    attachments: index === 0 && options.attachments?.length ? options.attachments : undefined,
   }))
 
   return [statusLine, ...landingLines]
@@ -79,83 +68,32 @@ export function resolvePostingText(
     transactionId: tx.transactionId,
     amount: tx.amount,
     creditDebitIndicator: tx.amount < 0 ? 'DBIT' : 'CRDT',
-    debtorName: tx.debtorName,
-    debtorId: tx.debtorId,
-    creditorName: tx.creditorName,
-    creditorId: tx.creditorId,
-    remittanceUstrd: tx.remittanceUstrd,
-    remittanceAdditional: tx.remittanceAdditional,
-    remittanceCreditorReference: tx.remittanceCreditorReference,
     entryAdditionalInfo: tx.entryAdditionalInfo,
-    txAdditionalInfo: tx.txAdditionalInfo,
+    ntryAcctSvcrRef: tx.ntryAcctSvcrRef,
+    ntryRef: tx.ntryRef,
   })
 
   if (dynamicTemplate) {
     return evaluatePostingTextTemplate(dynamicTemplate, {
       bankMessage: projection.bankMessage,
-      txAdditionalInfo: tx.txAdditionalInfo ?? undefined,
       entryAdditionalInfo: tx.entryAdditionalInfo ?? undefined,
-      remittanceCreditorReference: tx.remittanceCreditorReference ?? undefined,
-      remittanceUstrd: tx.remittanceUstrd ?? undefined,
-      remittanceAdditional: tx.remittanceAdditional ?? undefined,
-      counterparty: projection.counterpart ?? undefined,
     })
   }
 
-  if (!textTemplate) {
-    return projection.postingText || tx.transactionId
-  }
+  if (!textTemplate) return projection.postingText || tx.transactionId
 
   const normalized = textTemplate.trim().toLowerCase()
-  if (normalized === 'tekst fra bank') {
-    return projection.postingText || tx.transactionId
-  }
-
-  if (normalized === 'afsender fra bank') {
-    return (projection.counterpart ?? projection.bankMessage) || tx.transactionId
-  }
-
+  if (normalized === 'tekst fra bank') return projection.postingText || tx.transactionId
+  if (normalized === 'afsender fra bank') return projection.bankMessage || tx.transactionId
   return textTemplate
 }
 
 export function resolveBankMessage(tx: PostingTransactionContext): string {
-  return resolveCanonicalBankMessage({
-    txAdditionalInfo: tx.txAdditionalInfo ?? null,
-    remittanceCreditorReference: tx.remittanceCreditorReference ?? null,
-    remittanceUstrd: tx.remittanceUstrd ?? null,
-    remittanceAdditional: tx.remittanceAdditional ?? null,
-    entryAdditionalInfo: tx.entryAdditionalInfo ?? null,
-  })
-}
-
-export function resolveCounterpartyName(tx: PostingTransactionContext): string | undefined {
-  const projection = projectCanonicalTransactionText({
-    transactionId: tx.transactionId,
-    amount: tx.amount,
-    creditDebitIndicator: tx.amount < 0 ? 'DBIT' : 'CRDT',
-    debtorName: tx.debtorName,
-    debtorId: tx.debtorId,
-    creditorName: tx.creditorName,
-    creditorId: tx.creditorId,
-  })
-
-  return projection.counterpart ?? undefined
+  return resolveCanonicalBankMessage(tx.entryAdditionalInfo ?? null)
 }
 
 export function extractCprFromTransaction(tx: PostingTransactionContext): string | undefined {
-  const haystacks = [
-    tx.entryAdditionalInfo,
-    tx.txAdditionalInfo,
-    ...(tx.remittanceUstrd ?? []),
-    ...(tx.remittanceAdditional ?? []),
-  ].filter(Boolean) as string[]
-
-  for (const value of haystacks) {
-    const cpr = extractCprFromText(value)
-    if (cpr) return cpr
-  }
-
-  return undefined
+  return tx.entryAdditionalInfo ? extractCprFromText(tx.entryAdditionalInfo) : undefined
 }
 
 function truncate(text: string, length = 50): string {

@@ -35,30 +35,21 @@ watch(parts, (entries) => {
 
 const sourceOptions: Array<{ value: PostingTextSourceField; label: string }> = [
   {
-    value: 'txAdditionalInfo',
-    label: 'Ntry/NtryDtls/TxDtls/AddtlTxInf',
+    value: 'bankMessage',
+    label: 'Bankbesked (entry)',
   },
   {
     value: 'entryAdditionalInfo',
     label: 'Ntry/AddtlNtryInf',
   },
-  {
-    value: 'remittanceCreditorReference',
-    label: 'Ntry/NtryDtls/TxDtls/RmtInf/Strd/CdtrRefInf/Ref',
-  },
-  {
-    value: 'remittanceUstrd',
-    label: 'Ntry/NtryDtls/TxDtls/RmtInf/Ustrd',
-  },
-  {
-    value: 'remittanceAdditional',
-    label: 'Ntry/NtryDtls/TxDtls/RmtInf/AddtlRmtInf',
-  },
 ]
 
 const legacySourceLabels: Partial<Record<PostingTextSourceField, string>> = {
-  bankMessage: 'Bankbesked (ældre skabelon)',
   counterparty: 'Modpart (ældre skabelon)',
+  txAdditionalInfo: 'TxDtls-tekst (ikke længere tilgængelig)',
+  remittanceCreditorReference: 'Kreditorreference fra TxDtls (ikke længere tilgængelig)',
+  remittanceUstrd: 'Remittance fra TxDtls (ikke længere tilgængelig)',
+  remittanceAdditional: 'Ekstra remittance fra TxDtls (ikke længere tilgængelig)',
 }
 
 function optionsForSource(source: PostingTextSourceField) {
@@ -172,7 +163,7 @@ function addExtractPart() {
     id: nextPartId++,
     part: {
       type: 'extract',
-      source: 'txAdditionalInfo',
+      source: 'entryAdditionalInfo',
       pattern: '',
       captureGroup: 0,
     },

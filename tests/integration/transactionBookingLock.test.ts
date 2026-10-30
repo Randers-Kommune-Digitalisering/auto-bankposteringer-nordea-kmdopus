@@ -10,7 +10,7 @@ describe('transaction booking locks (integration)', () => {
     cleanup = undefined
   })
 
-  it('claims a full semantic group, rejects another owner, and allows reclaim after release or expiry', async () => {
+  it('locks each CAMT entry independently and allows reclaim after release or expiry', async () => {
     const { default: db } = await import('../../app/lib/db')
     const { account } = await import('../../app/lib/db/schema/account')
     const { bankingDocument, bankingStatement } = await import('../../app/lib/db/schema/statement')
@@ -47,7 +47,6 @@ describe('transaction booking locks (integration)', () => {
       const createdDocument = await db.insert(bankingDocument).values({
         accountId,
         format: 'camt053',
-        content: '<Document/>',
         contentHash: randomUUID(),
       }).returning({ id: bankingDocument.id })
       documentId = createdDocument[0]!.id
@@ -63,8 +62,7 @@ describe('transaction booking locks (integration)', () => {
         runId: runId!,
         accountId: accountId!,
         statementId: statementId!,
-        entryIndex: 1,
-        entrySubIndex: index + 1,
+        entryIndex: index + 1,
         amount: '10.00',
         bookingDate,
         creditDebitIndicator: 'CRDT' as const,
@@ -85,21 +83,25 @@ describe('transaction booking locks (integration)', () => {
       expect(claim.acquired).toBe(true)
 
       const conflict = await acquireTransactionBookingLock(transactionIds[1]!, secondUser)
-      expect(conflict).toEqual({ acquired: false, ownerName: firstUser.displayName })
+      expect(conflict.acquired).toBe(true)
+      const ownerConflict = await acquireTransactionBookingLock(transactionIds[0]!, secondUser)
+      expect(ownerConflict).toEqual({ acquired: false, ownerName: firstUser.displayName })
 
-      await expect(verifyTransactionBookingLock(transactionIds[0]!, secondUser, transactionIds))
+      await expect(verifyTransactionBookingLock(transactionIds[0]!, firstUser, transactionIds))
         .rejects.toMatchObject({ statusCode: 409 })
+      await expect(verifyTransactionBookingLock(transactionIds[0]!, firstUser, [transactionIds[0]!]))
+        .resolves.toMatchObject({ allTransactionIds: [transactionIds[0]] })
 
       const renewed = await acquireTransactionBookingLock(transactionIds[0]!, firstUser, true)
       expect(renewed.acquired).toBe(true)
 
       const release = await releaseTransactionBookingLock(transactionIds[0]!, firstUser)
-      expect(release.released).toBe(2)
-      expect((await acquireTransactionBookingLock(transactionIds[1]!, secondUser)).acquired).toBe(true)
+      expect(release.released).toBe(1)
+      expect((await acquireTransactionBookingLock(transactionIds[0]!, secondUser)).acquired).toBe(true)
 
       await db.update(transactionProcessing)
         .set({ lockedAt: new Date(Date.now() - MANUAL_BOOKING_LOCK_LEASE_MS - 1) })
-        .where(inArray(transactionProcessing.transactionId, transactionIds))
+        .where(eq(transactionProcessing.transactionId, transactionIds[0]!))
       expect((await acquireTransactionBookingLock(transactionIds[0]!, firstUser)).acquired).toBe(true)
     } catch (error) {
       if (runId && !cleanup) {

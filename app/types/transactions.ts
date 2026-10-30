@@ -37,6 +37,7 @@ export type OpenTransaction = {
   groupKey: string | null;
   bookingDate: string;
   amount: number;
+  underlyingTransactionCount: number;
   accountId: string;
   bankAccountName: string | null;
   status: BookingStatus | null;
@@ -126,7 +127,7 @@ export type StatementTransaction = {
 
   statementId: string | null;
   entryIndex: number | null;
-  entrySubIndex: number | null;
+  underlyingTransactionCount: number;
 
   amount: string;
   currency: string | null;
@@ -139,13 +140,6 @@ export type StatementTransaction = {
   ntryAcctSvcrRef: string | null;
   entryAdditionalInfo: string | null;
 
-  txAcctSvcrRef: string | null;
-  refsEndToEndId: string | null;
-  refsInstrId: string | null;
-  refsPmtInfId: string | null;
-  uetr: string | null;
-  txAdditionalInfo: string | null;
-
   bkTxCdDomain: string | null;
   bkTxCdFamily: string | null;
   bkTxCdSubFamily: string | null;
@@ -157,19 +151,6 @@ export type StatementTransaction = {
   counterpart?: string | null;
   counterpartHint?: string | null;
   referenceDetails?: TransactionReferenceDetail[];
-
-  debtorName: string | null;
-  debtorId: string | null;
-  debtorAccountIban: string | null;
-  creditorName: string | null;
-  creditorId: string | null;
-  creditorAccountIban: string | null;
-  ultimateDebtorName: string | null;
-  ultimateCreditorName: string | null;
-
-  remittanceUstrd: string[] | null;
-  remittanceCreditorReference: string | null;
-  remittanceAdditional: string[] | null;
 
   processingStatus: BookingStatus | null;
   ruleApplied: number | null;
@@ -191,6 +172,6 @@ export type Camt053SourceTreeNode = {
 export type StatementTransactionSourceTree = {
   statementId: string;
   entryIndex: number | null;
-  entrySubIndex: number | null;
+  underlyingTransactionCount: number;
   tree: Camt053SourceTreeNode;
 };

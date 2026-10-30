@@ -22,7 +22,6 @@ import type { PostingAttachment, PostingLineInput } from '../../posting/domain/p
 import { buildPostingCommand, type PostingCommand } from '../../posting/handlers/postingCommand'
 import {
   extractCprFromTransaction,
-  resolveCounterpartyName,
   resolvePostingText,
 } from '../domain/postingUtils'
 import { amountMatchesAbsolute, compareRulesBySpecificity } from '../domain/rulePrioritization'
@@ -30,8 +29,7 @@ import {
   parseAmount as parseTransactionAmount,
   parseAmountOrUndefined,
 } from '../domain/amount'
-import { buildNordeaDeterministicGroupKey } from '../../banking-ingestion/handlers/camt053/nordeaAdditionalEntryInfo'
-import { fieldToCategory } from '~/lib/rules/match-config'
+import { fieldToCategory, type MatchField } from '~/lib/rules/match-config'
 import { decodeTransactionTypeCatalogReference, matchesTransactionTypeCatalogReference } from '~/lib/rules/transactionTypeCatalog'
 
 export interface MatchSummary {
@@ -53,28 +51,11 @@ export type MatchableTransaction = {
   creditDebitIndicator?: string | null
   ntryRef?: string | null
   ntryAcctSvcrRef?: string | null
-  txAcctSvcrRef?: string | null
-  refsEndToEndId?: string | null
-  refsInstrId?: string | null
-  refsPmtInfId?: string | null
-  uetr?: string | null
   entryAdditionalInfo?: string | null
-  txAdditionalInfo?: string | null
   bkTxCdDomain?: string | null
   bkTxCdFamily?: string | null
   bkTxCdSubFamily?: string | null
   bkTxCdProprietary?: string | null
-  debtorName?: string | null
-  debtorId?: string | null
-  debtorAccountIban?: string | null
-  creditorName?: string | null
-  creditorId?: string | null
-  creditorAccountIban?: string | null
-  ultimateDebtorName?: string | null
-  ultimateCreditorName?: string | null
-  remittanceUstrd?: string[] | null
-  remittanceCreditorReference?: string | null
-  remittanceAdditional?: string[] | null
   processingStatus: BookingStatus | null
   hasProcessingRow: boolean
 }
@@ -213,28 +194,11 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
       creditDebitIndicator: transaction.creditDebitIndicator,
       ntryRef: transaction.ntryRef,
       ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,
-      txAcctSvcrRef: transaction.txAcctSvcrRef,
-      refsEndToEndId: transaction.refsEndToEndId,
-      refsInstrId: transaction.refsInstrId,
-      refsPmtInfId: transaction.refsPmtInfId,
-      uetr: transaction.uetr,
       entryAdditionalInfo: transaction.entryAdditionalInfo,
-      txAdditionalInfo: transaction.txAdditionalInfo,
       bkTxCdDomain: transaction.bkTxCdDomain,
       bkTxCdFamily: transaction.bkTxCdFamily,
       bkTxCdSubFamily: transaction.bkTxCdSubFamily,
       bkTxCdProprietary: transaction.bkTxCdProprietary,
-      debtorName: transaction.debtorName,
-      debtorId: transaction.debtorId,
-      debtorAccountIban: transaction.debtorAccountIban,
-      creditorName: transaction.creditorName,
-      creditorId: transaction.creditorId,
-      creditorAccountIban: transaction.creditorAccountIban,
-      ultimateDebtorName: transaction.ultimateDebtorName,
-      ultimateCreditorName: transaction.ultimateCreditorName,
-      remittanceUstrd: transaction.remittanceUstrd,
-      remittanceCreditorReference: transaction.remittanceCreditorReference,
-      remittanceAdditional: transaction.remittanceAdditional,
       processingStatus: transactionProcessing.status,
       processingRule: transactionProcessing.ruleApplied,
       accountProvider: account.provider,
@@ -293,13 +257,6 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
     }
   }
 
-  const entryGroupSizeByEntryKey = new Map<string, number>()
-  for (const row of rows) {
-    const entryKey = toStatementEntryKey(row.statementId, row.entryIndex)
-    if (!entryKey) continue
-    entryGroupSizeByEntryKey.set(entryKey, (entryGroupSizeByEntryKey.get(entryKey) ?? 0) + 1)
-  }
-
   const normalized = rows
     .filter(row => row.transactionId && row.runId && row.accountId)
     .filter(row => !row.processingStatus || row.processingStatus === 'åben')
@@ -321,15 +278,7 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
       return {
       transactionId: row.transactionId!,
       groupedTransactionIds: [row.transactionId!],
-      groupKey: buildNordeaDeterministicGroupKey({
-        accountId: row.accountId!,
-        bookingDate,
-        creditDebitIndicator: row.creditDebitIndicator ?? null,
-        entryGroupSize: entryGroupSizeByEntryKey.get(toStatementEntryKey(row.statementId, row.entryIndex) ?? '') ?? 0,
-        ntryRef: row.ntryRef ?? null,
-        entryAdditionalInfo: row.entryAdditionalInfo ?? null,
-        ntryAcctSvcrRef: row.ntryAcctSvcrRef ?? null,
-      }),
+      groupKey: null,
       runId: row.runId!,
       accountId: row.accountId!,
       statusDimensions,
@@ -338,28 +287,11 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
       amount: indicator === 'DBIT' ? -amountAbs : amountAbs,
       ntryRef: row.ntryRef ?? null,
       ntryAcctSvcrRef: row.ntryAcctSvcrRef ?? null,
-      txAcctSvcrRef: row.txAcctSvcrRef ?? null,
-      refsEndToEndId: row.refsEndToEndId ?? null,
-      refsInstrId: row.refsInstrId ?? null,
-      refsPmtInfId: row.refsPmtInfId ?? null,
-      uetr: row.uetr ?? null,
       entryAdditionalInfo: row.entryAdditionalInfo ?? null,
-      txAdditionalInfo: row.txAdditionalInfo ?? null,
       bkTxCdDomain: row.bkTxCdDomain ?? null,
       bkTxCdFamily: row.bkTxCdFamily ?? null,
       bkTxCdSubFamily: row.bkTxCdSubFamily ?? null,
       bkTxCdProprietary: row.bkTxCdProprietary ?? null,
-      debtorName: row.debtorName ?? null,
-      debtorId: row.debtorId ?? null,
-      debtorAccountIban: row.debtorAccountIban ?? null,
-      creditorName: row.creditorName ?? null,
-      creditorId: row.creditorId ?? null,
-      creditorAccountIban: row.creditorAccountIban ?? null,
-      ultimateDebtorName: row.ultimateDebtorName ?? null,
-      ultimateCreditorName: row.ultimateCreditorName ?? null,
-      remittanceUstrd: row.remittanceUstrd ?? null,
-      remittanceCreditorReference: row.remittanceCreditorReference ?? null,
-      remittanceAdditional: row.remittanceAdditional ?? null,
       processingStatus: row.processingStatus ?? null,
       hasProcessingRow: Boolean(row.processingStatus ?? row.processingRule),
       }
@@ -383,29 +315,9 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
     existing.groupedTransactionIds.push(tx.transactionId)
     existing.amount += tx.amount
     existing.entryAdditionalInfo = [existing.entryAdditionalInfo, tx.entryAdditionalInfo].filter(Boolean).join(' || ') || null
-    existing.txAdditionalInfo = [existing.txAdditionalInfo, tx.txAdditionalInfo].filter(Boolean).join(' || ') || null
-
-    const mergeStringArray = (left: string[] | null | undefined, right: string[] | null | undefined): string[] | null => {
-      const merged = Array.from(new Set([...(left ?? []), ...(right ?? [])].filter(Boolean)))
-      return merged.length ? merged : null
-    }
-
-    existing.remittanceUstrd = mergeStringArray(existing.remittanceUstrd, tx.remittanceUstrd)
-    existing.remittanceAdditional = mergeStringArray(existing.remittanceAdditional, tx.remittanceAdditional)
-    existing.remittanceCreditorReference = existing.remittanceCreditorReference ?? tx.remittanceCreditorReference ?? null
   }
 
   return [...singles, ...Array.from(grouped.values())]
-}
-
-function toStatementEntryKey(statementId: string | null, entryIndex: number | null): string | null {
-  const normalizedStatementId = String(statementId ?? '').trim()
-  if (!normalizedStatementId) return null
-
-  const normalizedEntryIndex = Number(entryIndex)
-  if (!Number.isInteger(normalizedEntryIndex) || normalizedEntryIndex < 1) return null
-
-  return `${normalizedStatementId}:${normalizedEntryIndex}`
 }
 
 async function fetchActiveRules(accountIds: string[]): Promise<HydratedRule[]> {
@@ -539,7 +451,9 @@ export function evaluateConditionGroups(
   const groups = new Map<string, { gate: RuleConditionGate; conditions: RuleConditionRow[] }>()
 
   for (const condition of conditions) {
-    const category = fieldToCategory[condition.field as RuleConditionField] ?? condition.field
+    const category = Object.hasOwn(fieldToCategory, condition.field)
+      ? fieldToCategory[condition.field as MatchField]
+      : condition.field
     const group = groups.get(category)
     if (group) {
       if (group.gate !== (condition.gate ?? 'OG')) return false
@@ -583,32 +497,6 @@ function extractFieldValue(
       return tx.ntryRef ?? undefined
     case 'ntry_acct_svcr_ref':
       return tx.ntryAcctSvcrRef ?? undefined
-    case 'tx_acct_svcr_ref':
-      return tx.txAcctSvcrRef ?? undefined
-    case 'refs_end_to_end_id':
-      return tx.refsEndToEndId ?? undefined
-    case 'refs_instr_id':
-      return tx.refsInstrId ?? undefined
-    case 'refs_pmt_inf_id':
-      return tx.refsPmtInfId ?? undefined
-    case 'uetr':
-      return tx.uetr ?? undefined
-    case 'dbtr_name':
-      return tx.debtorName ?? undefined
-    case 'dbtr_id':
-      return tx.debtorId ?? undefined
-    case 'dbtr_acct_iban':
-      return tx.debtorAccountIban ?? undefined
-    case 'cdtr_name':
-      return tx.creditorName ?? undefined
-    case 'cdtr_id':
-      return tx.creditorId ?? undefined
-    case 'cdtr_acct_iban':
-      return tx.creditorAccountIban ?? undefined
-    case 'ultmt_dbtr_name':
-      return tx.ultimateDebtorName ?? undefined
-    case 'ultmt_cdtr_name':
-      return tx.ultimateCreditorName ?? undefined
     case 'bk_tx_cd_domain':
       return tx.bkTxCdDomain ?? undefined
     case 'bk_tx_cd_family':
@@ -621,14 +509,6 @@ function extractFieldValue(
       return tx.creditDebitIndicator ?? undefined
     case 'entry_additional_info':
       return tx.entryAdditionalInfo ?? undefined
-    case 'tx_additional_info':
-      return tx.txAdditionalInfo ?? undefined
-    case 'rmt_ustrd':
-      return tx.remittanceUstrd?.filter(Boolean).join(' ') || undefined
-    case 'rmt_cdtr_ref':
-      return tx.remittanceCreditorReference ?? undefined
-    case 'rmt_addtl':
-      return tx.remittanceAdditional?.filter(Boolean).join(' ') || undefined
     default:
       return undefined
   }

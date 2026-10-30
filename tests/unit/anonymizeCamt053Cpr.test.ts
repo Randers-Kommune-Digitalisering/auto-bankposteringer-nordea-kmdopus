@@ -33,9 +33,9 @@ describe('anonymizeCamt053Cpr', () => {
     expect(sanitized).toContain('<NtryRef>0102031234</NtryRef>')
     expect(sanitized).toContain('<Ref>0708091234</Ref>')
     expect(tx.entryAdditionalInfo).toBe('entry [CPR REDACTED]')
-    expect(tx.txAdditionalInfo).toBe('tx [CPR REDACTED]')
-    expect(tx.remittanceUstrd).toEqual(['remittance [CPR REDACTED] and [CPR REDACTED]'])
-    expect(tx.remittanceAdditional).toEqual(['purpose [CPR REDACTED]', 'additional [CPR REDACTED]'])
+    expect(tx.underlyingTransactionCount).toBe(1)
+    expect(JSON.stringify(tx)).not.toContain('tx [CPR REDACTED]')
+    expect(JSON.stringify(tx)).not.toContain('[CPR REDACTED] and')
     expect(extractCprFromTransaction({
       transactionId: '00000000-0000-0000-0000-00000000beef',
       amount: 100,

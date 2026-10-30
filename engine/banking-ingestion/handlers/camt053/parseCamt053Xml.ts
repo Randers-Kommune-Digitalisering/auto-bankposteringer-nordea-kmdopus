@@ -35,7 +35,7 @@ export type Camt053ParsedBalance = {
 
 export type Camt053ParsedTransaction = {
   entryIndex: number
-  entrySubIndex: number
+  underlyingTransactionCount: number
   amount: string
   currency: string | null
   creditDebitIndicator: string | null
@@ -47,31 +47,10 @@ export type Camt053ParsedTransaction = {
   ntryAcctSvcrRef: string | null
   entryAdditionalInfo: string | null
   entryAdditionalInfoSegments: NordeaAdditionalEntryInfoSegment[]
-
-  txAcctSvcrRef: string | null
-  refsEndToEndId: string | null
-  refsInstrId: string | null
-  refsPmtInfId: string | null
-  uetr: string | null
-  txAdditionalInfo: string | null
-
   bkTxCdDomain: string | null
   bkTxCdFamily: string | null
   bkTxCdSubFamily: string | null
   bkTxCdProprietary: string | null
-
-  debtorName: string | null
-  debtorId: string | null
-  debtorAccountIban: string | null
-  creditorName: string | null
-  creditorId: string | null
-  creditorAccountIban: string | null
-  ultimateDebtorName: string | null
-  ultimateCreditorName: string | null
-
-  remittanceUstrd: string[]
-  remittanceCreditorReference: string | null
-  remittanceAdditional: string[]
 }
 
 export function parseCamt053Xml(xml: string): Camt053ParsedDocument {
@@ -147,89 +126,28 @@ export function parseCamt053Xml(xml: string): Camt053ParsedDocument {
       const entryDomain = asTrimmedString(entry?.BkTxCd?.Domn?.Cd)
       const entryFamily = asTrimmedString(entry?.BkTxCd?.Domn?.Fmly?.Cd)
       const entrySubFamily = asTrimmedString(entry?.BkTxCd?.Domn?.Fmly?.SubFmlyCd)
-
       const entryDetails = asArray<any>(entry?.NtryDtls)
       const txDetails = entryDetails.flatMap((detail) => asArray<any>(detail?.TxDtls))
-      const rows = txDetails.length ? txDetails : [null]
+      const entryAdditionalInfo = asTrimmedString(entry?.AddtlNtryInf)
 
-      for (const [txIndexZero, tx] of rows.entries()) {
-        const entrySubIndex = txIndexZero + 1
-        const txRefs = tx?.Refs
-        const txRmtInf = tx?.RmtInf
-        const txRltdPties = tx?.RltdPties
-
-        const txBkTxCd = tx?.BkTxCd
-        const txDomain = asTrimmedString(txBkTxCd?.Domn?.Cd) ?? entryDomain
-        const txFamily = asTrimmedString(txBkTxCd?.Domn?.Fmly?.Cd) ?? entryFamily
-        const txSubFamily = asTrimmedString(txBkTxCd?.Domn?.Fmly?.SubFmlyCd) ?? entrySubFamily
-
-        const purposePrtry = normalizeStringArray(tx?.Purp?.Prtry)
-        const remittanceUstrd = normalizeStringArray(txRmtInf?.Ustrd)
-        const remittanceAdditionalInfo = normalizeStringArray(txRmtInf?.AddtlRmtInf)
-        const structuredCreditorRef = asTrimmedString(txRmtInf?.Strd?.CdtrRefInf?.Ref)
-        const additionalRemittance = [...purposePrtry, ...remittanceAdditionalInfo]
-
-        const debtor = txRltdPties?.Dbtr
-        const debtorAcct = txRltdPties?.DbtrAcct
-        const creditor = txRltdPties?.Cdtr
-        const creditorAcct = txRltdPties?.CdtrAcct
-        const ultimateDebtor = txRltdPties?.UltmtDbtr
-        const ultimateCreditor = txRltdPties?.UltmtCdtr
-
-        const debtorName = extractPartyDisplayName(debtor)
-        const debtorId = extractPartyId(debtor)
-        const debtorAccountIban = asTrimmedString(debtorAcct?.Id?.IBAN)
-
-        const entryAdditionalInfo = asTrimmedString(entry?.AddtlNtryInf)
-        const entryAdditionalInfoSegments = parseNordeaAdditionalEntryInfo(entryAdditionalInfo)
-
-        const creditorName = extractPartyDisplayName(creditor)
-        const creditorId = extractPartyId(creditor)
-        const creditorAccountIban = asTrimmedString(creditorAcct?.Id?.IBAN)
-
-        const ultimateDebtorName = extractPartyDisplayName(ultimateDebtor)
-        const ultimateCreditorName = extractPartyDisplayName(ultimateCreditor)
-
-        const txAmtNode = tx?.AmtDtls?.TxAmt?.Amt
-        const txAmount = asAmountValue(txAmtNode) ?? entryAmount
-        const txCurrency = asAmountCurrency(txAmtNode) ?? entryCurrency
-
-        transactions.push({
-          entryIndex,
-          entrySubIndex,
-          amount: txAmount,
-          currency: txCurrency,
-          creditDebitIndicator,
-          status: asTrimmedString(entry?.Sts),
-          bookingDate,
-          valueDate,
-          ntryRef: asTrimmedString(entry?.NtryRef),
-          ntryAcctSvcrRef: asTrimmedString(entry?.AcctSvcrRef),
-          entryAdditionalInfo,
-          entryAdditionalInfoSegments,
-          txAcctSvcrRef: asTrimmedString(txRefs?.AcctSvcrRef),
-          refsEndToEndId: asTrimmedString(txRefs?.EndToEndId),
-          refsInstrId: asTrimmedString(txRefs?.InstrId),
-          refsPmtInfId: asTrimmedString(txRefs?.PmtInfId),
-          uetr: asTrimmedString(txRefs?.UETR),
-          txAdditionalInfo: asTrimmedString(tx?.AddtlTxInf),
-          bkTxCdDomain: txDomain ?? null,
-          bkTxCdFamily: txFamily ?? null,
-          bkTxCdSubFamily: txSubFamily ?? null,
-          bkTxCdProprietary: asTrimmedString(txBkTxCd?.Prtry?.Cd),
-          debtorName,
-          debtorId,
-          debtorAccountIban,
-          creditorName,
-          creditorId,
-          creditorAccountIban,
-          ultimateDebtorName,
-          ultimateCreditorName,
-          remittanceUstrd,
-          remittanceCreditorReference: structuredCreditorRef,
-          remittanceAdditional: additionalRemittance,
-        })
-      }
+      transactions.push({
+        entryIndex,
+        underlyingTransactionCount: txDetails.length,
+        amount: entryAmount,
+        currency: entryCurrency,
+        creditDebitIndicator,
+        status: asTrimmedString(entry?.Sts),
+        bookingDate,
+        valueDate,
+        ntryRef: asTrimmedString(entry?.NtryRef),
+        ntryAcctSvcrRef: asTrimmedString(entry?.AcctSvcrRef),
+        entryAdditionalInfo,
+        entryAdditionalInfoSegments: parseNordeaAdditionalEntryInfo(entryAdditionalInfo),
+        bkTxCdDomain: entryDomain,
+        bkTxCdFamily: entryFamily,
+        bkTxCdSubFamily: entrySubFamily,
+        bkTxCdProprietary: asTrimmedString(entry?.BkTxCd?.Prtry?.Cd),
+      })
     }
 
     statements.push({
@@ -273,13 +191,6 @@ function asTrimmedString(value: unknown): string | null {
   }
 
   return null
-}
-
-function normalizeStringArray(value: unknown): string[] {
-  const raw = asArray<any>(value as any)
-  return raw
-    .map((entry) => asTrimmedString(entry))
-    .filter((entry): entry is string => typeof entry === 'string' && entry.length > 0)
 }
 
 function parseDateOnly(value: unknown): Date | null {
@@ -327,67 +238,4 @@ function asAmountCurrency(amtNode: any): string | null {
   if (!amtNode || typeof amtNode !== 'object') return null
   const currency = amtNode?.['@_Ccy']
   return asTrimmedString(currency)
-}
-
-function extractPartyId(party: any): string | null {
-  if (!party || typeof party !== 'object') return null
-
-  const candidates = [
-    party?.Id?.OrgId?.Othr?.Id,
-    party?.Id?.OrgId?.AnyBIC,
-    party?.Id?.PrvtId?.Othr?.Id,
-    party?.Id?.PrvtId?.Othr?.SchmeNm?.Prtry,
-  ]
-
-  for (const candidate of candidates) {
-    const asText = asTrimmedString(candidate)
-    if (asText) return asText
-  }
-
-  return null
-}
-
-function extractPartyDisplayName(party: any): string | null {
-  if (!party || typeof party !== 'object') return null
-
-  const partyName = asTrimmedString(party?.Nm)
-  if (partyName) return partyName
-
-  const adrLines = normalizeStringArray(party?.PstlAdr?.AdrLine)
-  const preferredAdrLine = pickPreferredPartyAdrLine(adrLines)
-  return preferredAdrLine ?? null
-}
-
-function pickPreferredPartyAdrLine(lines: string[]): string | null {
-  if (!Array.isArray(lines) || lines.length === 0) return null
-
-  const normalized = lines
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0)
-
-  if (normalized.length === 0) return null
-
-  const bestNameLike = normalized.find((line) => !isLikelyHonorific(line) && !isLikelyAddressLine(line))
-  if (bestNameLike) return bestNameLike
-
-  const fallbackNonAddress = normalized.find((line) => !isLikelyAddressLine(line))
-  if (fallbackNonAddress) return fallbackNonAddress
-
-  return normalized[0] ?? null
-}
-
-function isLikelyHonorific(line: string): boolean {
-  return /^(hr|fru|mr|mrs|ms|dr)\.?$/i.test(line.trim())
-}
-
-function isLikelyAddressLine(line: string): boolean {
-  const value = line.trim()
-  if (!value) return false
-
-  // Postal codes, house numbers, or floor/door markers are usually address fragments.
-  if (/\b\d{4}\b/.test(value)) return true
-  if (/\d/.test(value) && /\b(st|th|tv|mf|sal)\b/i.test(value)) return true
-
-  const upper = value.toUpperCase()
-  return /(VEJ|GADE|STI|STIEN|ALLE|ALL[EÉ]|TORV|PLADS|PARK|BOULEVARD|V[ÆA]NGE|MARKEN|BAKKEN|TOFTEN)\b/.test(upper)
 }

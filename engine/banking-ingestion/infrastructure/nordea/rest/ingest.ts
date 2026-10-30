@@ -1,12 +1,15 @@
 import { and, asc, eq } from 'drizzle-orm'
 import { logger } from '~/lib/logger'
-import appEnv from '~/lib/env/env'
+import db from '~/lib/db'
 import { bankingAgreementAccountAllowlist } from '~/lib/db/schema/bankingAgreementAccountAllowlist'
 import { account } from '~/lib/db/schema/account'
 import { bankingAgreementAccountDimension } from '~/lib/db/schema/bankingAgreementAccountDimension'
 
 import { getAdapterCursor, setAdapterCursor } from '../../../handlers/bankAdapterCursorStore'
-import { ingestCamt053Document } from '../../../handlers/ingestCamt053Document'
+import {
+  persistPreparedCamt053Document,
+  prepareCamt053Document,
+} from '../../../handlers/ingestCamt053Document'
 
 import { loadNordeaRestEnv } from './env'
 import { NordeaCorporateRestClient } from './client'
@@ -75,7 +78,6 @@ function isUnauthorized(err: unknown): boolean {
 }
 
 export async function runNordeaRestIngestion(
-  trx: any,
   input: { runId: string; bookingDate: Date },
 ): Promise<{ insertedStatements: number; insertedBalances: number; insertedTransactions: number; deduplicated: boolean }> {
   const log = logger.child({ scope: 'banking.nordeaRestIngestion' })
@@ -94,7 +96,7 @@ export async function runNordeaRestIngestion(
   const fromDate = new Date(`${bookingDateOnly}T00:00:00.000Z`)
   const toDate = fromDate
 
-  let bearer = await getNordeaRestAccessToken(trx as any, {
+  let bearer = await getNordeaRestAccessToken(db as any, {
     client,
     provider: 'nordea',
     agreementNumber: env.NORDEA_REST_AGREEMENT_NUMBER,
@@ -103,13 +105,13 @@ export async function runNordeaRestIngestion(
     scopes: env.scopes,
   })
 
-  const allowlisted: Array<{ iban: string; name: string | null }> = await trx
+  const allowlisted: Array<{ iban: string; name: string | null }> = await db
     .select({ iban: bankingAgreementAccountAllowlist.iban, name: bankingAgreementAccountAllowlist.name })
     .from(bankingAgreementAccountAllowlist)
     .where(eq(bankingAgreementAccountAllowlist.provider, 'nordea' as any))
     .orderBy(asc(bankingAgreementAccountAllowlist.iban))
 
-  const ignoredRows: Array<{ iban: string; value: string | null }> = await trx
+  const ignoredRows: Array<{ iban: string; value: string | null }> = await db
     .select({ iban: bankingAgreementAccountDimension.iban, value: bankingAgreementAccountDimension.dimensionValue })
     .from(bankingAgreementAccountDimension)
     .where(and(
@@ -146,7 +148,7 @@ export async function runNordeaRestIngestion(
       accountList = await client.listAccounts({ bearerToken: bearer, page, size: pageSize })
     } catch (err) {
       if (!isUnauthorized(err)) throw err
-      bearer = await getNordeaRestAccessToken(trx as any, {
+      bearer = await getNordeaRestAccessToken(db as any, {
         client,
         provider: 'nordea',
         agreementNumber: env.NORDEA_REST_AGREEMENT_NUMBER,
@@ -248,18 +250,7 @@ export async function runNordeaRestIngestion(
 
     const derivedAccountId = `${row.iban}-${currency}`
 
-    await trx
-      .insert(account)
-      .values({
-        id: derivedAccountId,
-        provider: 'nordea' as any,
-        iban: row.iban,
-        currency,
-        name: ownerName,
-      })
-      .onConflictDoNothing({ target: account.id })
-
-    const existingCursor = await getAdapterCursor(trx as any, {
+    const existingCursor = await getAdapterCursor(db as any, {
       accountId: derivedAccountId,
       adapterKey: NORDEA_REST_TRANSACTIONS_ADAPTER_KEY,
     })
@@ -293,7 +284,7 @@ export async function runNordeaRestIngestion(
         })
       } catch (err) {
         if (!isUnauthorized(err)) throw err
-        bearer = await getNordeaRestAccessToken(trx as any, {
+        bearer = await getNordeaRestAccessToken(db as any, {
           client,
           provider: 'nordea',
           agreementNumber: env.NORDEA_REST_AGREEMENT_NUMBER,
@@ -326,23 +317,40 @@ export async function runNordeaRestIngestion(
       transactions: allTransactions,
     })
 
-    const ingestResult = await ingestCamt053Document(trx as any, {
-      runId: input.runId,
-      provider: 'nordea',
+    const prepared = prepareCamt053Document({
       filename: `nordea-rest-${row.iban}-${bookingDateOnly}.xml`,
       xml,
     })
+    const persisted = await db.transaction(async (trx) => {
+      await trx
+        .insert(account)
+        .values({
+          id: derivedAccountId,
+          provider: 'nordea',
+          iban: row.iban,
+          currency,
+          name: ownerName,
+        })
+        .onConflictDoNothing({ target: account.id })
 
-    insertedStatements += ingestResult.insertedStatements
-    insertedBalances += ingestResult.insertedBalances
-    insertedTransactions += ingestResult.insertedTransactions
-    deduplicated = deduplicated || ingestResult.deduplicated
+      const ingestResult = await persistPreparedCamt053Document(trx as any, {
+        runId: input.runId,
+        provider: 'nordea',
+        prepared,
+      })
 
-    await setAdapterCursor(trx as any, {
-      accountId: derivedAccountId,
-      adapterKey: NORDEA_REST_TRANSACTIONS_ADAPTER_KEY,
-      cursor: { value: JSON.stringify({ bookingDate: bookingDateOnly, continuationKey: nextKey }) },
+      await setAdapterCursor(trx as any, {
+        accountId: derivedAccountId,
+        adapterKey: NORDEA_REST_TRANSACTIONS_ADAPTER_KEY,
+        cursor: { value: JSON.stringify({ bookingDate: bookingDateOnly, continuationKey: nextKey }) },
+      })
+      return ingestResult
     })
+
+    insertedStatements += persisted.insertedStatements
+    insertedBalances += persisted.insertedBalances
+    insertedTransactions += persisted.insertedTransactions
+    deduplicated = deduplicated || persisted.deduplicated
   }
 
   return { insertedStatements, insertedBalances, insertedTransactions, deduplicated }

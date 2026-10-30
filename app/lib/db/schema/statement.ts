@@ -18,14 +18,13 @@ import { bankingDocumentFormatEnum, creditDebitIndicatorEnum } from './enums'
  *
  * Notes:
  * - A document may contain multiple statements.
- * - We store the raw content for auditability + reproducibility.
+ * - We retain a content hash for idempotent ingestion without retaining source XML.
  */
 export const bankingDocument = pgTable('banking_document', {
   id: uuid().defaultRandom().primaryKey(),
   accountId: text('account_id').references(() => account.id),
   format: bankingDocumentFormatEnum('format').notNull(),
   filename: text('filename'),
-  content: text('content').notNull(),
   contentHash: text('content_hash').notNull().unique(),
   receivedAt: timestamp('received_at', { withTimezone: true }).notNull().defaultNow(),
 

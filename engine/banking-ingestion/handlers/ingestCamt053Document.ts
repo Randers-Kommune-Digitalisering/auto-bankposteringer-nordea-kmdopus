@@ -9,24 +9,14 @@ import {
 } from '../../../app/lib/db/schema/statement'
 import { bankingAgreementAccountDimension } from '../../../app/lib/db/schema/bankingAgreementAccountDimension'
 import { transaction } from '../../../app/lib/db/schema/transaction'
-import { transactionReference } from '../../../app/lib/db/schema/transactionReference'
-import { transactionParty } from '../../../app/lib/db/schema/transactionParty'
 import { prepareCamt053XmlForIngestion } from './camt053/anonymizeCamt053Cpr'
 import { parseCamt053Xml } from './camt053/parseCamt053Xml'
-import {
-  buildReferenceDedupKeyV2,
-  normalizeReferenceValueV2,
-  type TransactionReferenceTypeV2,
-  type TransactionSourceScopeV2,
-  type TransactionPartyRoleV2,
-} from '../domain/transactionV2'
 
 type BankProvider = 'danskebank' | 'nordea' | 'bankconnect'
 
 type DbClient = {
   select: any
   insert: any
-  update: any
 }
 
 type IngestCamt053DocumentInput = {
@@ -35,6 +25,14 @@ type IngestCamt053DocumentInput = {
   filename?: string | null
   xml: string
 }
+
+export type PreparedCamt053Document = {
+  filename: string | null
+  contentHash: string
+  parsed: ReturnType<typeof parseCamt053Xml>
+}
+
+const INSERT_BATCH_SIZE = 250
 
 function accountIdFromStatement(stmt: { iban?: string | null; currency?: string | null }): string | null {
   const iban = (stmt.iban ?? '').trim()
@@ -47,188 +45,15 @@ function isTruthy(value: unknown): boolean {
   return /^(1|true|yes)$/i.test(String(value ?? '').trim())
 }
 
-function normalizeOptional(value: string | null | undefined): string | null {
-  const normalized = String(value ?? '').trim()
-  return normalized.length ? normalized : null
-}
+export function prepareCamt053Document(input: Pick<IngestCamt053DocumentInput, 'filename' | 'xml'>): PreparedCamt053Document {
+  const contentHash = crypto.createHash('sha256').update(input.xml, 'utf8').digest('hex')
+  const xml = prepareCamt053XmlForIngestion(input.xml, process.env.NODE_ENV)
 
-function buildTransactionReferenceRows(
-  transactionId: string,
-  tx: Awaited<ReturnType<typeof parseCamt053Xml>>['statements'][number]['transactions'][number],
-): Array<{
-  transactionId: string
-  xmlPath: string
-  sourceScope: TransactionSourceScopeV2
-  referenceType: TransactionReferenceTypeV2
-  sequenceNo: number
-  valueRaw: string
-  valueNormalized: string
-}> {
-  const candidates: Array<{
-    xmlPath: string
-    sourceScope: TransactionSourceScopeV2
-    referenceType: TransactionReferenceTypeV2
-    value: string | null | undefined
-  }> = [
-    { xmlPath: 'Ntry/NtryRef', sourceScope: 'entry', referenceType: 'reference', value: tx.ntryRef },
-    { xmlPath: 'Ntry/AcctSvcrRef', sourceScope: 'entry', referenceType: 'reference', value: tx.ntryAcctSvcrRef },
-    { xmlPath: 'Ntry/NtryDtls/TxDtls/Refs/AcctSvcrRef', sourceScope: 'tx', referenceType: 'reference', value: tx.txAcctSvcrRef },
-    { xmlPath: 'Ntry/NtryDtls/TxDtls/Refs/EndToEndId', sourceScope: 'tx', referenceType: 'reference', value: tx.refsEndToEndId },
-    { xmlPath: 'Ntry/NtryDtls/TxDtls/Refs/InstrId', sourceScope: 'tx', referenceType: 'reference', value: tx.refsInstrId },
-    { xmlPath: 'Ntry/NtryDtls/TxDtls/Refs/PmtInfId', sourceScope: 'tx', referenceType: 'reference', value: tx.refsPmtInfId },
-    { xmlPath: 'Ntry/NtryDtls/TxDtls/Refs/UETR', sourceScope: 'tx', referenceType: 'reference', value: tx.uetr },
-    { xmlPath: 'Ntry/AddtlNtryInf', sourceScope: 'entry', referenceType: 'technical', value: tx.entryAdditionalInfo },
-    { xmlPath: 'Ntry/NtryDtls/TxDtls/AddtlTxInf', sourceScope: 'tx', referenceType: 'freetext', value: tx.txAdditionalInfo },
-    { xmlPath: 'Ntry/NtryDtls/TxDtls/RmtInf/Strd/CdtrRefInf/Ref', sourceScope: 'remittance', referenceType: 'remittance', value: tx.remittanceCreditorReference },
-  ]
-
-  for (const value of tx.remittanceUstrd ?? []) {
-    candidates.push({
-      xmlPath: 'Ntry/NtryDtls/TxDtls/RmtInf/Ustrd',
-      sourceScope: 'remittance',
-      referenceType: 'remittance',
-      value,
-    })
+  return {
+    filename: input.filename ?? null,
+    contentHash,
+    parsed: parseCamt053Xml(xml),
   }
-
-  for (const value of tx.remittanceAdditional ?? []) {
-    candidates.push({
-      xmlPath: 'Ntry/NtryDtls/TxDtls/RmtInf/AddtlRmtInf',
-      sourceScope: 'remittance',
-      referenceType: 'remittance',
-      value,
-    })
-  }
-
-  const dedup = new Set<string>()
-  const rows: Array<{
-    transactionId: string
-    xmlPath: string
-    sourceScope: TransactionSourceScopeV2
-    referenceType: TransactionReferenceTypeV2
-    sequenceNo: number
-    valueRaw: string
-    valueNormalized: string
-  }> = []
-
-  for (const candidate of candidates) {
-    const valueRaw = normalizeOptional(candidate.value)
-    if (!valueRaw) continue
-    const valueNormalized = normalizeReferenceValueV2(valueRaw)
-    if (!valueNormalized) continue
-
-    const dedupKey = buildReferenceDedupKeyV2({
-      xmlPath: candidate.xmlPath,
-      valueNormalized,
-    })
-    if (dedup.has(dedupKey)) continue
-    dedup.add(dedupKey)
-
-    rows.push({
-      transactionId,
-      xmlPath: candidate.xmlPath,
-      sourceScope: candidate.sourceScope,
-      referenceType: candidate.referenceType,
-      sequenceNo: rows.length + 1,
-      valueRaw,
-      valueNormalized,
-    })
-  }
-
-  return rows
-}
-
-function buildTransactionPartyRows(
-  transactionId: string,
-  tx: Awaited<ReturnType<typeof parseCamt053Xml>>['statements'][number]['transactions'][number],
-): Array<{
-  transactionId: string
-  role: TransactionPartyRoleV2
-  displayName: string | null
-  identifier: string | null
-  accountIban: string | null
-  xmlPathName: string | null
-  xmlPathId: string | null
-  sequenceNo: number
-}> {
-  const candidates: Array<{
-    role: TransactionPartyRoleV2
-    displayName: string | null
-    identifier: string | null
-    accountIban: string | null
-    xmlPathName: string
-    xmlPathId: string
-    xmlPathIban: string
-  }> = [
-    {
-      role: 'debtor',
-      displayName: tx.debtorName,
-      identifier: tx.debtorId,
-      accountIban: tx.debtorAccountIban,
-      xmlPathName: 'Ntry/NtryDtls/TxDtls/RltdPties/Dbtr/Nm',
-      xmlPathId: 'Ntry/NtryDtls/TxDtls/RltdPties/Dbtr/Id',
-      xmlPathIban: 'Ntry/NtryDtls/TxDtls/RltdPties/DbtrAcct/Id/IBAN',
-    },
-    {
-      role: 'creditor',
-      displayName: tx.creditorName,
-      identifier: tx.creditorId,
-      accountIban: tx.creditorAccountIban,
-      xmlPathName: 'Ntry/NtryDtls/TxDtls/RltdPties/Cdtr/Nm',
-      xmlPathId: 'Ntry/NtryDtls/TxDtls/RltdPties/Cdtr/Id',
-      xmlPathIban: 'Ntry/NtryDtls/TxDtls/RltdPties/CdtrAcct/Id/IBAN',
-    },
-    {
-      role: 'ultimateDebtor',
-      displayName: tx.ultimateDebtorName,
-      identifier: null,
-      accountIban: null,
-      xmlPathName: 'Ntry/NtryDtls/TxDtls/RltdPties/UltmtDbtr/Nm',
-      xmlPathId: 'Ntry/NtryDtls/TxDtls/RltdPties/UltmtDbtr/Id',
-      xmlPathIban: 'Ntry/NtryDtls/TxDtls/RltdPties/UltmtDbtrAcct/Id/IBAN',
-    },
-    {
-      role: 'ultimateCreditor',
-      displayName: tx.ultimateCreditorName,
-      identifier: null,
-      accountIban: null,
-      xmlPathName: 'Ntry/NtryDtls/TxDtls/RltdPties/UltmtCdtr/Nm',
-      xmlPathId: 'Ntry/NtryDtls/TxDtls/RltdPties/UltmtCdtr/Id',
-      xmlPathIban: 'Ntry/NtryDtls/TxDtls/RltdPties/UltmtCdtrAcct/Id/IBAN',
-    },
-  ]
-
-  const rows: Array<{
-    transactionId: string
-    role: TransactionPartyRoleV2
-    displayName: string | null
-    identifier: string | null
-    accountIban: string | null
-    xmlPathName: string | null
-    xmlPathId: string | null
-    sequenceNo: number
-  }> = []
-
-  for (const candidate of candidates) {
-    const displayName = normalizeOptional(candidate.displayName)
-    const identifier = normalizeOptional(candidate.identifier)
-    const accountIban = normalizeOptional(candidate.accountIban)
-
-    if (!displayName && !identifier && !accountIban) continue
-
-    rows.push({
-      transactionId,
-      role: candidate.role,
-      displayName,
-      identifier,
-      accountIban,
-      xmlPathName: displayName ? candidate.xmlPathName : null,
-      xmlPathId: identifier ? candidate.xmlPathId : accountIban ? candidate.xmlPathIban : null,
-      sequenceNo: rows.length + 1,
-    })
-  }
-
-  return rows
 }
 
 async function ensureAccountExists(
@@ -253,17 +78,16 @@ async function ensureAccountExists(
     .limit(1)
 
   const row = rows[0] ?? null
-  if (!row) return
-  if (String(row.provider) !== input.provider) {
+  if (row && String(row.provider) !== input.provider) {
     throw new Error(
       `CAMT.053 ingestion: derived account id ${input.id} already exists with provider=${row.provider}; got provider=${input.provider}`,
     )
   }
 }
 
-export async function ingestCamt053Document(
+export async function persistPreparedCamt053Document(
   db: DbClient,
-  input: IngestCamt053DocumentInput,
+  input: { runId: string; provider: BankProvider; prepared: PreparedCamt053Document },
 ): Promise<{
   documentId: string
   insertedStatements: number
@@ -276,17 +100,9 @@ export async function ingestCamt053Document(
     runId: input.runId,
     provider: input.provider,
   })
-
-  const startedAt = Date.now()
-  const sourceXml = input.xml
-  const xml = prepareCamt053XmlForIngestion(sourceXml, process.env.NODE_ENV)
-  const contentHash = crypto.createHash('sha256').update(sourceXml, 'utf8').digest('hex')
-
-  log.debug('CAMT.053 ingest start', {
-    filename: input.filename ?? null,
-    contentHashPrefix: contentHash.slice(0, 12),
-    bytes: Buffer.byteLength(xml, 'utf8'),
-  })
+  const { prepared } = input
+  const parsed = prepared.parsed
+  const contentHash = prepared.contentHash
 
   const existing = await db
     .select({ id: bankingDocument.id })
@@ -295,10 +111,6 @@ export async function ingestCamt053Document(
     .limit(1)
 
   if (existing.length) {
-    log.debug('CAMT.053 ingest deduplicated', {
-      documentId: existing[0]!.id,
-      ms: Date.now() - startedAt,
-    })
     return {
       documentId: existing[0]!.id,
       insertedStatements: 0,
@@ -308,31 +120,19 @@ export async function ingestCamt053Document(
     }
   }
 
-  const parsed = parseCamt053Xml(xml)
-  const messageId = parsed.messageId
-  const createdAt = parsed.createdAt
-
-  log.debug('CAMT.053 parsed', {
-    messageId: messageId ?? null,
-    createdAt: createdAt ?? null,
-    statements: parsed.statements.length,
-  })
-
   const insertedDocument = await db
     .insert(bankingDocument)
     .values({
       accountId: null,
       format: 'camt053',
-      filename: input.filename ?? null,
-      content: xml,
+      filename: prepared.filename,
       contentHash,
-      messageId,
-      createdAt,
+      messageId: parsed.messageId,
+      createdAt: parsed.createdAt,
     })
     .returning({ id: bankingDocument.id })
 
   const documentId = insertedDocument[0]!.id
-
   const ignoredRows: Array<{ iban: string; value: string | null }> = await db
     .select({ iban: bankingAgreementAccountDimension.iban, value: bankingAgreementAccountDimension.dimensionValue })
     .from(bankingAgreementAccountDimension)
@@ -395,71 +195,49 @@ export async function ingestCamt053Document(
     const statementRowId = statementInsert[0]!.id
     insertedStatements += 1
 
-    for (const bal of stmt.balances) {
-      await db.insert(bankingStatementBalance).values({
-        statementId: statementRowId,
-        typeCode: bal.typeCode,
-        amount: bal.amount,
-        currency: bal.currency,
-        creditDebitIndicator: (bal.creditDebitIndicator ?? null) as any,
-        balanceDate: bal.balanceDate,
-      })
-      insertedBalances += 1
+    const balanceRows = stmt.balances.map((balance) => ({
+      statementId: statementRowId,
+      typeCode: balance.typeCode,
+      amount: balance.amount,
+      currency: balance.currency,
+      creditDebitIndicator: (balance.creditDebitIndicator ?? null) as any,
+      balanceDate: balance.balanceDate,
+    }))
+    for (let offset = 0; offset < balanceRows.length; offset += INSERT_BATCH_SIZE) {
+      const batch = balanceRows.slice(offset, offset + INSERT_BATCH_SIZE)
+      if (batch.length) {
+        await db.insert(bankingStatementBalance).values(batch)
+        insertedBalances += batch.length
+      }
     }
 
-    for (const tx of stmt.transactions) {
-      const insertedTx = await db.insert(transaction).values({
-        runId: input.runId,
-        accountId: derivedAccountId,
-        statementId: statementRowId,
-        entryIndex: tx.entryIndex,
-        entrySubIndex: tx.entrySubIndex,
-        amount: tx.amount,
-        currency: tx.currency,
-        creditDebitIndicator: (tx.creditDebitIndicator ?? null) as any,
-        status: tx.status,
-        bookingDate: tx.bookingDate,
-        valueDate: tx.valueDate,
-        ntryRef: tx.ntryRef,
-        ntryAcctSvcrRef: tx.ntryAcctSvcrRef,
-        entryAdditionalInfo: tx.entryAdditionalInfo,
-        txAcctSvcrRef: tx.txAcctSvcrRef,
-        refsEndToEndId: tx.refsEndToEndId,
-        refsInstrId: tx.refsInstrId,
-        refsPmtInfId: tx.refsPmtInfId,
-        uetr: tx.uetr,
-        txAdditionalInfo: tx.txAdditionalInfo,
-        bkTxCdDomain: tx.bkTxCdDomain,
-        bkTxCdFamily: tx.bkTxCdFamily,
-        bkTxCdSubFamily: tx.bkTxCdSubFamily,
-        bkTxCdProprietary: tx.bkTxCdProprietary,
-        debtorName: tx.debtorName,
-        debtorId: tx.debtorId,
-        debtorAccountIban: tx.debtorAccountIban,
-        creditorName: tx.creditorName,
-        creditorId: tx.creditorId,
-        creditorAccountIban: tx.creditorAccountIban,
-        ultimateDebtorName: tx.ultimateDebtorName,
-        ultimateCreditorName: tx.ultimateCreditorName,
-        remittanceUstrd: tx.remittanceUstrd.length ? tx.remittanceUstrd : null,
-        remittanceCreditorReference: tx.remittanceCreditorReference,
-        remittanceAdditional: tx.remittanceAdditional.length ? tx.remittanceAdditional : null,
-      }).returning({ id: transaction.id })
+    const transactionRows = stmt.transactions.map((tx) => ({
+      runId: input.runId,
+      accountId: derivedAccountId,
+      statementId: statementRowId,
+      entryIndex: tx.entryIndex,
+      underlyingTransactionCount: tx.underlyingTransactionCount,
+      amount: tx.amount,
+      currency: tx.currency,
+      creditDebitIndicator: (tx.creditDebitIndicator ?? null) as any,
+      status: tx.status,
+      bookingDate: tx.bookingDate,
+      valueDate: tx.valueDate,
+      ntryRef: tx.ntryRef,
+      ntryAcctSvcrRef: tx.ntryAcctSvcrRef,
+      entryAdditionalInfo: tx.entryAdditionalInfo,
+      bkTxCdDomain: tx.bkTxCdDomain,
+      bkTxCdFamily: tx.bkTxCdFamily,
+      bkTxCdSubFamily: tx.bkTxCdSubFamily,
+      bkTxCdProprietary: tx.bkTxCdProprietary,
+    }))
 
-      const transactionRowId = insertedTx[0]?.id
-      if (transactionRowId) {
-        const referenceRows = buildTransactionReferenceRows(transactionRowId, tx)
-        if (referenceRows.length) {
-          await db.insert(transactionReference).values(referenceRows)
-        }
-
-        const partyRows = buildTransactionPartyRows(transactionRowId, tx)
-        if (partyRows.length) {
-          await db.insert(transactionParty).values(partyRows)
-        }
+    for (let offset = 0; offset < transactionRows.length; offset += INSERT_BATCH_SIZE) {
+      const batch = transactionRows.slice(offset, offset + INSERT_BATCH_SIZE)
+      if (batch.length) {
+        await db.insert(transaction).values(batch)
+        insertedTransactions += batch.length
       }
-
-      insertedTransactions += 1
     }
   }
 
@@ -468,7 +246,6 @@ export async function ingestCamt053Document(
     insertedStatements,
     insertedBalances,
     insertedTransactions,
-    ms: Date.now() - startedAt,
   })
 
   return {
@@ -478,4 +255,28 @@ export async function ingestCamt053Document(
     insertedTransactions,
     deduplicated: false,
   }
+}
+
+export async function ingestCamt053Document(
+  db: DbClient,
+  input: IngestCamt053DocumentInput,
+): ReturnType<typeof persistPreparedCamt053Document> {
+  const startedAt = Date.now()
+  const prepared = prepareCamt053Document(input)
+  const result = await persistPreparedCamt053Document(db, {
+    runId: input.runId,
+    provider: input.provider,
+    prepared,
+  })
+
+  logger.debug('CAMT.053 document prepared and persisted', {
+    runId: input.runId,
+    provider: input.provider,
+    filename: input.filename ?? null,
+    contentHashPrefix: prepared.contentHash.slice(0, 12),
+    bytes: Buffer.byteLength(input.xml, 'utf8'),
+    deduplicated: result.deduplicated,
+    ms: Date.now() - startedAt,
+  })
+  return result
 }

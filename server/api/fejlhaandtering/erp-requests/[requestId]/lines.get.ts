@@ -28,9 +28,6 @@ export default defineEventHandler(async (event) => {
       transactionCurrency: transaction.currency,
       transactionBookingDate: transaction.bookingDate,
       transactionAccountId: transaction.accountId,
-      creditorName: transaction.creditorName,
-      debtorName: transaction.debtorName,
-      remittanceUstrd: transaction.remittanceUstrd,
       processingStatus: transactionProcessing.status,
       ruleApplied: transactionProcessing.ruleApplied,
     })
@@ -51,9 +48,6 @@ export default defineEventHandler(async (event) => {
             currency: row.transactionCurrency,
             bookingDate: row.transactionBookingDate,
             accountId: row.transactionAccountId,
-            creditorName: row.creditorName,
-            debtorName: row.debtorName,
-            remittanceUstrd: row.remittanceUstrd,
             processing: {
               status: row.processingStatus ?? null,
               ruleApplied: row.ruleApplied ?? null,

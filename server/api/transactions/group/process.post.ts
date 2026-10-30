@@ -70,15 +70,7 @@ export default defineEventHandler(async (event) => {
       creditDebitIndicator: transaction.creditDebitIndicator,
       ntryRef: transaction.ntryRef,
       ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,
-      debtorName: transaction.debtorName,
-      debtorId: transaction.debtorId,
-      creditorName: transaction.creditorName,
-      creditorId: transaction.creditorId,
       entryAdditionalInfo: transaction.entryAdditionalInfo,
-      txAdditionalInfo: transaction.txAdditionalInfo,
-      remittanceUstrd: transaction.remittanceUstrd,
-      remittanceCreditorReference: transaction.remittanceCreditorReference,
-      remittanceAdditional: transaction.remittanceAdditional,
       processingStatus: transactionProcessing.status,
       processingId: transactionProcessing.transactionId,
     })
@@ -203,15 +195,9 @@ export default defineEventHandler(async (event) => {
     requestLineTransactionId: null,
     amount: lineTotalAmount,
     statusDimensions: { artskonto },
-    debtorName: first.debtorName,
-    debtorId: first.debtorId,
-    creditorName: first.creditorName,
-    creditorId: first.creditorId,
     entryAdditionalInfo: rows.map((r) => r.entryAdditionalInfo).filter(Boolean).join(' || ') || null,
-    txAdditionalInfo: rows.map((r) => r.txAdditionalInfo).filter(Boolean).join(' || ') || null,
-    remittanceUstrd: dedupeStrings(rows.flatMap((r) => r.remittanceUstrd ?? [])),
-    remittanceCreditorReference: rows.map((r) => r.remittanceCreditorReference).find(Boolean) ?? null,
-    remittanceAdditional: dedupeStrings(rows.flatMap((r) => r.remittanceAdditional ?? [])),
+    ntryAcctSvcrRef: first.ntryAcctSvcrRef,
+    ntryRef: first.ntryRef,
   }
 
   const landingLines = body.lines.map((line) => {
@@ -395,11 +381,6 @@ function normalizeDigits(value?: string | null): string | null {
   }
   const digits = value.replace(/\D+/g, '')
   return digits.length ? digits : null
-}
-
-function dedupeStrings(values: string[]): string[] | null {
-  const merged = Array.from(new Set(values.map((v) => String(v).trim()).filter(Boolean)))
-  return merged.length ? merged : null
 }
 
 function validateDimensionsAgainstDefinitions(

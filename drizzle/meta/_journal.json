@@ -15,6 +15,13 @@
       "when": 1793100754793,
       "tag": "0001_manual_booking_group_drafts",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793100754794,
+      "tag": "0002_camt_entry_aggregates",
+      "breakpoints": true
     }
   ]
 }

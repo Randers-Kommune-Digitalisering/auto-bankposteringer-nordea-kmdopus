@@ -1,33 +1,44 @@
 import crypto from 'node:crypto'
 import { join } from 'node:path'
-import { and, asc, eq, inArray, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm'
 import db from '~/lib/db'
 import { run } from '~/lib/db/schema/run'
 import { errorLog } from '~/lib/db/schema/error'
 import { runTimelineEvent } from '~/lib/db/schema/runTimelineEvent'
 import { logger } from '~/lib/logger'
 import { LocalFileBankAdapter } from '../infrastructure/localFileBankAdapter'
+import type { FetchedBankDocument } from '../ports/bankAdapter'
 import { buildBankMeta } from '~~/utils/function'
-import { ingestCamt053Document } from './ingestCamt053Document'
 import { bankingAgreement } from '~/lib/db/schema/bankingAgreement'
 import { transaction } from '~/lib/db/schema/transaction'
 import type { BankProvider, BankChannel } from '~/lib/db/schema/bankingAgreement'
 import { getAgreementCursor, setAgreementCursor } from './bankingAgreementCursorStore'
+import {
+  persistPreparedCamt053Document,
+  prepareCamt053Document,
+} from './ingestCamt053Document'
 import { runNordeaRestIngestion } from '../infrastructure/nordea/rest/ingest'
 
-// Helpers
 function toDateOnlyUtc(value: Date): string {
   return value.toISOString().slice(0, 10)
 }
 
 function toDateOnly(value: Date | string): string {
-  if (value instanceof Date) {
-    return toDateOnlyUtc(value)
-  }
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return value
-  }
-  return toDateOnlyUtc(new Date(value))
+  return value instanceof Date
+    ? toDateOnlyUtc(value)
+    : /^\d{4}-\d{2}-\d{2}$/.test(value)
+      ? value
+      : toDateOnlyUtc(new Date(value))
+}
+
+export function shouldFetchBankDocuments(
+  existingRunTransactionCount: number,
+  latestBankingCompletion?: { eventType: string; status: string | null },
+): boolean {
+  return existingRunTransactionCount === 0
+    || !latestBankingCompletion
+    || latestBankingCompletion.eventType === 'completed_with_errors'
+    || latestBankingCompletion.status === 'failed'
 }
 
 function extractErrorDetails(err: unknown): {
@@ -53,10 +64,77 @@ function extractErrorDetails(err: unknown): {
   return { message, name, code, causeMessage }
 }
 
-// Main function
-export async function runTransactionBatch(options: { runId?: string; bookingDate?: Date } = {}): Promise<{ runId: string; insertedCount: number }> {
-  const log = logger.child({ scope: 'banking.runTransactionBatch' })
+function createBankAdapter(
+  input: {
+    provider: BankProvider
+    adapterKeyOverride: string | null
+    examplePath: string
+  },
+) {
+  if (input.adapterKeyOverride === 'local-file') {
+    return new LocalFileBankAdapter({
+      key: 'nordea-example-file',
+      filePath: input.examplePath,
+      filename: 'camt.053e.xml',
+    })
+  }
+  if (input.adapterKeyOverride === 'danskebank-edi-ws' || input.provider === 'danskebank') {
+    return buildBankMeta('danskebank')
+  }
+  if (input.adapterKeyOverride === 'nordea-corporate-access-ws' || input.provider === 'nordea') {
+    return buildBankMeta('nordea')
+  }
+  if (input.provider === 'bankconnect') {
+    throw new Error('BankConnect adapter er ikke implementeret endnu')
+  }
+  throw new Error(`Ingen adapter implementeret for provider=${input.provider}`)
+}
 
+async function recordProviderFailure(input: {
+  runId: string
+  provider: BankProvider
+  channel: BankChannel
+  error: unknown
+}): Promise<void> {
+  const errorDetails = extractErrorDetails(input.error)
+  const diagnosticParts = [
+    errorDetails.message,
+    errorDetails.name ? `name=${errorDetails.name}` : null,
+    errorDetails.code ? `code=${errorDetails.code}` : null,
+    errorDetails.causeMessage ? `cause=${errorDetails.causeMessage}` : null,
+  ].filter(Boolean)
+
+  await db.transaction(async (trx) => {
+    await trx.insert(errorLog).values({
+      runId: input.runId,
+      source: 'banking',
+      errorString: `provider=${input.provider} channel=${input.channel}: ${diagnosticParts.join(' | ')}`,
+    })
+    await trx.insert(runTimelineEvent).values({
+      runId: input.runId,
+      stage: 'banking',
+      eventType: 'provider_failed',
+      detail: 'Hentning fra en bankkilde fejlede.',
+      createdAt: sql`clock_timestamp()`,
+    })
+  })
+
+  logger.child({ scope: 'banking.runTransactionBatch' }).error('Bank ingestion fejlede for provider', {
+    runId: input.runId,
+    provider: input.provider,
+    channel: input.channel,
+    message: errorDetails.message,
+    errorName: errorDetails.name,
+    errorCode: errorDetails.code,
+    errorCauseMessage: errorDetails.causeMessage,
+    error: input.error,
+  })
+}
+
+export async function runTransactionBatch(
+  options: { runId?: string; bookingDate?: Date } = {},
+): Promise<{ runId: string; insertedCount: number }> {
+  const log = logger.child({ scope: 'banking.runTransactionBatch' })
   const runId = options.runId ?? crypto.randomUUID()
   const bookingDate = options.bookingDate ?? new Date()
   const bookingDateOnly = toDateOnlyUtc(bookingDate)
@@ -67,8 +145,6 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
     .where(eq(bankingAgreement.enabled, true))
     .orderBy(asc(bankingAgreement.provider))
 
-  // Temporary: ingest the bundled Nordea CAMT.053 example.
-  // This is intentionally deterministic and idempotent via banking_document.content_hash.
   const examplePath = join(
     process.cwd(),
     'resources',
@@ -77,31 +153,29 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
     'examples',
     'camt.053e.xml',
   )
-
   const adapterKeyOverride = `${process.env.BANK_ADAPTER ?? ''}`.trim() || null
-
   const overrideRun: Array<{ provider: BankProvider; channel: BankChannel }> = adapterKeyOverride
-    ? (
-        adapterKeyOverride === 'danskebank-edi-ws'
-          ? [{ provider: 'danskebank' as const, channel: 'iso20022' as const }]
-          : adapterKeyOverride === 'nordea-corporate-access-ws' || adapterKeyOverride === 'local-file'
-            ? [{ provider: 'nordea' as const, channel: 'iso20022' as const }]
-            : []
-      )
+    ? adapterKeyOverride === 'danskebank-edi-ws'
+      ? [{ provider: 'danskebank', channel: 'iso20022' }]
+      : adapterKeyOverride === 'nordea-corporate-access-ws' || adapterKeyOverride === 'local-file'
+        ? [{ provider: 'nordea', channel: 'iso20022' }]
+        : []
     : []
-
   const runs: Array<{ provider: BankProvider; channel: BankChannel }> = agreements.length
-    ? agreements.map((a) => ({ provider: a.provider as BankProvider, channel: a.channel as BankChannel }))
+    ? agreements.map((agreement) => ({
+        provider: agreement.provider as BankProvider,
+        channel: agreement.channel as BankChannel,
+      }))
     : overrideRun
 
-  const result = await db.transaction(async (trx) => {
-    // Ensure agreement rows exist for any provider we might persist cursor for.
+  await db.transaction(async (trx) => {
     if (runs.length) {
       await trx
         .insert(bankingAgreement)
-        .values(runs.map((r) => ({ provider: r.provider, enabled: false })))
+        .values(runs.map((entry) => ({ provider: entry.provider, enabled: false })))
         .onConflictDoNothing({ target: bankingAgreement.provider })
     }
+
     await trx
       .insert(run)
       .values({ id: runId, bookingDate, status: 'indlæser' })
@@ -118,40 +192,48 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
       detail: 'Bankhentning startet.',
       createdAt: sql`clock_timestamp()`,
     })
+  })
 
-    const existingRunTxCountRows = await trx
-      .select({ total: sql<number>`count(*)` })
-      .from(transaction)
-      .where(eq(transaction.runId, runId))
-      .limit(1)
+  const existingRunTxCountRows = await db
+    .select({ total: sql<number>`count(*)` })
+    .from(transaction)
+    .where(eq(transaction.runId, runId))
+    .limit(1)
+  const existingRunTxCount = Number(existingRunTxCountRows[0]?.total ?? 0)
+  const existingBookingDateTxCountRows = await db.execute(sql`
+    select count(*)::int as total
+    from "transaction" t
+    inner join run r on r.id = t.run_id
+    where r.booking_date = ${bookingDateOnly}::date
+  `)
+  const existingBookingDateTxCount = Number((existingBookingDateTxCountRows.rows?.[0] as any)?.total ?? 0)
+  const latestBankingCompletion = await db
+    .select({ eventType: runTimelineEvent.eventType, status: runTimelineEvent.status })
+    .from(runTimelineEvent)
+    .where(and(
+      eq(runTimelineEvent.runId, runId),
+      eq(runTimelineEvent.stage, 'banking'),
+      inArray(runTimelineEvent.eventType, ['completed', 'completed_with_errors']),
+    ))
+    .orderBy(desc(runTimelineEvent.createdAt), desc(runTimelineEvent.sequence))
+    .limit(1)
+  const shouldFetchFromBank = shouldFetchBankDocuments(existingRunTxCount, latestBankingCompletion[0])
 
-    const existingRunTxCount = Number(existingRunTxCountRows[0]?.total ?? 0)
+  let insertedStatements = 0
+  let insertedBalances = 0
+  let insertedTransactions = 0
+  let deduplicated = false
+  let providerErrors = 0
 
-    const existingBookingDateTxCountRows = await trx.execute(sql`
-      select count(*)::int as total
-      from "transaction" t
-      inner join run r on r.id = t.run_id
-      where r.booking_date = ${bookingDateOnly}::date
-    `)
-
-    const existingBookingDateTxCount = Number((existingBookingDateTxCountRows.rows?.[0] as any)?.total ?? 0)
-
-    const shouldFetchFromBank = existingRunTxCount === 0
-
-    let insertedStatements = 0
-    let insertedBalances = 0
-    let insertedTransactions = 0
-    let deduplicated = false
-    let providerErrors = 0
-
-    if (!shouldFetchFromBank) {
-      deduplicated = true
+  if (!shouldFetchFromBank) {
+    deduplicated = true
+    await db.transaction(async (trx) => {
       await trx.insert(errorLog).values({
         runId,
         source: 'banking',
         errorCode: 208,
         errorString: `Genbruger eksisterende bankdata i DB for bogføringsdato ${bookingDateOnly}. Bankkald er sprunget over.`,
-      } as any).catch(() => {})
+      } as any)
       await trx.insert(runTimelineEvent).values({
         runId,
         stage: 'banking',
@@ -159,129 +241,84 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
         detail: 'Eksisterende bankdata genbrugt; bankkald sprunget over.',
         createdAt: sql`clock_timestamp()`,
       })
-      log.info('Genbruger eksisterende transaktioner i DB for run - springer bankkald over', {
-        runId,
-        bookingDate: bookingDateOnly,
-        existingRunTxCount,
-        existingBookingDateTxCount,
-      })
-    }
+    })
+    log.info('Genbruger eksisterende transaktioner i DB for run - springer bankkald over', {
+      runId,
+      bookingDate: bookingDateOnly,
+      existingRunTxCount,
+      existingBookingDateTxCount,
+    })
+  }
 
-    for (const r of shouldFetchFromBank ? runs : []) {
-      try {
-        if (r.channel === 'rest') {
-          if (r.provider !== 'nordea') {
-            throw new Error(`REST-kanalen er ikke implementeret endnu for ${r.provider}`)
-          }
-
-          const nordea = await runNordeaRestIngestion(trx as any, { runId, bookingDate })
-          insertedStatements += nordea.insertedStatements
-          insertedBalances += nordea.insertedBalances
-          insertedTransactions += nordea.insertedTransactions
-          deduplicated = deduplicated || nordea.deduplicated
-          continue
+  for (const entry of shouldFetchFromBank ? runs : []) {
+    try {
+      if (entry.channel === 'rest') {
+        if (entry.provider !== 'nordea') {
+          throw new Error(`REST-kanalen er ikke implementeret endnu for ${entry.provider}`)
         }
+        const nordea = await runNordeaRestIngestion({ runId, bookingDate })
+        insertedStatements += nordea.insertedStatements
+        insertedBalances += nordea.insertedBalances
+        insertedTransactions += nordea.insertedTransactions
+        deduplicated = deduplicated || nordea.deduplicated
+        continue
+      }
 
-        const adapter = (() => {
-          if (adapterKeyOverride === 'local-file') {
-            return new LocalFileBankAdapter({
-              key: 'nordea-example-file',
-              filePath: examplePath,
-              filename: 'camt.053e.xml',
-            })
-          }
+      const adapter = createBankAdapter({
+        provider: entry.provider,
+        adapterKeyOverride,
+        examplePath,
+      })
+      const persistedCursor = await getAgreementCursor(db as any, {
+        provider: entry.provider,
+        adapterKey: adapter.key,
+      })
+      const fetched = await adapter.fetchDocuments({
+        accountId: `provider:${entry.provider}`,
+        cursor: persistedCursor,
+        limit: 25,
+        bookingDate: bookingDateOnly,
+      })
+      const preparedDocuments = fetched.documents
+        .filter((document: FetchedBankDocument) => document.format === 'camt053')
+        .map((document: FetchedBankDocument) => prepareCamt053Document({
+          filename: document.filename ?? null,
+          xml: document.content,
+        }))
 
-          if (adapterKeyOverride === 'danskebank-edi-ws' || r.provider === 'danskebank') {
-            return buildBankMeta('danskebank') // throws if provider is unknown
-          }
-
-          if (adapterKeyOverride === 'nordea-corporate-access-ws' || r.provider === 'nordea') {
-            return buildBankMeta('nordea') // throws if provider is unknown
-          }
-
-          if (r.provider === 'bankconnect') {
-            throw new Error('BankConnect adapter er ikke implementeret endnu')
-          }
-
-          throw new Error(`Ingen adapter implementeret for provider=${r.provider}`)
-        })()
-
-        const persistedCursor = await getAgreementCursor(trx as any, {
-          provider: r.provider,
-          adapterKey: adapter.key,
-        })
-
-        const fetched = await adapter.fetchDocuments({
-          // accountId is not used for agreement-scoped adapters; keep stable for tracing.
-          accountId: `provider:${r.provider}`,
-          cursor: persistedCursor,
-          limit: 25,
-          bookingDate: bookingDateOnly,
-        })
-
-        for (const doc of fetched.documents) {
-          if (doc.format !== 'camt053') continue
-
-          const ingestResult = await ingestCamt053Document(trx as any, {
+      await db.transaction(async (trx) => {
+        for (const prepared of preparedDocuments) {
+          const result = await persistPreparedCamt053Document(trx as any, {
             runId,
-            provider: r.provider,
-            filename: doc.filename ?? null,
-            xml: doc.content,
+            provider: entry.provider,
+            prepared,
           })
-
-          insertedStatements += ingestResult.insertedStatements
-          insertedBalances += ingestResult.insertedBalances
-          insertedTransactions += ingestResult.insertedTransactions
-          deduplicated = deduplicated || ingestResult.deduplicated
+          insertedStatements += result.insertedStatements
+          insertedBalances += result.insertedBalances
+          insertedTransactions += result.insertedTransactions
+          deduplicated = deduplicated || result.deduplicated
         }
 
         if (fetched.nextCursor) {
           await setAgreementCursor(trx as any, {
-            provider: r.provider,
+            provider: entry.provider,
             adapterKey: adapter.key,
             cursor: fetched.nextCursor,
           })
         }
-      } catch (err) {
-        providerErrors += 1
-        const errorDetails = extractErrorDetails(err)
-        log.error('Bank ingestion fejlede for provider', {
-          runId,
-          provider: r.provider,
-          channel: r.channel,
-          message: errorDetails.message,
-          errorName: errorDetails.name,
-          errorCode: errorDetails.code,
-          errorCauseMessage: errorDetails.causeMessage,
-          error: err,
-        })
-
-        const diagnosticParts = [
-          errorDetails.message,
-          errorDetails.name ? `name=${errorDetails.name}` : null,
-          errorDetails.code ? `code=${errorDetails.code}` : null,
-          errorDetails.causeMessage ? `cause=${errorDetails.causeMessage}` : null,
-        ].filter(Boolean)
-
-        await trx
-          .insert(errorLog)
-          .values({
-            runId,
-            source: 'banking',
-            errorString: `provider=${r.provider} channel=${r.channel}: ${diagnosticParts.join(' | ')}`,
-          })
-          .catch(() => {})
-        await trx.insert(runTimelineEvent).values({
-          runId,
-          stage: 'banking',
-          eventType: 'provider_failed',
-          detail: 'Hentning fra en bankkilde fejlede.',
-          createdAt: sql`clock_timestamp()`,
-        })
-        continue
-      }
+      })
+    } catch (error) {
+      providerErrors += 1
+      await recordProviderFailure({
+        runId,
+        provider: entry.provider,
+        channel: entry.channel,
+        error,
+      })
     }
+  }
 
+  const result = await db.transaction(async (trx) => {
     const offDateRows = await trx
       .select({ id: transaction.id, bookingDate: transaction.bookingDate })
       .from(transaction)
@@ -294,10 +331,7 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
       if (options.bookingDate) {
         const offDateIds = offDateRows.map((row) => row.id)
         if (offDateIds.length) {
-          await trx
-            .delete(transaction)
-            .where(inArray(transaction.id, offDateIds))
-
+          await trx.delete(transaction).where(inArray(transaction.id, offDateIds))
           log.info('Fjernede transaktioner uden for valgt bogføringsdato', {
             runId,
             selectedBookingDate: bookingDateOnly,
@@ -305,40 +339,36 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
           })
         }
       } else {
-      const txIdsByBookingDate = new Map<string, string[]>()
-      for (const row of offDateRows) {
-        const dateOnly = toDateOnly(row.bookingDate)
-        const txIds = txIdsByBookingDate.get(dateOnly) ?? []
-        txIds.push(row.id)
-        txIdsByBookingDate.set(dateOnly, txIds)
-      }
-
-      for (const [dateOnly, txIds] of txIdsByBookingDate.entries()) {
-        const existingRun = await trx
-          .select({ id: run.id })
-          .from(run)
-          .where(sql`${run.bookingDate} = ${dateOnly}::date`)
-          .limit(1)
-
-        const targetRunId = existingRun[0]?.id ?? crypto.randomUUID()
-        if (!existingRun[0]?.id) {
-          await trx
-            .insert(run)
-            .values({ id: targetRunId, bookingDate: new Date(`${dateOnly}T00:00:00.000Z`), status: 'udført' })
+        const txIdsByBookingDate = new Map<string, string[]>()
+        for (const row of offDateRows) {
+          const dateOnly = toDateOnly(row.bookingDate)
+          const txIds = txIdsByBookingDate.get(dateOnly) ?? []
+          txIds.push(row.id)
+          txIdsByBookingDate.set(dateOnly, txIds)
         }
 
-        await trx
-          .update(transaction)
-          .set({ runId: targetRunId })
-          .where(inArray(transaction.id, txIds))
-
-        log.info('Flyttede transaktioner til matchende bogføringsdato-run', {
-          sourceRunId: runId,
-          targetRunId,
-          bookingDate: dateOnly,
-          movedTransactions: txIds.length,
-        })
-      }
+        for (const [dateOnly, txIds] of txIdsByBookingDate) {
+          const existingRun = await trx
+            .select({ id: run.id })
+            .from(run)
+            .where(sql`${run.bookingDate} = ${dateOnly}::date`)
+            .limit(1)
+          const targetRunId = existingRun[0]?.id ?? crypto.randomUUID()
+          if (!existingRun[0]?.id) {
+            await trx.insert(run).values({
+              id: targetRunId,
+              bookingDate: new Date(`${dateOnly}T00:00:00.000Z`),
+              status: 'udført',
+            })
+          }
+          await trx.update(transaction).set({ runId: targetRunId }).where(inArray(transaction.id, txIds))
+          log.info('Flyttede transaktioner til matchende bogføringsdato-run', {
+            sourceRunId: runId,
+            targetRunId,
+            bookingDate: dateOnly,
+            movedTransactions: txIds.length,
+          })
+        }
       }
     }
 
@@ -347,14 +377,12 @@ export async function runTransactionBatch(options: { runId?: string; bookingDate
       .from(transaction)
       .where(eq(transaction.runId, runId))
       .limit(1)
-
     const runInsertedCount = Number(runTxCountRows[0]?.total ?? 0)
 
     await trx
       .update(run)
       .set({ status: providerErrors > 0 ? 'fejl' : 'udført' })
       .where(eq(run.id, runId))
-
     await trx.insert(runTimelineEvent).values({
       runId,
       stage: 'banking',

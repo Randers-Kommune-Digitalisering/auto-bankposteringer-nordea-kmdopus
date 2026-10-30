@@ -9,6 +9,10 @@ import { buildCamt053SourceTree } from '~~/server/utils/banking/camt053SourceTre
 
 const statementReadRoles = ['bookkeeper', 'admin', 'rule_admin', 'dev'] as const
 
+function dateOnly(value: Date | null): string | null {
+  return value ? value.toISOString().slice(0, 10) : null
+}
+
 export default defineEventHandler(async (event) => {
   await requireAnyAppRole(event, statementReadRoles)
 
@@ -21,9 +25,21 @@ export default defineEventHandler(async (event) => {
     .select({
       statementId: bankingStatement.statementId,
       entryIndex: transaction.entryIndex,
-      entrySubIndex: transaction.entrySubIndex,
+      underlyingTransactionCount: transaction.underlyingTransactionCount,
       format: bankingDocument.format,
-      content: bankingDocument.content,
+      amount: transaction.amount,
+      currency: transaction.currency,
+      creditDebitIndicator: transaction.creditDebitIndicator,
+      status: transaction.status,
+      bookingDate: transaction.bookingDate,
+      valueDate: transaction.valueDate,
+      ntryRef: transaction.ntryRef,
+      ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,
+      entryAdditionalInfo: transaction.entryAdditionalInfo,
+      bkTxCdDomain: transaction.bkTxCdDomain,
+      bkTxCdFamily: transaction.bkTxCdFamily,
+      bkTxCdSubFamily: transaction.bkTxCdSubFamily,
+      bkTxCdProprietary: transaction.bkTxCdProprietary,
     })
     .from(transaction)
     .innerJoin(bankingStatement, eq(transaction.statementId, bankingStatement.id))
@@ -36,20 +52,32 @@ export default defineEventHandler(async (event) => {
   }
 
   const tree = buildCamt053SourceTree({
-    xml: source.content,
     statementId: source.statementId,
     entryIndex: source.entryIndex,
-    entrySubIndex: source.entrySubIndex,
+    underlyingTransactionCount: source.underlyingTransactionCount,
+    amount: source.amount,
+    currency: source.currency,
+    creditDebitIndicator: source.creditDebitIndicator,
+    status: source.status,
+    bookingDate: dateOnly(source.bookingDate),
+    valueDate: dateOnly(source.valueDate),
+    ntryRef: source.ntryRef,
+    ntryAcctSvcrRef: source.ntryAcctSvcrRef,
+    entryAdditionalInfo: source.entryAdditionalInfo,
+    bkTxCdDomain: source.bkTxCdDomain,
+    bkTxCdFamily: source.bkTxCdFamily,
+    bkTxCdSubFamily: source.bkTxCdSubFamily,
+    bkTxCdProprietary: source.bkTxCdProprietary,
   })
 
   if (!tree) {
-    throw createError({ statusCode: 404, statusMessage: 'Transaktionen blev ikke fundet i kildedokumentet' })
+    throw createError({ statusCode: 404, statusMessage: 'Transaktionen blev ikke fundet i kilden' })
   }
 
   return {
     statementId: source.statementId,
     entryIndex: source.entryIndex,
-    entrySubIndex: source.entrySubIndex,
+    underlyingTransactionCount: source.underlyingTransactionCount,
     tree,
   }
 })

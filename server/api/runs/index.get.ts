@@ -50,52 +50,10 @@ function resolveTransactionType(row: TransactionTypeRow): string | null {
   return parts.length ? parts.join('/') : null
 }
 
-type TransactionPartyRow = {
-  debtorName: string | null;
-  debtorId: string | null;
-  ultimateDebtorName: string | null;
-  creditorName: string | null;
-  creditorId: string | null;
-  ultimateCreditorName: string | null;
-}
-
-function resolveCounterpart(amount: number, row: TransactionPartyRow): string | null {
-  const isOutgoing = amount < 0;
-  if (isOutgoing) {
-    return (
-      row.creditorName ??
-      row.ultimateCreditorName ??
-      row.creditorId ??
-      row.debtorName ??
-      row.ultimateDebtorName ??
-      row.debtorId ??
-      null
-    );
-  }
-  return (
-    row.debtorName ??
-    row.ultimateDebtorName ??
-    row.debtorId ??
-    row.creditorName ??
-    row.ultimateCreditorName ??
-    row.creditorId ??
-    null
-  );
-}
-
 type TransactionReferenceRow = {
   ntryRef: string | null;
   ntryAcctSvcrRef: string | null;
-  txAcctSvcrRef: string | null;
-  refsEndToEndId: string | null;
-  refsInstrId: string | null;
-  refsPmtInfId: string | null;
-  uetr: string | null;
   entryAdditionalInfo: string | null;
-  txAdditionalInfo: string | null;
-  remittanceUstrd: string[] | null;
-  remittanceCreditorReference: string | null;
-  remittanceAdditional: string[] | null;
 }
 
 function buildReferences(row: TransactionReferenceRow): string[] {
@@ -108,21 +66,7 @@ function buildReferences(row: TransactionReferenceRow): string[] {
 
   maybeAdd(row.ntryRef)
   maybeAdd(row.ntryAcctSvcrRef)
-  maybeAdd(row.txAcctSvcrRef)
-  maybeAdd(row.refsEndToEndId)
-  maybeAdd(row.refsInstrId)
-  maybeAdd(row.refsPmtInfId)
-  maybeAdd(row.uetr)
   maybeAdd(row.entryAdditionalInfo)
-  maybeAdd(row.txAdditionalInfo)
-  maybeAdd(row.remittanceCreditorReference)
-
-  if (Array.isArray(row.remittanceUstrd)) {
-    row.remittanceUstrd.forEach((value) => maybeAdd(value))
-  }
-  if (Array.isArray(row.remittanceAdditional)) {
-    row.remittanceAdditional.forEach((value) => maybeAdd(value))
-  }
 
   return Array.from(refs);
 }
@@ -157,22 +101,7 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
         bkTxCdProprietary: transaction.bkTxCdProprietary,
         ntryRef: transaction.ntryRef,
         ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,
-        txAcctSvcrRef: transaction.txAcctSvcrRef,
-        refsEndToEndId: transaction.refsEndToEndId,
-        refsInstrId: transaction.refsInstrId,
-        refsPmtInfId: transaction.refsPmtInfId,
-        uetr: transaction.uetr,
         entryAdditionalInfo: transaction.entryAdditionalInfo,
-        txAdditionalInfo: transaction.txAdditionalInfo,
-        remittanceUstrd: transaction.remittanceUstrd,
-        remittanceCreditorReference: transaction.remittanceCreditorReference,
-        remittanceAdditional: transaction.remittanceAdditional,
-        debtorName: transaction.debtorName,
-        debtorId: transaction.debtorId,
-        ultimateDebtorName: transaction.ultimateDebtorName,
-        creditorName: transaction.creditorName,
-        creditorId: transaction.creditorId,
-        ultimateCreditorName: transaction.ultimateCreditorName,
       })
       .from(transaction)
       .leftJoin(
@@ -289,7 +218,7 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
       status: row.status,
       ruleApplied: row.ruleApplied,
       transactionType: resolveTransactionType(row) ?? null,
-      counterpart: resolveCounterpart(amount, row),
+      counterpart: null,
       references: buildReferences(row),
     });
     transactionsByRun.set(row.runId, list);

@@ -81,30 +81,27 @@ describe('buildPostingLines', () => {
     expect(lines[2]?.attachments).toBeUndefined()
   })
 
-  it('prefers remittance text over technical entry additional info', () => {
+  it('uses only entry-level references and additional information for posting text', () => {
     const text = resolvePostingText(undefined, {
       transactionId: '00000000-0000-0000-0000-00000000beef',
       amount: 100,
       statusDimensions: { artskonto: '95999999' },
-      entryAdditionalInfo: '502:REFERENCE:63470645-20260804;804:NOTICE NUMBER:',
-      remittanceUstrd: ['63470645-20260804'],
-      debtorName: 'BAMBORA AB',
+      entryAdditionalInfo: 'Entry-level bank message',
+      ntryRef: '63470645-20260804',
     })
 
-    expect(text).toBe('BAMBORA AB — 63470645-20260804')
+    expect(text).toBe('63470645-20260804')
   })
 
-  it('prefers remittance text for template "tekst fra bank"', () => {
+  it('uses entry-level additional information for template "tekst fra bank"', () => {
     const text = resolvePostingText('tekst fra bank', {
       transactionId: '00000000-0000-0000-0000-00000000beef',
       amount: 100,
       statusDimensions: { artskonto: '95999999' },
-      entryAdditionalInfo: '502:REFERENCE:63470645-20260804;804:NOTICE NUMBER:',
-      remittanceUstrd: ['63470645-20260804'],
-      debtorName: 'BAMBORA AB',
+      entryAdditionalInfo: 'Entry-level bank message',
     })
 
-    expect(text).toBe('BAMBORA AB — 63470645-20260804')
+    expect(text).toBe('Entry-level bank message')
   })
 
   it('does not apply an implicit BDP posting-text policy', () => {
@@ -112,7 +109,7 @@ describe('buildPostingLines', () => {
       transactionId: '00000000-0000-0000-0000-00000000beef',
       amount: 100,
       statusDimensions: { artskonto: '95999999' },
-      txAdditionalInfo: 'foo BDP12345678901234567890 bar',
+      entryAdditionalInfo: 'foo BDP12345678901234567890 bar',
     })
 
     expect(text).toBe('foo BDP12345678901234567890 bar')
@@ -123,46 +120,41 @@ describe('buildPostingLines', () => {
       transactionId: '00000000-0000-0000-0000-00000000beef',
       amount: 100,
       statusDimensions: { artskonto: '95999999' },
-      txAdditionalInfo: 'foo KSD12345678901234567890 bar',
-      debtorName: 'BORGER NAVN',
+      entryAdditionalInfo: 'foo KSD12345678901234567890 bar',
     })
 
     expect(text).toContain('KSD12345678901234567890')
-    expect(text).toContain('BORGER NAVN')
+    expect(text).not.toContain('BORGER NAVN')
   })
 
   it('recreates a BDP format through a rule template', () => {
     const template = postingTextTemplateSchema.parse({
       version: 1,
-      parts: [{ type: 'extract', source: 'txAdditionalInfo', pattern: 'BDP\\d{15}' }],
+      parts: [{ type: 'extract', source: 'entryAdditionalInfo', pattern: 'BDP\\d{15}' }],
     })
     const text = resolvePostingText(undefined, {
       transactionId: '00000000-0000-0000-0000-00000000beef',
       amount: 100,
       statusDimensions: {},
-      txAdditionalInfo: 'foo BDP12345678901234567890 bar',
+      entryAdditionalInfo: 'foo BDP12345678901234567890 bar',
     }, template)
 
     expect(text).toBe('BDP123456789012345')
   })
 
-  it('recreates a KSD format with its counterparty through a rule template', () => {
+  it('recreates a KSD format from entry-level information through a rule template', () => {
     const template = postingTextTemplateSchema.parse({
       version: 1,
-      parts: [
-        { type: 'extract', source: 'txAdditionalInfo', pattern: 'KSD\\d{18}' },
-        { type: 'extract', source: 'counterparty', pattern: '.+' },
-      ],
+      parts: [{ type: 'extract', source: 'entryAdditionalInfo', pattern: 'KSD\\d{18}' }],
     })
     const text = resolvePostingText(undefined, {
       transactionId: '00000000-0000-0000-0000-00000000beef',
       amount: 100,
       statusDimensions: {},
-      txAdditionalInfo: 'foo KSD123456789012345678 bar',
-      debtorName: 'BORGER NAVN',
+      entryAdditionalInfo: 'foo KSD123456789012345678 bar',
     }, template)
 
-    expect(text).toBe('KSD123456789012345678BORGER NAVN')
+    expect(text).toBe('KSD123456789012345678')
   })
 
   it('keeps explicit booking text as highest override', () => {
@@ -170,24 +162,18 @@ describe('buildPostingLines', () => {
       transactionId: '00000000-0000-0000-0000-00000000beef',
       amount: 100,
       statusDimensions: { artskonto: '95999999' },
-      txAdditionalInfo: 'foo BDP12345678901234567890 bar',
-      debtorName: 'BORGER NAVN',
+      entryAdditionalInfo: 'foo BDP12345678901234567890 bar',
     })
 
     expect(text).toBe('Manuel posteringstekst')
   })
 
-  it.each([
-    ['entryAdditionalInfo', { entryAdditionalInfo: 'NOTICE 0102031234' }],
-    ['txAdditionalInfo', { txAdditionalInfo: 'NOTICE 0102031234' }],
-    ['remittanceUstrd', { remittanceUstrd: ['NOTICE 0102031234'] }],
-    ['remittanceAdditional', { remittanceAdditional: ['NOTICE 0102031234'] }],
-  ])('extracts CPR from %s', (_field, fields) => {
+  it('extracts CPR only from retained entry-level additional information', () => {
     expect(extractCprFromTransaction({
       transactionId: '00000000-0000-0000-0000-00000000beef',
       amount: 100,
       statusDimensions: {},
-      ...fields,
+      entryAdditionalInfo: 'NOTICE 0102031234',
     })).toBe('0102031234')
   })
 

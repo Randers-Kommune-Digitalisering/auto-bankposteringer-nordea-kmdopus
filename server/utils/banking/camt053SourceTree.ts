@@ -1,195 +1,111 @@
-import { XMLParser } from 'fast-xml-parser'
 import type { Camt053SourceTreeNode } from '~/types/transactions'
 
-type OrderedXmlNode = Record<string, unknown>
-
-const parser = new XMLParser({
-  preserveOrder: true,
-  ignoreAttributes: false,
-  attributeNamePrefix: '',
-  textNodeName: '#text',
-  cdataPropName: '#cdata',
-  commentPropName: '#comment',
-  removeNSPrefix: false,
-  trimValues: false,
-  parseTagValue: false,
-  parseAttributeValue: false,
-})
-
-function asNode(value: unknown): OrderedXmlNode | null {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-    ? value as OrderedXmlNode
-    : null
-}
-
-function elementName(node: OrderedXmlNode): string | null {
-  return Object.keys(node).find((key) => key !== ':@' && !key.startsWith('#')) ?? null
-}
-
-function localName(name: string): string {
-  const separator = name.lastIndexOf(':')
-  return separator === -1 ? name : name.slice(separator + 1)
-}
-
-function elementChildren(node: OrderedXmlNode): OrderedXmlNode[] {
-  const name = elementName(node)
-  const children = name ? node[name] : null
-  return Array.isArray(children)
-    ? children.map(asNode).filter((child): child is OrderedXmlNode => child !== null)
-    : []
-}
-
-function directElements(node: OrderedXmlNode, expectedName: string): OrderedXmlNode[] {
-  return elementChildren(node).filter((child) => {
-    const name = elementName(child)
-    return name !== null && localName(name) === expectedName
-  })
-}
-
-function textContent(nodes: OrderedXmlNode[]): string {
-  return nodes.map((node) => {
-    const text = node['#text']
-    if (typeof text === 'string') return text
-    const cdata = node['#cdata']
-    if (typeof cdata === 'string') return cdata
-    const name = elementName(node)
-    return name ? textContent(elementChildren(node)) : ''
-  }).join('')
-}
-
-function findElements(nodes: OrderedXmlNode[], expectedName: string): OrderedXmlNode[] {
-  const matches: OrderedXmlNode[] = []
-
-  for (const node of nodes) {
-    const name = elementName(node)
-    if (name && localName(name) === expectedName) matches.push(node)
-    matches.push(...findElements(elementChildren(node), expectedName))
-  }
-
-  return matches
-}
-
-function collectTransactionDetails(entry: OrderedXmlNode): OrderedXmlNode[] {
-  return findElements(elementChildren(entry), 'TxDtls')
-}
-
-function findElementPath(nodes: OrderedXmlNode[], target: OrderedXmlNode): OrderedXmlNode[] | null {
-  for (const node of nodes) {
-    if (node === target) return [node]
-    if (!elementName(node)) continue
-
-    const childPath = findElementPath(elementChildren(node), target)
-    if (childPath) return [node, ...childPath]
-  }
-
-  return null
-}
-
-function nodeValue(value: unknown): string {
-  if (typeof value === 'string') return value
-  if (Array.isArray(value)) {
-    return value.map((entry) => {
-      const node = asNode(entry)
-      return node ? textContent([node]) : ''
-    }).join('')
-  }
-  return ''
-}
-
-function toTreeNode(
-  source: OrderedXmlNode,
-  id: string,
-  selectedTxDetails: OrderedXmlNode | null,
-  contextPath: Map<OrderedXmlNode, OrderedXmlNode>,
-  statement: OrderedXmlNode,
-  entry: OrderedXmlNode,
-): Camt053SourceTreeNode[] {
-  const name = elementName(source)
-  if (!name) {
-    for (const [nodeName, kind] of [
-      ['#text', 'text'],
-      ['#cdata', 'cdata'],
-      ['#comment', 'comment'],
-    ] as const) {
-      if (nodeName in source) {
-        const value = nodeValue(source[nodeName])
-        if (kind === 'text' && !value.trim()) return []
-        return [{ id, kind, name: nodeName, value }]
-      }
-    }
-    return []
-  }
-
-  if (localName(name) === 'TxDtls' && selectedTxDetails && source !== selectedTxDetails) {
-    return []
-  }
-
-  const attributeNode = asNode(source[':@'])
-  const attributes = attributeNode
-    ? Object.entries(attributeNode).map(([attributeName, value]) => ({
-        name: attributeName,
-        value: String(value),
-      }))
-    : []
-
-  const pathChild = contextPath.get(source)
-  const children = elementChildren(source).flatMap((child, index) => {
-    if (source !== entry && pathChild) {
-      const childName = elementName(child)
-      const isStatementId = source === statement && childName !== null && localName(childName) === 'Id'
-      if (child !== pathChild && !isStatementId) return []
-    }
-
-    return toTreeNode(child, `${id}/${index}`, selectedTxDetails, contextPath, statement, entry)
-  })
-
-  return [{ id, kind: 'element', name, attributes, children }]
-}
-
-export function buildCamt053SourceTree(input: {
-  xml: string
+type EntrySource = {
   statementId: string
   entryIndex: number | null
-  entrySubIndex: number | null
-}): Camt053SourceTreeNode | null {
+  underlyingTransactionCount: number
+  amount: string
+  currency: string | null
+  creditDebitIndicator: string | null
+  status: string | null
+  bookingDate: string | null
+  valueDate: string | null
+  ntryRef: string | null
+  ntryAcctSvcrRef: string | null
+  entryAdditionalInfo: string | null
+  bkTxCdDomain: string | null
+  bkTxCdFamily: string | null
+  bkTxCdSubFamily: string | null
+  bkTxCdProprietary: string | null
+}
+
+function textNode(id: string, value: string): Camt053SourceTreeNode {
+  return { id, kind: 'text', name: '#text', value }
+}
+
+function elementNode(
+  id: string,
+  name: string,
+  value?: string | null,
+  attributes?: Array<{ name: string; value: string }>,
+): Camt053SourceTreeNode {
+  return {
+    id,
+    kind: 'element',
+    name,
+    attributes,
+    children: value == null ? [] : [textNode(`${id}/0`, value)],
+  }
+}
+
+function optionalElement(id: string, name: string, value: string | null): Camt053SourceTreeNode[] {
+  return value == null ? [] : [elementNode(id, name, value)]
+}
+
+export function buildCamt053SourceTree(input: EntrySource): Camt053SourceTreeNode | null {
   if (!Number.isInteger(input.entryIndex) || (input.entryIndex ?? 0) < 1) return null
 
-  let parsed: unknown
-  try {
-    parsed = parser.parse(input.xml)
-  } catch {
-    return null
+  const entryChildren = [
+    ...optionalElement('entry/ntry-ref', 'NtryRef', input.ntryRef),
+    elementNode('entry/amount', 'Amt', input.amount, input.currency
+      ? [{ name: 'Ccy', value: input.currency }]
+      : undefined),
+    ...optionalElement('entry/cdt-dbt-ind', 'CdtDbtInd', input.creditDebitIndicator),
+    ...optionalElement('entry/status', 'Sts', input.status),
+    ...(input.bookingDate
+      ? [{
+          id: 'entry/booking-date',
+          kind: 'element' as const,
+          name: 'BookgDt',
+          children: [elementNode('entry/booking-date/date', 'Dt', input.bookingDate)],
+        }]
+      : []),
+    ...(input.valueDate
+      ? [{
+          id: 'entry/value-date',
+          kind: 'element' as const,
+          name: 'ValDt',
+          children: [elementNode('entry/value-date/date', 'Dt', input.valueDate)],
+        }]
+      : []),
+    ...optionalElement('entry/acct-svcr-ref', 'AcctSvcrRef', input.ntryAcctSvcrRef),
+    ...optionalElement('entry/addtl-ntry-inf', 'AddtlNtryInf', input.entryAdditionalInfo),
+    {
+      id: 'entry/aggregate-count',
+      kind: 'element',
+      name: 'UnderlyingTransactionCount',
+      children: [textNode('entry/aggregate-count/0', String(input.underlyingTransactionCount))],
+    } satisfies Camt053SourceTreeNode,
+  ]
+
+  const codeChildren = [
+    ...optionalElement('entry/code/domain', 'Cd', input.bkTxCdDomain),
+    ...optionalElement('entry/code/family', 'Fmly', input.bkTxCdFamily),
+    ...optionalElement('entry/code/sub-family', 'SubFmlyCd', input.bkTxCdSubFamily),
+    ...optionalElement('entry/code/proprietary', 'Prtry', input.bkTxCdProprietary),
+  ]
+  if (codeChildren.length) {
+    entryChildren.push({
+      id: 'entry/bk-tx-cd',
+      kind: 'element',
+      name: 'BkTxCd',
+      children: codeChildren,
+    })
   }
 
-  const documentNodes = Array.isArray(parsed)
-    ? parsed.map(asNode).filter((node): node is OrderedXmlNode => node !== null)
-    : []
-  const statements = findElements(documentNodes, 'Stmt')
-  const matchingStatements = statements.filter((candidate) =>
-    textContent(directElements(candidate, 'Id')).trim() === input.statementId,
-  )
-  if (matchingStatements.length !== 1) return null
-  const statement = matchingStatements[0]!
-
-  const entry = directElements(statement, 'Ntry')[input.entryIndex! - 1]
-  if (!entry) return null
-
-  const txDetails = collectTransactionDetails(entry)
-  let selectedTxDetails: OrderedXmlNode | null = null
-  if (txDetails.length) {
-    if (!Number.isInteger(input.entrySubIndex) || (input.entrySubIndex ?? 0) < 1) return null
-    selectedTxDetails = txDetails[input.entrySubIndex! - 1] ?? null
-    if (!selectedTxDetails) return null
+  return {
+    id: 'summary',
+    kind: 'element',
+    name: 'EntrySummary',
+    children: [
+      elementNode('statement/id', 'StatementId', input.statementId),
+      {
+        id: 'entry',
+        kind: 'element',
+        name: 'Ntry',
+        attributes: [{ name: 'entryIndex', value: String(input.entryIndex) }],
+        children: entryChildren,
+      },
+    ],
   }
-
-  const document = findElements(documentNodes, 'Document')[0]
-  const path = document ? findElementPath([document], entry) : null
-  if (!document || !path) return null
-
-  const contextPath = new Map<OrderedXmlNode, OrderedXmlNode>()
-  for (let index = 0; index < path.length - 1; index += 1) {
-    contextPath.set(path[index]!, path[index + 1]!)
-  }
-
-  return toTreeNode(document, 'document', selectedTxDetails, contextPath, statement, entry)[0] ?? null
 }

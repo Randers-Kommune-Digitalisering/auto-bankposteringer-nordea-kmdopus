@@ -230,7 +230,9 @@ export function mapConditionsToMatches(conditions: RuleConditionRow[]): MatchEnt
   const byCategory = new Map<MatchCategory, Map<string, { fields: Set<MatchField>; operator: RuleConditionOperator; value: string; gate: MatchGate }>>()
 
   for (const condition of conditions) {
-    const category = fieldToCategory[condition.field]
+    if (!Object.hasOwn(fieldToCategory, condition.field)) continue
+    const field = condition.field as MatchField
+    const category = fieldToCategory[field]
     if (!category) continue
 
     const key = `${condition.gate ?? 'OG'}:${condition.operator}:${condition.value}`
@@ -248,7 +250,7 @@ export function mapConditionsToMatches(conditions: RuleConditionRow[]): MatchEnt
       })
     }
 
-    categoryMap.get(key)!.fields.add(condition.field)
+    categoryMap.get(key)!.fields.add(field)
   }
 
   const result: MatchEntry[] = []
@@ -489,7 +491,8 @@ function summarizeConditions(conditions: RuleConditionRow[]): RuleListDto['match
   }
 
   for (const condition of conditions) {
-    const category = fieldToCategory[condition.field]
+    if (!Object.hasOwn(fieldToCategory, condition.field)) continue
+    const category = fieldToCategory[condition.field as MatchField]
     if (!category) continue
 
     if (category === 'Reference') summary.references.add(condition.value)

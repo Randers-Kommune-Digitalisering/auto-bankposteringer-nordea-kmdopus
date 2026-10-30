@@ -12,8 +12,6 @@ import {
 import { ruleTag } from "./ruleTag";
 import { document } from "./document";
 import { transaction, transactionProcessing } from "./transaction";
-import { transactionReference } from "./transactionReference";
-import { transactionParty } from "./transactionParty";
 import { manualBookingDraft } from "./manualBookingDraft";
 import {
   manualBookingGroupDraft,
@@ -26,10 +24,6 @@ import { account } from "./account";
 import {
   BankingRequest,
   BankingResponse,
-  bankingPayload,
-  bankingReference,
-  bankingTxCode,
-  bankingParty,
 } from "./banking";
 import { bankingDocument, bankingStatement, bankingStatementBalance } from "./statement";
 import { bankingAdapterCursor } from "./bankingAdapterCursor";
@@ -181,8 +175,6 @@ export const transactionRelations = relations(transaction, ({ one, many }) => ({
   manualBookingDraft: one(manualBookingDraft, { fields: [transaction.id], references: [manualBookingDraft.transactionId] }),
   erpDocumentMemberships: many(erpDocumentTransaction),
   bookingPeriodRebookingAudits: many(bookingPeriodRebookingAudit),
-  references: many(transactionReference),
-  parties: many(transactionParty),
 }));
 
 export const manualBookingGroupDraftRelations = relations(manualBookingGroupDraft, ({ many }) => ({
@@ -219,41 +211,9 @@ export const bookingPeriodRebookingAuditRelations = relations(bookingPeriodReboo
   }),
 }));
 
-export const transactionReferenceRelations = relations(transactionReference, ({ one }) => ({
-  transaction: one(transaction, {
-    fields: [transactionReference.transactionId],
-    references: [transaction.id],
-  }),
-}));
-
-export const transactionPartyRelations = relations(transactionParty, ({ one }) => ({
-  transaction: one(transaction, {
-    fields: [transactionParty.transactionId],
-    references: [transaction.id],
-  }),
-}));
-
 export const transactionProcessingRelations = relations(transactionProcessing, ({ one }) => ({
   transaction: one(transaction, { fields: [transactionProcessing.transactionId], references: [transaction.id] }),
   rule: one(rule, { fields: [transactionProcessing.ruleApplied], references: [rule.id] }),
-}));
-
-export const bankingPayloadRelations = relations(bankingPayload, ({ many }) => ({
-  references: many(bankingReference),
-  txCodes: many(bankingTxCode),
-  parties: many(bankingParty),
-}));
-
-export const bankingReferenceRelations = relations(bankingReference, ({ one }) => ({
-  payload: one(bankingPayload, { fields: [bankingReference.payloadId], references: [bankingPayload.id] }),
-}));
-
-export const bankingTxCodeRelations = relations(bankingTxCode, ({ one }) => ({
-  payload: one(bankingPayload, { fields: [bankingTxCode.payloadId], references: [bankingPayload.id] }),
-}));
-
-export const bankingPartyRelations = relations(bankingParty, ({ one }) => ({
-  payload: one(bankingPayload, { fields: [bankingParty.payloadId], references: [bankingPayload.id] }),
 }));
 
 export const bankingDocumentRelations = relations(bankingDocument, ({ many, one }) => ({
