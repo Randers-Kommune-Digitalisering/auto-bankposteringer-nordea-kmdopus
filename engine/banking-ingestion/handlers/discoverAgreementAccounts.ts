@@ -10,12 +10,6 @@ import { LocalFileBankAdapter } from '../infrastructure/localFileBankAdapter'
 import { buildBankMeta } from '~~/utils/function'
 import type { BankAdapter } from '../ports/bankAdapter'
 
-function isRecoverableContentNotFound(provider: BankProvider, error: unknown): boolean {
-  if (provider !== 'nordea') return false
-  const message = String((error as any)?.message ?? error)
-  return message.includes('Nordea ResponseHeader 24') || message.toLowerCase().includes('content not found')
-}
-
 function toAccountId(input: { iban: string | null; currency: string | null }): string | null {
   const iban = String(input.iban ?? '').trim()
   const currency = String(input.currency ?? '').trim()
@@ -80,21 +74,8 @@ export async function discoverAgreementAccounts(options: {
         bookingDate,
       })
     } catch (error) {
-      if (!isRecoverableContentNotFound(options.provider, error)) {
-        skippedDays += 1
-        log.warn('Account discovery skipped date due to adapter error', {
-          bookingDate,
-          anchorBookingDate,
-          lookbackDays,
-          adapterKey: adapter.key,
-          provider: options.provider,
-          reason: String((error as any)?.message ?? error),
-        })
-        continue
-      }
-
       skippedDays += 1
-      log.warn('Account discovery skipped date due to no content', {
+      log.warn('Account discovery skipped date due to adapter error', {
         bookingDate,
         anchorBookingDate,
         lookbackDays,

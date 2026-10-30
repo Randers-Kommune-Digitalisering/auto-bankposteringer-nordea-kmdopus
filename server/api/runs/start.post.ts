@@ -7,6 +7,7 @@ import { run, runInsertSchema } from '~/lib/db/schema/run'
 import { job } from '~/lib/db/schema/job'
 import { bankingAgreement } from '~/lib/db/schema/bankingAgreement'
 import { withPgAdvisoryLock } from '~/lib/db/advisoryLock'
+import { isWeekendBookingDate } from '~/lib/scheduler/scheduledBookingDate'
 
 export default defineEventHandler(async (event) => {
   const body = runInsertSchema.safeParse(await readBody(event).catch(() => ({})))
@@ -20,6 +21,10 @@ export default defineEventHandler(async (event) => {
 
   if (!bookingDate) {
     throw createError({ statusCode: 400, statusMessage: 'Ugyldig bookingDate' })
+  }
+
+  if (isWeekendBookingDate(bookingDateIso)) {
+    throw createError({ statusCode: 400, statusMessage: 'Kørsler kan kun startes for hverdage.' })
   }
 
   const lock = await withPgAdvisoryLock(`run:start:${bookingDateIso}`, async () => {

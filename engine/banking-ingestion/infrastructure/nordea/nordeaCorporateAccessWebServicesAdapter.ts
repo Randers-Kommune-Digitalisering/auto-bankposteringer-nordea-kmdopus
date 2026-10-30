@@ -6,7 +6,12 @@ import type {
 import { z } from 'zod'
 import { logger } from '~/lib/logger'
 
-import { nordeaDownloadFile, nordeaDownloadFileList, nordeaCorporateAccessWsClientConfigSchema } from './nordeaCorporateAccessWsClient'
+import {
+  isNordeaContentNotFoundError,
+  nordeaDownloadFile,
+  nordeaDownloadFileList,
+  nordeaCorporateAccessWsClientConfigSchema,
+} from './nordeaCorporateAccessWsClient'
 
 /**
  * Nordea Corporate Access Web Services (SOAP) adapter focused on CAMT.053 ingestion.
@@ -117,7 +122,25 @@ export class NordeaCorporateAccessWebServicesAdapter implements BankAdapter {
       timeoutMs: config.timeoutMs,
     })
 
-    const list = await nordeaDownloadFileList(clientConfig, listInput)
+    let list: Awaited<ReturnType<typeof nordeaDownloadFileList>>
+    try {
+      list = await nordeaDownloadFileList(clientConfig, listInput)
+    } catch (error) {
+      if (!isNordeaContentNotFoundError(error)) throw error
+
+      log.info('Nordea DownloadFileList returned no matching content', {
+        requestedBookingDate,
+        fileType: listInput.fileType,
+        responseCode: error.responseCode,
+        responseText: error.responseText,
+      })
+      return {
+        documents: [],
+        nextCursor: {
+          value: JSON.stringify({ lastFetchAt: new Date().toISOString() }),
+        },
+      }
+    }
 
     const allTypes = Array.from(new Set(
       list.fileDescriptors

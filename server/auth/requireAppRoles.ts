@@ -23,6 +23,9 @@ function extractSessionRoles(session: OidcSession, clientId?: string, includeDev
 }
 
 async function getOidcSession(event: H3Event): Promise<OidcSession> {
+  const cachedSession = event.context.appOidcSession as OidcSession | undefined
+  if (cachedSession) return cachedSession
+
   const cookie = getRequestHeader(event, 'cookie')
 
   try {
@@ -37,7 +40,9 @@ async function getOidcSession(event: H3Event): Promise<OidcSession> {
       throw createError({ statusCode: 401, statusMessage: 'Bruger-session er ugyldig' })
     }
 
-    return payload as OidcSession
+    const session = payload as OidcSession
+    event.context.appOidcSession = session
+    return session
   }
   catch (error) {
     const status = typeof error === 'object' && error !== null && 'response' in error

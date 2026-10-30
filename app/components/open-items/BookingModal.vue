@@ -592,6 +592,18 @@ function collapseAllLines() {
 							@click="handleSaveDraft"
 						/>
 					</UTooltip>
+					<UTooltip text="Send til ERP">
+						<UButton
+							type="submit"
+							form="booking-modal-form"
+							:icon="appConfig.ui.icons.send"
+							color="primary"
+							variant="solid"
+							aria-label="Send til ERP"
+							:loading="isSubmitting"
+							:disabled="isBookingReadOnly || isLoadingDraft || isSubmitting || isSavingDraft || hasSumMismatch || accountingDimensionPending || !!accountingDimensionError"
+						/>
+					</UTooltip>
 				</div>
 			</div>
 		</template>
@@ -688,6 +700,7 @@ function collapseAllLines() {
 				</div>
 
 					<UForm
+						id="booking-modal-form"
 						ref="formRef"
 						:schema="manualBookingFormSchema"
 						:state="formState"
@@ -697,7 +710,7 @@ function collapseAllLines() {
 					>
 						<fieldset :disabled="isLoadingDraft || isSubmitting || isSavingDraft || isBookingReadOnly" class="contents">
 						<div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-							<div class="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+							<div class="grid grid-cols-2 gap-x-6 gap-y-1 px-4 text-sm">
 								<div class="text-gray-600">Linjesum</div>
 								<div class="text-right font-medium">{{ formattedLineSum }}</div>
 								<div class="text-gray-600">Transaktion</div>
@@ -837,19 +850,10 @@ function collapseAllLines() {
 							</UFormField>
 						</UCard>
 
+						<USeparator class="my-4" />
+
 						<RulesFileUpload @update="(value) => { if (!isBookingReadOnly) handleAttachmentUpdate(value) }" />
 
-						<div class="flex items-center justify-end gap-3 pt-4">
-							<UButton
-								type="submit"
-								color="primary"
-								:icon="appConfig.ui.icons.send"
-								:loading="isSubmitting"
-								:disabled="isBookingReadOnly || isSubmitting || isSavingDraft || hasSumMismatch || accountingDimensionPending || !!accountingDimensionError"
-							>
-								Send til ERP
-							</UButton>
-						</div>
 						</fieldset>
 					</UForm>
 				</div>

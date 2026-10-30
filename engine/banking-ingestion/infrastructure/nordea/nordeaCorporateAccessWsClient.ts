@@ -137,6 +137,20 @@ export type NordeaFileDescriptor = {
   timestamp: Date | null
 }
 
+export class NordeaResponseHeaderError extends Error {
+  constructor(
+    public readonly responseCode: string,
+    public readonly responseText: string | null,
+  ) {
+    super(`Nordea ResponseHeader ${responseCode}: ${responseText ?? ''}`.trim())
+    this.name = 'NordeaResponseHeaderError'
+  }
+}
+
+export function isNordeaContentNotFoundError(error: unknown): error is NordeaResponseHeaderError {
+  return error instanceof NordeaResponseHeaderError && error.responseCode === '24'
+}
+
 function buildRequestHeaderXml(cfg: NordeaCorporateAccessWsClientConfig, requestId: string, timestampIso: string): string {
   return (
     `<mod:RequestHeader>` +
@@ -160,7 +174,7 @@ function parseResponseHeaderOrThrow(doc: any): void {
     : firstTextByLocalName(doc, 'ResponseText')
   // Code may be empty when SOAP faults occur; in that case caller should treat as error anyway.
   if (responseCode && responseCode !== '0' && responseCode !== '00' && responseCode !== '000') {
-    throw new Error(`Nordea ResponseHeader ${responseCode}: ${responseText ?? ''}`.trim())
+    throw new NordeaResponseHeaderError(responseCode, responseText)
   }
 }
 

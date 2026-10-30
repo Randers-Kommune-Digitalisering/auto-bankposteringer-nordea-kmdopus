@@ -2,11 +2,26 @@ import type { RunStatus } from '~/lib/db/schema/enums'
 
 const MISSING_MAPPING_ERROR_PATTERN = /Mangler konterings-mapping \((artskonto|statuskonto)\) for bankkonto:/i
 const RECOVERY_SUCCESS_PATTERN = /^Genkørsel efter (statuskonto-mapping|ignorering af bankkonto) lykkedes\./i
+const RECOVERY_REQUESTED_PATTERN = /Automatisk genkørsel planlagt\./i
 
 export type RunErrorSummaryRow = {
+  source?: unknown
   errorCode: unknown
   errorString: unknown
   createdAt: unknown
+}
+
+export type RunStageEventSummary = {
+  stage: unknown
+  eventType: unknown
+  status: unknown
+  createdAt: unknown
+}
+
+export type RunJobSummary = {
+  type: unknown
+  status: unknown
+  updatedAt: unknown
 }
 
 export function isSeverityError(code: unknown): boolean {
@@ -31,11 +46,57 @@ function isRecoverySuccessEvent(row: RunErrorSummaryRow): boolean {
   return RECOVERY_SUCCESS_PATTERN.test(String(row.errorString ?? ''))
 }
 
-export function filterActiveRunErrors<T extends RunErrorSummaryRow>(rows: T[]): T[] {
+function isRecoveryRequestedEvent(row: RunErrorSummaryRow): boolean {
+  return Number(row.errorCode) === 202 && RECOVERY_REQUESTED_PATTERN.test(String(row.errorString ?? ''))
+}
+
+function isResolvedByLaterStageEvent(
+  row: RunErrorSummaryRow,
+  events: RunStageEventSummary[],
+): boolean {
+  const stage = row.source === 'banking'
+    ? 'banking'
+    : row.source === 'application' && isMissingMappingError(row.errorString)
+      ? 'matching'
+      : null
+  if (!stage) return false
+
+  const errorAt = toEpochMs(row.createdAt)
+  const laterEvents = events.filter(event => (
+    event.stage === stage && toEpochMs(event.createdAt) >= errorAt
+  ))
+
+  return laterEvents.some(event => (
+    event.eventType === 'continuation_requested'
+    || ['succeeded', 'accepted', 'needs_attention'].includes(String(event.status ?? ''))
+  ))
+}
+
+export function isSupersededBankingJobFailure(
+  job: RunJobSummary,
+  stageEvents: RunStageEventSummary[],
+): boolean {
+  if (job.type !== 'banking.ingest' || job.status !== 'failed') return false
+  const updatedAt = toEpochMs(job.updatedAt)
+  return stageEvents.some(event => (
+    (event.stage === 'banking' || event.stage === 'matching')
+    && event.eventType === 'continuation_requested'
+    && toEpochMs(event.createdAt) >= updatedAt
+  ))
+}
+
+export function filterActiveRunErrors<T extends RunErrorSummaryRow>(
+  rows: T[],
+  stageEvents: RunStageEventSummary[] = [],
+): T[] {
   return rows.filter((row) => {
-    const recoveredAfterError = isMissingMappingError(row.errorString) && rows.some((candidate) => (
-      isRecoverySuccessEvent(candidate) && toEpochMs(candidate.createdAt) >= toEpochMs(row.createdAt)
-    ))
+    const recoveredAfterError = (
+      isMissingMappingError(row.errorString)
+      && rows.some((candidate) => (
+        (isRecoverySuccessEvent(candidate) || isRecoveryRequestedEvent(candidate))
+        && toEpochMs(candidate.createdAt) >= toEpochMs(row.createdAt)
+      ))
+    ) || isResolvedByLaterStageEvent(row, stageEvents)
 
     return !recoveredAfterError && isSeverityError(row.errorCode)
   })

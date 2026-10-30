@@ -3,11 +3,11 @@ export type AppRole = (typeof APP_ROLES)[number]
 
 export const ROUTE_ROLE_POLICIES = {
   '/': ['bookkeeper', 'admin', 'rule_admin', 'dev'],
-  '/indstillinger': ['admin', 'rule_admin', 'dev'],
+  '/indstillinger': ['admin', 'dev'],
   '/fejlhaandtering': ['admin', 'dev'],
   '/konteringsregler': ['rule_admin', 'dev'],
   '/aabne-poster': ['bookkeeper', 'dev'],
-  '/kontoudtog': ['bookkeeper', 'admin', 'rule_admin', 'dev'],
+  '/kontoudtog': ['bookkeeper', 'rule_admin', 'dev'],
   '/koersler': ['admin', 'bookkeeper', 'dev'],
 } as const satisfies Record<string, readonly AppRole[]>
 

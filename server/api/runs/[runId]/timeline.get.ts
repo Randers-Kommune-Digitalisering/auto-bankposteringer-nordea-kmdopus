@@ -13,25 +13,7 @@ import { runTimelineEvent } from '~/lib/db/schema/runTimelineEvent'
 import type { RunTimelineResponse } from '~/types/runTimeline'
 import { requireAnyAppRole } from '~~/server/auth/requireAppRoles'
 import { summarizeRunSamleposter } from '~~/server/utils/runs/runSamlepostSummary'
-
-const MISSING_MAPPING_ERROR_PATTERN = /Mangler konterings-mapping \((artskonto|statuskonto)\) for bankkonto:/i
-const RECOVERY_SUCCESS_PATTERN = /^Genkørsel efter (statuskonto-mapping|ignorering af bankkonto) lykkedes\./i
-
-function toEpochMs(value: unknown): number {
-  const d = value instanceof Date ? value : new Date(String(value ?? ''))
-  const ms = d.getTime()
-  return Number.isFinite(ms) ? ms : 0
-}
-
-function isMissingMappingError(message: unknown): boolean {
-  return MISSING_MAPPING_ERROR_PATTERN.test(String(message ?? ''))
-}
-
-function isRecoverySuccessEvent(row: { errorCode: unknown; errorString: unknown }): boolean {
-  const code = Number(row.errorCode)
-  if (Number.isFinite(code) && code !== 200) return false
-  return RECOVERY_SUCCESS_PATTERN.test(String(row.errorString ?? ''))
-}
+import { filterActiveRunErrors } from '~~/server/utils/runs/runStatus'
 
 export default defineEventHandler(async (event) => {
   await requireAnyAppRole(event, ['admin', 'bookkeeper', 'dev'])
@@ -175,14 +157,7 @@ export default defineEventHandler(async (event) => {
     processingSource: row.processingSource ? String(row.processingSource) : null,
   })))
 
-  const filteredErrors = (errorRows ?? []).filter((e) => {
-    if (!isMissingMappingError(e.errorString)) return true
-    const errorMs = toEpochMs(e.createdAt)
-    return !(errorRows ?? []).some((candidate) => (
-      isRecoverySuccessEvent(candidate)
-      && toEpochMs(candidate.createdAt) >= errorMs
-    ))
-  })
+  const filteredErrors = filterActiveRunErrors(errorRows ?? [], eventRows ?? [])
 
   return {
     run: {

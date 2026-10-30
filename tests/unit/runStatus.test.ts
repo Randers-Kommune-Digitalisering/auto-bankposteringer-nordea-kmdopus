@@ -57,4 +57,21 @@ describe('filterActiveRunErrors', () => {
 
     expect(filterActiveRunErrors(rows)).toEqual([])
   })
+
+  it('clears a missing-mapping error once its automatic retry is queued', () => {
+    const rows = [
+      {
+        errorCode: 409,
+        errorString: 'Mangler konterings-mapping (artskonto) for bankkonto: nordea:DK123',
+        createdAt: new Date('2026-09-01T10:00:00.000Z'),
+      },
+      {
+        errorCode: 202,
+        errorString: 'Statuskonto-mapping oprettet. Automatisk genkørsel planlagt.',
+        createdAt: new Date('2026-09-01T11:00:00.000Z'),
+      },
+    ]
+
+    expect(filterActiveRunErrors(rows)).toEqual([])
+  })
 })

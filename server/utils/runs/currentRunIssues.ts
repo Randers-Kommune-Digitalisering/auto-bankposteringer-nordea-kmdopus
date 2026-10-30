@@ -1,5 +1,10 @@
 import type { ErrorListItem } from '~/types/runs'
-import { filterActiveRunErrors, type RunErrorSummaryRow } from './runStatus'
+import {
+  filterActiveRunErrors,
+  isSupersededBankingJobFailure,
+  type RunErrorSummaryRow,
+  type RunStageEventSummary,
+} from './runStatus'
 
 type RunScopedErrorLog = RunErrorSummaryRow & {
   id: string
@@ -55,6 +60,7 @@ export type ErpRequestResponseStatusRow = {
 }
 
 export type CurrentRunIssue = ErrorListItem
+type RunStageEvent = RunStageEventSummary & { runId: string }
 
 function isoDateTime(value: unknown): string {
   const date = value instanceof Date ? value : new Date(String(value ?? ''))
@@ -206,6 +212,7 @@ export function collectCurrentRunIssues(input: {
   jobs: RunScopedJob[]
   outbox: RunScopedOutbox[]
   rejectedErpDocuments?: CurrentErpDocumentRejection[]
+  stageEvents?: RunStageEvent[]
 }): CurrentRunIssue[] {
   const erpOutboxRunIds = new Set(
     input.outbox
@@ -219,10 +226,17 @@ export function collectCurrentRunIssues(input: {
     rows.push(row)
     errorLogsByRun.set(row.runId, rows)
   }
+  const stageEventsByRun = new Map<string, RunStageEvent[]>()
+  for (const event of input.stageEvents ?? []) {
+    const rows = stageEventsByRun.get(event.runId) ?? []
+    rows.push(event)
+    stageEventsByRun.set(event.runId, rows)
+  }
 
   const issues: CurrentRunIssue[] = []
   for (const rows of errorLogsByRun.values()) {
-    for (const row of filterActiveRunErrors(rows)) {
+    const runId = rows[0]?.runId
+    for (const row of filterActiveRunErrors(rows, runId ? stageEventsByRun.get(runId) : undefined)) {
       // ERP 502 rows mirror upload failures. The outbox owns their current state.
       if (row.source === 'erp' && Number(row.errorCode) === 502 && row.runId && erpOutboxRunIds.has(row.runId)) {
         continue
@@ -232,7 +246,9 @@ export function collectCurrentRunIssues(input: {
   }
 
   for (const row of input.jobs) {
-    if (row.status === 'failed' && row.runId) issues.push(issueFromJob(row))
+    if (row.status !== 'failed' || !row.runId) continue
+    const stageEvents = stageEventsByRun.get(row.runId) ?? []
+    if (!isSupersededBankingJobFailure(row, stageEvents)) issues.push(issueFromJob(row))
   }
 
   for (const row of input.outbox) {

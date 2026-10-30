@@ -1,3 +1,8 @@
+export function isWeekendBookingDate(bookingDateIso: string): boolean {
+  const day = new Date(`${bookingDateIso}T00:00:00.000Z`).getUTCDay()
+  return day === 0 || day === 6
+}
+
 export function getLatestCompletedWeekday(scheduledTimeIso: string): string {
   const scheduledDateParts = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Europe/Copenhagen',

@@ -5,6 +5,7 @@ import type { RunStatus } from '~/lib/db/schema/enums'
 import type { RunListItem, RunListResponse } from '~/types/runs'
 import useFlattenArray from '~/composables/useFlattenArray'
 import { getRunStatusPresentation } from '~/lib/presenters/runStatus'
+import { isWeekendBookingDate } from '~/lib/scheduler/scheduledBookingDate'
 import { DEFAULT_TIME_ZONE } from '~/utils'
 
 const appConfig = useAppConfig()
@@ -28,6 +29,7 @@ const runExistsForStartDate = computed(() => {
   const iso = startRunDateIso.value
   return allRows.value.some((r) => String(r.bookingDate).slice(0, 10) === iso)
 })
+const isWeekendStartRunDate = computed(() => isWeekendBookingDate(startRunDateIso.value))
 
 const startingRun = ref(false)
 
@@ -265,8 +267,12 @@ const columns: TableColumn<RunListItem>[] = [
                 </UPopover>
 
                 <UButton label="Start kørsel" color="primary" variant="soft" size="sm"
-                  :disabled="runExistsForStartDate" :loading="startingRun" @click="startRunForDate" />
+                  :disabled="runExistsForStartDate || isWeekendStartRunDate" :loading="startingRun"
+                  @click="startRunForDate" />
               </div>
+              <p v-if="isWeekendStartRunDate" class="mt-1 text-sm text-muted">
+                Kørsler kan kun startes for hverdage.
+              </p>
             </UFormField>
           </template>
           <template #date>

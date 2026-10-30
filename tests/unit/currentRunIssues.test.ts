@@ -3,6 +3,7 @@ import {
   collectCurrentRunIssues,
   resolveCurrentErpDocumentRejections,
 } from '../../server/utils/runs/currentRunIssues'
+import { resolveEffectiveRunStatus } from '../../server/utils/runs/runStatus'
 
 describe('collectCurrentRunIssues', () => {
   it('uses current ERP outbox state and ignores retrying/sent rows', () => {
@@ -51,6 +52,77 @@ describe('collectCurrentRunIssues', () => {
     })
 
     expect(issues.map(issue => issue.id)).toEqual(['error:app-error', 'job:job-1'])
+  })
+
+  it('clears pre-continuation banking errors from the current status but keeps new retry failures', () => {
+    const oldError = { id: 'old-error', runId: 'run-1', source: 'banking' as const, errorCode: null, errorString: 'First attempt failed', createdAt: new Date('2026-10-15T10:00:00Z') }
+    const retryRequested = {
+      runId: 'run-1',
+      stage: 'banking',
+      eventType: 'continuation_requested',
+      status: 'pending',
+      createdAt: new Date('2026-10-15T10:01:00Z'),
+    }
+
+    const pendingIssues = collectCurrentRunIssues({
+      errorLogs: [oldError],
+      jobs: [{ id: 'job-0', runId: 'run-1', type: 'banking.ingest', status: 'failed', lastError: 'First attempt failed', updatedAt: new Date('2026-10-15T10:00:30Z') }],
+      outbox: [],
+      stageEvents: [retryRequested],
+    })
+    expect(pendingIssues).toEqual([])
+    expect(resolveEffectiveRunStatus({
+      baseStatus: 'afventer',
+      hasActiveErrors: pendingIssues.length > 0,
+      hasNegativeErpResponse: false,
+      hasFailedIo: false,
+      hasInFlightIo: true,
+    })).toBe('afventer')
+
+    const failedRetryIssues = collectCurrentRunIssues({
+      errorLogs: [
+        oldError,
+        { id: 'retry-error', runId: 'run-1', source: 'banking', errorCode: null, errorString: 'Retry failed', createdAt: new Date('2026-10-15T10:02:00Z') },
+      ],
+      jobs: [
+        { id: 'job-0', runId: 'run-1', type: 'banking.ingest', status: 'failed', lastError: 'First attempt failed', updatedAt: new Date('2026-10-15T10:00:30Z') },
+        { id: 'job-1', runId: 'run-1', type: 'banking.ingest', status: 'failed', lastError: 'Retry failed', updatedAt: new Date('2026-10-15T10:03:00Z') },
+      ],
+      outbox: [],
+      stageEvents: [
+        retryRequested,
+        {
+          ...retryRequested,
+          eventType: 'completed_with_errors',
+          status: 'failed',
+          createdAt: new Date('2026-10-15T10:03:00Z'),
+        },
+      ],
+    })
+    expect(failedRetryIssues.map(issue => issue.id)).toEqual(['error:retry-error', 'job:job-1'])
+
+    const completedIssues = collectCurrentRunIssues({
+      errorLogs: [oldError],
+      jobs: [{ id: 'job-0', runId: 'run-1', type: 'banking.ingest', status: 'failed', lastError: 'First attempt failed', updatedAt: new Date('2026-10-15T10:00:30Z') }],
+      outbox: [],
+      stageEvents: [
+        retryRequested,
+        {
+          ...retryRequested,
+          eventType: 'completed',
+          status: 'succeeded',
+          createdAt: new Date('2026-10-15T10:04:00Z'),
+        },
+      ],
+    })
+    expect(completedIssues).toEqual([])
+    expect(resolveEffectiveRunStatus({
+      baseStatus: 'udført',
+      hasActiveErrors: completedIssues.length > 0,
+      hasNegativeErpResponse: false,
+      hasFailedIo: false,
+      hasInFlightIo: false,
+    })).toBe('udført')
   })
 
   it('counts distinct failed deliveries even when their messages match', () => {

@@ -481,6 +481,14 @@ function openGroupedBookingModal(items: OpenTransaction[]) {
   isBookingOpen.value = true
 }
 
+function openStackBooking(stack: OpenTransactionStack) {
+  if (stack.items.length > 1) {
+    openGroupedBookingModal(stack.items)
+    return
+  }
+  openBookingModal(stack.representative)
+}
+
 const onOpenItemsRowSelect = createTableRowSelectHandler((row: OpenItemsTableRow) => {
   if (row.stack.items.length > 1) {
     openGroupedBookingModal(row.stack.items)
@@ -544,7 +552,7 @@ const tableUi = {
   tbody: `${clickableTableRowsBodyClass} [&>tr]:last:[&>td]:border-b-0`,
   tr: 'group',
   th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
-  td: 'align-top group-has-[td:not(:empty)]:border-b border-default',
+  td: 'align-middle group-has-[td:not(:empty)]:border-b border-default',
   separator: 'h-0',
 }
 </script>
@@ -681,7 +689,15 @@ const tableUi = {
                       class="pointer-events-none absolute inset-0 z-0 -translate-y-1 translate-x-1 rounded-xl border border-default/60 bg-accented"
                     />
 
-                    <div class="relative z-20 rounded-xl border border-default/60 bg-default">
+                    <div
+                      class="relative z-20 cursor-pointer rounded-xl border border-default/60 bg-default transition-colors hover:border-primary/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                      role="button"
+                      tabindex="0"
+                      :aria-label="stack.items.length > 1 ? 'Åbn samlepost til behandling' : 'Åbn post til behandling'"
+                      @click="openStackBooking(stack)"
+                      @keydown.enter.prevent="openStackBooking(stack)"
+                      @keydown.space.prevent="openStackBooking(stack)"
+                    >
                       <BookingSummaryCard :summary="toStackSummary(stack)" :hide-section-keys="['teknisk']">
                       <template #footer>
                         <div class="mt-4 space-y-3">
@@ -700,38 +716,7 @@ const tableUi = {
                                 Samlepost · {{ stack.items.length }} poster
                               </UBadge>
                             </div>
-
-                            <div
-                              class="grid grid-cols-1 gap-2"
-                            >
-                              <UButton
-                                class="font-bold"
-                                color="primary"
-                                variant="solid"
-                                size="lg"
-                                block
-                                :trailing-icon="appConfig.ui.icons.edit"
-                                @click="openGroupedBookingModal(stack.items)"
-                              >
-                                Behandl
-                              </UButton>
-                            </div>
                           </div>
-
-                          <div v-if="stack.items.length <= 1" class="grid grid-cols-1 gap-2">
-                            <UButton
-                              class="w-full justify-center font-bold"
-                              color="primary"
-                              variant="solid"
-                              size="lg"
-                              block
-                              :trailing-icon="appConfig.ui.icons.edit"
-                              @click="openBookingModal(stack.representative)"
-                            >
-                              Behandl
-                            </UButton>
-                          </div>
-
                         </div>
                       </template>
                       </BookingSummaryCard>

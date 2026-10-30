@@ -1,6 +1,6 @@
 // This endpoint is used in interactive UI where the user can handle errors
 
-import { desc, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { setHeader } from "h3";
 import db from "~/lib/db";
 import { createUtcDateString } from "~~/utils/function";
@@ -10,6 +10,7 @@ import { errorLog } from "~/lib/db/schema/error";
 import { job } from "~/lib/db/schema/job";
 import { outbox } from "~/lib/db/schema/outbox";
 import { run } from "~/lib/db/schema/run";
+import { runTimelineEvent } from "~/lib/db/schema/runTimelineEvent";
 import { transaction, transactionProcessing } from "~/lib/db/schema/transaction";
 import type { RunStatus } from "~/lib/db/schema/enums";
 import type {
@@ -20,7 +21,10 @@ import type {
   TransactionListItem,
 } from "~/types/runs";
 import { parseAmount } from "#engine/matching/domain/amount";
-import { resolveEffectiveRunStatus } from "~~/server/utils/runs/runStatus";
+import {
+  isSupersededBankingJobFailure,
+  resolveEffectiveRunStatus,
+} from "~~/server/utils/runs/runStatus";
 import { collectCurrentRunIssues, resolveCurrentErpDocumentRejections } from "~~/server/utils/runs/currentRunIssues";
 
 function parseNumeric(value: unknown): number {
@@ -136,7 +140,7 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
 
   const runIds = runRows.map((row) => row.id);
 
-  const [TransactionTypeRows, erpDocumentRows, errorRows, requestRows, responseOutcomeRows, responseStatusRows, jobRows, outboxRows] = await Promise.all([
+  const [TransactionTypeRows, erpDocumentRows, errorRows, requestRows, responseOutcomeRows, responseStatusRows, jobRows, outboxRows, stageEventRows] = await Promise.all([
     db
       .select({
         id: transaction.id,
@@ -250,6 +254,19 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
       .from(outbox)
       .where(inArray(outbox.runId, runIds as any))
       .limit(500),
+    db
+      .select({
+        runId: runTimelineEvent.runId,
+        stage: runTimelineEvent.stage,
+        eventType: runTimelineEvent.eventType,
+        status: runTimelineEvent.status,
+        createdAt: runTimelineEvent.createdAt,
+      })
+      .from(runTimelineEvent)
+      .where(and(
+        inArray(runTimelineEvent.runId, runIds),
+        inArray(runTimelineEvent.eventType, ['continuation_requested', 'completed', 'completed_with_errors']),
+      )),
   ]);
 
   const transactionsByRun = new Map<string, TransactionListItem[]>();
@@ -289,6 +306,13 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
     errorLogs: errorRows,
     jobs: jobRows.map(row => ({ ...row, runId: row.runId ? String(row.runId) : null })),
     outbox: outboxRows.map(row => ({ ...row, runId: row.runId ? String(row.runId) : null })),
+    stageEvents: stageEventRows.map(row => ({
+      runId: String(row.runId),
+      stage: row.stage,
+      eventType: row.eventType,
+      status: row.status,
+      createdAt: row.createdAt,
+    })),
     rejectedErpDocuments: resolveCurrentErpDocumentRejections({
       requests: requestRows.map(row => ({
         runId: String(row.runId),
@@ -336,6 +360,9 @@ async function fetchRunsFromDb(): Promise<RunListResponse> {
 
     const status = String(row.status ?? '')
     if (status === 'failed') {
+      const continuationEvents = (stageEventRows ?? [])
+        .filter(event => String(event.runId) === runId)
+      if (isSupersededBankingJobFailure(row, continuationEvents)) continue
       hasFailedIoByRun.set(runId, true)
       continue
     }
