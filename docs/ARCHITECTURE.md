@@ -15,7 +15,9 @@ This repo is a stateless financial integration engine:
 ### CAMT entry aggregates
 
 - Each `Ntry` is the canonical, independently bookable transaction. Its amount and debit/credit direction come from the entry, never from summing its child `TxDtls`.
-- `transaction.underlying_transaction_count` records the number of child `TxDtls` solely as aggregate metadata. Child references, parties, remittance text, and raw XML are not persisted or exposed as individually matchable/bookable transactions.
+- `transaction.underlying_transaction_count` records the number of child `TxDtls` solely as aggregate metadata. Child-level references, full party structures, remittance text, and raw XML are not persisted or exposed as individually matchable/bookable transactions.
+- Related-party values are persisted in CAMT-specific transaction fields (`dbtr_*`, `cdtr_*`, and ultimate-party names), not in an application-level counterparty field. For entries with child transactions, each party field is retained only when every child has the same value; ambiguous child values are discarded.
+- “Modpart” is an application-level rule category that expands into the underlying CAMT related-party match fields. Users can match across the category or select individual CAMT fields in advanced rules and the RuleModal.
 - `banking_document` retains metadata and a SHA-256 content hash for idempotency, but not the source XML. The protected transaction source view is synthesized from the retained entry fields and is not a copy of the original XML.
 - The worker fetches and parses bank documents before opening a short persistence transaction. Metadata and statement rows are written once; transactions and balances are inserted in bounded batches, and cursor advancement is committed atomically with the corresponding persisted documents.
 - A retry checks the latest persisted bank-stage completion event: successful ingestion reuses the run's stored entries, while a run with no completion or a failed/partial provider completion fetches again. Document hashes make persistence idempotent, and a provider cursor only advances in the same transaction as its document rows.
@@ -39,7 +41,7 @@ This repo is a stateless financial integration engine:
 
 ## Posting text templates (matching -> ERP)
 
-- Posting text uses deterministic resolution from retained entry-level references and additional information, with an optional rule-owned template persisted alongside accounting parameters. Counterparty and child remittance fields are not available.
+- Posting text uses deterministic resolution from retained entry-level references and additional information, with an optional rule-owned template persisted alongside accounting parameters. Counterparty and child remittance fields remain unavailable to posting text templates.
 - Templates are versioned structured data with ordered literal and regex-extraction parts. Extraction reads only allowlisted transaction fields; RE2 provides linear-time matching over bank-supplied text.
 - Matching criteria remain boolean predicates and do not implicitly provide capture groups. A rule's text template independently selects its source field, regex, and capture group.
 - Municipality-specific formats such as BDP/KSD are expressed as ordinary persisted accounting rules. The runtime has no implicit marker-specific formatting or seeded fallback rules.

@@ -25,6 +25,16 @@ export const transaction = pgTable('transaction', {
   bookingDate: date('booking_date', { mode: "date" }).notNull(),
   valueDate: date('value_date', { mode: "date" }),
 
+  // Entry-level CAMT related parties, populated only when unambiguous.
+  debtorName: text('dbtr_name'),
+  debtorId: text('dbtr_id'),
+  debtorAccountIban: text('dbtr_acct_iban'),
+  creditorName: text('cdtr_name'),
+  creditorId: text('cdtr_id'),
+  creditorAccountIban: text('cdtr_acct_iban'),
+  ultimateDebtorName: text('ultmt_dbtr_name'),
+  ultimateCreditorName: text('ultmt_cdtr_name'),
+
   // Entry references
   ntryRef: text('ntry_ref'),
   ntryAcctSvcrRef: text('ntry_acct_svcr_ref'),

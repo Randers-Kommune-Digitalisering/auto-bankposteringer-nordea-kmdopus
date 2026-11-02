@@ -25,7 +25,16 @@ const matchCatalog = [
   },
   {
     category: matchCategoryLabels.counterparty,
-    fields: [],
+    fields: [
+      { key: "dbtr_name", label: "Debtor name (Dbtr/Nm)" },
+      { key: "dbtr_id", label: "Debtor ID (Dbtr/Id)" },
+      { key: "dbtr_acct_iban", label: "Debtor IBAN (DbtrAcct/IBAN)" },
+      { key: "cdtr_name", label: "Creditor name (Cdtr/Nm)" },
+      { key: "cdtr_id", label: "Creditor ID (Cdtr/Id)" },
+      { key: "cdtr_acct_iban", label: "Creditor IBAN (CdtrAcct/IBAN)" },
+      { key: "ultmt_dbtr_name", label: "Ultimate debtor name (UltmtDbtr/Nm)" },
+      { key: "ultmt_cdtr_name", label: "Ultimate creditor name (UltmtCdtr/Nm)" },
+    ],
   },
   {
     category: matchCategoryLabels.transactionType,

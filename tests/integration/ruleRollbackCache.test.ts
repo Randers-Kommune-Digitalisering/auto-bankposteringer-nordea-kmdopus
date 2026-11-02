@@ -44,7 +44,7 @@ describe('rule rollback cache invalidation (integration)', () => {
       }))
 
       const [createdRule] = await db.insert(rule).values({
-        currentVersionId: 1,
+        currentVersionId: 2,
         erpSupplier: 'kmd',
         type: 'standard',
         status: 'aktiv',
@@ -69,6 +69,18 @@ describe('rule rollback cache invalidation (integration)', () => {
           accounting: { dimensions: [], attachments: [] },
         },
       })
+      await db.insert(ruleVersion).values({
+        ruleId,
+        version: 2,
+        content: {
+          type: 'standard',
+          status: 'aktiv',
+          relatedBankAccounts: [],
+          ruleTags: [],
+          matches: [],
+          accounting: { dimensions: [], attachments: [] },
+        },
+      })
 
       const { default: rulesHandler } = await import('../../server/api/rules/index.get')
       const { default: rollbackHandler } = await import('../../server/api/rule-versions/[ruleId]/rollback.post')
@@ -86,6 +98,13 @@ describe('rule rollback cache invalidation (integration)', () => {
         const address = server.address()
         if (!address || typeof address === 'string') throw new Error('Test server did not bind a TCP port')
         const baseUrl = `http://127.0.0.1:${address.port}`
+
+        const currentVersionResponse = await fetch(`${baseUrl}/api/rule-versions/${ruleId}/rollback`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ version: 2 }),
+        })
+        expect(currentVersionResponse.status).toBe(409)
 
         const initialResponse = await fetch(`${baseUrl}/api/rules`)
         expect(initialResponse.status).toBe(200)

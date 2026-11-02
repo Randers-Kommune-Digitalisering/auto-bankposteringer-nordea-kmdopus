@@ -61,4 +61,21 @@ describe('accounting dimension constraints', () => {
       constraints,
     )).toThrow(/må \[psp-element\] ikke/i)
   })
+
+  it('allows incomplete dimensions when accounting is optional but still rejects forbidden combinations', () => {
+    expect(() => validateAccountingDimensionConstraints(
+      new Map([['artskonto', '12000000']]),
+      constraints,
+      { allowIncomplete: true },
+    )).not.toThrow()
+
+    expect(() => validateAccountingDimensionConstraints(
+      new Map([
+        ['artskonto', '90000000'],
+        ['omkostningssted', '0001'],
+      ]),
+      constraints,
+      { allowIncomplete: true },
+    )).toThrow(/må \[omkostningssted\] ikke/i)
+  })
 })

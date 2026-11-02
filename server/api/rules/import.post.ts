@@ -1,7 +1,7 @@
 import { defineEventHandler, readBody, getQuery } from 'h3'
 import Papa from 'papaparse'
 import { createInsertSchema } from 'drizzle-zod'
-import { inArray, sql } from 'drizzle-orm'
+import { inArray, or, sql } from 'drizzle-orm'
 
 import db from '~/lib/db'
 import { logger } from '~/lib/logger'
@@ -20,8 +20,10 @@ import { ruleDraftApiSchema } from '~~/server/utils/rules/ruleDraftApiSchema'
 import { account } from '~/lib/db/schema/account'
 import { ruleTag } from '~/lib/db/schema/ruleTag'
 import { ruleVersion, type RuleVersionInsertSchema } from '~/lib/db/schema/ruleVersion'
-import { ruleConditionOperatorValues, ruleConditionFieldValues } from '~/lib/db/schema/enums'
-import { fieldToCategory } from '~/lib/rules/match-config'
+import { ruleConditionOperatorValues } from '~/lib/db/schema/enums'
+import type { RuleConditionOperator } from '~/lib/db/schema/enums'
+import { fieldToCategory, matchFieldEnumValues } from '~/lib/rules/match-config'
+import type { MatchField } from '~/lib/rules/match-config'
 import {
   getActiveErpSupplier,
   listAccountingDimensionConstraints,
@@ -29,8 +31,16 @@ import {
   resolveDimensionValueRows,
 } from '~~/server/utils/accountingDimensions'
 import { compileRuleDraftToDb } from '~~/server/utils/rules/compileRuleDraftToDb'
+import { toDbNumericStringOrUndefined } from '~~/server/utils/rules/ruleDbValues'
 import { normalizeRuleTagIds } from '~~/server/utils/ruleTags/resolveRuleTagIds'
 import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
+import { ruleRequiresAccounting } from '~/lib/rules/ruleAccountingRequirements'
+import { normalizeIbanReference, resolveBankAccountReferences } from '~~/server/utils/bankAccounts/resolveBankAccountReferences'
+import {
+  assertConsistentRuleMatchGates,
+  getUnsupportedAdvancedFieldColumns,
+  parseAdvancedFieldToken,
+} from '~~/server/utils/rules/ruleCsv'
 
 const version = 1
 
@@ -87,48 +97,6 @@ function splitMultiValueCell(value: unknown): string[] {
   const last = current.trim()
   if (last.length) out.push(last)
   return out
-}
-
-function isRegexAllowedForField(fieldKey: string): boolean {
-  const category = (fieldToCategory as any)[fieldKey] as string | undefined
-  return category === 'Reference' || category === 'Modpart'
-}
-
-function parseAdvancedFieldToken(
-  token: string,
-  defaultOperator: string,
-  fieldKey: string,
-): { operator: string; value: string } {
-  const raw = token.trim()
-  if (!raw.length) return { operator: defaultOperator, value: '' }
-
-  const idx = raw.indexOf(':')
-  if (idx > 0) {
-    const prefix = raw.slice(0, idx).trim().toLowerCase()
-    const rest = raw.slice(idx + 1).trim()
-
-    if ((ruleConditionOperatorValues as readonly string[]).includes(prefix)) {
-      if (!rest.length) {
-        throw new Error(`Match-værdi mangler efter "${prefix}:"`)
-      }
-
-      if (prefix === 'regex') {
-        if (!isRegexAllowedForField(fieldKey)) {
-          throw new Error('Regex er kun understøttet for felter i Reference og Modpart')
-        }
-        try {
-          // eslint-disable-next-line no-new
-          new RegExp(rest)
-        } catch {
-          throw new Error(`Ugyldig regex-mønster: ${rest}`)
-        }
-      }
-
-      return { operator: prefix, value: rest }
-    }
-  }
-
-  return { operator: defaultOperator, value: raw }
 }
 
 function toOptionalString(value: unknown): string | undefined {
@@ -207,38 +175,39 @@ function mergeDimensions(
   return combined
 }
 
-function buildMatches(row: any, operator: string): MatchEntry[] | undefined {
+function buildMatches(row: Record<string, unknown>, operator: RuleConditionOperator): MatchEntry[] | undefined {
   const references = splitMultiValueCell(row.matchReferences)
   const counterparties = splitMultiValueCell(row.matchCounterparties)
   const classification = splitMultiValueCell(row.matchClassification)
 
   const matches: MatchEntry[] = []
-  for (const v of references) matches.push({ category: 'Reference', value: v, operator: operator as any, gate: 'ELLER' })
-  for (const v of counterparties) matches.push({ category: 'Modpart', value: v, operator: operator as any, gate: 'ELLER' })
-  for (const v of classification) matches.push({ category: 'Transaktionstype', value: v, operator: operator as any, gate: 'ELLER' })
+  for (const v of references) matches.push({ category: 'Reference', value: v, operator, gate: 'ELLER' })
+  for (const v of counterparties) matches.push({ category: 'Modpart', value: v, operator, gate: 'ELLER' })
+  for (const v of classification) matches.push({ category: 'Transaktionstype', value: v, operator, gate: 'ELLER' })
 
   // Advanced template: allow pinning values to a specific transaction field.
-  for (const fieldKey of ruleConditionFieldValues) {
+  for (const fieldKey of matchFieldEnumValues) {
     const columnName = `field_${fieldKey}`
-    const values = splitMultiValueCell((row as any)[columnName])
+    const values = splitMultiValueCell(row[columnName])
     if (!values.length) continue
 
     const category = (fieldToCategory as any)[fieldKey] as MatchEntry['category'] | undefined
     if (!category) continue
 
     for (const v of values) {
-      const parsed = parseAdvancedFieldToken(v, operator, String(fieldKey))
+      const parsed = parseAdvancedFieldToken(v, operator, fieldKey as MatchField)
       if (!parsed.value.length) continue
       matches.push({
         category,
         value: parsed.value,
-        fields: [fieldKey as any],
-        operator: parsed.operator as any,
-        gate: 'ELLER',
+        fields: [fieldKey],
+        operator: parsed.operator,
+        gate: parsed.gate,
       })
     }
   }
 
+  assertConsistentRuleMatchGates(matches)
   return matches.length ? matches : undefined
 }
 
@@ -282,9 +251,19 @@ export default defineEventHandler(async (event) => {
     const rowNumber = i + 2 // header is line 1
 
     try {
-      const operatorCell = toOptionalString((row as any).matchOperator)
-      const operator = operatorCell ?? 'eq'
-      if (operatorCell && !ruleConditionOperatorValues.includes(operatorCell as any)) {
+      const unsupportedFields = getUnsupportedAdvancedFieldColumns(row)
+      if (unsupportedFields.length) {
+        errors.push(...unsupportedFields.map(field => ({
+          row: rowNumber,
+          field,
+          message: `Feltet understøttes ikke af RuleModal og matchmotoren`,
+        })))
+        continue
+      }
+
+      const operatorCell = toOptionalString(row.matchOperator)
+      const operator = (operatorCell ?? 'eq') as RuleConditionOperator
+      if (operatorCell && !ruleConditionOperatorValues.includes(operator)) {
         errors.push({ row: rowNumber, field: 'matchOperator', message: `Ugyldig operator: ${operatorCell}` })
         continue
       }
@@ -298,7 +277,7 @@ export default defineEventHandler(async (event) => {
         continue
       }
 
-      const accountingTextTemplateCell = toOptionalString((row as any).accountingTextTemplate)
+      const accountingTextTemplateCell = toOptionalString(row.accountingTextTemplate)
       let accountingTextTemplate: unknown
       if (accountingTextTemplateCell) {
         try {
@@ -313,31 +292,31 @@ export default defineEventHandler(async (event) => {
         }
       }
 
-      const amountMin = parseOptionalNumberCell((row as any).matchAmountMin)
+      const amountMin = parseOptionalNumberCell(row.matchAmountMin)
       if (amountMin.invalid) {
         errors.push({ row: rowNumber, field: 'matchAmountMin', message: 'Ugyldigt talformat' })
         continue
       }
 
-      const amountMax = parseOptionalNumberCell((row as any).matchAmountMax)
+      const amountMax = parseOptionalNumberCell(row.matchAmountMax)
       if (amountMax.invalid) {
         errors.push({ row: rowNumber, field: 'matchAmountMax', message: 'Ugyldigt talformat' })
         continue
       }
 
       const candidate = {
-        type: toOptionalString((row as any).type),
-        status: toOptionalString((row as any).status),
-        relatedBankAccounts: splitMultiValueCell((row as any).relatedBankAccounts),
-        ruleTags: splitMultiValueCell((row as any).ruleTags),
+        type: toOptionalString(row.type),
+        status: toOptionalString(row.status),
+        relatedBankAccounts: splitMultiValueCell(row.relatedBankAccounts),
+        ruleTags: splitMultiValueCell(row.ruleTags),
         matches: buildMatches(row, operator),
         matchAmountMin: amountMin.value,
         matchAmountMax: amountMax.value,
-        accountingText: toOptionalString((row as any).accountingText),
+        accountingText: toOptionalString(row.accountingText),
         accountingTextTemplate,
-        accountingCprType: (toOptionalString((row as any).accountingCprType) ?? 'ingen'),
-        accountingCprNumber: toOptionalString((row as any).accountingCprNumber),
-        accountingNote: toOptionalString((row as any).accountingNote),
+        accountingCprType: (toOptionalString(row.accountingCprType) ?? 'ingen'),
+        accountingCprNumber: toOptionalString(row.accountingCprNumber),
+        accountingNote: toOptionalString(row.accountingNote),
         accountingDimensions: mergeDimensions(
           parseDimensions((row as any).accountingDimensions),
           parseDimensionColumns(row as Record<string, unknown>),
@@ -375,17 +354,31 @@ export default defineEventHandler(async (event) => {
   }
 
   // DB-backed validation
-  const allAccountIds = Array.from(new Set(drafts.flatMap(d => d.draft.relatedBankAccounts)))
+  const allAccountReferences = Array.from(new Set(drafts.flatMap(d => d.draft.relatedBankAccounts)))
   const allTagIds = normalizeRuleTagIds(drafts.flatMap(d => d.draft.ruleTags ?? []))
 
   const activeSupplier = await getActiveErpSupplier()
   const dimensionDefinitions = await listAccountingDimensionDefinitions(activeSupplier)
   const dimensionConstraints = await listAccountingDimensionConstraints(activeSupplier)
 
-  const existingAccounts = allAccountIds.length
-    ? await db.select({ id: account.id }).from(account).where(inArray(account.id, allAccountIds))
+  const normalizedIbanReferences = Array.from(new Set(allAccountReferences.map(normalizeIbanReference)))
+  const accountLookupConditions = []
+  if (allAccountReferences.length) {
+    accountLookupConditions.push(inArray(account.id, allAccountReferences))
+  }
+  if (normalizedIbanReferences.length) {
+    accountLookupConditions.push(inArray(
+      sql<string>`upper(regexp_replace(${account.iban}, '[[:space:]]', '', 'g'))`,
+      normalizedIbanReferences,
+    ))
+  }
+  const existingAccounts = accountLookupConditions.length
+    ? await db
+        .select({ id: account.id, iban: account.iban })
+        .from(account)
+        .where(or(...accountLookupConditions))
     : []
-  const existingAccountSet = new Set(existingAccounts.map(a => a.id))
+  const accountResolutionByReference = resolveBankAccountReferences(allAccountReferences, existingAccounts)
 
   const existingTags = allTagIds.length
     ? await db
@@ -405,11 +398,22 @@ export default defineEventHandler(async (event) => {
     const rowNumber = entry.rowNumber
     const draft = entry.draft
 
-    for (const accId of draft.relatedBankAccounts) {
-      if (!existingAccountSet.has(accId)) {
-        errors.push({ row: rowNumber, field: 'relatedBankAccounts', message: `Ukendt bankkonto: ${accId}` })
+    const resolvedAccountIds: string[] = []
+    for (const reference of draft.relatedBankAccounts) {
+      const resolution = accountResolutionByReference.get(reference)
+      if (resolution?.kind === 'resolved') {
+        resolvedAccountIds.push(resolution.accountId)
+      } else if (resolution?.kind === 'ambiguous') {
+        errors.push({
+          row: rowNumber,
+          field: 'relatedBankAccounts',
+          message: `Flere bankkonti har IBAN: ${reference}`,
+        })
+      } else {
+        errors.push({ row: rowNumber, field: 'relatedBankAccounts', message: `Ukendt bankkonto: ${reference}` })
       }
     }
+    draft.relatedBankAccounts = Array.from(new Set(resolvedAccountIds))
 
     for (const tagId of normalizeRuleTagIds(draft.ruleTags ?? [])) {
       if (!existingTagLowerSet.has(tagId.toLocaleLowerCase('da-DK')))
@@ -417,7 +421,13 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-      resolveDimensionValueRows({ ruleId: 0, dimensions: draft.accountingDimensions, definitions: dimensionDefinitions, constraints: dimensionConstraints })
+      resolveDimensionValueRows({
+        ruleId: 0,
+        dimensions: draft.accountingDimensions,
+        definitions: dimensionDefinitions,
+        constraints: dimensionConstraints,
+        requireComplete: ruleRequiresAccounting(draft.type, draft.status),
+      })
     } catch (e: any) {
       errors.push({ row: rowNumber, field: 'accountingDimensions', message: e?.message ?? 'Ugyldige konteringsdimensioner' })
     }
@@ -442,6 +452,8 @@ export default defineEventHandler(async (event) => {
 
       const validatedRule = createInsertSchema(rule).parse({
         ...ruleData,
+        matchAmountMin: toDbNumericStringOrUndefined(draft.matchAmountMin),
+        matchAmountMax: toDbNumericStringOrUndefined(draft.matchAmountMax),
         erpSupplier: activeSupplier,
       })
 
@@ -480,6 +492,7 @@ export default defineEventHandler(async (event) => {
         dimensions: draft.accountingDimensions,
         definitions: dimensionDefinitions,
         constraints: dimensionConstraints,
+        requireComplete: ruleRequiresAccounting(draft.type, draft.status),
       })
 
       if (dimensionRows.length) {
@@ -514,7 +527,7 @@ export default defineEventHandler(async (event) => {
   })
 
   const storage = useStorage('rules')
-  await storage.removeItem('rule-list')
+  await storage.removeItem('rule-list-v2')
 
   return { success: true, dryRun: false, totalRows, importedCount: insertedRuleIds.length, ruleIds: insertedRuleIds }
 })

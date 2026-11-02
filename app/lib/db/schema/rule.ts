@@ -257,12 +257,13 @@ export function mapConditionsToMatches(conditions: RuleConditionRow[]): MatchEnt
   for (const [category, grouped] of byCategory.entries()) {
     for (const meta of grouped.values()) {
       const fields = Array.from(meta.fields)
+      const useWholeCategory = fields.length === matchCategoryColumns[category].length && meta.gate === 'ELLER'
       result.push({
         category,
         value: meta.value,
-        fields: fields.length === matchCategoryColumns[category].length ? undefined : (fields as MatchField[]),
+        fields: useWholeCategory ? undefined : (fields as MatchField[]),
         operator: meta.operator,
-        gate: fields.length === matchCategoryColumns[category].length ? 'ELLER' : meta.gate
+        gate: useWholeCategory ? 'ELLER' : meta.gate
       })
     }
   }

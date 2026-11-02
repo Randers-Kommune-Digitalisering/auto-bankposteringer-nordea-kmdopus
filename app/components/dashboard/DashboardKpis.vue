@@ -21,24 +21,33 @@ type DashboardStat = {
 }
 
 const leadingColorClassesByColor: Record<NonNullable<DashboardStat['color']>, string> = {
-  primary: 'bg-primary/10 ring-primary/25',
-  secondary: 'bg-secondary/10 ring-secondary/25',
-  success: 'bg-success/10 ring-success/25',
-  info: 'bg-info/10 ring-info/25',
-  warning: 'bg-warning/10 ring-warning/25',
-  error: 'bg-error/10 ring-error/25',
-  neutral: 'bg-neutral/10 ring-neutral/25'
+  primary: 'text-primary/10',
+  secondary: 'text-secondary/10',
+  success: 'text-success/10',
+  info: 'text-info/10',
+  warning: 'text-warning/10',
+  error: 'text-error/10',
+  neutral: 'text-neutral/10'
 }
 
 const leadingColorClasses = (color?: DashboardStat['color']) => leadingColorClassesByColor[color ?? 'primary']
 
-const leadingBaseClass = 'p-2.5 rounded-full ring ring-inset flex-col'
+const leadingBaseClass = 'pointer-events-none absolute left-1/2 top-1/2 z-0 mb-0 p-0 -translate-x-1/2 -translate-y-1/2'
 
 const cardUiBase = {
-  container: 'gap-y-1.5',
-  wrapper: 'items-start',
+  container: 'px-3 py-2 sm:px-4 sm:py-3',
+  wrapper: 'pointer-events-none z-10 w-full flex-1',
+  body: 'min-w-0 w-full flex-1',
+  leadingIcon: 'size-[100cqh]',
   title: 'font-normal text-muted text-xs uppercase'
 } as const
+
+const cardCornerClasses: Record<DashboardStat['key'], string> = {
+  automation: 'rounded-tl-lg',
+  rules: 'rounded-tr-lg',
+  'open-items': 'rounded-bl-lg',
+  errors: 'rounded-br-lg'
+}
 
 const stats = computed<DashboardStat[]>(() => {
   const kpis = props.kpis
@@ -76,30 +85,48 @@ const stats = computed<DashboardStat[]>(() => {
     }
   ]
 })
+
+const leadingIconClasses = (stat: DashboardStat) => {
+  const transform = stat.key === 'automation'
+    ? '-scale-x-100'
+    : stat.key === 'rules'
+      ? 'scale-110 translate-y-[4cqh]'
+      : ''
+
+  return `${cardUiBase.leadingIcon} ${leadingColorClasses(stat.color)} ${transform}`
+}
 </script>
 
 <template>
-  <UPageGrid class="lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-px">
+  <div class="grid grid-cols-2 gap-2 lg:grid-rows-2">
     <UPageCard
-      v-for="(stat, index) in stats"
+      v-for="stat in stats"
       :key="stat.key"
       :icon="stat.icon"
       :title="stat.title"
       :to="stat.to"
       variant="subtle"
-      :ui="{ ...cardUiBase, leading: `${leadingBaseClass} ${leadingColorClasses(stat.color)}` }"
-      class="lg:rounded-none first:rounded-l-lg last:rounded-r-lg hover:z-1"
+      :ui="{
+        ...cardUiBase,
+        leading: leadingBaseClass,
+        leadingIcon: leadingIconClasses(stat)
+      }"
+      :class="[
+        'relative min-h-28 overflow-hidden [container-type:size]',
+        cardCornerClasses[stat.key]
+      ]"
     >
-      <div class="flex items-center gap-2">
-        <span class="text-2xl font-semibold text-highlighted">
-          {{ stat.value }}
-        </span>
-
-        <UBadge v-if="stat.badge" variant="subtle" class="text-xs" :color="stat.color">
-          {{ stat.badge }}
-        </UBadge>
-      </div>
-
+      <template #body>
+        <div class="grid h-full w-full grid-rows-[auto_1fr] justify-items-center text-center">
+          <span class="text-base font-medium uppercase text-muted">{{ stat.title }}</span>
+          <div class="grid place-content-center justify-items-center gap-2">
+            <span class="text-4xl font-semibold text-highlighted">{{ stat.value }}</span>
+            <UBadge v-if="stat.badge" variant="subtle" class="px-2 py-1 text-sm" :color="stat.color">
+              {{ stat.badge }}
+            </UBadge>
+          </div>
+        </div>
+      </template>
     </UPageCard>
-  </UPageGrid>
+  </div>
 </template>

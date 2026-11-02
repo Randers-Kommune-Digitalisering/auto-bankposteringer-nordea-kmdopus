@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
 import type { RuleListDto } from '~/lib/db/schema/rule'
+import { decodeCsvBytes, type CsvEncoding } from '~/lib/csv/decodeCsvBytes'
 
 type RuleVersionItem = {
   version: number
@@ -123,16 +124,17 @@ const versionColumns: TableColumn<RuleVersionItem>[] = [
     enableSorting: false,
     cell: ({ row }) => {
       const v = row.original.version
+      const isCurrentVersion = v === versionsData.value?.currentVersion
       return h(
         UButton,
         {
           size: 'sm',
           color: 'primary',
           variant: 'soft',
-          disabled: versionsLoading.value,
+          disabled: versionsLoading.value || isCurrentVersion,
           onClick: () => rollbackRule(v),
         },
-        () => 'Gendan',
+        () => isCurrentVersion ? 'Aktuel' : 'Gendan',
       )
     },
   },
@@ -143,6 +145,7 @@ const versionColumns: TableColumn<RuleVersionItem>[] = [
 // -------------------
 const csvFiles = ref<File | null>(null)
 const csvText = ref<string | null>(null)
+const csvEncoding = ref<CsvEncoding | null>(null)
 const importLoading = ref(false)
 const validateLoading = ref(false)
 const lastValidation = ref<RuleImportResponse | null>(null)
@@ -150,8 +153,22 @@ const lastValidation = ref<RuleImportResponse | null>(null)
 watch(csvFiles, async (file) => {
   lastValidation.value = null
   csvText.value = null
+  csvEncoding.value = null
   if (!file) return
-  csvText.value = await file.text()
+
+  try {
+    const decoded = decodeCsvBytes(new Uint8Array(await file.arrayBuffer()))
+    if (csvFiles.value !== file) return
+    csvText.value = decoded.text
+    csvEncoding.value = decoded.encoding
+  } catch (error) {
+    if (csvFiles.value !== file) return
+    toast.add({
+      title: 'Kunne ikke læse CSV-filen',
+      description: error instanceof Error ? error.message : 'Ukendt fejl',
+      color: 'error',
+    })
+  }
 })
 
 const canValidate = computed(() => Boolean(csvText.value?.trim().length))
@@ -256,50 +273,13 @@ const versionsTableKey = computed(() => (versionsData.value?.versions ?? []).map
       <div class="grid gap-6">
         <UCard>
           <template #header>
-            <div class="flex items-start justify-between gap-4">
-              <div>
-                <div class="font-medium">Masseindlæsning af regler (CSV)</div>
-                <div class="text-sm text-muted space-y-3 max-w-2xl">
-                  <p>Download skabelon, udfyld og upload. Eksport giver en CSV, der kan uploades igen (roundtrip).</p>
+            <div class="font-medium">Masseindlæsning af regler (CSV)</div>
+          </template>
 
-                  <details class="rounded-md border border-default bg-elevated/25 p-3">
-                    <summary class="cursor-pointer select-none font-medium text-foreground">Multiværdier (flere værdier i én celle)</summary>
-                    <div class="mt-2 space-y-2">
-                      <ul class="list-disc pl-5 space-y-1">
-                        <li>Brug <span class="font-mono">&amp;</span> til flere værdier: <span class="font-mono">a &amp; b &amp; c</span> (anbefalet).</li>
-                        <li><span class="font-mono">,</span> og <span class="font-mono">|</span> accepteres også (legacy), men vi anbefaler <span class="font-mono">&amp;</span>.</li>
-                        <li>Escape separatorer inde i en værdi: <span class="font-mono">\&amp;</span>, <span class="font-mono">\,</span>, <span class="font-mono">\|</span>.</li>
-                        <li>Literal backslash: skriv <span class="font-mono">\\</span>.</li>
-                      </ul>
-                    </div>
-                  </details>
-
-                  <details class="rounded-md border border-default bg-elevated/25 p-3">
-                    <summary class="cursor-pointer select-none font-medium text-foreground">Operatorer (eq, ilike, …)</summary>
-                    <div class="mt-2 space-y-2">
-                      <ul class="list-disc pl-5 space-y-1">
-                        <li><span class="font-mono">eq</span> = eksakt match (standard).</li>
-                        <li><span class="font-mono">ilike</span> = “indeholder” (case-insensitive).</li>
-                        <li><span class="font-mono">matchOperator</span> bruges som standard for <span class="font-mono">matchReferences</span>/<span class="font-mono">matchCounterparties</span>/<span class="font-mono">matchClassification</span>.</li>
-                        <li>I avancerede <span class="font-mono">field_*</span>-kolonner kan du vælge operator pr. værdi med prefix: <span class="font-mono">eq:123</span>, <span class="font-mono">ilike:randers</span> (osv.).</li>
-                      </ul>
-                    </div>
-                  </details>
-
-                  <details class="rounded-md border border-default bg-elevated/25 p-3">
-                    <summary class="cursor-pointer select-none font-medium text-foreground">Skabeloner og eksport</summary>
-                    <div class="mt-2 space-y-2">
-                      <ul class="list-disc pl-5 space-y-1">
-                        <li>CSV bruger semikolon (<span class="font-mono">;</span>) som kolonne-separator.</li>
-                        <li><span class="font-mono">dim_*</span> er ERP-dimensioner (fx <span class="font-mono">dim_artskonto</span>).</li>
-                        <li>Udvidet skabelon tilføjer <span class="font-mono">field_*</span> for feltspecifik matching.</li>
-                        <li>Eksport bruger udvidet format, så <span class="font-mono">matchReferences</span>/<span class="font-mono">matchCounterparties</span>/<span class="font-mono">matchClassification</span> kan godt være tomme selv om reglen matcher.</li>
-                      </ul>
-                    </div>
-                  </details>
-                </div>
-              </div>
-              <div class="flex flex-col items-stretch gap-2 min-w-64">
+          <div class="grid gap-6 lg:grid-cols-2">
+            <section class="min-w-0 space-y-4">
+              <div class="text-sm font-medium text-highlighted">Skabelon og format</div>
+              <div class="flex flex-wrap gap-2">
                 <UButton
                   :icon="appConfig.ui.icons.clipboard"
                   color="neutral"
@@ -325,79 +305,137 @@ const versionsTableKey = computed(() => (versionsData.value?.versions ?? []).map
                   target="_blank"
                 />
               </div>
-            </div>
-          </template>
+              <div class="text-sm text-muted space-y-3">
+                <p>Download skabelon, udfyld og upload. Eksport giver en CSV, der kan uploades igen (roundtrip).</p>
 
-          <div class="grid gap-4">
-            <UFileUpload
-              v-model="csvFiles"
-              :icon="appConfig.ui.icons.upload"
-              label="Upload CSV"
-              description=".csv"
-              layout="list"
-              :multiple="false"
-              accept=".csv,text/csv"
-              class="w-full min-h-28"
-            />
+                <details class="rounded-md border border-default bg-elevated/25 p-3">
+                  <summary class="cursor-pointer select-none font-medium text-foreground">Multiværdier (flere værdier i én celle)</summary>
+                  <div class="mt-2 space-y-2">
+                    <ul class="list-disc pl-5 space-y-1">
+                      <li>Brug <span class="font-mono">&amp;</span> til flere værdier: <span class="font-mono">a &amp; b &amp; c</span> (anbefalet).</li>
+                      <li><span class="font-mono">,</span> og <span class="font-mono">|</span> accepteres også (legacy), men vi anbefaler <span class="font-mono">&amp;</span>.</li>
+                      <li>Escape separatorer inde i en værdi: <span class="font-mono">\&amp;</span>, <span class="font-mono">\,</span>, <span class="font-mono">\|</span>.</li>
+                      <li>Literal backslash: skriv <span class="font-mono">\\</span>.</li>
+                    </ul>
+                  </div>
+                </details>
 
-            <div class="flex flex-wrap gap-2">
-              <UButton
-                :icon="appConfig.ui.icons.check"
-                label="Kontrollér fil"
-                color="primary"
+                <details class="rounded-md border border-default bg-elevated/25 p-3">
+                  <summary class="cursor-pointer select-none font-medium text-foreground">Operatorer (eq, ilike, …)</summary>
+                  <div class="mt-2 space-y-2">
+                    <ul class="list-disc pl-5 space-y-1">
+                      <li><span class="font-mono">eq</span> = eksakt match (standard).</li>
+                      <li><span class="font-mono">ilike</span> = “indeholder” (case-insensitive).</li>
+                      <li><span class="font-mono">matchOperator</span> bruges som standard for <span class="font-mono">matchReferences</span>/<span class="font-mono">matchCounterparties</span>/<span class="font-mono">matchClassification</span>.</li>
+                      <li>I avancerede <span class="font-mono">field_*</span>-kolonner kan du vælge operator pr. værdi med prefix: <span class="font-mono">eq:123</span>, <span class="font-mono">ilike:randers</span> (osv.).</li>
+                      <li>I avancerede <span class="font-mono">field_*</span>-kolonner kan du sætte gate pr. værdi med <span class="font-mono">og:</span> eller <span class="font-mono">eller:</span>, fx <span class="font-mono">og:ilike:randers</span>. Uden gate-prefix bruges <span class="font-mono">ELLER</span>.</li>
+                    </ul>
+                  </div>
+                </details>
+
+                <details class="rounded-md border border-default bg-elevated/25 p-3">
+                  <summary class="cursor-pointer select-none font-medium text-foreground">Dynamisk posteringstekst og CPR</summary>
+                  <div class="mt-2 space-y-2">
+                    <ul class="list-disc pl-5 space-y-1">
+                      <li><span class="font-mono">accountingTextTemplate</span> skal være JSON med samme struktur som eksporten. Eksempel: <code v-pre class="font-mono">{"version":1,"parts":[{"type":"text","value":"KSD "},{"type":"extract","source":"bankMessage","pattern":"KSD-(\\d+)","captureGroup":1}]}</code>. Lad <span class="font-mono">accountingText</span> stå tom, når du bruger skabelonen.</li>
+                      <li><span class="font-mono">accountingCprType=dynamisk</span> udtrækker CPR fra banktransaktionen; lad <span class="font-mono">accountingCprNumber</span> stå tom. Brug <span class="font-mono">statisk</span> sammen med et CPR-nummer for en fast værdi.</li>
+                    </ul>
+                  </div>
+                </details>
+
+                <details class="rounded-md border border-default bg-elevated/25 p-3">
+                  <summary class="cursor-pointer select-none font-medium text-foreground">Skabeloner og eksport</summary>
+                  <div class="mt-2 space-y-2">
+                    <ul class="list-disc pl-5 space-y-1">
+                      <li>CSV bruger semikolon (<span class="font-mono">;</span>) som kolonne-separator.</li>
+                      <li>Importen genkender UTF-8 og UTF-16 med BOM samt Windows-1252 (ANSI), når filen ikke er gyldig UTF-8.</li>
+                      <li><span class="font-mono">dim_*</span> er ERP-dimensioner (fx <span class="font-mono">dim_artskonto</span>).</li>
+                      <li>Udvidet skabelon tilføjer kun <span class="font-mono">field_*</span> for felter, der understøttes af RuleModal og matchmotoren.</li>
+                      <li>Eksport bruger udvidet format, så <span class="font-mono">matchReferences</span>/<span class="font-mono">matchCounterparties</span>/<span class="font-mono">matchClassification</span> kan godt være tomme selv om reglen matcher.</li>
+                      <li>Eksport stopper med en fejl, hvis regler indeholder ældre matchfelter, der ikke længere understøttes, så de ikke bliver tabt ved roundtrip.</li>
+                    </ul>
+                  </div>
+                </details>
+              </div>
+
+            </section>
+
+            <section class="min-w-0 space-y-4">
+              <div class="text-sm font-medium text-highlighted">Upload og import</div>
+              <UFileUpload
+                v-model="csvFiles"
+                :icon="appConfig.ui.icons.upload"
+                label="Upload CSV"
+                description=".csv"
+                layout="list"
+                :multiple="false"
+                accept=".csv,text/csv"
+                class="w-full min-h-28"
+              />
+              <p v-if="csvEncoding" class="text-sm text-muted">
+                Filen blev læst som <span class="font-medium text-highlighted">{{ csvEncoding }}</span>.
+              </p>
+
+              <div class="flex flex-wrap gap-2">
+                <UButton
+                  :icon="appConfig.ui.icons.check"
+                  label="Kontrollér fil"
+                  color="primary"
+                  variant="soft"
+                  :disabled="!canValidate"
+                  :loading="validateLoading"
+                  @click="validateCsv"
+                />
+                <UButton
+                  :icon="appConfig.ui.icons.database"
+                  label="Importér"
+                  color="primary"
+                  :disabled="!validatedOk || hasErrors"
+                  :loading="importLoading"
+                  @click="importCsv"
+                />
+              </div>
+
+              <UAlert
+                v-if="lastValidation && lastValidation.success"
+                color="success"
                 variant="soft"
-                :disabled="!canValidate"
-                :loading="validateLoading"
-                @click="validateCsv"
+                title="CSV er OK"
+                :description="`Valideret ${lastValidation.totalRows} række(r).`"
               />
-              <UButton
-                :icon="appConfig.ui.icons.database"
-                label="Importér"
-                color="primary"
-                :disabled="!validatedOk || hasErrors"
-                :loading="importLoading"
-                @click="importCsv"
+
+              <UAlert
+                v-else-if="lastValidation && !lastValidation.success"
+                color="error"
+                variant="soft"
+                title="CSV har fejl"
+                :description="`Fejl fundet: ${lastValidation.errors.length}. Viser de første ${errorPreview.length}.`"
               />
-            </div>
 
-            <UAlert
-              v-if="lastValidation && lastValidation.success"
-              color="success"
-              variant="soft"
-              title="CSV er OK"
-              :description="`Valideret ${lastValidation.totalRows} række(r).`"
-            />
-
-            <UAlert
-              v-else-if="lastValidation && !lastValidation.success"
-              color="error"
-              variant="soft"
-              title="CSV har fejl"
-              :description="`Fejl fundet: ${lastValidation.errors.length}. Viser de første ${errorPreview.length}.`"
-            />
-
-            <UTable
-              v-if="errorPreview.length"
-              :key="importErrorsTableKey"
-              :data="errorPreview"
-              :columns="[
-                { accessorKey: 'row', header: 'Række' },
-                { accessorKey: 'field', header: 'Felt' },
-                { accessorKey: 'message', header: 'Fejl' },
-              ]"
-              :ui="{
-                base: 'border-separate border-spacing-0',
-                thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
-                tbody: '[&>tr]:last:[&>td]:border-b-0',
-                th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
-                td: 'border-b border-default',
-                separator: 'h-0'
-              }"
-            />
+              <div v-if="errorPreview.length" class="overflow-x-auto">
+                <UTable
+                  :key="importErrorsTableKey"
+                  :data="errorPreview"
+                  :columns="[
+                    { accessorKey: 'row', header: 'Række' },
+                    { accessorKey: 'field', header: 'Felt' },
+                    { accessorKey: 'message', header: 'Fejl' },
+                  ]"
+                  :ui="{
+                    base: 'border-separate border-spacing-0',
+                    thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
+                    tbody: '[&>tr]:last:[&>td]:border-b-0',
+                    th: 'py-2 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
+                    td: 'border-b border-default',
+                    separator: 'h-0'
+                  }"
+                />
+              </div>
+            </section>
           </div>
         </UCard>
 
-        <UCard>
+        <UCard class="w-full lg:w-1/3">
           <template #header>
             <div class="flex items-center justify-between gap-4">
               <div>
@@ -415,31 +453,17 @@ const versionsTableKey = computed(() => (versionsData.value?.versions ?? []).map
             </div>
           </template>
 
-          <div class="grid gap-4 md:grid-cols-3">
-            <div class="md:col-span-2">
-              <UFormField label="Regel">
-                <USelectMenu
-                  v-model="selectedRuleId"
-                  :items="ruleOptions"
-                  valueKey="value"
-                  labelKey="label"
-                  placeholder="Vælg en regel"
-                  :loading="rulesPending"
-                />
-              </UFormField>
-            </div>
-            <div class="flex items-end">
-              <UButton
-                class="w-full"
-                icon="solar:list-bold-duotone"
-                label="Hent versioner"
-                color="neutral"
-                variant="soft"
-                :disabled="!selectedRuleId"
-                :loading="versionsLoading"
-                @click="loadRuleVersions"
+          <div>
+            <UFormField label="Regel">
+              <USelectMenu
+                v-model="selectedRuleId"
+                :items="ruleOptions"
+                valueKey="value"
+                labelKey="label"
+                placeholder="Vælg en regel"
+                :loading="rulesPending"
               />
-            </div>
+            </UFormField>
           </div>
 
           <UEmpty

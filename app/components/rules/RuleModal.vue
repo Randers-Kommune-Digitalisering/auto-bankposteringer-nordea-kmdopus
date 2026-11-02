@@ -19,6 +19,7 @@ import { useDefaultBankAccount } from '~/composables/useDefaultBankAccount'
 import { useTransactionTypeCatalog } from '~/composables/useTransactionTypeCatalog'
 import { encodeTransactionTypeCatalogReference, transactionTypeCatalogValueLabel, transactionTypeCategory } from '~/lib/rules/transactionTypeCatalog'
 import { MANUAL_BOOKING_LOCK_RENEW_INTERVAL_MS } from '#engine/manual-booking/domain/bookingLease'
+import { ruleRequiresAccounting } from '~/lib/rules/ruleAccountingRequirements'
 
 const appConfig = useAppConfig()
 const {
@@ -167,6 +168,7 @@ function createEmptyDraft(): RuleDraftUiState {
 }
 
 const state = reactive<RuleDraftUiState>(createEmptyDraft())
+const requiresAccounting = computed(() => ruleRequiresAccounting(state.type, state.status))
 
 // -------------------------
 // Active period (date range)
@@ -315,6 +317,12 @@ watchEffect(() => {
 // Load rule if editing
 // --------------------
 const ruleLockState = ref<'idle' | 'pending' | 'owned' | 'conflict' | 'error'>('idle')
+const ruleDraftLoading = ref(false)
+const ruleDraftLoaded = ref(false)
+const shouldRenderModal = computed(() =>
+  open.value
+  && (!isEdit.value || (!ruleDraftLoading.value && (ruleDraftLoaded.value || ruleLockState.value === 'error'))),
+)
 const ruleLockOwnerName = ref('')
 const ruleLockError = ref('')
 const deletingRulePending = ref(false)
@@ -365,6 +373,9 @@ watch(
   () => [open.value, props.ruleId] as const,
   async ([isOpen, ruleId]) => {
     const generation = ++ruleLockGeneration
+    ruleDraftLoading.value = isOpen && !!ruleId
+    ruleDraftLoaded.value = false
+    ruleLockState.value = isOpen && ruleId ? 'pending' : 'idle'
     stopRuleLockHeartbeat()
     const previousRuleId = activeRuleLockId
     activeRuleLockId = null
@@ -378,7 +389,6 @@ watch(
       return
     }
 
-    ruleLockState.value = 'pending'
     let acquired = false
     try {
       const result = await postRuleLockAction(ruleId, 'acquire')
@@ -413,10 +423,13 @@ watch(
       hydrateDraft(data)
       await nextTick()
       savedSnapshot.value = currentSnapshot.value
+      ruleDraftLoaded.value = true
     } catch (error: any) {
       if (generation !== ruleLockGeneration) return
       ruleLockError.value = error?.data?.message ?? error?.data?.statusMessage ?? 'Reglen kunne ikke indlæses.'
       ruleLockState.value = 'error'
+    } finally {
+      if (generation === ruleLockGeneration) ruleDraftLoading.value = false
     }
   },
   { immediate: true },
@@ -750,15 +763,17 @@ const ruleAccountingSchemaWithUiValidation = computed(() =>
       }
     }
 
-    for (const def of defs) {
-      if (!def.required) continue
-      const hasValue = dimensions.some((d) => d.key === def.key && String(d.value ?? '').trim().length > 0)
-      if (!hasValue) {
-        ctx.addIssue({
-          code: 'custom',
-          message: `${dimensionLabel(def.key)} er påkrævet`,
-          path: ['accountingDimensions', def.key],
-        })
+    if (requiresAccounting.value) {
+      for (const def of defs) {
+        if (!def.required) continue
+        const hasValue = dimensions.some((d) => d.key === def.key && String(d.value ?? '').trim().length > 0)
+        if (!hasValue) {
+          ctx.addIssue({
+            code: 'custom',
+            message: `${dimensionLabel(def.key)} er påkrævet`,
+            path: ['accountingDimensions', def.key],
+          })
+        }
       }
     }
 
@@ -804,6 +819,7 @@ const ruleAccountingSchemaWithUiValidation = computed(() =>
         : group.filter(c => (c.ifValueRegex ?? null) == null)
 
       for (const c of applicable) {
+        if (!requiresAccounting.value && c.kind !== 'forbids_any_of') continue
 
         if (c.kind === 'requires_any_of') {
           const ok = c.members.some(m => keys.has(m))
@@ -1086,7 +1102,7 @@ function onDownloadRule() {
 </script>
 
 <template>
-  <UModal v-model:open="open">
+  <UModal v-if="shouldRenderModal" v-model:open="open">
     <template #header>
       <div class="flex w-full items-center gap-4">
         <h2 class="text-lg font-semibold">
@@ -1129,7 +1145,15 @@ function onDownloadRule() {
 
     <template #body>
       <UAlert
-        v-if="ruleLockState === 'conflict'"
+        v-if="ruleDraftLoading"
+        class="mb-4"
+        color="neutral"
+        variant="soft"
+        title="Indlæser regel"
+        description="Reglens oplysninger indlæses, før formularen vises."
+      />
+      <UAlert
+        v-else-if="ruleLockState === 'conflict'"
         class="mb-4"
         color="warning"
         variant="soft"
@@ -1156,13 +1180,13 @@ function onDownloadRule() {
       />
 
       <div
-        v-if="(state.accountingNote ?? '').trim().length > 0"
+        v-if="(!isEdit || ruleDraftLoaded) && (state.accountingNote ?? '').trim().length > 0"
         class="mb-4 rounded-md border border-default bg-default px-3 py-2 text-sm border-l-4 border-l-primary/60"
       >
         <span class="font-semibold text-default">Noter:</span>
         <span class="ml-2 text-muted whitespace-pre-wrap">{{ state.accountingNote }}</span>
       </div>
-      <UForm ref="formRef" :schema="stepSchema" :state="state" @submit="onSubmit" :disabled="isRuleReadOnly || deletingRulePending">
+      <UForm v-if="!isEdit || ruleDraftLoaded" ref="formRef" :schema="stepSchema" :state="state" @submit="onSubmit" :disabled="isRuleReadOnly || deletingRulePending">
         <UStepper v-model="currentStep" :items="steps" class="mb-6">
           <template #content="{ item }">
             <USeparator class="mb-6" />
@@ -1448,11 +1472,14 @@ function onDownloadRule() {
                   />
                   <div v-if="accountingDimensionDefinitions.length" class="space-y-2">
                     <div class="text-sm font-medium text-highlighted">Kontering</div>
+                    <p v-if="!requiresAccounting" class="text-sm text-muted">
+                      Kontering er valgfri for undtagelser og inaktive regler.
+                    </p>
                     <UFormField
                       v-for="def in accountingDimensionDefinitions"
                       :key="def.id"
                       :name="`accountingDimensions.${def.key}`"
-                      :required="def.required"
+                      :required="requiresAccounting && def.required"
                     >
                       <UiFloatingLabelInput
                         v-model="accountingDimensionValues[def.key]"

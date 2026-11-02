@@ -80,13 +80,15 @@ const payload = computed(() => data.value)
 					v-model:account-ids="selectedAccountIds"
 				/>
 
-				<DashboardKpis v-if="payload" :kpis="payload.kpis" />
+				<div v-if="payload" class="grid grid-cols-1 gap-4 lg:flex">
+					<DashboardKpis :kpis="payload.kpis" class="lg:aspect-[4/3] lg:basis-5/12 lg:max-w-[30rem] lg:shrink-0" />
 
-				<DashboardAutomationChart
-					v-if="payload"
-					:series="payload.automationSeries"
-					title="Automatiseringsgrad (matches / transaktioner)"
-				/>
+					<DashboardAutomationChart
+						:series="payload.automationSeries"
+						title="Automatiseringsgrad (matches / transaktioner)"
+						class="min-w-0 lg:flex-1"
+					/>
+				</div>
 
 				<DashboardLatestRuns v-if="payload" :runs="payload.latestRuns" />
 			</div>

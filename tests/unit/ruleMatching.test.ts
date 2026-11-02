@@ -13,20 +13,19 @@ const transaction = {
   statusDimensions: {},
   bookingDate: new Date('2026-01-01'),
   amount: 100,
-  creditorName: 'Nets Danmark A/S',
+  dbtrName: 'Nets Danmark A/S',
   processingStatus: null,
   hasProcessingRow: false,
 } as MatchableTransaction
 
 const nordeaTransaction = {
   ...transaction,
-  debtorName: 'NETS DENMARK A/S',
+  dbtrName: 'NETS DENMARK A/S',
   entryAdditionalInfo: '502:REFERENCE:N54102770457',
-  remittanceAdditional: ['N54102770457'],
 }
 
 describe('rule matching groups', () => {
-  it('does not create matching conditions from child party fields', () => {
+  it('allows selecting underlying CAMT party fields in the Modpart category', () => {
     const legacyEntry = matchEntrySchema.safeParse({
       category: 'Modpart',
       value: 'nets',
@@ -35,19 +34,25 @@ describe('rule matching groups', () => {
       fields: ['dbtr_name', 'cdtr_name'],
     })
 
-    expect(legacyEntry.success).toBe(false)
+    expect(legacyEntry.success).toBe(true)
   })
 
-  it('ignores persisted matching conditions for child party fields', () => {
+  it('maps persisted CAMT party fields back to the Modpart category', () => {
     const matches = mapConditionsToMatches([
       { field: 'dbtr_name', operator: 'ilike', gate: 'ELLER', value: 'nets' } as any,
       { field: 'cdtr_name', operator: 'ilike', gate: 'ELLER', value: 'nets' } as any,
     ])
 
-    expect(matches).toEqual([])
+    expect(matches).toEqual([{
+      category: 'Modpart',
+      value: 'nets',
+      fields: ['dbtr_name', 'cdtr_name'],
+      operator: 'ilike',
+      gate: 'ELLER',
+    }])
   })
 
-  it('does not expand the party group into unavailable child fields', () => {
+  it('expands the Modpart category to all underlying CAMT party fields', () => {
     const conditions = mapMatchesToConditionRows([{
       category: 'Modpart',
       value: 'Nets',
@@ -55,7 +60,18 @@ describe('rule matching groups', () => {
       gate: 'ELLER',
     }])
 
-    expect(conditions).toEqual([])
+    expect(conditions.map(condition => condition.field)).toEqual([
+      'dbtr_name',
+      'dbtr_id',
+      'dbtr_acct_iban',
+      'cdtr_name',
+      'cdtr_id',
+      'cdtr_acct_iban',
+      'ultmt_dbtr_name',
+      'ultmt_cdtr_name',
+    ])
+    expect(conditions.every(condition => condition.gate === 'ELLER')).toBe(true)
+    expect(conditions.every(condition => condition.operator === 'ilike' && condition.value === 'Nets')).toBe(true)
   })
 
   it('forces ELLER when fields are omitted from the DTO', () => {
@@ -190,6 +206,28 @@ describe('rule matching groups', () => {
     ]
 
     expect(evaluateConditionGroups(nordeaTransaction, conditions as any)).toBe(true)
+  })
+
+  it('matches a Modpart rule against any populated CAMT party field', () => {
+    const conditions = mapMatchesToConditionRows([{
+      category: 'Modpart',
+      value: 'Nets',
+      operator: 'ilike',
+      gate: 'ELLER',
+    }])
+
+    expect(evaluateConditionGroups(nordeaTransaction, conditions as any)).toBe(true)
+    expect(evaluateConditionGroups({
+      ...nordeaTransaction,
+      dbtrName: null,
+      dbtrId: null,
+      dbtrAcctIban: null,
+      cdtrName: null,
+      cdtrId: null,
+      cdtrAcctIban: null,
+      ultmtDbtrName: null,
+      ultmtCdtrName: null,
+    }, conditions as any)).toBe(false)
   })
 
   it('treats ilike values as substrings rather than SQL wildcard patterns', () => {

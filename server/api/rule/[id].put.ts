@@ -19,14 +19,8 @@ import { ruleVersion, type RuleVersionInsertSchema } from '~/lib/db/schema/ruleV
 import { getActiveErpSupplier, listAccountingDimensionConstraints, listAccountingDimensionDefinitions, resolveDimensionValueRows } from '~~/server/utils/accountingDimensions'
 import { requireWriteAccessWithIdentity } from '~~/server/auth/requireAppRoles'
 import { verifyRuleEditLockInTransaction } from '~~/server/utils/ruleEditLock'
-
-function toDbNumericStringOrUndefined(value: number | null | undefined): string | undefined {
-  if (value == null) return undefined
-  if (typeof value !== 'number' || !Number.isFinite(value)) {
-    throw createError({ statusCode: 400, statusMessage: 'Ugyldigt beløb (amount_min/amount_max)' })
-  }
-  return value.toFixed(2)
-}
+import { ruleRequiresAccounting } from '~/lib/rules/ruleAccountingRequirements'
+import { toDbNumericStringOrUndefined } from '~~/server/utils/rules/ruleDbValues'
 
 function compileRuleDraftToDb(draft: RuleDraftSchema, newVersion: number, erpSupplier: string) {
   const {
@@ -130,8 +124,8 @@ export default defineEventHandler(async (event) => {
   const { ruleData, bankAccountIds, tagIds, conditionRows, accountingParameters, attachments, versionContent } = compileRuleDraftToDb(parsed.data, newVersion, existingRule.erpSupplier)
   const validatedDbPayload = createInsertSchema(rule).parse({
     ...ruleData,
-    matchAmountMin: toDbNumericStringOrUndefined((ruleData as any).matchAmountMin),
-    matchAmountMax: toDbNumericStringOrUndefined((ruleData as any).matchAmountMax),
+    matchAmountMin: toDbNumericStringOrUndefined(ruleData.matchAmountMin),
+    matchAmountMax: toDbNumericStringOrUndefined(ruleData.matchAmountMax),
   })
 
   await db.transaction(async (tx) => {
@@ -179,6 +173,7 @@ export default defineEventHandler(async (event) => {
       dimensions: parsed.data.accountingDimensions,
       definitions: dimensionDefinitions,
       constraints: dimensionConstraints,
+      requireComplete: ruleRequiresAccounting(parsed.data.type, parsed.data.status),
     })
     if (dimensionRows.length) {
       await tx.insert(ruleAccountingDimensionValue).values(dimensionRows)

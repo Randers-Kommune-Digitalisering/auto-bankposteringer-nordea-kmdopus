@@ -574,7 +574,7 @@ function collapseAllLines() {
 </script>
 
 <template>
-	<UModal v-model:open="open">
+	<UModal v-if="open && !isLoadingDraft" v-model:open="open">
 		<template #header>
 			<div class="flex w-full items-center gap-4">
 				<h2 class="text-lg font-semibold">
@@ -700,6 +700,7 @@ function collapseAllLines() {
 				</div>
 
 					<UForm
+						v-if="!isLoadingDraft"
 						id="booking-modal-form"
 						ref="formRef"
 						:schema="manualBookingFormSchema"

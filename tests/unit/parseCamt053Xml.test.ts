@@ -90,4 +90,64 @@ describe('parseCamt053Xml (Nordea example)', () => {
     expect(parsed.statements[0]!.transactions[0]!.underlyingTransactionCount).toBe(0)
     expect(parsed.statements[0]!.transactions[0]!.amount).toBe('100.00')
   })
+
+  it('parses the underlying CAMT party fields without collapsing them to counterparty semantics', () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt><Stmt>
+    <Id>STMT-3</Id><Acct><Id><IBAN>DK0012345678900000</IBAN></Id><Ccy>DKK</Ccy></Acct>
+    <Ntry><Amt Ccy="DKK">100.00</Amt><CdtDbtInd>CRDT</CdtDbtInd>
+      <BookgDt><Dt>2026-06-30</Dt></BookgDt>
+      <NtryDtls><TxDtls><RltdPties>
+        <Dbtr><Pty><Nm>Sender A/S</Nm><Id><OrgId><Othr><Id>SENDER-1</Id></Othr></OrgId></Id></Pty></Dbtr>
+        <DbtrAcct><Id><IBAN>DK0011223344556677</IBAN></Id></DbtrAcct>
+        <Cdtr><Pty><Nm>Municipality</Nm><Id><PrvtId><Othr><Id>RECIPIENT-1</Id></Othr></PrvtId></Id></Pty></Cdtr>
+        <UltmtDbtr><Pty><Nm>Ultimate Sender</Nm></Pty></UltmtDbtr>
+      </RltdPties></TxDtls></NtryDtls>
+    </Ntry>
+    <Ntry><Amt Ccy="DKK">25.00</Amt><CdtDbtInd>DBIT</CdtDbtInd>
+      <BookgDt><Dt>2026-06-30</Dt></BookgDt>
+      <NtryDtls><TxDtls><RltdPties>
+        <Dbtr><Nm>Municipality</Nm></Dbtr>
+        <Cdtr><Nm>Recipient A/S</Nm></Cdtr>
+      </RltdPties></TxDtls></NtryDtls>
+    </Ntry>
+  </Stmt></BkToCstmrStmt>
+</Document>`
+
+    const transactions = parseCamt053Xml(xml).statements[0]!.transactions
+    expect(transactions[0]).toMatchObject({
+      dbtrName: 'Sender A/S',
+      dbtrId: 'SENDER-1',
+      dbtrAcctIban: 'DK0011223344556677',
+      cdtrName: 'Municipality',
+      cdtrId: 'RECIPIENT-1',
+      ultmtDbtrName: 'Ultimate Sender',
+    })
+    expect(transactions[1]).toMatchObject({
+      dbtrName: 'Municipality',
+      cdtrName: 'Recipient A/S',
+    })
+  })
+
+  it('does not retain ambiguous party names from aggregated child transactions', () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt><Stmt>
+    <Id>STMT-4</Id><Acct><Id><IBAN>DK0012345678900000</IBAN></Id><Ccy>DKK</Ccy></Acct>
+    <Ntry><Amt Ccy="DKK">2.00</Amt><CdtDbtInd>CRDT</CdtDbtInd>
+      <BookgDt><Dt>2026-06-30</Dt></BookgDt>
+      <NtryDtls>
+        <TxDtls><RltdPties><Dbtr><Nm>Sender A</Nm></Dbtr></RltdPties></TxDtls>
+        <TxDtls><RltdPties><Dbtr><Nm>Sender B</Nm></Dbtr></RltdPties></TxDtls>
+      </NtryDtls>
+    </Ntry>
+  </Stmt></BkToCstmrStmt>
+</Document>`
+
+    const transaction = parseCamt053Xml(xml).statements[0]!.transactions[0]!
+    expect(transaction.dbtrName).toBeNull()
+    expect(JSON.stringify(transaction)).not.toContain('Sender A')
+    expect(JSON.stringify(transaction)).not.toContain('Sender B')
+  })
 })

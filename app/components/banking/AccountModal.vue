@@ -148,6 +148,10 @@ const state = reactive<FormState>({
   isDefaultBankAccount: false,
 })
 
+const loadState = ref<'idle' | 'loading' | 'ready' | 'error'>('idle')
+let loadGeneration = 0
+const shouldRenderModal = computed(() => open.value && loadState.value !== 'loading')
+
 function resetForm() {
   state.name = undefined
   state.statuskonto = undefined
@@ -179,17 +183,23 @@ watch(() => state.ignoreIngestion, (ignoreIngestion) => {
 })
 
 watch(
-  () => [props.accountId, open.value] as const,
+  () => [props.accountId, open.value, mode.value, JSON.stringify(props.configuredDraft)] as const,
   async ([id, isOpen]) => {
+    const generation = ++loadGeneration
     if (!isOpen) {
       resetForm()
+      loadState.value = 'idle'
       return
     }
+
+    resetForm()
+    loadState.value = 'loading'
 
     // Ensure ERP-driven validation config is available when the modal is opened.
     if (!isAccountingDimensionConfigReady.value) {
       await refreshAccountingDimensions().catch(() => {})
     }
+    if (generation !== loadGeneration) return
 
     if (isConfiguredMode.value) {
       if (props.configuredDraft) {
@@ -197,24 +207,34 @@ watch(
       } else {
         resetForm()
       }
+      loadState.value = 'ready'
       return
     }
 
     if (!id) {
-      resetForm()
+      loadState.value = 'ready'
       return
     }
 
     try {
       if (defaultBankAccountPending.value) await refreshDefaultBankAccount()
       const data = await $fetch<AccountSelectSchema>(`/api/bank-accounts/${id}`)
+      if (generation !== loadGeneration) return
       hydrateDraft(data)
     } catch (err) {
-      console.error('Fejl ved hentning af konto', err)
+      if (generation !== loadGeneration) return
       resetForm()
+      loadState.value = 'error'
+      toast.add({
+        title: 'Bankkonto kunne ikke indlæses',
+        description: err instanceof Error ? err.message : 'Ukendt fejl',
+        color: 'error',
+      })
+      return
     }
+    loadState.value = 'ready'
   },
-  { immediate: true }
+  { immediate: true, flush: 'sync' }
 )
 
 async function onSubmit() {
@@ -313,7 +333,7 @@ async function onSubmit() {
 </script>
 
 <template>
-  <UModal v-model:open="open">
+  <UModal v-if="shouldRenderModal" v-model:open="open">
     <template #header>
       <div class="flex items-center justify-between">
         <h2 class="text-lg font-semibold">
@@ -328,7 +348,17 @@ async function onSubmit() {
     </template>
 
     <template #body>
-      <UForm :schema="formSchema" :state="state" @submit="onSubmit">
+      <div v-if="loadState === 'loading'" class="flex justify-center py-8 text-sm text-muted">
+        Indlæser bankkonto …
+      </div>
+      <UAlert
+        v-else-if="loadState === 'error'"
+        color="error"
+        variant="soft"
+        title="Bankkonto kunne ikke indlæses"
+        description="Luk vinduet, og prøv igen."
+      />
+      <UForm v-else-if="loadState === 'ready'" :schema="formSchema" :state="state" @submit="onSubmit">
         <div
           class="mt-4 p-4 rounded-md border border-default space-y-4"
         >

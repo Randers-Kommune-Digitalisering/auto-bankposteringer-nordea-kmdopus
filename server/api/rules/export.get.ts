@@ -1,7 +1,12 @@
 import { defineEventHandler, getQuery, setHeader, createError } from 'h3'
 import db from '~/lib/db'
-import { ruleConditionFieldValues } from '~/lib/db/schema/enums'
+import type { RuleConditionField, RuleConditionOperator } from '~/lib/db/schema/enums'
 import { getActiveErpSupplier, listAccountingDimensionDefinitions } from '~~/server/utils/accountingDimensions'
+import {
+  buildRuleCsvHeaders,
+  formatAdvancedFieldToken,
+  getUnsupportedRuleConditionFields,
+} from '~~/server/utils/rules/ruleCsv'
 
 function escapeCsvCell(value: string): string {
   const needsQuotes = /[";\n\r]/.test(value)
@@ -30,10 +35,30 @@ function joinMulti(values: string[]): string {
   return cleaned.join(' & ')
 }
 
+function parseSelectedRuleIds(value: unknown): number[] | undefined {
+  if (value === undefined) return undefined
+  if (typeof value !== 'string') {
+    throw createError({ statusCode: 400, statusMessage: 'Regel-id’er skal angives som én kommasepareret liste' })
+  }
+
+  const tokens = value.split(',')
+  if (!tokens.length || tokens.length > 100 || tokens.some(token => !/^[1-9]\d*$/.test(token))) {
+    throw createError({ statusCode: 400, statusMessage: 'Ugyldig liste med regel-id’er' })
+  }
+
+  const ids = tokens.map(Number)
+  if (new Set(ids).size !== ids.length) {
+    throw createError({ statusCode: 400, statusMessage: 'Regel-id’er må ikke gentages' })
+  }
+
+  return ids
+}
+
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const variant = typeof query.variant === 'string' ? query.variant : 'advanced'
   const isAdvanced = variant === 'advanced'
+  const selectedRuleIds = parseSelectedRuleIds(query.ids)
 
   if (!isAdvanced) {
     // Export is intended to be uploadable without data loss.
@@ -48,28 +73,12 @@ export default defineEventHandler(async (event) => {
   const supplier = await getActiveErpSupplier()
   const dimensionDefinitions = await listAccountingDimensionDefinitions(supplier)
 
-  const headers = [
-    'type',
-    'status',
-    'relatedBankAccounts',
-    'ruleTags',
-    'matchOperator',
-    'matchReferences',
-    'matchCounterparties',
-    'matchClassification',
-    'matchAmountMin',
-    'matchAmountMax',
-    'accountingText',
-    'accountingTextTemplate',
-    'accountingCprType',
-    'accountingCprNumber',
-    'accountingNote',
-    ...dimensionDefinitions.map(d => `dim_${d.key}`),
-    ...(ruleConditionFieldValues.map(f => `field_${f}`)),
-  ]
+  const headers = buildRuleCsvHeaders(dimensionDefinitions.map(d => d.key), true)
 
   const rows = await db.query.rule.findMany({
-    where: (fields, { eq }) => eq(fields.erpSupplier, supplier),
+    where: (fields, { and, eq, inArray }) => selectedRuleIds
+      ? and(eq(fields.erpSupplier, supplier), inArray(fields.id, selectedRuleIds))
+      : eq(fields.erpSupplier, supplier),
     with: {
       bankAccounts: { columns: { bankAccountId: true } },
       tags: { columns: { ruleTagId: true } },
@@ -83,8 +92,28 @@ export default defineEventHandler(async (event) => {
     orderBy: (rule, { asc }) => [asc(rule.id)],
   })
 
+  if (selectedRuleIds && rows.length !== selectedRuleIds.length) {
+    throw createError({
+      statusCode: 409,
+      statusMessage: 'Valgte regler mangler eller har en anden ERP',
+    })
+  }
+
+  const unsupportedFields = getUnsupportedRuleConditionFields(
+    rows.flatMap(r => (r.conditions ?? []).map(condition => condition.field as RuleConditionField)),
+  )
+  if (unsupportedFields.length) {
+    throw createError({
+      statusCode: 409,
+      statusMessage: `Eksporten kan ikke roundtrippes, fordi regler bruger felter, som ikke understøttes af RuleModal og matchmotoren: ${unsupportedFields.join(', ')}`,
+    })
+  }
+
   const lines: string[] = []
   lines.push(toCsvRow(headers))
+  const fieldKeys = headers
+    .filter(header => header.startsWith('field_'))
+    .map(header => header.slice('field_'.length))
 
   for (const r of rows) {
     const relatedBankAccounts = joinMulti((r.bankAccounts ?? []).map(a => a.bankAccountId).filter(Boolean) as string[])
@@ -121,9 +150,11 @@ export default defineEventHandler(async (event) => {
       const value = String(condition.value ?? '').trim()
       if (!value.length) continue
 
-      const token = op === 'eq'
-        ? value
-        : `${op}:${value}`
+      const token = formatAdvancedFieldToken({
+        operator: op as RuleConditionOperator,
+        gate: condition.gate ?? 'ELLER',
+        value,
+      })
 
       const bucket = fieldCellByKey.get(fieldKey) ?? []
       bucket.push(token)
@@ -151,7 +182,7 @@ export default defineEventHandler(async (event) => {
       values.push(dimByKey.get(def.key) ?? '')
     }
 
-    for (const fieldKey of ruleConditionFieldValues) {
+    for (const fieldKey of fieldKeys) {
       values.push(joinMulti(fieldCellByKey.get(fieldKey) ?? []))
     }
 
@@ -164,7 +195,7 @@ export default defineEventHandler(async (event) => {
   setHeader(
     event,
     'Content-Disposition',
-    `attachment; filename="rules_export_${supplier}_advanced.csv"`,
+    `attachment; filename="rules_${selectedRuleIds ? 'selected' : 'export'}_${supplier}_advanced.csv"`,
   )
   setHeader(event, 'Cache-Control', 'no-store')
 

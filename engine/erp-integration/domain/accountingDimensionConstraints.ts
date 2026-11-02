@@ -14,6 +14,7 @@ export type AccountingDimensionConstraintLike = {
 export function validateAccountingDimensionConstraints(
   values: Map<string, string>,
   constraints?: AccountingDimensionConstraintLike[],
+  options: { allowIncomplete?: boolean } = {},
 ) {
   const keys = new Set(values.keys())
 
@@ -47,6 +48,7 @@ export function validateAccountingDimensionConstraints(
       : group.filter(c => (c.ifValueRegex ?? null) == null)
 
     for (const c of applicable) {
+      if (options.allowIncomplete && c.kind !== 'forbids_any_of') continue
 
       if (c.kind === 'requires_any_of') {
       const ok = c.members.some(m => keys.has(m))

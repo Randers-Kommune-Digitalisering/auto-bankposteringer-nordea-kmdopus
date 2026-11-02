@@ -14,9 +14,27 @@ const props = defineProps<{
   title?: string
 }>()
 
-const width = 860
-const height = 240
+const width = ref(860)
+const height = 224
 const padding = { top: 16, right: 16, bottom: 30, left: 32 }
+
+let resizeObserver: ResizeObserver | undefined
+
+onMounted(() => {
+  const container = containerRef.value
+  if (!container) return
+
+  const updateWidth = () => {
+    const measuredWidth = Math.round(container.getBoundingClientRect().width)
+    if (measuredWidth > 0) width.value = measuredWidth
+  }
+
+  updateWidth()
+  resizeObserver = new ResizeObserver(updateWidth)
+  resizeObserver.observe(container)
+})
+
+onBeforeUnmount(() => resizeObserver?.disconnect())
 
 const points = computed(() => {
   const series = props.series
@@ -26,7 +44,7 @@ const points = computed(() => {
   const min = Math.min(...values, 0)
   const max = Math.max(...values, 100)
 
-  const innerW = width - padding.left - padding.right
+  const innerW = width.value - padding.left - padding.right
   const innerH = height - padding.top - padding.bottom
 
   const xStep = series.length === 1 ? 0 : innerW / (series.length - 1)
@@ -80,10 +98,10 @@ function nearestIndexFromEvent(ev: PointerEvent): number | null {
   if (!svg) return null
   const rect = svg.getBoundingClientRect()
   const xPx = ev.clientX - rect.left
-  const xView = (xPx / rect.width) * width
+  const xView = (xPx / rect.width) * width.value
 
   const innerLeft = padding.left
-  const innerRight = width - padding.right
+  const innerRight = width.value - padding.right
   const clamped = Math.min(innerRight, Math.max(innerLeft, xView))
 
   const idxFloat = (clamped - innerLeft) / (innerRight - innerLeft)
@@ -133,7 +151,7 @@ const tooltip = computed(() => {
 </script>
 
 <template>
-  <UCard :ui="{ root: 'overflow-visible' }">
+  <UCard class="h-full" :ui="{ root: 'overflow-visible' }">
     <template #header>
       <div class="flex items-center justify-between gap-2">
         <div class="font-medium">{{ title ?? 'Automatiseringsgrad' }}</div>
@@ -144,7 +162,7 @@ const tooltip = computed(() => {
     <div ref="containerRef" class="relative w-full overflow-x-auto">
       <svg
         :viewBox="`0 0 ${width} ${height}`"
-        class="min-w-[720px] w-full"
+        class="h-[224px] w-full"
         @pointermove="onPointerMove"
         @pointerleave="onPointerLeave"
       >

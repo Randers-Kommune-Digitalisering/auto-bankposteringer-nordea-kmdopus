@@ -14,11 +14,16 @@ type RuleLockRow = {
   lockedByName: string | null
 }
 
+export type RuleMutationClaimResult =
+  | { status: 'claimed' }
+  | { status: 'locked'; ownerName: string }
+  | { status: 'missing' }
+
 function isLiveLock(row: RuleLockRow, now: Date): boolean {
   return Boolean(row.lockedBy && row.lockedAt && now.getTime() - row.lockedAt.getTime() < RULE_EDIT_LOCK_LEASE_MS)
 }
 
-async function selectRuleForUpdate(tx: DbTransaction, ruleId: number): Promise<RuleLockRow> {
+async function selectRuleForUpdateOrNull(tx: DbTransaction, ruleId: number): Promise<RuleLockRow | null> {
   const [row] = await tx
     .select({
       id: rule.id,
@@ -30,17 +35,13 @@ async function selectRuleForUpdate(tx: DbTransaction, ruleId: number): Promise<R
     .where(eq(rule.id, ruleId))
     .for('update')
 
-  if (!row) throw createError({ statusCode: 404, statusMessage: 'Reglen blev ikke fundet' })
-  return row
+  return row ?? null
 }
 
-function assertNoOtherOwner(row: RuleLockRow, user: LockOwnerIdentity, now: Date): void {
-  if (isLiveLock(row, now) && row.lockedBy !== user.id) {
-    throw createError({
-      statusCode: 409,
-        message: `Reglen redigeres af ${row.lockedByName || 'anden bruger'}`,
-    })
-  }
+async function selectRuleForUpdate(tx: DbTransaction, ruleId: number): Promise<RuleLockRow> {
+  const row = await selectRuleForUpdateOrNull(tx, ruleId)
+  if (!row) throw createError({ statusCode: 404, statusMessage: 'Reglen blev ikke fundet' })
+  return row
 }
 
 export async function acquireRuleEditLock(ruleId: number, user: LockOwnerIdentity, renewOnly = false) {
@@ -87,13 +88,36 @@ export async function claimRuleForMutationInTransaction(
   ruleId: number,
   user: LockOwnerIdentity,
 ): Promise<void> {
-  const row = await selectRuleForUpdate(tx, ruleId)
+  const result = await tryClaimRuleForMutationInTransaction(tx, ruleId, user)
+  if (result.status === 'missing') {
+    throw createError({ statusCode: 404, statusMessage: 'Reglen blev ikke fundet' })
+  }
+  if (result.status === 'locked') {
+    throw createError({
+      statusCode: 409,
+      statusMessage: `Reglen redigeres af ${result.ownerName}`,
+    })
+  }
+}
+
+export async function tryClaimRuleForMutationInTransaction(
+  tx: DbTransaction,
+  ruleId: number,
+  user: LockOwnerIdentity,
+): Promise<RuleMutationClaimResult> {
+  const row = await selectRuleForUpdateOrNull(tx, ruleId)
+  if (!row) return { status: 'missing' }
+
   const now = new Date()
-  assertNoOtherOwner(row, user, now)
+  if (isLiveLock(row, now) && row.lockedBy !== user.id) {
+    return { status: 'locked', ownerName: row.lockedByName || 'anden bruger' }
+  }
 
   await tx.update(rule)
     .set({ lockedAt: now, lockedBy: user.id, lockedByName: user.displayName })
     .where(eq(rule.id, ruleId))
+
+  return { status: 'claimed' }
 }
 
 export async function releaseRuleEditLock(ruleId: number, user: LockOwnerIdentity) {

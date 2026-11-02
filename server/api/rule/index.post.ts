@@ -18,17 +18,10 @@ import { logger } from '~/lib/logger'
 import { getActiveErpSupplier, listAccountingDimensionConstraints, listAccountingDimensionDefinitions, resolveDimensionValueRows } from '~~/server/utils/accountingDimensions'
 import { requireWriteAccess } from '~~/server/auth/requireAppRoles'
 import { normalizeRuleTagIds, resolveRuleTagIds } from '~~/server/utils/ruleTags/resolveRuleTagIds'
+import { ruleRequiresAccounting } from '~/lib/rules/ruleAccountingRequirements'
+import { toDbNumericStringOrUndefined } from '~~/server/utils/rules/ruleDbValues'
 
 const version = 1
-
-function toDbNumericStringOrUndefined(value: number | null | undefined): string | undefined {
-  if (value == null) return undefined
-  if (typeof value !== 'number' || !Number.isFinite(value)) {
-    throw createError({ statusCode: 400, statusMessage: 'Ugyldigt beløb (amount_min/amount_max)' })
-  }
-  // Amount min/max is DKK with øre. Store as fixed 2 decimals to avoid floating noise.
-  return value.toFixed(2)
-}
 
 export function compileRuleDraftToDb(draft: RuleDraftSchema) {
   const {
@@ -122,8 +115,8 @@ export default defineEventHandler(async (event) => {
 
     const validatedRule = createInsertSchema(rule).parse({
       ...ruleData,
-      matchAmountMin: toDbNumericStringOrUndefined((ruleData as any).matchAmountMin),
-      matchAmountMax: toDbNumericStringOrUndefined((ruleData as any).matchAmountMax),
+      matchAmountMin: toDbNumericStringOrUndefined(ruleData.matchAmountMin),
+      matchAmountMax: toDbNumericStringOrUndefined(ruleData.matchAmountMax),
       erpSupplier: activeSupplier,
     })
 
@@ -171,6 +164,7 @@ export default defineEventHandler(async (event) => {
         dimensions: draft.accountingDimensions,
         definitions: dimensionDefinitions,
         constraints: dimensionConstraints,
+        requireComplete: ruleRequiresAccounting(draft.type, draft.status),
       })
 
       if (dimensionRows.length) {

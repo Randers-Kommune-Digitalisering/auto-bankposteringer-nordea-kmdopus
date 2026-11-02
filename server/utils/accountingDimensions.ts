@@ -117,9 +117,11 @@ export function resolveDimensionValueRows(options: {
   dimensions?: AccountingDimensionInput[]
   definitions: AccountingDimensionDefinition[]
   constraints?: AccountingDimensionConstraint[]
+  requireComplete?: boolean
 }): Array<typeof ruleAccountingDimensionValue.$inferInsert> {
   const input = normalizeDimensionInput(options.dimensions)
   const byKey = new Map(options.definitions.map((d) => [d.key, d]))
+  const requireComplete = options.requireComplete ?? true
 
   for (const d of input) {
     if (!byKey.has(d.key)) {
@@ -127,9 +129,11 @@ export function resolveDimensionValueRows(options: {
     }
   }
 
-  for (const def of options.definitions) {
-    if (def.required && !input.some((d) => d.key === def.key)) {
-      throw new Error(`Manglende påkrævet konteringsdimension: ${def.key}`)
+  if (requireComplete) {
+    for (const def of options.definitions) {
+      if (def.required && !input.some((d) => d.key === def.key)) {
+        throw new Error(`Manglende påkrævet konteringsdimension: ${def.key}`)
+      }
     }
   }
 
@@ -158,6 +162,7 @@ export function resolveDimensionValueRows(options: {
   validateAccountingDimensionConstraints(
     new Map(input.map((d) => [d.key, d.value])),
     options.constraints,
+    { allowIncomplete: !requireComplete },
   )
 
   return input.map((d) => ({

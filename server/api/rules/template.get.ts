@@ -1,8 +1,8 @@
 import { defineEventHandler, getQuery, setHeader } from 'h3'
 import { erpSupplierValues } from '~/lib/db/schema/enums'
 import type { ErpSupplier } from '~/lib/db/schema/enums'
-import { ruleConditionFieldValues } from '~/lib/db/schema/enums'
 import { getActiveErpSupplier, listAccountingDimensionDefinitions } from '~~/server/utils/accountingDimensions'
+import { buildRuleCsvHeaders } from '~~/server/utils/rules/ruleCsv'
 
 function escapeCsvCell(value: string): string {
   const needsQuotes = /[";\n\r]/.test(value)
@@ -26,25 +26,7 @@ export default defineEventHandler(async (event) => {
 
   const dimensionDefinitions = await listAccountingDimensionDefinitions(supplier)
 
-  const headers = [
-    'type',
-    'status',
-    'relatedBankAccounts',
-    'ruleTags',
-    'matchOperator',
-    'matchReferences',
-    'matchCounterparties',
-    'matchClassification',
-    'matchAmountMin',
-    'matchAmountMax',
-    'accountingText',
-    'accountingTextTemplate',
-    'accountingCprType',
-    'accountingCprNumber',
-    'accountingNote',
-    ...dimensionDefinitions.map(d => `dim_${d.key}`),
-    ...(isAdvanced ? ruleConditionFieldValues.map(f => `field_${f}`) : []),
-  ]
+  const headers = buildRuleCsvHeaders(dimensionDefinitions.map(d => d.key), isAdvanced)
 
   const csv = toCsvRow(headers)
 

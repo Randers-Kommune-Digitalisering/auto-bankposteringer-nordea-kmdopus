@@ -22,6 +22,20 @@
       "when": 1793100754794,
       "tag": "0002_camt_entry_aggregates",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793615406763,
+      "tag": "0003_counterparty_rule_matching",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793618726120,
+      "tag": "0004_camt_party_matching_fields",
+      "breakpoints": true
     }
   ]
 }

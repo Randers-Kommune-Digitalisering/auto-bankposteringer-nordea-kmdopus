@@ -20,6 +20,8 @@ import { requireWriteAccessWithIdentity } from '~~/server/auth/requireAppRoles'
 import { claimRuleForMutationInTransaction } from '~~/server/utils/ruleEditLock'
 import { postingTextTemplateRe2Schema } from '#engine/matching/domain/postingTextTemplateRe2'
 import type { PostingTextTemplate } from '#engine/matching/domain/postingTextTemplate'
+import { ruleRequiresAccounting } from '~/lib/rules/ruleAccountingRequirements'
+import type { RuleStatus, RuleType } from '~/lib/db/schema/enums'
 
 type CprType = 'ingen' | 'statisk' | 'dynamisk'
 
@@ -118,6 +120,10 @@ export default defineEventHandler(async (event) => {
 
   if (!existingRule) {
     throw createError({ statusCode: 404, statusMessage: 'Rule not found' })
+  }
+
+  if (body.version === existingRule.currentVersionId) {
+    throw createError({ statusCode: 409, statusMessage: 'Den aktuelle version kan ikke gendannes' })
   }
 
   const [target] = await db
@@ -245,6 +251,10 @@ export default defineEventHandler(async (event) => {
       dimensions: legacyFallbackDimensions,
       definitions,
       constraints: dimensionConstraints,
+      requireComplete: ruleRequiresAccounting(
+        parsedContent.type as RuleType,
+        parsedContent.status as RuleStatus,
+      ),
     })
 
     if (dimensionRows.length) {

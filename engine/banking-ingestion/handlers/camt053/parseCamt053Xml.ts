@@ -43,6 +43,15 @@ export type Camt053ParsedTransaction = {
   bookingDate: Date
   valueDate: Date | null
 
+  dbtrName: string | null
+  dbtrId: string | null
+  dbtrAcctIban: string | null
+  cdtrName: string | null
+  cdtrId: string | null
+  cdtrAcctIban: string | null
+  ultmtDbtrName: string | null
+  ultmtCdtrName: string | null
+
   ntryRef: string | null
   ntryAcctSvcrRef: string | null
   entryAdditionalInfo: string | null
@@ -128,6 +137,7 @@ export function parseCamt053Xml(xml: string): Camt053ParsedDocument {
       const entrySubFamily = asTrimmedString(entry?.BkTxCd?.Domn?.Fmly?.SubFmlyCd)
       const entryDetails = asArray<any>(entry?.NtryDtls)
       const txDetails = entryDetails.flatMap((detail) => asArray<any>(detail?.TxDtls))
+      const relatedParties = extractEntryPartyFields(entry, txDetails)
       const entryAdditionalInfo = asTrimmedString(entry?.AddtlNtryInf)
 
       transactions.push({
@@ -139,6 +149,7 @@ export function parseCamt053Xml(xml: string): Camt053ParsedDocument {
         status: asTrimmedString(entry?.Sts),
         bookingDate,
         valueDate,
+        ...relatedParties,
         ntryRef: asTrimmedString(entry?.NtryRef),
         ntryAcctSvcrRef: asTrimmedString(entry?.AcctSvcrRef),
         entryAdditionalInfo,
@@ -171,6 +182,69 @@ export function parseCamt053Xml(xml: string): Camt053ParsedDocument {
     createdAt,
     statements,
   }
+}
+
+function extractEntryPartyFields(
+  entry: any,
+  txDetails: any[],
+): Pick<Camt053ParsedTransaction,
+  'dbtrName' | 'dbtrId' | 'dbtrAcctIban' | 'cdtrName' | 'cdtrId' | 'cdtrAcctIban' |
+  'ultmtDbtrName' | 'ultmtCdtrName'
+> {
+  const entryParties = entry?.RltdPties
+  const consistent = (extract: (relatedParties: any) => string | null) =>
+    extractConsistentPartyValue(entryParties, txDetails, extract)
+
+  return {
+    dbtrName: consistent(parties => getPartyName(parties?.Dbtr)),
+    dbtrId: consistent(parties => getPartyIds(parties?.Dbtr)),
+    dbtrAcctIban: consistent(parties => asTrimmedString(parties?.DbtrAcct?.Id?.IBAN)),
+    cdtrName: consistent(parties => getPartyName(parties?.Cdtr)),
+    cdtrId: consistent(parties => getPartyIds(parties?.Cdtr)),
+    cdtrAcctIban: consistent(parties => asTrimmedString(parties?.CdtrAcct?.Id?.IBAN)),
+    ultmtDbtrName: consistent(parties => getPartyName(parties?.UltmtDbtr)),
+    ultmtCdtrName: consistent(parties => getPartyName(parties?.UltmtCdtr)),
+  }
+}
+
+function extractConsistentPartyValue(
+  entryParties: any,
+  txDetails: any[],
+  extract: (relatedParties: any) => string | null,
+): string | null {
+  if (!txDetails.length) return extract(entryParties)
+
+  let sharedValue: string | null = null
+  let everyDetailHasValue = true
+  for (const detail of txDetails) {
+    const value = extract(detail?.RltdPties)
+    if (!value) {
+      everyDetailHasValue = false
+      continue
+    }
+    if (sharedValue && sharedValue !== value) return null
+    sharedValue = value
+  }
+
+  return everyDetailHasValue && sharedValue ? sharedValue : extract(entryParties)
+}
+
+function getPartyName(party: any): string | null {
+  return asTrimmedString(party?.Nm ?? party?.Pty?.Nm)
+}
+
+function getPartyIds(party: any): string | null {
+  const identification = party?.Id ?? party?.Pty?.Id
+  const organizationId = identification?.OrgId
+  const privateId = identification?.PrvtId
+  const ids = [
+    asTrimmedString(organizationId?.AnyBIC),
+    asTrimmedString(organizationId?.LEI),
+    ...asArray<any>(organizationId?.Othr).map(other => asTrimmedString(other?.Id)),
+    ...asArray<any>(privateId?.Othr).map(other => asTrimmedString(other?.Id)),
+  ].filter((value): value is string => value !== null)
+
+  return Array.from(new Set(ids)).join(' || ') || null
 }
 
 function asArray<T>(value: T | T[] | null | undefined): T[] {

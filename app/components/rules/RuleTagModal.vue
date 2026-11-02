@@ -43,6 +43,10 @@ const state = reactive<FormState>({
   newId: undefined
 })
 
+const loadState = ref<'idle' | 'loading' | 'ready' | 'error'>('idle')
+let loadGeneration = 0
+const shouldRenderModal = computed(() => open.value && loadState.value !== 'loading')
+
 function resetForm() {
   state.id = undefined
   state.newId = undefined
@@ -63,25 +67,38 @@ function normalizeStateField(value: string | undefined): string | undefined {
 watch(
   () => [props.tagId, open.value] as const,
   async ([id, isOpen]) => {
+    const generation = ++loadGeneration
     if (!isOpen) {
       resetForm()
+      loadState.value = 'idle'
       return
     }
 
     if (!id) {
       resetForm()
+      loadState.value = 'ready'
       return
     }
 
+    resetForm()
+    loadState.value = 'loading'
     try {
       const data = await $fetch<RuleTagSelectSchema>(`/api/rule-tags/${id}`)
+      if (generation !== loadGeneration) return
       hydrateDraft(data)
+      loadState.value = 'ready'
     } catch (err) {
-      console.error('Fejl ved hentning af ruletag', err)
+      if (generation !== loadGeneration) return
       resetForm()
+      loadState.value = 'error'
+      toast.add({
+        title: 'Tag kunne ikke indlæses',
+        description: err instanceof Error ? err.message : 'Ukendt fejl',
+        color: 'error',
+      })
     }
   },
-  { immediate: true }
+  { immediate: true, flush: 'sync' }
 )
 
 async function onSubmit() {
@@ -155,7 +172,7 @@ async function onSubmit() {
 </script>
 
 <template>
-  <UModal v-model:open="open">
+  <UModal v-if="shouldRenderModal" v-model:open="open">
     <template #header>
       <div class="flex items-center justify-between">
         <h2 class="text-lg font-semibold">
@@ -165,7 +182,17 @@ async function onSubmit() {
     </template>
 
     <template #body>
-      <UForm :schema="formSchema" :state="state" @submit="onSubmit">
+      <div v-if="loadState === 'loading'" class="flex justify-center py-8 text-sm text-muted">
+        Indlæser tag …
+      </div>
+      <UAlert
+        v-else-if="loadState === 'error'"
+        color="error"
+        variant="soft"
+        title="Tag kunne ikke indlæses"
+        description="Luk vinduet, og prøv igen."
+      />
+      <UForm v-else-if="loadState === 'ready'" :schema="formSchema" :state="state" @submit="onSubmit">
         <div class="mt-4 p-4 rounded-md border border-default space-y-4">
           <UFormField name="id" required>
             <UiFloatingLabelInput

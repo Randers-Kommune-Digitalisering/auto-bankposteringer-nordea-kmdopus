@@ -44,6 +44,9 @@ const { roles } = useAuthz()
 const loading = ref(false)
 const continuing = ref(false)
 const data = ref<RunTimelineResponse | null>(null)
+const loadError = ref(false)
+const loadedRunId = ref<string | null>(null)
+let loadGeneration = 0
 const continuation = computed(() => data.value ? resolveRunContinuation(data.value) : null)
 const canContinueRun = computed(() => canAccessPath('/fejlhaandtering', roles.value))
 
@@ -73,6 +76,9 @@ function toggleErpDeliveries() {
 }
 
 const runId = computed(() => props.run?.id ?? '')
+const shouldRenderModal = computed(() =>
+  open.value && (!runId.value || loadedRunId.value === runId.value || loadError.value),
+)
 
 function formatDateOnly(value: string | Date | null | undefined): string {
   if (!value) return '—'
@@ -81,19 +87,35 @@ function formatDateOnly(value: string | Date | null | undefined): string {
   return df.format(d)
 }
 
-async function load() {
-  if (!props.run?.id) return
+async function load(id = props.run?.id) {
+  const generation = ++loadGeneration
+  if (!id) {
+    data.value = null
+    loading.value = false
+    loadError.value = false
+    loadedRunId.value = null
+    return
+  }
+
   loading.value = true
+  data.value = null
+  loadError.value = false
   try {
-    data.value = await $fetch<RunTimelineResponse>(`/api/runs/${encodeURIComponent(props.run.id)}/timeline`, {
+    const result = await $fetch<RunTimelineResponse>(`/api/runs/${encodeURIComponent(id)}/timeline`, {
       method: 'GET',
     })
+    if (generation === loadGeneration) {
+      data.value = result
+      loadedRunId.value = id
+    }
   } catch (error) {
+    if (generation !== loadGeneration) return
     console.error('Kunne ikke hente run timeline', error)
     toast.add({ title: 'Kunne ikke hente run-detaljer', color: 'error' })
     data.value = null
+    loadError.value = true
   } finally {
-    loading.value = false
+    if (generation === loadGeneration) loading.value = false
   }
 }
 
@@ -121,15 +143,20 @@ async function continueRun() {
 
 watch(
   () => [open.value, props.run?.id] as const,
-  async ([isOpen]) => {
+  async ([isOpen, id]) => {
     if (!isOpen) {
+      loadGeneration++
+      loading.value = false
       data.value = null
+      loadError.value = false
+      loadedRunId.value = null
       resetEventLogs()
       return
     }
     resetEventLogs()
-    await load()
+    await load(id)
   },
+  { immediate: true, flush: 'sync' },
 )
 
 type StatusColor = 'success' | 'error' | 'warning' | 'neutral'
@@ -385,7 +412,7 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
 </script>
 
 <template>
-  <UModal v-model:open="open" :ui="{ content: 'max-w-md' }">
+  <UModal v-if="shouldRenderModal" v-model:open="open" :ui="{ content: 'max-w-md' }">
     <template #header>
       <div class="grid w-full gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-4">
         <div class="min-w-0">
@@ -424,7 +451,17 @@ const timelineItems = computed<RunTimelineItem[]>(() => {
 
     <template #body>
       <div class="space-y-4">
-        <div v-if="!run" class="text-sm text-muted">Ingen kørsel valgt.</div>
+        <div v-if="loading" class="flex justify-center py-8 text-sm text-muted">
+          Indlæser kørselsdetaljer …
+        </div>
+        <UAlert
+          v-else-if="loadError"
+          color="error"
+          variant="soft"
+          title="Kørselsdetaljer kunne ikke indlæses"
+          description="Luk vinduet, og prøv igen."
+        />
+        <div v-else-if="!run" class="text-sm text-muted">Ingen kørsel valgt.</div>
 
         <div v-else>
           <UTimeline :items="timelineItems" size="sm">
