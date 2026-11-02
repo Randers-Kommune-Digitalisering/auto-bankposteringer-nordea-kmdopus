@@ -47,7 +47,7 @@ describe('aggregate transaction pagination (integration)', () => {
       await db.insert(transactionCodeCatalog).values([
         { provider: 'nordea', codeKey: typeCodes[0]!, displayName: 'Zulu' },
         { provider: 'nordea', codeKey: typeCodes[1]!, displayName: 'Beta' },
-        { provider: 'nordea', codeKey: typeCodes[2]!, displayName: 'Aardvark' },
+        { provider: 'nordea', codeKey: typeCodes[2]!, displayName: 'Alpha' },
       ])
 
       const createdDocument = await db.insert(bankingDocument).values({
