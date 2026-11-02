@@ -15,9 +15,8 @@ describe('aggregate transaction pagination (integration)', () => {
     const { bankingDocument, bankingStatement, bankingStatementBalance } = await import(
       '../../app/lib/db/schema/statement'
     )
-    const { transaction, transactionProcessing, transactionCodeCatalog } = await import(
-      '../../app/lib/db/schema/transaction'
-    )
+    const { transaction, transactionProcessing } = await import('../../app/lib/db/schema/transaction')
+    const { transactionCodeCatalog } = await import('../../app/lib/db/schema/transactionCodeCatalog')
 
     const suffix = randomUUID()
     const accountId = `pagination-${suffix}`

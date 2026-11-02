@@ -25,6 +25,9 @@ describe('bank run requires an active agreement', () => {
       .from(bankingAgreement)
 
     const bookingDate = new Date(Date.UTC(2099, 0, 1 + Math.floor(Math.random() * 300)))
+    while (bookingDate.getUTCDay() === 0 || bookingDate.getUTCDay() === 6) {
+      bookingDate.setUTCDate(bookingDate.getUTCDate() + 1)
+    }
     const bookingDateIso = bookingDate.toISOString().slice(0, 10)
     let server: ReturnType<typeof createServer> | undefined
 

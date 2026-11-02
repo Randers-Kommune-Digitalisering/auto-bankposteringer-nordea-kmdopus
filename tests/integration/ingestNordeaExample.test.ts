@@ -115,7 +115,8 @@ describe('persistPreparedCamt053Document (integration)', () => {
         amount: row.amount,
         underlyingTransactionCount: row.underlyingTransactionCount,
       })))
-      expect(JSON.stringify(storedTransactions)).not.toContain('CPR')
+      expect(JSON.stringify(storedTransactions)).toContain('[CPR REDACTED]')
+      expect(JSON.stringify(storedTransactions)).not.toContain('010203-1234')
       expect(JSON.stringify(storedTransactions)).not.toContain('Ustrd')
       expect(storedTransactions.some((row) => row.entryAdditionalInfo?.includes('0102031234'))).toBe(false)
 
