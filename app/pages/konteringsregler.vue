@@ -842,7 +842,7 @@ async function deleteSelectedRules() {
 
 <style scoped>
 :global(.rules-table tbody tr:has([data-rule-status="inaktiv"]) > td) {
-  background-color: #f9f9f9;
+  background-color: var(--ui-bg-muted);
   background-image: none;
 }
 </style>
