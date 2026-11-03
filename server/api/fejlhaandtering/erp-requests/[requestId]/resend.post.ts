@@ -1,14 +1,15 @@
 import crypto from 'node:crypto'
 import { defineEventHandler, createError, readBody } from 'h3'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { z } from 'zod'
 import db from '~/lib/db'
-import { erpDocument, erpRequest, erpRequestLine, erpResponse } from '~/lib/db/schema/erp'
+import { erpDocument, erpRequest, erpRequestLine, erpResponse, erpResponseDocument } from '~/lib/db/schema/erp'
 import { outbox } from '~/lib/db/schema/outbox'
 import { runTimelineEvent } from '~/lib/db/schema/runTimelineEvent'
 import { erpIntegrationMetadata } from '~/lib/env/env'
 import { isWellFormedXml } from '~~/engine/erp-integration/infrastructure/validateXml'
 import { buildKmdFileName, replaceKmdRequestFilename } from '~~/engine/erp-integration/infrastructure/adapters/kmd/postingXmlBuilder'
+import { isErpRequestAccepted } from '~/lib/presenters/erpRequestOverview'
 import { requireErrorHandlingWriteIdentity } from '../../../../auth/requireAppRoles'
 
 export default defineEventHandler(async (event) => {
@@ -24,20 +25,38 @@ export default defineEventHandler(async (event) => {
 
   const existing = await db.query.erpRequest.findFirst({
     where: (fields, { eq }) => eq(fields.id, requestId),
-    columns: { id: true, runId: true, payload: true },
+    columns: { id: true, runId: true, documentId: true, payload: true },
   })
 
   if (!existing?.id) {
     throw createError({ statusCode: 404, statusMessage: 'ERP request blev ikke fundet' })
   }
 
-  if (body.payload !== undefined) {
-    const [response] = await db
-      .select({ statusText: erpResponse.statusText })
-      .from(erpResponse)
-      .where(eq(erpResponse.requestId, requestId))
-      .limit(1)
+  const [response] = await db
+    .select({ id: erpResponse.id, statusText: erpResponse.statusText })
+    .from(erpResponse)
+    .where(eq(erpResponse.requestId, requestId))
+    .limit(1)
 
+  const [responseDocument] = response?.id && existing.documentId
+    ? await db
+        .select({ status: erpResponseDocument.status })
+        .from(erpResponseDocument)
+        .where(and(
+          eq(erpResponseDocument.responseId, response.id),
+          eq(erpResponseDocument.documentId, existing.documentId),
+        ))
+        .limit(1)
+    : []
+
+  if (isErpRequestAccepted({
+    documentStatus: responseDocument?.status ?? null,
+    responseStatusText: response?.statusText ?? null,
+  })) {
+    throw createError({ statusCode: 409, statusMessage: 'Accepterede ERP-requests kan ikke genfremsendes' })
+  }
+
+  if (body.payload !== undefined) {
     if (!response?.statusText?.trim().toUpperCase().startsWith('FEJL')) {
       throw createError({ statusCode: 409, statusMessage: 'Kun ERP-afviste requests kan genfremsendes med redigeret XML' })
     }

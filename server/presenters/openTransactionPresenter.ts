@@ -3,11 +3,9 @@ import type {
   OpenTransactionInput,
   TransactionReferenceDetail,
   TransactionSummary,
-  TransactionSummaryChip,
   TransactionSummaryInput,
   TransactionSummarySection,
 } from '~/types/transactions'
-import { buildTransactionReferenceBuckets } from '~~/engine/matching/domain/transactionTextProjection'
 
 const currencyFormatter = new Intl.NumberFormat('da-DK', {
   style: 'currency',
@@ -26,10 +24,13 @@ export function presentOpenTransaction(input: OpenTransactionInput): OpenTransac
       runId: input.runId,
       bookingDate: input.bookingDate,
       amount: input.amount,
+      underlyingTransactionCount: input.underlyingTransactionCount,
       transactionType: input.transactionType,
       transactionTypeCode: input.transactionTypeCode,
+      transactionTypeHint: input.transactionTypeHint,
       counterpart: input.counterpart,
       counterpartHint: input.counterpartHint,
+      counterpartSource: input.counterpartSource ?? input.counterpartHint,
       references: input.references,
       referenceDetails: input.referenceDetails,
     }),
@@ -39,7 +40,6 @@ export function presentOpenTransaction(input: OpenTransactionInput): OpenTransac
 export function buildTransactionSummaryView(input: TransactionSummaryInput): TransactionSummary {
   const amountValue = typeof input.amount === 'number' ? input.amount : 0
   const direction: TransactionSummary['direction'] = amountValue >= 0 ? 'credit' : 'debit'
-  const counterpartRole = direction === 'credit' ? 'Afsender' : 'Modtager'
   const references = Array.isArray(input.references)
     ? input.references.filter((entry): entry is string => typeof entry === 'string' && entry.trim().length > 0)
     : []
@@ -51,48 +51,37 @@ export function buildTransactionSummaryView(input: TransactionSummaryInput): Tra
         source: entry.source?.trim() || 'Ukendt XML-felt',
       }))
     : references.map((value) => ({ value, source: 'Ukendt XML-felt' }))
-  const summaryReferences = buildSummaryReferences(referenceDetails)
-
-  const referenceSection: TransactionSummarySection | null = summaryReferences.reference.length
-    ? {
-      key: 'reference',
-      label: 'Reference',
-      chips: summaryReferences.reference,
-    }
-    : null
-
-  const technicalSection: TransactionSummarySection | null = summaryReferences.teknisk.length
-    ? {
-      key: 'teknisk',
-      label: 'Øvrige oplysninger',
-      chips: summaryReferences.teknisk,
-    }
-    : null
-
   const sections: TransactionSummarySection[] = [
     {
       key: 'part',
-      label: counterpartRole,
-      items: [
-        {
-          label: counterpartRole,
-          value: input.counterpart ?? '-',
-          hint: input.counterpartHint?.trim() || undefined,
-        },
-      ],
+      label: 'Modpart',
+      fields: input.counterpart?.trim()
+        ? [{
+          label: 'Modpart',
+          value: input.counterpart.trim(),
+          sourcePath: input.counterpartSource?.trim() || input.counterpartHint?.trim() || undefined,
+        }]
+        : [],
     },
-    ...(referenceSection ? [referenceSection] : []),
-    ...(technicalSection ? [technicalSection] : []),
+    {
+      key: 'reference',
+      label: 'Reference',
+      fields: referenceDetails.map((entry) => ({
+        label: entry.source,
+        value: entry.value,
+        sourcePath: entry.source,
+      })),
+    },
     {
       key: 'transaktionstype',
       label: 'Transaktionstype',
-      items: [
-        {
-          label: 'Type',
-          value: input.transactionType ?? 'Ukendt type',
-          hint: input.transactionTypeHint?.trim() || input.transactionTypeCode?.trim() || undefined,
-        },
-      ],
+      fields: input.transactionType
+        ? [{
+          label: 'Transaktionstype',
+          value: input.transactionType,
+          sourcePath: input.transactionTypeHint?.trim() || undefined,
+        }]
+        : [],
     },
   ]
 
@@ -108,10 +97,11 @@ export function buildTransactionSummaryView(input: TransactionSummaryInput): Tra
     },
     transactionId: {
       label: 'Transaktions-ID',
-      value: input.id,
+      value: input.underlyingTransactionCount && input.underlyingTransactionCount > 1
+        ? `Samlepost (${input.underlyingTransactionCount} underliggende transaktioner)`
+        : input.id,
     },
     direction,
-    counterpartRole,
     sections,
   }
 }
@@ -121,19 +111,6 @@ function formatSignedAmount(amount: number): string {
   if (value < 0) return `-${currencyFormatter.format(Math.abs(value))}`
   if (value > 0) return `${currencyFormatter.format(value)}`
   return currencyFormatter.format(0)
-}
-
-type ReferenceBuckets = {
-  reference: TransactionSummaryChip[]
-  teknisk: TransactionSummaryChip[]
-}
-
-function buildSummaryReferences(references: TransactionReferenceDetail[]): ReferenceBuckets {
-  const buckets = buildTransactionReferenceBuckets(references)
-  return {
-    reference: buckets.reference.map((chip) => ({ value: chip.value, source: chip.source })),
-    teknisk: buckets.teknisk.map((chip) => ({ value: chip.value, source: chip.source })),
-  }
 }
 
 function formatDate(value: string): string {

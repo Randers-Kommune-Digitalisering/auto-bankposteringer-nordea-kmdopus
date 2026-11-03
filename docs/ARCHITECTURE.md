@@ -16,9 +16,10 @@ This repo is a stateless financial integration engine:
 
 - Each `Ntry` is the canonical, independently bookable transaction. Its amount and debit/credit direction come from the entry, never from summing its child `TxDtls`.
 - `transaction.underlying_transaction_count` records the number of child `TxDtls` solely as aggregate metadata. Child-level references, full party structures, remittance text, and raw XML are not persisted or exposed as individually matchable/bookable transactions.
-- Related-party values are persisted in CAMT-specific transaction fields (`dbtr_*`, `cdtr_*`, and ultimate-party names), not in an application-level counterparty field. For entries with child transactions, each party field is retained only when every child has the same value; ambiguous child values are discarded.
-- “Modpart” is an application-level rule category that expands into the underlying CAMT related-party match fields. Users can match across the category or select individual CAMT fields in advanced rules and the RuleModal.
-- `banking_document` retains metadata and a SHA-256 content hash for idempotency, but not the source XML. The protected transaction source view is synthesized from the retained entry fields and is not a copy of the original XML.
+- Only a single `counterpart_name` and its `counterpart_name_source` path may be retained, and only when an entry has exactly one `TxDtls`. `CRDT` selects `Dbtr`; `DBIT` selects `Cdtr`. Resolution prefers the first `PstlAdr/AdrLine` in the matching transaction-detail party, then its explicit name, then the corresponding entry-level party in the same order; if neither direct party has a name, the same address-before-name priority applies to `UltmtDbtr`/`UltmtCdtr`. Party identifiers and the rest of the address are not stored.
+- “Modpart” is one canonical rule field (`counterparty_name`), not an expansion into debtor, creditor, or identifier fields. Aggregated entries and grouped bookings do not expose a counterparty.
+- The open-items list and statement view use the same `BookingSummaryCard`. Its three categories are Modpart, Reference, and Transaktionstype; non-empty categories use distinct semantic colors, and each displayed value separates its Danish field label, value, and CAMT source path. Empty categories and empty footer slots are omitted. A shared field catalog supplies labels and paths to the card, rule matching, and dynamic posting-text source selection.
+- `banking_document` retains metadata and a SHA-256 content hash for idempotency, but not the source XML. The statement view no longer synthesizes a raw CAMT tree; it presents the normalized summary only.
 - The worker fetches and parses bank documents before opening a short persistence transaction. Metadata and statement rows are written once; transactions and balances are inserted in bounded batches, and cursor advancement is committed atomically with the corresponding persisted documents.
 - A retry checks the latest persisted bank-stage completion event: successful ingestion reuses the run's stored entries, while a run with no completion or a failed/partial provider completion fetches again. Document hashes make persistence idempotent, and a provider cursor only advances in the same transaction as its document rows.
 - Entry aggregation is ERP-neutral. Adapters and matching/posting use the same canonical entry contract regardless of provider.
@@ -34,14 +35,16 @@ This repo is a stateless financial integration engine:
 ## ERP response polling and recovery
 
 - The scheduler enqueues the global `erp.ingestResponses` worker job at 00:00 and 12:00 in `Europe/Copenhagen`; the scheduler does not perform SFTP I/O itself.
+- `erp_request.created_at` is the persisted start of the response deadline. An unanswered request is presented as failed once 48 hours have elapsed, including time spent waiting for SFTP delivery; a persisted ERP response takes precedence. The deadline is derived from database state and the current time, so it needs no process-local timer or mutable timeout cache.
 - Poll slots are represented by their local Copenhagen date/time and persisted in the job payload. A PostgreSQL advisory lock plus the persisted slot key prevents duplicate enqueue across scheduler replicas and restarts. Slot conversion uses the IANA timezone database so CET/CEST changes do not shift the requested wall-clock times.
 - The recovery queue presents failed jobs and failed ERP outbox deliveries as one paginated worklist. Each retry endpoint atomically changes only a currently failed row with a supported job type/topic; stale retries return a conflict. Payloads are excluded from the list and error text is bounded/redacted.
 - A failed transport upload retry, a global ERP response poll, and business recovery (ERP request resend or transaction reopen) are distinct actions. Business recovery remains in the ERP request detail workflow.
+- Error-handling admins can resend a request while it is awaiting an ERP response. Resend creates a new linked request attempt and transport filename; accepted requests are rejected server-side to prevent duplicate posting.
 - Timeline event normalization is a separate concern: run-level bank and ERP events should later share an explicit, deduplicated event contract rather than being inferred from the recovery worklist.
 
 ## Posting text templates (matching -> ERP)
 
-- Posting text uses deterministic resolution from retained entry-level references and additional information, with an optional rule-owned template persisted alongside accounting parameters. Counterparty and child remittance fields remain unavailable to posting text templates.
+- Posting text uses deterministic resolution from retained entry-level references and additional information, with an optional rule-owned template persisted alongside accounting parameters. A template may also use the retained single-detail counterparty name; child remittance fields remain unavailable.
 - Templates are versioned structured data with ordered literal and regex-extraction parts. Extraction reads only allowlisted transaction fields; RE2 provides linear-time matching over bank-supplied text.
 - Matching criteria remain boolean predicates and do not implicitly provide capture groups. A rule's text template independently selects its source field, regex, and capture group.
 - Municipality-specific formats such as BDP/KSD are expressed as ordinary persisted accounting rules. The runtime has no implicit marker-specific formatting or seeded fallback rules.
@@ -153,8 +156,8 @@ flowchart LR
 ## Banking document retention
 
 - `banking_document` is an ingestion/idempotency anchor containing document metadata and a content hash; raw bank payloads are not retained.
-- Statement metadata and normalized entry rows are the deterministic source for runtime behavior and for the generated source view.
-- The CAMT source view cannot reproduce child `TxDtls` details. This is intentional data minimization: the app retains only the aggregate entry needed for booking and the child count needed to identify a grouped entry.
+- Statement metadata and normalized entry rows are the deterministic source for runtime behavior and the generated transaction summary.
+- The statement UI does not expose a raw or generated CAMT source tree. This is intentional data minimization: the app retains only the aggregate entry, the child count, and a single unambiguous counterparty name where applicable.
 - `pnpm db:clear-bank-data -- --execute --confirm-delete-bank-derived-data --expected-database=<non-production-db>` is a one-off destructive migration preparation command. It additionally requires `ALLOW_DESTRUCTIVE_BANKING_DATA_CLEANUP=1`, refuses production-marked environments/database names, clears run-scoped booking/ERP/ingestion state and bank cursors, and preserves accounts and configuration (agreements, rules, mappings, dimensions, and catalogs). Verify `DATABASE_URL` and the database name independently before using it; it is not part of normal deployment or `db:init`.
 
 ## Authentication and Authorization (v1)

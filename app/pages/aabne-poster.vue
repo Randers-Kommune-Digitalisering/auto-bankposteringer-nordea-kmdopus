@@ -418,16 +418,15 @@ const columns: TableColumn<OpenItemsTableRow>[] = [
 ]
 
 function toStackSummary(stack: OpenTransactionStack): TransactionSummary {
-  if (!stack.isGrouped || stack.items.length <= 1) {
+  if (!stack.isGrouped && stack.items.length <= 1) {
     return stack.representative.summary
   }
 
-  const base = stack.representative.summary
+  const base = withoutCounterparty(stack.representative.summary)
   const lineCount = stack.items.length
 
   return {
     ...base,
-    sections: base.sections.filter((section) => section.key !== 'teknisk'),
     amount: {
       ...base.amount,
       raw: stack.totalAmount,
@@ -448,14 +447,13 @@ function toGroupedModalTransaction(items: OpenTransaction[]): OpenTransaction | 
   if (!representative) return null
 
   const totalAmount = items.reduce((sum, item) => sum + (Number(item.amount) || 0), 0)
-  const base = representative.summary
+  const base = withoutCounterparty(representative.summary)
 
   return {
     ...representative,
     amount: totalAmount,
     summary: {
       ...base,
-      sections: base.sections.filter((section) => section.key !== 'teknisk'),
       amount: {
         ...base.amount,
         raw: totalAmount,
@@ -466,6 +464,15 @@ function toGroupedModalTransaction(items: OpenTransaction[]): OpenTransaction | 
         value: `Samlepost (${items.length} linjer)`,
       },
     },
+  }
+}
+
+function withoutCounterparty(summary: TransactionSummary): TransactionSummary {
+  return {
+    ...summary,
+    sections: summary.sections.map((section) => (
+      section.key === 'part' ? { ...section, fields: [] } : section
+    )),
   }
 }
 
@@ -698,8 +705,8 @@ const tableUi = {
                       @keydown.enter.prevent="openStackBooking(stack)"
                       @keydown.space.prevent="openStackBooking(stack)"
                     >
-                      <BookingSummaryCard :summary="toStackSummary(stack)" :hide-section-keys="['teknisk']">
-                      <template #footer>
+                      <BookingSummaryCard :summary="toStackSummary(stack)">
+                      <template v-if="stackNotePreview(stack) || stack.items.length > 1" #footer>
                         <div class="mt-4 space-y-3">
                           <UAlert
                             v-if="stackNotePreview(stack)"

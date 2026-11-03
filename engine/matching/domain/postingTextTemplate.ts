@@ -2,6 +2,8 @@ import { z } from 'zod/v4'
 
 export const POSTING_TEXT_SOURCE_FIELDS = [
   'bankMessage',
+  'ntryRef',
+  'ntryAcctSvcrRef',
   'txAdditionalInfo',
   'entryAdditionalInfo',
   'remittanceCreditorReference',
@@ -39,6 +41,8 @@ export const postingTextTemplateSchema = z.object({
 export type PostingTextTemplate = z.infer<typeof postingTextTemplateSchema>
 export type PostingTextTemplateValues = Partial<{
   bankMessage: string
+  ntryRef: string
+  ntryAcctSvcrRef: string
   txAdditionalInfo: string
   entryAdditionalInfo: string
   remittanceCreditorReference: string

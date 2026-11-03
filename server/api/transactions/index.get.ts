@@ -13,7 +13,7 @@ import type {
   OpenTransactionsResponse,
   StatementTransaction,
 } from '~/types/transactions'
-import { presentOpenTransaction } from '~~/server/presenters/openTransactionPresenter'
+import { buildTransactionSummaryView, presentOpenTransaction } from '~~/server/presenters/openTransactionPresenter'
 import { projectCanonicalTransactionFields } from '~~/server/presenters/transactionCanonicalFields'
 import { buildTransactionCodeCatalogMap, resolveTransactionType, type TransactionCodeCatalogMap } from '~~/server/presenters/transactionTypePresenter'
 import { createUtcIsoString, parseIsoDateToUtcDate } from '~~/utils/function'
@@ -48,6 +48,8 @@ type BaseRow = {
   status: string | null
   bookingDate: Date
   valueDate: Date | null
+  counterpartName: string | null
+  counterpartNameSource: string | null
 
   ntryRef: string | null
   ntryAcctSvcrRef: string | null
@@ -188,6 +190,9 @@ function mapRowToStatementTransaction(
     bookingDate: createUtcIsoString(row.bookingDate),
     amount: signedAmount,
     creditDebitIndicator: row.creditDebitIndicator,
+    underlyingTransactionCount: row.underlyingTransactionCount,
+    counterpartName: row.counterpartName,
+    counterpartNameSource: row.counterpartNameSource,
     entryAdditionalInfo: row.entryAdditionalInfo,
     ntryAcctSvcrRef: row.ntryAcctSvcrRef,
     ntryRef: row.ntryRef,
@@ -225,7 +230,23 @@ function mapRowToStatementTransaction(
     postingText: canonicalFields.postingText,
     counterpart: canonicalFields.counterpart,
     counterpartHint: canonicalFields.counterpartHint,
+    counterpartSource: canonicalFields.counterpartHint,
     referenceDetails: canonicalFields.referenceDetails,
+    summary: buildTransactionSummaryView({
+      id: row.id,
+      runId: row.runId,
+      bookingDate: createUtcIsoString(row.bookingDate),
+      amount: signedAmount,
+      underlyingTransactionCount: row.underlyingTransactionCount,
+      transactionType: transactionType.value,
+      transactionTypeCode: transactionType.code,
+      transactionTypeHint: transactionType.hint,
+      counterpart: canonicalFields.counterpart,
+      counterpartHint: canonicalFields.counterpartHint,
+      counterpartSource: canonicalFields.counterpartHint,
+      references: canonicalFields.references,
+      referenceDetails: canonicalFields.referenceDetails,
+    }),
 
     processingStatus: row.processingStatus,
     ruleApplied: row.ruleApplied,
@@ -246,6 +267,9 @@ function mapRowToOpenTransaction(
     bookingDate: createUtcIsoString(row.bookingDate),
     amount: signedAmount,
     creditDebitIndicator: row.creditDebitIndicator,
+    underlyingTransactionCount: row.underlyingTransactionCount,
+    counterpartName: row.counterpartName,
+    counterpartNameSource: row.counterpartNameSource,
     entryAdditionalInfo: row.entryAdditionalInfo,
     ntryAcctSvcrRef: row.ntryAcctSvcrRef,
     ntryRef: row.ntryRef,
@@ -277,6 +301,7 @@ function mapRowToOpenTransaction(
     transactionTypeHint: transactionType.hint,
     counterpart: canonicalFields.counterpart,
     counterpartHint: canonicalFields.counterpartHint,
+    counterpartSource: canonicalFields.counterpartHint,
     references: canonicalFields.references,
     referenceDetails: canonicalFields.referenceDetails,
   }
@@ -388,6 +413,8 @@ export default defineEventHandler(async (event) => {
       status: transaction.status,
       bookingDate: transaction.bookingDate,
       valueDate: transaction.valueDate,
+      counterpartName: transaction.counterpartName,
+      counterpartNameSource: transaction.counterpartNameSource,
 
       ntryRef: transaction.ntryRef,
       ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,

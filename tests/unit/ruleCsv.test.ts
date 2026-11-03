@@ -61,8 +61,8 @@ describe('rule CSV format', () => {
       field_not_a_rule_field: 'value',
       field_tx_acct_svcr_ref: '',
       field_dbtr_name: 'Borrower',
-    })).toEqual(['field_not_a_rule_field'])
-    expect(getUnsupportedRuleConditionFields(['ntry_ref', 'dbtr_name'])).toEqual([])
+    })).toEqual(['field_not_a_rule_field', 'field_dbtr_name'])
+    expect(getUnsupportedRuleConditionFields(['ntry_ref', 'dbtr_name'])).toEqual(['dbtr_name'])
   })
 
   it('keeps an OG gate in RuleModal even when every field in a category is selected', () => {

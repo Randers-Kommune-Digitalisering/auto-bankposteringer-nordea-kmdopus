@@ -81,7 +81,7 @@ describe('buildPostingLines', () => {
     expect(lines[2]?.attachments).toBeUndefined()
   })
 
-  it('uses only entry-level references and additional information for posting text', () => {
+  it('does not use NtryRef as the default posting text', () => {
     const text = resolvePostingText(undefined, {
       transactionId: '00000000-0000-0000-0000-00000000beef',
       amount: 100,
@@ -90,7 +90,7 @@ describe('buildPostingLines', () => {
       ntryRef: '63470645-20260804',
     })
 
-    expect(text).toBe('63470645-20260804')
+    expect(text).toBe('Entry-level bank message')
   })
 
   it('uses entry-level additional information for template "tekst fra bank"', () => {
@@ -102,6 +102,21 @@ describe('buildPostingLines', () => {
     })
 
     expect(text).toBe('Entry-level bank message')
+  })
+
+  it('makes the retained counterparty available to dynamic posting text', () => {
+    const template = postingTextTemplateSchema.parse({
+      version: 1,
+      parts: [{ type: 'extract', source: 'counterparty', pattern: '.*' }],
+    })
+    const text = resolvePostingText(undefined, {
+      transactionId: '00000000-0000-0000-0000-00000000beef',
+      amount: 100,
+      statusDimensions: {},
+      counterpartName: 'Sender A/S',
+    }, template)
+
+    expect(text).toBe('Sender A/S')
   })
 
   it('does not apply an implicit BDP posting-text policy', () => {

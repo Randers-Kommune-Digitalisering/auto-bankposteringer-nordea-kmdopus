@@ -43,14 +43,8 @@ export type Camt053ParsedTransaction = {
   bookingDate: Date
   valueDate: Date | null
 
-  dbtrName: string | null
-  dbtrId: string | null
-  dbtrAcctIban: string | null
-  cdtrName: string | null
-  cdtrId: string | null
-  cdtrAcctIban: string | null
-  ultmtDbtrName: string | null
-  ultmtCdtrName: string | null
+  counterpartName: string | null
+  counterpartNameSource: string | null
 
   ntryRef: string | null
   ntryAcctSvcrRef: string | null
@@ -137,7 +131,7 @@ export function parseCamt053Xml(xml: string): Camt053ParsedDocument {
       const entrySubFamily = asTrimmedString(entry?.BkTxCd?.Domn?.Fmly?.SubFmlyCd)
       const entryDetails = asArray<any>(entry?.NtryDtls)
       const txDetails = entryDetails.flatMap((detail) => asArray<any>(detail?.TxDtls))
-      const relatedParties = extractEntryPartyFields(entry, txDetails)
+      const relatedParties = extractCounterpartyFields(entry, txDetails)
       const entryAdditionalInfo = asTrimmedString(entry?.AddtlNtryInf)
 
       transactions.push({
@@ -184,67 +178,76 @@ export function parseCamt053Xml(xml: string): Camt053ParsedDocument {
   }
 }
 
-function extractEntryPartyFields(
+function extractCounterpartyFields(
   entry: any,
   txDetails: any[],
-): Pick<Camt053ParsedTransaction,
-  'dbtrName' | 'dbtrId' | 'dbtrAcctIban' | 'cdtrName' | 'cdtrId' | 'cdtrAcctIban' |
-  'ultmtDbtrName' | 'ultmtCdtrName'
-> {
-  const entryParties = entry?.RltdPties
-  const consistent = (extract: (relatedParties: any) => string | null) =>
-    extractConsistentPartyValue(entryParties, txDetails, extract)
+): Pick<Camt053ParsedTransaction, 'counterpartName' | 'counterpartNameSource'> {
+  if (txDetails.length !== 1) {
+    return { counterpartName: null, counterpartNameSource: null }
+  }
+
+  const direction = asTrimmedString(entry?.CdtDbtInd)?.toUpperCase()
+  const partyTag = direction === 'CRDT' ? 'Dbtr' : direction === 'DBIT' ? 'Cdtr' : null
+  if (!partyTag) return { counterpartName: null, counterpartNameSource: null }
+
+  const detailParty = txDetails[0]?.RltdPties?.[partyTag]
+  const entryParty = entry?.RltdPties?.[partyTag]
+  const ultimatePartyTag = partyTag === 'Dbtr' ? 'UltmtDbtr' : 'UltmtCdtr'
+  const detailUltimateParty = txDetails[0]?.RltdPties?.[ultimatePartyTag]
+  const entryUltimateParty = entry?.RltdPties?.[ultimatePartyTag]
+  const detailPrefix = `/Ntry/NtryDtls/TxDtls/RltdPties/${partyTag}`
+  const entryPrefix = `/Ntry/RltdPties/${partyTag}`
+  const detailUltimatePrefix = `/Ntry/NtryDtls/TxDtls/RltdPties/${ultimatePartyTag}`
+  const entryUltimatePrefix = `/Ntry/RltdPties/${ultimatePartyTag}`
+  const name = resolvePartyAddressName(detailParty, detailPrefix)
+    ?? resolveExplicitPartyName(detailParty, detailPrefix)
+    ?? resolvePartyAddressName(entryParty, entryPrefix)
+    ?? resolveExplicitPartyName(entryParty, entryPrefix)
+    ?? resolvePartyAddressName(detailUltimateParty, detailUltimatePrefix)
+    ?? resolvePartyAddressName(entryUltimateParty, entryUltimatePrefix)
+    ?? resolveExplicitPartyName(detailUltimateParty, detailUltimatePrefix)
+    ?? resolveExplicitPartyName(entryUltimateParty, entryUltimatePrefix)
 
   return {
-    dbtrName: consistent(parties => getPartyName(parties?.Dbtr)),
-    dbtrId: consistent(parties => getPartyIds(parties?.Dbtr)),
-    dbtrAcctIban: consistent(parties => asTrimmedString(parties?.DbtrAcct?.Id?.IBAN)),
-    cdtrName: consistent(parties => getPartyName(parties?.Cdtr)),
-    cdtrId: consistent(parties => getPartyIds(parties?.Cdtr)),
-    cdtrAcctIban: consistent(parties => asTrimmedString(parties?.CdtrAcct?.Id?.IBAN)),
-    ultmtDbtrName: consistent(parties => getPartyName(parties?.UltmtDbtr)),
-    ultmtCdtrName: consistent(parties => getPartyName(parties?.UltmtCdtr)),
+    counterpartName: name?.value ?? null,
+    counterpartNameSource: name?.source ?? null,
   }
 }
 
-function extractConsistentPartyValue(
-  entryParties: any,
-  txDetails: any[],
-  extract: (relatedParties: any) => string | null,
-): string | null {
-  if (!txDetails.length) return extract(entryParties)
+function resolveExplicitPartyName(party: any, sourcePrefix: string): { value: string; source: string } | null {
+  const candidates: Array<{ value: unknown; path: string }> = [
+    { value: party?.Nm, path: `${sourcePrefix}/Nm` },
+    { value: party?.Pty?.Nm, path: `${sourcePrefix}/Pty/Nm` },
+  ]
 
-  let sharedValue: string | null = null
-  let everyDetailHasValue = true
-  for (const detail of txDetails) {
-    const value = extract(detail?.RltdPties)
-    if (!value) {
-      everyDetailHasValue = false
-      continue
+  for (const candidate of candidates) {
+    const value = asTrimmedString(candidate.value)
+    if (value) return { value, source: candidate.path }
+  }
+
+  return null
+}
+
+function resolvePartyAddressName(party: any, sourcePrefix: string): { value: string; source: string } | null {
+  const addressLines = [
+    { value: party?.PstlAdr?.AdrLine, path: `${sourcePrefix}/PstlAdr/AdrLine` },
+    { value: party?.Pty?.PstlAdr?.AdrLine, path: `${sourcePrefix}/Pty/PstlAdr/AdrLine` },
+  ]
+  for (const candidate of addressLines) {
+    const lines = asArray(candidate.value)
+    const index = lines.findIndex((line) => asTrimmedString(line) !== null)
+    if (index >= 0) {
+      const value = asTrimmedString(lines[index])
+      if (value) {
+        return {
+          value,
+          source: lines.length > 1 ? `${candidate.path}[${index + 1}]` : candidate.path,
+        }
+      }
     }
-    if (sharedValue && sharedValue !== value) return null
-    sharedValue = value
   }
 
-  return everyDetailHasValue && sharedValue ? sharedValue : extract(entryParties)
-}
-
-function getPartyName(party: any): string | null {
-  return asTrimmedString(party?.Nm ?? party?.Pty?.Nm)
-}
-
-function getPartyIds(party: any): string | null {
-  const identification = party?.Id ?? party?.Pty?.Id
-  const organizationId = identification?.OrgId
-  const privateId = identification?.PrvtId
-  const ids = [
-    asTrimmedString(organizationId?.AnyBIC),
-    asTrimmedString(organizationId?.LEI),
-    ...asArray<any>(organizationId?.Othr).map(other => asTrimmedString(other?.Id)),
-    ...asArray<any>(privateId?.Othr).map(other => asTrimmedString(other?.Id)),
-  ].filter((value): value is string => value !== null)
-
-  return Array.from(new Set(ids)).join(' || ') || null
+  return null
 }
 
 function asArray<T>(value: T | T[] | null | undefined): T[] {

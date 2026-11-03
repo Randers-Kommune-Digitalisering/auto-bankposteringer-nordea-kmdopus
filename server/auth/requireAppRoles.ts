@@ -1,6 +1,7 @@
 import { createError, getRequestHeader, type H3Event } from 'h3'
 import type { AppRole } from '~/lib/authz/policy'
 import { extractRolesFromOidcUser } from '~/lib/authz/extractRoles'
+import { resolveUserDisplayName } from '~/lib/authz/userDisplayName'
 
 type OidcSession = {
   userName?: string
@@ -102,10 +103,10 @@ export function resolveLockOwnerIdentity(
   const stableIssuer = typeof issuer === 'string' && issuer.trim()
     ? issuer.trim()
     : developmentIdentityAllowed ? 'development' : 'oidc'
-  const userInfoName = session?.userInfo?.name
-  const displayName = [userInfoName, preferredUsername, session?.userName]
-    .find((value): value is string => typeof value === 'string' && value.trim().length > 0)
-    ?.trim() ?? 'anden bruger'
+  const displayName = resolveUserDisplayName({
+    userInfo: session?.userInfo,
+    userName: developmentUsername ?? 'anden bruger',
+  })
   const ownerSubject = typeof subject === 'string' && subject.trim()
     ? subject.trim()
     : `dev:${developmentUsername || displayName}`

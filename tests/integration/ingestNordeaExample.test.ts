@@ -100,6 +100,8 @@ describe('persistPreparedCamt053Document (integration)', () => {
           entryIndex: transaction.entryIndex,
           amount: transaction.amount,
           underlyingTransactionCount: transaction.underlyingTransactionCount,
+          counterpartName: transaction.counterpartName,
+          counterpartNameSource: transaction.counterpartNameSource,
           entryAdditionalInfo: transaction.entryAdditionalInfo,
         })
         .from(transaction)
@@ -110,10 +112,14 @@ describe('persistPreparedCamt053Document (integration)', () => {
         entryIndex: row.entryIndex,
         amount: String(row.amount),
         underlyingTransactionCount: row.underlyingTransactionCount,
+        counterpartName: row.counterpartName,
+        counterpartNameSource: row.counterpartNameSource,
       }))).toEqual(expectedTransactions.map((row) => ({
         entryIndex: row.entryIndex,
         amount: row.amount,
         underlyingTransactionCount: row.underlyingTransactionCount,
+        counterpartName: row.counterpartName,
+        counterpartNameSource: row.counterpartNameSource,
       })))
       expect(JSON.stringify(storedTransactions)).toContain('[CPR REDACTED]')
       expect(JSON.stringify(storedTransactions)).not.toContain('010203-1234')

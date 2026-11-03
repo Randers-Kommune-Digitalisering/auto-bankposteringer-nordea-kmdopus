@@ -9,14 +9,17 @@ export type CanonicalTransactionProjectionInput = {
   bookingDate: string
   amount: number
   creditDebitIndicator: string | null
+  underlyingTransactionCount?: number
+  counterpartName?: string | null
+  counterpartNameSource?: string | null
   entryAdditionalInfo: string | null
   ntryAcctSvcrRef: string | null
   ntryRef: string | null
 }
 
 export type CanonicalTransactionProjection = {
-  counterpart: null
-  counterpartHint: null
+  counterpart: string | null
+  counterpartHint: string | null
   referenceDetails: TransactionReferenceDetail[]
   references: string[]
   preferredReference: string | null
@@ -32,12 +35,11 @@ export function projectCanonicalTransactionFields(
     creditDebitIndicator: input.creditDebitIndicator,
     entryAdditionalInfo: input.entryAdditionalInfo,
     ntryAcctSvcrRef: input.ntryAcctSvcrRef,
-    ntryRef: input.ntryRef,
   })
 
   return {
-    counterpart: null,
-    counterpartHint: null,
+    counterpart: input.underlyingTransactionCount === 1 ? input.counterpartName ?? null : null,
+    counterpartHint: input.underlyingTransactionCount === 1 ? input.counterpartNameSource ?? null : null,
     referenceDetails: projection.referenceDetails,
     references: projection.references,
     preferredReference: projection.preferredReference,

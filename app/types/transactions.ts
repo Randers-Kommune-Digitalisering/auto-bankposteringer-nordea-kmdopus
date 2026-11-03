@@ -5,29 +5,23 @@ export type TransactionReferenceDetail = {
   source: string;
 };
 
-export type TransactionSummaryChip = {
+export type TransactionSummaryField = {
+  label: string;
   value: string;
-  source?: string;
+  sourcePath?: string;
 };
 
-export type TransactionSummarySection =
-  | {
-      key: "part" | "transaktionstype";
-      label: string;
-      items: Array<{ label: string; value: string; hint?: string }>;
-    }
-  | {
-    key: "reference" | "teknisk";
-    label: string;
-    chips: TransactionSummaryChip[];
-  };
+export type TransactionSummarySection = {
+  key: "part" | "reference" | "transaktionstype";
+  label: string;
+  fields: TransactionSummaryField[];
+};
 
 export type TransactionSummary = {
   amount: { label: string; value: string; raw: number };
   bookingDate: { label: string; value: string };
   transactionId: { label: string; value: string };
   direction: "credit" | "debit";
-  counterpartRole: string;
   sections: TransactionSummarySection[];
 };
 
@@ -49,6 +43,7 @@ export type OpenTransaction = {
   transactionTypeHint?: string | null;
   counterpart: string | null;
   counterpartHint?: string | null;
+  counterpartSource?: string | null;
   references: string[];
   referenceDetails: TransactionReferenceDetail[];
   summary: TransactionSummary;
@@ -89,11 +84,13 @@ export type TransactionSummaryInput = {
   runId: string;
   bookingDate: string;
   amount: number;
+  underlyingTransactionCount?: number;
   transactionType: string | null;
   transactionTypeCode?: string | null;
   transactionTypeHint?: string | null;
   counterpart: string | null;
   counterpartHint?: string | null;
+  counterpartSource?: string | null;
   references: string[];
   referenceDetails: TransactionReferenceDetail[];
 };
@@ -150,7 +147,9 @@ export type StatementTransaction = {
   postingText?: string | null;
   counterpart?: string | null;
   counterpartHint?: string | null;
+  counterpartSource?: string | null;
   referenceDetails?: TransactionReferenceDetail[];
+  summary: TransactionSummary;
 
   processingStatus: BookingStatus | null;
   ruleApplied: number | null;
@@ -158,20 +157,4 @@ export type StatementTransaction = {
   // Deterministic running balance computed from statement opening balance + entry order.
   // Present when statementId/entryIndex and OPBD balance exists.
   runningBalance: string | null;
-};
-
-export type Camt053SourceTreeNode = {
-  id: string;
-  kind: "element" | "text" | "cdata" | "comment";
-  name: string;
-  value?: string;
-  attributes?: Array<{ name: string; value: string }>;
-  children?: Camt053SourceTreeNode[];
-};
-
-export type StatementTransactionSourceTree = {
-  statementId: string;
-  entryIndex: number | null;
-  underlyingTransactionCount: number;
-  tree: Camt053SourceTreeNode;
 };

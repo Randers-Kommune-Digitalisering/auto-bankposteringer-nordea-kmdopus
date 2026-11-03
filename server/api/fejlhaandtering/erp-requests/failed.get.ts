@@ -18,6 +18,7 @@ type ErpRequestAttemptRow = {
   document_origin: string | null
   response_id: string | null
   response_status_text: string | null
+  request_created_at: string | Date | null
   outbox_status: string | null
   outbox_last_error: string | null
   outbox_created_at: string | Date | null
@@ -72,6 +73,7 @@ export default defineEventHandler(async (event) => {
 export async function listErpRequestOverview(
   { start, end, page, pageSize }: z.infer<typeof querySchema>,
 ) {
+  const now = new Date()
   const offset = (page - 1) * pageSize
 
   const runResult = await db.execute(sql`
@@ -129,6 +131,7 @@ export async function listErpRequestOverview(
       document.origin as document_origin,
       response.id as response_id,
       response.status_text as response_status_text,
+      request.created_at as request_created_at,
       delivery.status as outbox_status,
       delivery.last_error as outbox_last_error,
       delivery.created_at as outbox_created_at,
@@ -196,6 +199,7 @@ export async function listErpRequestOverview(
         eventSequence: row.event_sequence === null ? null : Number(row.event_sequence),
         responseId: toStringOrNull(row.response_id),
         responseStatusText: toStringOrNull(row.response_status_text),
+        requestCreatedAt: toIsoTimestamp(row.request_created_at),
         outboxStatus: toStringOrNull(row.outbox_status),
         outboxLastError: toStringOrNull(row.outbox_last_error),
         eventStatus: toStringOrNull(row.event_status),
@@ -212,7 +216,7 @@ export async function listErpRequestOverview(
 
   const latestRequests = selectLatestErpRequestPerDocument(attempts)
   const documents = latestRequests.map((request) => {
-    const status = getErpOverviewStatus(request)
+    const status = getErpOverviewStatus({ ...request, now })
 
     return {
       ...request,

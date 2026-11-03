@@ -67,6 +67,7 @@ export default defineEventHandler(async (event) => {
       runId: transaction.runId,
       statementId: transaction.statementId,
       entryIndex: transaction.entryIndex,
+      underlyingTransactionCount: transaction.underlyingTransactionCount,
       bookingDate: transaction.bookingDate,
       ntryRef: transaction.ntryRef,
       creditDebitIndicator: transaction.creditDebitIndicator,
@@ -76,6 +77,7 @@ export default defineEventHandler(async (event) => {
       accountProvider: account.provider,
       accountIban: account.iban,
       entryAdditionalInfo: transaction.entryAdditionalInfo,
+      counterpartName: transaction.counterpartName,
       processingStatus: transactionProcessing.status,
       processingId: transactionProcessing.transactionId,
     })
@@ -201,6 +203,7 @@ export default defineEventHandler(async (event) => {
     transactionId: row.id,
     amount,
     statusDimensions: { statuskonto },
+    counterpartName: row.underlyingTransactionCount === 1 ? row.counterpartName : null,
     entryAdditionalInfo: row.entryAdditionalInfo,
     ntryAcctSvcrRef: row.ntryAcctSvcrRef,
     ntryRef: row.ntryRef,

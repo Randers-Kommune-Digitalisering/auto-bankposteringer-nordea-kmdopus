@@ -8,6 +8,10 @@ import type {
   PostingTextSourceField,
   PostingTextTemplate,
 } from '~/../engine/matching/domain/postingTextTemplate'
+import {
+  formatTransactionFieldOptionLabel,
+  transactionFieldCatalog,
+} from '~/../engine/matching/domain/transactionFieldCatalog'
 
 type TemplatePart = PostingTextTemplate['parts'][number]
 type EditorPart = { id: number; part: TemplatePart; sample: string }
@@ -33,19 +37,24 @@ watch(parts, (entries) => {
   }
 }, { deep: true })
 
-const sourceOptions: Array<{ value: PostingTextSourceField; label: string }> = [
+const sourceOptions: Array<{ value: PostingTextSourceField; label: string; disabled?: boolean }> = [
   {
-    value: 'bankMessage',
-    label: 'Bankbesked (entry)',
+    value: 'counterparty',
+    label: formatTransactionFieldOptionLabel(transactionFieldCatalog.counterpartName),
+  },
+  {
+    value: 'ntryAcctSvcrRef',
+    label: formatTransactionFieldOptionLabel(transactionFieldCatalog.ntryAcctSvcrRef),
   },
   {
     value: 'entryAdditionalInfo',
-    label: 'Ntry/AddtlNtryInf',
+    label: formatTransactionFieldOptionLabel(transactionFieldCatalog.entryAdditionalInfo),
   },
 ]
 
 const legacySourceLabels: Partial<Record<PostingTextSourceField, string>> = {
-  counterparty: 'Modpart (ældre skabelon)',
+  ntryRef: 'Udfaset CAMT-felt (kun eksisterende skabeloner)',
+  bankMessage: `${formatTransactionFieldOptionLabel(transactionFieldCatalog.entryAdditionalInfo)} (ældre skabelon)`,
   txAdditionalInfo: 'TxDtls-tekst (ikke længere tilgængelig)',
   remittanceCreditorReference: 'Kreditorreference fra TxDtls (ikke længere tilgængelig)',
   remittanceUstrd: 'Remittance fra TxDtls (ikke længere tilgængelig)',
@@ -54,9 +63,8 @@ const legacySourceLabels: Partial<Record<PostingTextSourceField, string>> = {
 
 function optionsForSource(source: PostingTextSourceField) {
   const legacyLabel = legacySourceLabels[source]
-  return legacyLabel
-    ? [...sourceOptions, { value: source, label: legacyLabel }]
-    : sourceOptions
+  const options = sourceOptions.filter(option => option.value !== source)
+  return legacyLabel ? [...options, { value: source, label: legacyLabel, disabled: true }] : options
 }
 
 const captureGroupOptions = (pattern: string) => [

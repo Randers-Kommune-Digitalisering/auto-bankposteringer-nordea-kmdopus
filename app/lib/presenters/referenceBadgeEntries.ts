@@ -25,7 +25,10 @@ function isPlaceholderValue(value: string): boolean {
 export function toCanonicalReferenceBadgeEntries(
   referenceDetails: TransactionReferenceDetail[] | null | undefined,
 ): BadgeEntry[] {
-  const buckets = buildTransactionReferenceBuckets(referenceDetails ?? [])
+  const visibleReferenceDetails = (referenceDetails ?? []).filter((entry) => (
+    entry.source.trim().replace(/^\/+/, '').toLowerCase() !== 'ntry/ntryref'
+  ))
+  const buckets = buildTransactionReferenceBuckets(visibleReferenceDetails)
 
   return dedupeBadgeEntries(
     buckets.reference

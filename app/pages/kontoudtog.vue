@@ -2,11 +2,12 @@
 import { h } from 'vue'
 import { today, type DateValue } from '@internationalized/date'
 import type { TableColumn } from '@nuxt/ui'
-import type { Camt053SourceTreeNode, StatementTransaction, StatementTransactionSourceTree } from '~/types/transactions'
+import type { StatementTransaction } from '~/types/transactions'
 import { TRANSACTION_BADGE_COLUMN_CLASS, TRANSACTION_BADGE_STYLE } from '~/lib/presenters/transactionBadgeStyles'
 import { DEFAULT_TIME_ZONE, formatSignedDkk } from '~/utils'
 import { formatTransactionFieldHint } from '~/lib/presenters/transactionFieldHints'
 import { toCanonicalReferenceBadgeEntries, toCanonicalValueBadgeEntries, type BadgeEntry } from '~/lib/presenters/referenceBadgeEntries'
+import BookingSummaryCard from '~/components/open-items/BookingSummaryCard.vue'
 import { useStackedTransactions } from '~/composables/useStackedTransactions'
 import { useDebouncedString } from '~/composables/useDebouncedString'
 import {
@@ -131,57 +132,11 @@ const stacked = useStackedTransactions({
 const fetchedRows = computed<StatementTransaction[]>(() => stacked.value.items)
 const totalRows = computed<number>(() => data.value?.total ?? 0)
 const visibleRows = computed<StatementTransaction[]>(() => fetchedRows.value)
-const isRawTransactionOpen = ref(false)
-const selectedRawTransaction = ref<StatementTransaction | null>(null)
-const rawSource = ref<StatementTransactionSourceTree | null>(null)
-const rawSourceState = ref<'pending' | 'error' | 'unavailable' | null>(null)
-const rawSourceRequestId = ref(0)
+const isTransactionSummaryOpen = ref(false)
+const selectedTransaction = ref<StatementTransaction | null>(null)
+const selectedEntryLabel = ref('')
+const selectedUnderlyingTransactionCount = ref(0)
 const isExportingCsv = ref(false)
-
-type RawSourceTreeItem = {
-  id: string
-  label: string
-  kind: Camt053SourceTreeNode['kind']
-  value?: string
-  trailingIcon?: string
-  onSelect?: () => void
-  children?: RawSourceTreeItem[]
-  defaultExpanded?: boolean
-}
-
-function toRawSourceTreeItem(node: Camt053SourceTreeNode): RawSourceTreeItem {
-  const label = node.kind === 'element'
-    ? `<${node.name}${(node.attributes ?? []).map((attribute) => ` ${attribute.name}="${attribute.value}"`).join('')}>`
-    : node.kind === 'text'
-      ? node.value ?? ''
-      : node.kind === 'cdata'
-        ? `<![CDATA[${node.value ?? ''}]]>`
-        : `<!-- ${node.value ?? ''} -->`
-
-  return {
-    id: node.id,
-    label,
-    kind: node.kind,
-    value: node.value,
-    trailingIcon: node.kind === 'text' ? appConfig.ui.icons.copy : undefined,
-    onSelect: node.kind === 'text' ? () => { void copyRawText(node.value ?? '') } : undefined,
-    defaultExpanded: node.kind === 'element',
-    children: node.children?.map(toRawSourceTreeItem),
-  }
-}
-
-const rawSourceTreeItems = computed<RawSourceTreeItem[]>(() =>
-  rawSource.value ? [toRawSourceTreeItem(rawSource.value.tree)] : [],
-)
-
-async function copyRawText(value: string): Promise<void> {
-  try {
-    await navigator.clipboard.writeText(value)
-    toast.add({ title: 'Tekst kopieret', color: 'success' })
-  } catch {
-    toast.add({ title: 'Kunne ikke kopiere teksten', color: 'error' })
-  }
-}
 
 function sortableHeader(label: string, key: StatementSortKey) {
   const isSorted = sortKey.value === key ? sortDirection.value : false
@@ -257,7 +212,10 @@ function buildGroupedRows(
 
     const amount = items.reduce((sum, entry) => sum + Number(entry.amount ?? 0), 0)
     const category: StatementStackRow['category'] =
-      representative.underlyingTransactionCount > 1 ? 'Samlepost' : 'Enkeltpost'
+      items.length > 1 || representative.underlyingTransactionCount > 1 ? 'Samlepost' : 'Enkeltpost'
+    const lineCount = items.length > 1
+      ? items.reduce((total, item) => total + item.underlyingTransactionCount, 0)
+      : representative.underlyingTransactionCount
 
     return {
       stackId: stack.stackId,
@@ -270,7 +228,7 @@ function buildGroupedRows(
       referenceEntries,
       transactionTypeEntries,
       category,
-      lineCount: representative.underlyingTransactionCount,
+      lineCount,
     }
   })
 
@@ -415,7 +373,6 @@ async function downloadStatementCsv(): Promise<void> {
       { header: 'Saldo', value: (r) => formatDanishAmount(lastEntryDetail(r).runningBalance) },
       { header: 'Kredit/debet', value: (r) => r.representative.creditDebitIndicator === 'CRDT' ? 'K' : r.representative.creditDebitIndicator === 'DBIT' ? 'D' : '' },
       { header: 'Reference', value: (r) => r.referenceEntries.map((entry) => entry.value).join(' · ') },
-      { header: 'EntryRef', value: (r) => r.representative.ntryRef ?? '' },
       { header: 'Transaktionstype', value: (r) => r.transactionTypeEntries[0]?.value ?? '' },
       { header: 'Kategori', value: (r) => r.category },
     ]
@@ -474,33 +431,35 @@ type StatementStackRow = {
   lineCount: number
 }
 
-async function openRawTransaction(row: StatementStackRow): Promise<void> {
-  selectedRawTransaction.value = row.representative
-  rawSource.value = null
-  rawSourceState.value = 'pending'
-  isRawTransactionOpen.value = true
-  const requestId = rawSourceRequestId.value + 1
-  rawSourceRequestId.value = requestId
+function openTransactionSummary(row: StatementStackRow): void {
+  const isGrouped = row.items.length > 1
+    || row.stackId.startsWith('group:')
+    || row.representative.underlyingTransactionCount > 1
+  const underlyingTransactionCount = row.items.length > 1
+    ? row.items.reduce((total, item) => total + item.underlyingTransactionCount, 0)
+    : row.representative.underlyingTransactionCount
 
-  try {
-    const source = await $fetch<StatementTransactionSourceTree>(
-      `/api/transactions/${encodeURIComponent(row.representative.id)}/source`,
-    )
-    if (requestId !== rawSourceRequestId.value) return
-    rawSource.value = source
-    rawSourceState.value = null
-  } catch (error) {
-    if (requestId !== rawSourceRequestId.value) return
-    const statusCode = typeof error === 'object' && error !== null && 'statusCode' in error
-      ? Number((error as { statusCode?: unknown }).statusCode)
-      : 0
-    rawSourceState.value = statusCode === 404 ? 'unavailable' : 'error'
-  }
+  selectedTransaction.value = isGrouped
+    ? {
+      ...row.representative,
+      summary: {
+        ...row.representative.summary,
+        sections: row.representative.summary.sections.map((section) => (
+          section.key === 'part' ? { ...section, fields: [] } : section
+        )),
+        transactionId: {
+          ...row.representative.summary.transactionId,
+          value: `Samlepost (${row.items.length} poster)`,
+        },
+      },
+    }
+    : row.representative
+  selectedEntryLabel.value = isGrouped ? 'Samlepost' : 'Enkeltpost'
+  selectedUnderlyingTransactionCount.value = underlyingTransactionCount
+  isTransactionSummaryOpen.value = true
 }
 
-const onStatementRowSelect = createTableRowSelectHandler((row: StatementStackRow) => {
-  void openRawTransaction(row)
-})
+const onStatementRowSelect = createTableRowSelectHandler(openTransactionSummary)
 
 const columns: TableColumn<StatementStackRow>[] = [
   { // Banking date
@@ -546,7 +505,9 @@ const columns: TableColumn<StatementStackRow>[] = [
           variant: 'subtle',
           color: 'neutral',
         }, () => category),
-        h('span', { class: 'text-xs text-muted' }, `${lineCount} underliggende transaktioner`),
+        ...(category === 'Samlepost' && lineCount > 0
+          ? [h('span', { class: 'text-xs text-muted' }, `${lineCount} underliggende transaktioner`)]
+          : []),
       ])
     },
   },
@@ -687,33 +648,18 @@ const tableUi = {
           @update:page="setPage"
         />
 
-        <UModal v-model:open="isRawTransactionOpen" title="Kildevisning (samlepost)" :ui="{ content: 'max-w-5xl', body: 'space-y-3' }">
+        <UModal v-model:open="isTransactionSummaryOpen" title="Transaktionsoversigt" :ui="{ content: 'max-w-2xl', body: 'space-y-3' }">
           <template #body>
-            <div v-if="!selectedRawTransaction" class="text-sm text-muted">Ingen transaktion valgt.</div>
-            <div v-else class="space-y-3">
-              <div v-if="rawSourceState === 'pending'" class="text-sm text-muted">Henter kildevisning...</div>
-              <div v-else-if="rawSourceState === 'unavailable'" class="text-sm text-muted">Kildevisningen er ikke tilgængelig for denne transaktion.</div>
-              <div v-else-if="rawSourceState === 'error'" class="text-sm text-error">Kunne ikke hente kildevisningen.</div>
-              <div v-else-if="rawSource" class="space-y-2">
-                <div class="text-xs text-muted">
-                  Statement {{ rawSource.statementId }} · Ntry {{ rawSource.entryIndex }} · {{ rawSource.underlyingTransactionCount }} underliggende transaktioner
-                </div>
-                <p class="text-sm text-muted">Dette er en genereret visning af lagrede entry-felter, ikke den oprindelige CAMT-fil.</p>
-                <UTree
-                  :items="rawSourceTreeItems"
-                  class="max-h-[65vh] overflow-auto font-mono text-xs [&_button]:whitespace-normal [&_button]:break-all"
-                >
-                  <template #item-label="{ item }">
-                    <span
-                      :title="item.kind === 'text' ? item.value : item.label"
-                      :class="item.kind === 'text' ? 'block max-w-[min(70vw,48rem)] truncate' : undefined"
-                    >
-                      {{ item.label }}
-                    </span>
-                  </template>
-                </UTree>
-              </div>
+            <div v-if="selectedTransaction" class="space-y-3">
+              <p class="text-sm text-muted">
+                {{ selectedEntryLabel }}
+                <template v-if="selectedEntryLabel === 'Samlepost' && selectedUnderlyingTransactionCount > 0">
+                  · {{ selectedUnderlyingTransactionCount }} underliggende transaktioner
+                </template>
+              </p>
+              <BookingSummaryCard :summary="selectedTransaction.summary" />
             </div>
+            <div v-else class="text-sm text-muted">Ingen transaktion valgt.</div>
           </template>
         </UModal>
       </div>

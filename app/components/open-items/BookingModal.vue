@@ -678,20 +678,25 @@ function collapseAllLines() {
 				/>
 				<BookingSummaryCard v-if="summary" :summary="summary" />
 
-				<UCard v-if="transaction?.id || transaction?.runId" variant="soft" :ui="{ body: 'space-y-3 p-4' }">
-
-					<div v-if="transaction?.id" class="text-xs font-semibold uppercase tracking-wide text-muted">Transaktions-ID</div>
-					<div v-if="transaction?.id" class="flex flex-wrap gap-2">
-						<UBadge variant="soft" color="warning" size="lg" class="max-w-full min-w-0 whitespace-normal break-all">
-							{{ transaction.id }}
-						</UBadge>
+				<UCard v-if="transaction?.id || transaction?.runId" variant="soft" :ui="{ body: 'space-y-2 p-3' }">
+					<div
+						v-if="transaction?.id"
+						class="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)] items-stretch gap-x-3 rounded-md border border-default/60 border-l-4 border-l-warning bg-elevated/30 px-3 py-2"
+					>
+						<p class="flex items-center text-xs font-semibold text-muted">Transaktions-ID</p>
+						<div class="flex min-h-10 min-w-0 items-center border-l border-default/50 pl-3">
+							<p class="w-full break-all text-right font-mono text-sm font-semibold leading-5">{{ transaction.id }}</p>
+						</div>
 					</div>
 
-					<div v-if="transaction?.runId" class="text-xs font-semibold uppercase tracking-wide text-muted">Kørsels-ID</div>
-					<div v-if="transaction?.runId" class="flex flex-wrap gap-2">
-						<UBadge variant="soft" color="warning" size="lg" class="max-w-full min-w-0 whitespace-normal break-all">
-							{{ transaction.runId }}
-						</UBadge>
+					<div
+						v-if="transaction?.runId"
+						class="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)] items-stretch gap-x-3 rounded-md border border-default/60 border-l-4 border-l-warning bg-elevated/30 px-3 py-2"
+					>
+						<p class="flex items-center text-xs font-semibold text-muted">Kørsels-ID</p>
+						<div class="flex min-h-10 min-w-0 items-center border-l border-default/50 pl-3">
+							<p class="w-full break-all text-right font-mono text-sm font-semibold leading-5">{{ transaction.runId }}</p>
+						</div>
 					</div>
 				</UCard>
 

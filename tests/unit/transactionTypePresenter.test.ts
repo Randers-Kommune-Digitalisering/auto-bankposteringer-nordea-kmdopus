@@ -16,7 +16,7 @@ describe('transactionTypePresenter', () => {
     expect(result).toEqual({
       value: 'Betalingsservice',
       code: 'PRTRY:BGS',
-      hint: 'bkTxCdProprietary',
+      hint: '/Ntry/BkTxCd/Prtry/Cd',
     })
   })
 
@@ -33,7 +33,7 @@ describe('transactionTypePresenter', () => {
     expect(result).toEqual({
       value: 'Kreditoverførsel',
       code: 'PMNT/ICDT',
-      hint: 'bkTxCdDomain + bkTxCdFamily + bkTxCdSubFamily',
+      hint: '/Ntry/BkTxCd/Domn/Cd · Fmly/Cd · Fmly/SubFmlyCd',
     })
   })
 
@@ -50,7 +50,7 @@ describe('transactionTypePresenter', () => {
     expect(result).toEqual({
       value: 'PMNT/ICDT',
       code: 'PMNT/ICDT',
-      hint: 'bkTxCdDomain + bkTxCdFamily + bkTxCdSubFamily',
+      hint: '/Ntry/BkTxCd/Domn/Cd · Fmly/Cd · Fmly/SubFmlyCd',
     })
   })
 

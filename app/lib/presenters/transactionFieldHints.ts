@@ -16,7 +16,6 @@ const FIELD_LABELS: Record<string, string> = {
   remittanceCreditorReference: 'Creditor reference',
   entryAdditionalInfo: 'Entry additional info',
   txAdditionalInfo: 'Tx additional info',
-  ntryRef: 'NtryRef',
   ntryAcctSvcrRef: 'NtryAcctSvcrRef',
   txAcctSvcrRef: 'TxAcctSvcrRef',
   refsEndToEndId: 'EndToEndId',
@@ -36,7 +35,6 @@ function fromXmlPathToken(token: string): string | undefined {
   if (normalized.includes('txdtls/refs/uetr')) return FIELD_LABELS.uetr
   if (normalized.includes('txdtls/refs/acctsvcrref')) return FIELD_LABELS.txAcctSvcrRef
   if (normalized.includes('ntry/acctsvcrref')) return FIELD_LABELS.ntryAcctSvcrRef
-  if (normalized.endsWith('ntry/ntryref') || normalized === 'ntryref') return FIELD_LABELS.ntryRef
   if (normalized.includes('purp/prtry')) return 'Purpose (Prtry)'
   if (normalized.includes('rmtinf/ustrd')) return FIELD_LABELS.remittanceUstrd
   if (normalized.includes('rmtinf/addtlrmtinf')) return FIELD_LABELS.remittanceAdditional

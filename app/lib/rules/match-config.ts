@@ -2,6 +2,10 @@
 // It also provides utility types and constants for working with these fields in the application.
 
 import type { RuleConditionField } from "../db/schema/enums";
+import {
+  formatTransactionFieldOptionLabel,
+  transactionFieldCatalog,
+} from "../../../engine/matching/domain/transactionFieldCatalog";
 
 export type MatchFieldMeta = {
   key: RuleConditionField;
@@ -18,37 +22,61 @@ const matchCatalog = [
   {
     category: matchCategoryLabels.reference,
     fields: [
-      { key: "ntry_ref", label: "Entry reference (NtryRef)" },
-      { key: "ntry_acct_svcr_ref", label: "Entry AcctSvcrRef" },
-      { key: "entry_additional_info", label: "Additional entry info" },
+      {
+        key: transactionFieldCatalog.ntryAcctSvcrRef.matchField,
+        label: transactionFieldCatalog.ntryAcctSvcrRef.label,
+        pathLabel: transactionFieldCatalog.ntryAcctSvcrRef.pathLabel,
+      },
+      {
+        key: transactionFieldCatalog.entryAdditionalInfo.matchField,
+        label: transactionFieldCatalog.entryAdditionalInfo.label,
+        pathLabel: transactionFieldCatalog.entryAdditionalInfo.pathLabel,
+      },
     ],
   },
   {
     category: matchCategoryLabels.counterparty,
     fields: [
-      { key: "dbtr_name", label: "Debtor name (Dbtr/Nm)" },
-      { key: "dbtr_id", label: "Debtor ID (Dbtr/Id)" },
-      { key: "dbtr_acct_iban", label: "Debtor IBAN (DbtrAcct/IBAN)" },
-      { key: "cdtr_name", label: "Creditor name (Cdtr/Nm)" },
-      { key: "cdtr_id", label: "Creditor ID (Cdtr/Id)" },
-      { key: "cdtr_acct_iban", label: "Creditor IBAN (CdtrAcct/IBAN)" },
-      { key: "ultmt_dbtr_name", label: "Ultimate debtor name (UltmtDbtr/Nm)" },
-      { key: "ultmt_cdtr_name", label: "Ultimate creditor name (UltmtCdtr/Nm)" },
+      {
+        key: transactionFieldCatalog.counterpartName.matchField,
+        label: transactionFieldCatalog.counterpartName.label,
+        pathLabel: transactionFieldCatalog.counterpartName.pathLabel,
+      },
     ],
   },
   {
     category: matchCategoryLabels.transactionType,
     fields: [
-      { key: "bk_tx_cd_domain", label: "Kode domæne" },
-      { key: "bk_tx_cd_family", label: "Kode familie" },
-      { key: "bk_tx_cd_sub_family", label: "Kode underfamilie" },
-      { key: "bk_tx_cd_proprietary", label: "Proprietary kode" },
-      { key: "cdt_dbt_ind", label: "Credit/Debit (CRDT/DBIT)" },
+      {
+        key: transactionFieldCatalog.bkTxCdDomain.matchField,
+        label: transactionFieldCatalog.bkTxCdDomain.label,
+        pathLabel: transactionFieldCatalog.bkTxCdDomain.pathLabel,
+      },
+      {
+        key: transactionFieldCatalog.bkTxCdFamily.matchField,
+        label: transactionFieldCatalog.bkTxCdFamily.label,
+        pathLabel: transactionFieldCatalog.bkTxCdFamily.pathLabel,
+      },
+      {
+        key: transactionFieldCatalog.bkTxCdSubFamily.matchField,
+        label: transactionFieldCatalog.bkTxCdSubFamily.label,
+        pathLabel: transactionFieldCatalog.bkTxCdSubFamily.pathLabel,
+      },
+      {
+        key: transactionFieldCatalog.bkTxCdProprietary.matchField,
+        label: transactionFieldCatalog.bkTxCdProprietary.label,
+        pathLabel: transactionFieldCatalog.bkTxCdProprietary.pathLabel,
+      },
+      {
+        key: transactionFieldCatalog.creditDebitIndicator.matchField,
+        label: transactionFieldCatalog.creditDebitIndicator.label,
+        pathLabel: transactionFieldCatalog.creditDebitIndicator.pathLabel,
+      },
     ],
   },
 ] as const satisfies readonly {
   category: string;
-  fields: readonly MatchFieldMeta[];
+  fields: readonly (MatchFieldMeta & { pathLabel: string })[];
 }[];
 
 export type MatchCategory = typeof matchCatalog[number]["category"];
@@ -90,7 +118,7 @@ export const fieldToCategory = matchCatalog.reduce((acc, group) => {
 
 export const matchFieldOptionsByCategory = matchCatalog.reduce((acc, group) => {
   acc[group.category] = group.fields.map((field) => ({
-    label: field.label,
+    label: formatTransactionFieldOptionLabel(field),
     value: field.key,
   }));
   return acc;

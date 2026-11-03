@@ -91,6 +91,8 @@ describe('ERP request overview', () => {
     expect(getErpOverviewStatus({
       responseId: null,
       responseStatusText: null,
+      requestCreatedAt: '2026-10-16T08:00:00.000Z',
+      now: new Date('2026-10-16T08:01:00.000Z'),
       outboxStatus: 'pending',
       outboxLastError: null,
       eventStatus: 'processing',
@@ -99,6 +101,57 @@ describe('ERP request overview', () => {
       label: 'Sender',
       color: 'warning',
       detail: 'Genfremsendelse startet.',
+    })
+  })
+
+  it('keeps an unanswered request awaiting until 48 hours have elapsed', () => {
+    const beforeDeadline = getErpOverviewStatus({
+      responseId: null,
+      responseStatusText: null,
+      requestCreatedAt: '2026-10-16T08:00:00.000Z',
+      now: new Date('2026-10-18T07:59:59.999Z'),
+      outboxStatus: 'sent',
+      outboxLastError: null,
+      eventStatus: 'sent',
+      eventDetail: 'ERP-request afsendt; afventer ERP-svar.',
+    })
+    const atDeadline = getErpOverviewStatus({
+      responseId: null,
+      responseStatusText: null,
+      requestCreatedAt: '2026-10-16T08:00:00.000Z',
+      now: new Date('2026-10-18T08:00:00.000Z'),
+      outboxStatus: 'sent',
+      outboxLastError: null,
+      eventStatus: 'sent',
+      eventDetail: 'ERP-request afsendt; afventer ERP-svar.',
+    })
+
+    expect(beforeDeadline).toEqual({
+      label: 'Afsendt – afventer svar',
+      color: 'warning',
+      detail: 'ERP-request afsendt; afventer ERP-svar.',
+    })
+    expect(atDeadline).toEqual({
+      label: 'Svarfrist overskredet',
+      color: 'error',
+      detail: 'ERP-svar ikke modtaget inden for 48 timer.',
+    })
+  })
+
+  it('does not time out a request after its ERP response has been received', () => {
+    expect(getErpOverviewStatus({
+      responseId: 'response-1',
+      responseStatusText: 'OK: 1/1 bilag godkendt',
+      requestCreatedAt: '2026-10-16T08:00:00.000Z',
+      now: new Date('2026-10-19T08:00:00.000Z'),
+      outboxStatus: 'sent',
+      outboxLastError: null,
+      eventStatus: 'accepted',
+      eventDetail: 'ERP har accepteret bilaget.',
+    })).toEqual({
+      label: 'Accepteret',
+      color: 'success',
+      detail: 'OK: 1/1 bilag godkendt',
     })
   })
 

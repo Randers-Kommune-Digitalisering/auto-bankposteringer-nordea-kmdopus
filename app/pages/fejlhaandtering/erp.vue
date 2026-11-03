@@ -959,7 +959,6 @@ async function reopenBookedTransactions() {
           <BookingSummaryCard
             v-if="selectedTransactionSummary"
             :summary="selectedTransactionSummary"
-            :hide-section-keys="['teknisk']"
           />
           <section v-if="selectedTransaction?.accountingLines.length" class="mt-5 space-y-3">
             <h3 class="text-sm font-semibold">Sendt kontering</h3>

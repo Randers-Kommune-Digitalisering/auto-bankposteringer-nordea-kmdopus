@@ -1,6 +1,6 @@
 import { z } from "zod/v4";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { pgTable, text, uuid, integer, numeric, jsonb, primaryKey, index, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { pgTable, text, uuid, integer, numeric, jsonb, primaryKey, index, timestamp, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { run } from "./run";
 import { transaction } from "./transaction";
 import { erpDocumentOriginEnum } from "./enums";
@@ -12,6 +12,7 @@ export const erpRequest = pgTable("erp_request", {
   documentId: text("document_id").references(() => erpDocument.id),
   filename: text().unique(),
   payload: text("payload"),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => ({
   runIdIdx: index('erp_request_run_id_idx').on(t.runId),
   documentIdIdx: index('erp_request_document_id_idx').on(t.documentId),

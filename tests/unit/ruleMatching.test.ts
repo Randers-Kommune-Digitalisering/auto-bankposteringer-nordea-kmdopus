@@ -3,6 +3,7 @@ import type { MatchableTransaction } from '../../engine/matching/handlers/transa
 import { evaluateConditionGroups } from '../../engine/matching/handlers/transactionMatchingService'
 import { mapConditionsToMatches, mapMatchesToConditionRows, mapRuleToListDto, matchEntrySchema } from '../../app/lib/db/schema/rule'
 import { encodeTransactionTypeCatalogReference } from '../../app/lib/rules/transactionTypeCatalog'
+import { matchFieldOptionsByCategory } from '../../app/lib/rules/match-config'
 
 const transaction = {
   transactionId: 'transaction-1',
@@ -13,46 +14,51 @@ const transaction = {
   statusDimensions: {},
   bookingDate: new Date('2026-01-01'),
   amount: 100,
-  dbtrName: 'Nets Danmark A/S',
+  counterpartName: 'Nets Danmark A/S',
   processingStatus: null,
   hasProcessingRow: false,
 } as MatchableTransaction
 
 const nordeaTransaction = {
   ...transaction,
-  dbtrName: 'NETS DENMARK A/S',
+  counterpartName: 'NETS DENMARK A/S',
   entryAdditionalInfo: '502:REFERENCE:N54102770457',
 }
 
 describe('rule matching groups', () => {
-  it('allows selecting underlying CAMT party fields in the Modpart category', () => {
+  it('uses the canonical counterparty label and CAMT path in rule selectors', () => {
+    expect(matchFieldOptionsByCategory.Modpart).toEqual([{
+      label: 'Modpart · RltdPties/Dbtr|Cdtr (PstlAdr/AdrLine first, then Nm|Pty/Nm); fallback UltmtDbtr|UltmtCdtr',
+      value: 'counterparty_name',
+    }])
+  })
+
+  it('allows selecting only the canonical counterparty field in the Modpart category', () => {
     const legacyEntry = matchEntrySchema.safeParse({
       category: 'Modpart',
       value: 'nets',
       operator: 'ilike',
       gate: 'ELLER',
-      fields: ['dbtr_name', 'cdtr_name'],
+      fields: ['counterparty_name'],
     })
 
     expect(legacyEntry.success).toBe(true)
   })
 
-  it('maps persisted CAMT party fields back to the Modpart category', () => {
+  it('maps the persisted counterparty field back to the Modpart category', () => {
     const matches = mapConditionsToMatches([
-      { field: 'dbtr_name', operator: 'ilike', gate: 'ELLER', value: 'nets' } as any,
-      { field: 'cdtr_name', operator: 'ilike', gate: 'ELLER', value: 'nets' } as any,
+      { field: 'counterparty_name', operator: 'ilike', gate: 'ELLER', value: 'nets' } as any,
     ])
 
     expect(matches).toEqual([{
       category: 'Modpart',
       value: 'nets',
-      fields: ['dbtr_name', 'cdtr_name'],
       operator: 'ilike',
       gate: 'ELLER',
     }])
   })
 
-  it('expands the Modpart category to all underlying CAMT party fields', () => {
+  it('maps the Modpart category to the single canonical counterparty field', () => {
     const conditions = mapMatchesToConditionRows([{
       category: 'Modpart',
       value: 'Nets',
@@ -60,16 +66,7 @@ describe('rule matching groups', () => {
       gate: 'ELLER',
     }])
 
-    expect(conditions.map(condition => condition.field)).toEqual([
-      'dbtr_name',
-      'dbtr_id',
-      'dbtr_acct_iban',
-      'cdtr_name',
-      'cdtr_id',
-      'cdtr_acct_iban',
-      'ultmt_dbtr_name',
-      'ultmt_cdtr_name',
-    ])
+    expect(conditions.map(condition => condition.field)).toEqual(['counterparty_name'])
     expect(conditions.every(condition => condition.gate === 'ELLER')).toBe(true)
     expect(conditions.every(condition => condition.operator === 'ilike' && condition.value === 'Nets')).toBe(true)
   })
@@ -208,7 +205,7 @@ describe('rule matching groups', () => {
     expect(evaluateConditionGroups(nordeaTransaction, conditions as any)).toBe(true)
   })
 
-  it('matches a Modpart rule against any populated CAMT party field', () => {
+  it('matches a Modpart rule against the retained counterparty name', () => {
     const conditions = mapMatchesToConditionRows([{
       category: 'Modpart',
       value: 'Nets',
@@ -219,14 +216,7 @@ describe('rule matching groups', () => {
     expect(evaluateConditionGroups(nordeaTransaction, conditions as any)).toBe(true)
     expect(evaluateConditionGroups({
       ...nordeaTransaction,
-      dbtrName: null,
-      dbtrId: null,
-      dbtrAcctIban: null,
-      cdtrName: null,
-      cdtrId: null,
-      cdtrAcctIban: null,
-      ultmtDbtrName: null,
-      ultmtCdtrName: null,
+      counterpartName: null,
     }, conditions as any)).toBe(false)
   })
 
@@ -236,7 +226,7 @@ describe('rule matching groups', () => {
       value: '%Nets%',
       operator: 'ilike',
       gate: 'ELLER',
-      fields: ['dbtr_name'],
+      fields: ['counterparty_name'],
     }])
 
     expect(evaluateConditionGroups(nordeaTransaction, conditions as any)).toBe(false)

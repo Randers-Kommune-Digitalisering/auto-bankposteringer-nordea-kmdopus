@@ -44,7 +44,7 @@ export function resolveTransactionType(input: TransactionTypeInput): {
     return {
       value: catalogValue(provider, code, input.catalogByProviderCodeKey) ?? proprietary,
       code,
-      hint: 'bkTxCdProprietary',
+      hint: '/Ntry/BkTxCd/Prtry/Cd',
     }
   }
 
@@ -59,7 +59,7 @@ export function resolveTransactionType(input: TransactionTypeInput): {
   return {
     value: catalogValue(provider, code, input.catalogByProviderCodeKey) ?? parts.join('/'),
     code,
-    hint: 'bkTxCdDomain + bkTxCdFamily + bkTxCdSubFamily',
+    hint: '/Ntry/BkTxCd/Domn/Cd · Fmly/Cd · Fmly/SubFmlyCd',
   }
 }
 

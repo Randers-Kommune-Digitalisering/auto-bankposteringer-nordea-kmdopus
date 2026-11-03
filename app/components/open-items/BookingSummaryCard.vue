@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, toRef } from 'vue'
-import { formatTransactionFieldHint } from '~/lib/presenters/transactionFieldHints'
-import { toSummarySectionEntries } from '~/lib/presenters/transactionSummaryEntries'
+import { toVisibleSummarySections } from '~/lib/presenters/transactionSummaryEntries'
 import type { TransactionSummary } from '~/types/transactions'
 
 const appConfig = useAppConfig()
@@ -10,26 +9,8 @@ const directionIcon = computed(() =>
 	summary.value.direction === 'credit' ? appConfig.ui.icons.arrowAngleUp : appConfig.ui.icons.arrowAngleDown
 )
 
-type HideableSectionKey = 'reference' | 'teknisk'
-
-const props = withDefaults(defineProps<{ summary: TransactionSummary; hideSectionKeys?: HideableSectionKey[] }>(), {
-	hideSectionKeys: () => [],
-})
+const props = defineProps<{ summary: TransactionSummary }>()
 const summary = toRef(props, 'summary')
-
-type SummaryItemsSection = {
-	key: 'part' | 'transaktionstype'
-	label: string
-	items: Array<{ label: string; value: string; hint?: string }>
-}
-
-type SummaryChipsSection = {
-	key: 'reference' | 'teknisk'
-	label: string
-	chips: Array<{ value: string; source?: string }>
-}
-
-type TransactionSummarySection = SummaryItemsSection | SummaryChipsSection
 
 const isGroupedSummary = computed(() => /^samlepost\s*\(/i.test(String(summary.value.transactionId?.value ?? '').trim()))
 const directionLabel = computed(() => {
@@ -37,73 +18,24 @@ const directionLabel = computed(() => {
 	return isGroupedSummary.value ? `${base} (samlepost)` : base
 })
 
-
-const partSection = computed<SummaryItemsSection | null>(() => {
-	const section = (summary.value.sections as TransactionSummarySection[]).find((entry) => entry.key === 'part')
-	return section?.key === 'part' ? section : null
-})
-
-type BadgeColor = 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'error' | 'neutral'
-
-const orderedSections = computed<TransactionSummarySection[]>(() => {
-	const order: TransactionSummarySection['key'][] = ['part', 'reference', 'teknisk', 'transaktionstype']
-	const prioritized = order
-		.map((key) => (summary.value.sections as TransactionSummarySection[]).find((section) => section.key === key))
-		.filter((section): section is TransactionSummarySection => Boolean(section))
-	const remaining = (summary.value.sections as TransactionSummarySection[]).filter((section) => !order.includes(section.key))
-	const hidden = new Set(props.hideSectionKeys)
-	return [...prioritized, ...remaining].filter((section) => !hidden.has(section.key as HideableSectionKey))
-})
-
-const sectionColor = (key: TransactionSummarySection['key']): BadgeColor => {
-	switch (key) {
-		case 'reference':
-			return 'success'
-		case 'teknisk':
-			return 'warning'
-		case 'part':
-			return 'secondary'
-		case 'transaktionstype':
-				return 'warning'
-		default:
-			return 'neutral'
-	}
-}
-
-type SectionEntry = {
-	key: TransactionSummarySection['key']
-	label: string
-	color: BadgeColor
-	values: Array<{ value: string; hint?: string }>
-}
-
-function toSectionEntry(section: TransactionSummarySection): SectionEntry {
-	return {
-		key: section.key,
-		label: section.label,
-		color: sectionColor(section.key),
-		values: toSummarySectionEntries(section),
-	}
-}
-
-const sectionEntries = computed<SectionEntry[]>(() => orderedSections.value.map(toSectionEntry))
+const sectionEntries = computed(() => toVisibleSummarySections(summary.value.sections))
 </script>
 
 <template>
-	<UCard variant="soft" :ui="{ body: 'space-y-5 p-5', footer: 'p-5 pt-0 border-t border-default/60' }">
+	<UCard variant="soft" :ui="{ body: 'space-y-3 p-4', footer: 'p-5 pt-0 border-t border-default/60' }">
     <template #header>
       <!-- Direction -->
       <UBadge
         size="sm"
         variant="soft"
         color="primary"
-        class="flex justify-center text-xs font-semibold uppercase tracking-wide mt-2 mb-6"
+        class="flex justify-center text-xs font-semibold uppercase tracking-wide mb-3"
       >
         <UIcon :name="directionIcon" class="h-4.5 w-4.5" />
         <span>{{ directionLabel }}</span>
       </UBadge>
       <!-- Amount -->
-			<div class="space-y-1 text-center mt-2 mb-6">
+			<div class="space-y-1 text-center mb-3">
         <p class="text-xs font-medium uppercase tracking-wide">{{ summary.amount.label }}</p>
         <p class="text-3xl font-bold">{{ summary.amount.value }}</p>
       </div>
@@ -115,27 +47,78 @@ const sectionEntries = computed<SectionEntry[]>(() => orderedSections.value.map(
         </div>
       </div>
     </template>
-		<div class="space-y-6">
-			<section v-for="section in sectionEntries" :key="section.key" class="space-y-2">
-				<header class="text-xs font-semibold uppercase tracking-wide">
-					{{ section.label }}
-				</header>
-				<div v-if="section.values.length" class="space-y-2">
-					<UBadge
+		<div class="space-y-1.5">
+			<section v-for="section in sectionEntries" :key="section.key" :aria-label="section.label" class="space-y-1.5">
+				<div class="grid gap-1.5">
+					<div
 						v-for="(entry, index) in section.values"
 						:key="section.key + index"
-						variant="soft"
-						:color="section.color"
-						size="lg"
-						:title="formatTransactionFieldHint(entry.hint)"
-						class="block max-w-full min-w-0 whitespace-normal break-all"
+						class="min-w-0 rounded-md border border-default/60 border-l-4 px-3 py-2"
+						:class="{
+							'border-l-secondary': section.key === 'part',
+							'border-l-success': section.key === 'reference',
+							'border-l-warning': section.key === 'transaktionstype',
+							'bg-secondary/5': section.key === 'part',
+							'bg-success/5': section.key === 'reference',
+							'bg-warning/5': section.key === 'transaktionstype',
+							'grid grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)] items-stretch gap-x-3': !entry.valueLines?.length,
+							'space-y-3': entry.valueLines?.length,
+						}"
 					>
-						{{ entry.value }}
-					</UBadge>
+						<div
+							v-if="entry.valueLines?.length"
+							class="space-y-1 text-center"
+						>
+							<p class="text-xs font-semibold text-muted">
+								{{ entry.label }}
+							</p>
+							<p
+								v-if="entry.sourcePath"
+								class="break-all font-mono text-[10px] leading-3.5 text-muted"
+							>
+								{{ entry.sourcePath }}
+							</p>
+						</div>
+						<template v-else>
+							<div class="flex min-w-0 flex-col justify-center gap-1">
+								<p class="text-xs font-semibold text-muted">
+									{{ entry.label }}
+								</p>
+								<p
+									v-if="entry.sourcePath"
+									class="break-all font-mono text-[10px] leading-3.5 text-muted"
+								>
+									{{ entry.sourcePath }}
+								</p>
+							</div>
+						</template>
+						<div
+							class="min-w-0"
+							:class="entry.valueLines?.length ? 'w-full' : 'flex min-h-12 items-center border-l border-default/50 pl-3'"
+						>
+							<div v-if="entry.valueLines?.length" class="w-full divide-y divide-default/40">
+								<div
+									v-for="(line, lineIndex) in entry.valueLines"
+									:key="lineIndex"
+									class="grid min-w-0 grid-cols-[minmax(0,0.9fr)_minmax(0,1.5fr)] items-center gap-x-3 py-1.5 first:pt-0 last:pb-0"
+								>
+									<p v-if="line.label" class="break-words text-xs font-medium leading-4 text-muted">
+										{{ line.label }}
+									</p>
+									<p
+										class="break-words text-right text-base font-semibold leading-5"
+										:class="{ 'col-span-2': !line.label }"
+									>
+										{{ line.value }}
+									</p>
+								</div>
+							</div>
+							<p v-else class="w-full break-words text-right text-base font-semibold leading-5">
+								{{ entry.value }}
+							</p>
+						</div>
+					</div>
 				</div>
-				<UAlert v-else color="neutral" variant="soft" :icon="appConfig.ui.icons.leftAlign" class="text-xs">
-					Ingen data i denne kategori
-				</UAlert>
 			</section>
 		</div>
 		<template v-if="$slots.footer" #footer>

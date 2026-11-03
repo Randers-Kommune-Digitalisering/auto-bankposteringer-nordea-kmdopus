@@ -9,7 +9,6 @@ export type CanonicalTransactionTextInput = {
   creditDebitIndicator: string | null
   entryAdditionalInfo?: string | null
   ntryAcctSvcrRef?: string | null
-  ntryRef?: string | null
 }
 
 export type CanonicalTransactionTextProjection = {
@@ -28,7 +27,6 @@ export function projectCanonicalTransactionText(
   const referenceDetails = buildReferenceDetails({
     entryAdditionalInfo: input.entryAdditionalInfo ?? null,
     ntryAcctSvcrRef: input.ntryAcctSvcrRef ?? null,
-    ntryRef: input.ntryRef ?? null,
   })
   const references = referenceDetails.map((entry) => entry.value)
   const preferredReference = resolvePreferredReference(referenceDetails)
@@ -49,12 +47,10 @@ export function projectCanonicalTransactionText(
 export function buildReferenceDetails(input: {
   entryAdditionalInfo: string | null
   ntryAcctSvcrRef: string | null
-  ntryRef: string | null
 }): TransactionReferenceDetail[] {
   const candidates: Array<{ value: string | null; source: string }> = [
-    { value: input.entryAdditionalInfo, source: '/Ntry/AddtlNtryInf' },
     { value: input.ntryAcctSvcrRef, source: '/Ntry/AcctSvcrRef' },
-    { value: input.ntryRef, source: '/Ntry/NtryRef' },
+    { value: input.entryAdditionalInfo, source: '/Ntry/AddtlNtryInf' },
   ]
   const seen = new Set<string>()
   const details: TransactionReferenceDetail[] = []

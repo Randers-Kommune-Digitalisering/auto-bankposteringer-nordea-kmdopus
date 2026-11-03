@@ -12,6 +12,7 @@ export type PostingTransactionContext = {
   requestLineTransactionId?: string | null
   amount: number
   statusDimensions: Record<string, string>
+  counterpartName?: string | null
   entryAdditionalInfo?: string | null
   ntryAcctSvcrRef?: string | null
   ntryRef?: string | null
@@ -70,13 +71,15 @@ export function resolvePostingText(
     creditDebitIndicator: tx.amount < 0 ? 'DBIT' : 'CRDT',
     entryAdditionalInfo: tx.entryAdditionalInfo,
     ntryAcctSvcrRef: tx.ntryAcctSvcrRef,
-    ntryRef: tx.ntryRef,
   })
 
   if (dynamicTemplate) {
     return evaluatePostingTextTemplate(dynamicTemplate, {
       bankMessage: projection.bankMessage,
+      ntryRef: tx.ntryRef ?? undefined,
+      ntryAcctSvcrRef: tx.ntryAcctSvcrRef ?? undefined,
       entryAdditionalInfo: tx.entryAdditionalInfo ?? undefined,
+      counterparty: tx.counterpartName ?? undefined,
     })
   }
 

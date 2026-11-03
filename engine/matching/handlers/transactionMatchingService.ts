@@ -49,14 +49,7 @@ export type MatchableTransaction = {
   bookingDate: Date
   amount: number
   creditDebitIndicator?: string | null
-  dbtrName?: string | null
-  dbtrId?: string | null
-  dbtrAcctIban?: string | null
-  cdtrName?: string | null
-  cdtrId?: string | null
-  cdtrAcctIban?: string | null
-  ultmtDbtrName?: string | null
-  ultmtCdtrName?: string | null
+  counterpartName?: string | null
   ntryRef?: string | null
   ntryAcctSvcrRef?: string | null
   entryAdditionalInfo?: string | null
@@ -200,14 +193,7 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
       amount: transaction.amount,
       bookingDate: transaction.bookingDate,
       creditDebitIndicator: transaction.creditDebitIndicator,
-      dbtrName: transaction.debtorName,
-      dbtrId: transaction.debtorId,
-      dbtrAcctIban: transaction.debtorAccountIban,
-      cdtrName: transaction.creditorName,
-      cdtrId: transaction.creditorId,
-      cdtrAcctIban: transaction.creditorAccountIban,
-      ultmtDbtrName: transaction.ultimateDebtorName,
-      ultmtCdtrName: transaction.ultimateCreditorName,
+      counterpartName: transaction.counterpartName,
       ntryRef: transaction.ntryRef,
       ntryAcctSvcrRef: transaction.ntryAcctSvcrRef,
       entryAdditionalInfo: transaction.entryAdditionalInfo,
@@ -300,14 +286,7 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
       statusDimensions,
       bookingDate,
       creditDebitIndicator: row.creditDebitIndicator ?? null,
-      dbtrName: row.dbtrName ?? null,
-      dbtrId: row.dbtrId ?? null,
-      dbtrAcctIban: row.dbtrAcctIban ?? null,
-      cdtrName: row.cdtrName ?? null,
-      cdtrId: row.cdtrId ?? null,
-      cdtrAcctIban: row.cdtrAcctIban ?? null,
-      ultmtDbtrName: row.ultmtDbtrName ?? null,
-      ultmtCdtrName: row.ultmtCdtrName ?? null,
+      counterpartName: row.counterpartName ?? null,
       amount: indicator === 'DBIT' ? -amountAbs : amountAbs,
       ntryRef: row.ntryRef ?? null,
       ntryAcctSvcrRef: row.ntryAcctSvcrRef ?? null,
@@ -332,7 +311,7 @@ async function fetchMatchableTransactions(runId: string): Promise<MatchableTrans
 
     const existing = grouped.get(tx.groupKey)
     if (!existing) {
-      grouped.set(tx.groupKey, { ...tx })
+      grouped.set(tx.groupKey, { ...tx, counterpartName: null })
       continue
     }
 
@@ -517,22 +496,8 @@ function extractFieldValue(
   field: RuleConditionField,
 ): string | undefined {
   switch (field) {
-    case 'dbtr_name':
-      return tx.dbtrName ?? undefined
-    case 'dbtr_id':
-      return tx.dbtrId ?? undefined
-    case 'dbtr_acct_iban':
-      return tx.dbtrAcctIban ?? undefined
-    case 'cdtr_name':
-      return tx.cdtrName ?? undefined
-    case 'cdtr_id':
-      return tx.cdtrId ?? undefined
-    case 'cdtr_acct_iban':
-      return tx.cdtrAcctIban ?? undefined
-    case 'ultmt_dbtr_name':
-      return tx.ultmtDbtrName ?? undefined
-    case 'ultmt_cdtr_name':
-      return tx.ultmtCdtrName ?? undefined
+    case 'counterparty_name':
+      return tx.counterpartName ?? undefined
     case 'ntry_ref':
       return tx.ntryRef ?? undefined
     case 'ntry_acct_svcr_ref':

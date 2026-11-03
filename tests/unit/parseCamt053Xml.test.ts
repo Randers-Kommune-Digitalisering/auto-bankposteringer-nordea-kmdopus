@@ -91,7 +91,7 @@ describe('parseCamt053Xml (Nordea example)', () => {
     expect(parsed.statements[0]!.transactions[0]!.amount).toBe('100.00')
   })
 
-  it('parses the underlying CAMT party fields without collapsing them to counterparty semantics', () => {
+  it('resolves the counterparty from the single detail based on entry direction', () => {
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
   <BkToCstmrStmt><Stmt>
@@ -117,20 +117,120 @@ describe('parseCamt053Xml (Nordea example)', () => {
 
     const transactions = parseCamt053Xml(xml).statements[0]!.transactions
     expect(transactions[0]).toMatchObject({
-      dbtrName: 'Sender A/S',
-      dbtrId: 'SENDER-1',
-      dbtrAcctIban: 'DK0011223344556677',
-      cdtrName: 'Municipality',
-      cdtrId: 'RECIPIENT-1',
-      ultmtDbtrName: 'Ultimate Sender',
+      counterpartName: 'Sender A/S',
+      counterpartNameSource: '/Ntry/NtryDtls/TxDtls/RltdPties/Dbtr/Pty/Nm',
     })
     expect(transactions[1]).toMatchObject({
-      dbtrName: 'Municipality',
-      cdtrName: 'Recipient A/S',
+      counterpartName: 'Recipient A/S',
+      counterpartNameSource: '/Ntry/NtryDtls/TxDtls/RltdPties/Cdtr/Nm',
     })
   })
 
-  it('does not retain ambiguous party names from aggregated child transactions', () => {
+  it('uses the first postal address line only as a name fallback', () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt><Stmt>
+    <Id>STMT-4</Id><Acct><Id><IBAN>DK0012345678900000</IBAN></Id><Ccy>DKK</Ccy></Acct>
+    <Ntry><Amt Ccy="DKK">2.00</Amt><CdtDbtInd>CRDT</CdtDbtInd>
+      <BookgDt><Dt>2026-06-30</Dt></BookgDt>
+      <NtryDtls><TxDtls><RltdPties><Dbtr><PstlAdr>
+        <AdrLine>Sender Name</AdrLine><AdrLine>Street 1</AdrLine>
+      </PstlAdr></Dbtr></RltdPties></TxDtls></NtryDtls>
+    </Ntry>
+  </Stmt></BkToCstmrStmt>
+</Document>`
+
+    const transaction = parseCamt053Xml(xml).statements[0]!.transactions[0]!
+    expect(transaction.counterpartName).toBe('Sender Name')
+    expect(transaction.counterpartNameSource).toBe('/Ntry/NtryDtls/TxDtls/RltdPties/Dbtr/PstlAdr/AdrLine[1]')
+    expect(JSON.stringify(transaction)).not.toContain('Street 1')
+  })
+
+  it('prefers the first postal address line over explicit party names', () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt><Stmt>
+    <Id>STMT-ADDRESS-PRIORITY</Id><Acct><Id><IBAN>DK0012345678900000</IBAN></Id><Ccy>DKK</Ccy></Acct>
+    <Ntry><Amt Ccy="DKK">2.00</Amt><CdtDbtInd>CRDT</CdtDbtInd>
+      <BookgDt><Dt>2026-06-30</Dt></BookgDt>
+      <NtryDtls><TxDtls><RltdPties><Dbtr>
+        <Nm>Registered Sender Name</Nm>
+        <PstlAdr><AdrLine>Udbetaling Danmark</AdrLine><AdrLine>Street 1</AdrLine></PstlAdr>
+      </Dbtr></RltdPties></TxDtls></NtryDtls>
+    </Ntry>
+  </Stmt></BkToCstmrStmt>
+</Document>`
+
+    const transaction = parseCamt053Xml(xml).statements[0]!.transactions[0]!
+    expect(transaction.counterpartName).toBe('Udbetaling Danmark')
+    expect(transaction.counterpartNameSource).toBe('/Ntry/NtryDtls/TxDtls/RltdPties/Dbtr/PstlAdr/AdrLine[1]')
+  })
+
+  it('falls back to the direction-matched entry party when the single detail has no explicit name', () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt><Stmt>
+    <Id>STMT-5</Id><Acct><Id><IBAN>DK0012345678900000</IBAN></Id><Ccy>DKK</Ccy></Acct>
+    <Ntry><Amt Ccy="DKK">2.00</Amt><CdtDbtInd>CRDT</CdtDbtInd>
+      <BookgDt><Dt>2026-06-30</Dt></BookgDt>
+      <NtryDtls><TxDtls><RltdPties><Dbtr /></RltdPties></TxDtls></NtryDtls>
+      <RltdPties><Dbtr><Pty><Nm>Entry Sender</Nm></Pty></Dbtr></RltdPties>
+    </Ntry>
+    <Ntry><Amt Ccy="DKK">3.00</Amt><CdtDbtInd>DBIT</CdtDbtInd>
+      <BookgDt><Dt>2026-06-30</Dt></BookgDt>
+      <NtryDtls><TxDtls><RltdPties><Dbtr><Nm>Other party</Nm></Dbtr></RltdPties></TxDtls></NtryDtls>
+      <RltdPties><Cdtr><PstlAdr><AdrLine>Recipient Name</AdrLine><AdrLine>Street 2</AdrLine></PstlAdr></Cdtr></RltdPties>
+    </Ntry>
+  </Stmt></BkToCstmrStmt>
+</Document>`
+
+    const transactions = parseCamt053Xml(xml).statements[0]!.transactions
+    expect(transactions[0]).toMatchObject({
+      counterpartName: 'Entry Sender',
+      counterpartNameSource: '/Ntry/RltdPties/Dbtr/Pty/Nm',
+    })
+    expect(transactions[1]).toMatchObject({
+      counterpartName: 'Recipient Name',
+      counterpartNameSource: '/Ntry/RltdPties/Cdtr/PstlAdr/AdrLine[1]',
+    })
+    expect(JSON.stringify(transactions[1])).not.toContain('Street 2')
+  })
+
+  it('uses the direction-matched ultimate party only when the direct party has no name', () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt><Stmt>
+    <Id>STMT-6</Id><Acct><Id><IBAN>DK0012345678900000</IBAN></Id><Ccy>DKK</Ccy></Acct>
+    <Ntry><Amt Ccy="DKK">2.00</Amt><CdtDbtInd>CRDT</CdtDbtInd>
+      <BookgDt><Dt>2026-06-30</Dt></BookgDt>
+      <NtryDtls><TxDtls><RltdPties>
+        <Dbtr><Id><OrgId><Othr><Id>DBTR-1</Id></Othr></OrgId></Id></Dbtr>
+        <UltmtDbtr><Pty><Nm>Udbetaling Danmark</Nm></Pty></UltmtDbtr>
+        <UltmtCdtr><Pty><Nm>Other party</Nm></Pty></UltmtCdtr>
+      </RltdPties></TxDtls></NtryDtls>
+    </Ntry>
+    <Ntry><Amt Ccy="DKK">3.00</Amt><CdtDbtInd>DBIT</CdtDbtInd>
+      <BookgDt><Dt>2026-06-30</Dt></BookgDt>
+      <NtryDtls><TxDtls><RltdPties>
+        <Dbtr><Pty><Nm>Other party</Nm></Pty></Dbtr>
+        <UltmtCdtr><Pty><Nm>Udbetaling Danmark</Nm></Pty></UltmtCdtr>
+      </RltdPties></TxDtls></NtryDtls>
+    </Ntry>
+  </Stmt></BkToCstmrStmt>
+</Document>`
+
+    const transactions = parseCamt053Xml(xml).statements[0]!.transactions
+    expect(transactions[0]).toMatchObject({
+      counterpartName: 'Udbetaling Danmark',
+      counterpartNameSource: '/Ntry/NtryDtls/TxDtls/RltdPties/UltmtDbtr/Pty/Nm',
+    })
+    expect(transactions[1]).toMatchObject({
+      counterpartName: 'Udbetaling Danmark',
+      counterpartNameSource: '/Ntry/NtryDtls/TxDtls/RltdPties/UltmtCdtr/Pty/Nm',
+    })
+  })
+
+  it('does not retain party names from aggregated child transactions', () => {
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
   <BkToCstmrStmt><Stmt>
@@ -146,7 +246,8 @@ describe('parseCamt053Xml (Nordea example)', () => {
 </Document>`
 
     const transaction = parseCamt053Xml(xml).statements[0]!.transactions[0]!
-    expect(transaction.dbtrName).toBeNull()
+    expect(transaction.counterpartName).toBeNull()
+    expect(transaction.counterpartNameSource).toBeNull()
     expect(JSON.stringify(transaction)).not.toContain('Sender A')
     expect(JSON.stringify(transaction)).not.toContain('Sender B')
   })

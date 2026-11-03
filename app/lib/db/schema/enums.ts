@@ -16,8 +16,7 @@ export const ruleConditionGateValues = ['OG', 'ELLER'] as const
 export const ruleConditionGateEnum = pgEnum('rule_condition_gate', ruleConditionGateValues)
 export type RuleConditionGate = typeof ruleConditionGateValues[number]
 
-// NOTE: This enum is intentionally CAMT.053-specific.
-// It is used both in DB (rule_banking_condition.field) and in the UI match catalog.
+// The persisted enum retains legacy fields; match-config defines the currently selectable fields.
 export const ruleConditionFieldValues = [
 	// References (ISO20022: Refs)
 	'ntry_ref',
@@ -29,6 +28,7 @@ export const ruleConditionFieldValues = [
 	'uetr',
 
 	// Parties (ISO20022: RltdPties)
+	'counterparty_name',
 	'dbtr_name',
 	'dbtr_id',
 	'dbtr_acct_iban',

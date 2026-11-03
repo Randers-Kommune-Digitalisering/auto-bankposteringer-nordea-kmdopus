@@ -16,6 +16,8 @@ export type ErpOverviewStatus = {
   detail: string | null
 }
 
+export const ERP_RESPONSE_TIMEOUT_MS = 48 * 60 * 60 * 1000
+
 export function isErpRequestAccepted(input: {
   documentStatus: string | null
   responseStatusText: string | null
@@ -76,6 +78,8 @@ export function selectLatestErpRequestPerDocument<T extends ErpRequestAttempt>(a
 export function getErpOverviewStatus(input: {
   responseId: string | null
   responseStatusText: string | null
+  requestCreatedAt?: string | null
+  now?: Date
   outboxStatus: string | null
   outboxLastError: string | null
   eventStatus: string | null
@@ -91,18 +95,6 @@ export function getErpOverviewStatus(input: {
   if (status === 'rejected') {
     return { label: 'Afvist', color: 'error', detail: responseStatusText ?? eventDetail }
   }
-  if (status === 'failed') {
-    return { label: 'Afsendelse fejlede', color: 'error', detail: eventDetail ?? input.outboxLastError }
-  }
-  if (status === 'processing' || status === 'in_progress') {
-    return { label: 'Sender', color: 'warning', detail: eventDetail }
-  }
-  if (status === 'sent') {
-    return { label: 'Afsendt – afventer svar', color: 'warning', detail: eventDetail }
-  }
-  if (status === 'pending' || status === 'blocked') {
-    return { label: 'Afventer', color: 'warning', detail: eventDetail }
-  }
 
   if (responseStatusText) {
     const normalized = responseStatusText.toUpperCase()
@@ -117,6 +109,34 @@ export function getErpOverviewStatus(input: {
   if (input.responseId) {
     return { label: 'Svar modtaget', color: 'neutral', detail: eventDetail }
   }
+
+  if (input.requestCreatedAt) {
+    const requestCreatedAt = Date.parse(input.requestCreatedAt)
+    if (
+      Number.isFinite(requestCreatedAt)
+      && (input.now ?? new Date()).getTime() - requestCreatedAt >= ERP_RESPONSE_TIMEOUT_MS
+    ) {
+      return {
+        label: 'Svarfrist overskredet',
+        color: 'error',
+        detail: 'ERP-svar ikke modtaget inden for 48 timer.',
+      }
+    }
+  }
+
+  if (status === 'failed') {
+    return { label: 'Afsendelse fejlede', color: 'error', detail: eventDetail ?? input.outboxLastError }
+  }
+  if (status === 'processing' || status === 'in_progress') {
+    return { label: 'Sender', color: 'warning', detail: eventDetail }
+  }
+  if (status === 'sent') {
+    return { label: 'Afsendt – afventer svar', color: 'warning', detail: eventDetail }
+  }
+  if (status === 'pending' || status === 'blocked') {
+    return { label: 'Afventer', color: 'warning', detail: eventDetail }
+  }
+
   if (input.outboxStatus === 'failed') {
     return {
       label: 'Afsendelse fejlede',
